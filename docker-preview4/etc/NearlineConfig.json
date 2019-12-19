@@ -1,0 +1,8 @@
+{
+    "db": {
+        "type": "jdbc",
+        "url": "jdbc:postgresql://localhost:5432/dai",
+        "username": "dai",
+        "password": "123@dai"
+    }
+}

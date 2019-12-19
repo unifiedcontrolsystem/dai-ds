@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<!--
+    Copyright (C) 2018 Intel Corporation
+
+    SPDX-License-Identifier: Apache-2.0
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAI Data Process</title>
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.min.css">
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.theme.min.css">
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.structure.min.css">
+  <link rel="stylesheet" href="js/dataTables-1.10.15.jqueryui.css">
+  <link rel="stylesheet" href="js/rowGroup.dataTables.min.css">
+  <script language="javascript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery-ui-1.12.1.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.dataTables-1.10.15.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/dataTables.rowGroup.min.js"></script>
+  
+  <!-- Rack definition and layout.  This is json and will be fetched from the inventory adapter as derived from the manifest -->
+  <script language="javascript" type="text/javascript" src="data/floor-layout2.js"></script>
+
+  <!-- Include artificial data.  This is json-like and should come from a service -->
+  <script language="javascript" type="text/javascript" src="data/sampledata.js"></script>
+  
+<style>
+body {
+	font-size: 10pt;
+}
+table.dataTable thead th,
+table.dataTable thead td {
+  padding: 4px 4px;
+}
+table.dataTable tfoot th,
+table.dataTable tfoot td {
+  padding: 4px 4px 4px 4px;
+}
+table.dataTable tbody th,
+table.dataTable tbody td {
+  padding: 1px 2px;
+}
+.tab-heading {
+	background-color: gray;
+	color: white;
+	padding: 8px;
+	margin-bottom: 4px;
+	font: 18px arial, sans-serif;
+}
+#floor-layout {
+	width: 850px;
+	max-width: 850px;
+	float: left;
+	font-size: 0;
+	overflow: auto;
+	position: relative;			/* note lack of left/right, etc.  This is for nested absolute rack positioning */
+	background-color: #fbfbfb;
+}
+.tabs-panel {
+	float: left;
+	overflow-x: auto;
+}
+
+#stateKey {
+	font: 12px arial, sans-serif;
+    border-collapse: collapse;
+	white-space: nowrap;
+}
+.tooltip {
+	display:none;
+	position:absolute;
+	border:1px solid #333;
+	background-color:#161616;
+	border-radius:2px;
+	padding:5px;
+	white-space: nowrap;
+	color:#fff;
+	font: 12px arial, sans-serif;
+}
+.ui-button {
+	padding-top: 2px;
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-bottom: 2px;
+}
+
+#control-bar {
+	width: 100vw;
+}
+#clockface {
+	vertical-align: middle;
+}
+#contextselector {
+	width: 28em;
+}
+#zoombuttons {
+	padding: 0;
+}
+#wayback {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 100;
+}
+@keyframes wayback-wiggle {
+	0%   { transform: rotate(0deg); }
+	25%  { transform: rotate(-1deg); }
+	50%  { transform: rotate(0deg); }
+	75%  { transform: rotate(1deg); }
+	100% { transform: rotate(0deg); }
+}
+.wayback-mode {
+/*	animation-name: wayback-wiggle;
+	animation-timing-function: linear;
+	animation-duration: 0.5s;
+ */
+	background-image: url("js/images/waybackbg.png");
+}
+</style>
+</head>
+
+<body>
+<div id="control-bar">
+  <img id="clockface" src="js/images/clockface2.png" width="24" height="24"/>
+  &nbsp;&nbsp;&nbsp;
+  <input name="contextselector" id="contextselector"/>
+  &nbsp;&nbsp;&nbsp;
+  <label for="zoom0"><img src="js/images/zoom1.gif" width="24" height="24"/></label>
+  <input type="radio" name="zoom" class="zoomer" id="zoom0" value="0"/>
+  <label for="zoom1"><img src="js/images/zoom2.gif" width="24" height="24"/></label>
+  <input type="radio" name="zoom" class="zoomer" id="zoom1" value="1">
+  <label for="zoom2"><img src="js/images/zoom3.gif" width="24" height="24"/></label>
+  <input type="radio" name="zoom" class="zoomer" id="zoom2" value="2"/>
+  <img id="wayback" src="js/images/pb3.png"/>
+</div>
+<p>
+<div id="floor-layout">
+  <canvas id="floor-canvas">
+  Browser does not support canvas?
+  </canvas>
+</div>
+<div id="tabs" class="tabs-panel">
+  <ul>
+    <li><a href="#hardware-view">Hardware</a></li>
+    <li><a href="#jobs-view">Jobs</a></li>
+    <li><a href="#ras-view">RAS</a></li>
+	<li><a href="#service-view">Service</a></li>
+	<li><a href="#diags-view">Diagnostics</a></li>
+  	<li><a href="#env-view">Environmental</a></li>
+  	<li><a href="#conf-view">Configuration</a></li>
+</ul>
+
+  <div id="hardware-view">
+	<div class="tab-heading">System Hardware</div>
+	<p>hardware detail goes here (twisty list?)
+  </div>
+  
+  <div id="jobs-view">
+	<div class="tab-heading">Jobs</div>
+	<table class='JobTable' id="Jobs"></table>
+	<p>Compute Node State Summary</p>
+	<table id="stateKey" width="400" height="150" style="border:1px solid #d3d3d3">
+	</table>
+  </div>
+
+  <div id="ras-view">
+	<div class="tab-heading">System RAS Events</div>
+	<table class='RASTable' id="RAS"></table>
+  </div>
+  <div id="service-view">
+	<div class="tab-heading">Service Actions</div>
+	<table class='ServiceTable' id="ServiceActions"></table>
+  </div>
+  <div id="diags-view">
+	<div class="tab-heading">Diagnostics</div>
+	<p>diags here
+  </div>
+  <div id="env-view">
+	<div class="tab-heading">System Environmental Monitoring</div>
+	<p>Environmental data here
+	<p>This data is summarized from sensys (or similar) which requires in-line
+	   analytics into the nearline data tier.  We don't want a full firehose of
+	   data into the DAI.
+	<p>The rack map could show a heatmap based on env data, possibly augmented with job data.
+  </div>
+  <div id="conf-view">
+	<div class="tab-heading">Software, Operating System, and Hardware Configuration</div>
+	<p>Configuration data here
+	<p>This would include tons and tons of stuff, including OS image management, SN components, and hw config
+  </div>
+</div>
+
+
+
+<script>
+'use strict';
+
+/* Simple Point used for x,y (top/left) corners as well as width,height */
+class Point {
+	constructor(x,y) {
+		this.x = x;
+		this.y = y;
+	}
+	scale(f) {
+		return new Point(this.x*f, this.y*f);
+	}
+	offset(pt) {
+		return new Point(this.x+pt.x, this.y+pt.y);
+	}
+}
+
+/*
+ * A HWitem tracks hardware for the UI.  As such, it has a feature
+ * for tracking selections for the hardware so that multiple views
+ * of the same hardware can be consistent.
+ */
+class HWitem {
+	constructor(location, hwtype, state) {
+		this.location = location;
+		this.hwtype = hwtype;
+		this.selected = false;		// Indicates the UI is trying to show this item as "selected"
+		this.parent = null;
+		this.israck = false;		// israck is initialized within addContent()
+		this.changeState(state);	// inits this.state and this.statecolor
+		this.job = null;
+		this.content = [];			// "child" hardware items
+	}
+	changeState(state) {
+		this.state = state;
+		this.statecolor = colormap[[this.hwtype, 'state', this.state].join('-')];  // QQQ needed optimization???
+	}
+	changeJob(job) {
+		this.job = job;
+	}
+	changeSelected(bool) {
+		this.selected = bool;
+	}
+	changeSelectedContent(bool) {
+		this.selected = bool;
+		this.forEachContent(function(child) {
+			child.changeSelectedContent(bool);
+		});
+	}
+	addContent(hwitem) {
+		hwitem.parent = this;
+		if (this.parent == null) {
+			// hwitem must be a rack.  Only the floor has a null parent (and null rack)
+			hwitem.israck = true;
+			hwitem.rack = hwitem;
+		} else {
+			hwitem.rack = this.rack;	// same rack as me.
+		}
+		this.content.push(hwitem);
+	}
+	forEachContent(func, val) {
+		this.content.forEach(func, val);
+	}
+}
+
+/*
+ * HWitemView
+ *
+ * View object for drawing a hardware item.  This object tracks specifics of drawing the item within
+ * a particular Floorview due to the gridpos/sz given in construction.   The highlight details are
+ * stored in the HWitem this view points to so that multiple HWitemViews can point to a single piece
+ * of hardware and represent that hardware with the exact same state.
+ *
+ */
+class HWitemView {
+	constructor(hwitem, name, rgridpos, gridsz, obscured) {
+		this.parent   = null;
+		this.hwitem   = hwitem;		// The hwitem data we display
+		this.obscured = obscured;	// not really visible
+		this.canvas	  = null;		// gets from parent
+		this.ctx	  = null;		// canvas context
+		this.name     = name;		// leaf name in location
+		this.gridpos  = null;		// corrected wrt a parent
+		this.rgridpos = rgridpos;	// relative pos wrt a parent
+		this.gridsz   = gridsz;
+		this.drawpos  = null;
+		this.drawsz   = null;
+		this.content  = [];			// "child" view items
+	}
+	draw() {						// Draws HWitemView and children
+		if (!this.obscured)
+			this.drawself();
+		this.forEachContent(function(child) {
+			child.draw();
+		});
+	}
+	drawself() {						// Redraw only this HWitemView
+		var ctx = this.ctx;
+		var hwitem = this.hwitem;
+		// color priority:  selected first, then job, then state
+		var color;
+		if (hwitem.selected)
+			color = this.floorv.selectcolor;
+		else if (hwitem.job && hwitem.job.color)
+			color = hwitem.job.color;
+		else
+			color = hwitem.statecolor;
+		ctx.fillStyle = color;
+		ctx.fillRect(this.drawpos.x, this.drawpos.y, this.drawsz.x, this.drawsz.y);
+	}
+	applyZoom(f) {
+		this.drawpos = this.gridpos.scale(f);
+		this.drawsz  = this.gridsz.scale(f);
+		if (!this.obscured) {
+			// This adjustment separates boxes
+			if (this.drawsz.x > 4) this.drawsz.x--;
+			if (this.drawsz.y > 3) this.drawsz.y--;
+		}
+		this.forEachContent(function(child) {
+			child.applyZoom(this);
+		}, f);
+		return this;
+	}
+	addContent(hwitemv) {
+		hwitemv.parent = this;
+		hwitemv.gridpos = this.gridpos.offset(hwitemv.rgridpos);
+		hwitemv.floorv = this.floorv;
+		hwitemv.canvas = this.canvas;	// QQQ an optimization.  Needed?  Could use this.floorv.canvas
+		hwitemv.ctx = this.ctx;
+		this.content.push(hwitemv);
+	}
+	forEachContent(func, val) {
+		this.content.forEach(func, val);
+	}
+	// This should be protected.  It is called by the FloorView
+	// for construction of the floor layout view objects.
+	applyLayoutViewContent(locprefix, layout, inventory) {
+		layout.types[this.hwitem.hwtype].content.forEach(
+			function(contentitem) {
+				var location = [locprefix, contentitem.name].join("-");
+				var hwitem = inventory.getHwByLocation(location);
+				var rgridpos = new Point(contentitem.x, contentitem.y);
+				var hwtype = layout.types[contentitem.type];
+				var gridsz = new Point(hwtype.width, hwtype.height);
+				var obscured = hwtype.obscured?true:false;
+				var hwitemv = new HWitemView(hwitem, contentitem.name, rgridpos, gridsz, obscured);
+				this.addContent(hwitemv);
+				hwitemv.applyLayoutViewContent(location, layout, inventory);	// add children
+			}, this
+		);
+	}
+}
+
+/*
+ * FloorView represents a view of the system, or a subset of the system
+ *
+ * A FloorView is a set of racks.  Right now its implemented as an extension of a HWitemView
+ * which is probably not correct.  We really only need the ability to draw() and draw when
+ * underlying data has changed.
+ *
+ */
+class FloorView {
+	constructor(viewname, canvas, layoutdiv, inventory) {
+	//	super(inventory.getHwByLocation("system"), "floorview-"+viewname, new Point(0,0), null, true);
+		// Only partially init.   Call applyLayoutView() to finish
+		this.viewname = viewname;				// Chooses layout view
+		this.canvas = canvas;
+		this.layoutdiv = layoutdiv,
+		this.ctx = canvas.getContext("2d");
+		this.description = null;				// from applyLayoutView()
+		this.zoomlevel = 0;						// initial from applyLayoutView()
+		this.zoomscales = null;					// from applyLayoutView()
+		this.rackbackgroundcolor = colormap["rack-background-color"];
+		this.rackbordercolor     = colormap["rack-border-color"];
+		this.racklabelcolor      = colormap["rack-label-color"];
+		this.selectcolor 		 = colormap["selected-hw"];
+		this.racks = [];						// List of HWitemViews
+		this.inventory = inventory;				// Full system inventory HardwareSet
+		inventory.addObserver(this);
+		
+		$(canvas).on('click', null, this, function(event) {
+			event.data.click(event.offsetX, event.offsetY); // call floorv.click(x,y)...
+		});
+	}
+	// Draw *all* the racks.
+	draw() {
+		this.drawracks(this.racks);
+	}
+	// Draw a specific set of racks
+	drawracks(racks) {
+		racks.forEach(function(rackv) {
+			this.drawBackground(rackv);
+			rackv.draw();
+			this.drawBorder(rackv);
+			this.drawLabel(rackv);
+		}, this);
+	}
+	// Clear the background for a rack.
+	drawBackground(rackv) {
+		var ctx = this.ctx;
+		ctx.fillStyle = this.rackbackgroundcolor;
+		ctx.fillRect(rackv.drawpos.x, rackv.drawpos.y, rackv.drawsz.x, rackv.drawsz.y);
+	}
+	drawBorder(rackv) {
+		// Add a border.  Use fillRect to make it crisp.
+		var x = rackv.drawpos.x;
+		var y = rackv.drawpos.y;
+		var w = rackv.drawsz.x;
+		var h = rackv.drawsz.y;
+		var ctx = this.ctx;
+		ctx.fillStyle = this.rackbordercolor;
+		ctx.fillRect(x-1, y-1, w+2, 1);		// along top
+		ctx.fillRect(x-1, y+h, w+2, 1);		// along bottom
+		ctx.fillRect(x-1, y-1,   1, h+2);	// left side
+		ctx.fillRect(x+w, y-1,   1, h+2);	// right side
+	}
+	drawLabel(rackv) {
+		// Add a label.  Rotate going by aspect ratio of the rack.
+		// Could add an attribute to the rack layout.
+		var x = rackv.drawpos.x;
+		var y = rackv.drawpos.y;
+		var w = rackv.drawsz.x;
+		var h = rackv.drawsz.y;
+		var ctx = this.ctx;
+		ctx.save();
+		ctx.fillStyle = this.racklabelcolor;
+		// Decide whether to rotate based on aspect ratio
+		// Could add an explicit attribute to the rack layout
+		if (h/w < 2.0) {
+			var fontpx = ((w/rackv.name.length)/1.25)|0;	// estimate px by assuming square letters
+			ctx.font = ["bold ", fontpx, "px sans-serif"].join('');
+			var sz = ctx.measureText(rackv.name);
+			var fx = x+((w-sz.width) >>> 1);
+			var fy = y+fontpx;
+			ctx.fillText(rackv.name, fx, fy);
+		} else {
+			// use rotated text
+			var fontpx = (w/1.5)|0;
+			ctx.font = ["bold ", fontpx, "px sans-serif"].join('');
+			var sz = ctx.measureText(rackv.name);
+			var fy = y+((h-sz.width) >>> 1)+sz.width;
+			var fx = x+fontpx;
+			ctx.translate(fx,fy);
+			ctx.rotate(-Math.PI/2);
+			ctx.fillText(rackv.name, 0, 0);
+		}
+		ctx.restore();
+	}
+	observedChange(obs, val) {
+		// assume obs is this.inventory
+		if (val) {
+			// optimize...val is a Set of rack hwitems
+			var drawracks = [];
+			this.racks.forEach(function(rackv) {
+				if (val.has(rackv.hwitem))
+					drawracks.push(rackv);
+			});
+			this.drawracks(drawracks);
+		} else {
+			this.draw();
+		}
+	}
+	/*
+	 * The canvas was clicked.  Figure out which rack it was (ignore a rack miss)
+	 */
+	click(drawx, drawy)	{
+		this.racks.forEach(function(rackv) {
+			// check rack bounding rectangle
+			var x1 = rackv.drawpos.x;
+			var y1 = rackv.drawpos.y;
+			var x2 = x1+rackv.drawsz.x;
+			var y2 = y1+rackv.drawsz.y;
+			if (drawx >= x1 && drawx < x2 && drawy >= y1 && drawy < y2) {
+				console.log("clicked on ", rackv.name);
+				// Open the rack as a dialog
+
+				var rackcanvas = document.createElement("canvas");
+				var rackviewobj = $(rackcanvas).dialog({ autoOpen: false, width: 420 });
+				var rackview = new FloorView("Rack", rackcanvas, rackviewobj, systemInventory);
+				floorLayout.views.Rack.floor.content[0].name = rackv.name;   // QQQ: horrible hack to parameterize this view
+				rackview.applyLayoutView(floorLayout);
+				rackview.applyZoom(0).draw();
+				$(rackviewobj).attr("title", "Rack " + rackv.name).change();
+				$(rackviewobj).dialog("open");		// it has an X for the user to close
+			}
+		});
+	}
+	applyZoom(zoomlevel) {
+		this.zoomlevel = zoomlevel;
+		var f = this.zoomscales[zoomlevel];
+		this.drawsz  = this.gridsz.scale(f);
+		this.canvas.width = this.drawsz.x;
+		this.canvas.height = this.drawsz.y;
+		$(this.layoutdiv).css("width", this.drawsz.x);  // This div is what really expands/shrinks the allotted space
+		this.racks.forEach(function(rackv) {
+			rackv.applyZoom(f);
+		});
+		return this;
+	}
+	applyLayoutView(floorlayout) {
+		var layout = floorlayout.views[this.viewname];
+		this.gridsz = new Point(layout.floor.width, layout.floor.height);
+		this.description = layout.floor.description;
+		this.zoomlevel = layout.initzoom;
+		this.zoomscales = layout.zoomscales;
+		layout.floor.content.forEach(
+			function(contentitem) {
+				var hwitem = this.inventory.getHwByLocation(contentitem.name);
+				var rgridpos = new Point(contentitem.x, contentitem.y);
+				var hwtype = layout.types[contentitem.type];
+				var gridsz = new Point(hwtype.width, hwtype.height);
+				var obscured = hwtype.obscured?true:false;
+				var hwitemv = new HWitemView(hwitem, contentitem.name, rgridpos, gridsz, obscured);
+				hwitemv.gridpos = rgridpos;   // QQQ: seems hackish.  Do we need a RackHwItemView?
+				hwitemv.floorv = this;
+				hwitemv.canvas = this.canvas;
+				hwitemv.ctx = this.ctx;
+				this.racks.push(hwitemv);
+				hwitemv.applyLayoutViewContent(contentitem.name, layout, this.inventory);
+			}, this
+		);
+	}
+}
+
+/* HardwareSet
+ *
+ * A HardwareSet is a container for HWitems.  HWitems are tracked by both
+ * location string as well as a per-hardware-type rank ID that is assigned
+ * on insertion order.  The system inventory is tracked as a HardwareSet.
+ *
+ * A HardwareSet can be observed.  Notification of updates is performed
+ * manually.  That is, the HardwareSet is manipulated and the caller will
+ * eventually call notifyObservers().  Perhaps this can be automated.
+ */
+class HardwareSet {
+	constructor() {
+		this.locations = new Map();	// HWitem indexed by location
+		this.hwtypes = new Map();	// HWitem ranked array indexed by hwtype
+		this.observers = [];
+	}
+	getHwByLocation(location) {
+		return this.locations.get(location);
+	}
+	getHwByHwtypeRank(hwtype, rank) {
+		var hwt = this.hwtypes.get(hwtype);
+		return hwt?hwt[rank]:null;
+	}
+	addHw(hwitem) {
+		this.locations.set(hwitem.location, hwitem);
+		var hwt = this.hwtypes.get(hwitem.hwtype);
+		if (!hwt) {
+			// New hwtype.  Add it.
+			hwt = [];
+			this.hwtypes.set(hwitem.hwtype, hwt);
+		}
+		hwitem.hwrank = hwt.length;		// cur length is the rank it will get
+		hwt.push(hwitem);
+	}
+	addObserver(obs) {			// obs must have an observedChange() method
+		this.observers.push(obs);
+	}
+	notifyObservers(val) {
+		this.observers.forEach(function(obs) {
+			obs.observedChange(this, val);
+		}, this);
+	}
+
+	/* iterateRankSpec
+	 *
+	 * Iterates over rankspec calling func for all ranks (0..n-1)
+	 * with a single char value taken from rankspec.  It is assumed '-'
+	 * means 'skip' so these ranks will be skipped.
+	 *   func(rank, charval, arg)
+	 *   rankspec is "nnnLnnnL..."
+	 *
+	 * returns the number of ranks with values (skipping '-')
+	 */
+	static iterateRankSpec(func, rankspec, arg)
+	{
+		var count = 0;
+		var rank = 0;
+		var rslen = rankspec.length;
+		for (let i=0; i<rslen; ) {
+			let rep=1;
+			let j=i;
+			while (j < rslen && rankspec[j] >= "0" && rankspec[j] <= "9")
+				j++;	// skip a number
+			if (j > i) { // assume i..j is a number
+				rep = parseInt(rankspec.slice(i,j));
+			}
+			let charval = rankspec[j];
+			if (charval && charval != "-") {
+				for (let k=0; k<rep; k++) {
+					func(rank+k, charval, arg);
+				}
+				count += rep;
+			}
+			rank += rep;
+			i=j+1;
+		}
+		return count;
+	}
+	
+	/* changeStateFromRankSpec
+	 *
+	 * Right now any char (other than '-') is assumed to be a state char
+	 * to be applied to a range of ranks.  Returns the count impacted.
+	 */
+	 changeStateFromRankSpec(hwtype, rankspec) {
+		var hwt = this.hwtypes.get(hwtype);
+		if (!hwt) return 0;	// empty set
+		return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
+			arg[rank].changeState(charval);
+		}, rankspec, hwt);
+	}
+	
+	/* locationsToRankSpec
+	 *
+	 * Given a space-separated list of locations, produce a rankspec.
+	 * For now it is assumed locations are always CNs.  This isn't scalable and will be
+	 * deprecated anyway.
+	 */
+	 locationsToRankSpec(locations) {
+		// Start with a "long hand" rankspec, then compress later.
+		var numcns = this.hwtypes.get('dense-compute-node').length;
+		var spec = [];	// array of single chars.   String would be nice, but they are immutable in javascript
+		locations.split(' ').forEach(function(loc) {
+			var hwitem = this.getHwByLocation(loc);
+			spec[hwitem.hwrank] = '+';
+		}, this);
+		// Now RLE encode the rankspec data
+		var rspec = [];		// will build list of items to join
+
+		// spec is a sparse array with only + entries.  Iterate over these + entries.
+		var previdx = -1;	// index of prev +
+		var runlen = 0;		// current run of + (if any)
+		spec.forEach(function(s, i) {
+			if (i-1 == previdx) {
+				// we are continuing a line of +'s
+				runlen++;
+			} else {
+				// We skipped ahead.  emit the prev '+' run and this run of '-'
+				if (runlen > 0) {
+					if (runlen > 1)
+						rspec.push(runlen);
+					rspec.push('+');
+				}
+				var skiprun = i-previdx-1;
+				if (skiprun > 1)
+					rspec.push(skiprun);
+				rspec.push('-');
+				runlen = 1;		// The current + that got us here.
+			}
+			previdx = i;
+		});
+		if (runlen > 0) {
+			if (runlen > 1)
+				rspec.push(runlen);
+			rspec.push('+');
+		}
+		return rspec.join('');
+	 }
+	
+	/* assignJob
+	 *
+	 * Right now any char (other than '-') is assumed to select hardware
+	 * Returns the count impacted.  select is a boolean
+	 * Use tag=null to remove the tag.
+	 */
+	 assignJob(job) {
+		var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+		if (!hwt) return 0;	// empty set
+		return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
+			arg[rank].changeJob(job);
+		}, job.rankspec, hwt);
+	}
+	 selectJob(job) {
+		var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+		if (!hwt) return 0;	// empty set
+		return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
+			arg[rank].changeSelected(true);
+		}, job.rankspec, hwt);
+	}
+	 unselectJob(job) {
+		var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+		if (!hwt) return 0;	// empty set
+		return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
+			arg[rank].changeSelected(false);
+		}, job.rankspec, hwt);
+	}
+}
+
+
+/*
+ * Job -- represents a job on the system (active or completed)
+ *
+ * This object simply represents the existance and characteristics of a job.  At this
+ * time it is not an active object with operations to be performed against it.
+ *
+ * Currently the job info tracks the attributes of a job (not adequate).
+ */
+class Job {
+	constructor(jobid, info, rankspec) {
+		this.jobid = jobid;
+		this.info = info;			// QQQ set of attributes for now
+		this.rankspec = rankspec;
+		this.color = null;			// only applies to active jobs
+
+		var rackset = new Set();
+		var hwt = systemInventory.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+		var count=0;
+		HardwareSet.iterateRankSpec(function(rank, charval, arg) {
+			rackset.add(hwt[rank].rack);	// Every node HWitem has a rack reference
+			count++;
+		}, rankspec, hwt);
+		
+		this.rackset = rackset;
+		this.numnodes = count;
+	}
+}
+
+/*
+ * JobSet is a set of jobs, active or completed.
+ *
+ * For UI purposes, a color is assigned to active jobs.
+ * We need a method to update job state, including a job completing
+ * in which case the color should be returned as the job goes non-active.
+ *
+ * Note that adding a job here also assigns the job to the system inventory,
+ * which may seem a little odd.  Perhaps a JobSet should be considered
+ * part of the system inventory (system state).  A SystemState object may
+ * be required and inventory and jobs reference it.
+ */
+class JobSet {
+	constructor() {
+		this.jobs = new Map();	// indexed by jobid (string), contains Job objects
+	}
+	addJob(job) {
+		if (job.info.state != 'T') {
+			// Adding an active job
+			job.color = jobcolors.shift();  // QQQ what if we run out?
+			systemInventory.assignJob(job);	// QQQ global
+		}
+		this.jobs.set(job.jobid, job);
+	}
+	updateJob(job) {
+		if (job.info.state == 'T' && job.color) {	// Job terminated
+			jobcolors.push(job.color);
+			job.color = null;
+			systemInventory.assignJob(job);	// picks up color=null
+		}
+	}
+	removeJob(job) {
+		if (job.color) {
+			// implies an active job
+			jobcolors.push(job.color);
+			job.color = null;
+			systemInventory.assignJob(job);	// picks up color=null
+		}
+		return this.jobs.delete(job.jobid);	// returns job object
+	}
+	getJobById(jobid) {
+		return this.jobs.get(jobid);
+	}
+}
+
+var colormap = {
+	"dense-compute-node-state-M" : "#000d1a",
+	"dense-compute-node-state-A" : "#cce5ff",
+	"dense-compute-node-state-E" : "red",
+	"dense-compute-node-state-S" : "violet",
+	"dense-compute-node-state-B" : "#004d99",
+	"dense-compute-node-state-D" : "#0073e6",
+	"dense-compute-node-state-I" : "#3399ff",
+	"dense-compute-node-state-L" : "#66ccff",
+
+	"dense-swblade-state-A"      : "#ffd9b3",
+	"dense-rectifier-state-A"    : "#ffd9b3",
+	"dense-cmm-state-A"          : "#ffbfbf",
+	"vCDU-state-A"               : "#eeeeee",
+	"io-node-state-A"            : "#cce5ff",
+	"storage-drawer-state-A"     : "#ffbfbf",
+	"opa-dcs-state-A"            : "#ffd9b3",
+	"subnet-sn-state-A"          : "#cce5ff",
+	"eth-switch-state-A"         : "#ffd9b3",
+	"service-node-state-A"       : "#cce5ff",
+	"frontend-node-state-A"      : "#cce5ff",
+
+	"rack-background-color"		 : "#fbfbfb",  // should match canvas background, probably
+	"rack-border-color"          : "#dddddd",
+	"rack-label-color"           : "rgba(0,0,0,0.3)",
+	
+	"selected-hw"				 : "#50f442"	// bright green
+}
+var jobcolors = [
+	"#E7AD99",
+	"#849324",
+	"#FFB30F",
+	"#6da565",
+	"#D7C9AA",
+	"#93534D",
+	"#CDEBA8",
+	"#F7AA84",
+	"#A94E71",
+	"#8D80AD",
+	"#99B2DD",
+	"#64F58D",
+	"#99B2DD",
+	"#80475E",
+	"#F3DFA2",
+	"#955E42",
+	"#8E4162",
+	"#59C3C3",
+	"#52489C",
+	"#437F97",
+	"#3A6EA5",
+	"#C18C5D",
+	"#A26769",
+	"#6BAA75"
+];
+
+var systemInventory = null;	// HardwareSet mapping of all location -> hwitems
+
+var floorv = null;			// Global for zoom buttons for now.  May be a subset of the system.
+
+var jobset = null;			// Known jobs...active and completed.
+
+var curviewidx = 1;
+var tabsobj;
+var jobtable;
+var rastable;
+var servicetable;
+
+var contextList = ["Now", "RAS 2017-06-01 22:15:12.004000 R00-CH2-CB1-PM0-CN0"];
+
+// This state table should be queried from the datastore.  Colors are in the colormap.
+var States = {
+	M: {name: "Missing", description: "Nodes that are Missing or Powered Off)"},
+	B: {name: "BIOS", description: "Nodes with BIOS Starting"},
+	D: {name: "Discovered", description: "Nodes just Discovered"},
+	I: {name: "IP Assigned",   description: "Nodes having IP addresses just assigned"},
+	L: {name: "Loading", description: "Nodes that are Loading image"},
+	A: {name: "Active", description: "Nodes that are Active (booted)"},
+	E: {name: "Error",  description: "Nodes in Error"},
+	S: {name: "Service", description: "Nodes in Service"},
+};
+
+// Polling stuff
+var VOLTDBAPIURL = 'http://localhost:8805/api/1.0/';
+var HISTPOLL = 1;	// check every "this many" seconds for a history change.
+
+var curdata;		// Initialized in initFloorLayout();
+var contexttime;	// Current time the page should represent (via the datepicker.  null => "Now", else Date obj
+
+var starthistory;				// Initialized in initHistorySlider();
+var nodeMaxLastChgTimestamp;	// Continuously updated.  Last time the DB was updated
+var nodeMaxDBUpdatedTimestamp;	// Last DB history update time (always >= nodeMaxLastChgTimestamp).
+var rasMaxTimestamp;			// Time of last RAS event (string for now)
+var jobMaxLastChgTimestamp;		// (not updating right now)
+var jobMaxDBUpdatedTimestamp;	// Time of last Job update (string for now)
+
+
+function TimeIt(msg, func)
+{
+	var startmsec = Date.now();
+	func();
+	var endmsec = Date.now();
+	console.log(msg, ": ", endmsec-startmsec, "msec");
+}
+
+$(document).ready(main());
+
+function main()
+{
+	console.log("main");
+	$(".zoomer").checkboxradio({icon: false});
+	$(".zoomer").on("change", function(event) {
+		// ToDo: this is the only global var ref to floorv (I think)
+		floorv.applyZoom(this.value).draw();
+		$("#tabs").css("width", "calc(99% - "+$(floorv.canvas).parent().outerWidth()+"px)");
+	});
+	
+	tabsobj = $("#tabs").tabs({
+		active: curviewidx,
+	});
+	$("#contextselector").autocomplete({
+		delay: 0,
+		minLength: 0,
+		source: contextList,
+	}).val("Now").on('click', function() {
+		// QQQ: this loses track of which one we had (was in this.value)
+		// Can we select the value we had from the list?
+		this.oldvalue = this.value;
+		this.value = "";
+		$(this).autocomplete("search");
+	}).on('autocompletechange change', function() {
+		contextChanged(this);
+	});
+
+	
+	systemInventory = systemInventoryConstructFromLayoutView(floorLayout.views.Full);
+	console.log(systemInventory.hwtypes.get("dense-compute-node").length);
+
+	floorv = new FloorView("Full", document.getElementById("floor-canvas"), document.getElementById("floor-layout"), systemInventory);
+	TimeIt("floorv.applyLayoutView", function() {
+	floorv.applyLayoutView(floorLayout); });
+	// NB: updating the zoom radiobox will trigger the first zoom and draw of the floorv canvas
+	$("#zoom"+floorv.zoomlevel).attr("checked", "checked").change();
+
+	// Now create the various tabs
+	jobset = new JobSet();
+
+	// Take the initial zoom canvas height for the tabs for now
+//	$("#tabs").css("width", "calc(95% - "+floorv.canvas.width+"px)");
+	
+	jobtable = $("#Jobs").DataTable({
+		select: 'single',
+		pageLength: 50,
+		order: [5, 'desc'],		// end timestamp
+		jQueryUI: true,
+		autoWidth: false,
+		rowId: 0,
+		columns: [
+			{title: "ID", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var jobid = rowData[0];  		// i.e., this cell
+				$(cell).parent().attr("jobid", jobid);		// add jobid to the <tr>
+				var job = jobset.getJobById(jobid)
+				if (job.color) {
+					$(cell).css("background-color", job.color);	// colorize cell for active jobs
+				}
+			}},
+			{title: "Name"},
+			{title: "User"},
+			{title: "Nodes",	searchable: false},
+			{title: "Start", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var time = rowData[4];  		// i.e., this cell
+				$(cell).attr('history', ['Job', time, 'start', rowData.slice(0,3)].join(' '));
+			}},
+			{title: "End", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var time = rowData[5];  		// i.e., this cell
+				$(cell).attr('history', ['Job', time, 'end', rowData.slice(0,3)].join(' '));
+			}},
+			{title: "State",    searchable: false},
+			{title: "Exit",     searchable: false},
+			{title: "RAS",      searchable: false},
+			{title: "BSN"},
+		],
+		rowGroup: {
+			startRender: function(rows, group) {
+				var heading = {'S': 'Running jobs', 'B': 'Booting jobs', 'T': 'Completed jobs'};
+				return $('<tr/>').append("<td colspan='11'>" + heading[group] + "</td>");
+			},
+			endRender: null,
+			dataSrc: 6			// State
+		}
+	});
+/*	// Now add jobs from sample data.   NOTE:  THIS IS OBSOLETE FOR THE sampleJobData!
+	for (var i=0; i<sampleJobData.length; i++) {
+		// OLD: startnode[0], numnodes[1], jobid[2], jobname[3], jobuser[4], jobduration[5], jobstart[6], jobend[7], jobstate[8], jobexit[9], jobras[10], jobbsn[11]
+		// NEW: rankspec[0], jobid[1], jobname[2], jobuser[3], jobduration[4], jobstart[5], jobend[6], jobstate[7], jobexit[8], jobras[9], jobbsn[10]
+		var d=sampleJobData[i];
+		if (d.length == 12) { // old format
+			var rankspec = [parseInt(d[0]), "-", parseInt(d[1]), "+"].join("");
+			var job = new Job(d[2], d, rankspec);
+			jobset.addJob(job);			// this assigns a color if job is active
+			jobtable.row.add([d[2], d[3], d[4], job.numnodes, d[6], d[7], d[8], d[9], d[10], d[11] ]);
+		} else {
+			var job = new Job(d[1], d, d[0]);
+			jobset.addJob(job);			// this assigns a color if job is active
+			jobtable.row.add([d[1], d[2], d[3], job.numnodes, d[5], d[6], d[7], d[8], d[9], d[10] ]);
+		}
+	}
+	jobtable.draw();
+	systemInventory.notifyObservers(0);		// due to jobs being added */
+
+	// Add highlight job on touch for the jobs table
+	$("#Jobs tbody").on('mouseenter', 'tr', function() {
+		$(this).addClass('selected');
+		var jobid = $(this).attr('jobid');
+		if (jobid) {
+			var job = jobset.getJobById(jobid);
+			systemInventory.selectJob(job);
+			systemInventory.notifyObservers(job.rackset);
+		}
+	});
+	$("#Jobs tbody").on('mouseleave', 'tr', function() {
+		$(this).removeClass('selected');
+		var jobid = $(this).attr('jobid');
+		if (jobid) {
+			var job = jobset.getJobById(jobid);
+			systemInventory.unselectJob(job);
+			systemInventory.notifyObservers(job.rackset);
+		}
+	});
+
+	rastable = $("#RAS").DataTable({
+		select: 'single',
+		pageLength: 50,
+		order: [1, 'desc'],		// timestamp
+		jQueryUI: true,
+		autoWidth: false,
+		columns: [
+			{title: "Type"},
+			{title: "Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var time = rowData[1];  		// i.e., this cell
+				$(cell).attr('history', ['RAS', time, rowData[3]].join(' '));
+			}},
+			{title: "Severity"},
+			{title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var loc = rowData[3];  		// i.e., this cell
+				$(cell).parent().attr("location", loc);		// add location to the <tr>
+			}},
+			{title: "Job(s)"},
+			{title: "Control Action"},
+			{title: "Message"},
+		],
+	});
+	// Now add RAS from sample data.
+	for (var i=0; i<sampleRASData.length; i++) {
+		// Event Type[0]	Time[1]	Severity[2]	Location[3]	Jobs[4] ControlAction[5]	Message[6]
+		rastable.row.add(sampleRASData[i]);
+	}
+	rastable.draw();
+
+	servicetable = $("#ServiceActions").DataTable({
+		select: 'single',
+		pageLength: 50,
+		order: [0, 'desc'],		// timestamp
+		jQueryUI: true,
+		autoWidth: false,
+		columns: [
+			{title: "ID"},
+			{title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var loc = rowData[1];  		// i.e., this cell
+				$(cell).parent().attr("location", loc);		// add location to the <tr>
+			}},
+			{title: "State"},
+			{title: "Start User"},
+			{title: "Start Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var time = rowData[4];  		// i.e., this cell
+				$(cell).attr('history', ['Service', time, 'start', rowData[1]].join(' '));
+			}},
+			{title: "End User"},
+			{title: "End Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+				var time = rowData[6];  		// i.e., this cell
+				$(cell).attr('history', ['Service', time, 'end', rowData[1]].join(' '));
+			}},
+			{title: "Comments"},
+		],
+	});
+	// Now add Service Actions from sample data.
+	for (var i=0; i<sampleServiceActionData.length; i++) {
+// ID[0]   Location[1]   State[2]   Started by User[3]   Started Time[4]  Ended by User[5]   Ended Time[6]   Comments[7]
+		servicetable.row.add(sampleServiceActionData[i]);
+	}
+	servicetable.draw();
+
+	// Add highlight  location on touch for *both* the RAS and Service Action tables
+	$("#RAS tbody, #ServiceActions tbody").on('mouseenter', 'tr', function() {
+		$(this).addClass('selected');
+		var location = $(this).attr('location');
+		if (location) {
+			var hwitem = systemInventory.getHwByLocation(location);
+			hwitem.changeSelectedContent(true);
+			var rackset = new Set();
+			rackset.add(hwitem.rack);
+			systemInventory.notifyObservers(rackset);
+		}
+	});
+	$("#RAS tbody, #ServiceActions tbody").on('mouseleave', 'tr', function() {
+		$(this).removeClass('selected');
+		var location = $(this).attr('location');
+		if (location) {
+			var hwitem = systemInventory.getHwByLocation(location);
+			hwitem.changeSelectedContent(false);
+			var rackset = new Set();
+			rackset.add(hwitem.rack);
+			systemInventory.notifyObservers(rackset);
+		}
+	});
+	
+	$("#RAS tbody, #ServiceActions tbody").on('click', 'td', function() {
+		var history = $(this).attr('history');
+		if (history) {
+			console.log("history=", history);
+			changeContext(history);
+		}
+	});
+	
+	$("#clockface, #wayback").on('click', function() {	// Click on clockface or Mister Peabody
+		console.log("reset to now");
+		changeContext("Now");
+	});
+
+	
+	initStateKey();
+
+	// Start with fictitious, but reasonable, start/end history ranges.  These will update.
+	nodeMaxLastChgTimestamp = new Date();
+	starthistory = new Date(nodeMaxLastChgTimestamp.getTime() - 10*60*1000);  // 100min ago for now.  We update accurately below.
+
+	// From here on we start talking to the server...
+	
+	// Now fetch the actual start of history (starthistory).
+	// This is async, but that's ok.  Meanwhile the slider represents the past 10 min and works.
+	// The async processing of starthistory will perform fetchDBChangeTimestamps().
+	fetchHistoryStart();
+}
+
+
+function systemInventoryConstructFromLayoutView(layout)
+{
+	var system = new HWitem("system", "floor", "A");
+	var sysinv = new HardwareSet();
+	sysinv.addHw(system);
+	
+	// Note: we don't currently create objects for hwtypes.
+	// Here the only thing we use with hwtype data is to enumerate
+	// hardware elements.  We don't care about floor coordinates, etc.
+	layout.floor.content.forEach(
+		function(contentitem) {
+			var hw = new HWitem(contentitem.name, contentitem.type, "A");
+			this.addContent(hw);
+			sysinv.addHw(hw);
+			systemInventoryContentFromLayoutView(hw, sysinv, layout);	// add children
+		}, system
+	);
+	return sysinv;
+}
+
+function systemInventoryContentFromLayoutView(parenthw, sysinv, layout)
+{
+	// Use parenthw.hwtype to add content (if any)
+	layout.types[parenthw.hwtype].content.forEach(
+		function(contentitem) {
+			var location = [parenthw.location, contentitem.name].join("-");
+			var hw = new HWitem(location, contentitem.type, contentitem.type == "dense-compute-node" ? "M" : "A");
+			this.addContent(hw);
+			sysinv.addHw(hw);
+			systemInventoryContentFromLayoutView(hw, sysinv, layout);	// add children
+		}, parenthw
+	);
+}
+
+// replace the table in the state key, matching the states we have defined.
+function initStateKey()
+{
+	var tabtxt = "";
+	for (var s in States) {
+		var sobj = States[s];
+		var color = colormap[['dense-compute-node-state', s].join('-')]
+		tabtxt += "<tr title='" + sobj.description + "' class='masterTooltip'>"
+				+ "<td width='20px'>" + sobj.name + "</td>"
+				+ "<td><table width='300px'><tr>"
+				+ "<td id='stateKey" + s + "bar' style='width:0%;background-color:" + color +  "'> </td>"
+				+ "<td id='stateKey" + s + "val' style='width:100%; text-align:right'>0</td></tr></table></td></tr>\n"
+	}
+	$("#stateKey").html(tabtxt);
+	$('.masterTooltip').hover(function(){
+			// Hover over code
+			var title = $(this).attr('title');
+			$(this).data('tipText', title).removeAttr('title');
+			$('<p class="tooltip" id="keytip"/p>')
+			.text(title)
+			.appendTo('body')
+			.fadeIn('slow');
+	}, function() {
+			// Hover out code
+			$(this).attr('title', $(this).data('tipText'));
+			$('#keytip').remove();
+	}).mousemove(function(e) {
+			var mousex = e.pageX + 20; //Get X coordinates
+			var mousey = e.pageY + 10; //Get Y coordinates
+			$('#keytip')
+			.css({ top: mousey, left: mousex })
+	});
+}
+
+/* The context autocomplete box has changed due to user input
+ */
+function contextChanged(inputbox)
+{
+	var context = inputbox.value;
+	var oldcontext = inputbox.oldvalue;
+
+	if (context == "") {	// match any whitespace?
+		context = inputbox.value = "Now";
+	}
+	if (context == oldcontext)
+		return;	// harmless
+
+	console.log("new: ", context, "  prev: ", oldcontext);
+	changeContext(context);
+
+	//	$("#contextselector").css("background-color", "red");	// Do this to show an error with the context?
+}
+
+/* The UI wants to change the current context.
+ *
+ * Do so, tracking history as well as changing the UI to make it clear where(when) we are.
+ */
+function changeContext(context)
+{
+	// QQQ extract a date/time.  We cheat here for now by making assumptions
+	if (context == "Now") {
+		console.log("go to now");
+		if (contexttime == null)
+			return;		// already at "Now"
+		contexttime = null;
+	} else {
+		var w = context.split(" ");
+		switch (w[0]) {
+			case "RAS":
+			case "Service":
+				console.log("ras or service context");
+				contexttime = new Date(w[1] + " " + w[2] + " UTC");
+				break;
+			case "Job":
+				console.log("job context (not implemented!)");
+				return; //QQQ
+				break;
+			default:
+				console.log("assume raw timestamp (not implemented!)");
+				return //QQQ
+				break;
+		}
+	}
+	addContextHistory(context);
+	$('#contextselector').val(context);
+	if (contexttime) {
+		$('#wayback').css("display", "block");	// Show Mister Peabody
+		$('body').addClass("wayback-mode");
+	} else {
+		$('#contextselector').val("Now");
+		$('#wayback').css("display", "none");	// Hide Mister Peabody
+		$('body').removeClass("wayback-mode");
+	}
+	updateNodeStatesFromDB();
+}
+
+function addContextHistory(context)
+{
+	if (contextList.indexOf(context) == -1)
+		contextList.push(context);	// New value
+}
+
+// Pad a number to n digits with leading zeros
+function pad(num, digits)
+{
+	var str = ""+num;	// convert to string
+	while (str.length < digits)
+		str = "0" + str;
+	return str;
+}
+
+// return a string time string suitable for voltdb queries.
+function timestringFromDate(date)
+{
+	return date.getUTCFullYear() + '-' + pad(date.getUTCMonth()+1, 2) + '-' + pad(date.getUTCDate(), 2)
+		+ ' ' + pad(date.getUTCHours(), 2) + ':' + pad(date.getUTCMinutes(), 2) + ':' + pad(date.getUTCSeconds(), 2)
+		+ '.' + pad(date.getUTCMilliseconds(), 3) + '000';
+}
+
+// Fetch starthistory, which we already initialized to now-10min as a guess.
+// We only do this once as the start of history cannot change.
+// Start of history is really only used to scale the history scrollbar.  Nothing more.
+function fetchHistoryStart()
+{
+//	console.log(VOLTDBAPIURL,
+//				"Procedure=ComputeNodeHistoryOldestTimestamp&Parameters=[]&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=ComputeNodeHistoryOldestTimestamp&Parameters=[]&jsonp=?",
+				dbHistoryStartResponse, "json");
+}
+
+function dbHistoryStartResponse(response)
+{
+	if (response.status < 0) {
+//		console.log("history start response.status=", response.status);  // -3 when not ready
+		setTimeout(fetchHistoryStart, HISTPOLL*1000);		// kick it off again in the future.
+		return;
+	}
+//	console.log("history start response len=", response.results[0].data.length);
+	if (response.results[0].data.length > 0) {
+		var tstamp = response.results[0].data[0][0];
+		starthistory = new Date(tstamp/1000);
+//		console.log("tstamp=", tstamp, " starthistory=", timestringFromDate(starthistory));
+/*		historyslider.slider("option", "min", Math.floor(starthistory.getTime())); */
+		nodeMaxLastChgTimestamp=null;
+		fetchDBChangeTimestamps();
+	}
+}
+
+function fetchDBChangeTimestamps()
+{
+//	console.log(VOLTDBAPIURL,
+//				"Procedure=DbChgTimestamps&Parameters=[]&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=DbChgTimestamps&Parameters=[]&jsonp=?",
+				fetchDBChangeTimestampsResponse, "json");
+}
+
+function fetchDBChangeTimestampsResponse(response)
+{
+	if (response.status < 0) {
+		console.log("db change response.status=", response.status);  // -3 when not ready
+		return;
+	}
+	console.log("db change response len=", response.results[0].data.length);
+	for (var i=0; i < response.results[0].data.length; i++) {
+		var name = response.results[0].data[i][0];		// 2 columns, and probably 3 rows
+		var val = response.results[0].data[i][1];
+		if (name == "Node_Max_LastChgTimestamp") {
+			var tstamp = new Date(val + " GMT-0000");
+			if (nodeMaxLastChgTimestamp == null || nodeMaxLastChgTimestamp < tstamp) {
+				// History end has advanced.  Readjust the history slider.
+				nodeMaxLastChgTimestamp = tstamp;
+//				console.log("tstamp=", tstamp, " nodeMaxLastChgTimestamp=", timestringFromDate(nodeMaxLastChgTimestamp));
+/*				// Update the history slider max.
+				var oldval = historyslider.slider("option", "value");
+				var oldmax = historyslider.slider("option", "max");
+				historyslider.slider("option", "max", Math.floor(nodeMaxLastChgTimestamp.getTime()));
+				if (oldval == oldmax)
+					historyslider.slider("option", "value", Math.floor(nodeMaxLastChgTimestamp.getTime()));
+*/
+			}
+		} else if (name == "Node_Max_DbUpdatedTimestamp") {
+			var tstamp = new Date(val + " GMT-0000");
+			if (nodeMaxDBUpdatedTimestamp == null || nodeMaxDBUpdatedTimestamp < tstamp) {
+				// Database updating has advanced.  Track it.
+				nodeMaxDBUpdatedTimestamp = new Date(tstamp);
+//				console.log("tstamp=", tstamp, " nodeMaxDBUpdatedTimestamp=", timestringFromDate(nodeMaxDBUpdatedTimestamp));
+				if (contexttime == null)
+					updateNodeStatesFromDB();		// Need up-to-date data if showing "Now"
+			}
+		} else if (name == "Job_Max_LastChgTimestamp") {
+			// Not doing anything with this one just yet.
+		} else if (name == "Job_Max_DbUpdatedTimestamp") {
+			if (jobMaxDBUpdatedTimestamp != val) {
+				updateJobsFromDB();
+				jobMaxDBUpdatedTimestamp = val;
+			}
+		} else if (name == "Ras_Max_DbUpdatedTimestamp") {
+			if (rasMaxTimestamp != val) {
+				updateRasFromDB();
+				rasMaxTimestamp = val;
+			}
+		} else {
+			console.log("got unknown DbChgTimestamps change ", name, " (ignored)");
+		}
+	}
+	setTimeout(fetchDBChangeTimestamps, HISTPOLL*1000);		// kick it off again in the future.
+}
+
+
+// Update the current page based on contexttime
+// contextime == null means "Now" so we use nodeMaxDBUpdatedTimestamp,
+// else we really want to see the context time.
+function updateNodeStatesFromDB()
+{
+	var timestring = timestringFromDate(contexttime ? contexttime : nodeMaxDBUpdatedTimestamp);
+	
+	console.log(VOLTDBAPIURL,
+				"Procedure=ComputeNodeHistoryListOfStateAtTime&Parameters=['"
+				+ timestring + "','']&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=ComputeNodeHistoryListOfStateAtTime&Parameters=['"
+				+ timestring + "','']&jsonp=?",
+				dbNodeStatesResponse, "json");
+	$('#clockface').css({"background-color": "red"});
+}
+
+function dbNodeStatesResponse(response)
+{
+	$('#clockface').css({"background-color": ''});
+	if (response.status < 0) {
+		console.log("response.status=", response.status);  // -3 when not ready
+		return;
+	}
+	console.log("response len=", response.results[0].data.length);
+	if (response.results[0].data.length > 0)
+		updateNodeStates(response.results[0].data);
+}
+
+//
+// Iterate through JSON update data.
+// The data argument is <update>.results[0].data.
+//
+function updateNodeStates(data)
+{
+	if (data[0].length == 1) {
+//		console.log("single col case");
+		for (var i=0; i<data.length; i++) {
+			var hwitem = systemInventory.getHwByHwtypeRank("dense-compute-node", i);
+			hwitem.changeState(data[i][0]);
+		}
+		systemInventory.notifyObservers(null);
+	} else {
+		console.log("ERROR: not handling multi-col case!");
+	}
+	// Update state key.   Use curdata since it is now current.
+	for (var s in States) {
+		var val=0;
+		for (var i=0; i<data.length; i++) // QQQ: this won't work when data is a delta.
+			if (data[i][0] == s)
+				val++;
+		$("#stateKey" + s + "val").html(val);
+		$("#stateKey" + s + "bar").width(((val*100)/data.length)+"%");
+		$("#stateKey" + s + "bar").css('background-color', val > 0 ? colormap[['dense-compute-node-state', s].join('-')] : "white");
+	}
+}
+
+// Simple fetch all RAS
+function updateRasFromDB()
+{	
+//	console.log(VOLTDBAPIURL,
+//				"Procedure=RasEventListAtTime&Parameters=['','']&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=RasEventListAtTime&Parameters=['','']&jsonp=?",
+				dbRASresponse, "json");
+}
+
+function dashifnull(str)
+{
+	return (str == null || str == "null") ? "-" : str;
+}
+
+function dbRASresponse(response)
+{
+	if (response.status < 0) {
+		console.log("ras response.status=", response.status);  // -3 when not ready
+		return;
+	}
+	
+//	console.log("ras response len=", response.results[0].data.length);
+	// Columns can be determined by the schema in the response.
+	// They are (in order)
+	// 0 EventType:  id#
+	// 1 TimeStamp:  as usec
+	// 2 DBUpdateTimeStamp: as usec (not shown here)
+	// 3 Severity:  as string (e.g. "Fatal")
+	// 4 Location:  as string
+	// 5 JobID: as string
+	// 6 ControlAction: string action name
+	// 7 Message:  as string
+	// 8 InstanceData: string (not shown)
+	
+	rastable.rows().remove();	// removes all rows
+	
+	for (var i=0; i< response.results[0].data.length; i++) {
+		var eventtype = response.results[0].data[i][0];
+		var timestamp = response.results[0].data[i][1];
+		var severity = response.results[0].data[i][3];
+		var location = response.results[0].data[i][4];
+		var job = response.results[0].data[i][5];
+		var controlaction = response.results[0].data[i][6];
+		var message = response.results[0].data[i][7];
+		var rasdate = timestringFromDate(new Date(timestamp/1000));
+		rastable.row.add([eventtype, rasdate, severity, location, dashifnull(job), controlaction, message]);
+	}
+	rastable.draw();
+}
+
+// Simple fetch all Jobs.  We kick off a fetch for both active and non-active
+function updateJobsFromDB()
+{	
+	console.log(VOLTDBAPIURL,
+				"Procedure=JobHistoryListOfNonActiveJobsAtTime&Parameters=['']&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=JobHistoryListOfNonActiveJobsAtTime&Parameters=['']&jsonp=?",
+				dbNonActiveJobsresponse, "json");
+}
+
+function dbJobsresponse(response)
+{
+	if (response.status < 0) {
+		console.log("job response.status=", response.status);  // -3 when not ready
+		return;
+	}
+
+	console.log("job response len=", response.results[0].data.length);
+	// Columns can be determined by the schema in the response.
+	// JobId[0]  JobName[1]  State[2]  Bsn[3]  UserName[4]  StartTimestamp[5]  NumNodes[6]  Nodes[7]
+
+	for (var i=0; i< response.results[0].data.length; i++) {
+		var WLMjobid = response.results[0].data[i][0];
+		var info = {
+			id: WLMjobid,
+			name: response.results[0].data[i][1],
+			state: response.results[0].data[i][2],
+			BSN: response.results[0].data[i][3],
+			user: response.results[0].data[i][4],
+			starttime: new Date(response.results[0].data[i][5]/1000),
+			endtime: null,
+			numnodes: response.results[0].data[i][6],
+			nodes: response.results[0].data[i][7],	// jettison this once we know the rankspec is accurate
+		};
+		updateJob(WLMjobid, info);
+	}
+	jobtable.draw();	// assume something changed
+	systemInventory.notifyObservers(null);
+}
+
+function dbNonActiveJobsresponse(response)
+{
+	if (response.status < 0) {
+		console.log("na job response.status=", response.status);  // -3 when not ready
+		return;
+	}
+
+	console.log("na job response len=", response.results[0].data.length);
+	// Columns can be determined by the schema in the response.
+	// JobId[0] JobName[1] State[2] Bsn[3] UserName[4] StartTimestamp[5] EndTimeStamp[6] ExitStatus[7] NumNodes[8] Nodes[9] JobAcctInfo[10]
+
+	for (var i=0; i< response.results[0].data.length; i++) {
+		var WLMjobid = response.results[0].data[i][0];
+		var info = {
+			id: WLMjobid,
+			name: response.results[0].data[i][1],
+			state: response.results[0].data[i][2],
+			BSN: response.results[0].data[i][3],
+			user: response.results[0].data[i][4],
+			starttime: new Date(response.results[0].data[i][5]/1000),
+			endtime: new Date(response.results[0].data[i][6]/1000),
+			exitstatus: response.results[0].data[i][7],
+			numnodes: response.results[0].data[i][8],
+			nodes: response.results[0].data[i][9],	// jettison this once we know the rankspec is accurate
+			jobacctinfo: response.results[0].data[i][10],
+		};
+		updateJob(WLMjobid, info);
+	}
+	jobtable.draw();	// assume something changed
+	systemInventory.notifyObservers(null);
+
+	// Now kick off an active job update.
+	console.log(VOLTDBAPIURL,
+				"Procedure=JobHistoryListOfActiveJobsAtTime&Parameters=['']&jsonp=?");
+	jQuery.post(VOLTDBAPIURL,
+				"Procedure=JobHistoryListOfActiveJobsAtTime&Parameters=['']&jsonp=?",
+				dbJobsresponse, "json");
+}
+
+
+function updateJob(jobid, info)
+{
+	var job;
+	if (job = jobset.getJobById(jobid)) {
+		// job exists already...do some info updates if the job we know isn't in terminated state.
+		if (job.info.state != 'T') {
+			console.log("existing active job", jobid, info, job);
+			// Find the right row...
+			// Update the job.
+			job.info = info;		// wholesale replace the info
+			if (info.state == 'T'){
+				// completed job 
+				jobset.updateJob(job);	// handles color marking on transition
+				jobtable.row('#'+jobid).remove();	// hackish to remove/add, but this does the job.color update as the row is re-created.
+				jobtable.row.add([jobid, info.name, info.user, info.numnodes,
+					timestringFromDate(info.starttime), timestringFromDate(info.endtime), info.state, info.exitstatus, 0, info.BSN]);
+			} else {
+				// still running job
+				jobtable.row('#'+jobid).data([jobid, info.name, info.user, info.numnodes,
+					timestringFromDate(info.starttime), ':', info.state, '-', 0, info.BSN]);
+			}
+		}
+	} else {
+		var rankset = systemInventory.locationsToRankSpec(info.nodes);
+		job = new Job(jobid, info, rankset);
+		jobset.addJob(job);
+		console.log("newly seen job", jobid, info, job);
+		if (info.state == 'T') {
+			// completed job (seen for first time)
+			jobtable.row.add([jobid, info.name, info.user, info.numnodes,
+				timestringFromDate(info.starttime), timestringFromDate(info.endtime), info.state, info.exitstatus, 0, info.BSN]);
+		} else {
+			// running job
+			jobtable.row.add([jobid, info.name, info.user, info.numnodes,
+				timestringFromDate(info.starttime), ':', info.state, '-', 0, info.BSN]);
+		}
+	}
+}
+
+</script>
+</body>
+</html>

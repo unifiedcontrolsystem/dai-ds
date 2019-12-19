@@ -1,0 +1,15 @@
+#!/usr/bin/sh
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#PBS -l select=1:ncpus=2:mpiprocs=1
+#PBS -l cput=0:05:00
+#PBS -A DonsAccount
+#PBS -j oe
+ulimit -a
+pbsdsh -- date
+pbsdsh -- dd if=/dev/zero of=/dev/null
+pbsdsh -- date
+pbsdsh -- dd if=/dev/zero of=/dev/null
+pbsdsh -- date

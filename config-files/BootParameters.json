@@ -1,0 +1,66 @@
+{
+  "boot-images": {
+    "content": [
+      {
+        "id": "centos7.3-vtune",
+        "description": "Centos 7.3 w/ Vtune VNFS",
+        "BootImageFile": "centos7.3-vtune",
+        "BootImageChecksum": "ecaa78c6c36a3442a45f20852f99a7cf",
+        "BootOptions": null,
+        "KernelArgs": null,
+        "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
+        "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+      },
+      {
+        "id": "centos7.3-slurm",
+        "description": "Centos 7.3 w/ Slurm VNFS",
+        "BootImageFile": "centos7.3-1611-slurm",
+        "BootImageChecksum": "7427dbf6ec4e028f22d595195fe72563",
+        "BootOptions": null,
+        "KernelArgs": null,
+        "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
+        "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+      },
+      {
+        "id": "centos7.3-slurm-vtune",
+        "description": "Centos 7.3 w/ Slurm and Vtune VNFS",
+        "BootImageFile": "centos7.3-1611-slurm-vtune",
+        "BootImageChecksum": "d94a4a134d1ea146afc7a82a084ae1a4",
+        "BootOptions": null,
+        "KernelArgs": null,
+        "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
+        "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+      },
+      {
+        "id": "mOS",
+        "description": "mOS",
+        "BootImageFile": "mOS",
+        "BootImageChecksum": "589a4eedbf582d5e96bd62d6ec0bf1c0",
+        "BootOptions": null,
+        "KernelArgs": "console=tty0 console=ttyS0,115200 selinux=0 intel_idle.max_cstate=1 intel_pstate=disable nmi_watchdog=0 tsc=reliable lwkcpus=40.1-19,41-59:60.21-39,61-79 lwkmem=108G kernelcore=16G",
+        "BootStrapImageFile": "4.9.61-attaufer-mos-8139",
+        "BootStrapImageChecksum": "4c09b8f5908802ce64fb898eda8964d6"
+      },
+      {
+        "id": "diagImage",
+        "description": "HPC Offline Diagnostics Image",
+        "BootImageFile": "centos7.3-1611-slurm-vtune",
+        "BootImageChecksum": "d94a4a134d1ea146afc7a82a084ae1a4",
+        "BootOptions": null,
+        "KernelArgs": null,
+        "BootStrapImageFile": "sklDiagImage",
+        "BootStrapImageChecksum": "addc1dce586cf6b96d28bc5eb099773f"
+      },
+      {
+        "id": "proprietaryOS",
+        "description": "Proprietary Operating System",
+        "BootImageFile": "proprietary_os_11.2.7",
+        "BootImageChecksum": "42ade6a34d1ea146afc7a82a084ae1a4",
+        "BootOptions": null,
+        "KernelArgs": null,
+        "BootStrapImageFile": "proprietary_os_11.2.7_bootstrap",
+        "BootStrapImageChecksum": "333c1dce586cf6b96d28bc5eb099773f"
+      }
+    ]
+  }
+}

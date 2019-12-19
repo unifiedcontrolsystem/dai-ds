@@ -1,0 +1,162 @@
+version: '2'
+
+services:
+  postgres:
+    image: postgres:11.4
+    entrypoint: docker-entrypoint.sh
+    command: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=dai
+      - POSTGRES_USER=dai
+      - POSTGRES_PASSWORD=123@dai
+      - SERVICE_LOCATION=SN0-DB0
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - HOSTNAME=postgres
+    ports:
+      - "5432:5432/tcp"
+    volumes:
+      - "./tier2:/docker-entrypoint-initdb.d"
+      - "./data/pgdata:/var/lib/postgresql/data/pgdata"
+    restart: always
+
+  voltdb:
+    depends_on:
+      - postgres
+    image: voltdb/voltdb-community:9.2.1
+    entrypoint: /opt/voltdb/schema/docker-entrypoint.sh
+    container_name: voltdb
+    environment:
+      - SERVICE_LOCATION=SN0-DB1
+      - HOSTNAME=voltdb
+    ports:
+      - "21212:21212/tcp"
+      - "3021:3021/tcp"
+      - "5555:5555/tcp"
+      - "8080:8080/tcp"
+    volumes:
+      - "./log/voltdb:/var/voltdb/voltdbroot/log"
+      - "./tier1:/opt/voltdb/schema"
+      - "./jars:/opt/voltdb/jars"
+    restart: always
+
+  rabbitmq:
+    depends_on:
+      - postgres
+      - voltdb
+    image: rabbitmq:3.7-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672/tcp"
+      - "5672:5672/tcp"
+    environment:
+      - RABBITMQ_NODE_IP="0.0.0.0"
+      - SERVICE_LOCATION=SN0-PUB0
+      - HOSTNAME=rabbitmq
+    restart: always
+
+  populate-schema:
+    depends_on:
+      - voltdb
+      - postgres
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/populateSchema.sh
+    container_name: populate-schema
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: 'no'
+
+  smw:
+    depends_on:
+      - populate-schema
+      - rabbitmq
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/entryPoint.sh
+    container_name: smw
+    environment:
+      - SERVICE_LOCATION=SN0-SMW0
+      - HOSTNAME=smw
+      - DAI_LOGGING_LEVEL=DEBUG
+    ports:
+      - "4567:4567/tcp"
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: always
+
+  submn1:
+    depends_on:
+      - smw
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/entryPoint.sh
+    container_name: submn1
+    environment:
+      - SERVICE_LOCATION=SN0-SMG0
+      - HOSTNAME=submn1
+      - DAI_LOGGING_LEVEL=DEBUG
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: always
+
+  submn2:
+    depends_on:
+      - smw
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/entryPoint.sh
+    container_name: submn2
+    environment:
+      - SERVICE_LOCATION=SN0-SMG1
+      - HOSTNAME=submn2
+      - DAI_LOGGING_LEVEL=DEBUG
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: always
+
+  submn3:
+    depends_on:
+      - smw
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/entryPoint.sh
+    container_name: submn3
+    environment:
+      - SERVICE_LOCATION=SN0-SMG2
+      - HOSTNAME=submn3
+      - DAI_LOGGING_LEVEL=DEBUG
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: always
+
+  eventsim:
+    depends_on:
+      - submn1
+      - submn2
+      - submn3
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/bin/eventSimEntryPoint.sh
+    container_name: eventsim
+    environment:
+      - SERVICE_LOCATION=SN0-SIM0
+      - HOSTNAME=eventsim
+      - DAI_LOGGING_LEVEL=DEBUG
+    ports:
+      - "5678:5678/tcp"
+    volumes:
+      - "./config:/opt/ucs/etc"
+      - "./jars:/opt/ucs/lib"
+      - "./log/ucs:/opt/ucs/log"
+      - "./dai:/opt/ucs/bin"
+    restart: always

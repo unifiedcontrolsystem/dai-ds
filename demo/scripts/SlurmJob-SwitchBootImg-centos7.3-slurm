@@ -1,0 +1,10 @@
+#!/bin/bash
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#
+#SBATCH -N 16
+#SBATCH -J MyJobName
+#SBATCH --constraint="centos7.5-slurm"
+srun /opt/ucs/demo/workloads/UMT 1

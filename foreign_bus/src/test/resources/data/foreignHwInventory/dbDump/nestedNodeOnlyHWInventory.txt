@@ -1,0 +1,16 @@
+
+SELECT * FROM HW_Location ORDER BY ID;
+ID            PARENTID    TYPE              ORDINAL  FRUID                           FRUTYPE           FRUSUBTYPE                
+------------- ----------- ----------------- -------- ------------------------------- ----------------- --------------------------
+x0                        Cabinet                  0 Cray-2345-1234556789            Cabinet           MountainCabinet (example) 
+x0c0          x0          Chassis                  0 Cray-ch01-23452345              Chassis           MountainChassis (example) 
+x0c0s0b0n0    x0c0s0b0    Node                     0 Dell-99999-1234.1234.2345       Node              River                     
+x0c0s0b0n0d0  x0c0s0b0n0  Memory                   0 MFR-PARTNUMBER-SERIALNUMBER     Memory            DIMM2400G32               
+x0c0s0b0n0d1  x0c0s0b0n0  Memory                   1 empty-x0c0s0b0n0d1              NULL              NULL                      
+x0c0s0b0n0d2  x0c0s0b0n0  Memory                   2 MFR-PARTNUMBER-SERIALNUMBER_2   Memory            DIMM2400G32               
+x0c0s0b0n0d3  x0c0s0b0n0  Memory                   3 empty-x0c0s0b0n0d3              NULL              NULL                      
+x0c0s0b0n0p0  x0c0s0b0n0  Processor                0 HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL Processor         SKL24                     
+x0c0s0b0n0p1  x0c0s0b0n0  Processor                1 HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL Processor         SKL24                     
+x0m0p0        x0m0        CabinetPDU               0 CabinetPDU.29347ZT536           CabinetPDU        NULL                      
+x0m0p0j1      x0m0p0      CabinetPDUOutlet         0 CabinetPDUOutlet.0.CabinetPDU.29347ZT536 CabinetPDUOutlet  NULL                      
+x0m0p0j2      x0m0p0      CabinetPDUOutlet         2 CabinetPDUOutlet.1.CabinetPDU.29347ZT536 CabinetPDUOutlet  NULL                      

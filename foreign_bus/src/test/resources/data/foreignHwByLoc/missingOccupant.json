@@ -1,0 +1,20 @@
+{
+  "ID": "x0c0s0b0n0",
+  "Type": "Node",
+  "Ordinal": 0,
+  "Status": "Populated",
+  "HWInventoryByLocationType": "HWInvByLocNode",
+  "NodeLocationInfo": {
+    "Id": "System.Embedded.1",
+    "Name": "Name describing system or where it is located, per mgfr",
+    "Description": "Description of system/node type, per mgfr",
+    "Hostname": "if_defined_in_Redfish",
+    "ProcessorSummary": {
+      "Count": 2,
+      "Model": "Multi-Core Intel(R) Xeon(R) processor E5-16xx Series"
+    },
+    "MemorySummary": {
+      "TotalSystemMemoryGiB": 64
+    }
+  }
+}

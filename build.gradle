@@ -1,0 +1,1842 @@
+// Copyright (C) 2018-2019 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:1.12.2+'
+    }
+}
+
+plugins {
+    id 'nebula.ospackage' version '6.1.4'
+}
+
+apply plugin: 'nebula.rpm'
+apply plugin: 'java'
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// To build this gradle project you need both JDK 8 and JDK 11 with JDK 11 being the   //
+// default/primary Java and compiler. The System property 'java8.bootstrapClasspath'   //
+// in gradle MUST be set correctly to the JAVA_HOME of the Java 8 JDK where the rt.jar //
+// file is located. Alternatively, the environment variable JAVA8_BOOTSTRAP_CLASSPATH  //
+// can be set to the JAVA_HOME for Java 8 JDK. This is required because VoltDB 9.x     //
+// requires Java 8 and will fail with Java 11 JAR files. This may also be set in the   //
+// ~/.gradle/gradle.properties file:                                                   //
+//                                                                                     //
+//   systemProp.java8.bootstrapClasspath=/usr/lib/jvm/java-8-openjdk-amd64             //
+//                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////
+def JAVA8_HOME=System.getProperty("java8.bootstrapClasspath",
+        System.getenv("JAVA8_BOOTSTRAP_CLASSPATH"))
+if(JAVA8_HOME == null || JAVA8_HOME =="")
+    System.err.println(
+"""*** WARNING: you are missing the java8.bootstrapClasspath property pointing to
+    the Java 8 Runtime library. This could lead to runtime errors in the
+    cross-compiled JAR files. See the project root build.gradle file for
+    details about setting this up. Official builds MUST have this defined
+    properly.""")
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Build variables                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////
+boolean SUPPRESS_RELEASE_AND_HASH=Boolean.parseBoolean(System.getProperty("suppressReleaseAndHash", "false"))
+
+def gitVersionString() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        ignoreExitValue = true
+        standardOutput = stdout
+        commandLine "git", "--git-dir=${rootProject.projectDir}/.git", "describe", "--tags"
+    }
+    def version = stdout.toString().trim()
+    return (version == null || version.isEmpty())?'0.0.0':version
+}
+
+def static pythonVersionString(String gitVersion) {
+    String[] parts = gitVersion.split("-")
+    String pyVersion = parts[0]
+    if(parts.length > 1)
+        pyVersion += ".dev" + parts[1]
+    return pyVersion
+}
+def packageVersion = gitVersionString()
+if (SUPPRESS_RELEASE_AND_HASH) {
+    println("*** Suppressing git release and hash for this build!")
+    packageVersion = packageVersion.split('-')[0]
+}
+def packageRelease = '0'
+if(packageVersion.split('-').length > 1)
+    packageRelease = packageVersion.split('-')[1]
+def pythonVersion = pythonVersionString(packageVersion)
+
+// Dependent Package Versions (latest as of 12/5/2019)
+def voltdb_version = '9.1.1'
+def apache_version = '2.12.1'
+def httpcomponents_version = '4.5.10'
+def cliftonjson_version = '3.1.0'
+def keycloak_version = '8.0.1'
+def rabbitmq_version = '5.7.3'
+def picocli_version = '4.1.1'
+def commonsio_version = '2.6'
+def gson_version = '2.8.6'
+def spark_version = '2.9.1'
+def postgres_jdbc_version = '42.2.8'
+def slf4j_version = '1.7.29'
+def commonscli_version = '1.4'
+def commonslang3_version = '3.9'
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Developers and the CI must define the System property 'includeDebugSymbols' as      //
+// 'true' either at the gradlew commandline or a better solution would be to add the   //
+// following line to the ~/.gradle/gradle.properties file:                             //
+//                                                                                     //
+//     systemProp.includeDebugSymbols=true                                             //
+//                                                                                     //
+// The default behavior of 'false' will be for github default build behaviors.         //
+/////////////////////////////////////////////////////////////////////////////////////////
+if(System.getProperty("ucs.includeDbgSymbols") != null) {
+    System.err.println("""
+*** The property 'ucs.includeDbgSymbols' is deprecated!
+    Please use 'includeDebugSymbols' instead.")""")
+}
+def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSymbols",
+System.getProperty("ucs.includeDbgSymbols", "false")))
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+def enforcePmd = true
+def pmdScanLevel = 2
+def enforceJacoco = includeDbgSymbols
+import java.time.Instant
+def thisYear = Instant.now().toDate().toYear().toString()
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Packaging and install variables                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////
+def install_dir = "/opt/ucs"
+def bin_dir     = install_dir + "/bin"
+def etc_dir     = install_dir + "/etc"
+def share_dir   = install_dir + "/share"
+def lib_dir     = install_dir + "/lib"
+def log_dir     = install_dir + "/log"
+
+println("\n*** Build Version: " + packageVersion)
+if(!includeDbgSymbols)
+    System.err.println("*** Not including debug symbols and turning off coverage compliance!")
+
+task rootClean(type: Delete) {
+    delete "${projectDir}/out", "${projectDir}/build"
+    delete += fileTree("${projectDir}").matching {
+        include "*.log"
+    }
+    delete += fileTree("${rootProject.projectDir}").matching {
+        include "**/build/**"
+    }
+}
+clean.finalizedBy(rootClean)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Root project and all project definitions                                            //
+/////////////////////////////////////////////////////////////////////////////////////////
+allprojects {
+    version = "${packageVersion}"
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Sub-project common definitions                                                       //
+/////////////////////////////////////////////////////////////////////////////////////////
+subprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+    apply plugin: 'pmd'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    compileTestJava {
+        options.compilerArgs <<'-Xlint:deprecation'
+    }
+
+    compileJava {
+        doFirst {
+            if(JAVA8_HOME != null && JAVA8_HOME != "" && sourceCompatibility.toString() == "1.8") {
+                options.bootstrapClasspath = fileTree(include: ['*.jar'], dir: "$JAVA8_HOME/jre/lib/")
+            }
+        }
+        if(!includeDbgSymbols)
+            options.compilerArgs << '-g:none'
+        options.compilerArgs << '-Werror'
+        options.compilerArgs << '-Xlint:all,-path,-options'
+        options.compilerArgs << '-Xlint:-processing'
+        options.compilerArgs << '-XDignore.symbol.file=true'
+
+        options.fork = true
+        options.forkOptions.executable = 'javac'
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.12+'
+        testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22+'
+    }
+
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    jacoco {
+        toolVersion = "0.8.2"
+    }
+
+    clean {
+        delete += "out"
+    }
+
+    jar {
+        doLast {
+            copy {
+                from outputs.files
+                into "../build/jars"
+            }
+            copy {
+                from outputs.files
+                into "../build/libs"
+            }
+            copy {
+                from configurations.compile
+                into "../build/jars"
+            }
+        }
+    }
+
+    pmdTest.enabled = false
+    pmdMain {
+        group = "Reporting"
+        consoleOutput = true
+        rulePriority = pmdScanLevel
+        ignoreFailures = !enforcePmd
+        ruleSets = []
+        ruleSetFiles = files("${rootProject.projectDir}/pmd.xml")
+        reports {
+            xml.enabled = true
+            xml.destination = file("${rootProject.buildDir}/pmd/${project.name}.xml")
+            html.enabled = true
+            html.destination = file("${rootProject.buildDir}/reports/pmd/${project.name}.html")
+        }
+    }
+
+    test {
+        useJUnit()
+        environment('XDG_CONFIG_DIRS', '/tmp')
+        System.setProperty('daiLoggingLevel', 'debug')
+        testLogging {
+            showCauses = true
+            showExceptions = true
+            showStackTraces = true
+            showStandardStreams = true
+        }
+        reports {
+            html.destination = file("${rootProject.buildDir}/reports/tests/${project.name}")
+        }
+
+        finalizedBy "jacocoTestReport"
+    }
+
+    jacocoTestReport {
+        group = "Build"
+        reports {
+            xml.enabled = true
+            csv.enabled = false
+            html.destination = file("${rootProject.buildDir}/reports/coverage/${project.name}")
+            xml.destination = file("${rootProject.buildDir}/jacoco/jacocoTestResults-${project.name}.xml")
+        }
+
+        finalizedBy "jacocoTestCoverageVerification"
+    }
+
+    // Integration Tests (at Component Level)
+    configurations {
+        integrationImplementation.extendsFrom testImplementation
+        integrationRuntime.extendsFrom testRuntime
+    }
+
+    sourceSets {
+        integration {
+            groovy.srcDir "$projectDir/src/integration/groovy"
+            resources.srcDir "$projectDir/src/integration/resources"
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+        }
+    }
+
+    task integrationTest(type: Test) {
+        testClassesDirs = sourceSets.integration.output.classesDirs
+        classpath = sourceSets.integration.runtimeClasspath
+    }
+}
+clean.dependsOn(subprojects.clean)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Subproject build definitions                                                        //
+/////////////////////////////////////////////////////////////////////////////////////////
+project(':xdg') {
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':properties') {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':logging') {
+    dependencies {
+        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: apache_version
+        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: apache_version
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':runtime_utils') {
+    dependencies {
+        compile project(':properties')
+        compile project(':logging')
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':config_io') {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    dependencies {
+        compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
+        compile project(':properties')
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':procedures') {
+    apply plugin: 'groovy'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    dependencies {
+        compile group: 'org.voltdb', name: 'voltdb', version: voltdb_version
+        compile project(':properties')
+        compile project(':config_io')
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':authentication') {
+    apply plugin: 'groovy'
+    dependencies {
+        compile project(':logging')
+        compile group: 'org.keycloak', name: 'keycloak-admin-client', version: keycloak_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile group: 'org.jboss.resteasy', name: 'resteasy-client', version: '4.3.0.Final'
+        testCompile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '4.3.0.Final'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':networking') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(":authentication")
+        compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':dai_core') {
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':xdg')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':logging')
+        compile project(':networking')
+        compile project(':perflogging')
+        compile project(':runtime_utils')
+        compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
+        compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
+        compile group: 'info.picocli', name: 'picocli', version: picocli_version
+        compile group: 'commons-io', name: 'commons-io', version: commonsio_version
+        compile "com.google.code.gson:gson:${gson_version}"
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+        compileOnly 'org.projectlombok:lombok:1.18.8'
+        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    }
+
+    project.mainClassName = 'com.intel.dai.AdapterDaiMgr'
+
+    jar {
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.81
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.52
+                }
+            }
+        }
+    }
+
+    distZip.doLast {
+        delete {
+            delete "${buildDir}/distributions/${project.name}-${packageVersion}.zip"
+        }
+    }
+}
+
+project(':ui') {
+    apply plugin: 'application'
+
+    dependencies {
+        compile project(':dai_core')
+        compile project(':logging')
+        compile project(':properties')
+        compile project(':config_io')
+        compile "com.sparkjava:spark-core:${spark_version}"
+        compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
+        compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
+
+        testCompile "com.despegar:spark-test:1.1.8"
+    }
+    project.mainClassName = 'com.intel.dai.ui.AdapterUIRest'
+
+    jar {
+        from fileTree(dir: "${projectDir}/../demo", include: 'demo-v2/**')
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+
+    distZip.doLast {
+        delete {
+            delete "${buildDir}/distributions/${project.name}-${packageVersion}.zip"
+        }
+    }
+}
+
+project(':populate_schema') {
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':dai_core')
+        compile group: 'org.postgresql', name: 'postgresql', version: postgres_jdbc_version
+        compile group: 'org.voltdb', name: 'voltdb', version: voltdb_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+    project.mainClassName = 'com.intel.dai.populate.OnlineTierDataLoaderApp'
+
+    jar {
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+
+    distZip.doLast {
+        delete {
+            delete "${buildDir}/distributions/${project.name}-${packageVersion}.zip"
+        }
+    }
+}
+
+project(':partitioned_monitor') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(':networking')
+        compile project(':dai_core')
+        compile project(':properties')
+        compile project(':config_io')
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':perflogging') {
+    dependencies { }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':foreign_bus') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(':networking')
+        compile project(':dai_core')
+        compile project(':runtime_utils')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':partitioned_monitor')
+        compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4j_version
+        compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
+        compile "com.sparkjava:spark-core:${spark_version}"
+        compile "com.google.code.gson:gson:${gson_version}"
+        compile "commons-cli:commons-cli:${commonscli_version}"
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+        compileOnly 'org.projectlombok:lombok:1.18.8'
+        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':resource_managers') {
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':dai_core')
+        compile project(':logging')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':runtime_utils')
+        compile "commons-io:commons-io:${commonsio_version}" // Used by the Pbs and Slurm Adapters
+        compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version // Used directly by this component.
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+    project.mainClassName = project.hasProperty("main") ? project.getProperty("main") : 'com.intel.dai.AdapterWlmCobalt'
+
+    jar {
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Summarize coverage HTML                                                             //
+/////////////////////////////////////////////////////////////////////////////////////////
+task makeSummaryHtml(type: Exec) {
+    dependsOn subprojects.jacocoTestReport
+    workingDir = "${projectDir}"
+    commandLine "python3", "build-scripts/reportCoverage.py"
+}
+rootProject.test.finalizedBy(makeSummaryHtml)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Java RPM and Docker Packaging                                                       //
+/////////////////////////////////////////////////////////////////////////////////////////
+task makeDaiVoltRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/populate-voltdb").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+PROG=\$(basename "\$0")
+
+[[ -z "\$LOG_LEVEL" ]] && LOG_LEVEL=INFO
+
+if [ \$# -ne 1 ]; then
+  echo "Error: Must be one parameter with a comma separated list of VoltDB servers with no spaces!" >&2
+  echo "Usage: \$PROG <voltdb_server(s)>"
+  exit 1
+fi
+
+UCS_DIR="${install_dir}"
+UCS_LIB="\${UCS_DIR}/lib"
+UCS_ETC="\${UCS_DIR}/etc"
+UCS_BIN="\${UCS_DIR}/bin"
+UCS_LOG="\${UCS_DIR}/log"
+
+VOLT_SERVERS=127.0.0.1
+[[ -n "\$1" ]] && VOLT_SERVERS="\$1" && shift
+
+export CLASSPATH="\${CLASSPATH}:\${UCS_LIB}/*:\${UCS_LIB}/postgresql-42.2.5.jar"
+logging=-DdaiLoggingLevel=\${LOG_LEVEL}
+
+java -jar \$logging "\${UCS_LIB}/populate_schema-${packageVersion}.jar" \$VOLT_SERVERS "\${UCS_ETC}/SystemManifest.json" "\${
+            UCS_ETC
+        }/MachineConfig.json" "\${UCS_ETC}/RasEventMetaData.json" 2>&1 | tee "\${UCS_LOG}/populate-voltdb.log"
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-volt.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+state="\$(systemctl is-active dai-volt | cat)"
+if [ "\${state}" == "active" ]; then
+  systemctl stop dai-volt
+fi
+systemctl disable dai-volt
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/postUninstall-volt.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+systemctl daemon-reload
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/postInstall-volt.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+systemctl daemon-reload
+systemctl enable dai-volt
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/dai-volt.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=DAI Volt daemon
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/voltctl start
+ExecStop=/usr/bin/voltctl stop
+ExecReload=/usr/bin/voltctl restart
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/voltctl").text = """#!/usr/bin/env bash
+# Copyright (C) 2018-${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#######################################################################
+# Program Variables
+PROG=\$(basename \$0)
+
+#######################################################################
+# UCS Installed Location Variables
+VOLT_BIN="/opt/voltdb/bin"
+UCS_VER="${packageVersion}"
+UCS_DIR="${install_dir}"
+UCS_DATA="\${UCS_DIR}/share"
+UCS_LIB="\${UCS_DIR}/lib"
+UCS_LOGDIR="\${UCS_DIR}/log"
+UCS_LOG="\${UCS_LOGDIR}/\${PROG}.log"
+UCS_CFG="\${UCS_DIR}/etc"
+MANIFEST="\${UCS_CFG}/SystemManifest.json"
+CONFIG="\${UCS_CFG}/MachineConfig.json"
+RAS_META_DATA="\${UCS_CFG}/RasEventMetaData.json"
+[ -z "\$VOLT_HTTP_PORT" ] && VOLT_HTTP_PORT=18080
+
+#######################################################################
+# JAR file names
+PROPERTIES="\${UCS_LIB}/properties-\${UCS_VER}.jar"
+CONFIG_IO="\${UCS_LIB}/config_io-\${UCS_VER}.jar"
+PROCEDURES="\${UCS_LIB}/procedures-\${UCS_VER}.jar"
+POPULATE_SCHEMA="\${UCS_LIB}/populate_schema-\${UCS_VER}.jar"
+
+#######################################################################
+# Low Level Functions
+function usage_exit() {
+  echo "Usage: \${PROG} [-h | --help | --version | start | stop | restart]"
+  exit \$1
+}
+
+function rotate_logs() {
+  local size="\$(du -m "/opt/ucs/log/\${PROG}.log" | cut -f1)"
+  [ "\${size}" == "" ] && size=0
+  if [ \$size -gt 16 ]; then
+      local next
+      local i
+      [ -f "\${UCS_LOGDIR}/\${PROG}.log.10" ] && rm "\${UCS_LOGDIR}/\${PROG}.log.10"
+      for i in 9 8 7 6 5 4 3 2 1; do
+        next=`expr \$i + 1`
+        [ -f "\${UCS_LOGDIR}/\${PROG}.log.\$i" ] && mv "\${UCS_LOGDIR}/\${PROG}.log.\${i}" "\${UCS_LOGDIR}/\${PROG}.log.\${next}"
+      done
+      [ -f "\${UCS_LOG}" ] && mv "\${UCS_LOG}" "\${UCS_LOGDIR}/\${PROG}.log.1"
+      echo >"\${UCS_LOG}"
+  fi
+}
+
+function log() {
+  if [ -f "\${UCS_LOG}" ]; then
+    echo \$* | tee -a \${UCS_LOG}
+  else
+    echo \$* | tee \${UCS_LOG}
+  fi
+}
+
+function disable_transparent_pages() {
+  if [ -z "\$(cat /sys/kernel/mm/transparent_hugepage/enabled | grep '\\[never\\]')" ]; then
+    log -n "Setting transparent huge pages 'enable' to never..."
+    if [ -w "/sys/kernel/mm/transparent_hugepage/enabled" ]; then
+      log "as root..."
+      echo never >/sys/kernel/mm/transparent_hugepage/enabled
+    else
+      log "elevating to root..."
+      sudo bash -c "echo never >/sys/kernel/mm/transparent_hugepage/enabled"
+    fi
+  fi
+  if [ -z "\$(cat /sys/kernel/mm/transparent_hugepage/defrag | grep '\\[never\\]')" ]; then
+    log "Setting transparent huge pages 'defrag' to never..."
+    if [ -w "/sys/kernel/mm/transparent_hugepage/defrag" ]; then
+      log "as root..."
+      echo never >/sys/kernel/mm/transparent_hugepage/defrag
+    else
+      log "elevating to root..."
+      sudo bash -c "echo never >/sys/kernel/mm/transparent_hugepage/defrag"
+    fi
+  fi
+}
+
+function is_running() {
+  \${VOLT_BIN}/voltadmin validate >/dev/null 2>&1
+  return \$?
+}
+
+function start_db_and_wait() {
+  \${VOLT_BIN}/voltdb create --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
+  if [ \${PIPESTATUS[0]} -ne 0 ]; then
+    return \${PIPESTATUS[0]}
+  fi
+  is_running
+  while [ \$? -ne 0 ]; do is_running; done
+  return 0
+}
+
+function populate_tables() {
+  \${VOLT_BIN}/sqlcmd <"\${UCS_DATA}/DAI-Volt-Tables.sql" 2>&1 | tee -a \$UCS_LOG
+  local rv=\${PIPESTATUS[0]}
+  [[ \$rv -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: voltctl failed to load tables into schema!'" | \${
+            VOLT_BIN
+        }/sqlcmd | tee -a \$UCS_LOG
+  return \$rv
+}
+
+function populate_procedures() {
+  \${VOLT_BIN}/sqlcmd <"\${UCS_DATA}/DAI-Volt-Procedures.sql" 2>&1 | tee -a \$UCS_LOG
+  local rv=\${PIPESTATUS[0]}
+  [[ \$rv -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: voltctl failed to load procedures into schema!'" | \${
+            VOLT_BIN
+        }/sqlcmd | tee -a \$UCS_LOG
+  return \$rv
+}
+
+function load_classes() {
+  \${VOLT_BIN}/sqlcmd --query="load classes \${PROPERTIES};" 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/sqlcmd --query="load classes \${UCS_LIB}/json-simple-3.0.2.jar;" 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/sqlcmd --query="load classes \${CONFIG_IO};" 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/sqlcmd --query="load classes \${PROCEDURES};" 2>&1 | tee -a \$UCS_LOG
+  return \${PIPESTATUS[0]}
+}
+
+#######################################################################
+# High Level Functions
+function startVolt() {
+  is_running
+  if [ \$? -eq 0 ]; then
+    log "voltdb is already running!"
+    return 1
+  fi
+  log "Starting voltdb..."
+  start_db_and_wait
+  local rv=\$?
+  if [ \$rv -eq 0 ]; then
+    populate_tables
+    rv=\$?
+    if [ \$rv -eq 0 ]; then
+      load_classes
+      rv=\$?
+      if [ \$rv -eq 0 ]; then
+        populate_procedures
+        rv=\$?
+      fi
+    fi
+  else
+    log "Starting voltdb failed!"
+    return \$rv
+  fi
+  if [ \$rv -ne 0 ]; then
+    log "Creating the DB failed!"
+    is_running
+    if [ \$? -eq 0 ]; then
+      log "Stopping voltdb..."
+      \${VOLT_BIN}/voltdb stop 2>&1 | tee -a \$UCS_LOG
+    fi
+  fi
+  return \$rv
+}
+
+function stopVolt() {
+  is_running
+  if [ \$? -ne 0 ]; then
+    log "Error: voltdb is not currently running!"
+    return 1
+  fi
+
+  log "Stopping voltdb..."
+  \${VOLT_BIN}/voltdb stop 2>&1 | tee -a \$UCS_LOG
+  return \${PIPESTATUS[0]}
+}
+
+function populateSchema() {
+  if [ ! -f "\${MANIFEST}" ]; then
+    log "Error: system manifest file is required!"
+    return 1
+  fi
+
+  if [ ! -f "\$CONFIG" ]; then
+    log "Error: machine configuration file is required!"
+    return 1
+  fi
+
+  java -jar "\${POPULATE_SCHEMA}" localhost \${MANIFEST} \${CONFIG} \${RAS_META_DATA} 2>&1 | tee -a \$UCS_LOG
+
+  return \${PIPESTATUS[0]}
+}
+
+function startAll() {
+  disable_transparent_pages
+  startVolt
+  local rv=1
+  if [ \$? -eq 0 ]; then
+    populateSchema  # Cannot run properly after RPM install, files must be setup for the system by the administrator.
+    rv=\$?
+    if [ \$rv -ne 0 ]; then
+        log "Error: Populating the system schema failed!"
+        stopVolt
+    fi
+  fi
+  return \${rv}
+}
+
+function stopAll() {
+    stopVolt
+    return 0
+}
+
+#######################################################################
+# Main Entry Point
+rotate_logs
+
+case "\$1" in
+  "-h")
+    usage_exit 0
+    ;;
+  "--help")
+    usage_exit 0
+    ;;
+  "--version")
+    echo "\${PROG} version \${VERSION}"
+    exit 0
+    ;;
+  "start")
+    startAll
+    exit \$?
+    ;;
+  "stop")
+    stopAll
+    exit \$?
+    ;;
+  "restart")
+    stopAll
+    startAll
+    exit \$?
+    ;;
+  *)
+    echo "Syntax Error: Bad commandline option!" >&2
+    usage_exit 1
+    ;;
+esac
+"""
+    }
+    summary = 'The Data Access Interface (DAI) VoltDB Service and Utilities for HPC clusters.'
+    release = "${packageRelease}"
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = 'dai-voltdb'
+
+    preUninstall    file("${buildDir}/tmp/preUninstall-volt.sh")
+    postInstall     file("${buildDir}/tmp/postInstall-volt.sh")
+    postUninstall   file("${buildDir}/tmp/postUninstall-volt.sh")
+
+    directory(log_dir, 0700)
+
+    into("/")
+
+    from("${buildDir}/tmp/voltctl") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+
+    from("${buildDir}/tmp/populate-voltdb") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+
+    from("${buildDir}/tmp/dai-volt.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+
+    link("/usr/bin/voltctl", bin_dir + '/voltctl')
+    link("/usr/bin/populate-voltdb", bin_dir + '/populate-voltdb')
+}
+
+task makeDaiRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/volt.ip").text = """127.0.0.1
+"""
+        new File((String)"${buildDir}/tmp/ucs-dai-mgr.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=UCS DAI Manager
+
+[Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+ExecStart=/usr/bin/ucs-start-dai-mgr
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/ucs-start-dai-mgr").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+MACHINECONFIG=${etc_dir}/MachineConfig.json
+HOSTNAME=\$(hostname)
+VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
+CLASS="com.intel.dai.AdapterDaiMgr"
+LOGNAME="AdapterDaiMgr-MotherSuperior.log"
+
+java -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+"""
+        new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
+# Copyright (C) 2018-${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+pgrep -af java | grep "com.intel." | grep -v "AdapterDaiMgr" | awk '{print \$1 " " \$6}'
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/environment").text = """DAI_VERSION="${packageVersion}"
+"""
+        new File((String)"${buildDir}/tmp/postInstall-dai.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+systemctl daemon-reload
+systemctl enable ucs-dai-mgr
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/postUninstall-dai.sh").text = """#!/bin/bash
+# Copyright (C) 2018-${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+systemctl daemon-reload
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+state="\$(systemctl is-active ucs-dai-mgr | cat)"
+if [ "\${state}" == "active" ]; then
+  systemctl stop ucs-dai-mgr
+fi
+systemctl disable ucs-dai-mgr
+
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/eventsim-server").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+java -cp "${lib_dir}/foreign_bus-${packageVersion}.jar" com.intel.dai.eventsim.EventSim \$@
+"""
+        new File((String)"${buildDir}/tmp/hw-discovery-2.sh").text ="""#!/bin/bash -x
+
+java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDiscoveryCLI -m \$@
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/hw-ingestion-2.sh").text ="""#!/bin/bash -x
+SERVER="localhost"
+java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDbClientCLI -s \${SERVER} -m v2d -i \$@
+exit \$?
+"""
+    }
+    summary = 'The Data Access Interface (DAI) for HPC clusters.'
+    release = "${packageRelease}"
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai.sh")
+    postUninstall file("${buildDir}/tmp/postUninstall-dai.sh")
+    postInstall   file("${buildDir}/tmp/postInstall-dai.sh")
+
+    directory(log_dir, 0700)
+
+    into("/")
+
+    from("${buildDir}/tmp/show-adapters") {
+        into(bin_dir)
+        fileMode = 0755
+    }
+
+    from("data/db") {
+        into(share_dir)
+    }
+
+    from("${buildDir}/tmp/ucs-dai-mgr.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+
+    from("data/DAI-schema-migration") {
+        into(share_dir + "/schema-migration")
+    }
+
+    from("${buildDir}/tmp/ucs-start-dai-mgr") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+
+    from("config-files") {
+        into(etc_dir)
+    }
+
+    from("${buildDir}/tmp/volt.ip") {
+        into(etc_dir)
+    }
+
+    from ('build/jars') {
+        into(lib_dir)
+    }
+
+    from("${buildDir}/tmp/eventsim-server") {
+        into(bin_dir)
+        fileMode = 0755
+    }
+
+    from("${buildDir}/tmp/environment") {
+        into(bin_dir)
+    }
+
+    // HW Inventory
+    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+        into(etc_dir)
+    }
+
+    from("${buildDir}/tmp/hw-discovery-2.sh") {
+        into(bin_dir)
+        rename("hw-discovery-2.sh", "hw-discovery.sh")
+        fileMode = 0700
+    }
+
+    from("${buildDir}/tmp/hw-ingestion-2.sh") {
+        into(bin_dir)
+        rename("hw-ingestion-2.sh", "hw-ingestion.sh")
+        fileMode = 0700
+    }
+
+    link("/usr/bin/ucs-start-dai-mgr", bin_dir + '/ucs-start-dai-mgr')
+    link("/usr/bin/show-adapters", bin_dir + '/show-adapters')
+    link("/usr/bin/eventsim-server", bin_dir + '/eventsim-server')
+}
+
+task makeStaticAnalysisZip(type: Zip) {
+    archiveFileName = "${project.name}-static-analysis-src-${project.version}.zip"
+    destinationDirectory = file("${buildDir}/distributions")
+    from("${projectDir}/") {
+        exclude("**/test/", "**/tests/", "**/build/", "build-scripts/", "data/", ".idea", ".gradle", "**/gradle/",
+                "docker*/", "config-files", "*.log", "**/out/", "**/LICENSES/**", "build.gradle", "**/*.json",
+                "**/resources/", "offline-configs", "docs", ".gitreview", ".travis.yml", "*.txt", "pmd.xml",
+                "settings.gradle", "COPYRIGHT")
+    }
+    into(project.name)
+}
+
+task makeDeveloperDockerTarball(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/manifest.txt").text = """json-simple-3.1.0.jar
+properties-${packageVersion}.jar
+config_io-${packageVersion}.jar
+procedures-${packageVersion}.jar
+"""
+    }
+    archiveFileName = "${project.name}-docker-dev-${project.version}.tar.gz"
+    compression = Compression.GZIP
+    destinationDirectory = file("${buildDir}/distributions")
+    from("${projectDir}/docker-dev-cluster")
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("tier2")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("tier1")
+        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("tier1")
+        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
+    }
+    from("${buildDir}/tmp/manifest.txt") {
+        into("jars")
+    }
+    from("${buildDir}/jars") {
+        into("jars")
+    }
+    from("${projectDir}/config-files/RasEventMetaData.json") {
+        into("config")
+    }
+    from("${projectDir}/config-files/BootParameters.json") {
+        into("config")
+    }
+    into("docker")
+}
+
+task makeDockerInstallTarballDai(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dockerDai.yml").text = """# DAI Docker Deployment Config
+name: docker_cp4_dai_${packageVersion}
+tarball: ${buildDir}/tmp/docker-deploy-dai.tar.gz
+destination_folder: ${buildDir}/distributions
+services:
+  - dai-manager.service
+"""
+        new File((String)"${buildDir}/tmp/dai-manager.service").text = """[Unit]
+Description=DAI Manager Service.
+Requires=dai-voltdb.service dai-rabbitmq.service dai-postgres.service
+After=dai-voltdb.service dai-rabbitmq.service dai-postgres.service
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/eventsim-server.sh").text ="""#!/bin/bash -x
+
+LOG="/opt/ucs/log/eventsim-server.log"
+OPTS="-DdaiLoggingLevel=DEBUG"
+CP="/opt/dai-docker/lib/*"
+CLASS="com.intel.dai.eventsim.EventSimApiApp"
+
+java \${OPTS} -cp "\${CP}" \${CLASS} \$@ 2>&1 | tee \${LOG}
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/hw-discovery.sh").text ="""#!/bin/bash -x
+
+java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDiscoveryCLI -m \$@
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/hw-ingestion.sh").text ="""#!/bin/bash -x
+SERVER="localhost"
+java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDbClientCLI -s \${SERVER} -m v2d -i \$@
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/empty.txt").text = """Created folder for logs."""
+    }
+    // main section
+    archiveFileName = "docker-deploy-dai.tar.gz"
+    compression = Compression.GZIP
+    destinationDirectory = file("${buildDir}/tmp")
+    fileMode = 0600
+    dirMode = 0700
+
+    from ("${projectDir}/docker-preview4/dai.yml") {
+        into("opt/dai-docker")
+    }
+    from("${buildDir}/jars") {
+        exclude("**/procedures-${packageVersion}.jar")
+        exclude("**/populate_schema-${packageVersion}.jar")
+        into("opt/dai-docker/lib")
+    }
+    from("${projectDir}/docker-preview4/etc") {
+        exclude("**/SystemManifest.json")
+        exclude("**/MachineConfig.json")
+        into("opt/dai-docker/etc")
+    }
+    from("${buildDir}/tmp/dai-manager.service") {
+        into("etc/systemd/system")
+    }
+    from("${projectDir}/config-files/log4j2.xml") {
+        into("opt/dai-docker/etc")
+    }
+    from("${projectDir}/docker-preview4/dai/entryPoint.sh") {
+        into("opt/dai-docker/dai")
+        fileMode = 0700
+    }
+    // EventSim Server
+    from("${projectDir}/config-files/EventSim.json") {
+        into("opt/ucs/etc")
+    }
+    from("${projectDir}/config-files/BootParameters.json") {
+        into("opt/ucs/etc")
+    }
+    from("${projectDir}/config-files/InventoryNodeProcessorMemory.json") {
+        into("opt/ucs/etc")
+    }
+    from("${projectDir}/docker-preview4/etc/SystemManifest.json") {
+        into("opt/ucs/etc")
+    }
+    from("${projectDir}/docker-preview4/etc/LocationTranslationMap.json") {
+        into("opt/ucs/etc")
+    }
+    from("${buildDir}/tmp/eventsim-server.sh") {
+        into("opt/ucs/bin")
+        fileMode = 0700
+    }
+    from("${buildDir}/tmp/empty.txt") {
+        into("opt/ucs/log")
+    }
+    // HW Inventory
+    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+        into("opt/ucs/etc")
+    }
+    from("${buildDir}/tmp/hw-discovery.sh") {
+        into("opt/ucs/bin")
+        fileMode = 0700
+    }
+    from("${buildDir}/tmp/hw-ingestion.sh") {
+        into("opt/ucs/bin")
+        fileMode = 0700
+    }
+    into("/")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/dockerDai.yml"
+        }
+    }
+}
+
+task makeDockerInstallTarball3rdParty(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/docker3rdParty.yml").text = """# DAI 3rd Party Docker Deployment Config
+name: docker_cp4_3rd_party_${packageVersion}
+tarball: ${buildDir}/tmp/dai-deploy-3rd-party.tar.gz
+destination_folder: ${buildDir}/distributions
+services:
+  - dai-postgres.service
+  - dai-voltdb.service
+  - dai-rabbitmq.service
+"""
+        new File((String)"${buildDir}/tmp/dai-postgres.service").text = """[Unit]
+Description=DAI PostgreSQL Docker service.
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/dai-rabbitmq.service").text = """[Unit]
+Description=DAI RabbitMQ broker.
+Requires=dai-postgres.service
+After=dai-postgres.service
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/dai-voltdb.service").text = """[Unit]
+Description=DAI VoltDB Docker service with schema.
+Requires=dai-rabbitmq.service
+After=dai-rabbitmq.service
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
+
+LOG="/opt/ucs/log/populate_schema.log"
+ARGS="\${VOLTDB_SERVER} /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
+JAR="/opt/ucs/lib/populate_schema-${packageVersion}.jar"
+
+java -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
+
+exit \$?
+"""
+    }
+    archiveFileName = "dai-deploy-3rd-party.tar.gz"
+    compression = Compression.GZIP
+    destinationDirectory = file("${buildDir}/tmp")
+    fileMode = 0600
+    dirMode = 0700
+
+    // Postgres setup
+    from("${projectDir}/docker-preview4/postgres.yml") {
+        into("opt/dai-docker")
+    }
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("opt/dai-docker/tier2/init.d")
+        fileMode(0644)
+    }
+    // RabbitMQ setup
+    from("${projectDir}/docker-preview4/rabbitmq.yml") {
+        into("opt/dai-docker")
+    }
+    //VoltDB setup
+    from("${projectDir}/docker-preview4/voltdb.yml") {
+        into("opt/dai-docker")
+    }
+    from("${projectDir}/docker-preview4/tier1/init.d/docker-entrypoint.sh") {
+        into("opt/dai-docker/tier1/init.d")
+        fileMode(0700)
+    }
+    from("${buildDir}/jars/json-simple-3.1.0.jar") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
+    }
+    from("${buildDir}/libs/properties-${packageVersion}.jar") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("properties-${packageVersion}.jar", "20-properties-${packageVersion}.jar")
+    }
+    from("${buildDir}/libs/config_io-${packageVersion}.jar") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("config_io-${packageVersion}.jar", "50-config_io-${packageVersion}.jar")
+    }
+    from("${buildDir}/libs/procedures-${packageVersion}.jar") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("procedures-${packageVersion}.jar", "99-procedures-${packageVersion}.jar")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("opt/dai-docker/tier1/init.d")
+        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
+    }
+    // Populate VoltDB
+    from("${buildDir}/tmp/populateSchema.sh") {
+        into("opt/dai-docker/tier1/init.d")
+        fileMode(0700)
+    }
+    from("${buildDir}/jars") {
+        exclude("**/procedures-${packageVersion}.jar")
+        into("opt/dai-docker/lib")
+    }
+    from("${projectDir}/docker-preview4/etc/MachineConfig.json") {
+        into("opt/dai-docker/etc/")
+    }
+    from("${projectDir}/docker-preview4/etc/SystemManifest.json") {
+        into("opt/dai-docker/etc/")
+    }
+    from("${projectDir}/docker-preview4/etc/NearlineConfig.json") {
+        into("opt/dai-docker/etc/")
+    }
+    from("${projectDir}/config-files/RasEventMetaData.json") {
+        into("opt/dai-docker/etc")
+    }
+    // Services
+    from("${buildDir}/tmp/dai-postgres.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-voltdb.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-rabbitmq.service") {
+        into("etc/systemd/system")
+    }
+    into("/")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/docker3rdParty.yml"
+        }
+    }
+}
+
+task makeEventSimCliInstaller(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/eventsim_cli.yml").text ="""# EventSim CLI Install Config
+name: cli_eventsim_${packageVersion}
+tarball: ${buildDir}/tmp/eventsim.tar.gz
+destination_folder: ${buildDir}/distributions
+
+python_installers:
+  - '${install_dir}/python/eventsim_cli-${pythonVersion}-py3-none-any.whl'
+
+soft_links:
+  - from: '${bin_dir}/eventsim'
+    to: '/usr/bin/eventsim'
+"""
+        exec {
+            workingDir = "${projectDir}/cli_eventsim"
+            errorOutput = standardOutput
+            environment("DAIVER", "${pythonVersion}")
+            commandLine "python3", "${projectDir}/cli_eventsim/setup-eventsim.py", "bdist_wheel"
+        }
+        copy {
+            from("${projectDir}/cli_eventsim/dist/eventsim_cli-${pythonVersion}-py3-none-any.whl")
+            into("${buildDir}/tmp")
+        }
+        delete("${projectDir}/cli_eventsim/dist", "${projectDir}/cli_eventsim/eventsim_cli.egg-info",
+                "${projectDir}/cli_eventsim/build")
+    }
+    archiveFileName = "eventsim.tar.gz"
+    destinationDirectory = file("${buildDir}/tmp")
+    compression = Compression.GZIP
+    fileMode = 0600
+    dirMode = 0700
+
+    from("${projectDir}/cli_eventsim/eventsim") {
+        into("bin")
+        fileMode = 0755
+    }
+    from("${projectDir}/cli_eventsim/eventsim_cli_config.json") {
+        into("etc")
+    }
+    from("${buildDir}/tmp/eventsim_cli-${pythonVersion}-py3-none-any.whl") {
+        into("python")
+    }
+    into("/opt/ucs")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/eventsim_cli.yml"
+        }
+    }
+}
+
+task makeUcsCliInstaller(type: Tar, dependsOn: makeDaiRpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String) "${buildDir}/tmp/ucs_cli.yml").text = """# UCS CLI Install Config
+name: cli_ucs_${packageVersion}
+tarball: ${buildDir}/tmp/ucs_cli.tar.gz
+destination_folder: ${buildDir}/distributions
+
+python_installers:
+  - '${install_dir}/python/ucs_cli-${pythonVersion}-py3-none-any.whl'
+
+soft_links:
+  - from: '${bin_dir}/ucs'
+    to: '/usr/bin/ucs'
+"""
+        exec {
+            workingDir = "${projectDir}/cli"
+            errorOutput = standardOutput
+            environment("DAIVER", "${pythonVersion}")
+            commandLine "python3", "${projectDir}/cli/setup.py", "bdist_wheel"
+        }
+        copy {
+            from("${projectDir}/cli/dist/ucs_cli-${pythonVersion}-py3-none-any.whl")
+            into("${buildDir}/tmp")
+        }
+        delete("${projectDir}/cli/dist", "${projectDir}/cli/ucs_cli.egg-info", "${projectDir}/cli/build")
+    }
+    archiveFileName = "ucs_cli.tar.gz"
+    destinationDirectory = file("${buildDir}/tmp")
+    compression = Compression.GZIP
+    fileMode = 0600
+    dirMode = 0700
+
+    from("${projectDir}/cli/ucs") {
+        into("opt/ucs/bin")
+        fileMode = 0755
+    }
+    from("${projectDir}/cli/cli_config.json") {
+        into("opt/ucs/etc")
+    }
+    from("${buildDir}/tmp/ucs_cli-${pythonVersion}-py3-none-any.whl") {
+        into("opt/ucs/python")
+    }
+    from("${projectDir}/cli/ucs_completion.sh") {
+        into("etc/bash_completion.d")
+        fileMode = 0644
+    }
+    into("/")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/ucs_cli.yml"
+        }
+    }
+}
+
+task makeAllArtifacts {
+    dependsOn subprojects.jar
+    finalizedBy "makeDaiRpm", "makeDaiVoltRpm", "makeEventSimCliInstaller", "makeUcsCliInstaller",
+            "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai", "makeDeveloperDockerTarball",
+            "makeStaticAnalysisZip"
+}
+rootProject.build.finalizedBy(makeAllArtifacts)
+
+task dockerBuild(type: Exec) {
+    group = 'build'
+    workingDir = "${projectDir}"
+    commandLine "docker-build/docker-build.sh", "build"
+}

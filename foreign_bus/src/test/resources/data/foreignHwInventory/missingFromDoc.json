@@ -1,0 +1,28 @@
+{
+  "XName": "x0c0",
+  "Format": "NestNodesOnly",
+  "ComputeModules": [
+    {
+      "ID": "x0c0s0",
+      "Type": "ComputeModule",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocComputeModule",
+      "ComputeModuleLocationInfo": {
+        "Id": "ComputeModule.0"
+      }
+    }
+  ],
+  "NodeEnclosures": [
+    {
+      "ID": "x0c0s0b0",
+      "Type": "NodeEnclosure",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocNodeEnclosure",
+      "NodeEnclosureLocationInfo": {
+        "Id": "NodeEnclosure.0"
+      }
+    }
+  ]
+}

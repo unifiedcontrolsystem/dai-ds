@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2018-2019 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+"""
+Main Module to call CLI.
+"""
+from cli.src.parser import Parser
+
+if __name__ == '__main__':
+    main_parser = Parser()
+    result = main_parser.execute_cli_cmd()
+    exit(result)

@@ -1,0 +1,37 @@
+{
+  "ID": "x0c0s0b0n0p0",
+  "Type": "Processor",
+  "Ordinal": 0,
+  "Status": "Populated",
+  "HWInventoryByLocationType": "HWInvByLocProcessor",
+  "ProcessorLocationInfo": {
+    "Id": "CPU1",
+    "Name": "Processor",
+    "Description": "Socket 1 Processor",
+    "Socket": "CPU 1"
+  },
+  "PopulatedFRU": {
+    "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
+    "Type": "Processor",
+    "Subtype": "SKL24",
+    "HWInventoryByFRUType": "HWInvByFRUProcessor",
+    "ProcessorFRUInfo": {
+      "InstructionSet": "x86-64",
+      "Manufacturer": "Intel",
+      "MaxSpeedMHz": 2600,
+      "Model": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+      "ProcessorArchitecture": "x86",
+      "ProcessorId": {
+        "EffectiveFamily": 6,
+        "EffectiveModel": 79,
+        "IdentificationRegisters": 263921,
+        "MicrocodeInfo": 184549399,
+        "Step": 1,
+        "VendorID": "GenuineIntel"
+      },
+      "ProcessorType": "CPU",
+      "TotalCores": 24,
+      "TotalThreads": 48
+    }
+  }
+}

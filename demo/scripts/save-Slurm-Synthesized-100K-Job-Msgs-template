@@ -1,0 +1,160 @@
+2018-03-29T20:56:20.769Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+00@@ NodeList=@@Node[+00To+00]@@ #CPUs=2 Partition=dudley
+2018-03-29T20:56:20.769Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+01@@ NodeList=@@Node[+01To+01]@@ #CPUs=2 Partition=dudley
+2018-03-29T20:56:20.770Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+02@@ NodeList=@@Node[+02To+02]@@ #CPUs=2 Partition=dudley
+2018-03-29T20:56:20.770Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+03@@ NodeList=@@Node[+03To+10]@@ #CPUs=16 Partition=dudley
+2018-03-29T20:56:20.770Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+04@@ NodeList=@@Node[+11To+18]@@ #CPUs=16 Partition=dudley
+2018-03-29T20:56:20.771Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+05@@ NodeList=@@Node[+19To+26]@@ #CPUs=16 Partition=dudley
+2018-03-29T20:56:20.771Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+06@@ NodeList=@@Node[+27To+58]@@ #CPUs=64 Partition=dudley
+2018-03-29T20:56:20.815Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+06@@.0 @@Node[+27To+58]@@ usec=1315
+2018-03-29T20:56:20.817Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+03@@.0 @@Node[+03To+10]@@ usec=944
+2018-03-29T20:56:20.819Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+02@@.0 @@Node[+02To+02]@@ usec=856
+2018-03-29T20:56:20.819Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+00@@.0 @@Node[+00To+00]@@ usec=869
+2018-03-29T20:56:20.820Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+04@@.0 @@Node[+11To+18]@@ usec=1627
+2018-03-29T20:56:20.821Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+01@@.0 @@Node[+01To+01]@@ usec=2389
+2018-03-29T20:56:20.822Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+05@@.0 @@Node[+19To+26]@@ usec=1596
+2018-03-29T20:56:21.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+00@@;ddreed(1001);MyJobName;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:56:21.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+00]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:21.854Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+01@@.0 usec=560
+2018-03-29T20:56:21.854Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+00@@.0 usec=549
+2018-03-29T20:56:21.875Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+05@@.0 usec=558
+2018-03-29T20:56:21.911Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+00@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:23.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+03@@;ddreed(1001);8nodes1jobstep;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:56:23.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+03To+10]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:23.872Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+03@@.0 usec=761
+2018-03-29T20:56:23.878Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+04@@.0 usec=600
+2018-03-29T20:56:23.951Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+03@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:25.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+06@@;ddreed(1001);32nodes1jobstep;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:56:25.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+27To+58]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:25.978Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+07@@ NodeList=@@Node[+27To+58]@@ #CPUs=64 Partition=dudley
+2018-03-29T20:56:26.010Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+07@@.0 @@Node[+27To+58]@@ usec=1616
+2018-03-29T20:56:25.883Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+06@@.0 usec=1025
+2018-03-29T20:56:25.977Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+06@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:26.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+01@@;ddreed(1001);SlurmJob-01Nodes-3JobSteps;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:56:26.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+01To+01]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:26.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+04@@;ddreed(1001);SlurmJob-08Nodes-3JobSteps;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:56:26.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+11To+18]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:27.004Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+01@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:27.040Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+04@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:27.068Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+07@@.0 usec=833
+2018-03-29T20:56:29.852Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+02@@.0 usec=622
+2018-03-29T20:56:32.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+07@@;ddreed(1001);SlurmJob-32Nodes-3JobSteps;COMPLETED;2018-03-29T20:56:25.000Z;2018-03-29T20:56:32.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+27To+58]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:56:32.337Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+08@@.0 @@Node[+27To+58]@@ usec=1622
+2018-03-29T20:56:32.299Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+07@@ State=0x8003 NodeCnt=0
+2018-03-29T20:56:32.300Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+08@@ NodeList=@@Node[+27To+58]@@ #CPUs=64 Partition=dudley
+2018-03-29T20:56:41.398Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+08@@.0 usec=1072
+2018-03-29T20:57:06.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+02@@;ddreed(1001);SlurmJob-01Nodes-9JobSteps;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:57:06.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+02To+02]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:57:06.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+05@@;ddreed(1001);SlurmJob-08Nodes-9JobSteps;COMPLETED;2018-03-29T20:56:20.000Z;2018-03-29T20:57:06.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+19To+26]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:57:06.209Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+02@@ State=0x8003 NodeCnt=0
+2018-03-29T20:57:06.340Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+05@@ State=0x8003 NodeCnt=0
+2018-03-29T20:57:17.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+08@@;ddreed(1001);SlurmJob-32Nodes-9JobSteps;COMPLETED;2018-03-29T20:56:32.000Z;2018-03-29T20:57:17.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+27To+58]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:57:18.094Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+09@@.0 @@Node[+00To+63]@@ usec=1803
+2018-03-29T20:57:18.058Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+08@@ State=0x8003 NodeCnt=0
+2018-03-29T20:57:18.059Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+09@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T20:57:26.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+09@@;ddreed(1001);64nodes1jobstep;COMPLETED;2018-03-29T20:57:18.000Z;2018-03-29T20:57:26.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:57:26.290Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+10@@.0 @@Node[+00To+63]@@ usec=2768
+2018-03-29T20:57:26.159Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+09@@.0 usec=2562
+2018-03-29T20:57:26.260Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+09@@ State=0x8003 NodeCnt=0
+2018-03-29T20:57:26.261Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+10@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T20:57:30.369Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+10@@.0 usec=1455
+2018-03-29T20:57:35.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+10@@;ddreed(1001);SlurmJob-64Nodes-3JobSteps;COMPLETED;2018-03-29T20:57:26.000Z;2018-03-29T20:57:35.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:57:35.677Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+11@@.0 @@Node[+00To+63]@@ usec=2023
+2018-03-29T20:57:35.647Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+10@@ State=0x8003 NodeCnt=0
+2018-03-29T20:57:35.648Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+11@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T20:57:37.753Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+11@@.0 usec=1587
+2018-03-29T20:59:28.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+11@@;ddreed(1001);SlurmJob-64Nodes-9JobSteps;COMPLETED;2018-03-29T20:57:35.000Z;2018-03-29T20:59:28.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T20:59:28.802Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+12@@.0 @@Node[+00To+63]@@ usec=1862
+2018-03-29T20:59:28.771Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+11@@ State=0x8003 NodeCnt=0
+2018-03-29T20:59:28.772Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+12@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T20:59:30.875Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+12@@.0 usec=1558
+2018-03-29T21:00:21.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+12@@;ddreed(1001);SlurmJob-64Nodes-9JobSteps;COMPLETED;2018-03-29T20:59:28.000Z;2018-03-29T21:00:21.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:21.660Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+13@@.0 @@Node[+00To+63]@@ usec=2135
+2018-03-29T21:00:21.629Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+12@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:21.629Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+13@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T21:00:25.737Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+13@@.0 usec=1233
+2018-03-29T21:00:30.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+13@@;ddreed(1001);SlurmJob-64Nodes-3JobSteps;COMPLETED;2018-03-29T21:00:21.000Z;2018-03-29T21:00:30.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:31.952Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+13@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:31.953Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+14@@ NodeList=@@Node[+00To+63]@@ #CPUs=128 Partition=dudley
+2018-03-29T21:00:31.985Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+14@@.0 @@Node[+00To+63]@@ usec=1984
+2018-03-29T21:00:40.052Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+14@@.0 usec=1206
+2018-03-29T21:00:40.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+14@@;ddreed(1001);64nodes1jobstep;COMPLETED;2018-03-29T21:00:31.000Z;2018-03-29T21:00:40.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+63]@@ NodeCnt=64 ProcCnt=128 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:40.324Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+14@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:40.324Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+15@@ NodeList=@@Node[+00To+31]@@ #CPUs=64 Partition=dudley
+2018-03-29T21:00:40.325Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+16@@ NodeList=@@Node[+32To+63]@@ #CPUs=64 Partition=dudley
+2018-03-29T21:00:40.355Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+15@@.0 @@Node[+00To+31]@@ usec=1698
+2018-03-29T21:00:40.363Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+16@@.0 @@Node[+32To+63]@@ usec=1484
+2018-03-29T21:00:41.438Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+16@@.0 usec=1050
+2018-03-29T21:00:46.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+16@@;ddreed(1001);SlurmJob-32Nodes-3JobSteps;COMPLETED;2018-03-29T21:00:40.000Z;2018-03-29T21:00:46.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+32To+63]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:46.703Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+17@@.0 @@Node[+32To+63]@@ usec=1570
+2018-03-29T21:00:46.666Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+16@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:46.667Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+17@@ NodeList=@@Node[+32To+63]@@ #CPUs=64 Partition=dudley
+2018-03-29T21:00:49.419Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+15@@.0 usec=965
+2018-03-29T21:00:51.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+17@@;ddreed(1001);32nodes1jobstep;COMPLETED;2018-03-29T21:00:46.000Z;2018-03-29T21:00:51.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+32To+63]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:51.764Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+17@@.0 usec=1075
+2018-03-29T21:00:51.840Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+17@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:51.841Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+18@@ NodeList=@@Node[+32To+39]@@ #CPUs=16 Partition=dudley
+2018-03-29T21:00:51.841Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+19@@ NodeList=@@Node[+40To+47]@@ #CPUs=16 Partition=dudley
+2018-03-29T21:00:51.842Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+20@@ NodeList=@@Node[+48To+55]@@ #CPUs=16 Partition=dudley
+2018-03-29T21:00:51.842Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+21@@ NodeList=@@Node[+56To+56]@@ #CPUs=2 Partition=dudley
+2018-03-29T21:00:51.842Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+22@@ NodeList=@@Node[+57To+57]@@ #CPUs=2 Partition=dudley
+2018-03-29T21:00:51.842Z;head-12;/var/log/slurmctld.log;sched;Allocate;JobID=@@JobId+23@@ NodeList=@@Node[+58To+58]@@ #CPUs=2 Partition=dudley
+2018-03-29T21:00:51.882Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+18@@.0 @@Node[+32To+39]@@ usec=1092
+2018-03-29T21:00:51.883Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+21@@.0 @@Node[+56To+56]@@ usec=1407
+2018-03-29T21:00:51.885Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+20@@.0 @@Node[+48To+55]@@ usec=980
+2018-03-29T21:00:51.886Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+22@@.0 @@Node[+57To+57]@@ usec=1170
+2018-03-29T21:00:51.887Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+23@@.0 @@Node[+58To+58]@@ usec=1147
+2018-03-29T21:00:51.888Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_job_step_create:;StepId=@@JobId+19@@.0 @@Node[+40To+47]@@ usec=981
+2018-03-29T21:00:52.911Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+22@@.0 usec=643
+2018-03-29T21:00:52.912Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+23@@.0 usec=519
+2018-03-29T21:00:52.923Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+18@@.0 usec=1414
+2018-03-29T21:00:52.963Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+23@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:52.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+23@@;ddreed(1001);MyJobName;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:00:52.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+58To+58]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:54.929Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+20@@.0 usec=804
+2018-03-29T21:00:54.939Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+19@@.0 usec=564
+2018-03-29T21:00:55.006Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+20@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:54.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+20@@;ddreed(1001);8nodes1jobstep;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:00:54.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+48To+55]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:58.108Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+19@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:58.048Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+22@@ State=0x8003 NodeCnt=0
+2018-03-29T21:00:58.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+22@@;ddreed(1001);SlurmJob-01Nodes-3JobSteps;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:00:58.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+57To+57]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:00:58.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+19@@;ddreed(1001);SlurmJob-08Nodes-3JobSteps;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:00:58.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+40To+47]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:01:00.912Z;head-12;/var/log/slurmctld.log;sched;_slurm_rpc_step_complete;StepId=@@JobId+21@@.0 usec=699
+2018-03-29T21:01:26.066Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+15@@ State=0x8003 NodeCnt=0
+2018-03-29T21:01:25.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+15@@;ddreed(1001);SlurmJob-32Nodes-9JobSteps;COMPLETED;2018-03-29T21:00:40.000Z;2018-03-29T21:01:25.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+00To+31]@@ NodeCnt=32 ProcCnt=64 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:01:37.288Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+21@@ State=0x8003 NodeCnt=0
+2018-03-29T21:01:37.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+21@@;ddreed(1001);SlurmJob-01Nodes-9JobSteps;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:01:37.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+56To+56]@@ NodeCnt=1 ProcCnt=2 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:01:37.000Z;head-12;/var/log/slurm_jobcomp.log;@@JobId+18@@;ddreed(1001);SlurmJob-08Nodes-9JobSteps;COMPLETED;2018-03-29T21:00:51.000Z;2018-03-29T21:01:37.000Z;GroupId=ddreed(1001) Partition=dudley TimeLimit=1440 NodeList=@@Node[+32To+39]@@ NodeCnt=8 ProcCnt=16 WorkDir=/home/ddreed/dai/demo/scripts
+2018-03-29T21:01:37.413Z;head-12;/var/log/slurmctld.log;cleanup_completing;%{function};JobID=@@JobId+18@@ State=0x8003 NodeCnt=0
+### Start of direct substitution of records - no substitution, no repetitions! ###
+2018-04-11T19:50:55.934Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_27 users=ddreed nodes=n000000 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:50:55 end=2018-04-11T13:05:55
+2018-04-11T19:51:26.314Z;head-12;/var/log/slurmctld.log;_slurm_rpc_delete_reservation;complete;for ddreed_27 usec=71
+2018-04-11T19:52:52.303Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_28 users=ddreed nodes=n000000 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:52:52 end=2018-04-11T13:07:52
+2018-04-11T19:53:27.389Z;head-12;/var/log/slurmctld.log;sched;Updated;reservation=ddreed_28 users=ddreed nodes=n000000 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:52:52 end=2018-04-11T12:56:52
+2018-04-11T19:53:43.650Z;head-12;/var/log/slurmctld.log;_slurm_rpc_delete_reservation;complete;for ddreed_28 usec=62
+2018-04-11T19:55:39.902Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_29 users=ddreed nodes=n000000 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:55:39 end=2018-04-11T13:10:39
+2018-04-11T19:55:41.954Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_30 users=ddreed nodes=n000001 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:55:41 end=2018-04-11T13:10:41
+2018-04-11T19:55:44.229Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_31 users=ddreed nodes=n000002 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:55:44 end=2018-04-11T13:10:44
+2018-04-11T19:55:58.496Z;head-12;/var/log/slurmctld.log;_slurm_rpc_delete_reservation;complete;for ddreed_30 usec=73
+2018-04-11T19:56:13.356Z;head-12;/var/log/slurmctld.log;sched;Updated;reservation=ddreed_29 users=ddreed nodes=n000000 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:55:39 end=2018-04-11T12:59:39
+2018-04-11T19:56:22.839Z;head-12;/var/log/slurmctld.log;sched;Updated;reservation=ddreed_31 users=ddreed nodes=n000002 cores=2 licenses=(null) tres=cpu=2 watts=4294967294 start=2018-04-11T12:55:44 end=2018-04-11T12:59:44
+2018-04-11T19:56:49.911Z;head-12;/var/log/slurmctld.log;_slurm_rpc_delete_reservation;complete;for ddreed_31 usec=87
+2018-04-11T19:56:54.017Z;head-12;/var/log/slurmctld.log;_slurm_rpc_delete_reservation;complete;for ddreed_29 usec=68
+2018-04-11T20:09:16.119Z;head-12;/var/log/slurmctld.log;sched;Created;reservation=ddreed_32 users=ddreed nodes=n[000000-000004] cores=10 licenses=(null) tres=cpu=10 watts=4294967294 start=2018-04-11T13:09:16 end=2018-04-11T13:24:16
+
+2018-04-11T21:07:03.442Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;sched;_slurm_rpc_allocate_resources;JobId=3000 NodeList=(null) usec=279
+2018-04-11T21:07:06.444Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:11.448Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:17.452Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:24.457Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:32.461Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:41.465Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:07:51.469Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:08:02.186Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;sched;Allocate;JobID=3000 NodeList=n[000001,000003,000007-000009,000013-000015,000019,000021-000064]  #CPUs=4240 Partition=normal
+2018-04-11T21:08:02.473Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3000 uid 60000
+2018-04-11T21:08:34.000Z;submn1;/var/hit/data/slurmaccounting/slurm_jobcomp.log;3000;sys_seth(60000);testUSR1;FAILED;2018-04-11T21:08:02.000Z;2018-04-11T21:08:34.000Z;GroupId=users(100) Partition=normal TimeLimit=240 NodeList=n[000001,000003,000007-000009,000013-000015,000019,000021-000064]  NodeCnt=53 ProcCnt=4240 WorkDir=/home/sys_seth/jenkins_exec/uan1_user/workspace/Regr_180131_User/mttscratch/TestGet_Sig
+
+2018-04-11T21:11:02.473Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:03.442Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;sched;_slurm_rpc_allocate_resources;JobId=3001 NodeList=(null) usec=279
+2018-04-11T21:10:06.444Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:11.448Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:17.452Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:24.457Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:32.461Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:41.465Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:10:51.469Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;_slurm_rpc_kill_job2;REQUEST_KILL_JOB;job 3001 uid 60000
+2018-04-11T21:11:02.186Z;submn1;/var/hit/data/slurmaccounting/slurmctld.log;sched;Allocate;JobID=3001 NodeList=n[000001,000003,000007-000009,000013-000015,000019,000021-000064] #CPUs=4240 Partition=normal
+2018-04-11T21:11:34.000Z;submn1;/var/hit/data/slurmaccounting/slurm_jobcomp.log;3001;sys_seth(60000);testUSR1;FAILED;2018-04-11T21:11:02.000Z;2018-04-11T21:11:34.000Z;GroupId=users(100) Partition=normal TimeLimit=240 NodeList=n[000001,000003,000007-000009,000013-000015,000019,000021-000064] NodeCnt=53 ProcCnt=4240 WorkDir=/home/sys_seth/jenkins_exec/uan1_user/workspace/Regr_180131_User/mttscratch/TestGet_Sig
+

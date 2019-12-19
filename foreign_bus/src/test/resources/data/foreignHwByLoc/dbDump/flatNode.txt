@@ -1,0 +1,5 @@
+
+SELECT * FROM HW_Location ORDER BY ID;
+ID          PARENTID  TYPE  ORDINAL  FRUID                      FRUTYPE  FRUSUBTYPE 
+----------- --------- ----- -------- -------------------------- -------- -----------
+x0c0s0b0n0  x0c0s0b0  Node         0 Dell-99999-1234.1234.2345  Node     River      

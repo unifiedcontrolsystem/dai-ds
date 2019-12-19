@@ -1,0 +1,95 @@
+HOW TO BUILD DAI
+==============================================================================
+There are 2 ways to build DAI. The first is using docker and is by far the
+most portable way. The second way is to use a host and install all the
+prerequisites needed to do the build. Access to the internet is required in
+both cases but proxies are allowed. In both build cases, the output will
+appear in <repo_root>/build/ folder will be populated and the distribution
+files location in <repo_root>/build/distributions/.
+
+
+Docker Build
+------------------------------------------------------------------------------
+This is by far the most portable method. First install and configure docker.
+The details depend on the specific OS distribution. The general
+steps are:
+  1. Install and configure the docker package via the package manager on the
+     OS (docker has documentation on this: https://docs.docker.com/).
+      a. Make sure the installed service is running and has internet access
+      b. Configure all docker users
+
+  2. Get and extract the DAI source tarball or another method to get the DAI
+     source tree.
+
+  3. 'cd' to the extracted source tree's root.
+
+  4. In the source tree at the root do the following (Any proxy in
+     'http_proxy' environment variable will be honored by the docker build
+      script and execution):
+        $ docker-build/docker-build.sh build
+     or
+        $ ./gradlew dockerBuild
+
+    This will build a docker image called 'dai_builder', then run the
+    container doing the ./gradlew build inside. The gradle persistent files
+    for the container will be stored at ~/.gradle/docker. This will save time
+    for subsequent builds.
+
+
+Host Build
+------------------------------------------------------------------------------
+This is more complicated but is more useful for developers.
+  1. Make sure the host contains the following packages (actual names vary by
+     OS distribution, the names below are for OpenSuse Leap 15.1):
+        git
+        rpm-build
+        python3
+        python3-devel
+        python3-pip
+        python3-setuptools
+        java-1_8_0-openjdk
+        java-1_8_0-openjdk-devel
+        java-11-openjdk
+        java-11-openjdk-devel
+
+     NOTE: It is VERY important to install openjdk 1.8 then 11 so that 11 is
+           the default!
+
+     NOTE: Examine the docker-build/Dockerfile to how its done for a docker
+           container.
+
+  2. If a proxy is required for external access then please make sure of the
+     following items:
+      a. Make sure gradle can access the internet by placing the updated lines
+         in the ~/.gradle/gradle.properties file:
+
+         systemProp.http.proxyHost=<proxy_host>
+         systemProp.http.proxyPort=<proxy_port>
+         systemProp.https.proxyHost=<proxy_host>
+         systemProp.https.proxyPort=<proxy_port>
+         systemProp.https.proxyUser=<proxy_user_if_needed>
+         systemProp.https.proxyPassword=<proxy_password_if_needed>
+
+         systemProp.java8.bootstrapClasspath=/usr/lib/jvm/java-8-openjdk-amd64
+
+      b. Python 3's pip requires the proxy variable 'HTTPS_PROXY' is set to
+         the proxy of the environment the host is inside.
+
+  3. Set the following properties in the ~/.gradle/gradle.properties file:
+
+         systemProp.java8.bootstrapClasspath=/usr/lib64/jvm/java-1.8.0
+         systemProp.ucs.includeDbgSymbols=true
+
+     NOTE: Make sure the path to Java 1.8 is correct for the OS distribution
+           being used (OpenSUSE Leap 15.1's path is shown here)!
+
+  4. Get and extract the DAI source tarball or another method to get the DAI
+     source tree.
+
+  5. 'cd' to the extracted source tree's root.
+
+  6. Build the distributable components.
+        $ ./gradlew build
+
+
+Copyright(c) 2019 Intel(r) Corp.

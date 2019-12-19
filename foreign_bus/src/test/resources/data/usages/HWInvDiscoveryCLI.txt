@@ -1,0 +1,7 @@
+usage: HWInvDiscoveryCLI
+ -d,--discovery-initiation <arg>     initiate discovery at {xname}
+ -o,--output <arg>                   output file path for HW inventory
+                                     JSON
+ -p,--discovery-status               poll for discovery status
+ -q,--query-hw-inventory <arg>       query hw inventory at {xname}
+ -s,--entire-hw-inventory-snapshot   get entire hw inventory snapshot

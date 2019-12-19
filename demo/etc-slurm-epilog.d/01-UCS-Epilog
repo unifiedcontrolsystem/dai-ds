@@ -1,0 +1,55 @@
+#!/bin/bash
+################################################################################
+# Example environment variables that Slurm will fill in before invocation.
+################################################################################
+### SLURM_NODELIST=n[000000-000001]
+### SLURMD_NODENAME=n000001
+### SLURM_JOBID=636
+### SLURM_STEP_ID=0
+### SLURM_CONF=/etc/slurm/slurm.conf
+### SLURM_JOB_ID=636
+### PWD=/var/log
+### SLURM_JOB_USER=ddreed
+### SLURM_UID=1000
+### SLURM_JOB_UID=1000
+### SHLVL=1
+### SLURM_CLUSTER_NAME=linux
+### SLURM_JOB_PARTITION=vDudley
+### SLURM_JOB_CONSTRAINTS=(null)  OR  SLURM_JOB_CONSTRAINTS=ENV_Capability  OR SLURM_JOB_CONSTRAINTS=ENV_Rich etc.
+### _=/usr/bin/printenv
+################################################################################
+#
+# Issue command so that this script logs into a file (for debug purposes).
+exec >> /tmp/Epilog-Job$SLURM_JOB_ID.log 2>&1
+#
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - started - Job ID=$SLURM_JOBID, Job Constraints='$SLURM_JOB_CONSTRAINTS', Node Name='$SLURMD_NODENAME'"
+#
+# Remove this terminating job from our tracking mechanism of active jobs on this node.
+ActiveJobDirectory=/etc/slurm/UcsActiveJobsOnThisNode
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - removing the file that indicates that this job was active on this node - rm -f $ActiveJobDirectory/$SLURM_JOBID"
+rm -f "$ActiveJobDirectory"/$SLURM_JOBID
+#
+# Put the new list of active jobs for this node into the mOS repository (now that this one has finished and been removed).
+for j in /etc/slurm/UcsActiveJobsOnThisNode/*; do
+    j=${j##*/}
+    if [[ $j != '*' ]]; then
+        jobs[${#jobs[@]}]=$j
+    fi
+done
+if [[ "$jobs" ]]; then
+    joblist=$(printf "%s," ${jobs[@]})
+fi
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - current list of active jobs on this node - ${joblist%,}"
+if [[ -w /sys/kernel/mOS/ras/jobid ]]; then
+    echo -n ${joblist%,} > /sys/kernel/mOS/ras/jobid
+    echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - updated the mOS repository (/sys/kernel/mOS/ras/jobid) with the list of active jobs on this node"
+else
+    echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - file /sys/kernel/mOS/ras/jobid does not exist, so I could not put the list of active jobs into the mOS repository!"
+fi
+#
+## Invoke the slurm script to "Kill any user processes on a node when the last SLURM job there ends".
+#echo  "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - invoking script to kill any user processes when the last slurm job ends on this node - /etc/slurm/slurm.epilog.clean"
+#/etc/slurm/slurm.epilog.clean
+#
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) Epilog - ended"
+exit $result

@@ -1,0 +1,13 @@
+{
+  "FRUS": [
+    {
+      "ID": "x0c0s0b0n0",
+      "ParentID": "x0c0s0b0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "FRUID": "Dell-99999-1234.1234.2345",
+      "FRUType": "Node",
+      "FRUSubType": "River"
+    }
+  ]
+}

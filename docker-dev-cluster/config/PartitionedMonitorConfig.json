@@ -1,0 +1,112 @@
+{
+  "providerClassMap": {
+    "bootEventAction": "com.intel.dai.monitoring_providers.BootEventActions",
+    "rasEventData": "com.intel.dai.monitoring_providers.RasEventTransformer",
+    "telemetryAction": "com.intel.dai.monitoring_providers.TelemetryActions",
+    "rasEventAction": "com.intel.dai.monitoring_providers.RasEventActions",
+    "bootEventData": "com.intel.dai.monitoring_providers.BootEventTransformer",
+    "telemetryData": "com.intel.dai.monitoring_providers.TelemetryTransformer"
+  },
+  "networkStreams": {
+    "nodeRasEvents": {
+      "arguments": {
+        "connectPort": 5678,
+        "connectAddress": "eventsim",
+        "urlPath": "/streams/nodeRasEvents",
+        "connectTimeout": "30"
+      },
+      "name": "sse"
+    },
+    "nodeTelemetry": {
+      "arguments": {
+        "connectPort": 5678,
+        "connectAddress": "eventsim",
+        "urlPath": "/streams/nodeTelemetry",
+        "connectTimeout": "30"
+      },
+      "name": "sse"
+    },
+    "nodeBootEvents": {
+      "arguments": {
+        "connectPort": 5678,
+        "connectAddress": "eventsim",
+        "urlPath": "/streams/nodeBootEvents",
+        "connectTimeout": "30"
+      },
+      "name": "sse"
+    }
+  },
+  "adapterProfiles": {
+    "allBootEvents": {
+      "actionProvider": "bootEventAction",
+      "networkStreamsRef": [
+        "nodeBootEvents"
+      ],
+      "subjects": [
+        "stateChanges"
+      ],
+      "dataTransformProvider": "bootEventData"
+    },
+    "allRasEvents": {
+      "actionProvider": "rasEventAction",
+      "networkStreamsRef": [
+        "nodeRasEvents"
+      ],
+      "subjects": [
+        "events"
+      ],
+      "dataTransformProvider": "rasEventData"
+    },
+    "allTelemetry": {
+      "actionProvider": "telemetryAction",
+      "networkStreamsRef": [
+        "nodeTelemetry"
+      ],
+      "subjects": [
+        "telemetry"
+      ],
+      "dataTransformProvider": "telemetryData"
+    }
+  },
+  "providerConfigurations": {
+    "com.intel.partitioned_monitor.PartitionedMonitorSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://rabbitmq"
+    },
+    "com.intel.dai.monitoring_providers.TelemetryActions": {
+      "publishRawTopic": "ucs_raw_data",
+      "publishAggregatedTopic": "ucs_aggregated_data",
+      "publish": true
+    },
+    "com.intel.dai.monitoring_providers.BootEventActions": {
+      "publishTopic": "ucs_boot_event",
+      "doActions": false,
+      "bootImageInfoUrlPath": "/bootparameters",
+      "publish": true
+    },
+    "com.intel.dai.monitoring_providers.RasEventTransformer": {
+      "suppressionCount": 100,
+      "useRepeatSuppression": true,
+      "suppressionWindowSeconds": 120
+    },
+    "com.intel.dai.monitoring_providers.RasEventActions": {
+      "publishTopic": "ucs_ras_event",
+      "publish": true
+    },
+    "com.intel.dai.monitoring_providers.TelemetryTransformer": {
+      "useAggregation": true,
+      "timeWindowSeconds": 600,
+      "useTimeWindow": false,
+      "windowSize": 10,
+      "useMovingAverage": false
+    }
+  },
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}

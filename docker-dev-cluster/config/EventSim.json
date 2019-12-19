@@ -1,0 +1,25 @@
+{
+    "network" : "sse",
+    "eventsimConfig" : {
+        "SystemManifest": "/opt/ucs/etc/SystemManifest.json",
+        "SensorMetadata": "/resources/ForeignSensorMetaData.json",
+        "RASMetadata": "/resources/ForeignEventMetaData.json",
+        "eventCount": 10,
+        "timeDelayMus": 1,
+        "eventRatioSensorToRas": 1,
+        "randomizerSeed": "234"
+    },
+    "sseConfig" : {
+        "serverAddress": "*",
+        "serverPort": "5678",
+        "urls" : {
+            "/streams/nodeTelemetry" : ["telemetry"],
+            "/streams/nodeBootEvents" : ["stateChanges"],
+            "/streams/nodeRasEvents" : ["events"]
+        }
+    },
+    "rabbitmq" : {
+        "exchangeName" : "simulator",
+        "uri"          : "amqp://127.0.0.1"
+    }
+}

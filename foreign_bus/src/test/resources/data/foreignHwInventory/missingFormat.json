@@ -1,0 +1,230 @@
+{
+  "XName": "x0c0s0b0n0",
+  "Nodes": [
+    {
+      "ID": "x0c0s0b0n0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Status": "Populated",
+      "HWInventoryByLocationType": "HWInvByLocNode",
+      "NodeLocationInfo": {
+        "Id": "System.Embedded.1",
+        "Name": "Name describing system or where it is located, per mgfr",
+        "Description": "Description of system/node type, per mgfr",
+        "Hostname": "if_defined_in_Redfish",
+        "ProcessorSummary": {
+          "Count": 2,
+          "Model": "Multi-Core Intel(R) Xeon(R) processor E5-16xx Series"
+        },
+        "MemorySummary": {
+          "TotalSystemMemoryGiB": 64
+        }
+      },
+      "PopulatedFRU": {
+        "FRUID": "Dell-99999-1234.1234.2345",
+        "Type": "Node",
+        "Subtype": "River",
+        "HWInventoryByFRUType": "HWInvByFRUNode",
+        "NodeFRUInfo": {
+          "AssetTag": "AdminAssignedAssetTag",
+          "BiosVersion": "v1.0.2.9999",
+          "Model": "OKS0P2354",
+          "Manufacturer": "Dell",
+          "PartNumber": "p99999",
+          "SerialNumber": "1234.1234.2345",
+          "SKU": "as213234",
+          "SystemType": "Physical",
+          "UUID": "26276e2a-29dd-43eb-8ca6-8186bbc3d971"
+        }
+      },
+      "Processors": [
+        {
+          "ID": "x0c0s0b0n0p0",
+          "Type": "Processor",
+          "Ordinal": 0,
+          "Status": "Populated",
+          "HWInventoryByLocationType": "HWInvByLocProcessor",
+          "ProcessorLocationInfo": {
+            "Id": "CPU1",
+            "Name": "Processor",
+            "Description": "Socket 1 Processor",
+            "Socket": "CPU 1"
+          },
+          "PopulatedFRU": {
+            "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
+            "Type": "Processor",
+            "Subtype": "SKL24",
+            "HWInventoryByFRUType": "HWInvByFRUProcessor",
+            "ProcessorFRUInfo": {
+              "InstructionSet": "x86-64",
+              "Manufacturer": "Intel",
+              "MaxSpeedMHz": 2600,
+              "Model": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+              "ProcessorArchitecture": "x86",
+              "ProcessorId": {
+                "EffectiveFamily": 6,
+                "EffectiveModel": 79,
+                "IdentificationRegisters": 263921,
+                "MicrocodeInfo": 184549399,
+                "Step": 1,
+                "VendorID": "GenuineIntel"
+              },
+              "ProcessorType": "CPU",
+              "TotalCores": 24,
+              "TotalThreads": 48
+            }
+          }
+        },
+        {
+          "ID": "x0c0s0b0n0p1",
+          "Type": "Processor",
+          "Ordinal": 1,
+          "Status": "Populated",
+          "HWInventoryByLocationType": "HWInvByLocProcessor",
+          "ProcessorLocationInfo": {
+            "Id": "CPU2",
+            "Name": "Processor",
+            "Description": "Socket 2 Processor",
+            "Socket": "CPU 2"
+          },
+          "PopulatedFRU": {
+            "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
+            "Type": "Processor",
+            "Subtype": "SKL24",
+            "HWInventoryByFRUType": "HWInvByFRUProcessor",
+            "ProcessorFRUInfo": {
+              "InstructionSet": "x86-64",
+              "Manufacturer": "Intel",
+              "MaxSpeedMHz": 2600,
+              "Model": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+              "ProcessorArchitecture": "x86",
+              "ProcessorId": {
+                "EffectiveFamily": 6,
+                "EffectiveModel": 79,
+                "IdentificationRegisters": 263921,
+                "MicrocodeInfo": 184549399,
+                "Step": 1,
+                "VendorID": "GenuineIntel"
+              },
+              "ProcessorType": "CPU",
+              "TotalCores": 24,
+              "TotalThreads": 48
+            }
+          }
+        }
+      ],
+      "Memory": [
+        {
+          "ID": "x0c0s0b0n0d0",
+          "Type": "Memory",
+          "Ordinal": 0,
+          "Status": "Populated",
+          "HWInventoryByLocationType": "HWInvByLocMemory",
+          "MemoryLocationInfo": {
+            "Id": "DIMM1",
+            "Name": "DIMM Slot 1",
+            "MemoryLocation": {
+              "Socket": 1,
+              "MemoryController": 1,
+              "Channel": 1,
+              "Slot": 1
+            }
+          },
+          "PopulatedFRU": {
+            "FRUID": "MFR-PARTNUMBER-SERIALNUMBER",
+            "Type": "Memory",
+            "Subtype": "DIMM2400G32",
+            "HWInventoryByFRUType": "HWInvByFRUMemory",
+            "MemoryFRUInfo": {
+              "BaseModuleType": "RDIMM",
+              "BusWidthBits": 72,
+              "CapacityMiB": 32768,
+              "DataWidthBits": 64,
+              "ErrorCorrection": "MultiBitECC",
+              "Manufacturer": "Micron",
+              "MemoryType": "DRAM",
+              "MemoryDeviceType": "DDR4",
+              "OperatingSpeedMhz": 2400,
+              "PartNumber": "XYZ-123-1232",
+              "RankCount": 2,
+              "SerialNumber": "sn12344567689"
+            }
+          }
+        },
+        {
+          "ID": "x0c0s0b0n0d1",
+          "Type": "Memory",
+          "Ordinal": 1,
+          "Status": "Empty",
+          "HWInventoryByLocationType": "HWInvByLocMemory",
+          "MemoryLocationInfo": {
+            "Id": "DIMM2",
+            "Name": "Socket 1 DIMM Slot 2",
+            "MemoryLocation": {
+              "Socket": 1,
+              "MemoryController": 1,
+              "Channel": 1,
+              "Slot": 2
+            }
+          },
+          "PopulatedFRU": null
+        },
+        {
+          "ID": "x0c0s0b0n0d2",
+          "Type": "Memory",
+          "Ordinal": 2,
+          "Status": "Populated",
+          "HWInventoryByLocationType": "HWInvByLocMemory",
+          "MemoryLocationInfo": {
+            "Id": "DIMM3",
+            "Name": "Socket 2 DIMM Slot 1",
+            "MemoryLocation": {
+              "Socket": 2,
+              "MemoryController": 2,
+              "Channel": 1,
+              "Slot": 1
+            }
+          },
+          "PopulatedFRU": {
+            "FRUID": "MFR-PARTNUMBER-SERIALNUMBER_2",
+            "Type": "Memory",
+            "Subtype": "DIMM2400G32",
+            "HWInventoryByFRUType": "HWInvByFRUMemory",
+            "MemoryFRUInfo": {
+              "BaseModuleType": "RDIMM",
+              "BusWidthBits": 72,
+              "CapacityMiB": 32768,
+              "DataWidthBits": 64,
+              "ErrorCorrection": "MultiBitECC",
+              "Manufacturer": "Micron",
+              "MemoryType": "DRAM",
+              "MemoryDeviceType": "DDR4",
+              "OperatingSpeedMhz": 2400,
+              "PartNumber": "XYZ-123-1232",
+              "RankCount": 2,
+              "SerialNumber": "k346456346346"
+            }
+          }
+        },
+        {
+          "ID": "x0c0s0b0n0d3",
+          "Type": "Memory",
+          "Ordinal": 3,
+          "Status": "Empty",
+          "HWInventoryByLocationType": "HWInvByLocMemory",
+          "MemoryLocationInfo": {
+            "Id": "DIMM3",
+            "Name": "Socket 2 DIMM Slot 2",
+            "MemoryLocation": {
+              "Socket": 2,
+              "MemoryController": 2,
+              "Channel": 1,
+              "Slot": 2
+            }
+          },
+          "PopulatedFRU": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3511 @@
+{ "Events" : [
+    {
+        "DescriptiveName":"RasUnknownEvent",
+        "EventType":"0000000000",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"An unknown system RAS event occurred, please review the instance data:"
+    },
+    {
+        "DescriptiveName":"RasDbSchemaPopulateFillingInTier1",
+        "EventType":"0000000001",
+        "Severity":"WARN",
+        "Category":"Initialization",
+        "Component":"DbSchemaPopulate",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The DbSchemaPopulate tools is being used to put info into the Tier1 data store:"
+    },
+
+
+
+    {
+        "DescriptiveName":"RasGenAdapterRequeuedWorkItem",
+        "EventType":"0001000001",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Requeued a zombie work item:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterHungWorkItem",
+        "EventType":"0001000002",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Detected a possible hung work item:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterWiSaveRestartDataFailed",
+        "EventType":"0001000003",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"WorkItemSaveRestartData failed:"
+    },
+    {
+        "DescriptiveName":"RasGenWorkItemFindAndOwnFailed",
+        "EventType":"0001000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"WorkItemFindAndOwn of a new WorkItem failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterAbend",
+        "EventType":"0001000005",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Adapter finished abnormally:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed",
+        "EventType":"0001000006",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForHouseKeepingNoRtrnValue - failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForWrkItmsNoRtrnValueFailed",
+        "EventType":"0001000007",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForWrkItmsNoRtrnValue - failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForWrkItmsRtrnLongFailed",
+        "EventType":"0001000008",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForWrkItmsRtrnLong - stored procedure failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForWrkItmsRtrnLongIOExcptn",
+        "EventType":"0001000009",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForWrkItmsRtrnLong - IOException during Callback:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForWrkItmsRtrnLongExcptn",
+        "EventType":"0001000010",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForWrkItmsRtrnLong - Exception during Callback:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterWaitForWorkItemToFinishAndMarkDoneFailed",
+        "EventType":"0001000011",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"waitForWorkItemToFinishAndMarkDone - failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMyCallbackForHouseKeepingLongRtrnValueFailed",
+        "EventType":"0001000012",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"MyCallbackForHouseKeepingLongRtrnValue - stored procedure failed:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMissingRasEventDescrName",
+        "EventType":"0001000013",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"A RAS DescriptiveName was specified that does not exist in the RAS MetaData:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterException",
+        "EventType":"0001000014",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterMissingCaseStmt",
+        "EventType":"0001000015",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterDetectedOutOfTsOrderItem",
+        "EventType":"0001000016",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"A work item was detected to have occurred out of timestamp order, in regards to similar items:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterExceptionButContinue",
+        "EventType":"0001000017",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter, but we are catching and continuing:"
+    },
+    {
+        "DescriptiveName":"RasGenAdapterUnableToConnectToAmqp",
+        "EventType":"0001000018",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterGeneric",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Unable to connect to AMQP - likely cause is that the rabbitmq-server is not started, will keep trying:"
+    },
+
+
+    {
+        "DescriptiveName":"RasAotMissingCaseStmt",
+        "EventType":"0002000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterOnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasAotException",
+        "EventType":"0002000002",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterOnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasAotDataMoverQueryFailed",
+        "EventType":"0002000003",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterOnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The DataMover failed, due to a SQL Query failure:"
+    },
+    {
+        "DescriptiveName":"RasAotAutoPurgeOfTier1HistoricalDataFinished",
+        "EventType":"0002000004",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterOnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The automated purge of Tier1 historical data completed:"
+    },
+    {
+        "DescriptiveName":"RasAotAutoPurgeOfTier1HistoricalDataFinished",
+        "EventType":"0002000005",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterOnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The automated purge of Tier1 historical data did not advance, DataMover may have a problem:"
+    },
+
+
+    {
+        "DescriptiveName":"RasMissingCaseStmt",
+        "EventType":"0003000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasException",
+        "EventType":"0003000002",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasMissingControlOperationLogic",
+        "EventType":"0003000003",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Found a unexpected control operation, do not know what actions to take to handle it:"
+    },
+    {
+        "DescriptiveName":"RasUnexpectedTypeOfLctnNonCn",
+        "EventType":"0003000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Ras Event detected that contains an unexpected type of lctn, it was not a ComputeNode lctn:"
+    },
+    {
+        "DescriptiveName":"RasResetRecursionDetected",
+        "EventType":"0003000005",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Reset recursion was detected when processing this RAS event, the reset was skipped:"
+    },
+    {
+        "DescriptiveName":"RasSkippingControlOperationCuzHwBeingServiced",
+        "EventType":"0003000006",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The RAS adapter skipped running a RAS events control operation because the hardware is currently being serviced:"
+    },
+    {
+        "DescriptiveName":"RasMultipleJobsUsingSameNode",
+        "EventType":"0003000007",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterRas",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Detected multiple jobs using the same compute node:"
+    },
+
+
+    {
+        "DescriptiveName":"RasProvMissingCaseStmt",
+        "EventType":"0004000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasProvException",
+        "EventType":"0004000002",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasProvDiscCompNodeFailed",
+        "EventType":"0004000003",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DiscoveredComputeNode failed:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeDiscFailedInvalidMacAddr",
+        "EventType":"0004000004",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ComputeNodeDiscovered failed, invalid MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeSaveIpAddrFailedInvalidMacAddr",
+        "EventType":"0004000005",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ComputeNodeSaveIpAddr failed, invalid MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeSaveIpAddrFailedInvalidIpAddr",
+        "EventType":"0004000006",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"ComputeNodeSaveIpAddr failed, invalid IP address:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeDhcpNak",
+        "EventType":"0004000007",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"DHCPNAK occurred:"
+    },
+    {
+        "DescriptiveName":"RasProvBiosStartInvalidMacAddr",
+        "EventType":"0004000008",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"During BiosStart the node attempted to use an unexpected MacAddr:"
+    },
+    {
+        "DescriptiveName":"RasProvBootFailedNoBootableDevice",
+        "EventType":"0004000009",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndResetNode",
+        "GenerateAlert":"N",
+        "Msg":"During BiosStart the bios could not find any bootable device:"
+    },
+    {
+        "DescriptiveName":"RasProvKernelPanic",
+        "EventType":"0004000010",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndKillJobOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"A compute node failed/died due to a Kernel Panic:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeCpuThrottled",
+        "EventType":"0004000011",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"",
+        "GenerateAlert":"N",
+        "Msg":"A compute node cpu throttled due to package temperature above threshold:"
+    },
+    {
+        "DescriptiveName":"RasProvNodePoweredDown",
+        "EventType":"0004000012",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has powered down:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeActive",
+        "EventType":"0004000013",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has booted and is now active:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeOops",
+        "EventType":"0004000014",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndKillJobOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"A compute node experienced a kernel oops:"
+    },
+    {
+        "DescriptiveName":"RasProvFoundNodeAlreadyActive",
+        "EventType":"0004000015",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During control system restart we determined this node was already active, so we set its state to Active:"
+    },
+    {
+        "DescriptiveName":"RasProvServiceNodeDiscFailedInvalidMacAddr",
+        "EventType":"0004000016",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ServiceNodeDiscovered failed, invalid MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvServiceNodeSaveIpAddrFailedInvalidMacAddr",
+        "EventType":"0004000017",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ServiceNodeSaveIpAddr failed, invalid MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvServiceNodeSaveIpAddrFailedInvalidIpAddr",
+        "EventType":"0004000018",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnServiceNode",
+        "GenerateAlert":"N",
+        "Msg":"ServiceNodeSaveIpAddr failed, invalid IP address:"
+    },
+    {
+        "DescriptiveName":"RasProvServiceNodeDhcpNak",
+        "EventType":"0004000019",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"DHCPNAK occurred:"
+    },
+    {
+        "DescriptiveName":"RasProvBiosStartInvalidNodeLctn",
+        "EventType":"0004000020",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"During BiosStart an unexpected/invalid node lctn was encountered:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeSetStateFailedInvalidNode",
+        "EventType":"0004000021",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ComputeNodeSetState failed, invalid node:"
+    },
+    {
+        "DescriptiveName":"RasProvServiceNodeSetStateFailedInvalidNode",
+        "EventType":"0004000022",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ServiceNodeSetState failed, invalid node:"
+    },
+    {
+        "DescriptiveName":"RasProvCompNodeSaveBootImageFailedInvalidNode",
+        "EventType":"0004000023",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"ComputeNodeSaveBootImageInfo failed, invalid node:"
+    },
+    {
+        "DescriptiveName":"RasProvBootImageIdInvalid",
+        "EventType":"0004000024",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Specified Boot Image ID is invalid, it does not exist in the data store:"
+    },
+    {
+        "DescriptiveName":"RasProvGetBootImageFilesChecksumFailed",
+        "EventType":"0004000025",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Retrieval of the Boot Image file checksum failed, stderr:"
+    },
+    {
+        "DescriptiveName":"RasProvGetBootStrapFilesChecksumFailed",
+        "EventType":"0004000026",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Retrieval of the Boot Strap file checksum failed, stderr:"
+    },
+    {
+        "DescriptiveName":"RasProvBootImageChecksumMismatch",
+        "EventType":"0004000027",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Detected a mismatch between the data stores boot image checksum and the warewulf boot image checksum:"
+    },
+    {
+        "DescriptiveName":"RasProvBootStrapChecksumMismatch",
+        "EventType":"0004000028",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Detected a mismatch between the data stores boot strap checksum and the warewulf boot strap checksum:"
+    },
+    {
+        "DescriptiveName":"RasProvInvalidHostname",
+        "EventType":"0004000029",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Invalid hostname - unable to find the specified location string that is associated with this hostname:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeNeverCompletedReboot",
+        "EventType":"0004000030",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"This node never finished rebooting, it stayed in an unexpected state:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeFailedReboot",
+        "EventType":"0004000031",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"This node failed to reboot:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeNeverCompletedPoweroff",
+        "EventType":"0004000032",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"This node never finished powering off, it stayed in an unexpected state:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeFailedPoweroff",
+        "EventType":"0004000033",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"This node failed to power off:"
+    },
+    {
+        "DescriptiveName":"RasProvChgBootimageAndBootstrapForNodeFailed",
+        "EventType":"0004000034",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Error occurred while trying to change the BootImage and BootStrapImage for a node:"
+    },
+    {
+        "DescriptiveName":"RasProvChgKargsForNodeFailed",
+        "EventType":"0004000035",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Error occurred while trying to change the Kernel Argument (kargs) configuration for a node:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpDiscoverFailedInvalidMacAddr",
+        "EventType":"0004000036",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCP Discover processing failed, invalid MAC address in the message:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpRequestFailedInvalidMacAddr",
+        "EventType":"0004000037",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCP Request processing failed, invalid MAC address in the message:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpNakFailedInvalidMacAddr",
+        "EventType":"0004000038",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCP NAK processing failed, invalid MAC address in the message:"
+    },
+    {
+        "DescriptiveName":"RasProvBootFailedNoFile",
+        "EventType":"0004000039",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndResetNode",
+        "GenerateAlert":"N",
+        "Msg":"Loading bootstrap failed, no such file or directory:"
+    },
+    {
+        "DescriptiveName":"RasProvPxeUpdateFailed",
+        "EventType":"0004000040",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Pxe update failed, stderr:"
+    },
+    {
+        "DescriptiveName":"RasProvImageUpdateFailed",
+        "EventType":"0004000041",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Provisioned image update failed:"
+    },
+    {
+        "DescriptiveName":"RasProvKargsUpdateFailed",
+        "EventType":"0004000042",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Updating KARGS for provisioned image failed:"
+    },
+    {
+        "DescriptiveName":"RasProvFileTransferProblem",
+        "EventType":"0004000043",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorAndResetNode",
+        "GenerateAlert":"N",
+        "Msg":"During node boot, we detected that the provisioner failed to transfer a file into the node:"
+    },
+    {
+        "DescriptiveName":"RasProvGigabyteEthernetEepromReadFailed",
+        "EventType":"0004000044",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Gigabyte ethernet driver failed, eeprom read at offset failed:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkReplacedInvInfoWithBootMsgInfo",
+        "EventType":"0004000045",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Replaced the inventory info for this node with the info from the boot message:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkUpdatedDbInvInfoDueToMismatch",
+        "EventType":"0004000046",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Mismatch in one or more fields between db and boot msg inventory info, updated these fields in the db inventory info using boot message values:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingDbInvInfo",
+        "EventType":"0004000047",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - DB inventory info is not present:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingDbInvFruSctn",
+        "EventType":"0004000048",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - DB inventory info is present but it does not have the FRU section:"
+    },
+    {
+        "DescriptiveName":"RasProvJobConstraintIsNotUcsBootImageId",
+        "EventType":"0004000049",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Specified job constraint does not exist in the BootImage table, assuming this is a normal WLM constraint (non-ucs bootimage constraint):"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingDbInvMemorySctn",
+        "EventType":"0004000050",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - DB inventory info is present but it does not have the memory section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingBootmsgInvMemorySctn",
+        "EventType":"0004000051",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Boot message inventory info is present but it does not have the TotalSystemMemoryGiB section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingDbInvBiosinfoSctn",
+        "EventType":"0004000052",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - DB inventory info is present but it does not have the bios_info section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingBootmsgInvBiosversionSctn",
+        "EventType":"0004000053",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Boot message inventory info is present but it does not have the bios_version section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingDbInvCpuinfoSctn",
+        "EventType":"0004000054",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - DB inventory info is present but it does not have the cpu_info section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingBootmsgInvSocketCoresSctn",
+        "EventType":"0004000055",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Boot message inventory info is present but it does not have the SocketCores section:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkDetectedNewFru",
+        "EventType":"0004000056",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Detected that there is now different hardware in this lctn:"
+    },
+    {
+        "DescriptiveName":"RasProvNodeBootInvChkMissingBootmsgInvFruSerial",
+        "EventType":"0004000057",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Booting node inventory check - Boot message inventory info is present but it does not have the FRU product serial number field:"
+    },
+    {
+        "DescriptiveName":"RasProvMachineCheckOccurred",
+        "EventType":"0004000058",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Machine check occurred:"
+    },
+    {
+        "DescriptiveName":"RasProvCantReachProvWebSrvr",
+        "EventType":"0004000059",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"During boot we detected that we cannot reach the provisioner web server:"
+    },
+    {
+        "DescriptiveName":"RasProvHfiLinkFailed",
+        "EventType":"0004000060",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"HFI link either did not start or else it failed:"
+    },
+    {
+        "DescriptiveName":"RasProvLinuxServiceInactive",
+        "EventType":"0004000061",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"During boot we detected that an essential linux service did not start:"
+    },
+    {
+        "DescriptiveName":"RasProvBmcMacAddrFailed",
+        "EventType":"0004000062",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to update BMC MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvHostMacAddrFailed",
+        "EventType":"0004000063",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to update BMC MAC address:"
+    },
+    {
+        "DescriptiveName":"RasProvPfsCfgFailed",
+        "EventType":"0004000064",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to configure the PFS on this node - see syslog for more information:"
+    },
+    {
+        "DescriptiveName":"RasProvPfsUnableToMount",
+        "EventType":"0004000065",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Failed PFS mount on this node:"
+    },
+    {
+        "DescriptiveName":"RasProvPfsNetworkInitFailed",
+        "EventType":"0004000066",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"PFS network initialisation failed:"
+    },
+    {
+        "DescriptiveName":"RasProvPxeRemoteBootCancelled",
+        "EventType":"0004000067",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"PXE boot failed - remote boot cancelled:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpDeclineInvalidMacAddr",
+        "EventType":"0004000068",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCPDECLINE request processing failed, unexpected MAC address in the message:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpDecline",
+        "EventType":"0004000069",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCPDECLINE request occurred - dhcp client rejected its assigned IP address:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpUpdateFailed",
+        "EventType":"0004000070",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCP update failed, stderr:"
+    },
+    {
+        "DescriptiveName":"RasProvDhcpRestartFailed",
+        "EventType":"0004000071",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DHCP restart failed, stderr:"
+    },
+    {
+        "DescriptiveName":"RasProvNmiWatchdogSoftLockup",
+        "EventType":"0004000072",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Detected a NMI watchdog soft lockup, suppressing other occurrences of this event until this node is rebooted"
+    },
+
+
+    {
+        "DescriptiveName":"RasWlmMissingCaseStmt",
+        "EventType":"0005000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasWlmException",
+        "EventType":"0005000002",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasWlmProvisioningNode",
+        "EventType":"0005000003",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"WLM is provisioning this node:"
+    },
+    {
+        "DescriptiveName":"RasWlmProvisioningFailed",
+        "EventType":"0005000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"WLM provisioning of this node failed, WLM has set the node to offline:"
+    },
+    {
+        "DescriptiveName":"RasWlmProvisionHookError",
+        "EventType":"0005000005",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"WLM provision_hook error occurred:"
+    },
+    {
+        "DescriptiveName":"RasWlmKilledJob",
+        "EventType":"0005000006",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"WorkItem requested a job be killed, the job has been killed:"
+    },
+    {
+        "DescriptiveName":"RasWlmFailureExtractingListOfNodes",
+        "EventType":"0005000007",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failure occurred as we attempted to extract the full list of nodes for this job:"
+    },
+    {
+        "DescriptiveName":"RasWlmInvalidHostname",
+        "EventType":"0005000008",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Invalid wlm node name - unable to find the specified location string associated with this node name:"
+    },
+    {
+        "DescriptiveName":"RasWlmJobStartInvalidNodeList",
+        "EventType":"0005000009",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Invalid NodeList was specified on a job started log message - ignoring this job start message:"
+    },
+    {
+        "DescriptiveName":"RasWlmJobSacctStdErr",
+        "EventType":"0005000010",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of sacct command in job ended processing, this message came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmJobStepSacctStdErr",
+        "EventType":"0005000011",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of sacct command in JobStep ended processing, this message came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmStartUsingNodeStdErr",
+        "EventType":"0005000012",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of command to tell WLM to start using this node again, this message came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmStopUsingNodeStdErr",
+        "EventType":"0005000013",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of command to tell WLM to stop using this node, this message came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmUnableToCreatePrologEpilogInputFifo",
+        "EventType":"0005000014",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failure creating input FIFO for getting input from prolog or epilogs:"
+    },
+    {
+        "DescriptiveName":"RasWlmPrologEpilogUnexpectedJobConstraint",
+        "EventType":"0005000015",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Encountered an unexpected job constraint value from the WLM prolog or epilog:"
+    },
+    {
+        "DescriptiveName":"RasWlmStaleDataEntries",
+        "EventType":"0005000016",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Stale data entries that were deleted:"
+    },
+    {
+        "DescriptiveName":"RasWlmCantTellWlmToUseUnownedNode",
+        "EventType":"0005000017",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Attempted to tell WLM to begin to use a compute node that is not owned by WLM (owned by a different subsystem):"
+    },
+    {
+        "DescriptiveName":"RasWlmCantTellWlmToUseNonComputeNode",
+        "EventType":"0005000018",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Attempted to tell WLM to begin to use a non-compute node:"
+    },
+    {
+        "DescriptiveName":"RasWlmUnexpectedWlmNodeState",
+        "EventType":"0005000019",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"While filling in a nodes WlmNodeState, we encountered an unexpected wlm state value:"
+    },
+    {
+        "DescriptiveName":"RasWlmStartUsingNodeStdErrInvldNodeState",
+        "EventType":"0005000020",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of command to tell WLM to start using this node again, an invalid node state msg came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmStopUsingNodeStdErrInvldNodeState",
+        "EventType":"0005000021",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During invocation of command to tell WLM to stop using this node, an invalid node state msg came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasWlmHfiLinkDown",
+        "EventType":"0005000022",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"WLM detected that a HFI link on this node has failed:"
+    },
+    {
+        "DescriptiveName":"RasWlmJobEpilogFailed",
+        "EventType":"0005000023",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterWlm",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"WLM job epilog failed, the wlm is draining this node:"
+    },
+
+
+    {
+        "DescriptiveName":"RasCntrlMissingCaseStmt",
+        "EventType":"0006000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasCntrlException",
+        "EventType":"0006000002",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter:"
+    },
+    {
+        "DescriptiveName":"RasCntrlNodePoweredOff",
+        "EventType":"0006000003",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has been powered off:"
+    },
+    {
+        "DescriptiveName":"RasCntrlIncreasedFanSpeed",
+        "EventType":"0006000004",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Fan speed has been increased:"
+    },
+    {
+        "DescriptiveName":"RasCntrlNodePoweredOn",
+        "EventType":"0006000005",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has been powered on:"
+    },
+    {
+        "DescriptiveName":"RasCntrlNodeReset",
+        "EventType":"0006000006",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has been reset:"
+    },
+    {
+        "DescriptiveName":"RasCntrlNodeShutdown",
+        "EventType":"0006000007",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has been shutdown:"
+    },
+    {
+        "DescriptiveName":"RasCntrlUnsupportedOperation",
+        "EventType":"0006000008",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"The requested operation is not supported."
+    },
+    {
+        "DescriptiveName":"NodePowerCycle",
+        "EventType":"0006000009",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DEPRECATED due to incorrect name convention - This node has been powered cycled:"
+    },
+    {
+        "DescriptiveName":"RasCntrlNodePowerCycle",
+        "EventType":"0006000010",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterControl",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"This node has been powered cycled:"
+    },
+
+
+    {
+        "DescriptiveName":"RasAntMissingCaseStmt",
+        "EventType":"0007000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterNearlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Missing switch case, so unable to handle the work requested to be done:"
+    },
+    {
+        "DescriptiveName":"RasAntException",
+        "EventType":"0007000002",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterNearlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Exception occurred within the adapter - the input message will be skipped:"
+    },
+    {
+        "DescriptiveName":"RasAntDataReceiverInvalidMsgId",
+        "EventType":"0007000003",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterNearlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"DataReceiver got a message with an invalid/unexpected AmqpMessageId - data may have been lost:"
+    },
+    {
+        "DescriptiveName":"RasAntDataReceiverAppearsStuck",
+        "EventType":"0007000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterNearlineTier",
+        "ControlOperation":"Notify",
+        "GenerateAlert":"Y",
+        "Msg":"DataReceiver appears to be stuck - data is not flowing to tier2 in a timely manner:"
+    },
+
+
+    {
+        "DescriptiveName":"RasMntrSoftNodePowerHi",
+        "EventType":"0008000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported node power exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftNodePowerLo",
+        "EventType":"0008000002",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported node power exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftSystemAirFlowHi",
+        "EventType":"0008000003",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system air flow exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftSystemAirFlowLo",
+        "EventType":"0008000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system air flow exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftExitAirTempHi",
+        "EventType":"0008000005",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system air exit temperature is exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftExitAirTempLo",
+        "EventType":"0008000006",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system air exit temperature is exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftSystemFanHi",
+        "EventType":"0008000007",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system fan RPM is exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftSystemFanLo",
+        "EventType":"0008000008",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system fan RPM is exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftPowerSupplyPowerInHi",
+        "EventType":"0008000009",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system power supply power is exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftPowerSupplyPowerInLo",
+        "EventType":"0008000010",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorAndKillJobAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system power supply power is exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftPowerSupplyTempHi",
+        "EventType":"0008000011",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorAndKillJobAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system power supply temperature is exceeding its high threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftPowerSupplyTempLo",
+        "EventType":"0008000012",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system power supply temperature is exceeding its low threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftPowerRailOutOfBounds",
+        "EventType":"0008000013",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorAndKillJobAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported system power rails voltage is out of bounds for safe operation:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftProcessorTempHi",
+        "EventType":"0008000014",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation": null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported processor temperature is exceeding its high soft threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftProcessorTempLo",
+        "EventType":"0008000015",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported processor temperature is exceeding its low soft threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrHardProcessorTempExceeded",
+        "EventType":"0008000016",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorAndKillJobAndPwrOffNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported processor temperature is exceeding its tolerances:"
+    },
+    {
+        "DescriptiveName":"RasMntrLogicalCoreTempHi",
+        "EventType":"0008000017",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported a logical core temperature is exceeding its high soft threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrLogicalCoreTempLo",
+        "EventType":"0008000018",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported a logical core temperature is exceeding its low soft threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSoftMemoryCorrectableErrorSwarm",
+        "EventType":"0008000019",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported an ECC correctable error swarm, check the memory:"
+    },
+    {
+        "DescriptiveName":"RasMntrHardMemoryCorrectableErrorSwarm",
+        "EventType":"0008000020",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorAndKillJobOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported a serious ECC correctable error swarm, failure may be imminent:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysConfigurationFileLoadFailure",
+        "EventType":"0008000021",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Adapter is not correctly running and data from Sensys cannot be relied on:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysThermalMarginHi",
+        "EventType":"0008000022",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported a temperature exceeded its thermal margin:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysDTSThermalMarginHi",
+        "EventType":"0008000023",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported a temperature exceeded its thermal margin:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysCurrentPercentageExceeded",
+        "EventType":"0008000024",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported current for power supply is exceeding soft threshold:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysMaximumInletTemperatureExceeded",
+        "EventType":"0008000025",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Monitoring reported air inflow is too warm:"
+    },
+    {
+        "DescriptiveName":"RasMntrSensysSyslogEvent",
+        "EventType":"0008000100",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected a critical event from syslog:"
+    },
+    {
+        "DescriptiveName":"RasMntrMemoryUncorrectableError",
+        "EventType":"0008000200",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Sensys detected an event from the compute node BMC's Event Logs - Memory Error:"
+    },
+    {
+        "DescriptiveName":"RasMntrBmcCommError",
+        "EventType":"0008000201",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the compute node BMC's Event Logs - BMC Communications Error:"
+    },
+    {
+        "DescriptiveName":"RasMntrPowerUnitFailedError",
+        "EventType":"0008000202",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - Power Unit Failed:"
+    },
+    {
+        "DescriptiveName":"RasMntrPowerUnitRedundancyLostError",
+        "EventType":"0008000203",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - Power Unit Redundancy Lost:"
+    },
+    {
+        "DescriptiveName":"RasMntrPowerUnitNotRedundantError",
+        "EventType":"0008000204",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - Power Unit Not Redundant:"
+    },
+    {
+        "DescriptiveName":"RasMntrNmiCriticalInterruptError",
+        "EventType":"0008000205",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - NMI Critical Interrupt:"
+    },
+    {
+        "DescriptiveName":"RasMntrHardCriticalLowTemperatureError",
+        "EventType":"0008000206",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - Critical Low Temperature:"
+    },
+    {
+        "DescriptiveName":"RasMntrFanInsufficientResourcesError",
+        "EventType":"0008000207",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Monitoring detected an event from the compute node BMC's Event Logs - Fan Insufficient Resources:"
+    },
+    {
+        "DescriptiveName":"RasMntrFanNotRedundantError",
+        "EventType":"0008000208",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the compute node BMC's Event Logs - Fan Not Redundant:"
+    },
+    {
+        "DescriptiveName":"RasMntrFanRedundancyLostError",
+        "EventType":"0008000209",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the compute node BMC's Event Logs - Fan Redundancy Lost:"
+    },
+    {
+        "DescriptiveName":"RasMntrFanCriticallySlowError",
+        "EventType":"0008000210",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the compute node BMC's Event Logs - Fan Critically Slow: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPARoutingError",
+        "EventType":"0008000211",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - Routing error: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPASecurityError",
+        "EventType":"0008000212",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - Security error: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPABubbleError",
+        "EventType":"0008000213",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - Bubble error: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPAIntegrityError",
+        "EventType":"0008000214",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - Integrity error: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPASMACongestionError",
+        "EventType":"0008000215",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - SMA Congestion error: "
+    },
+    {
+        "DescriptiveName":"RasMntrOPACongestionIndicatorError",
+        "EventType":"0008000216",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an event from the OPA Fabric - Congestion Indicator error: "
+    },
+    {
+        "DescriptiveName":"RasMntrDiskFullSoftError",
+        "EventType":"0008000217",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"Notify",
+        "GenerateAlert":"Y",
+        "Msg":"Sensys detected disk volume warning - Disk approaching full: "
+    },
+    {
+        "DescriptiveName":"RasMntrDeviceTimeoutError",
+        "EventType":"0008000218",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Sensys detected a device is not responding: "
+    },
+    {
+        "DescriptiveName":"RasMntrSELEvent",
+        "EventType":"0008000299",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Sensys detected an unclassified event from the node BMC's Event Logs: "
+    },
+
+
+    {
+        "DescriptiveName":"RasDiagFailed",
+        "EventType":"0009000001",
+        "Severity":"FATAL",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"A diagnostic failed:"
+    },
+    {
+        "DescriptiveName":"RasDiagReservingNodeFailed",
+        "EventType":"0009000002",
+        "Severity":"ERROR",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Reserving node for running diagnostic failed:"
+    },
+    {
+        "DescriptiveName":"RasDiagSavingNodeBootImageInfoFailed",
+        "EventType":"0009000003",
+        "Severity":"ERROR",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to get the save BootImage of node before running diagnostic:"
+    },
+    {
+        "DescriptiveName":"RasDiagProvisionNodeFailed",
+        "EventType":"0009000004",
+        "Severity":"ERROR",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to Provision node for running diagnostic:"
+    },
+    {
+        "DescriptiveName":"RasDiagResultUpdateFailed",
+        "EventType":"0009000005",
+        "Severity":"ERROR",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to save diagnostic results for individual h/w unit:"
+    },
+    {
+        "DescriptiveName":"RasDiagHardwareRebootFailed",
+        "EventType":"0009000006",
+        "Severity":"ERROR",
+        "Category":"Diagnostic",
+        "Component":"AdapterDiagnostics",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to reboot h/w unit:"
+    },
+
+
+
+    {
+        "DescriptiveName":"RasSnapshotRestoreStarted",
+        "EventType":"0010000001",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Database snapshot restore started:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotRestoreFinished",
+        "EventType":"0010000002",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Database snapshot restore finished:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotTableRestoreFinished",
+        "EventType":"0010000003",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Restore of snapshot data completed for this table:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotTableRowsDeleted",
+        "EventType":"0010000004",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"During restore of database snapshot, we first deleted existing data:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotStoreStarted",
+        "EventType":"0010000005",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Database snapshot store started:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotStoreFinished",
+        "EventType":"0010000006",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Database snapshot store finished:"
+    },
+    {
+        "DescriptiveName":"RasSnapshotTableStoreFinished",
+        "EventType":"0010000007",
+        "Severity":"WARN",
+        "Category":"Database",
+        "Component":"OnlineTier",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Store of snapshot data completed for this table:"
+    },
+
+
+    {
+        "DescriptiveName":"RasDaimgrStartAdapterInstanceStdErr",
+        "EventType":"0011000001",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"While starting an adapter instance on this service node, this message came out of standard error:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDiscAnAdapterEnded",
+        "EventType":"0011000002",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"While monitoring child adapter instances, we discovered that an adapter instance has ended:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrStartedAddtlAdapterInstance",
+        "EventType":"0011000003",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Detected a backlog of work items, so started an additional adapter instance:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDidNotStartAddtlAdapterInstanceNoDaiMgr",
+        "EventType":"0011000004",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Did not start the requested adapter instance as there is not yet a DaiMgr adapter running on that Service Node:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDidNotStartAddtlAdapterInstanceAlreadyFreeInstance",
+        "EventType":"0011000005",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Did not start the requested adapter instance as there is a free adapter instance that will handle this type of work:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDetectedInactiveDaiManagerAndPutSsnInError",
+        "EventType":"0011000006",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Detected that this DaiMgr work item is inactive (will also mark SSN in error):"
+    },
+    {
+        "DescriptiveName":"RasDaimgrUcsStopDaiMgrShuttingDownDaiMgr",
+        "EventType":"0011000007",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"ucs-stop-dai-mgr is being run to shutdown DaiMgr:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDetectedInactiveDaiManager",
+        "EventType":"0011000008",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Detected that this DaiMgr work item is inactive (does not mark SSN in error):"
+    },
+    {
+        "DescriptiveName":"RasDaimgrSysClkNotSynced",
+        "EventType":"0011000009",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"Detected that this DaiMgr is running on a system with an unsynced clock:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrDetectedThisIsZombieInstance",
+        "EventType":"0011000010",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"Detected that this DaiMgr instance is itself a zombie - will restart this whole systemctl service:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrErrorDuringZombieRestart",
+        "EventType":"0011000011",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"Detected that this DaiMgr instance is itself a zombie - restart of systemctl service encountered an error:"
+    },
+    {
+        "DescriptiveName":"RasDaimgrExceptionDuringZombieRestart",
+        "EventType":"0011000012",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterDaiMgr",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"Y",
+        "Msg":"Detected that this DaiMgr instance is itself a zombie - restart of systemctl service encountered an exception:"
+    },
+
+
+    {
+        "DescriptiveName":"RasServiceForcingNodeOwnerToFreePool",
+        "EventType":"0012000001",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Forcing this h/w to free pool prior to starting PrepareForRepair Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServicePrepareForRepairFail",
+        "EventType":"0012000002",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to complete the PrepareForRepair Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceRequestFail",
+        "EventType":"0012000003",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to complete the Requested Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceEndRepairFailed",
+        "EventType":"0012000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to complete the EndRepair Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceEndRepairComplete",
+        "EventType":"0012000005",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Completed the EndRepair Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceForceClosing",
+        "EventType":"0012000006",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Force closing the current Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceLogUpdateFailed",
+        "EventType":"0012000007",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to open ServiceLog file for Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServicePrepareEngineeringFail",
+        "EventType":"0012000008",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to complete the Exclusive Engineering Start Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceEndEngineeringFailed",
+        "EventType":"0012000009",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Failed to complete the End Exclusive Engineering Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServiceEndEngineeringComplete",
+        "EventType":"0012000010",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Completed the End Exclusive Engineering Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasServicePreparedEngineering",
+        "EventType":"0012000011",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterService",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Completed the Exclusive Engineering Start Service Operation:"
+    },
+
+
+    {
+        "DescriptiveName":"RasCliSecurityUnauthEngrAccess",
+        "EventType":"0013000001",
+        "Severity":"INFO",
+        "Category":"CLI",
+        "Component":"Security",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Unauthorized user tried to perform command on hardware under Exclusive Engineeering Access:"
+    },
+    {
+        "DescriptiveName":"RasCliSecurityUnauthServiceOper",
+        "EventType":"0013000002",
+        "Severity":"INFO",
+        "Category":"CLI",
+        "Component":"Security",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Unauthorized command on hardware under Service Operation:"
+    },
+    {
+        "DescriptiveName":"RasCliSecurityUnauthWlmAlloc",
+        "EventType":"0013000003",
+        "Severity":"INFO",
+        "Category":"CLI",
+        "Component":"Security",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Unauthorized user tried to perform command on hardware under a WLM allocation:"
+    },
+
+
+    {
+        "DescriptiveName":"RasAlertmgrTestEventGenerateAlert",
+        "EventType":"0014000001",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterAlertMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Test AlertMgr event that has GenerateAlert turned on:"
+    },
+    {
+        "DescriptiveName":"RasAlertmgrTestEventDontGenerateAlert",
+        "EventType":"0014000002",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterAlertMgr",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test AlertMgr event that has GenerateAlert turned off:"
+    },
+
+
+    {
+        "DescriptiveName":"RasMntrForeignNodeBoot",
+        "EventType":"1000000000",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node start booting:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeStandby",
+        "EventType":"1000000001",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node in standby state:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeSrvStarted",
+        "EventType":"1000000002",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node service started:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeAvailable",
+        "EventType":"1000000003",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node becomes available:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeFailed",
+        "EventType":"1000000004",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node failed:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeSrvFailed",
+        "EventType":"1000000005",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node service failed:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeUnavailable",
+        "EventType":"1000000006",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node becomes unavailable:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHeartbeat",
+        "EventType":"1000000007",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign heartbeat between node and SMW received:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHeartbeatStop",
+        "EventType":"1000000008",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign heartbeat between node and SMW stopped:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHWErr",
+        "EventType":"1000000009",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign detected hardware error:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignVoltFault",
+        "EventType":"1000000010",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign detected voltage fault:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignAggData",
+        "EventType":"1000000011",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign aggregation data:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignAlpsAppStatus",
+        "EventType":"1000000012",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign ALPS application status:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignAttrReq",
+        "EventType":"1000000013",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign attribute request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignAttrData",
+        "EventType":"1000000014",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign attribute data:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignBootRsp",
+        "EventType":"1000000015",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign boot response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignDbgLevel",
+        "EventType":"1000000016",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign set debug level:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignDbgLevelRsp",
+        "EventType":"1000000017",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign set debug level response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignDumpCabinet",
+        "EventType":"1000000018",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign dump cabinet data request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignDumpCabinetData",
+        "EventType":"1000000019",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign cabinet data dump:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignGlobalNidListReq",
+        "EventType":"1000000020",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign global node id list request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignGlobalNidListRsp",
+        "EventType":"1000000021",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign global node id list response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNHandshake",
+        "EventType":"1000000022",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN handshake:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNLinkCfg",
+        "EventType":"1000000023",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN link configuration:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNLinkCfgRsp",
+        "EventType":"1000000024",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN link configuration response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNLinkDataReq",
+        "EventType":"1000000025",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN link data request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNLoadReq",
+        "EventType":"1000000026",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN load request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignHSNLoadRsp",
+        "EventType":"1000000027",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign HSN load response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignImpsImgMapReq",
+        "EventType":"1000000028",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign IMPS image map request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignImpsImgMapRsp",
+        "EventType":"1000000029",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign IMPS image map response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0Op",
+        "EventType":"1000000030",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 operation:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0OpRsp",
+        "EventType":"1000000031",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 operation response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0ModDown",
+        "EventType":"1000000032",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 module down:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0ModDownRsp",
+        "EventType":"1000000033",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 module down response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0ModUp",
+        "EventType":"1000000034",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 module up:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0ModUpRsp",
+        "EventType":"1000000035",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 module up response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0NodeDown",
+        "EventType":"1000000036",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 node down:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0NodeDownRsp",
+        "EventType":"1000000037",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 node down response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0NodeUp",
+        "EventType":"1000000038",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 node up:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0NodeUpRsp",
+        "EventType":"1000000039",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 node up response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0Reset",
+        "EventType":"1000000040",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 reset:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL0ResetRsp",
+        "EventType":"1000000041",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L0 reset response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL1AttrReq",
+        "EventType":"1000000042",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L1 attribute request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignL1AttrData",
+        "EventType":"1000000043",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign L1 attribute data:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignMarker",
+        "EventType":"1000000044",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign marker:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNidListReq",
+        "EventType":"1000000045",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node id list request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNidListRsp",
+        "EventType":"1000000046",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node id list response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeCmd",
+        "EventType":"1000000047",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node command:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeCmdRsp",
+        "EventType":"1000000048",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node command response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeHalt",
+        "EventType":"1000000049",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node halt:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeHaltRsp",
+        "EventType":"1000000050",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node halt response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignNodeInfo",
+        "EventType":"1000000051",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign node info:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignOrbTimeoutHandled",
+        "EventType":"1000000052",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign ORB timeout handled:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPartIdLookupReq",
+        "EventType":"1000000053",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign part id lookup request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPartIdLookupRsp",
+        "EventType":"1000000054",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign part id lookup response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPartTransReq",
+        "EventType":"1000000055",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign part transfer request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPartTransRsp",
+        "EventType":"1000000056",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign part transfer response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPartTransDone",
+        "EventType":"1000000057",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign part transfer done:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPMDataReq",
+        "EventType":"1000000058",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign power management data request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPMDataRsp",
+        "EventType":"1000000059",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign power management data response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPowerCfg",
+        "EventType":"1000000060",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign power configuration:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignPowerCfgRsp",
+        "EventType":"1000000061",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign power configuration response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignRcaDiag",
+        "EventType":"1000000062",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign RCA diagnostics:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignRoutePh1",
+        "EventType":"1000000063",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign route phase 1:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignRoutePh3Rsp",
+        "EventType":"1000000064",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign route phase 3 response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignSicProcStop",
+        "EventType":"1000000065",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign SIC process stop:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignSicProcStopRsp",
+        "EventType":"1000000066",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign stop SIC process response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignClearStateFlag",
+        "EventType":"1000000067",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign clear state flags:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignMonikerData",
+        "EventType":"1000000068",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign moniker data:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignSoftwareNodeInfo",
+        "EventType":"1000000069",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign software node info:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignStateTransReq",
+        "EventType":"1000000070",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign state transition request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignStateTransRsp",
+        "EventType":"1000000071",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign state transition response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignStateTransDone",
+        "EventType":"1000000072",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign state transition done:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIBoot",
+        "EventType":"1000000073",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI boot:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIBootRsp",
+        "EventType":"1000000074",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI boot response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIStateReq",
+        "EventType":"1000000075",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI dynamic state request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIStateRsp",
+        "EventType":"1000000076",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI dynamic state response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIFlagRsp",
+        "EventType":"1000000077",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI flag response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIHalt",
+        "EventType":"1000000078",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI halt:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIHaltRsp",
+        "EventType":"1000000079",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI halt response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIPartConfReq",
+        "EventType":"1000000080",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI part configuration request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUIPartConfRsp",
+        "EventType":"1000000081",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign UI part configuration response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUpdateNodeListReq",
+        "EventType":"1000000082",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign update node list request:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUpdateNodeListRsp",
+        "EventType":"1000000083",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Foreign update node list response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignBootImageIdUpdate",
+        "EventType":"1000000084",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "Msg":"Foreign update node boot image ID:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignBootImageUpdate",
+        "EventType":"1000000085",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "Msg":"Foreign update boot image information list response:"
+    },
+    {
+        "DescriptiveName":"RasMntrForeignUnknownEvent",
+        "EventType":"1000000100",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorHSS",
+        "ControlOperation":null,
+        "Msg":"An unknown Foreign RAS event was received: "
+    },
+
+
+    {
+        "DescriptiveName":"RasMosEventRange",
+        "EventType":"1001000000",
+        "Severity":"WARN",
+        "Category":"mOS",
+        "Component":"",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"mOS has this range from 1001000001 - 1001999999:"
+    },
+    {
+        "Category": "mOS",
+        "Component": "Test",
+        "ControlOperation": null,
+        "DescriptiveName": "mOSTestEvent",
+        "EventType": "1001000001",
+        "GenerateAlert":"N",
+        "Msg": "This event is for testing only:",
+        "Severity": "DEBUG"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkctl",
+        "ControlOperation": "ErrorOnNode",
+        "DescriptiveName": "mOSLwkctlFailure",
+        "EventType": "1001000002",
+        "GenerateAlert":"N",
+        "Msg": "An error occurred during dynamic partitioning:",
+        "Severity": "ERROR"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkctl",
+        "ControlOperation": null,
+        "DescriptiveName": "mOSLwkctlWarning",
+        "EventType": "1001000003",
+        "GenerateAlert":"N",
+        "Msg": "An warning occurred during dynamic partitioning:",
+        "Severity": "WARN"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkprocess",
+        "ControlOperation": "KillJobOnNode",
+        "DescriptiveName": "mOSLwkProcessError",
+        "EventType": "1001000004",
+        "GenerateAlert":"N",
+        "Msg": "An unexpected error occurred in an LWK process:",
+        "Severity": "ERROR"
+    },
+    {
+        "Category": "mOS",
+        "Component": "boot",
+        "ControlOperation": "ErrorOnNode",
+        "DescriptiveName": "mOSBootError",
+        "EventType": "1001000005",
+        "GenerateAlert":"N",
+        "Msg": "An unexpected error occurred during boot:",
+        "Severity": "ERROR"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkprocess",
+        "ControlOperation": "ErrorAndKillJobOnNode",
+        "DescriptiveName": "mOSLwkProcessErrorUnstableNode",
+        "EventType": "1001000006",
+        "GenerateAlert":"N",
+        "Msg": "An unexpected error occurred in an LWK process.  The hosting node is considered unstable:",
+        "Severity": "ERROR"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkmem",
+        "ControlOperation": "KillJobOnNode",
+        "DescriptiveName": "mOSLwkmemProcessError",
+        "EventType": "1001100000",
+        "GenerateAlert":"N",
+        "Msg": "A process level fatal error occurred in LWK memory:",
+        "Severity": "ERROR"
+    },
+    {
+        "Category": "mOS",
+        "Component": "lwkmem",
+        "ControlOperation": null,
+        "DescriptiveName": "mOSLwkmemBootWarning",
+        "EventType": "1001100002",
+        "GenerateAlert":"N",
+        "Msg": "An unexpected problem was detected during boot:",
+        "Severity": "WARN"
+    },
+    {
+        "Category": "mOS",
+        "Component": "Scheduler",
+        "ControlOperation": null,
+        "DescriptiveName": "mOSSchedulerWarning",
+        "EventType": "1001200001",
+        "GenerateAlert":"N",
+        "Msg": "A warning occurred in the Scheduler:",
+        "Severity": "WARN"
+    },
+    {
+        "Category": "mOS",
+        "Component": "Scheduler",
+        "ControlOperation": "KillJobOnNode",
+        "DescriptiveName": "mOSSchedulerError",
+        "EventType": "1001200002",
+        "GenerateAlert":"N",
+        "Msg": "An unexpected error occurred in the Scheduler:",
+        "Severity": "ERROR"
+    },
+
+
+    {
+        "DescriptiveName":"RasCnosEventRange",
+        "EventType":"1002000000",
+        "Severity":"WARN",
+        "Category":"CNOS",
+        "Component":"",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"CNOS has this range from 1002000001 - 1002999999:"
+    },
+    {
+        "DescriptiveName":"cnosEnvironmentFailure",
+        "EventType":"1002000001",
+        "Severity":"ERROR",
+        "Category":"CNOS",
+        "Component":"EnvSwitch",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"cnos environment switching error:"
+    },
+
+
+    {
+        "DescriptiveName":"RasHitEventRange",
+        "EventType":"1003000000",
+        "Severity":"WARN",
+        "Category":"HIT",
+        "Component":"",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"HIT has this range from 1003000001 - 1003999999:"
+    },
+    {
+        "DescriptiveName":"RasHitFabricHealthCheckError",
+        "EventType":"1003000001",
+        "Severity":"ERROR",
+        "Category":"HIT",
+        "Component":"FabricHealthCheck",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Fabric health check test failed:"
+    },
+
+
+    {
+        "DescriptiveName":"RasTestEvent",
+        "EventType":"9001000001",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":"TestControlOperation",
+        "GenerateAlert":"N",
+        "Msg":"Test:"
+    },
+
+
+    {
+        "DescriptiveName":"RasTestEvent01",
+        "EventType":"9002000001",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 01:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent02",
+        "EventType":"9002000002",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 02:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent03",
+        "EventType":"9002000003",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 03:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent04",
+        "EventType":"9002000004",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 04:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent05",
+        "EventType":"9002000005",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 05:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent06",
+        "EventType":"9002000006",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 06:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent07",
+        "EventType":"9002000007",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 07:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent08",
+        "EventType":"9002000008",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 08:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent09",
+        "EventType":"9002000009",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 09:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent10",
+        "EventType":"9002000010",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 10:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent11",
+        "EventType":"9002000011",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 11:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent12",
+        "EventType":"9002000012",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 12:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent13",
+        "EventType":"9002000013",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 13:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent14",
+        "EventType":"9002000014",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 14:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent15",
+        "EventType":"9002000015",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 15:"
+    },
+    {
+        "DescriptiveName":"RasTestEvent16",
+        "EventType":"9002000016",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"TEST",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Test RAS Event 16:"
+    }
+]}

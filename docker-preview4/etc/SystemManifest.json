@@ -1,0 +1,106 @@
+{
+  "sysname": "preview4",
+  "views": {
+    "Full": {
+      "floor": {
+        "description": "The Single Full Preview 4 System",
+        "content": [
+          {
+            "name": "X0",
+            "definition": "rack"
+          }
+        ]
+      },
+      "definitions": {
+        "rack": {
+          "description": "Preview 4 Rack",
+          "type": "Rack",
+          "content": [
+            {
+              "name": "FSW1",
+              "definition": "fabric-switch"
+            },
+            {
+              "name": "ESW1",
+              "definition": "ethernet-switch"
+            },
+            {
+              "name": "ESW2",
+              "definition": "ethernet-switch"
+            },
+            {
+              "name": "SMS1",
+              "definition": "service-node"
+            },
+            {
+              "name": "SMS2",
+              "definition": "service-node"
+            },
+            {
+              "name": "SMS3",
+              "definition": "service-node"
+            },
+            {
+              "name": "SMS4",
+              "definition": "service-node"
+            },
+            {
+              "name": "S28",
+              "definition": "compute-node"
+            },
+            {
+              "name": "S26",
+              "definition": "compute-node"
+            },
+            {
+              "name": "S24",
+              "definition": "compute-node"
+            },
+            {
+              "name": "TRAY",
+              "definition": "console-tray"
+            },
+            {
+              "name": "S21",
+              "definition": "compute-node"
+            },
+            {
+              "name": "UAN1",
+              "definition": "user-access-node"
+            }
+          ]
+        },
+        "compute-node": {
+          "description": "Compute node",
+          "type": "ComputeNode",
+          "content": []
+        },
+        "service-node": {
+          "description": "Service Node",
+          "type": "ServiceNode",
+          "content": []
+        },
+        "fabric-switch": {
+          "description": "100Gbe Network Switch",
+          "type": "Switch",
+          "content": []
+        },
+        "ethernet-switch": {
+          "description": "10Gbe Network Switch",
+          "type": "Switch",
+          "content": []
+        },
+        "console-tray": {
+          "description": "Console Tray for the Rack.",
+          "type": "Tray",
+          "content": []
+        },
+        "user-access-node": {
+          "description": "User Access Node for System",
+          "type": "ServiceNode",
+          "content": []
+        }
+      }
+    }
+  }
+}

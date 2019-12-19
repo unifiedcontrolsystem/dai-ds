@@ -1,0 +1,38 @@
+{
+  "providerClassMap": {
+    "comment0": "tokenAuthProvider: com.intel.authentication.KeycloakTokenAuthentication",
+    "comment1" : "EventSim does not require a token",
+    "tokenAuthProvider": null,
+    "requester": "com.intel.dai.hwinventory.api.ForeignHwInventoryRequester"
+  },
+  "providerConfigurations": {
+    "tokenAuthProvider": {
+      "tokenServer": "https://localhost:28080/auth",
+      "realm": "realm_name",
+      "clientId": "application_id",
+      "clientSecret": "some_secret"
+    },
+    "requester": {
+      "initiateDiscovery": {
+        "endpoint": "http://localhost:5678",
+        "verb": "POST",
+        "resource": "/Inventory/Discover"
+      },
+      "getDiscoveryStatus": {
+        "endpoint": "http://localhost:5678",
+        "verb": "GET",
+        "resource": "/Inventory/DiscoveryStatus"
+      },
+      "getHwInventorySnapshot": {
+        "endpoint": "http://localhost:5678",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware"
+      },
+      "getHWInventoryUpdate": {
+        "endpoint": "http://localhost:5678",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware/Query/"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<deployment>
+    <cluster    hostcount="2" sitesperhost="48" kfactor="1" />
+    <partition-detection enabled="true"/>
+    <commandlog enabled="false" synchronous="false">
+        <frequency time="300" transactions="1000"/>
+    </commandlog>
+    <snapshot enabled="false" frequency="30m" prefix="ucs_db" retain="3" />
+    <systemsettings>
+        <temptables maxsize="200"/>
+    </systemsettings>
+</deployment>

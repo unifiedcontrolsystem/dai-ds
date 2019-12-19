@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  dai-voltdb:
+    network_mode: host
+    image: voltdb/voltdb-community:9.2.1
+    entrypoint: /opt/voltdb/schema/docker-entrypoint.sh
+    container_name: dai-voltdb
+    environment:
+      - HTTP_PORT=18080
+    volumes:
+      - "/opt/dai-docker/tier1/log:/var/voltdb/voltdbroot/log"
+      - "/opt/dai-docker/tier1/init.d:/opt/voltdb/schema"
+    restart: always
+
+  dai-populate-schema:
+    network_mode: host
+    depends_on:
+      - dai-voltdb
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/voltdb/schema/populateSchema.sh
+    container_name: dai-populate-schema
+    environment:
+      - VOLTDB_SERVER=localhost
+    volumes:
+      - "/opt/dai-docker/tier1/log:/opt/ucs/log"
+      - "/opt/dai-docker/etc:/opt/ucs/etc"
+      - "/opt/dai-docker/lib:/opt/ucs/lib"
+      - "/opt/dai-docker/tier1/init.d:/opt/voltdb/schema"
+    restart: 'no'

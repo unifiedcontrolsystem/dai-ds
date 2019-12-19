@@ -1,0 +1,21 @@
+#!/usr/bin/sh
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sleep 10
+#
+echo "Into $HOSTNAME"
+if [ "$HOSTNAME" = R00-CH0-CB7-PM3-CN1 ]; then
+	# Insert a mock kernel panic message into the serial console log (note blank lines are necessary to get past login prompt)
+	sudo sh -c "cat > /dev/console" <<EOF
+
+
+[  114.713695] Kernel panic - not syncing: Fatal exception  @@@ Written by KernelPanic-Script job @@@
+EOF
+	#### Shutdown the network so the node appears dark, just as it would after a kernel panic.
+	###sudo ip link set dev eth0 down
+fi
+#
+#
+sleep 999

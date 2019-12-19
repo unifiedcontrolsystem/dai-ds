@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!--
+    Copyright (C) 2018 Intel Corporation
+
+    SPDX-License-Identifier: Apache-2.0
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAI Data Process</title>
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.min.css">
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.theme.min.css">
+  <link rel="stylesheet" href="js/jquery-ui-1.12.1.structure.min.css">
+  <link rel="stylesheet" href="js/dataTables-1.10.15.jqueryui.css">
+  <link rel="stylesheet" href="js/rowGroup.dataTables.min.css">
+  <script language="javascript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery-ui-1.12.1.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.dataTables-1.10.15.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/dataTables.rowGroup.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/classes_required.js"></script>
+    <script language="javascript" type="text/javascript" src="js/ajax_calls_functions_volt.js"></script>
+  <!-- Rack definition and layout.  This is json and will be fetched from the inventory adapter as derived from the manifest -->
+  <!--<script language="javascript" type="text/javascript" src="data/nsai_floor_layout.js"></script>
+
+  <!-- Include artificial data.  This is json-like and should come from a service -->
+  <script language="javascript" type="text/javascript" src="data/sampledata.js"></script>
+    <script language="javascript" type="text/javascript" src="data/sampledata2.js"></script>
+
+    <style>
+        body {
+            font-size: 10pt;
+        }
+        table.dataTable thead th,
+        table.dataTable thead td {
+            padding: 4px 4px;
+        }
+        table.dataTable tfoot th,
+        table.dataTable tfoot td {
+            padding: 4px 4px 4px 4px;
+        }
+        table.dataTable tbody th,
+        table.dataTable tbody td {
+            padding: 1px 2px;
+        }
+        tr.shown-content-in-tabular-form {
+            padding: 0% 2% 0% 0%;
+            width: 70%;
+        }
+        tr.hidden-content-in-tabular-form {
+            display: none;
+            width: 70%;
+        }
+        table.shown-content-in-tabular-form {
+            padding: 0% 2% 0% 0%;
+        }
+        table.hidden-content-in-tabular-form {
+            display: none;
+        }
+        table.inv_inside_table {
+            /*border: 1px solid black;
+             */width:80%;
+            /*border-right: 1px solid black;*/
+            /*border-top: 1px solid black;*/
+        }
+
+        table.inv_inside_table caption{
+            text-align: left;
+        }
+        .tab-heading {
+            background-color: gray;
+            color: white;
+            padding: 8px;
+            margin-bottom: 4px;
+            font: 18px arial, sans-serif;
+        }
+        #floor-layout {
+            width: 750px;
+            max-width: 800px;
+            float: left;
+            font-size: 0;
+            overflow: auto;
+            position: relative;			/* note lack of left/right, etc.  This is for nested absolute rack positioning */
+            background-color: #fbfbfb;
+        }
+        .rack {
+            position: absolute;
+            box-sizing: border-box;
+        }
+        @keyframes state-error-attention {
+            from { border-color: rgba(255,0,0,0.4); }
+            to   { border-color: rgba(255,0,0,1.0); }
+        }
+        .rack-attention {
+            border: 2px solid red;
+            /* animation: state-error-attention 1.5s infinite; */
+        }
+        .rack-highlight {
+            background-color: rgba(80,244,66,0.5);
+            border: 2px solid #50f442;
+        }
+        .rack-dialog {
+            position: relative;
+        }
+        .hwelement {
+            position: absolute;
+            box-sizing: border-box;
+        }
+        .tabs-panel {
+            float: left;
+            overflow-x: auto;
+        }
+
+        #stateKey {
+            font: 12px arial, sans-serif;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+        .tooltip {
+            display:none;
+            position:absolute;
+            border:1px solid #333;
+            background-color:#161616;
+            border-radius:2px;
+            padding:5px;
+            white-space: nowrap;
+            color:#fff;
+            font: 12px arial, sans-serif;
+        }
+        .ui-button {
+            padding-top: 2px;
+            padding-left: 2px;
+            padding-right: 2px;
+            padding-bottom: 2px;
+        }
+
+        #control-bar {
+            width: 100vw;
+        }
+        #clockface {
+            vertical-align: middle;
+        }
+        #contextselector {
+            width: 28em;
+        }
+        #zoombuttons {
+            padding: 0;
+        }
+        .hoverinfo {
+            display:none;
+            position:absolute;
+            z-index:999;
+            border:1px solid #333;
+            background-color: #c5c5c5;
+            border-radius:2px;
+            box-shadow: 10px 10px 5px gray;
+            padding:5px;
+            white-space: nowrap;
+            text-align: left;
+            font: 16px arial, sans-serif;
+        }
+        #wayback {
+            display: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 100;
+        }
+        @keyframes wayback-wiggle {
+            0%   { transform: rotate(0deg); }
+            25%  { transform: rotate(-1deg); }
+            50%  { transform: rotate(0deg); }
+            75%  { transform: rotate(1deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .wayback-mode {
+            /*	animation-name: wayback-wiggle;
+                animation-timing-function: linear;
+                animation-duration: 0.5s;
+             */
+            background-image: url("js/images/waybackbg.png");
+        }
+        h1#sys_name_header {
+            text-align: center;
+            font-family: "Times New Roman";
+            color: #454545;
+            font-size: 30px;
+        }
+    </style>
+
+</head>
+<body>
+<h1 id="sys_name_header"></h1>
+<div id="control-bar">
+    <img src="js/images/clockface.gif" width="24" height="24" style="float:left"/><span style="float:left">&nbsp;&nbsp;</span>
+    <input type="text" value="Now" name="nowshowingtime" id="nowshowingtime" style="float:left"/>
+    &nbsp;&nbsp;&nbsp;
+    <label for="zoom0"><img src="js/images/zoom1.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom0" value="0"/>
+    <label for="zoom1"><img src="js/images/zoom2.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom1" value="1">
+    <label for="zoom2"><img src="js/images/zoom3.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom2" value="2"/>
+    <img id="wayback" src="js/images/pb3.png"/>
+</div>
+<p>
+<div id="floor-layout">
+    <canvas id="floor-canvas">
+        Browser does not support canvas?
+    </canvas>
+</div>
+<div id="tabs" class="tabs-panel">
+    <ul>
+        <li><a href="#hardware-view">Hardware</a></li>
+        <li><a href="#jobs-view">Jobs</a></li>
+        <li><a href="#wlm-reservation-view">Reservations</a></li>
+        <li><a href="#ras-view">RAS</a></li>
+        <li><a href="#service-view">Service</a></li>
+        <li><a href="#diags-view">Diagnostics</a></li>
+        <li><a href="#env-view">Environmental</a></li>
+        <li><a href="#invsnap-view">Inventory Snapshot</a></li>
+    </ul>
+
+    <div id="hardware-view">
+        <div class="tab-heading">System Hardware</div>
+        <div id="tabs2" class="tabs-panel">
+            <ul>
+                <li><a href="#service-node">Service Node</a></li>
+                <li><a href="#compute-node">Compute Node</a></li>
+            </ul>
+            <div id="service-node">
+                <table id="ServiceNodeData" width="400" height="150" style="border:1px solid #d3d3d3"></table>
+            </div>
+            <div id="compute-node">
+                <table id="ComputeNodeData" width="400" height="150" style="border:1px solid #d3d3d3"></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="jobs-view">
+        <div class="tab-heading">Jobs</div>
+        <div id="tabs3" class="tabs-panel">
+            <ul>
+                <li><a href="#job-nonactive">Completed Jobs</a></li>
+                <li><a href="#jobs-active">Running Jobs</a></li>
+            </ul>
+
+            <div id="job-nonactive">
+                <table id="JobsNonActiveData" width="400" height="150" style="border:1px solid #d3d3d3"></table>
+            </div>
+            <div id="jobs-active">
+                <table id="JobsActiveData" width="400" height="150" style="border:1px solid #d3d3d3"></table>
+            </div>
+            <p>Compute Node State Summary</p>
+            <table id="stateKey" width="400" height="150" style="border:1px solid #d3d3d3">
+            </table>
+        </div>
+    </div>
+
+    <div id="wlm-reservation-view">
+        <div class="tab-heading">Reservations</div>
+        <table class='WLMRESTable' id="WLMReservations"></table>
+    </div>
+
+    <div id="ras-view">
+        <div class="tab-heading">System RAS Events</div>
+        <table class='RASTable' id="RAS"></table>
+    </div>
+    <div id="service-view">
+        <div class="tab-heading">Service Actions</div>
+        <table class='ServiceTable' id="ServiceActions"></table>
+    </div>
+    <div id="diags-view">
+        <div class="tab-heading">Diagnostics</div>
+        <table class='RASTable' id="Diags"></table>
+    </div>
+    <div id="env-view">
+        <div class="tab-heading">System Environmental Monitoring</div>
+        <table class='RASTable' id="Env">
+        </table>
+    </div>
+    <div id="invsnap-view">
+        <div class="tab-heading">Inventory Snapshot</div>
+        <table class='RASTable' id="InvSnap"></table>
+    </div>
+</div>
+<script language="javascript" type="text/javascript" src="js/functions_javascript.js"></script>
+<script>
+</script>
+</body>
+</html>

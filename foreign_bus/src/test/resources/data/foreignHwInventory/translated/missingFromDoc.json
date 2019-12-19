@@ -1,0 +1,18 @@
+{
+  "FRUS": [
+    {
+      "ID": "x0c0s0",
+      "ParentID": "x0c0",
+      "Type": "ComputeModule",
+      "Ordinal": 0,
+      "FRUID": "empty-x0c0s0"
+    },
+    {
+      "ID": "x0c0s0b0",
+      "ParentID": "x0c0s0",
+      "Type": "NodeEnclosure",
+      "Ordinal": 0,
+      "FRUID": "empty-x0c0s0b0"
+    }
+  ]
+}

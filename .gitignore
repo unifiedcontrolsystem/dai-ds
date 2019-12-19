@@ -1,0 +1,76 @@
+# IDE artifcats
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# PBS Pro job output files
+P*.o*
+
+# Slurm job output files
+slurm-*.out
+
+# VoltDB files
+voltdb_crash*
+
+#.gitignore#
+.gitignore~
+
+.gradle
+build/
+bin/
+
+#Ignore Bat files
+*.bat
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+# Generated Exclusions
+log/
+out/
+voltdbroot/
+cli/dist/
+cli/ucs_cli.egg-info/
+cli/ucs_cli/__pycache__/
+cli2/.pytest_cache/
+cli2/cli/__pycache__/
+cli2/cli/src/__pycache__/
+cli2/cli/src/tests/__pycache__/
+cli2/coverage-report.xml/
+cli2/dist/
+cli2/results.xml
+cli2/.coverage
+cli2/ucs_cli2.egg-info/

@@ -1,0 +1,217 @@
+{
+  "UcsConfigValues": [
+    {
+      "Value": "/opt/ucs/log",
+      "Key": "UcsLogfileDirectory"
+    },
+    {
+      "Value": "/opt/ucs/etc/log4j2.xml",
+      "Key": "UcsLog4jConfigurationFile"
+    },
+    {
+      "Value": "/opt/ucs/etc",
+      "Key": "UcsConfigDirectory"
+    },
+    {
+      "Value": "sms01-nmn",
+      "Key": "SmwHostname"
+    }
+  ],
+  "AdapterInstances": [
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-SMS1",
+      "Invocation": "com.intel.dai.AdapterNearlineTierJdbc",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-SMS1",
+      "Invocation": "com.intel.dai.AdapterOnlineTierVolt",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-SMS1",
+      "Invocation": "com.intel.dai.ui.AdapterUIRest",
+      "TypeOfAdapter": "UI",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-SMS1",
+      "Invocation": "com.intel.dai.ras.AdapterRas",
+      "TypeOfAdapter": "RAS",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/PartitionedMonitorAdapter-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-SMS1",
+      "Invocation": "com.intel.partitioned_monitor.PartitionedMonitorAdapterApp",
+      "TypeOfAdapter": "MONITOR",
+      "NumberOfInstances": 3
+    }
+  ],
+  "InitialWorkItems": [
+    {
+      "Parms": null,
+      "TypeOfAdapter": "DAI_MGR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "MotherSuperiorDaiMgr",
+      "Queue": "X0-SMS1"
+    },
+    {
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=127.0.0.1",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataMover",
+      "Queue": "X0-SMS1"
+    },
+    {
+      "Parms": "RabbitMQHost=127.0.0.1",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataReceiver",
+      "Queue": "X0-SMS1"
+    },
+    {
+      "Parms": "$Profile#events1",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-SMS1"
+    },
+    {
+      "Parms": "$Profile#telemetry1",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-SMS1"
+    },
+    {
+      "Parms": "$Profile#stateChanges1",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-SMS1"
+    }
+  ],
+  "Nodes": [
+    {
+      "Aggregator": "manual",
+      "BmcHostName": "sms1-bmc",
+      "IpAddr": "10.2.0.1",
+      "BmcAddr": "10.4.0.1",
+      "BootImageId": null,
+      "HostName": "sms01-nmn",
+      "MacAddr": "aa:bb:cc:dd:ef:80",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ef:00",
+      "Lctn": "X0-SMS1"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "sms2-bmc",
+      "IpAddr": "10.2.0.2",
+      "BmcAddr": "10.4.0.2",
+      "BootImageId": null,
+      "HostName": "sms02-nmn",
+      "MacAddr": "aa:bb:cc:dd:ef:81",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ef:01",
+      "Lctn": "X0-SMS2"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "sms3-bmc",
+      "IpAddr": "10.2.0.3",
+      "BmcAddr": "10.4.0.3",
+      "BootImageId": null,
+      "HostName": "sms03-nmn",
+      "MacAddr": "aa:bb:cc:dd:ef:82",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ef:02",
+      "Lctn": "X0-SMS3"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "sms4-bmc",
+      "IpAddr": "10.2.0.4",
+      "BmcAddr": "10.4.0.4",
+      "BootImageId": null,
+      "HostName": "sms04-nmn",
+      "MacAddr": "aa:bb:cc:dd:ef:83",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ef:03",
+      "Lctn": "X0-SMS4"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "uan01-bmc",
+      "IpAddr": "10.2.99.1",
+      "BmcAddr": "10.4.99.20",
+      "BootImageId": null,
+      "HostName": "uan01-nmn",
+      "MacAddr": "aa:bb:cc:dd:ef:84",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ef:04",
+      "Lctn": "X0-UAN1"
+    },
+
+
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "nid000001-bmc",
+      "IpAddr": "10.2.0.5",
+      "BmcAddr": "10.4.0.5",
+      "BootImageId": null,
+      "HostName": "nid000001-nmn",
+      "MacAddr": "aa:bb:cc:dd:ee:80",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ee:00",
+      "Environment": "rich",
+      "Lctn": "X0-S28"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "nid000002-bmc",
+      "IpAddr": "10.2.0.6",
+      "BmcAddr": "10.4.0.6",
+      "BootImageId": null,
+      "HostName": "nid000002-nmn",
+      "MacAddr": "aa:bb:cc:dd:ee:81",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ee:01",
+      "Environment": "rich",
+      "Lctn": "X0-S26"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "nid000003-bmc",
+      "IpAddr": "10.2.0.7",
+      "BmcAddr": "10.4.0.7",
+      "BootImageId": null,
+      "HostName": "nid000003-nmn",
+      "MacAddr": "aa:bb:cc:dd:ee:82",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ee:02",
+      "Environment": "rich",
+      "Lctn": "X0-S24"
+    },
+    {
+      "Aggregator": "X0-SMS1",
+      "BmcHostName": "nid000004-bmc",
+      "IpAddr": "10.2.0.8",
+      "BmcAddr": "10.4.0.8",
+      "BootImageId": null,
+      "HostName": "nid000004-nmn",
+      "MacAddr": "aa:bb:cc:dd:ee:83",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "aa:bb:cc:dd:ee:03",
+      "Environment": "rich",
+      "Lctn": "X0-S21"
+    }
+  ]
+}

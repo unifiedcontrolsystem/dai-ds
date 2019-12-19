@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+echo "DELETE FROM ComputeNode_History; DELETE FROM Tier2_ComputeNode_History;" | sqlcmd
+echo "UPDATE ComputeNode SET State='M', DbUpdatedTimestamp=NOW, LastChgTimestamp=Now, LastChgAdapterType='DB_WIPE', LastChgWorkItemId=-1;" | sqlcmd
+echo "INSERT INTO ComputeNode_History SELECT * FROM ComputeNode;" | sqlcmd
+#
+echo "DELETE FROM ServiceNode_History; DELETE FROM Tier2_ServiceNode_History;" | sqlcmd
+echo "UPDATE ServiceNode SET State='M', DbUpdatedTimestamp=NOW, LastChgTimestamp=Now, LastChgAdapterType='DB_WIPE', LastChgWorkItemId=-1;" | sqlcmd
+echo "INSERT INTO ServiceNode_History SELECT * FROM ServiceNode;" | sqlcmd
+#
+echo "DELETE FROM RasEvent; DELETE FROM Tier2_RasEvent;" | sqlcmd
+echo "DELETE FROM Job;" | sqlcmd
+echo "DELETE FROM Job_History; DELETE FROM Tier2_Job_History;" | sqlcmd
+echo "DELETE FROM InternalCachedJobs;" | sqlcmd
+echo "DELETE FROM InternalJobInfo;" | sqlcmd
+echo "DELETE FROM JobStep; DELETE FROM JobStep_History; DELETE FROM Tier2_JobStep_History;" | sqlcmd
+echo "DELETE FROM InternalJobStepInfo;" | sqlcmd
+echo "DELETE FROM InternalInflightWlmPrologOrEpilogRequests;" | sqlcmd
+#echo "DELETE FROM WorkItem; DELETE FROM WorkItem_History; DELETE FROM Tier2_WorkItem_History;" | sqlcmd
+echo "DELETE FROM Adapter; DELETE FROM Adapter_History; DELETE FROM Tier2_Adapter_History;" | sqlcmd
+echo "DELETE FROM WlmReservation_History; DELETE FROM Tier2_WlmReservation_History;" | sqlcmd
+
+##echo "DELETE FROM TIER2_ADAPTER_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_AGGREGATEDENVDATA;" | sqlcmd
+echo "DELETE FROM TIER2_ALERT;" | sqlcmd
+echo "DELETE FROM TIER2_BOOTIMAGE_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_CHASSIS_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_COMPUTENODE_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_DIAG;" | sqlcmd
+echo "DELETE FROM TIER2_FABRICTOPOLOGY_HISTORY;" | sqlcmd
+##echo "DELETE FROM TIER2_JOBSTEP_HISTORY;" | sqlcmd
+##echo "DELETE FROM TIER2_JOB_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_LUSTRE_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_MACHINE_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_RACK_HISTORY;" | sqlcmd
+##echo "DELETE FROM TIER2_RASEVENT;" | sqlcmd
+echo "DELETE FROM TIER2_RASMETADATA;" | sqlcmd
+echo "DELETE FROM TIER2_REPLACEMENT_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_SERVICENODE_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_SERVICEOPERATION_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_SWITCH_HISTORY;" | sqlcmd
+echo "DELETE FROM TIER2_WLMRESERVATION_HISTORY;" | sqlcmd
+##echo "DELETE FROM TIER2_WORKITEM_HISTORY;" | sqlcmd

@@ -1,0 +1,9 @@
+clustershell
+progress
+requests
+python-dateutil
+texttable
+pytest
+pytest-cov
+pylint
+mock

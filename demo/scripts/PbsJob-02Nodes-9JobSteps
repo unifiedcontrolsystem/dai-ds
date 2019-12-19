@@ -1,0 +1,18 @@
+#!/usr/bin/sh
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#PBS -l select=2:ncpus=2:mpiprocs=1
+#PBS -l walltime=1:00:00
+#PBS -A DonsAccount
+#PBS -j oe
+pbsdsh -- ~/dai/NEKbone 1
+pbsdsh -- ~/dai/MILC 1
+pbsdsh -- ~/dai/UMT 1
+pbsdsh -- ~/dai/AMG 1
+pbsdsh -- ~/dai/mpibench 1
+pbsdsh -- ~/dai/linpak 1
+pbsdsh -- ~/dai/dgemm 1
+pbsdsh -- ~/dai/stress 1
+pbsdsh -- ~/dai/qcd 1

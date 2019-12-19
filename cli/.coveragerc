@@ -1,0 +1,15 @@
+# Copyright (c) 2016 Intel Corp.
+
+[run]
+branch=True
+omit=
+    */test_plugins/*
+    */special_plugins/*
+    */.local/lib/*
+    run-coverage.py
+    all-tests.py
+    */tests/*
+    */__init__.py
+    /usr/lib/python*/
+    /usr/local/lib/python*
+    *tests*

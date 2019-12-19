@@ -1,0 +1,34 @@
+# Copyright (C) 2019 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+env:
+  global:
+    - secure: "W7bbfAZM5FDBmHqcOO4h/Mca0tlEITQoCvBacVp3hKdSi8rZxnfl1VXa+pEyKz2o7NXZJNeP4lCD6Yrr5tZ2hI2Czwt9arBQHo6wOa3JMcPEYtFWz4F6+69gWRMLy3nxGg1fMZDnFnwis9GObgqfr9BTMFDYsD5sbkdIesXpTc935xuIpKnVYQO8dvYPvpTJJs4htb62+aXiwuXfoS1/D6scoP8ND4Gj5EBdRWF+ij5dPapINrWj5mQFJXHrFXHqD2DqICJwJLzsXs7x5KAMciRl1yA5pdezT7haLBxYCVYdon+431pbLdNJDJHoTa+TFzy/g7n37y4ooZMGVwpoDfkscybDxgCqkwAfYZRvSPy1FXG+3Fq7p5NNsRrQPWCsZq6nfDYUAi92BAPQfRMONzENTZRtQZXZntCmZeDP9D6PwYp/K5q1gu97M90dPtHs4aBjyLZJ3DJibrsmh+Z5lltf8pZFFdMWQ0VZ2gp+cO2pXN7Ozid6JcpdmmPm8yAdgrcW4sV1Rv1hM5G3z3cKptkWiqmX1q1S3mgmeYosoIjl9ft9fz+kVrrOr5q7UePMobVCFkcHMEoe5Vojd4SNBhyvGfGEld1Yy8esNYEf24PYiWLYOAOBCfQXW2lOYhpK4V8mFxDmetakZb79ZDPHBMxm4A38+NTuVQO8Tn8G5Ok="
+
+language: java
+
+jdk:
+  - openjdk11
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+addons:
+  coverity_scan:
+    project:
+      name: "unifiedcontrolsystem/ucs"
+    notification_email: "css_or@intel.com"
+    build_command_prepend: ""
+    build_command: "./gradlew compileJava"
+    branch_pattern: coverity_scan
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-

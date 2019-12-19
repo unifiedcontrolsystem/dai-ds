@@ -1,0 +1,43 @@
+#!/usr/bin/sh
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#
+# Should result in 24 jobs and 104 job steps.
+#
+iCntr=0
+while [ $iCntr -lt 1 ]; do
+	echo The counter is $iCntr
+
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-192Nodes-1JobSteps
+
+	sbatch ~/dai/demo/scripts/SlurmJob-192Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-64Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-32Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-08Nodes-1JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-9JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-3JobSteps
+	sbatch ~/dai/demo/scripts/SlurmJob-01Nodes-1JobSteps
+
+    let iCntr=iCntr+1
+done
+

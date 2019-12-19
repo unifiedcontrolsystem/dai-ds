@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  dai-postgres:
+    network_mode: host
+    image: postgres:11.4
+    container_name: dai-postgres
+    environment:
+      - POSTGRES_DB=dai
+      - POSTGRES_USER=dai
+      - POSTGRES_PASSWORD=123@dai
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - "/opt/dai-docker/tier2/log:/var/log/postgresql"
+      - "/opt/dai-docker/tier2/init.d:/docker-entrypoint-initdb.d"
+      - "/opt/dai-docker/tier2/data/pgdata:/var/lib/postgresql/data/pgdata"
+    restart: always

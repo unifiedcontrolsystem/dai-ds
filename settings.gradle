@@ -1,0 +1,22 @@
+// Copyright (C) 2018-2019 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+include 'dai_core'
+include 'xdg'
+include 'properties'
+include 'config_io'
+include 'procedures'
+include 'logging'
+include 'authentication'
+include 'foreign_bus'
+include 'networking'
+include 'ui'
+include 'runtime_utils'
+include 'populate_schema'
+include 'partitioned_monitor'
+include 'perflogging'
+include 'resource_managers'
+
+rootProject.name = 'dai'

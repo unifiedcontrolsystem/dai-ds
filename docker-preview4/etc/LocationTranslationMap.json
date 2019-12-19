@@ -1,0 +1,17 @@
+{
+  "conversion_node_map": {
+    "x0":          "X0",
+    "x0c0s36b0n0": "X0-SMS1",
+    "x0c0s34b0n0": "X0-SMS2",
+    "x0c0s32b0n0": "X0-SMS3",
+    "x0c0s30b0n0": "X0-SMS4",
+    "x0c0s28b0n0": "X0-S28",
+    "x0c0s26b0n0": "X0-S26",
+    "x0c0s24b0n0": "X0-S24",
+    "x0c0s21b0n0": "X0-S21",
+    "x0c0s11b0n0": "X0-UAN1"
+  },
+  "sensor_embedded_cpu_pattern": "_CPU[0-9]+",
+  "sensor_embedded_channel_pattern": "_CH[0-9]+",
+  "sensor_embedded_dimm_pattern": "_DIMM[0-9]+"
+}

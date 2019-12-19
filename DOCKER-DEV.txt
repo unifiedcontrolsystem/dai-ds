@@ -1,0 +1,78 @@
+SAMPLE DAI DOCKER CLUSTER
+==============================================================================
+Folder: ./docker-dev-cluster
+
+
+Prerequisites:
+------------------------------------------------------------------------------
+The host used must have docker and docker-compose installed and running
+properly with internet access to use the docker service cluster on a given
+host.
+
+
+Description and Use:
+------------------------------------------------------------------------------
+When building DAI, one of the outputs found in the build/distribution folder
+is the file:
+
+    dai-docker-dev-<version>.tar.gz
+
+This file when extracted onto a single host, contains everything needed to get
+a DAI service cluster up an running including the EventSim server.
+
+There are 2 docker-compose files in the 'docker' folder once extracted. The
+default file 'docker-compose.yml' starts up everything including the third
+party components such as:
+    * RabbitMQ Broker 3.7.x
+    * PostgreSQL 11.4.x (With persistent storage in docker/data/pgdata)
+    * VoltDB Community Edition 9.0
+
+The other docker compose services started are:
+    * Populating the VoltDB with initial schema and data (exits when finished)
+    * A management or parent service node called 'smw'.
+    * 3 sub-management or child service nodes called 'submn1', 'submn2', and
+      'submn3'.
+    * The EventSim server used to simulate a Foreign REST API with SSE based
+      eventing.
+
+The second file 'docker-compose-third-party-only.yml' only starts the third
+party services and executes the container to populate the VoltDB initial data.
+This could be used to run DAI on a real host but have the third party
+components run in docker.
+
+All of the third party containers and EventSim container expose the relevant
+ports to the host.
+    * RabbitMQ
+        + 15672/tcp - management port
+        + 5672/tcp  - pub/sub port
+    * VoltDB Community Edition
+        + 21212/tcp - Client port
+        + 3021/tcp  - Internal server port
+        + 5555/tcp  - Replication port
+        + 8080/tcp  - Web interface
+    * PostgresSQL
+        + 5432/tcp - Client port
+    * EventSim
+        + 5678/tcp - CLI REST access port
+
+The external ports can be changed if there is a port conflict with the host by
+changing the docker-compose files.   The first number in the number pairs
+under the 'ports:' sections is the host port.
+
+Each of the containers smw and submn[1-3] launch the DaiManager and the actual
+DAI adapters launched are determined by the MachineConfig.json file loaded
+into the VoltDB at docker cluster startup.
+
+Once the cluster is running the EventSim CLI can be installed on the host and
+used to generate telemetry, events, or boot state changes for testing.
+
+
+Launching the Docker Cluster:
+------------------------------------------------------------------------------
+1. Change directory to <repo_root>/docker/
+2. execute: docker-compose up -d
+    NOTE: -d runs the cluster in the background, leaving it off the command
+          will block the shell. Use Ctrl+C to exit.
+
+
+Copyright(c) 2019 Intel(r) Corp.

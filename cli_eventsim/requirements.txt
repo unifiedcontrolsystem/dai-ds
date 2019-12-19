@@ -1,0 +1,7 @@
+clustershell
+requests
+timeout-decorator
+pytest
+pytest-cov
+pylint
+mock

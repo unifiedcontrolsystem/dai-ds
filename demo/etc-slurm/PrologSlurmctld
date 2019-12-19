@@ -1,0 +1,60 @@
+#!/bin/bash
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+################################################################################
+# Example environment variables that Slurm will fill in before invocation.
+################################################################################
+###  SLURM_JOB_ID=40
+###  SLURM_JOB_NODELIST=C001N0001,C001N0002,C001N0003
+###  SLURM_JOB_NODELIST=C001N[0001-0064]
+###  SLURM_JOB_CONSTRAINTS=centos7.3-slurm
+###  SLURM_JOB_CONSTRAINTS=centos7.3-slurm-vtune
+###  SLURM_JOB_CONSTRAINTS=
+################################################################################
+#
+# Issue command so that this script logs into a file (for debug purposes).
+exec >> /tmp/PrologSlurmctld-Job$SLURM_JOB_ID.log 2>&1
+#
+# Short-circuit if there isn't any constraint specified (string is null or string has 0 length)
+# (if there aren't any constraints then there isn't any need to check boot images).
+if [[ $SLURM_JOB_CONSTRAINTS = "(null)" ]]; then
+    echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - No constraints for this job, so no need to check boot images - short-circuiting this flow!"
+    exit 0
+fi
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - started"
+#
+# NOTE: we are using FIFOs in this code only until the scon is available and hardened at which time it should be substituted for the FIFOs.
+#
+# Determine the name of the result fifo that will get the results back from the Slurm adapter.
+ResultFifo=/tmp/slurm-ResultFifoForPrologOrEpilog-Job$SLURM_JOB_ID.fifo
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - ResultFifo=$ResultFifo"
+#
+# Use mkfifo to create the result fifo.
+# ToDo: there is currently a security exposure here that needs to be fixed, it should be resolved by our usage of the SCON (replacing this fifo)!!!
+#       Note: this prolog/epilog script runs under the slurm userid, so this --mode is needed so that the adapters are able to write results into this FIFO.
+mkfifo --mode=666 $ResultFifo
+#
+# Echo the pertinent info from this invocation of the PrologSlurmctld into the Slurm adapter's input fifo.
+InvocationParms="Job="$SLURM_JOB_ID" Constraints="$SLURM_JOB_CONSTRAINTS" NodeList="$SLURM_JOB_NODELIST" ResultFifo="$ResultFifo
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - $InvocationParms"
+echo $InvocationParms > /tmp/slurm-InputFifoForPrologOrEpilog.fifo
+#
+# Wait for the results to show up in the result fifo from the Slurm adapter.
+result=$(cat $ResultFifo)
+#
+# Remove this result fifo
+rm $ResultFifo
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - Removed fifo $ResultFifo"
+#
+# Check the results - return 0 if results were successful, return non-zero if the results were NOT successful.
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - Received results="$result
+if [[ $result = "0" ]]; then
+    echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - this was successful"
+else
+    echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - this FAILED"
+fi
+#
+# Return to caller
+echo "$(TZ=UTC date +%Y-%m-%dT%H:%M:%S.%N) PrologSlurmctld - ended"
+exit $result

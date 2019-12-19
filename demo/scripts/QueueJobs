@@ -1,0 +1,36 @@
+#!/usr/bin/sh
+# Copyright (C) 2018 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+iCntr=0
+while [ $iCntr -lt 1 ]; do
+	echo The counter is $iCntr
+
+	qsub ~/dai/PbsJob-01Nodes-1JobSteps
+	qsub ~/dai/PbsJob-02Nodes-1JobSteps
+	qsub ~/dai/PbsJob-04Nodes-1JobSteps
+	qsub ~/dai/PbsJob-08Nodes-1JobSteps
+	qsub ~/dai/PbsJob-16Nodes-1JobSteps
+	qsub ~/dai/PbsJob-32Nodes-1JobSteps
+	qsub ~/dai/PbsJob-64Nodes-1JobSteps
+	qsub ~/dai/PbsJob-TooMuchWallClkTime
+
+	qsub ~/dai/PbsJob-64Nodes-3JobSteps
+	qsub ~/dai/PbsJob-32Nodes-3JobSteps
+	qsub ~/dai/PbsJob-16Nodes-3JobSteps
+	qsub ~/dai/PbsJob-08Nodes-3JobSteps
+	qsub ~/dai/PbsJob-04Nodes-3JobSteps
+	qsub ~/dai/PbsJob-02Nodes-3JobSteps
+	qsub ~/dai/PbsJob-01Nodes-3JobSteps
+
+	qsub ~/dai/PbsJob-01Nodes-9JobSteps
+	qsub ~/dai/PbsJob-02Nodes-9JobSteps
+	qsub ~/dai/PbsJob-04Nodes-9JobSteps
+	qsub ~/dai/PbsJob-08Nodes-9JobSteps
+#	qsub ~/dai/PbsJob-32Nodes-9JobSteps
+#	qsub ~/dai/PbsJob-64Nodes-9JobSteps
+
+    let iCntr=iCntr+1
+done
+
