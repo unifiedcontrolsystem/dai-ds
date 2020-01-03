@@ -40,31 +40,31 @@
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "SN0-SMW0",
-      "Invocation": "com.intel.dai.ras.AdapterRas",
+      "Invocation": "com.intel.dai.ras.AdapterRasForeignBus",
       "TypeOfAdapter": "RAS",
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/PartitionedMonitorAdapter-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "SN0-SMG0",
-      "Invocation": "com.intel.partitioned_monitor.PartitionedMonitorAdapterApp",
+      "Invocation": "com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
       "TypeOfAdapter": "MONITOR",
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/PartitionedMonitorAdapter-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "SN0-SMG1",
-      "Invocation": "com.intel.partitioned_monitor.PartitionedMonitorAdapterApp",
+      "Invocation": "com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
       "TypeOfAdapter": "MONITOR",
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/PartitionedMonitorAdapter-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "SN0-SMG2",
-      "Invocation": "com.intel.partitioned_monitor.PartitionedMonitorAdapterApp",
-      "TypeOfAdapter": "MONITOR",
+      "Invocation": "com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus",
+      "TypeOfAdapter": "PROVISIONER",
       "NumberOfInstances": 1
     }
   ],
@@ -112,22 +112,22 @@
       "Queue": ""
     },
     {
-      "Parms": "$Profile#allTelemetry",
+      "Parms": "$Profile#environmental",
       "TypeOfAdapter": "MONITOR",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "SN0-SMG0"
     },
     {
-      "Parms": "$Profile#allRasEvents",
+      "Parms": "$Profile#ras_events",
       "TypeOfAdapter": "MONITOR",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "SN0-SMG1"
     },
     {
-      "Parms": "$Profile#allBootEvents",
-      "TypeOfAdapter": "MONITOR",
+      "Parms": null,
+      "TypeOfAdapter": "PROVISIONER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "SN0-SMG2"

@@ -7,7 +7,7 @@ package com.intel.dai.eventsim;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.logging.Logger;
-import com.intel.partitioned_monitor.DataTransformerException;
+import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
@@ -597,7 +597,7 @@ public class Component {
         ev.setTimestamp((startTimeLong_ += 500000));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         ev.setEventType("ec_node_failed");
@@ -610,7 +610,7 @@ public class Component {
         ev.setTimestamp((startTimeLong_ += 500000));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         ev.setEventType("ec_node_unavailable");
@@ -623,7 +623,7 @@ public class Component {
         ev.setTimestamp((startTimeLong_ += 500000));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         ev.setEventType("ec_boot");
@@ -636,7 +636,7 @@ public class Component {
         ev.setTimestamp((startTimeLong_ += 500000));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         ev.setBootImageId(getRandomBootImageId());
@@ -658,7 +658,7 @@ public class Component {
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         ev.setEventCategory("events");
@@ -672,7 +672,7 @@ public class Component {
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         try {
             ev.setLocation(CommonFunctions.convertLocationToXName(getLocation()));
-        } catch (DataTransformerException e) {
+        } catch (NetworkListenerProviderException e) {
             logger_.error("error while converting location to xname");
         }
         if (definitionSensorMetadata_ == null) {

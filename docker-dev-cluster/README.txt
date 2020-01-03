@@ -4,6 +4,7 @@
 
 Prerequisites:
 ===============
+0. System must have at least 32GB or RAM to run smoothly.
 1. Docker version 17+
 2. Docker has access internet for repo access
 3. The account being used has permission to use docker

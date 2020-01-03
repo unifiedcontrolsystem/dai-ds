@@ -9,6 +9,7 @@ System.
 
 Pre-requisites:
 ----------------
+0. System must have at least 32GB or RAM to run smoothly.
 1. docker installed and configured for the root user.
 2. docker-compose installed.
 3. ALL configuration files changed to support the Preview 4 (or

@@ -1,6 +1,102 @@
 {
-    "Nodes" :
-    [
+  "AdapterInstances":
+  [
+    {
+      "ServiceNode":"SN0-SMS1",
+      "TypeOfAdapter":"RAS",
+      "NumberOfInstances":1,
+      "Invocation":"com.intel.dai.AdapterRasForeignBus",
+      "LogFile":"$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$INSTANCE.log"
+    },
+    {
+      "ServiceNode":"SN0-SMS1",
+      "TypeOfAdapter":"NEARLINE_TIER",
+      "NumberOfInstances":1,
+      "Invocation":"com.intel.dai.AdapterNearlineTierVolt",
+      "LogFile":"$UCSLOGFILEDIRECTORY/AdapterNearlineTier.log"
+    },
+    {
+      "ServiceNode":"SN0-SMS1",
+      "TypeOfAdapter":"ONLINE_TIER",
+      "NumberOfInstances":1,
+      "Invocation":"com.intel.dai.AdapterOnlineTierVolt",
+      "LogFile":"$UCSLOGFILEDIRECTORY/AdapterOnlineTier.log"
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
+      "ServiceNode": "SN0-SMS1",
+      "Invocation": "com.intel.dai.ui.AdapterUIRest",
+      "TypeOfAdapter": "UI",
+      "NumberOfInstances": 1
+    },
+    {
+      "ServiceNode":"SN0-SMS1",
+      "TypeOfAdapter":"MONITOR",
+      "NumberOfInstances":2,
+      "Invocation":"com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
+      "LogFile":"$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log"
+    },
+    {
+      "ServiceNode":"SN0-SMS1",
+      "TypeOfAdapter":"PROVISIONER",
+      "NumberOfInstances":1,
+      "Invocation":"com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus",
+      "LogFile":"$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log"
+    }
+  ],
+  "InitialWorkItems":
+  [
+    {
+      "Queue":"SN0-SMS1",
+      "TypeOfAdapter":"DAI_MGR",
+      "WorkToBeDone":"MotherSuperiorDaiMgr",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"ONLINE_TIER",
+      "WorkToBeDone":"DataMover",
+      "Parms":"RabbitMQHost=localhost,IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000",
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"NEARLINE_TIER",
+      "WorkToBeDone":"DataReceiver",
+      "Parms":"RabbitMQHost=localhost",
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Queue":"SN0-SMS1",
+      "TypeOfAdapter":"MONITOR",
+      "WorkToBeDone":"HandleInputFromExternalComponent",
+      "Parms":"$Profile#environmental",
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Queue":"SN0-SMS1",
+      "TypeOfAdapter":"MONITOR",
+      "WorkToBeDone":"HandleInputFromExternalComponent",
+      "Parms":"$Profile#ras_events",
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Queue":"SN0-SMS1", "TypeOfAdapter":"PROVISIONER",
+      "WorkToBeDone":"HandleInputFromExternalComponent",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
+    }
+  ],
+  "UcsConfigValues":
+  [
+    { "Key":"SmwHostname", "Value":"SN0-SMS1" },
+    { "Key":"UcsLogfileDirectory", "Value":"/opt/ucs/log" },
+    { "Key":"UcsClasspath", "Value":"/opt/voltdb/voltdb/*:/opt/ucs/lib/*" },
+    { "Key":"UcsLog4jConfigurationFile", "Value":"/opt/ucs/etc/log4j2.xml" },
+    { "Key":"UcsConfigDirectory", "Value":"/opt/ucs/etc" }
+  ],
+    "Nodes": [
         { "Lctn":"R0-00-CH00-CN0", "Type":"ComputeNode", "Aggregator":"SN0-SMS1", "IpAddr":"192.168.122.10", "HostName":"node0", "MacAddr":"52:01:00:00:00:01", "BmcAddr":"192.168.222.10", "BmcHostName":"node0-bmc", "BmcMacAddr":"52:02:00:00:00:01", "BootImageId":null},
         { "Lctn":"R0-00-CH00-CN1", "Type":"ComputeNode", "Aggregator":"SN0-SMS1", "IpAddr":"192.168.122.11", "HostName":"node1", "MacAddr":"52:01:00:00:00:02", "BmcAddr":"192.168.222.11", "BmcHostName":"node1-bmc", "BmcMacAddr":"52:02:00:00:00:02", "BootImageId":null},
         { "Lctn":"R0-00-CH00-CN2", "Type":"ComputeNode", "Aggregator":"SN0-SMS1", "IpAddr":"192.168.122.12", "HostName":"node2", "MacAddr":"52:01:00:00:00:03", "BmcAddr":"192.168.222.12", "BmcHostName":"node2-bmc", "BmcMacAddr":"52:02:00:00:00:03", "BootImageId":null},
@@ -6947,35 +7043,5 @@
         { "Lctn":"SN0-SMS2",       "Type":"ServiceNode", "Aggregator":"SN0-SMS1", "IpAddr":"192.168.150.234", "HostName":"SN0-SMS2", "MacAddr":"52:01:00:00:1b:3c", "BmcAddr":"192.168.250.234", "BmcHostName":"SN0-SMS2-bmc", "BmcMacAddr":"52:02:00:00:1b:3c", "BootImageId":null},
 
         { "Lctn":"SN0-SMS1",       "Type":"ServiceNode", "Aggregator":"manual",   "HostName":"SN0-SMS1", "IpAddr":"192.168.1.5", "BmcAddr":"192.168.1.105", "HfiIpAddr":"192.168.100.1",  "SmwIpAddr":"192.168.10.1", "BmcEthIpAddr":"192.168.20.1",  "BmcMacAddr":"00:1e:67:fe:93:d9", "HfiMacAddr":"50:52:00:47:a4:01", "SmwMacAddr":"52:54:00:47:a4:01", "MacAddr":"00:1e:67:fe:93:d7", "BmcEthMacAddr":"50:54:01:47:a4:01", "BmcHostName":"SN0-SMS1-BMC", "BootImageId":null  }
-    ],
-
-    "AdapterInstances":
-    [
-        { "ServiceNode":"SN0-SMS1", "TypeOfAdapter":"RAS",           "NumberOfInstances":1, "Invocation":"com.intel.dai.AdapterRas",                    "LogFile":"$UCSLOGFILEDIRECTORY/AdapterRas-$INSTANCE.log" },
-        { "ServiceNode":"SN0-SMS1", "TypeOfAdapter":"NEARLINE_TIER", "NumberOfInstances":1, "Invocation":"com.intel.dai.AdapterNearlineTierVolt",           "LogFile":"$UCSLOGFILEDIRECTORY/AdapterNearlineTier.log" },
-        { "ServiceNode":"SN0-SMS1", "TypeOfAdapter":"ONLINE_TIER",   "NumberOfInstances":1, "Invocation":"com.intel.dai.AdapterOnlineTierVolt",             "LogFile":"$UCSLOGFILEDIRECTORY/AdapterOnlineTier.log" },
-        { "ServiceNode":"SN0-SMS1", "TypeOfAdapter":"MONITOR",       "NumberOfInstances":3, "Invocation":"com.intel.partitioned_monitor.PartitionedMonitorAdapterApp", "LogFile":"$UCSLOGFILEDIRECTORY/PartitionedMonitorAdapterApp-BootEvents-$LCTN-$INSTANCE.log" }
-    ],
-
-
-    "InitialWorkItems":
-    [
-        { "Queue":"SN0-SMS1", "TypeOfAdapter":"DAI_MGR", "WorkToBeDone":"MotherSuperiorDaiMgr",           "Parms":null,                                                                         "NotifyWhenFinished":"F" },
-
-        { "Queue":"SN0-SMS1", "TypeOfAdapter":"MONITOR",       "WorkToBeDone":"HandleInputFromExternalComponent", "Parms":"$Profile#allTelemetry",                                                      "NotifyWhenFinished":"F" },
-        { "Queue":"SN0-SMS1", "TypeOfAdapter":"MONITOR",       "WorkToBeDone":"HandleInputFromExternalComponent", "Parms":"$Profile#allRasEvents",                                                      "NotifyWhenFinished":"F" },
-        { "Queue":"SN0-SMS1", "TypeOfAdapter":"MONITOR",       "WorkToBeDone":"HandleInputFromExternalComponent", "Parms":"$Profile#allBootEvents",                                                     "NotifyWhenFinished":"F" },
-
-        { "Queue":"", "TypeOfAdapter":"ONLINE_TIER",   "WorkToBeDone":"DataMover",                        "Parms":"RabbitMQHost=localhost,IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000","NotifyWhenFinished":"F" },
-        { "Queue":"", "TypeOfAdapter":"NEARLINE_TIER", "WorkToBeDone":"DataReceiver",                     "Parms":"RabbitMQHost=localhost",                                                     "NotifyWhenFinished":"F" }
-    ],
-
-    "UcsConfigValues":
-    [
-        { "Key":"SmwHostname", "Value":"SN0-SMS1" },
-        { "Key":"UcsLogfileDirectory", "Value":"/opt/ucs/log" },
-        { "Key":"UcsClasspath", "Value":"/opt/voltdb/voltdb/*:/opt/ucs/lib/*" },
-        { "Key":"UcsLog4jConfigurationFile", "Value":"/opt/ucs/etc/log4j2.xml" },
-        { "Key":"UcsConfigDirectory", "Value":"/opt/ucs/etc" }
     ]
 }

@@ -3,7 +3,7 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.partitioned_monitor.DataTransformerException;
+import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import org.junit.AfterClass;
@@ -74,7 +74,7 @@ public class CommonFunctionsTest {
                 "BC_I_NODE3_YY", "EXTRA"));
     }
 
-    @Test(expected = DataTransformerException.class)
+    @Test(expected = NetworkListenerProviderException.class)
     public void negativeconvertXNameLocationTest1() throws Exception {
         CommonFunctions.convertXNameToLocation("x0c1s0n0");
     }
@@ -90,7 +90,7 @@ public class CommonFunctionsTest {
         assertEquals("x0c0s3b0n0", CommonFunctions.convertLocationToXName("R0-CH0-CN3-BC_I_NODE3_YY-EXTRA"));
     }
 
-    @Test(expected = DataTransformerException.class)
+    @Test(expected = NetworkListenerProviderException.class)
     public void negativeConvertLocationToXNameTests() throws Exception {
         CommonFunctions.convertLocationToXName("R3-CH0-CN0");
     }

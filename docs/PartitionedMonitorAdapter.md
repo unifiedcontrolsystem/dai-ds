@@ -56,12 +56,12 @@ Example section:
 ### 4.1 Incoming Data Transformation
 When raw data is received over the network transport then it must be normalized into a common format that the PartitionedMonitorAdapter and other components understand. Providers that understand the raw data format and can convert this format to the common (or normalized) format are created for each external source. These classes are loaded dynamically by the *PartitionedMonitorAdapter* for each adapter profile (see below) and called to transform the data.
 
-The class implementation must implement the interface *com.intel.partitioned_monitor.DataTransformer*. The implementation must only ever throw *com.intel.partitioned_monitor.DataTransformerException*. The constructor should never throw an exception. The logger is available because it was passed into the required constructor.
+The class implementation must implement the interface *DataTransformer*. The implementation must only ever throw *DataTransformerException*. The constructor should never throw an exception. The logger is available because it was passed into the required constructor.
 
 ### 4.2 Acting on Transformed Data
 After the data is normalized the *PartitionedMonitorAdapter* does not understand specifically how to process the data. So the *PartitionedMonitorAdapter* implements a interface exposing all possible calls into the tier1, tier2, and tier3 data stores. This interface along with the processed data is passed into the DataAction implementation for processing. This provider will perform actions which includes storing data, firing RAS events, and/or data aggregation.
 
-The class implementation must implement the interface *com.intel.partitioned_monitor.DataAction*. The implementation must only ever throw *com.intel.partitioned_monitor.DataActionException*. The constructor should never throw an exception. The logger is available because it was passed into the required constructor.
+The class implementation must implement the interface *DataAction*. The implementation must only ever throw *com.intel.partitioned_monitor.DataActionException*. The constructor should never throw an exception. The logger is available because it was passed into the required constructor.
 
 ### 4.3 Network Request Builders (HTTP based protocols only)
 When making a new connection via an HTTP protocol like `sse`, the request is usually either a **GET** method (“sse” only) or a **POST** method (`sse`). In the case of a **GET**, the url path is usually followed by a URI query string with selection, filters or other variables. For a **POST**, there is usually a JSON body with the same type of information. Since the query and body depend on the server (source) the intended connection parameters, etc... the configuration cannot be stored and must be created dynamically.
@@ -82,7 +82,7 @@ The getToken() object returns the OAuth 2.0 string token to be used in HTTP comm
 ## 5 Provider and Other Configurations (`providerConfigurations`)
 This section contains the required configurations for each provider or component that requires a configuration.  The map is keys off the canonical name of the class to which the configuration belongs to. The map is opaque to the *PartitionedMonitoAdapter* and is only parsed by the owning provider or component.
 
-So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface: *com.intel.partitioned_monitor.PartitionedMonitorSystemActions*.  In this case it describes where to publish the raw and aggregated data from the adapter.
+So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface: *PartitionedMonitorSystemActions*.  In this case it describes where to publish the raw and aggregated data from the adapter.
 
 ## 6 Network Stream Connection Definitions (`networkStreams`)
 So describe each type of connection there is a section called `networkStreams` that defines all possible connections in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
@@ -224,17 +224,17 @@ This lists the types of subjects provided by this profile. Although it is allowe
   },
   "providerClassMap": {
     "telemetryAction": "com.intel.dai.monitoring_providers.TelemetryActions",
-    "telemetryData": "com.intel.dai.monitoring_providers.TelemetryTransformer"
+    "telemetryData": "com.intel.dai.monitoring.TelemetryTransformer"
   },
   "providerConfigurations": {
-    "com.intel.dai.monitoring_providers.TelemetryTransformer": {
+    "com.intel.dai.monitoring.TelemetryTransformer": {
       "useAggregation": true,
       "useTimeWindow": false,
       "windowSize": 25,
       "timeWindowSeconds": 600,
       "useMovingAverage": false
     },
-    "com.intel.partitioned_monitor.PartitionedMonitorSystemActions": {
+    "PartitionedMonitorSystemActions": {
       "sourceType": "rabbitmq",
       "uri": "amqp://127.0.0.1",
       "exchange": "ucs"
@@ -306,7 +306,7 @@ subjectMap:
 # transformers)
 providerClassMap:
   telemetryAction: com.intel.dai.monitoring_providers.telemetryActions
-  telemetryData: com.intel.dai.monitoring_providers.TelemetryTransformer
+  telemetryData: com.intel.dai.monitoring.TelemetryTransformer
 
 
 # Configuration for action and data transform providers as well as the
@@ -314,14 +314,14 @@ providerClassMap:
 providerConfigurations:
 
   # This defines where the incoming data will be republished to.
-  com.intel.partitioned_monitor.PartitionedMonitorSystemActions:
+  PartitionedMonitorSystemActions:
     sourceType: rabbitmq
     exchange: ucs
     uri: amqp://127.0.0.1
 
   # This defines the config for the aggregation features of the
   # TelemetryTransformer data transformer provider.
-  com.intel.dai.monitoring_providers.TelemetryTransformer:
+  com.intel.dai.monitoring.TelemetryTransformer:
     useAggregation: true
     timeWindowSeconds: 600
     useTimeWindow: false
