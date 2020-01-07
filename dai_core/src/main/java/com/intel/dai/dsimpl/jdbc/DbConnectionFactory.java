@@ -55,6 +55,9 @@ public class DbConnectionFactory {
         String password = dbParams.get("password");
         String dbType = dbParams.get("type");
         Boolean autoCommit = Boolean.parseBoolean(dbParams.get("auto-commit"));
+        if (url.contains("postgresql")) {
+            autoCommit = Boolean.parseBoolean("false");
+        }
         String driver = dbParams.get("driver");
 
         return createConn(driver, url, username, password, dbType, autoCommit);
