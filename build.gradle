@@ -675,7 +675,7 @@ project(':populate_schema') {
     }
 }
 
-project(':partitioned_monitor') {
+project(':dai_network_listener') {
     apply plugin: 'groovy'
 
     dependencies {
@@ -684,6 +684,141 @@ project(':partitioned_monitor') {
         compile project(':dai_core')
         compile project(':properties')
         compile project(':config_io')
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(":provisioners") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(":xdg")
+        compile project(':dai_core')
+        compile project(':dai_network_listener')
+        compile project(":foreign_bus")
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(":inventory") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(":xdg")
+        compile project(':dai_core')
+        compile project(':dai_network_listener')
+        compile project(":foreign_bus")
+        compile "com.google.code.gson:gson:${gson_version}"
+        compile "commons-cli:commons-cli:${commonscli_version}"
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+        compileOnly 'org.projectlombok:lombok:1.18.8'
+        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.61
+                }
+            }
+        }
+    }
+}
+
+project(":monitoring") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(":xdg")
+        compile project(':dai_core')
+        compile project(':dai_network_listener')
+        compile project(":foreign_bus")
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(":ras") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(':dai_core')
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
@@ -737,18 +872,15 @@ project(':foreign_bus') {
 
     dependencies {
         compile project(':logging')
-        compile project(':networking')
         compile project(':dai_core')
+        compile project(':networking')
         compile project(':runtime_utils')
         compile project(':properties')
         compile project(':config_io')
-        compile project(':partitioned_monitor')
+        compile project(':dai_network_listener')
         compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4j_version
         compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
         compile "com.sparkjava:spark-core:${spark_version}"
-        compile "com.google.code.gson:gson:${gson_version}"
-        compile "commons-cli:commons-cli:${commonscli_version}"
-        compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'

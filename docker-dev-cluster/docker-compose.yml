@@ -61,6 +61,7 @@ services:
       - postgres
     image: openjdk:11.0.5-jdk
     entrypoint: /opt/ucs/bin/populateSchema.sh
+    command: voltdb
     container_name: populate-schema
     volumes:
       - "./config:/opt/ucs/etc"

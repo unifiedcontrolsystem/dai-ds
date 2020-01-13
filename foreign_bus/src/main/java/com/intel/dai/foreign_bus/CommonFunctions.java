@@ -7,7 +7,7 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.partitioned_monitor.DataTransformerException;
+import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.intel.xdg.XdgConfigFile;
@@ -45,10 +45,10 @@ final public class CommonFunctions {
      * @param xnameLocation The xname location string.
      * @param otherArgs Args to help determine sub-node location information (1st=sensor name; 2nd=extra info).
      * @return The complete DAI location string.
-     * @throws DataTransformerException If the xname location is not recognized.
+     * @throws NetworkListenerProviderException If the xname location is not recognized.
      */
     public static String convertXNameToLocation(String xnameLocation, String... otherArgs)
-            throws DataTransformerException {
+            throws NetworkListenerProviderException {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
         if(xnameLocation.equals("all"))
@@ -61,7 +61,7 @@ final public class CommonFunctions {
                     builder.append(nodeMap_.getString(xnameLocation));
                     processName(builder, sensorName, extraLocation);
             } else
-                throw new DataTransformerException(String.format("The xname '%s' was not in the conversion map!",
+                throw new NetworkListenerProviderException(String.format("The xname '%s' was not in the conversion map!",
                         xnameLocation));
         } catch(PropertyNotExpectedType e) {
             throw new RuntimeException("Its possible the resource file for XName translation has been corrupted", e);
@@ -75,7 +75,7 @@ final public class CommonFunctions {
      * @param daiLocation The DAI location string. May contain sub-component information.
      * @return The basic XName location.
      */
-    public static String convertLocationToXName(String daiLocation) throws DataTransformerException {
+    public static String convertLocationToXName(String daiLocation) throws NetworkListenerProviderException {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
         if(daiLocation.equals("all"))
@@ -85,7 +85,7 @@ final public class CommonFunctions {
             if (reverseNodeMap_.containsKey(daiLocation))
                 return reverseNodeMap_.getString(daiLocation);
             else {
-                throw new DataTransformerException(String.format("The DAI location string '%s' was not found " +
+                throw new NetworkListenerProviderException(String.format("The DAI location string '%s' was not found " +
                         "in the conversion map!", daiLocation));
             }
         } catch(PropertyNotExpectedType e) {

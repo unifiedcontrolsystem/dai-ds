@@ -21,7 +21,7 @@ class ReportJacoco(object):
         self.__parser.add_argument('--version', action='version',
                                    version='%(prog)s version {}'.format(ReportJacoco.VERSION))
         self.__parser.add_argument('-t', '--title',
-                                   help='Specify a title for the result.', default='UCS Coverage Summary',
+                                   help='Specify a title for the result.', default='DAI-DS Coverage Summary',
                                    action='store')
         self.__title = None
         self.__results = []
@@ -94,7 +94,9 @@ class ReportJacoco(object):
         size = len(self.__results) - 1
         for i in range(0, size):
             for j in range(1, size):
-                if self.__results[j-1]['line_percent'] > self.__results[j]['line_percent']:
+                first = self.__results[j-1]['line_percent'] + self.__results[j-1]['branch_percent']
+                second = self.__results[j]['line_percent'] + self.__results[j]['branch_percent']
+                if first > second:
                     saved = self.__results[j-1]
                     self.__results[j-1] = self.__results[j]
                     self.__results[j] = saved
@@ -138,7 +140,9 @@ class ReportJacoco(object):
                     format(data['branch_covered'], data['branch_total'], color, data['branch_percent'])
                 html += '<tr style="background-color: yellow"><td><b>TARGETS</b></td>' \
                         '<td align="center"><b>{}</b></td><td align="center"><b>{}</b></td></tr>'.format(TARGET_METHOD, TARGET_BRANCH)
-        html += '</table></blockquote></body></html>'
+        html += '</table>'
+        html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div>'
+        html += '</blockquote></body></html>'
         with open(out_file, 'w') as file:
             file.write(html)
 
