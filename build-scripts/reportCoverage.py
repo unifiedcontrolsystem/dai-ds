@@ -139,7 +139,12 @@ class ReportJacoco(object):
                         'style="background-color:{};"><b>{:3.1f}%</b></td></tr>'.\
                     format(data['branch_covered'], data['branch_total'], color, data['branch_percent'])
                 html += '<tr style="background-color: yellow"><td><b>TARGETS</b></td>' \
-                        '<td align="center"><b>{}</b></td><td align="center"><b>{}</b></td></tr>'.format(TARGET_METHOD, TARGET_BRANCH)
+                        '<td align="center"><b>{}</b></td><td align="center"><b>{}</b></td></tr>'.format(TARGET_METHOD,
+                                                                                                         TARGET_BRANCH)
+                print('\n###############################################################################')
+                print('### Total Coverage = {:3.1f}% / {:3.1f}% (method / branch)'.format(
+                    data['line_percent'], data['branch_percent']))
+                print('###############################################################################')
         html += '</table>'
         html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div>'
         html += '</blockquote></body></html>'
