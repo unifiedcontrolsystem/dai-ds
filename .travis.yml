@@ -5,7 +5,7 @@
 
 env:
   global:
-    - secure: "W7bbfAZM5FDBmHqcOO4h/Mca0tlEITQoCvBacVp3hKdSi8rZxnfl1VXa+pEyKz2o7NXZJNeP4lCD6Yrr5tZ2hI2Czwt9arBQHo6wOa3JMcPEYtFWz4F6+69gWRMLy3nxGg1fMZDnFnwis9GObgqfr9BTMFDYsD5sbkdIesXpTc935xuIpKnVYQO8dvYPvpTJJs4htb62+aXiwuXfoS1/D6scoP8ND4Gj5EBdRWF+ij5dPapINrWj5mQFJXHrFXHqD2DqICJwJLzsXs7x5KAMciRl1yA5pdezT7haLBxYCVYdon+431pbLdNJDJHoTa+TFzy/g7n37y4ooZMGVwpoDfkscybDxgCqkwAfYZRvSPy1FXG+3Fq7p5NNsRrQPWCsZq6nfDYUAi92BAPQfRMONzENTZRtQZXZntCmZeDP9D6PwYp/K5q1gu97M90dPtHs4aBjyLZJ3DJibrsmh+Z5lltf8pZFFdMWQ0VZ2gp+cO2pXN7Ozid6JcpdmmPm8yAdgrcW4sV1Rv1hM5G3z3cKptkWiqmX1q1S3mgmeYosoIjl9ft9fz+kVrrOr5q7UePMobVCFkcHMEoe5Vojd4SNBhyvGfGEld1Yy8esNYEf24PYiWLYOAOBCfQXW2lOYhpK4V8mFxDmetakZb79ZDPHBMxm4A38+NTuVQO8Tn8G5Ok="
+    - secure: "ehJ5xVSTPxSUYEwKTVkXTi5p8n8L7wrTs6gzUNgem/R5IgdZyFWFfhNESA/DLTqPxdB3Q5gIJj0Vb700wZ6B6RI/OYZ8kvEQp1pKYLJ+1SrZdMA2Dz3w5n11i65Ylj/wOSGxbmN2VYndcAwXY7/TAPOWEo64+gXXcVmlS2jMNgY="
 
 language: java
 
@@ -25,7 +25,7 @@ addons:
   coverity_scan:
     project:
       name: "unifiedcontrolsystem/ucs"
-    notification_email: "css_or@intel.com"
+    notification_email: "paul.d.amonson@intel.com"
     build_command_prepend: ""
     build_command: "./gradlew compileJava"
     branch_pattern: coverity_scan
