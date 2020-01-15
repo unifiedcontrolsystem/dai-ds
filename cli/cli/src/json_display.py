@@ -5,31 +5,15 @@
 """
 Display JSON data to screen in raw or tabular format.
 """
+import os
 import json
 from texttable import Texttable
 from .logger import Logger
+from shutil import get_terminal_size
 
 
 class JsonDisplay(object):
     """Decode the JSON contents and disply it based on user input to raw JSON format or tabular format"""
-
-    OWNER_MAP = {"W": "WLM",
-                 "S": "Service",
-                 "G": "General",
-                 "F": "Free Pool"}
-    STATE_MAP = {"B": "Bios Starting",
-                 "D": "Discovered (dhcp discover)",
-                 "I": "IP address assigned (dhcp request)",
-                 "L": "Starting load of Boot images",
-                 "K": "Kernel boot started",
-                 "A": "Active",
-                 "M": "Missing",
-                 "E": "Error",
-                 "U": "Unkwown"}
-    WLMSTATE_MAP = {"A": "Available",
-                    "U": "Unavailable",
-                    "M": "Maintenance",
-                    "X": "Unknown"}
 
     def __init__(self, json_data):
         if json_data is None or len(json_data) == 0:
@@ -41,10 +25,16 @@ class JsonDisplay(object):
         try:
             # Try to treat the result as a JSON string
             parsed_result = json.loads(self._json_data)
-            result = json.dumps(parsed_result, indent=4)
-            return result
         except ValueError:
             return self._json_data
+        try:
+            # Try to treat the parsed result as a schemed dictionary
+            keys = [item["data"] for item in parsed_result["schema"]]
+            data = [dict(zip(keys, row)) for row in parsed_result["data"]]
+        except KeyError:
+            data = parsed_result
+
+        return json.dumps(data, indent=4)
 
     def _extract_column_heading_to_display_from_json_result(self, json_result, columns_order):
         column_index_in_data = list()
@@ -74,15 +64,7 @@ class JsonDisplay(object):
         for line_index in range(json_result['result-data-lines']):
             line_data = json_result[json_field_with_info][line_index]
             line_result = list()
-            header_index = 0
             for column_index in column_index_in_data:
-                if header_list[header_index] == "OWNER":
-                    line_data[column_index] = self.OWNER_MAP[line_data[column_index]]
-                if header_list[header_index] == "STATE":
-                    line_data[column_index] = self.STATE_MAP[line_data[column_index]]
-                if header_list[header_index] == "WLMNODESTATE":
-                    line_data[column_index] = self.WLMSTATE_MAP[line_data[column_index]]
-                header_index = header_index + 1
                 line_result.append(line_data[column_index])
             result.append(line_result)
         return result
@@ -105,7 +87,8 @@ class JsonDisplay(object):
             raise RuntimeError(self._json_data)
 
     def _print_data_as_table(self, result_list):
-        t = Texttable(100)
+        screen_width, _ = get_terminal_size((100, 0))
+        t = Texttable(int(screen_width))
         col_type = ["t"] * len(result_list[0])
         t.set_cols_dtype(col_type)
         t.add_rows(result_list)

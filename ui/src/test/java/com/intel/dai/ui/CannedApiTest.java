@@ -3,15 +3,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.intel.dai.ui;
-import com.intel.logging.Logger;
+import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
+import com.intel.dai.exceptions.ProviderException;
+import com.intel.logging.LoggerFactory;
+import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.ExcludeCategories;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -25,7 +30,6 @@ public class CannedApiTest {
 
     class MockCannedApi extends CannedAPI {
         MockCannedApi() {
-            super(mock(Logger.class));
             jsonConverter = new MockJsonConverter();
         }
 
@@ -56,15 +60,6 @@ public class CannedApiTest {
     }
 
     @Test
-    public void rasjobid() throws Exception {
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getraswithjobid", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
     public void rasfilters() throws Exception {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
@@ -83,15 +78,6 @@ public class CannedApiTest {
     }
 
     @Test
-    public void invchanges() throws Exception {
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getinvchanges", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
     public void invspecific() throws Exception {
         input_map.put("StartTime", "null");
         input_map.put("EndTime","null");
@@ -102,57 +88,43 @@ public class CannedApiTest {
         assertNotNull(result);
     }
 
-    @Test
-    public void snapshotspecificlctn() throws Exception {
-        input_map.put("StartTime", "null");
-        input_map.put("EndTime","null");
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getsnapshotspecificlctn", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void getrefsnapshotspecificlctn() throws Exception {
-        input_map.put("lctn", "null");
-        input_map.put("limit","null");
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getrefsnapshot", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void getjobdata() throws Exception {
-        HashMap<String, String> inputMap= new HashMap<>();
-        String location = "testLocation";
-        String jobId = "22";
-        inputMap.put("Lctn", location);
-        inputMap.put("JobId", jobId);
-        inputMap.put("StartTime", "null");
-        inputMap.put("EndTime","null");
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getjobdata", inputMap);
-        Mockito.verify(mockconn, Mockito.times(1))
-                .prepareCall(Mockito.contains("call GetJobPowerData"));
-        // Verify the right parameters are passed
-        Mockito.verify(mockstmt, Mockito.times(1)).setString(Mockito.anyInt(),
-                Mockito.eq(location));
-        Mockito.verify(mockstmt, Mockito.times(1)).setString(Mockito.anyInt(),
-                Mockito.eq(jobId));
-        assertNotNull(result);
-    }
-
-    @Test
+    @Test(expected = ProviderException.class)
     public void defaultoption() throws Exception {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
         String result = canned.getData("default", input_map);
+    }
+
+    @Test
+    public void getJobInformation() throws Exception {
+        String jobid = "testjobid";
+        input_map.put("Jobid", jobid);
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("getjobinfo", input_map);
         assertNotNull(result);
     }
+
+    @Test
+    public void getReservationInformation() throws Exception {
+        String reservation = "testname";
+        input_map.put("Name", reservation);
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("getreservationinfo", input_map);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getSystemSummary() throws Exception {
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("system_summary", input_map);
+        assertNotNull(result);
+    }
+
 }

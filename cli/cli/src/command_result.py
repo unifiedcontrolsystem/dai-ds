@@ -17,7 +17,7 @@ class CommandResult(object):
         self.message = message
 
     def __str__(self):
-        return "{} - {}".format(self.return_code, self.message)
+        return self.message
 
     def __eq__(self, other):
         if isinstance(other, CommandResult):

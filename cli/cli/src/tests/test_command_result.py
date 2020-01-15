@@ -14,7 +14,7 @@ class CommandResultTest(TestCase):
 
     def test_stringify(self):
         result1 = CommandResult(1, "success")
-        self.assertEqual('1 - success', str(result1))
+        self.assertEqual('success', str(result1))
 
     def test_equal(self):
         result1 = CommandResult(1, "success")

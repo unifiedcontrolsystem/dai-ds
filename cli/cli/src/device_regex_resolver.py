@@ -5,7 +5,7 @@
 """
 Helper class to resolve device regex.
 """
-from ClusterShell.NodeSet import NodeSet, RESOLVER_NOGROUP, NodeSetParseError, RangeSetParseError
+from ClusterShell.NodeSet import NodeSet, RESOLVER_NOGROUP, NodeSetParseError, RangeSetParseError, fold
 
 
 class DeviceRegexResolver(object):
@@ -20,3 +20,10 @@ class DeviceRegexResolver(object):
             except (NodeSetParseError, RangeSetParseError) as e:
                 raise RuntimeError("Not a valid device name")
         return ','.join(device_list)
+
+    @staticmethod
+    def fold_devices(device_list):
+        """Fold the devices in list to a regex"""
+        devices = ",".join(device_list)
+        device_set = NodeSet(devices)
+        return fold(device_set)

@@ -26,3 +26,6 @@ class DeviceRegexResolverTest(TestCase):
             self.fail()
         except RuntimeError:
             pass
+
+    def test_fold_devices(self):
+        self.assertEqual(DeviceRegexResolver.fold_devices(['node001', 'node002', 'node003']), 'node[001-003]')

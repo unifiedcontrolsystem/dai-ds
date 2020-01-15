@@ -6,8 +6,11 @@ package com.intel.dai.dsapi;
 
 import com.intel.properties.PropertyMap;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.exceptions.BadInputException;
 
 import java.io.Closeable;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Queries to retrieve location from a given node hostname and viceversa.
@@ -46,4 +49,9 @@ public interface Location extends AutoCloseable, Closeable {
      *
      */
     void reloadCache() throws DataStoreException;
+
+    public Set<String> getLocationsFromNodes(Set<String> nodes) throws BadInputException;
+
+    public Set<String> getNodesFromLocations(Set<String> locations) throws BadInputException;
+
 }
