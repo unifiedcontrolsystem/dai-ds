@@ -575,6 +575,7 @@ project(':dai_core') {
 
 project(':ui') {
     apply plugin: 'application'
+    apply plugin: 'groovy'
 
     dependencies {
         compile project(':dai_core')
@@ -586,6 +587,8 @@ project(':ui') {
         compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
 
         testCompile "com.despegar:spark-test:1.1.8"
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
     }
     project.mainClassName = 'com.intel.dai.ui.AdapterUIRest'
 

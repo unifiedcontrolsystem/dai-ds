@@ -26,7 +26,7 @@ class ParserTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: ucs [-h] [-V]', capturedOutput.getvalue())
+        self.assertIn('usage: ucs [-h]', capturedOutput.getvalue())
         capturedOutput.close()
 
     def test_parser_help(self):
@@ -41,7 +41,7 @@ class ParserTest(TestCase):
         positive_cmd_result = CommandResult(0, "positive_result")
         Parser.handle_command_result(positive_cmd_result)
         sys.stdout = sys.__stdout__
-        self.assertEqual('0 - positive_result\n', capturedOutput.getvalue())
+        self.assertEqual('positive_result\n', capturedOutput.getvalue())
 
     def test_negative_handle_command_result(self):
         capturedOutput = io.StringIO()
@@ -49,7 +49,7 @@ class ParserTest(TestCase):
         negative_cmd_result = CommandResult(-1, "negative_result")
         Parser.handle_command_result(negative_cmd_result)
         sys.stderr = sys.__stderr__
-        self.assertEqual('-1 - negative_result\n', capturedOutput.getvalue())
+        self.assertEqual('negative_result\n', capturedOutput.getvalue())
 
     @patch('argparse.ArgumentParser.parse_args')
     @patch.object(Parser, 'handle_command_result')
@@ -65,7 +65,7 @@ class ParserTest(TestCase):
         output = captured_output.getvalue()
         captured_output.close()
         self.assertEqual(1, return_code)
-        self.assertEqual('1 - User has interrupted the command execution\n', output)
+        self.assertEqual('User has interrupted the command execution\n', output)
 
     @patch('argparse.ArgumentParser.parse_args')
     @patch.object(Parser, 'handle_command_result')
@@ -81,7 +81,7 @@ class ParserTest(TestCase):
         output = captured_output.getvalue()
         captured_output.close()
         self.assertEqual(1, return_code)
-        self.assertEqual('1 - Error in executing command\n', output)
+        self.assertEqual('Error in executing command\n', output)
 
     @patch('argparse.ArgumentParser.parse_args')
     @patch.object(Parser, 'handle_command_result')
@@ -91,10 +91,10 @@ class ParserTest(TestCase):
         sys.stderr = captured_output
         parser = Parser()
         sys.argv = ['ucs', 'power', 'on', 'tes']
-        handle_command_result_mock.side_effect = IOError
+        handle_command_result_mock.side_effect = IOError('User cannot enter optional arguments multiple times')
         return_code = parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         output = captured_output.getvalue()
         captured_output.close()
         self.assertEqual(1, return_code)
-        self.assertEqual('1 - User cannot enter optional arguments multiple times\n', output)
+        self.assertEqual('User cannot enter optional arguments multiple times\n', output)

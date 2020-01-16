@@ -5,7 +5,6 @@
 package com.intel.dai.ui;
 
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
-import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
@@ -28,7 +27,6 @@ public class QueryApiTest {
 
     class MockQueryApi extends QueryAPI {
         MockQueryApi() {
-            super(mock(Logger.class));
             jsonConverter = new MockJsonConverter();
         }
 

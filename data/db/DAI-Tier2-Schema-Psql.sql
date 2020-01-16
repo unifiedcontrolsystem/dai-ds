@@ -81,7 +81,7 @@ CREATE TYPE public.jobnonactivetype AS (
 --
 
 CREATE TYPE public.raseventtype AS (
-	eventtype character varying(10),
+	eventtype character varying(65),
 	lastchgtimestamp timestamp without time zone,
 	dbupdatedtimestamp timestamp without time zone,
 	severity character varying(10),
@@ -92,6 +92,10 @@ CREATE TYPE public.raseventtype AS (
 	instancedata character varying(500)
 );
 
+CREATE TYPE public.system_summary_count AS (
+    state character varying(1),
+    count bigint
+);
 
 --
 -- Name: raseventtypewithdescriptivename; Type: TYPE; Schema: public; Owner: -
@@ -1594,11 +1598,11 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
     LANGUAGE sql
     AS $$
         select * from  tier2_aggregatedenvdata
-        where timestamp <= coalesce(p_end_time, current_timestamp) and
-            timestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+        where timestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+            timestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
             case
                 when p_lctn='%' then (lctn ~ '.*' or lctn is null)
-                when p_lctn is not null then (select string_to_array(lctn, ' ')) <@ (select string_to_array(p_lctn, ','))
+                when p_lctn is not null then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@ (select string_to_array(p_lctn, ','))))
             end
         order by timestamp LIMIT p_limit; $$;
 
@@ -1647,14 +1651,14 @@ BEGIN
     if p_start_time is null and p_end_time is null then
     return query
         select distinct on (lctn) * from  tier2_computenode_history
-        where (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+        where (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
         order by lctn, dbupdatedtimestamp desc limit p_limit;
     else
     return query
         select * from  tier2_computenode_history
-        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-            dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-            (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+            dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
+            (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
         order by dbupdatedtimestamp desc limit p_limit;
     END IF;
     return;
@@ -1805,7 +1809,7 @@ BEGIN
     select numnodes into v_nodenums from tier2_job_history where jobid=p_job_id limit 1;
     select * into v_locslist from getlistnodelctnsastable(v_nodenums);
     return query
-        select RE.EventType,
+        select MD.DescriptiveName,
         RE.LastChgTimestamp,
         RE.DbUpdatedTimestamp,
         MD.Severity,
@@ -1830,8 +1834,7 @@ $$;
 -- Name: getraseventswithfilters(timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getraseventswithfilters(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_event_type character varying, p_severity character varying, p_jobid character varying, p_limit integer) RETURNS SETOF public.raseventtype
-
+CREATE OR REPLACE FUNCTION public.getraseventswithfilters(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_event_type character varying, p_severity character varying, p_jobid character varying, p_limit integer, p_exclude character varying) RETURNS TABLE(type character varying(65), "time" timestamp without time zone, dbupdatedtimestamp timestamp without time zone, severity character varying(10), lctn character varying(100), jobid character varying(30), controloperation character varying(50), detail character varying(10000))
     LANGUAGE plpgsql
     AS $$
 
@@ -1858,22 +1861,26 @@ BEGIN
     end if;
 
     return query
-        select  RE.EventType,
+        select  MD.descriptivename,
                 RE.LastChgTimestamp,
                 RE.DbUpdatedTimestamp,
                 MD.Severity,
                 RE.Lctn,
                 RE.JobId,
                 RE.ControlOperation,
-                MD.Msg,
-                RE.InstanceData
+                CAST(CONCAT(MD.msg, ' ', RE.instancedata) AS character varying(10000))
         from Tier2_RasEvent RE
             inner join Tier2_RasMetaData MD on
             RE.EventType = MD.EventType
-        where RE.DbUpdatedTimestamp <=
-            coalesce(v_end_time, current_timestamp) and
-            RE.DbUpdatedTimestamp >= coalesce(v_start_time, current_timestamp - INTERVAL '6 MONTHS') and
+        where RE.lastchgtimestamp <=
+            coalesce(v_end_time, current_timestamp at time zone 'UTC') and
+            RE.lastchgtimestamp >= coalesce(v_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '6 MONTHS') and
             MD.Severity like v_severity and
+            case
+                when p_exclude = '%' then (MD.DescriptiveName ~ '.*')
+                when p_exclude != '%' then (MD.DescriptiveName !~ p_exclude)
+            end
+            and
             case
                 when v_event_type = '%' then (MD.descriptivename ~ '.*')
                 when v_event_type != '%' then (MD.descriptivename ~ v_event_type)
@@ -2274,7 +2281,7 @@ CREATE OR REPLACE FUNCTION public.raseventlistattime(p_start_time timestamp with
 BEGIN
     if p_start_time is not null then
         return query
-            select RE.EventType,
+            select MD.DescriptiveName,
                 RE.LastChgTimestamp,
                 RE.DbUpdatedTimestamp,
                 MD.Severity,
@@ -2384,6 +2391,135 @@ BEGIN
 END
 $$;
 
+--
+-- Name: GetJobInfo(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.GetJobInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_jobid character varying, p_username character varying, p_state character varying, p_limit integer) RETURNS SETOF public.jobnonactivetype
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_prev_job_id varchar := '';
+    v_job Tier2_Job_History;
+    v_rec JobNonActiveType%rowtype;
+
+BEGIN
+    for v_job  in
+        select *
+        from Tier2_Job_History
+        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+        and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
+        and
+        case
+                when p_jobid = '%' then (jobid ~ '.*')
+                when p_jobid != '%' then (jobid ~ p_jobid)
+        end
+        and
+        case
+                when p_username = '%' then (username ~ '.*')
+                when p_username != '%' then (username ~ p_username)
+        end
+                and
+        case
+                when p_state = '%' then (state ~ '.*')
+                when p_state != '%' then (state ~ p_state)
+        end
+        order by JobId desc, starttimestamp desc LIMIT p_limit
+    loop
+        if v_job.JobId <> v_prev_job_id then
+            v_prev_job_id := v_job.JobId;
+            v_rec.JobId := v_job.JobId;
+            v_rec.JobName := v_job.JobName;
+            v_rec.State := v_job.State;
+            v_rec.Bsn := v_job.Bsn;
+            v_rec.UserName := v_job.UserName;
+            v_rec.StartTimestamp := v_job.StartTimestamp;
+            v_rec.EndTimestamp := v_job.EndTimestamp;
+            v_rec.ExitStatus := v_job.ExitStatus;
+            v_rec.NumNodes := v_job.NumNodes;
+            v_rec.Nodes := v_job.Nodes;
+            v_rec.JobAcctInfo := v_job.JobAcctInfo;
+            v_rec.Wlmjobstate := v_job.Wlmjobstate;
+            return next v_rec;
+        end if;
+    end loop;
+    return;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION public.rankstolocations(p_ranks character varying) RETURNS TABLE(location VarChar(25))
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    return query
+        select distinct lctn
+        from tier2_computenode_history
+        where sequencenumber::varchar(255) = ANY(string_to_array(p_ranks, ','));
+    return;
+END
+$$;
+
+--
+-- Name: reservationlistattime(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getReservationInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_reservation_name character varying, p_user character varying, p_limit integer) RETURNS SETOF public.reservationtype
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    if p_start_time is null then
+        return query
+            select RE.ReservationName,
+                RE.Users,
+                RE.Nodes,
+                RE.StartTimestamp,
+                RE.EndTimestamp,
+                RE.DeletedTimestamp,
+                RE.LastChgTimestamp
+            from Tier2_WlmReservation_History RE
+            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            and RE.ReservationName = coalesce(p_reservation_name, RE.ReservationName)
+            and RE.Users LIKE '%' || coalesce(p_user, RE.Users) || '%'
+            order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT p_limit;
+    else
+        return query
+           select RE.ReservationName,
+                RE.Users,
+                RE.Nodes,
+                RE.StartTimestamp,
+                RE.EndTimestamp,
+                RE.DeletedTimestamp,
+                RE.LastChgTimestamp
+            from Tier2_WlmReservation_History RE
+            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            and RE.DbUpdatedTimestamp >= p_start_time
+            and RE.ReservationName = coalesce(p_reservation_name, RE.ReservationName)
+            and RE.Users LIKE '%' || coalesce(p_user, RE.Users) || '%'
+            order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT p_limit;
+    end if;
+    return;
+END
+$$;
+
+--
+-- Name: GetComputeNodeSummary(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.GetComputeNodeSummary() RETURNS SETOF public.system_summary_count
+    LANGUAGE sql
+    AS $$
+    select state, count(*) as count from tier2_computenode_history group by state;
+$$;
+
+--
+-- Name: GetServiceNodeSummary(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.GetServiceNodeSummary() RETURNS SETOF public.system_summary_count
+    LANGUAGE sql
+    AS $$
+    select state, count(*) as count from tier2_servicenode_history group by state;
+$$;
 
 --
 -- Name: serviceinventorylist(); Type: FUNCTION; Schema: public; Owner: -

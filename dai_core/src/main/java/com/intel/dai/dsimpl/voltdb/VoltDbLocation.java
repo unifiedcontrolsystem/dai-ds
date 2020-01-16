@@ -5,12 +5,15 @@
 package com.intel.dai.dsimpl.voltdb;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import com.intel.dai.dsapi.Location;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.exceptions.BadInputException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
 
@@ -98,12 +101,12 @@ public class VoltDbLocation implements Location {
     }
 
     private void updateSystemLabel()
-        throws IOException, ProcCallException, DataStoreException {
+            throws IOException, ProcCallException, DataStoreException {
         ClientResponse response = voltDb_.callProcedure("MachineDescription");
         if (response.getStatus() != ClientResponse.SUCCESS) {
             String errMsg = String.format(
-                "Unable to retrieve node information from the data store. Client response status: %s",
-                response.getStatus());
+                    "Unable to retrieve node information from the data store. Client response status: %s",
+                    response.getStatus());
             log_.error(errMsg);
             throw new DataStoreException(errMsg);
         }
@@ -113,12 +116,12 @@ public class VoltDbLocation implements Location {
     }
 
     private void updateFromProcedure(String procedure)
-        throws IOException, ProcCallException, DataStoreException {
+            throws IOException, ProcCallException, DataStoreException {
         ClientResponse response = voltDb_.callProcedure(procedure);
         if (response.getStatus() != ClientResponse.SUCCESS) {
             String errMsg = String.format(
-                "Unable to retrieve node information from the data store. Client response status: %s",
-                response.getStatus());
+                    "Unable to retrieve node information from the data store. Client response status: %s",
+                    response.getStatus());
             log_.error(errMsg);
             throw new DataStoreException(errMsg);
         }
@@ -130,6 +133,44 @@ public class VoltDbLocation implements Location {
             hostMap_.put(vt.getString("HostName"), vt.getString("Lctn"));
             hostMap_.put(vt.getString("BmcHostName"), vt.getString("Lctn") + "-BMC");
         }
+    }
+
+    public Set<String> getLocationsFromNodes(Set<String> nodes) throws BadInputException {
+        Set<String> locations = new HashSet<>();
+        for(String node : nodes){
+            if (hostMap_.containsKey(node)) {
+                locations.add(hostMap_.get(node));
+                continue;
+            }
+
+            if(locationMap_.containsKey(node)) {
+                locations.add(node);
+                continue;
+            }
+
+            log_.error(node+ " is not a valid location or hostname of a node");
+            throw new BadInputException(node + " is a Bad input. It isn't a location or hostname of a node");
+        }
+        return locations;
+    }
+
+    public Set<String> getNodesFromLocations(Set<String> locations) throws BadInputException {
+        Set<String> nodes = new HashSet<>();
+        for(String lctn : locations){
+            if (locationMap_.containsKey(lctn)) {
+                nodes.add(locationMap_.get(lctn));
+                continue;
+            }
+
+            if(hostMap_.containsKey(lctn)) {
+                nodes.add(lctn);
+                continue;
+            }
+
+            log_.error(lctn+ " is not a valid location or hostname of a node");
+            throw new BadInputException(lctn + " is a Bad input. It isn't a location or hostname of a node");
+        }
+        return nodes;
     }
 
     private Client voltDb_;

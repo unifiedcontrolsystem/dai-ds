@@ -21,7 +21,6 @@ class GroupCli(object):
         group_subparsers = group_parser.add_subparsers(help='Subparser for group')
         self._group_parser.set_defaults(func=self._group_execute)
         self._add_add_parser(group_subparsers)
-        self._add_remove_parser(group_subparsers)
         self._add_get_parser(group_subparsers)
         self._add_list_parser(group_subparsers)
         self._add_remove_parser(group_subparsers)

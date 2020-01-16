@@ -16,6 +16,7 @@ from dateutil.parser import parse
 from datetime import datetime
 from datetime import timedelta
 from .json_display import JsonDisplay
+from .view_events_summary import ViewEventsSummary
 from .json_error_creation import JsonError
 
 
@@ -26,18 +27,13 @@ class ViewCli(object):
         self._root_parser = root_parser
         view_subparsers = root_parser.add_subparsers(help='subparser for quering/viewing data from the database')
         self._root_parser.set_defaults(func=self._view_execute)
-        self._add_system_info_parser(view_subparsers)
-        self._add_events_parser(view_subparsers)
         self._add_environment_parser(view_subparsers)
-        # self._add_inventory_history_parser(view_subparsers)
-        # self._add_replacement_history_parser(view_subparsers)
-        # self._add_inventory_info_parser(view_subparsers)
-        self._add_state_parser(view_subparsers)
+        self._add_events_parser(view_subparsers)
+        self._add_job_info_parser(view_subparsers)
         self._add_network_config_parser(view_subparsers)
-        # self._add_snapshot_info_parser(view_subparsers)
-        # self._add_get_ref_snapshot_info_parser(view_subparsers)
-        # self._add_jobpower_parser(view_subparsers)
-        # self._add_diagsview_parser(view_subparsers)
+        self._add_reservation_info_parser(view_subparsers)
+        self._add_state_parser(view_subparsers)
+        self._add_system_info_parser(view_subparsers)
         self.lgr = Logger()
         self.user = pwd.getpwuid(os.getuid()).pw_name
 
@@ -48,23 +44,30 @@ class ViewCli(object):
         system_info_parser.add_argument('--format', choices=['json', 'table'], default='table',
                                         help='Display data either in JSON or table format.'
                                              ' Default will be to display data in tabular format')
+        system_info_parser.add_argument('--summary', help='Display a summary of cluster by showing the state count '
+                                                          'of all compute and service nodes', action='store_true')
         system_info_parser.set_defaults(func=self._view_system_info_execute)
 
     def _add_events_parser(self, view_parser):
         events_parser = view_parser.add_parser('event', help='view the events data')
-        events_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date is'
-                                                        ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        events_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is'
-                                                      ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        events_parser.add_argument('--start-time', dest="start_time",
+                                   help='provide the start time. The preferred format for the date is'
+                                        ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        events_parser.add_argument('--end-time', dest="end_time",
+                                   help='provide the end time. The preferred format for the date is'
+                                        ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
         events_parser.add_argument('--limit', type=int, help='Provide a limit to the number of records of data '
                                                              'being retrieved. The default value is 100')
         events_parser.add_argument('--locations', help='Filter all event data for a given locations. '
                                                        'Provide comma separated location list or location '
                                                        'group. Example: R2-CH0[1-4]-N[1-4]')
         events_parser.add_argument('--jobid', help='Filter all event data for a jobid.')
-        events_parser.add_argument('--event_type', help='Filter all event data for a given event_type. The event_type'
-                                                        ' data depends on the descriptive name of the events in the '
-                                                        'RASMetadata.json. \n Example: RasGen or Ras')
+        events_parser.add_argument('--type', dest="type",
+                                   help='Filter all event data for the descriptive name of the event type in the  '
+                                        'RASMetadata.json. \n Example: RasGen or Ras. Regex are allowed too')
+        events_parser.add_argument('--type-exclude', dest="exclude",
+                                   help='excludes all event data for the descriptive name of the event type in the'
+                                        'RASMetadata.json. \n Example: RasGen or Ras. Regex are allowed too')
         events_parser.add_argument('--severity', help='Filter all event data for a given severity {INFO, FATAL, ERROR,'
                                                       ' CRITICAL}. This option does not take wildcards or RegEx \n')
         events_parser.add_argument('--format', choices=['json', 'table'], default='table',
@@ -75,15 +78,18 @@ class ViewCli(object):
                                                                             'Uses a default of 900s')
         events_parser.add_argument('--all', help='Specify all output fields for more information than default view',
                                    action='store_true')
+        events_parser.add_argument('--summary', help='Summary of RAS Events. This command is not to be used with '
+                                                     '--format option', action='store_true')
         events_parser.set_defaults(func=self._view_events_execute)
 
     def _add_environment_parser(self, view_parser):
         environment_parser = view_parser.add_parser('env', help='view the environmental data')
-        environment_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date'
-                                                             ' is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        environment_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is'
-                                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-
+        environment_parser.add_argument('--start-time', dest="start_time",
+                                        help='provide the start time. The preferred format for the date is'
+                                        ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        environment_parser.add_argument('--end-time', dest="end_time",
+                                        help='provide the end time. The preferred format for the date is'
+                                        ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
         environment_parser.add_argument('--limit', type=int, help='Provide a limit to the number of records of data '
                                                                   'being retrieved. The default value is 100')
         environment_parser.add_argument('--locations', help='Filter all environmental data for a given locations. '
@@ -98,44 +104,6 @@ class ViewCli(object):
                                         help='Specify all output fields for more information than default view',
                                         action='store_true')
         environment_parser.set_defaults(func=self._view_environment_execute)
-
-    def _add_inventory_history_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('inventory-history', help='view the history of inventory changes '
-                                                                            'for a location')
-        inventory_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date '
-                                                           'is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is '
-                                                         '"YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('locations',
-                                      help='Filter all inventory history data for a given locations. '
-                                           'Provide comma separated location list or location group. '
-                                           'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--limit', type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. '
-                                           'The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. Default will be to display '
-                                           'data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                               'Uses a default of 900s')
-        inventory_parser.set_defaults(func=self._view_inventory_change_execute)
-
-    def _add_inventory_info_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('inventory-info', help='view the latest inventory info data for a '
-                                                                         'specific location')
-        inventory_parser.add_argument('locations',
-                                      help='Filter all inventory info data for a given locations. '
-                                           'Provide comma separated location list or location group. '
-                                           'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--limit', default=100, type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. '
-                                           'The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                               'Uses a default of 900s')
-        inventory_parser.set_defaults(func=self._view_inventory_info_execute)
 
     def _add_state_parser(self, view_parser):
         state_parser = view_parser.add_parser('state', help='view the latest state info data for a specific location')
@@ -169,115 +137,75 @@ class ViewCli(object):
                                                                                      'Uses default of 900s')
         network_config__parser.set_defaults(func=self._view_network_config_execute)
 
-    def _add_replacement_history_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('replacement-history', help='view the replacement history data')
-        inventory_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date '
-                                                           'is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is '
-                                                         '"YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser1 = inventory_parser.add_mutually_exclusive_group(required=True)
-        inventory_parser1.add_argument('locations', nargs='?',
-                                       help='Filter all inventory info and history for a given locations. '
-                                            'Provide comma separated location list or location group. '
-                                            'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser1.add_argument('sernum', nargs='?', help='Filter all inventory history data for a given '
-                                                                 'serial number')
-        inventory_parser.add_argument('--limit', type=int, help='Provide a limit to the number of records of data '
-                                                                'being retrieved. The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+    def _add_job_info_parser(self, view_parser):
+        job_parser = view_parser.add_parser('job', help='view the job information for the cluster')
+        job_parser.add_argument('--start-time', dest="start_time",
+                                      help='provide the start time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        job_parser.add_argument('--end-time', dest="end_time",
+                                      help='provide the end time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        job_parser.add_argument('--jobid', help='Filter all job data for a given jobid. This will also'
+                                                ' display accounting information and nodes for given jobid')
+        job_parser.add_argument('--user', dest="username", help='Filter all job data for a given username')
+        job_parser.add_argument('--limit', default=100, type=int,
+                                                  help='Provide a limit to the number of records of data being retrieved. '
+                                                       'The default value is 100')
+        job_parser.add_argument('--format', choices=['json', 'table'], default='table',
+                                      help='Display data either in JSON or table format. Default will be to display '
+                                           'data in tabular format')
+        job_parser.add_argument('--all', help='Specify all output fields for more '
+                                              'information than default view', action='store_true')
+        job_parser.add_argument('--active', help='Show only jobs that are currently running', action='store_true')
+        job_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
                                                                                'Uses a default of 900s')
-        inventory_parser.add_argument('--all', help='Specify all output fields for more information than default view',
-                                      action='store_true')
-        inventory_parser.set_defaults(func=self._view_replacement_history_execute)
+        job_parser.set_defaults(func=self._view_job_info_execute)
 
-    def _add_snapshot_info_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('snapshot-info', help='view the snapshot data')
-        inventory_parser.add_argument('locations',
-                                      help='Filter all snapshot info for a given locations. '
-                                           'Provide comma separated location list or location group. '
-                                           'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date '
-                                                           'is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is '
-                                                         '"YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--limit', type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. The '
-                                           'default value is 100')
-        inventory_parser.add_argument('--sernum', help='Filter all inventory history data for a given serial number')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+    def _add_reservation_info_parser(self, view_parser):
+        job_parser = view_parser.add_parser('reservation', help='view the reservation information for the cluster')
+        job_parser.add_argument('--start-time', dest="start_time",
+                                      help='provide the start time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        job_parser.add_argument('--end-time', dest="end_time",
+                                      help='provide the end time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        job_parser.add_argument('--name', help='Filter all reservation data for a given reservation name.')
+        job_parser.add_argument('--user', dest="username", help='Filter all reservation data for a given username')
+        job_parser.add_argument('--limit', default=100, type=int,
+                                                  help='Provide a limit to the number of records of data being retrieved. '
+                                                       'The default value is 100')
+        job_parser.add_argument('--format', choices=['json', 'table'], default='table',
+                                      help='Display data either in JSON or table format. Default will be to display '
+                                           'data in tabular format')
+        job_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
                                                                                'Uses a default of 900s')
-        inventory_parser.set_defaults(func=self._view_snapshot_info_execute)
-
-    def _add_get_ref_snapshot_info_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('snapshot-getref', help='view the reference snapshot data for '
-                                                                          'given locations')
-        inventory_parser.add_argument('locations', type=str, help='Filter all snapshot info for a given locations. '
-                                                                  'Provide comma separated location list or location '
-                                                                  'group. Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.set_defaults(func=self._view_get_ref_snapshot_info_execute)
-
-    def _add_jobpower_parser(self, view_parser):
-        jobpower_parser = view_parser.add_parser('jobpower', help='view the job power data')
-        jobpower_parser.add_argument('--jobid', default='', help='job id for which the '
-                                                                 'job power information is for.')
-        jobpower_parser.add_argument('--locations', default='',
-                                     help='Filter all job power information data for a given locations. '
-                                          'Provide comma separated location list '
-                                          'or location regex. Example: R2-CH0[1-4]-N[1-4]')
-        jobpower_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date '
-                                                          'is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        jobpower_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is '
-                                                        '"YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        jobpower_parser.add_argument('--limit', type=int,
-                                     help='Provide a limit to the number of records of data being retrieved. '
-                                          'The default value is 100')
-        jobpower_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                     help='Display data either in JSON or table format. '
-                                          'Default will be to display data in tabular format')
-        jobpower_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                              'Uses a default of 900s')
-        jobpower_parser.set_defaults(func=self._view_job_power_execute)
-
-    def _add_diagsview_parser(self, view_parser):
-        diagsview_parser = view_parser.add_parser('diag', help='view the diagnostics results data')
-
-        diagsview_parser.add_argument('--start_time', help='provide the start time. The preferred format for the date '
-                                                           'is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        diagsview_parser.add_argument('--end_time', help='provide the end time. The preferred format for the date is '
-                                                         '"YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        diagsview_parser.add_argument('--locations', help='Filter all diagnostics results for given locations. '
-                                                          'Provide comma separated location list or location regex. '
-                                                          'Example: R2-CH0[1-4]-N[1-4]')
-        diagsview_parser.add_argument('--limit', type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. '
-                                           'The default value is 100')
-        diagsview_parser.add_argument('--diagid', help='Filter all diagnostics data for a given DiagId')
-        diagsview_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        diagsview_parser.add_argument('--timeout', default=900, type=int,
-                                      help='Timeout value for HTTP request. Uses a default of 900s')
-        diagsview_parser.set_defaults(func=self._view_diagsdata_execute)
+        job_parser.set_defaults(func=self._view_reservation_info_execute)
 
     def _view_execute(self, args):
         self._root_parser.print_help()
 
+    def _parse_response_as_per_user_request(self, format, response_code, response):
+        json_display = JsonDisplay(response)
+
+        if format == 'json':
+            data_to_display = json_display.display_raw_json()
+        else:
+            data_to_display = '\n' + json_display.display_json_in_tabular_format()
+        return CommandResult(response_code, data_to_display)
+
     def _view_system_info_execute(self, args):
         client = HttpClient()
-        url = client.get_base_url() + 'system'
+        user = 'user=' + self.user
+
+        if args.summary:
+            command = 'cli/system_summary?'
+        else:
+            command = 'system?'
+
+        url = client.get_base_url() + command + "&".join([x for x in [user] if x != ""])
+
         self.lgr.debug("_view_system_info_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, 900)
-
-        json_result = json.loads(response)
 
         data_to_display = ''
 
@@ -288,17 +216,35 @@ class ViewCli(object):
             json_result = json.loads(response)
             for node_type, nodes in json_result.items():
                 json_display = JsonDisplay(json.dumps(nodes))
-                if args.all:
-                    columns_order = ["LCTN", "HOSTNAME", "AGGREGATOR", "STATE", "IPADDR", "MACADDR", "BMCIPADDR",
-                                     "BOOTIMAGEID", "TYPE", "SEQUENCENUMBER", "LASTCHGWORKITEMID", "BMCMACADDR",
-                                     "LASTCHGTIMESTAMP", "INVENTORYINFO", "DBUPDATEDTIMESTAMP", "OWNER", "SERNUM",
-                                     "BMCHOSTNAME", "LASTCHGADAPTERTYPE"]
+                if args.summary:
+                    data_to_display += '\n' + node_type.upper() + ' NODES'
+                    columns_order = ["state","count"]
                 else:
-                    columns_order = ["LCTN", "HOSTNAME", "AGGREGATOR", "STATE", "IPADDR", "MACADDR", "BMCIPADDR",
-                                     "BOOTIMAGEID", "TYPE"]
+                    if args.all:
+                        columns_order = ["LCTN", "HOSTNAME", "AGGREGATOR", "STATE", "IPADDR", "MACADDR", "BMCIPADDR",
+                                         "BOOTIMAGEID", "TYPE", "SEQUENCENUMBER", "LASTCHGWORKITEMID", "BMCMACADDR",
+                                         "LASTCHGTIMESTAMP", "INVENTORYINFO", "DBUPDATEDTIMESTAMP", "OWNER", "SERNUM",
+                                         "BMCHOSTNAME", "LASTCHGADAPTERTYPE"]
+                    else:
+                        columns_order = ["LCTN", "HOSTNAME", "AGGREGATOR", "STATE", "IPADDR", "MACADDR", "BMCIPADDR",
+                                         "BOOTIMAGEID", "TYPE"]
                 data_to_display += '\n' + json_display.display_json_in_tabular_format(columns_order)
 
         return CommandResult(response_code, data_to_display)
+
+    @staticmethod
+    def get_regex_expressions(filename):
+        user_home = os.path.expanduser("~")
+        filter_folder = ".ucs"
+        filter_path = "{}/{}/{}".format(user_home, filter_folder, filename)
+        if not os.path.exists(filter_path):
+            return None
+        with open(filter_path, 'r') as f:
+            content = f.readlines()
+        expressions = []
+        for expression in content:
+            expressions.append(expression.replace('\n', ''))
+        return "|".join(expressions)
 
     def _view_events_execute(self, args):
         client = HttpClient()
@@ -310,10 +256,27 @@ class ViewCli(object):
             severity = 'Severity=' + args.severity
         else:
             severity = ''
-        if args.event_type is not None:
-            event_type = 'EventType=' + args.event_type
+
+        exclude_expressions = self.get_regex_expressions("exclude")
+        if args.exclude is not None:
+            exclude = 'Exclude=' + args.exclude
+        else:
+            exclude = ''
+        if exclude and exclude_expressions:
+            exclude = exclude + "|" + exclude_expressions
+        elif exclude_expressions:
+            exclude = 'Exclude=' + exclude_expressions
+
+        include_expressions = self.get_regex_expressions("include")
+        if args.type is not None:
+            event_type = 'EventType=' + args.type
         else:
             event_type = ''
+        if event_type and include_expressions:
+            event_type = event_type + "|" + include_expressions
+        elif include_expressions:
+            event_type = 'EventType=' + include_expressions
+
         jobid = ''
         if args.jobid is not None:
             if self.is_bad_input(args.jobid):
@@ -321,24 +284,36 @@ class ViewCli(object):
                 return self._parse_response_as_per_user_request(args.format, 1,
                                                                 JsonError(response_msg).construct_error_result())
             jobid = 'JobId=' + args.jobid
+        user = 'user=' + self.user
         url = client.get_base_url() + 'cli/getraswithfilters?' + "&".join(
-            [x for x in [starttime, endtime, limit, jobid, lctn, severity, event_type] if x != ""])
+            [x for x in [starttime, endtime, limit, jobid, lctn, severity, event_type, user, exclude] if x != ""])
         self.lgr.debug("_view_events_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
+        if args.summary:
+            return self._view_events_summary(response_code, response, display_format)
         else:
-            if args.all:
-                columns_order = ["lastchgtimestamp", "lctn", "eventtype", "severity", "controloperation", "msg",
-                                 "jobid", "instancedata", "dbupdatedtimestamp"]
+            json_display = JsonDisplay(response)
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
             else:
-                columns_order = ["lastchgtimestamp", "lctn", "eventtype", "severity", "controloperation", "msg"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+                if args.all:
+                    columns_order = ["time", "lctn", "type", "severity", "controloperation", "detail",
+                                     "jobid", "dbupdatedtimestamp"]
+                else:
+                    columns_order = ["time", "lctn", "type", "severity", "jobid", "controloperation", "detail"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
 
         return CommandResult(response_code, data_to_display)
+
+    def _view_events_summary(self, response_code, response, display_format):
+        if display_format:
+            response_msg = 'Summary option cannot be used with format option. ' \
+                           'Please look at ucs view event help. '
+            return self._parse_response_as_per_user_request(display_format, 1,
+                                                            JsonError(response_msg).construct_error_result())
+        else:
+            return CommandResult(response_code, ViewEventsSummary(response).generate_summary())
 
     def _view_environment_execute(self, args):
         client = HttpClient()
@@ -346,8 +321,9 @@ class ViewCli(object):
         # &EndTime=YYYY-MM-DD HH:MM:SS.[f]
         starttime, endtime = self._retrieve_time_from_args(args)
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+        user = 'user=' + self.user
         url = client.get_base_url() + 'cli/getenvwithfilters?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn] if x != ""])
+            [x for x in [starttime, endtime, limit, lctn, user] if x != ""])
         self.lgr.debug("_view_environment_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
@@ -365,54 +341,11 @@ class ViewCli(object):
 
         return CommandResult(response_code, data_to_display)
 
-    def _view_replacement_history_execute(self, args):
-        client = HttpClient()
-        if args.sernum is not None and args.locations is not None:
-            raise RuntimeError('The inventory change takes either a lctn or a serial number as an input filter. '
-                               'Try again with only one of them')
-        if args.sernum is None and args.locations is None:
-            raise RuntimeError('The inventory change requires one of the input filters lctn or a serial number. '
-                               'Try again with one of them')
-        starttime, endtime = self._retrieve_time_from_args(args)
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        url = client.get_base_url() + 'cli/getinvchanges?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn] if x != ""])
-        self.lgr.debug("_view_replacement_history_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            if args.all:
-                columns_order = ["lastchgtimestamp", "lctn", "oldsernum", "newsernum", "serviceoperationid", "oldstate",
-                                 "newstate", "frutype", "entrynumber", "dbupdatedtimestamp"]
-            else:
-                columns_order = ["lastchgtimestamp", "lctn", "oldsernum", "newsernum", "serviceoperationid"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_inventory_info_execute(self, args):
-        client = HttpClient()
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn] if x != ""])
-        self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["lctn", "type", "hostname", "sequencenumber", "sernum", "entrynumber"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
     def _view_state_execute(self, args):
         client = HttpClient()
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn] if x != ""])
+        user = 'user=' + self.user
+        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
         self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
@@ -428,7 +361,8 @@ class ViewCli(object):
     def _view_network_config_execute(self, args):
         client = HttpClient()
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn] if x != ""])
+        user = 'user=' + self.user
+        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
         self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
@@ -441,101 +375,67 @@ class ViewCli(object):
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 
-    def _view_inventory_change_execute(self, args):
-        client = HttpClient()
-        starttime, endtime = self._retrieve_time_from_args(args)
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn] if x != ""])
-        self.lgr.debug("_view_inventory_change_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
+    def _view_job_info_execute(self, args):
+            args.locations = None
+            client = HttpClient()
+            starttime, endtime = self._retrieve_time_from_args(args)
+            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+            user = 'user=' + self.user
+            if args.username is not None:
+                username = 'Username=' + args.username
+            else:
+                username = ''
+            if args.jobid is not None:
+                jobid = 'Jobid=' + args.jobid
+            else:
+                jobid = ''
+            if args.active:
+                state = 'State=S'
+            else:
+                state = ''
+            url = client.get_base_url() + 'cli/getjobinfo?' + "&".join(
+                [x for x in [starttime, endtime, limit, user, username, jobid, state] if x != ""])
+            self.lgr.debug("_view_job_info_execute: URL for request is {0}".format(url))
+            response_code, response = client.send_get_request(url, time_out)
 
-        json_display = JsonDisplay(response)
+            json_display = JsonDisplay(response)
 
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["lctn", "type", "hostname", "sequencenumber", "sernum", "entrynumber"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                columns_order = ["jobid", "jobname", "state", "numnodes", "username", "starttimestamp", "endtimestamp"]
+                if args.jobid is not None or args.all:
+                    columns_order = columns_order + ["jobacctinfo", "nodes"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+            return CommandResult(response_code, data_to_display)
 
-    def _view_snapshot_info_execute(self, args):
-        client = HttpClient()
-        lctn, starttime, endtime, limit, display_format, time_out = self._retrieve_data_from_args(args)
-        url = client.get_base_url() + 'cli/getsnapshotspecificlctn?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn] if x != ""])
-        self.lgr.debug("_view_snapshot_info_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
+    def _view_reservation_info_execute(self, args):
+            args.locations = None
+            client = HttpClient()
+            starttime, endtime = self._retrieve_time_from_args(args)
+            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+            user = 'user=' + self.user
+            if args.username is not None:
+                username = 'Username=' + args.username
+            else:
+                username = ''
+            if args.name is not None:
+                name = 'Name=' + args.name
+            else:
+                name = ''
+            url = client.get_base_url() + 'cli/getreservationinfo?' + "&".join(
+                [x for x in [starttime, endtime, limit, user, username, name] if x != ""])
+            self.lgr.debug("_view_reservation_info_execute: URL for request is {0}".format(url))
+            response_code, response = client.send_get_request(url, time_out)
 
-        json_display = JsonDisplay(response)
+            json_display = JsonDisplay(response)
 
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ['lctn', 'id', 'snapshottimestamp', 'inventoryinfo', 'reference']
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_get_ref_snapshot_info_execute(self, args):
-        client = HttpClient()
-        if self.is_bad_input(args.locations):
-            return CommandResult(1, "Bad input, please try with a valid location")
-        lctn = 'Lctn=' + DeviceRegexResolver.get_devices(args.locations)
-        url = client.get_base_url() + 'cli/getrefsnapshot?' + lctn
-        self.lgr.debug("_view_get_ref_snapshot_info_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, 900)
-
-        json_display = JsonDisplay(response)
-
-        if args.format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ['lctn', 'id', 'snapshottimestamp', 'inventoryinfo', 'reference']
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_job_power_execute(self, args):
-        client = HttpClient()
-        location, start_time, end_time, limit, display_format, time_out = self._retrieve_data_from_args(args)
-        job_id = 'JobId=' + args.jobid
-        url = client.get_base_url() + 'cli/getjobdata?' + "&".join(
-            [x for x in [start_time, end_time, limit, location, job_id] if x != ""])
-        self.lgr.debug("_view_job_power_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ['lctn', 'jobid', 'totalruntime', 'totalpackageenergy', 'totaldramenergy',
-                             'jobpowertimestamp']
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_diagsdata_execute(self, args):
-        client = HttpClient()
-        # URL will be GET http://hostaddress:hostport/cli/getdiagsdata?StartTime=YYYY-MM-DD HH:MM:SS.[f]
-        # &EndTime=YYYY-MM-DD HH:MM:SS.[f]
-        starttime, endtime = self._retrieve_time_from_args(args)
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        if args.diagid is not None:
-            diagid = 'DiagId=' + args.diagid
-        else:
-            diagid = ''
-        url = client.get_base_url() + 'cli/getdiagsdata?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn, diagid] if x != ""])
-        self.lgr.debug("_view_diagsdata_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ['diagid', 'lctn', 'state', 'results', 'dbupdatedtimestamp']
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                columns_order = ["reservationname", "users", "nodes", "starttimestamp", "endtimestamp", "deletedtimestamp"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+            return CommandResult(response_code, data_to_display)
 
     def _validate_input_timestamp(self, input_time):
         try:
@@ -547,6 +447,8 @@ class ViewCli(object):
     def _retrieve_from_args(self, args):
         MAX_TIMEOUT = 2147483647
         if args.limit is not None:
+            if args.limit < 0:
+                raise RuntimeError("Bad input, please try with a valid limit (number larger than 0)")
             limit = 'Limit=' + str(args.limit)
         else:
             if args.start_time is None and args.end_time is None:
@@ -557,6 +459,7 @@ class ViewCli(object):
 
         display_format = args.format
         time_out = min([args.timeout, MAX_TIMEOUT])
+
         if args.locations is not None:
             if self.is_bad_input(args.locations):
                 raise RuntimeError("Bad input, please try with a valid location")

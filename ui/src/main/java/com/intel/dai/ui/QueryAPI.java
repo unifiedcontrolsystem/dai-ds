@@ -15,12 +15,10 @@ import com.intel.dai.exceptions.DataStoreException;
 
 public class QueryAPI {
     private Connection conn = null;
-    private Logger log_;
     JsonConverterGUI jsonConverter = new JsonConverterGUI();
     private static ConfigIO jsonParser = ConfigIOFactory.getInstance("json");
 
-    QueryAPI(Logger logger) {
-        log_ = logger;
+    QueryAPI() {
         assert jsonParser != null: "Failed to get a JSON parser!";
     }
 
@@ -30,69 +28,72 @@ public class QueryAPI {
 
     public synchronized String getData(String requestKey, HashMap<String, String> params_map)
             throws SQLException, DataStoreException {
+        Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
         conn = get_connection();
-        Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
-        Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
-        int seq_num = Integer.parseInt(params_map.getOrDefault("SeqNum", "-1"));
-        PropertyArray jsonResult;
-        switch (requestKey) {
-            case "filedata":
-                jsonResult = executeProcedureNoParams("{call GetManifestContent()}");
-                break;
-            case "diagsact":
-                jsonResult = executeProcedureEndTime("{call DiagListOfActiveDiagsAtTime(?)}", endtime);
-                break;
-            case "diagsnonact":
-                jsonResult = executeProcedureEndTime("{call DiagListOfNonActiveDiagsAtTime(?)}", endtime);
-                break;
-            case "nodestatehistory":
-                jsonResult = executeProcedureStartEndTime("{call ComputeNodeHistoryListOfStateAtTime(?, ?)}", starttime, endtime);
-                break;
-            case "rasevent":
-                jsonResult = executeProcedureStartEndTime("{call RasEventListAtTime(?, ?)}", starttime, endtime);
-                break;
-            case "aggenv":
-                jsonResult = executeProcedureStartEndTime("{call AggregatedEnvDataListAtTime(?, ?)}", starttime, endtime);
-                break;
-            case "jobsact":
-                jsonResult = executeProcedureEndTime("{call JobHistoryListOfActiveJobsatTime(?)}", endtime);
-                break;
-            case "jobsnonact":
-                jsonResult = executeProcedureEndTime("{call JobHistoryListOfNonActiveJobsAtTime(?)}", endtime);
-                break;
-            case "changets":
-                jsonResult = executeProcedureNoParams("{call DbChgTimestamps()}");
-                break;
-            case "serviceinv":
-                jsonResult = executeProcedureNoParams("{call ServiceInventoryList()}");
-                break;
-            case "computeinv":
-                jsonResult = executeProcedureOneParam("{call ComputeNodeInventoryList(?)}", seq_num);
-                break;
-            case "computehistoldestts":
-                jsonResult = executeProcedureNoParams("{call ComputeNodeHistoryOldestTimestamp()}");
-                break;
-            case "inventoryss":
-                jsonResult = executeProcedureStartEndTime("{call InventorySnapshotList(?, ?)}", starttime, endtime);
-                break;
-            case "inventoryinfo":
-                jsonResult = executeProcedureStartEndTime("{call InventoryInfoList(?, ?)}", starttime, endtime);
-                break;
-            case "replacementhistory":
-                jsonResult = executeProcedureStartEndTime("{call ReplacementHistoryList(?, ?)}", starttime, endtime);
-                break;
-            case "reservationlist":
-                jsonResult = executeProcedureStartEndTime("{call ReservationListAtTime(?, ?)}", starttime, endtime);
-                break;
-            case "serviceadapterdata":
-                jsonResult = executeProcedureEndTime("{call ServiceOperationAtTime(?)}", endtime);
-                break;
-            default:
-                return "Invalid request, request key: '" + requestKey + "' : Not Found";
+        try {
+            Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
+            Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
+            int seq_num = Integer.parseInt(params_map.getOrDefault("SeqNum", "-1"));
+            PropertyArray jsonResult;
+            switch (requestKey) {
+                case "filedata":
+                    jsonResult = executeProcedureNoParams("{call GetManifestContent()}");
+                    break;
+                case "diagsact":
+                    jsonResult = executeProcedureEndTime("{call DiagListOfActiveDiagsAtTime(?)}", endtime);
+                    break;
+                case "diagsnonact":
+                    jsonResult = executeProcedureEndTime("{call DiagListOfNonActiveDiagsAtTime(?)}", endtime);
+                    break;
+                case "nodestatehistory":
+                    jsonResult = executeProcedureStartEndTime("{call ComputeNodeHistoryListOfStateAtTime(?, ?)}", starttime, endtime);
+                    break;
+                case "rasevent":
+                    jsonResult = executeProcedureStartEndTime("{call RasEventListAtTime(?, ?)}", starttime, endtime);
+                    break;
+                case "aggenv":
+                    jsonResult = executeProcedureStartEndTime("{call AggregatedEnvDataListAtTime(?, ?)}", starttime, endtime);
+                    break;
+                case "jobsact":
+                    jsonResult = executeProcedureEndTime("{call JobHistoryListOfActiveJobsatTime(?)}", endtime);
+                    break;
+                case "jobsnonact":
+                    jsonResult = executeProcedureEndTime("{call JobHistoryListOfNonActiveJobsAtTime(?)}", endtime);
+                    break;
+                case "changets":
+                    jsonResult = executeProcedureNoParams("{call DbChgTimestamps()}");
+                    break;
+                case "serviceinv":
+                    jsonResult = executeProcedureStartEndTime("{call ServiceNodeInventoryList(?, ?)}", starttime, endtime);
+                    break;
+                case "computeinv":
+                    jsonResult = executeProcedureStartEndTime("{call ComputeNodeInventoryList(?, ?)}", starttime, endtime);
+                    break;
+                case "computehistoldestts":
+                    jsonResult = executeProcedureNoParams("{call ComputeNodeHistoryOldestTimestamp()}");
+                    break;
+                case "inventoryss":
+                    jsonResult = executeProcedureStartEndTime("{call InventorySnapshotList(?, ?)}", starttime, endtime);
+                    break;
+                case "inventoryinfo":
+                    jsonResult = executeProcedureStartEndTime("{call InventoryInfoList(?, ?)}", starttime, endtime);
+                    break;
+                case "replacementhistory":
+                    jsonResult = executeProcedureStartEndTime("{call ReplacementHistoryList(?, ?)}", starttime, endtime);
+                    break;
+                case "reservationlist":
+                    jsonResult = executeProcedureStartEndTime("{call ReservationListAtTime(?, ?)}", starttime, endtime);
+                    break;
+                case "serviceadapterdata":
+                    jsonResult = executeProcedureEndTime("{call ServiceOperationAtTime(?)}", endtime);
+                    break;
+                default:
+                    return "Invalid request, request key: '" + requestKey + "' : Not Found";
+            }
+            return jsonParser.toString(jsonResult);
+        } finally {
+            conn.close();
         }
-
-        conn.close();
-        return jsonParser.toString(jsonResult);
     }
 
     private String getStartEndTime(HashMap <String, String> params_map, String key)
