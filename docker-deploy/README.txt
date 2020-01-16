@@ -3,27 +3,27 @@ Install and User Guide for DAI on CP4:
 
 This installed package includes 4 services to control docker-compose
 containers. One each for postgres, voltdb, rabbitmq, and dai. It assumes all
-adapters run on one system (i.e. this was the decision for the Preview 4
-System.
+adapters run on one system.
 
 
 Pre-requisites:
 ----------------
-0. System must have at least 32GB or RAM to run smoothly.
-1. docker installed and configured for the root user.
-2. docker-compose installed.
-3. ALL configuration files changed to support the Preview 4 (or
-   other) system.  This includes:
+1. System must have at least 32GB or RAM to run smoothly.
+2. docker installed and configured for the root user.
+3. docker-compose installed.
+4. ALL configuration files changed to support the target system. This includes:
     a. SystemManifest.json
     b. MachineConfig.json
     c. NearlineConfig.json
-    d. PartitionedMonitorAdapter.json
-    e. LocationTranslationMap.json - If this doesn't match the machine config
+    d. ProviderMonitoringNetworkForeignBus.json
+    e. ProviderProvisionerNetworkForeignBus.json
+    f. LocationTranslationMap.json - If this doesn't match the machine config
                                      The PartitionedMonitorAdapter may not
                                      function. Make sure to include ALL Foreign
                                      names.
-4. The API (or eventsim) must be available for the
-   PartitionedMonitorAdapter to connect.
+5. The API (or eventsim) must be available for the
+   ProviderMonitoringNetworkForeignBus and ProviderProvisionerNetworkForeignBus
+   to connect.
 
 
 Installing DAI and Third Party Components:
