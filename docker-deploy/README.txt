@@ -8,7 +8,7 @@ adapters run on one system.
 
 Pre-requisites:
 ----------------
-1. System must have at least 32GB or RAM to run smoothly.
+1. System must have at least 32GB of RAM to run smoothly.
 2. docker installed and configured for the root user.
 3. docker-compose installed.
 4. ALL configuration files changed to support the target system. This includes:
