@@ -100,9 +100,6 @@ __NOTE:__ Examine the docker-build/Dockerfile to how its done for a docker
     ```
     systemProp.includeDebugSymbols=true
     ```
-__NOTE:__ Make sure the path to Java 1.8 is correct for the OS distribution
-    being used (OpenSUSE Leap 15.1's path is shown here)!
-
 4. Get and extract the DAI source tarball or another method to get the DAI
   source tree.
 5. 'cd' to the extracted source tree's root.
@@ -135,10 +132,12 @@ Pre-requisites:
     * NearlineConfig.json
     * ProviderMonitoringNetworkForeignBus.json
     * ProviderProvisionerNetworkForeignBus.json
-    * LocationTranslationMap.json - If this doesn't match the machine config
-                                     The provisioning and monitoiring providers
-                                     may not function. Make sure to include ALL Foreign
-                                     names.
+    * LocationTranslationMap.json - If the contents of this file do not correleate with
+                                    the MachineConfig.json file's contents then the
+                                    provisioning and monitoring providers may not
+                                    function as expected. Make sure ALL Foreign
+                                    names match a DAI name and no "location" is missing
+                                    or unexpected.
 5. The API (or eventsim) must be available for the
    ProviderMonitoringNetworkForeignBus and ProviderProvisionerNetworkForeignBus
    to connect.
@@ -175,7 +174,7 @@ __NOTE:__ If you start only the dai-manager service then all other services will
       start as dependencies if not already running but may experience timing issues and not start up properly.
 
 These services all use the /opt/dai-docker/*.yml files for docker-compose
-launching.  _Do not use docker or docker-compose directly, without out first stopping the services and disabling them_. Attempting to stop a container directly will just cause it to restart as the service is set to restart the container on container exit.
+launching.  _Do not use docker or docker-compose directly, without first stopping the services and disabling them_. Attempting to stop a container directly will just cause it to restart as the service is set to restart the container on container exit.
 
 Stopping or restarting is done as all services or all docker-compose. _Do not mix these control techniques_.
 
