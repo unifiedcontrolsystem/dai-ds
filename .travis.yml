@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-
 env:
   global:
     secure: Uqbvt/s82XGldIwNXeCIk9EmDbkwsVZBOnwBbewbF15WYUZNGGCS0l4oIdvFu191ysjoJ2CizlZcRumEyWverbwiTMmyCjR2M8Ix7vGv3pYL8tq+/XKMoQORwjKpg0B1QY+iLIDhlyRntxlPszJofh0CJhtu89ePcJei5htji87xWZ9bs82BV8SuWxENe/MFWfJ0XRF662DIY5kYsJSnh9hrBcbNCx93PaaVtnl5837k08bmtroDkvvDuzzS93LpMJHwL/DwVQ6BtOZjqIJtVOWDx2/DGbczfOeBgMudu468HFhwuc52un0+0TAWeTiazXFRilcIc9zWc7a48boZy/JaEglFCsWw3O3BTe6R8ZqRydke+TW/2hzftmnD5WncLWsoRCb6VxWH6vnwPAtimscjoCVT3/R9qqM5Xfv5vgH6v+uKASjJcbguRsQPFwfWwq91M4P8lgXwHdQeeSGLbr0XUe6nZFOmtF3osThqXqEwSCWBDPjMp5C148zpEZzeSM9WYOdv20sQqCm8pAbCfjtcBvI+U9ePncH4cDymI8dhBkEV8Fv2nKxBhWn/loYWbGQITY0WF0wdpdAcwkgXEECdaBIikD7GNhXjjb2g4P6sQdSmd58p/sC7FX521fLRXzGPicu6oCr7xI9UWnznBMNuVyUGzRXWrZJxFH6AY3w=
@@ -21,8 +20,9 @@ addons:
     project:
       name: "unifiedcontrolsystem/dai-ds"
     notification_email: paul.d.amonson@intel.com
-    build_command_prepend: "./gradlew --no-daemon clean"
-    build_command: "./gradlew --no-daemon compileJava"
+    build_command_prepend: ""
+    build_command: "./gradlew --no-daemon --no-parallel compileJava"
     branch_pattern: coverity_scan
 before_install:
 - "echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-"
+script: 'if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./gradlew check ; fi'
