@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
@@ -8,8 +12,6 @@ import com.google.gson.JsonSyntaxException;
 import com.intel.authentication.TokenAuthentication;
 import com.intel.authentication.TokenAuthenticationException;
 
-import com.intel.dai.dsapi.HWInvUtil;
-import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.networking.restclient.RESTClient;
@@ -35,10 +37,7 @@ import java.util.Map;
 
 public class HWInvDiscoveryCLI {
     private static Logger log = LoggerFactory.getInstance("CLI", "HWInvDiscovery", "console");
-    private static String configPath = "/opt/ucs/etc/HWInvDiscoveryCLIConfig.json";
-    private static RESTClient restClient;
     private static Gson gson;
-    private static HWDiscoverySession sess;
     private static RestRequester requester_ = null;
     private static TokenAuthentication tokenProvider_ = null;
 
@@ -50,13 +49,9 @@ public class HWInvDiscoveryCLI {
     private static String discoveryXname;
     private static String queryXname;
 
-    private HWInvUtil util;
-
-    HWInvDiscoveryCLI(HWInvUtil u) {
-        util = u;
-    }
     public static void main(String[] args) {
-        int status = new HWInvDiscoveryCLI(new HWInvUtilImpl()).run(args);
+        log.initialize();
+        int status = new HWInvDiscoveryCLI().run(args);
 
         // Note that the return code is only from 0 to 255
         if (status != 0) {
@@ -112,14 +107,16 @@ public class HWInvDiscoveryCLI {
     }
 
     private void createRestClient() throws RESTClientException {
+        HWDiscoverySession sess;
         try {
+            String configPath = "/opt/ucs/etc/HWInvDiscoveryCLIConfig.json";
             sess = toHWDiscoverySession(configPath);
             log.info("config:%n%s", sess.toString());
         } catch (Exception e) {
             log.error("Exception: %s", e.getMessage());
             throw new RESTClientException("Cannot determine CLI configuration");
         }
-        restClient = RESTClientFactory.getInstance("jdk11", log);
+        RESTClient restClient = RESTClientFactory.getInstance("jdk11", log);
 
         String requesterClass = sess.providerClassMap.requester;
         String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
@@ -135,7 +132,9 @@ public class HWInvDiscoveryCLI {
             if (tokenProvider_ == null) {
                 throw new RESTClientException("Cannot create token provider");
             }
-            restClient.setTokenOAuthRetriever(tokenProvider_);
+            if (restClient != null) {
+                restClient.setTokenOAuthRetriever(tokenProvider_);
+            }
         }
 
         createRequester(requesterClass, sess.providerConfigurations.requester, restClient);

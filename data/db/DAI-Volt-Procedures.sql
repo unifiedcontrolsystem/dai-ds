@@ -670,7 +670,13 @@ CREATE PROCEDURE
 
 
 CREATE PROCEDURE FROM
-	CLASS com.intel.dai.procedures.UpsertFRUIntoHWInv;
+    CLASS com.intel.dai.procedures.UpsertLocationIntoHWInv;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.DeleteAllLocationsAtIdFromHWInv;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.AllLocationsAtIdFromHWInv;
 
 END_OF_BATCH
 

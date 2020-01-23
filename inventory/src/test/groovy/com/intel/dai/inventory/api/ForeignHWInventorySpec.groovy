@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api
 
 // This test is necessary because ForeignHWInventory.toString() is exercised by

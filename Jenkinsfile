@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 pipeline {
     agent none
     stages {

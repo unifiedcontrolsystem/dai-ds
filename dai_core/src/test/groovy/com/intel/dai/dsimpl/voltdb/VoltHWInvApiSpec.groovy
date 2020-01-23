@@ -15,17 +15,21 @@ class VoltHWInvApiSpec extends spock.lang.Specification {
         api = new VoltHWInvApi(logger, new HWInvUtilImpl(), servers)
     }
 
-    def "Test initialize" () {
+    def "initialize"() {
         when: api.initialize()
         then: notThrown Exception
     }
     // Ingesting nonexistent file now results in a no-op
-    def "Test ingest -- nonexistent file" () {
+    def "ingest -- nonexistent file"() {
         when: api.ingest "noSuchFile"
         then: notThrown IOException
     }
-    def "Test ingest -- null client" () {
+    def "ingest -- null client"() {
         when: api.ingest "src/test/resources/data/empty.json"
+        then: thrown DataStoreException
+    }
+    def "delete - null client"() {
+        when: api.delete "x0"
         then: thrown DataStoreException
     }
 }

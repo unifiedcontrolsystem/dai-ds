@@ -1,8 +1,7 @@
 {
-  "FRUS": [
+  "locs": [
     {
       "ID": "x0",
-      "ParentID": "",
       "Type": "Cabinet",
       "Ordinal": 0,
       "FRUID": "Cray-2345-1234556789",
@@ -11,7 +10,6 @@
     },
     {
       "ID": "x0c0",
-      "ParentID": "x0",
       "Type": "Chassis",
       "Ordinal": 0,
       "FRUID": "Cray-ch01-23452345",
@@ -20,7 +18,6 @@
     },
     {
       "ID": "x0c0s0b0n0",
-      "ParentID": "x0c0s0b0",
       "Type": "Node",
       "Ordinal": 0,
       "FRUID": "Dell-99999-1234.1234.2345",
@@ -28,26 +25,7 @@
       "FRUSubType": "River"
     },
     {
-      "ID": "x0c0s0b0n0p0",
-      "ParentID": "x0c0s0b0n0",
-      "Type": "Processor",
-      "Ordinal": 0,
-      "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
-      "FRUType": "Processor",
-      "FRUSubType": "SKL24"
-    },
-    {
-      "ID": "x0c0s0b0n0p1",
-      "ParentID": "x0c0s0b0n0",
-      "Type": "Processor",
-      "Ordinal": 1,
-      "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
-      "FRUType": "Processor",
-      "FRUSubType": "SKL24"
-    },
-    {
       "ID": "x0c0s0b0n0d0",
-      "ParentID": "x0c0s0b0n0",
       "Type": "Memory",
       "Ordinal": 0,
       "FRUID": "MFR-PARTNUMBER-SERIALNUMBER",
@@ -56,14 +34,12 @@
     },
     {
       "ID": "x0c0s0b0n0d1",
-      "ParentID": "x0c0s0b0n0",
       "Type": "Memory",
       "Ordinal": 1,
       "FRUID": "empty-x0c0s0b0n0d1"
     },
     {
       "ID": "x0c0s0b0n0d2",
-      "ParentID": "x0c0s0b0n0",
       "Type": "Memory",
       "Ordinal": 2,
       "FRUID": "MFR-PARTNUMBER-SERIALNUMBER_2",
@@ -72,14 +48,28 @@
     },
     {
       "ID": "x0c0s0b0n0d3",
-      "ParentID": "x0c0s0b0n0",
       "Type": "Memory",
       "Ordinal": 3,
       "FRUID": "empty-x0c0s0b0n0d3"
     },
     {
+      "ID": "x0c0s0b0n0p0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
+      "FRUType": "Processor",
+      "FRUSubType": "SKL24"
+    },
+    {
+      "ID": "x0c0s0b0n0p1",
+      "Type": "Processor",
+      "Ordinal": 1,
+      "FRUID": "HOW-TO-ID-CPUS-FROM-REDFISH-IF-AT-ALL",
+      "FRUType": "Processor",
+      "FRUSubType": "SKL24"
+    },
+    {
       "ID": "x0m0p0",
-      "ParentID": "x0m0",
       "Type": "CabinetPDU",
       "Ordinal": 0,
       "FRUID": "CabinetPDU.29347ZT536",
@@ -87,7 +77,6 @@
     },
     {
       "ID": "x0m0p0j1",
-      "ParentID": "x0m0p0",
       "Type": "CabinetPDUOutlet",
       "Ordinal": 0,
       "FRUID": "CabinetPDUOutlet.0.CabinetPDU.29347ZT536",
@@ -95,7 +84,6 @@
     },
     {
       "ID": "x0m0p0j2",
-      "ParentID": "x0m0p0",
       "Type": "CabinetPDUOutlet",
       "Ordinal": 2,
       "FRUID": "CabinetPDUOutlet.1.CabinetPDU.29347ZT536",

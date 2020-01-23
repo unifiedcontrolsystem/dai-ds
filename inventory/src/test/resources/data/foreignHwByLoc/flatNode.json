@@ -1,37 +1,37 @@
 {
-  "ID": "x0c0s0b0n0",
-  "Type": "Node",
-  "Ordinal": 0,
-  "Status": "Populated",
   "HWInventoryByLocationType": "HWInvByLocNode",
+  "ID": "x0c0s26b0n0",
   "NodeLocationInfo": {
-    "Id": "System.Embedded.1",
-    "Name": "Name describing system or where it is located, per mgfr",
-    "Description": "Description of system/node type, per mgfr",
-    "Hostname": "if_defined_in_Redfish",
+    "Description": "Computer system providing compute resources",
+    "HostName": "",
+    "Id": "WO105483L01S005",
+    "MemorySummary": {
+      "TotalSystemMemoryGiB": 192
+    },
+    "Name": "S2600WFT",
     "ProcessorSummary": {
       "Count": 2,
-      "Model": "Multi-Core Intel(R) Xeon(R) processor E5-16xx Series"
-    },
-    "MemorySummary": {
-      "TotalSystemMemoryGiB": 64
+      "Model": "Central Processor"
     }
   },
+  "Ordinal": 0,
   "PopulatedFRU": {
-    "FRUID": "Dell-99999-1234.1234.2345",
-    "Type": "Node",
-    "Subtype": "River",
+    "FRUID": "Node.WO105483L01S005",
     "HWInventoryByFRUType": "HWInvByFRUNode",
     "NodeFRUInfo": {
-      "AssetTag": "AdminAssignedAssetTag",
-      "BiosVersion": "v1.0.2.9999",
-      "Model": "OKS0P2354",
-      "Manufacturer": "Dell",
-      "PartNumber": 99999,
-      "SerialNumber": "1234.1234.2345",
-      "SKU": "as213234",
+      "AssetTag": "....................",
+      "BiosVersion": "SE5C620.86B.02.01.0008.031920191559",
+      "Manufacturer": "Intel Corporation",
+      "Model": "S2600WFT",
+      "PartNumber": "K40014-001",
+      "SKU": "R2308WFTZSR",
+      "SerialNumber": "WO105483L01S005",
       "SystemType": "Physical",
-      "UUID": "26276e2a-29dd-43eb-8ca6-8186bbc3d971"
-    }
-  }
+      "UUID": "99984680-4fd6-11e9-906e-0017a4403562"
+    },
+    "Subtype": "",
+    "Type": "Node"
+  },
+  "Status": "Populated",
+  "Type": "Node"
 }

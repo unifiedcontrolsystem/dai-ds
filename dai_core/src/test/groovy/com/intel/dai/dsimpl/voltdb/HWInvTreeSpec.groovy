@@ -1,6 +1,10 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.dsimpl.voltdb
 
-import com.intel.dai.dsapi.HWInvSlot
+import com.intel.dai.dsapi.HWInvLoc
 import com.intel.dai.dsapi.HWInvTree
 
 class HWInvTreeSpec extends spock.lang.Specification {
@@ -9,9 +13,9 @@ class HWInvTreeSpec extends spock.lang.Specification {
         def t1 = new HWInvTree()
         expect: t0.toString() == t1.toString()
     }
-    def "Test HWInvSlot toString" () {
-        def s0 = new HWInvSlot()
-        def s1 = new HWInvSlot()
+    def "Test HWInvLoc toString" () {
+        def s0 = new HWInvLoc()
+        def s1 = new HWInvLoc()
         expect: s0.toString() == s1.toString()
     }
 }

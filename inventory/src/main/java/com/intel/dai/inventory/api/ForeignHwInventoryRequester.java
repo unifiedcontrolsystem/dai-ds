@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api;
 
 
@@ -86,65 +90,68 @@ class ForeignHwInventoryRequester implements RestRequester {
     }
 
     private int interpreteQueryHWInvTreeResult(URI uri, BlockingResult result, String outputFile) {
-        if (result == null) {
+        if (validBlockingResult(uri, result) != 0) {
             return 1;
         }
-        if (result.code == 200) {
-            if (result.responseDocument == null) {
-                logger.error("responseDocument is null");
-                return 1;
-            }
-            HWInvUtilImpl cliUtil = new HWInvUtilImpl();
-            try {
-                cliUtil.fromStringToFile(result.responseDocument, outputFile);
-            } catch (IOException e) {
-                logger.error("Cannot write to %s", outputFile);
-                return 1;
-            }
-            return 0;
+
+        // Write the HW inventory tree to the output file
+        HWInvUtilImpl cliUtil = new HWInvUtilImpl();
+        try {
+            cliUtil.fromStringToFile(result.responseDocument, outputFile);
+        } catch (IOException | NullPointerException e) {
+            logger.error("Cannot write to %s", outputFile);
+            return 1;
         }
-        logger.error("%s => %d", uri.toString(), result.code);
-        return result.code;
+        return 0;
     }
+
     private int interpretePollForDiscoveryProgressResult(URI uri, BlockingResult result) {
-        if (result == null) {
+       if (validBlockingResult(uri, result) != 0) {
+            return 1;
+       }
+
+        // Need at least 1 "Complete"
+        if (!result.responseDocument.contains("Complete")) {
             return 1;
         }
-        if (result.code == 200) {
-            if (result.responseDocument == null) {
-                logger.error("json is null");
+
+        // All discovery must be "Complete"
+        String[] notComplete = {"NotStarted", "Pending", "InProgress"};
+        for (String nc : notComplete) {
+            if (result.responseDocument.contains(nc)) {
                 return 1;
             }
-            logger.info(result.responseDocument);
-            if (!result.responseDocument.contains("Complete")) {
-                return 1;
-            }
-            String[] notComplete = {"NotStarted", "Pending", "InProgress"};
-            for (String nc : notComplete) {
-                if (result.responseDocument.contains(nc)) {
-                    return 1;
-                }
-            }
-            return 0;
         }
-        // Requires interpretation of discovery progress by walking the status array
-        logger.error("%s => %d", uri.toString(), result.code);
-        return result.code;
+        return 0;
     }
+
     private int interpretedInitiateDiscoveryServerResult(URI uri, BlockingResult result) {
+       if (validBlockingResult(uri, result) != 0) {
+            return 1;
+       }
+
+        // Success as long as the result from the blocking call is valid
+        return 0;
+    }
+
+    private int validBlockingResult(URI uri, BlockingResult result) {
         if (result == null) {
             return 1;
         }
-        if (result.code == 200) {
-            if (result.responseDocument == null) {
-                logger.error("interpretedInitiateDiscoveryServerResult:json is null");
-                return 1;
-            }
-            logger.info(result.responseDocument);
-            return 0;
+        if (result.code != 200) {
+            logger.error("%s => %d", uri.toString(), result.code);
+            return result.code;
         }
-        logger.error("%s => %d", uri.toString(), result.code);
-        return result.code;
+        if (result.requestInfo == null) {
+            logger.error("requestInfo is null");
+            return 1;
+        }
+        if (result.responseDocument == null) {
+            logger.error("responseDocument is null");
+            return 1;
+        }
+        logger.info(result.responseDocument);
+        return 0;
     }
 
     private Logger logger;
