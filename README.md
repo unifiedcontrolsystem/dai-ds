@@ -15,7 +15,7 @@ UCS is a flexible software stack that assists development of new designs by OEMs
 https://unifiedcontrolsystem.github.io/
 
 
-Travis CI &nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/unifiedcontrolsystem/dai-ds.svg?branch=master)](https://travis-ci.org/unifiedcontrolsystem/dai-ds)
+Travis CI &nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/unifiedcontrolsystem/dai-ds.svg?branch=master)](https://travis-ci.org/unifiedcontrolsystem/dai-ds)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://scan.coverity.com/projects/unifiedcontrolsystem-dai-ds"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/20195/badge.svg"/></a>
 ====================
 
 The DAI/DS public GitHub project has been integrated with Travis continuous integration.
