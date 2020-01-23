@@ -1,6 +1,0 @@
-
-SELECT * FROM HW_Location ORDER BY ID;
-ID        PARENTID  TYPE           ORDINAL  FRUID           FRUTYPE  FRUSUBTYPE 
---------- --------- -------------- -------- --------------- -------- -----------
-x0c0s0    x0c0      ComputeModule         0 empty-x0c0s0    NULL     NULL       
-x0c0s0b0  x0c0s0    NodeEnclosure         0 empty-x0c0s0b0  NULL     NULL       

@@ -1,13 +1,12 @@
 {
-  "FRUS": [
+  "locs": [
     {
-      "ID": "x0c0s0b0n0",
-      "ParentID": "x0c0s0b0",
+      "ID": "x0c0s26b0n0",
       "Type": "Node",
       "Ordinal": 0,
-      "FRUID": "Dell-99999-1234.1234.2345",
+      "FRUID": "Node.WO105483L01S005",
       "FRUType": "Node",
-      "FRUSubType": "River"
+      "FRUSubType": ""
     }
   ]
 }

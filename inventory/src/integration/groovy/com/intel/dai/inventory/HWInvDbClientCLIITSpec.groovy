@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory
 
 import com.intel.dai.inventory.api.HWInvDbClientCLI
@@ -23,14 +27,14 @@ class HWInvDbClientCLIITSpec extends Specification {
     }
 
     def "Test run args - c2d" () {
-        String[] myArgs = ["-m", "c2d", "-i", fileName]
+        String[] myArgs = ["-c", fileName]
         expect: cli.run(myArgs) == 0
         where:
         fileName                                                          | dummy
         dataDir+"foreignHwByLocList/translated/preview4HWInventory.json"  | null
     }
     def "Test run args - v2d" () {
-        String[] myArgs = ["-m", "v2d", "-i", fileName]
+        String[] myArgs = ["-v", fileName]
 
         expect:
         cli.run(myArgs) == 0

@@ -3,7 +3,7 @@
     "comment0": "tokenAuthProvider: com.intel.authentication.KeycloakTokenAuthentication",
     "comment1" : "EventSim does not require a token",
     "tokenAuthProvider": null,
-    "requester": "com.intel.dai.hwinventory.api.ForeignHwInventoryRequester"
+    "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
   },
   "providerConfigurations": {
     "tokenAuthProvider": {

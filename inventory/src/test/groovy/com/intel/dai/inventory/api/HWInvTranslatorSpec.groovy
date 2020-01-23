@@ -1,5 +1,10 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api
 
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import org.apache.commons.io.FileUtils
 import spock.lang.*
 
@@ -52,7 +57,8 @@ class HWInvTranslatorSpec extends Specification {
         def inputFile = new File(expectedResultFileName)
         def outputFile = new File(outputFileName)
 
-        expect: FileUtils.contentEquals(inputFile, outputFile)
+        expect:
+        FileUtils.contentEquals(inputFile, outputFile)
 
         where:
         inputFileName                            | outputFileName              || expectedResultFileName
@@ -111,12 +117,12 @@ class HWInvTranslatorSpec extends Specification {
         "ID"    | "Type"    | 0         | "Populated"       | null
         "ID"    | "Type"    | 0         | "noSuchStatus"    | null
     }
-    def "foreignToCanonical - negative" () {
+    def "foreignToCanonical - negative"() {
         def ts = new HWInvTranslator(inputFile, "doesNotMatter", null)
-        expect: ts.foreignToCanonical() == 1
+        expect: ts.foreignToCanonical() == res
 
         where:
-        inputFile                                               | dummy
+        inputFile                                               | res
         "doesNotExists"                                         | null
         dataDir+"foreignHwByLoc/translated/flatNode.json"       | null   // already translated
         dataDir+"foreignHwByLoc/flatProcessor.json"             | null   // only nodes are supported
@@ -124,7 +130,7 @@ class HWInvTranslatorSpec extends Specification {
         dataDir+"foreignHwInventory/missingXname.json"          | null
         dataDir+"foreignHwInventory/missingXnameAndFormat.json" | null
     }
-    def "extractParentId" () {
+    def "extractParentId"() {
         def ts = new HWInvTranslator("doesNotMatter", "doesNotMatter", null)
         expect: ts.extractParentId(candidate) == result
 
@@ -135,5 +141,41 @@ class HWInvTranslatorSpec extends Specification {
         "x0c0s0b0n"     | ""
         "^#^@!"         | ""
         null            | null
+    }
+    def "foreignToCanonical"() {
+        def ts = new HWInvTranslator(inputFileName, outputFileName, new HWInvUtilImpl())
+        expect:
+        ts.foreignToCanonical() == location
+        def expectOutputFile = new File(expectedResultFileName)
+        def outputFile = new File(outputFileName)
+        FileUtils.contentEquals(expectOutputFile, outputFile)
+
+        where:
+        inputFileName                                           | expectedResultFileName                                            | outputFileName                        | location
+        dataDir+"foreignHwByLoc/flatNode.json"                  | dataDir+"foreignHwByLoc/translated/flatNode.json"                 | tmpDir+"flatNode.json.tr"             | "x0c0s26b0n0"
+        dataDir+"foreignHwByLocList/preview4HWInventory.json"   | dataDir+"foreignHwByLocList/translated/preview4HWInventory.json"  | tmpDir+"preview4HWInventory.json.tr"  | ""
+        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | dataDir+"foreignHwInventory/translated/nodeNoMemoryNoCpu.json"    | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | "x0c0s21b0n0"
+        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   | dataDir+"foreignHwByLocList/translated/preview4HWInventory.json"  | tmpDir+"hsm-inv-hw-query-s0.json.tr"  | "s0"
+    }
+    def "isValidLocationName"() {
+        def ts = new HWInvTranslator("doesNotMatter", "doesNotMatter", null)
+        expect: ts.isValidLocationName(candidate) == result
+
+        where:
+        candidate       | result
+        "x0"            | true
+        "x0c0s0b0n0"    | true
+        "x0c0s21b0n0"   | true
+        "x0c0s0b0n"     | false
+        "^#^@!"         | false
+        null            | false
+        "X0"            | false
+        "x0*"           | false
+        "+"             | false
+    }
+    def "main"() {
+        String[] myArgs = ["-i", dataDir+"foreignHwByLoc/flatNode.json", "-o", tmpDir+"flatNodeFromMain.tr.json"]
+        when: ts.main(myArgs)
+        then: notThrown Exception
     }
 }
