@@ -127,7 +127,7 @@
       "subjects": [
         "events"
       ],
-      "adapterProvider": "environmentalData"
+      "adapterProvider": "rasData"
     }
   },
 
