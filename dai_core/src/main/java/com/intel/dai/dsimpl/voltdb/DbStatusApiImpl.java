@@ -14,7 +14,6 @@ import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcCallException;
 
 import java.io.IOException;
-import java.sql.*;
 import java.time.Instant;
 
 /**
@@ -67,15 +66,6 @@ public class DbStatusApiImpl implements DbStatusApi {
     @Override
     public void setDataPopulationFailed(String description) throws DataStoreException {
         setPopulateStatus(DbStatusEnum.POPULATE_DATA_ERROR, description);
-    }
-
-    @Override
-    public void close() throws IOException {
-        try {
-            voltDb_.close();
-        } catch(InterruptedException e) {
-            throw new IOException(e);
-        }
     }
 
     private void setPopulateStatus(DbStatusEnum status, String description) throws DataStoreException {

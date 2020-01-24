@@ -15,6 +15,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -22,11 +23,11 @@ import java.util.ArrayList;
  */
 public class Java11RESTServer extends RESTServer {
     private static final int DEFAULT_QUEUED_CONNECTIONS =
-            Integer.valueOf(System.getProperty("Java11RESTServer.maxQueuedConnections", "100"));
+            Integer.parseInt(System.getProperty("Java11RESTServer.maxQueuedConnections", "100"));
     private static final int DEFAULT_SERVER_LINGER_SECONDS =
-            Integer.valueOf(System.getProperty("Java11RESTServer.serverLingerSeconds", "5"));
+            Integer.parseInt(System.getProperty("Java11RESTServer.serverLingerSeconds", "5"));
     private static final long CONNECTION_LINGER =
-            Long.valueOf(System.getProperty("Java11RESTServer.connectionLinger", "333"));
+            Long.parseLong(System.getProperty("Java11RESTServer.connectionLinger", "333"));
 
     public Java11RESTServer(Logger log) throws RESTServerException {
         super(log);
@@ -114,7 +115,6 @@ public class Java11RESTServer extends RESTServer {
 
     private void sseHandler(RouteObject route, HttpExchange exchange) {
         try {
-            HttpExchangeRequest request = new HttpExchangeRequest(exchange);
             PropertyMap params = new PropertyMap();
             for(String pair: exchange.getRequestURI().getQuery().split("&")) {
                 String[] parts = pair.split("=");
@@ -124,7 +124,7 @@ public class Java11RESTServer extends RESTServer {
             exchange.getResponseHeaders().put("Connection", new ArrayList<>() {{ add("keep-alive"); }});
             exchange.getResponseHeaders().put("Content-Type", new ArrayList<>() {{ add("text/event-stream"); }});
             exchange.sendResponseHeaders(200, 0L);
-            exchange.getResponseBody().write(":Accepted\n".getBytes());
+            exchange.getResponseBody().write(":Accepted\n".getBytes(StandardCharsets.UTF_8));
             exchange.getResponseBody().flush();
             connectionManager_.addConnection(exchange, route.eventTypes);
         } catch(IOException e) {
@@ -150,7 +150,7 @@ public class Java11RESTServer extends RESTServer {
         for(String key: response.headers_.keySet())
             exchange.getResponseHeaders().put(key, new ArrayList<>() {{ add(response.headers_.get(key)); }});
         exchange.sendResponseHeaders(response.code_, response.body_.length());
-        exchange.getResponseBody().write(response.body_.getBytes());
+        exchange.getResponseBody().write(response.body_.getBytes(StandardCharsets.UTF_8));
         exchange.getResponseBody().flush();
         try { Thread.sleep(CONNECTION_LINGER); } catch(InterruptedException e) { /* Ignore interrupt */ }
         exchange.close();
@@ -163,7 +163,7 @@ public class Java11RESTServer extends RESTServer {
             String errorBody = responseTranslator_.toString(responseDocument);
             exchange.sendResponseHeaders(code, errorBody.length());
             OutputStream responseBody = exchange.getResponseBody();
-            responseBody.write(errorBody.getBytes());
+            responseBody.write(errorBody.getBytes(StandardCharsets.UTF_8));
             exchange.getResponseBody().flush();
             try { Thread.sleep(CONNECTION_LINGER); } catch(InterruptedException e) { /* Ignore interrupt */ }
             responseBody.close();

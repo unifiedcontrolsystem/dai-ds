@@ -35,15 +35,15 @@ public final class PropertyMap extends HashMap<String, Object> implements Proper
     @SuppressWarnings("unchecked")
     public PropertyMap(Map<String,?> baseMap) {
         if(baseMap != null) {
-            for (String key : baseMap.keySet()) {
-                Object value = baseMap.get(key);
-                if (value == null) put(key, null);
+            for (Entry<String,?> entry : baseMap.entrySet()) {
+                Object value = entry.getValue();
+                if (value == null) put(entry.getKey(), null);
                 else if (value instanceof Map<?, ?>)
-                    put(key, new PropertyMap((Map<String, ?>) value));
+                    put(entry.getKey(), new PropertyMap((Map<String, ?>) value));
                 else if (value instanceof List<?>)
-                    put(key, new PropertyArray((List<?>) value));
+                    put(entry.getKey(), new PropertyArray((List<?>) value));
                 else
-                    put(key, value);
+                    put(entry.getKey(), value);
             }
         }
     }

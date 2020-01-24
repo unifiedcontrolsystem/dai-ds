@@ -160,7 +160,7 @@ final public class CommonFunctions {
         Pattern regex = Pattern.compile(sensorCpuPattern_);
         Matcher matcher = regex.matcher(str);
         if(!matcher.find()) return null;
-        return new NodeOrCpuInfo(Integer.valueOf(str.substring(matcher.start() + 4, matcher.end())),
+        return new NodeOrCpuInfo(Integer.parseInt(str.substring(matcher.start() + 4, matcher.end())),
                 str.substring(0, matcher.start()) + str.substring(matcher.end()));
     }
 
@@ -171,8 +171,8 @@ final public class CommonFunctions {
         Pattern regex2 = Pattern.compile(sensorChannelPattern_);
         Matcher channelMatcher = regex2.matcher(str);
         if(!channelMatcher.find()) return null;
-        return new DimmInfo(Integer.valueOf(str.substring(channelMatcher.start() + 3, channelMatcher.end())),
-                Integer.valueOf(str.substring(dimmMatcher.start() + 5, dimmMatcher.end())),
+        return new DimmInfo(Integer.parseInt(str.substring(channelMatcher.start() + 3, channelMatcher.end())),
+                Integer.parseInt(str.substring(dimmMatcher.start() + 5, dimmMatcher.end())),
                 str.substring(0, channelMatcher.start()) + str.substring(dimmMatcher.end()));
     }
 
@@ -193,7 +193,7 @@ final public class CommonFunctions {
     public interface IndirectCall_ {
         void loadMaps();
     }
-    public static IndirectCall_ loadCall_ = CommonFunctions::loadConversionsMaps;
+    static IndirectCall_ loadCall_ = CommonFunctions::loadConversionsMaps;
 
     private static class NodeOrCpuInfo {
         String newString;

@@ -23,9 +23,9 @@ import java.io.IOException;
 //      long   lWorkItemId          - The work item id that the adapter is "processing" during which it ends up using this callback
 //-------------------------------------------------------------------------
 class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
-    public final String KeyForLctn = "Lctn=";
-    public final String KeyForTimeInMicroSecs = "TimeInMicroSecs=";
-    public final String KeyForUsingSynthData = "UsingSynthData";
+    public static final String KeyForLctn = "Lctn=";
+    public static final String KeyForTimeInMicroSecs = "TimeInMicroSecs=";
+    public static final String KeyForUsingSynthData = "UsingSynthData";
 
     // Member data
     private VoltDbRasEventLog obj;
@@ -187,6 +187,8 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                         bLoggedRasEvent = true;
                     }
                     break;
+                default:
+                    logger.warn("default of switch statement hit! This should NEVER happen!");
             }
 
             // IFF another RAS event has not been logged, log the generic callback failed RAS event.

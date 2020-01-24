@@ -28,12 +28,10 @@ public class QueryAPI {
 
     public synchronized String getData(String requestKey, HashMap<String, String> params_map)
             throws SQLException, DataStoreException {
-        Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
         conn = get_connection();
         try {
             Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
             Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
-            int seq_num = Integer.parseInt(params_map.getOrDefault("SeqNum", "-1"));
             PropertyArray jsonResult;
             switch (requestKey) {
                 case "filedata":
@@ -134,7 +132,7 @@ public class QueryAPI {
             }
         }
     }
-    private PropertyArray executeProcedureOneParam (String prep_procedure, Integer num_inp)
+    private synchronized PropertyArray executeProcedureOneParam (String prep_procedure, Integer num_inp)
             throws SQLException
     {
         try (CallableStatement stmt = conn.prepareCall(prep_procedure)) {

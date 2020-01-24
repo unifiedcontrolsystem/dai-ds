@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 class SSEConnectionManager implements AutoCloseable, Closeable {
     private static final long PING_INTERVAL_SECONDS =
-            Integer.valueOf(System.getProperty("SSEConnectionManager.pingInterval", "90"));
+            Integer.parseInt(System.getProperty("SSEConnectionManager.pingInterval", "90"));
 
     SSEConnectionManager(RESTServer server, Logger log) {
         server_ = server;
@@ -97,7 +98,7 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
 
     private boolean publishSSEPing(SSEConnection connection) {
         try {
-            connection.exchange.getResponseBody().write(":Ping\n".getBytes());
+            connection.exchange.getResponseBody().write(":Ping\n".getBytes(StandardCharsets.UTF_8));
             connection.exchange.getResponseBody().flush();
         } catch(IOException e) {
             String host = connection.exchange.getRemoteAddress().getHostName();
@@ -112,12 +113,15 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
     private boolean publishSSE(SSEConnection connection, String eventType, String data, String id) {
         String[] parts = data.split("\n");
         try {
-            connection.exchange.getResponseBody().write(String.format("event:%s\n", eventType.trim()).getBytes());
+            connection.exchange.getResponseBody().write(String.format("event:%s%n",
+                    eventType.trim()).getBytes(StandardCharsets.UTF_8));
             if(id != null && !id.isBlank())
-                connection.exchange.getResponseBody().write(String.format("id:%s\n", id).getBytes());
+                connection.exchange.getResponseBody().write(String.format("id:%s%n", id).
+                        getBytes(StandardCharsets.UTF_8));
             for (String part : parts)
-                connection.exchange.getResponseBody().write(String.format("data:%s\n", part).getBytes());
-            connection.exchange.getResponseBody().write("\n".getBytes());
+                connection.exchange.getResponseBody().write(String.format("data:%s%n", part).
+                        getBytes(StandardCharsets.UTF_8));
+            connection.exchange.getResponseBody().write("\n".getBytes(StandardCharsets.UTF_8));
             connection.exchange.getResponseBody().flush();
         } catch(IOException e) {
             String host = connection.exchange.getRemoteAddress().getHostName();

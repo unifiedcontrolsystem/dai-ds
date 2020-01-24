@@ -108,11 +108,5 @@ public class RESTClientTest {
         client_.deleteRESTRequestAsync(URI.create("http://localhost"), this::responseCallbackException);
     }
 
-    @Test
-    public void subscribeToSSE() throws RESTClientException {
-        client_.subscribeToSSEPOST(URI.create("http://localhost"), null, this::responseCallback,
-                this::sseEvent, null);
-    }
-
     private MockRESTClient client_;
 }

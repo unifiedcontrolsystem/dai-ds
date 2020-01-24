@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * Description of interface ServiceInformation.
  */
-public interface Jobs extends AutoCloseable, Closeable {
+public interface Jobs {
 
     /**
      * Add nodes to internal cached jobs table

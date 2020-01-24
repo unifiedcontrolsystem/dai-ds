@@ -4,29 +4,20 @@
 
 package com.intel.dai.ui;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
-import com.intel.dai.AdapterSingletonFactory;
-import com.intel.dai.exceptions.ProviderException;
-import com.intel.logging.Logger;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import spark.Request;
-import com.intel.logging.LoggerFactory;
-
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.List;
-import java.util.regex.Pattern;
 
-import static spark.Spark.*;
 import com.intel.properties.*;
 import com.intel.config_io.*;
 import com.intel.dai.exceptions.DataStoreException;
-
 import com.intel.dai.exceptions.BadInputException;
+import com.intel.dai.AdapterSingletonFactory;
+import com.intel.dai.exceptions.ProviderException;
+import com.intel.logging.Logger;
+import com.intel.logging.LoggerFactory;
+
+import spark.Request;
+import static spark.Spark.*;
 
 public class AdapterUIRest extends AdapterUI {
     /**
@@ -40,8 +31,8 @@ public class AdapterUIRest extends AdapterUI {
      */
     private String rabbitMQHost;
     private Map<String,String> AdapterMap;
-    private static ConfigIO jsonParser_ = null;
     ResponseCreator responseCreator;
+
     AdapterUIRest(String[] args, Logger logger) {
         super(logger);
         AdapterMap = new HashMap<>();
@@ -51,19 +42,20 @@ public class AdapterUIRest extends AdapterUI {
         rabbitMQHost = (args.length >= 4) ? args[3] : "localhost";
     }
 
-    public static void main(String[] cmd_args) throws ProviderException {
+    public static void main(String[] cmd_args) {
         Logger logger = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "console");
         AdapterSingletonFactory.initializeFactory("UI", AdapterUIRest.class.getName(), logger);
-        jsonParser_ = ConfigIOFactory.getInstance("json");
-        assert jsonParser_ != null : "Failed to create a JSON parser!";
+        ConfigIO parser = ConfigIOFactory.getInstance("json");
+        assert parser != null : "Failed to create a JSON parser!";
         staticFiles.location("/demo-v2/");
         final AdapterUIRest uiRest = new AdapterUIRest(cmd_args, logger);
+        uiRest.setParser(parser);
         uiRest.initialize("UI", AdapterUIRest.class.getName(), cmd_args);
         execute_routes(uiRest);
     }
 
     void setParser(ConfigIO parser) {
-        AdapterUIRest.jsonParser_ = parser;
+        responseCreator.setParser(parser);
     }
 
     static void execute_routes(AdapterUIRest uiRest) {
@@ -239,7 +231,7 @@ public class AdapterUIRest extends AdapterUI {
 
     @Override
     public String canned_cmds(String cmd, Map<String, String> params) {
-        CannedAPI mCLI_Updater = new CannedAPI();
+        CannedAPI mCLI_Updater = new CannedAPI(log_);
         String[] results_array = new String[2];
         try {
             String lctn_param = params.getOrDefault("Lctn", "");

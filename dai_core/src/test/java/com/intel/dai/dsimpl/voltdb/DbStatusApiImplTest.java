@@ -40,17 +40,6 @@ public class DbStatusApiImplTest {
     }
 
     @Test
-    public void closeNormalTest() throws Exception {
-        status_.close();
-    }
-
-    @Test(expected = IOException.class)
-    public void closeExceptionTest() throws Exception {
-        doThrow(InterruptedException.class).when(client_).close();
-        status_.close();
-    }
-
-    @Test
     public void getStatusTest() throws DataStoreException {
         setStatusTable(DbStatusEnum.SCHEMA_LOADING.getDbString(), "");
         assertEquals(DbStatusEnum.SCHEMA_LOADING, status_.getStatus());

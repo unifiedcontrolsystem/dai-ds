@@ -15,7 +15,7 @@ import org.voltdb.client.ProcCallException;
 /**
  * Description of interface DbStatusApi.
  */
-public interface NodeInformation extends AutoCloseable, Closeable {
+public interface NodeInformation {
     /**
      * Get state of a compute node
      *

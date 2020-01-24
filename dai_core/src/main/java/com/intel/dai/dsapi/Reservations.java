@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * Description of interface ServiceInformation.
  */
-public interface Reservations extends AutoCloseable, Closeable {
+public interface Reservations {
 
     /**
      * Create reservation in reservation table

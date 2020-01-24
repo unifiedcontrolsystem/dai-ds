@@ -290,29 +290,29 @@ public class NetworkListenerCore {
 
     private Map<String,String> buildArgumentsForNetwork(PropertyMap args) {
         Map<String,String> result = new HashMap<>();
-        for(String key: args.keySet()) {
-            switch(key) {
+        for(Map.Entry<String,Object> entry: args.entrySet()) {
+            switch(entry.getKey()) {
                 case "subjects":
                     int size = 0;
                     List<?> subjects = null;
-                    if(args.get(key) instanceof List) {
-                        subjects = (List<?>)args.get(key);
+                    if(entry.getValue() instanceof List) {
+                        subjects = (List<?>)entry.getValue();
                         size = subjects.size();
                     }
                     String[] array = new String[size];
                     for(int i = 0; i < array.length; i++)
                         array[i] = subjects.get(i).toString();
-                    result.put(key, String.join(",", array));
+                    result.put(entry.getKey(), String.join(",", array));
                     break;
                 case "requestBuilderSelectors":
-                    parseSelector(args.getMapOrDefault(key, new PropertyMap()), result);
+                    parseSelector(args.getMapOrDefault(entry.getKey(), new PropertyMap()), result);
                     break;
                 case "tokenAuthProvider":
-                    result.put(key, args.get(key).toString());
-                    parseTokenConfig(config_.getProviderConfigurationFromClassName(args.get(key).toString()), result);
+                    result.put(entry.getKey(), entry.getValue().toString());
+                    parseTokenConfig(config_.getProviderConfigurationFromClassName(entry.getValue().toString()), result);
                     break;
                 default: // Drop any unexpected keys...
-                    result.put(key, args.get(key).toString());
+                    result.put(entry.getKey(), entry.getValue().toString());
                     break;
             }
         }
@@ -325,15 +325,15 @@ public class NetworkListenerCore {
     }
 
     void parseSelector(PropertyMap map, Map<String,String> result) {
-        for(String key: map.keySet()) {
-            if(map.get(key) instanceof PropertyMap) continue; // Map is unsupported!!!
-            if(map.get(key) instanceof PropertyArray) {
-                String[] array = new String[map.getArrayOrDefault(key, null).size()];
+        for(Map.Entry<String,Object> entry: map.entrySet()) {
+            if(entry.getValue() instanceof PropertyMap) continue; // Map is unsupported!!!
+            if(entry.getValue() instanceof PropertyArray) {
+                String[] array = new String[map.getArrayOrDefault(entry.getKey(), null).size()];
                 for(int i = 0; i < array.length; i++)
-                    array[i] = map.getArrayOrDefault(key, null).get(i).toString();
-                result.put(key, String.join(",", array));
+                    array[i] = map.getArrayOrDefault(entry.getKey(), null).get(i).toString();
+                result.put(entry.getKey(), String.join(",", array));
             }
-            result.put("requestBuilderSelectors." + key, map.get(key).toString());
+            result.put("requestBuilderSelectors." + entry, entry.getValue().toString());
         }
     }
 

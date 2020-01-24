@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * Description of interface ServiceInformation.
  */
-public interface ServiceInformation extends AutoCloseable, Closeable {
+public interface ServiceInformation {
     /**
      * Get service operation information for a given location
      *

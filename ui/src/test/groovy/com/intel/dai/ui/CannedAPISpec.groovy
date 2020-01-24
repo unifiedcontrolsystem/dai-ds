@@ -1,15 +1,15 @@
 package com.intel.dai.ui
 
 import spock.lang.Specification
-import com.intel.config_io.ConfigIO;
-import com.intel.config_io.ConfigIOFactory;
-import com.intel.properties.*;
-import com.intel.logging.LoggerFactory;
-import com.intel.logging.Logger;
-import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
-import java.sql.Connection;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
+import com.intel.config_io.ConfigIO
+import com.intel.config_io.ConfigIOFactory
+import com.intel.properties.*
+import com.intel.logging.LoggerFactory
+import com.intel.logging.Logger
+
+import java.sql.CallableStatement
+import java.sql.Connection
+import java.sql.ResultSet
 
 
 class CannedAPISpec extends Specification {
@@ -19,9 +19,15 @@ class CannedAPISpec extends Specification {
     def setup() {
 
         def jsonParser = Mock(ConfigIO)
+        def logger = Mock(Logger)
         ConfigIOFactory.getInstance(_) >> jsonParser
 
-        underTest_ = new CannedAPI()
+        underTest_ = new CannedAPI(logger)
+        underTest_.conn = Mock(Connection)
+        CallableStatement stmt = Mock(CallableStatement)
+        underTest_.conn.prepareCall(_) >> stmt
+        stmt.executeQuery() >> Mock(ResultSet)
+        underTest_.jsonConverter = Mock(JsonConverter)
     }
 
     def "Test map_state_values owner"() {
@@ -47,8 +53,7 @@ class CannedAPISpec extends Specification {
         jsonResult.put("data", datap)
         def jsonResultMap = new PropertyMap(jsonResult)
 
-        def log = Mock(Logger)
-        LoggerFactory.getInstance(_, _, _) >> log
+        underTest_.jsonConverter.convertToJsonResultSet(_) >> jsonResultMap
 
         expect:
         underTest_.map_state_values(jsonResultMap)
@@ -143,5 +148,4 @@ class CannedAPISpec extends Specification {
         expect:
         underTest_.map_job_values(jsonResultMap)
     }
-
 }

@@ -20,14 +20,14 @@ public class SSEStreamRequestBuilder implements SSERequestBuilder {
     @Override
     public String buildRequest(Collection<String> eventTypes, Map<String, String> builderSpecific) {
         StringBuilder result = new StringBuilder();
-        for(String key: builderSpecific.keySet()) {
-            if(allowedKeys_.contains(key)) {
+        for(Map.Entry<String,String> entry : builderSpecific.entrySet()) {
+            if(allowedKeys_.contains(entry.getKey())) {
                 if(result.length() == 0)
                     result.append("?");
                 else
                     result.append("&");
-                String baseKey = key.split("\\.")[1];
-                result.append(baseKey).append("=").append(builderSpecific.get(key));
+                String baseKey = entry.getKey().split("\\.")[1];
+                result.append(baseKey).append("=").append(entry.getValue());
             }
         }
         return result.toString();

@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -77,7 +78,7 @@ public class PerfLogger {
 
             File fp = new File(outputFile_);
 
-            try (FileWriter fw = new FileWriter(fp, fp.exists())) {
+            try (FileWriter fw = new FileWriter(fp, StandardCharsets.UTF_8, fp.exists())) {
                 BufferedWriter writer = new BufferedWriter(fw);
                 writer.write(firstTimestamp_.getTime().getTime() + " : " + firstEvent_);
                 writer.newLine();

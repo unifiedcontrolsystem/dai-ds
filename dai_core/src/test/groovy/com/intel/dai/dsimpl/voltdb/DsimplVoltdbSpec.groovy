@@ -52,17 +52,6 @@ class VoltDbBootImageSpec extends Specification {
 }
 
 class VoltDbJobsSpec extends Specification {
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbJobs(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
-    }
     def "getClient"() {
         String[] servers = {"localhost"}
         def logger = Mock(Logger)
@@ -81,17 +70,6 @@ class VoltDbLocationSpec extends Specification {
         def ts = new VoltDbLocation(logger, servers)
 
         expect: ts.getSystemLocations().size() == 2
-    }
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbLocation(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
     }
     def "getSystemLabel"() {
         String[] servers = {"localhost"};
@@ -144,17 +122,6 @@ class VoltDbWLMInformationSpec extends Specification {
 
         expect: ts.getClient() == cl
     }
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbWLMInformation(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
-    }
 }
 
 class VoltDbReservationsSpec extends Specification {
@@ -166,17 +133,6 @@ class VoltDbReservationsSpec extends Specification {
         VoltDbClient.voltClient = cl
 
         expect: ts.getClient() == cl
-    }
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbReservations(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
     }
 }
 
@@ -190,17 +146,6 @@ class VoltDbServiceInformationSpec extends Specification {
 
         expect: ts.getClient() == cl
     }
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbServiceInformation(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
-    }
 }
 
 class VoltDbNodeInformationSpec extends Specification {
@@ -212,17 +157,6 @@ class VoltDbNodeInformationSpec extends Specification {
         VoltDbClient.voltClient = cl
 
         expect: ts.getClient() == cl
-    }
-    def "close"() {
-        String[] servers = {"localhost"};
-        def logger = Mock(Logger)
-        def ts = new VoltDbNodeInformation(logger, servers)
-        def cl = Mock(Client)
-        cl.close() >> {}
-        ts.voltDb_ = cl
-
-        when: ts.close()
-        then: notThrown Exception
     }
 }
 

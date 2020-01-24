@@ -118,17 +118,14 @@ public class HWInvDiscoveryCLI {
         }
         RESTClient restClient = RESTClientFactory.getInstance("jdk11", log);
 
-        String requesterClass = sess.providerClassMap.requester;
-        String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
-
-        if (tokenAuthProvider != null) {
+        if (sess.providerClassMap.tokenAuthProvider != null) {
             Map<String, String> config = Map.of(
                     "tokenServer", sess.providerConfigurations.tokenAuthProvider.tokenServer,
                     "realm", sess.providerConfigurations.tokenAuthProvider.realm,
                     "clientId", sess.providerConfigurations.tokenAuthProvider.clientId,
                     "clientSecret", sess.providerConfigurations.tokenAuthProvider.clientSecret
             );
-            createTokenProvider(tokenAuthProvider, config);
+            createTokenProvider(sess.providerClassMap.tokenAuthProvider, config);
             if (tokenProvider_ == null) {
                 throw new RESTClientException("Cannot create token provider");
             }
@@ -137,7 +134,7 @@ public class HWInvDiscoveryCLI {
             }
         }
 
-        createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
+        createRequester(sess.providerClassMap.requester, sess.providerConfigurations.requester, restClient);
     }
 
     private static void getOptions(String[] args) throws ParseException {

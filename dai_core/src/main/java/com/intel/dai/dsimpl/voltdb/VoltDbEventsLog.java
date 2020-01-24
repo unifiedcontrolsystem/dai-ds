@@ -77,7 +77,7 @@ public class VoltDbEventsLog implements EventsLog {
         String instancedata = param.getOrDefault("instancedata", null);
         String jobid = param.getOrDefault("jobid", null);
         String checkJobBool = param.getOrDefault("checkForAffectedJob", "false");
-        Boolean checkJob = Boolean.parseBoolean(checkJobBool);
+        boolean checkJob = Boolean.parseBoolean(checkJobBool);
 
         if (location == null || location.isEmpty())
             checkJob = false;
@@ -85,11 +85,8 @@ public class VoltDbEventsLog implements EventsLog {
         if (jobid != null && !jobid.isEmpty()) {
             _raseventlog.logRasEventWithEffectedJob(eventtype,instancedata,location,jobid,System.currentTimeMillis() * 1000L , "UI", -1L);
         }
-        else  if( jobid == null && checkJob == true) {
+        else  if( jobid == null && checkJob) {
             _raseventlog.logRasEventCheckForEffectedJob(eventtype,instancedata,location,System.currentTimeMillis() * 1000L, "UI", -1L);
-        }
-        else if (jobid == null && checkJob == false) {
-            _raseventlog.logRasEventNoEffectedJob(eventtype,instancedata,location, System.currentTimeMillis() * 1000L, "UI", -1L);
         }
         else {
             _raseventlog.logRasEventNoEffectedJob(eventtype,instancedata,location, System.currentTimeMillis() * 1000L, "UI", -1L);

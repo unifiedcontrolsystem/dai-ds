@@ -1,6 +1,7 @@
 package com.intel.runtime_utils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public final class PropertyLoader {
@@ -17,7 +18,7 @@ public final class PropertyLoader {
 
         if (pathToFile != null) {
             File fp = new File(pathToFile);
-            try (FileReader fr = new FileReader(fp)) {
+            try (FileReader fr = new FileReader(fp, StandardCharsets.UTF_8)) {
                 result.load(fr);
             } catch ( IOException ignore ) { }
         }

@@ -43,7 +43,7 @@ import org.voltdb.*;
 public class WorkItemFinished extends VoltProcedure {
 
 
-    final String selectWorkItem = "SELECT " +
+    static final String selectWorkItem = "SELECT " +
         "Queue, WorkToBeDone, Parameters, NotifyWhenFinished, State, RequestingWorkItemId, RequestingAdapterType, WorkingAdapterId, WorkingResults, Results, StartTimestamp, DbUpdatedTimestamp " +
         "FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ? Order By WorkingAdapterType, Id;";
     public final SQLStmt selectWorkItemSql = new SQLStmt(selectWorkItem);
@@ -62,7 +62,7 @@ public class WorkItemFinished extends VoltProcedure {
     );
 
 
-    final String deleteWorkItem = "DELETE FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ?;";
+    static final String deleteWorkItem = "DELETE FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ?;";
     public final SQLStmt deleteWorkItemSql = new SQLStmt(deleteWorkItem);
 
 

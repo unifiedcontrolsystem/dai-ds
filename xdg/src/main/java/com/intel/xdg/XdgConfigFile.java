@@ -134,7 +134,7 @@ public class XdgConfigFile {
 
     String getSearchPath() { return String.join(":", path_); }
 
-    private boolean checkFile(File file) { return file.exists() & file.isFile() & file.canRead(); }
+    private boolean checkFile(File file) { return file.canRead() && file.isFile(); }
 
     private AbstractCollection<String> getConfigPath() {
         AbstractCollection<String> dirs = new StringArrayListSet();

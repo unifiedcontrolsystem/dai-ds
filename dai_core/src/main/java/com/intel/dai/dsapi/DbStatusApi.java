@@ -6,12 +6,10 @@ package com.intel.dai.dsapi;
 
 import com.intel.dai.exceptions.DataStoreException;
 
-import java.io.Closeable;
-
 /**
  * Description of interface DbStatusApi.
  */
-public interface DbStatusApi extends AutoCloseable, Closeable {
+public interface DbStatusApi {
     /**
      * Wait for a DbStatusEnum.SCHEMA_LOADED or a timeout.
      *

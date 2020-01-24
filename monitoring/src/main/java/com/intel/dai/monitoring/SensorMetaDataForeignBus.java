@@ -36,8 +36,7 @@ class SensorMetaDataForeignBus {
     }
 
     String getUnits(String sensor) {
-        checkSensor(sensor);
-        return entries_.get(sensor).units;
+        return checkSensor(sensor)?entries_.get(sensor).units:"";
     }
 
     boolean checkSensor(String sensor) {
