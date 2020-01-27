@@ -186,12 +186,6 @@ public class CannedAPI {
         try {
             Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
             Integer state_pos = null;
-            Integer nodes_pos = null;
-            BitSet bsThisJobsNodes = null;
-            boolean bFirstNode = true;
-            StringBuilder sbTemp = new StringBuilder();
-            PropertyMap locations = null;
-            String locationList = "";
 
             PropertyArray schema = jsonResult.getArray("schema");
 
@@ -200,42 +194,14 @@ public class CannedAPI {
                     PropertyMap m = schema.getMap(i);
                     if (m.getString("data").equals("state"))
                         state_pos = Integer.valueOf(i);
-                    if (m.getString("data").equals("nodes"))
-                        nodes_pos = Integer.valueOf(i);
                 }
 
                 PropertyArray data = jsonResult.getArray("data");
-                PropertyArray locdata = null;
 
                 for (int i = 0; i < data.size(); i++){
                     PropertyArray items = data.getArray(i);
                     if (state_pos != null)
                         items.set(state_pos.intValue(), jobstate_map.get(items.getString(state_pos.intValue())));
-                    if (nodes_pos != null) {
-                        bsThisJobsNodes = BitSet.valueOf(hexStringToByteArray(items.getString(nodes_pos.intValue())));
-                        bFirstNode = true;
-                        sbTemp = new StringBuilder();
-                        // Loop through any bits that are "on" and add its corresponding location string.
-                        for (int j = bsThisJobsNodes.nextSetBit(0); j >= 0; j = bsThisJobsNodes.nextSetBit(j+1)) {
-                            // Add the node's rank to the string that will be returned to the caller.
-                            if (bFirstNode == false) {
-                                sbTemp.append( "," + Integer.toString(j) );
-                            }
-                            else {
-                                bFirstNode = false;
-                                sbTemp.append( Integer.toString(j) );
-                            }
-                        }
-                        locations = executeProcedure("{call rankstolocations(?)}", sbTemp.toString());
-                        locdata = locations.getArray("data");
-                        locationList = "";
-                        for (int j = 0; j < locdata.size(); j++){
-                            PropertyArray locitems = locdata.getArray(j);
-                            locationList = locationList + locitems.getString(0) + ",";
-                        }
-                        items.set(nodes_pos.intValue(), locationList);
-                    }
-
                 }
 
                 jsonResult.put("data", data);
@@ -247,16 +213,6 @@ public class CannedAPI {
         }
 
         return jsonResult;
-    }
-
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
     }
 
     private String getStartEndTime(Map<String, String> params_map, String key)
@@ -274,18 +230,6 @@ public class CannedAPI {
         else
             new_time = Timestamp.valueOf(Time);
         return new_time;
-    }
-
-    private PropertyMap executeProcedure(String prepProcedure, String FilterVariableOne)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setString(1, FilterVariableOne);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
-            }
-        }
     }
 
     private PropertyMap executeProcedure(String prepProcedure)

@@ -5,6 +5,7 @@
 $(document).ready(function(){
     test(get_floor);
 });
+
 function get_start_date(end_time, days)
 {
     var time_slice;
@@ -12,19 +13,19 @@ function get_start_date(end_time, days)
     var start_time_new;
     if (end_time == null){
         time = new Date();
-        console.log("START TIME", time.getFullYear()+'-'+(time.getMonth() < 9 ? '0' :'') + (time.getMonth()+1)+'-'+
-            (time.getDate() < 10 ? '0' :'') + (time.getDate()) + " 00:00:00.0");
-        return time.getFullYear()+'-'+(time.getMonth() < 9 ? '0' :'') + (time.getMonth()+1)+'-'+
-            (time.getDate() < 10 ? '0' :'') + (time.getDate()) + " 00:00:00.0";
+        console.log("START TIME", time.getFullYear()+'-'+("0" + (time.getMonth()+1)).slice(-2)+'-'+
+                                          ("0" + (time.getDate())).slice(-2) + " 00:00:00.000");
+        return time.getFullYear()+'-'+("0" + (time.getMonth()+1)).slice(-2)+'-'+
+                                                         ("0" + (time.getDate())).slice(-2) + " 00:00:00.000";
     }
     else {
         time_slice = end_time.split(" ")[1];
         time = new Date(end_time);
         start_time_new = new Date(time.setDate(time.getDate() - days));
-    console.log("START TIME", start_time_new.getFullYear()+'-'+(start_time_new.getMonth() < 10 ? '0' :'') + (start_time_new.getMonth()+1)+'-'+
-        (start_time_new.getDate() < 10 ? '0' :'') + (start_time_new.getDate()) +" "+time_slice);
-    return start_time_new.getFullYear()+'-'+(start_time_new.getMonth() < 10 ? '0' :'') + (start_time_new.getMonth()+1)+'-'+
-        (start_time_new.getDate() < 10 ? '0' :'') + (start_time_new.getDate()) +" "+time_slice;}
+    console.log("START TIME", start_time_new.getFullYear()+'-'+("0" + (start_time_new.getMonth()+1)).slice(-2)+'-'+
+        ("0" + (start_time_new.getDate())).slice(-2) +" "+time_slice);
+    return start_time_new.getFullYear()+'-'+("0" + (start_time_new.getMonth()+1)).slice(-2)+'-'+
+                   ("0" + (start_time_new.getDate())).slice(-2) +" "+time_slice;}
 }
 function timestringFromDate(date)
 {
@@ -51,10 +52,23 @@ function main()
         $("#tabs").css("width", "calc(99% - "+$(floorv.canvas).parent().outerWidth()+"px)");
         $("#tabs2").css("width", "100%");
         $("#tabs3").css("width", "100%");
+        $("#tabs5").css("width", "100%");
     });
-
+    // Collect ID names of tabs for url #tab=<name>
+        	$("ul#maintabs li a[href]").each(function(){
+        		tabids.push($(this).attr("href").slice(1)) // slice off the leading #.
+        	})
+        	urloptions = parsehash(location.hash);
+        	curviewidxmain = tabids.indexOf(urloptions["tab"])
+        	if (curviewidxmain == -1) {		// didn't match a real tab
+        		curviewidxmain = 1
+        	}
     tabsobj = $("#tabs").tabs({
-        active: curviewidx,
+        active: curviewidxmain,
+        activate: function(event, ui) {
+        			urloptions["tab"]=tabids[tabsobj.tabs("option", "active")]
+        			location.hash = generatehash(urloptions)	// update hash right away for bookmarking
+        		}
     });
 
     tabsobj2 = $("#tabs2").tabs({
@@ -65,6 +79,10 @@ function main()
     });
 
     tabsobj4 = $("#tabs4").tabs({
+        active: curviewidx,
+    });
+
+    tabsobj5 = $("#tabs5").tabs({
         active: curviewidx,
     });
 
@@ -94,7 +112,7 @@ function main()
     });
     systemDescriptions = systemDescriptionsConstructFromLayoutView(floorLayout.views.Full);
     systemInventory = systemInventoryConstructFromLayoutView(floorLayout.views.Full);
-    console.log(systemInventory.hwtypes.get("dense-compute-node").length);
+    // console.log(systemInventory.hwtypes.get("dense-compute-node").length);
 
     floorv = new FloorView("Full", document.getElementById("floor-canvas"), document.getElementById("floor-layout"), systemInventory);
     TimeIt("floorv.applyLayoutView", function() {
@@ -462,9 +480,10 @@ function main()
             {title: "Boot Image"},
             {title: "IP Address"},
             {title: "MAC Address"},
-        ],
+        ]
     });
     servicenodestable.draw();
+
     $("#ServiceNodeData").on("page.dt", function(){
         var table = $("#ServiceNodeData").DataTable();
         var table_info = table.page.info();
@@ -501,10 +520,8 @@ function main()
                 "targets": [ 6 ],
                 "visible": false,
                 "searchable": false
-            }],
-
-        deferRender: true,
-    });
+            }]
+        });
     computenodestable.draw();
 
     $("#ComputeNodeData").on("page.dt", function(){
@@ -663,8 +680,13 @@ function main()
     // Now fetch the actual start of history (starthistory).
     // This is async, but that's ok.  Meanwhile the slider represents the past 10 min and works.
     // The async processing of starthistory will perform fetchDBChangeTimestamps().
-    fetchHistoryStart(dbHistoryStartResponse);
+    fetchHistoryInit();
 }
+
+function fetchHistoryInit() {
+fetchHistoryStart(dbHistoryStartResponse);
+}
+
 function systemDescriptionsConstructFromLayoutView(layout)
 {
     var sysdesc = {};
@@ -672,6 +694,42 @@ function systemDescriptionsConstructFromLayoutView(layout)
         sysdesc[t] = layout.definitions[t].description;
     }
     return sysdesc;
+}
+ /*
+  * This function parses the given location hash and returns an options mapping.
+  * The hash part of the url looks like:
+  *    #option=value&option=value&...
+  *
+  * All values are assumed to be simple so no special quoting is needed.
+  */
+ function parsehash(hash) {
+    var options={}
+	if (hash.length == 0){
+        options["tab"] = "nodestate-view"
+        }
+    else{
+	// chop off the # at the start of hash
+	hash = hash.substr(1,hash.length-1)
+	// split the assignments apart
+	var assignments = hash.split("&")
+	for (var i in assignments) {
+ 	 	 var nameval = assignments[i].split("=")
+		 options[nameval[0]]=nameval[1]
+ 	 }
+ 	 }
+	 return options
+}
+/* This is the inverse of parsehash().  Given options produced by
+ * parsehash, create the URL hash (with leading #).
+ *
+ * Assumes options are simple with no need to quote.
+ */
+function generatehash(options) {
+	var optlist=[]
+	for (var opt in options) {
+		optlist.push(opt+"="+options[opt])
+	}
+	return "#"+optlist.join("&")
 }
 
 function systemInventoryConstructFromLayoutView(layout)

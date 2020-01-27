@@ -6,26 +6,26 @@
 -->
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DAI Data Process</title>
-  <link rel="stylesheet" href="js/jquery-ui-1.12.1.min.css">
-  <link rel="stylesheet" href="js/jquery-ui-1.12.1.theme.min.css">
-  <link rel="stylesheet" href="js/jquery-ui-1.12.1.structure.min.css">
-  <link rel="stylesheet" href="js/dataTables-1.10.15.jqueryui.css">
-  <link rel="stylesheet" href="js/rowGroup.dataTables.min.css">
-  <script language="javascript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jquery-ui-1.12.1.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jquery.dataTables-1.10.15.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/dataTables.rowGroup.min.js"></script>
-  
-  <!-- Rack definition and layout.  This is json and will be fetched from the inventory adapter as derived from the manifest -->
-  <script language="javascript" type="text/javascript" src="data/floor-layout2.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DAI Data Process</title>
+    <link rel="stylesheet" href="js/jquery-ui-1.12.1.min.css">
+    <link rel="stylesheet" href="js/jquery-ui-1.12.1.theme.min.css">
+    <link rel="stylesheet" href="js/jquery-ui-1.12.1.structure.min.css">
+    <link rel="stylesheet" href="js/dataTables-1.10.15.jqueryui.css">
+    <link rel="stylesheet" href="js/rowGroup.dataTables.min.css">
+    <script language="javascript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jquery-ui-1.12.1.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jquery.dataTables-1.10.15.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/dataTables.rowGroup.min.js"></script>
 
-  <!-- Include artificial data.  This is json-like and should come from a service -->
-  <script language="javascript" type="text/javascript" src="data/sampledata.js"></script>
-  
-<style>
+    <!-- Rack definition and layout.  This is json and will be fetched from the inventory adapter as derived from the manifest -->
+    <script language="javascript" type="text/javascript" src="data/floor-layout2.js"></script>
+
+    <!-- Include artificial data.  This is json-like and should come from a service -->
+    <script language="javascript" type="text/javascript" src="data/sampledata.js"></script>
+
+    <style>
 body {
 	font-size: 10pt;
 }
@@ -159,73 +159,73 @@ table.dataTable tbody td {
 
 <body>
 <div id="control-bar">
-  <img id="clockface" src="js/images/clockface2.png" width="24" height="24"/>
-  &nbsp;&nbsp;&nbsp;
-  <input name="contextselector" id="contextselector"/>
-  &nbsp;&nbsp;&nbsp;
-  <label for="zoom0"><img src="js/images/zoom1.gif" width="24" height="24"/></label>
-  <input type="radio" name="zoom" class="zoomer" id="zoom0" value="0"/>
-  <label for="zoom1"><img src="js/images/zoom2.gif" width="24" height="24"/></label>
-  <input type="radio" name="zoom" class="zoomer" id="zoom1" value="1">
-  <label for="zoom2"><img src="js/images/zoom3.gif" width="24" height="24"/></label>
-  <input type="radio" name="zoom" class="zoomer" id="zoom2" value="2"/>
-  <img id="wayback" src="js/images/pb3.png"/>
+    <img id="clockface" src="js/images/clockface2.png" width="24" height="24"/>
+    &nbsp;&nbsp;&nbsp;
+    <input name="contextselector" id="contextselector"/>
+    &nbsp;&nbsp;&nbsp;
+    <label for="zoom0"><img src="js/images/zoom1.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom0" value="0"/>
+    <label for="zoom1"><img src="js/images/zoom2.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom1" value="1">
+    <label for="zoom2"><img src="js/images/zoom3.gif" width="24" height="24"/></label>
+    <input type="radio" name="zoom" class="zoomer" id="zoom2" value="2"/>
+    <img id="wayback" src="js/images/pb3.png"/>
 </div>
 <p>
 <div id="floor-layout">
-  <canvas id="floor-canvas">
-  Browser does not support canvas?
-  </canvas>
+    <canvas id="floor-canvas">
+        Browser does not support canvas?
+    </canvas>
 </div>
 <div id="tabs" class="tabs-panel">
-  <ul>
-    <li><a href="#hardware-view">Hardware</a></li>
-    <li><a href="#jobs-view">Jobs</a></li>
-    <li><a href="#ras-view">RAS</a></li>
-	<li><a href="#service-view">Service</a></li>
-	<li><a href="#diags-view">Diagnostics</a></li>
-  	<li><a href="#env-view">Environmental</a></li>
-  	<li><a href="#conf-view">Configuration</a></li>
-</ul>
+    <ul>
+        <li><a href="#hardware-view">Hardware</a></li>
+        <li><a href="#jobs-view">Jobs</a></li>
+        <li><a href="#ras-view">RAS</a></li>
+        <li><a href="#service-view">Service</a></li>
+        <li><a href="#diags-view">Diagnostics</a></li>
+        <li><a href="#env-view">Environmental</a></li>
+        <li><a href="#conf-view">Configuration</a></li>
+    </ul>
 
-  <div id="hardware-view">
-	<div class="tab-heading">System Hardware</div>
-	<p>hardware detail goes here (twisty list?)
-  </div>
-  
-  <div id="jobs-view">
-	<div class="tab-heading">Jobs</div>
-	<table class='JobTable' id="Jobs"></table>
-	<p>Compute Node State Summary</p>
-	<table id="stateKey" width="400" height="150" style="border:1px solid #d3d3d3">
-	</table>
-  </div>
+    <div id="hardware-view">
+        <div class="tab-heading">System Hardware</div>
+        <p>hardware detail goes here (twisty list?)
+    </div>
 
-  <div id="ras-view">
-	<div class="tab-heading">System RAS Events</div>
-	<table class='RASTable' id="RAS"></table>
-  </div>
-  <div id="service-view">
-	<div class="tab-heading">Service Actions</div>
-	<table class='ServiceTable' id="ServiceActions"></table>
-  </div>
-  <div id="diags-view">
-	<div class="tab-heading">Diagnostics</div>
-	<p>diags here
-  </div>
-  <div id="env-view">
-	<div class="tab-heading">System Environmental Monitoring</div>
-	<p>Environmental data here
-	<p>This data is summarized from sensys (or similar) which requires in-line
-	   analytics into the nearline data tier.  We don't want a full firehose of
-	   data into the DAI.
-	<p>The rack map could show a heatmap based on env data, possibly augmented with job data.
-  </div>
-  <div id="conf-view">
-	<div class="tab-heading">Software, Operating System, and Hardware Configuration</div>
-	<p>Configuration data here
-	<p>This would include tons and tons of stuff, including OS image management, SN components, and hw config
-  </div>
+    <div id="jobs-view">
+        <div class="tab-heading">Jobs</div>
+        <table class='JobTable' id="Jobs"></table>
+        <p>Compute Node State Summary</p>
+        <table id="stateKey" width="400" height="150" style="border:1px solid #d3d3d3">
+        </table>
+    </div>
+
+    <div id="ras-view">
+        <div class="tab-heading">System RAS Events</div>
+        <table class='RASTable' id="RAS"></table>
+    </div>
+    <div id="service-view">
+        <div class="tab-heading">Service Actions</div>
+        <table class='ServiceTable' id="ServiceActions"></table>
+    </div>
+    <div id="diags-view">
+        <div class="tab-heading">Diagnostics</div>
+        <p>diags here
+    </div>
+    <div id="env-view">
+        <div class="tab-heading">System Environmental Monitoring</div>
+        <p>Environmental data here
+        <p>This data is summarized from sensys (or similar) which requires in-line
+            analytics into the nearline data tier.  We don't want a full firehose of
+            data into the DAI.
+        <p>The rack map could show a heatmap based on env data, possibly augmented with job data.
+    </div>
+    <div id="conf-view">
+        <div class="tab-heading">Software, Operating System, and Hardware Configuration</div>
+        <p>Configuration data here
+        <p>This would include tons and tons of stuff, including OS image management, SN components, and hw config
+    </div>
 </div>
 
 
@@ -772,7 +772,7 @@ class HardwareSet {
 		}
 		return count;
 	}
-	
+
 	/* changeStateFromRankSpec
 	 *
 	 * Right now any char (other than '-') is assumed to be a state char
@@ -785,7 +785,7 @@ class HardwareSet {
 			arg[rank].changeState(charval);
 		}, rankspec, hwt);
 	}
-	
+
 	/* locationsToRankSpec
 	 *
 	 * Given a space-separated list of locations, produce a rankspec.
@@ -832,7 +832,7 @@ class HardwareSet {
 		}
 		return rspec.join('');
 	 }
-	
+
 	/* assignJob
 	 *
 	 * Right now any char (other than '-') is assumed to select hardware
@@ -885,7 +885,7 @@ class Job {
 			rackset.add(hwt[rank].rack);	// Every node HWitem has a rack reference
 			count++;
 		}, rankspec, hwt);
-		
+
 		this.rackset = rackset;
 		this.numnodes = count;
 	}
@@ -1008,7 +1008,7 @@ var contextList = ["Now", "RAS 2017-06-01 22:15:12.004000 R00-CH2-CB1-PM0-CN0"];
 
 // This state table should be queried from the datastore.  Colors are in the colormap.
 var States = {
-	M: {name: "Missing", description: "Nodes that are Missing or Powered Off)"},
+	M: {name: "Offline", description: "Nodes that are Missing or Powered Off)"},
 	B: {name: "BIOS", description: "Nodes with BIOS Starting"},
 	D: {name: "Discovered", description: "Nodes just Discovered"},
 	I: {name: "IP Assigned",   description: "Nodes having IP addresses just assigned"},
@@ -1019,7 +1019,7 @@ var States = {
 };
 
 // Polling stuff
-var VOLTDBAPIURL = 'http://localhost:8805/api/1.0/';
+var VOLTDBAPIURL = 'http://localhost:8080/api/1.0/';
 var HISTPOLL = 1;	// check every "this many" seconds for a history change.
 
 var curdata;		// Initialized in initFloorLayout();
@@ -1052,7 +1052,7 @@ function main()
 		floorv.applyZoom(this.value).draw();
 		$("#tabs").css("width", "calc(99% - "+$(floorv.canvas).parent().outerWidth()+"px)");
 	});
-	
+
 	tabsobj = $("#tabs").tabs({
 		active: curviewidx,
 	});
@@ -1070,7 +1070,7 @@ function main()
 		contextChanged(this);
 	});
 
-	
+
 	systemInventory = systemInventoryConstructFromLayoutView(floorLayout.views.Full);
 	console.log(systemInventory.hwtypes.get("dense-compute-node").length);
 
@@ -1085,7 +1085,7 @@ function main()
 
 	// Take the initial zoom canvas height for the tabs for now
 //	$("#tabs").css("width", "calc(95% - "+floorv.canvas.width+"px)");
-	
+
 	jobtable = $("#Jobs").DataTable({
 		select: 'single',
 		pageLength: 50,
@@ -1251,7 +1251,7 @@ function main()
 			systemInventory.notifyObservers(rackset);
 		}
 	});
-	
+
 	$("#RAS tbody, #ServiceActions tbody").on('click', 'td', function() {
 		var history = $(this).attr('history');
 		if (history) {
@@ -1259,13 +1259,13 @@ function main()
 			changeContext(history);
 		}
 	});
-	
+
 	$("#clockface, #wayback").on('click', function() {	// Click on clockface or Mister Peabody
 		console.log("reset to now");
 		changeContext("Now");
 	});
 
-	
+
 	initStateKey();
 
 	// Start with fictitious, but reasonable, start/end history ranges.  These will update.
@@ -1273,7 +1273,7 @@ function main()
 	starthistory = new Date(nodeMaxLastChgTimestamp.getTime() - 10*60*1000);  // 100min ago for now.  We update accurately below.
 
 	// From here on we start talking to the server...
-	
+
 	// Now fetch the actual start of history (starthistory).
 	// This is async, but that's ok.  Meanwhile the slider represents the past 10 min and works.
 	// The async processing of starthistory will perform fetchDBChangeTimestamps().
@@ -1286,7 +1286,7 @@ function systemInventoryConstructFromLayoutView(layout)
 	var system = new HWitem("system", "floor", "A");
 	var sysinv = new HardwareSet();
 	sysinv.addHw(system);
-	
+
 	// Note: we don't currently create objects for hwtypes.
 	// Here the only thing we use with hwtype data is to enumerate
 	// hardware elements.  We don't care about floor coordinates, etc.
@@ -1532,7 +1532,7 @@ function fetchDBChangeTimestampsResponse(response)
 function updateNodeStatesFromDB()
 {
 	var timestring = timestringFromDate(contexttime ? contexttime : nodeMaxDBUpdatedTimestamp);
-	
+
 	console.log(VOLTDBAPIURL,
 				"Procedure=ComputeNodeHistoryListOfStateAtTime&Parameters=['"
 				+ timestring + "','']&jsonp=?");
@@ -1585,7 +1585,7 @@ function updateNodeStates(data)
 
 // Simple fetch all RAS
 function updateRasFromDB()
-{	
+{
 //	console.log(VOLTDBAPIURL,
 //				"Procedure=RasEventListAtTime&Parameters=['','']&jsonp=?");
 	jQuery.post(VOLTDBAPIURL,
@@ -1604,7 +1604,7 @@ function dbRASresponse(response)
 		console.log("ras response.status=", response.status);  // -3 when not ready
 		return;
 	}
-	
+
 //	console.log("ras response len=", response.results[0].data.length);
 	// Columns can be determined by the schema in the response.
 	// They are (in order)
@@ -1617,9 +1617,9 @@ function dbRASresponse(response)
 	// 6 ControlAction: string action name
 	// 7 Message:  as string
 	// 8 InstanceData: string (not shown)
-	
+
 	rastable.rows().remove();	// removes all rows
-	
+
 	for (var i=0; i< response.results[0].data.length; i++) {
 		var eventtype = response.results[0].data[i][0];
 		var timestamp = response.results[0].data[i][1];
@@ -1636,7 +1636,7 @@ function dbRASresponse(response)
 
 // Simple fetch all Jobs.  We kick off a fetch for both active and non-active
 function updateJobsFromDB()
-{	
+{
 	console.log(VOLTDBAPIURL,
 				"Procedure=JobHistoryListOfNonActiveJobsAtTime&Parameters=['']&jsonp=?");
 	jQuery.post(VOLTDBAPIURL,
@@ -1725,7 +1725,7 @@ function updateJob(jobid, info)
 			// Update the job.
 			job.info = info;		// wholesale replace the info
 			if (info.state == 'T'){
-				// completed job 
+				// completed job
 				jobset.updateJob(job);	// handles color marking on transition
 				jobtable.row('#'+jobid).remove();	// hackish to remove/add, but this does the job.color update as the row is re-created.
 				jobtable.row.add([jobid, info.name, info.user, info.numnodes,
