@@ -144,39 +144,4 @@ class CannedAPISpec extends Specification {
         underTest_.map_job_values(jsonResultMap)
     }
 
-    def "Test map_job_values nodes"() {
-
-        def nodemap = new HashMap<String, String>()
-        nodemap.put("data","nodes")
-        def nodepmap = new PropertyMap(nodemap)
-
-        def schemaarray = new ArrayList()
-        schemaarray.add(nodepmap)
-        def schema = new PropertyArray(schemaarray)
-
-        def nodemapdata = new ArrayList()
-        nodemapdata.add("00000000000000000000000040922409")
-        def nodepmapdata = new PropertyArray(nodemapdata)
-
-        def dataarray = new ArrayList()
-        dataarray.add(nodepmapdata)
-        def datap = new PropertyArray(dataarray)
-
-        def jsonResult = new HashMap<String, Object>()
-        jsonResult.put("schema", schema)
-        jsonResult.put("data", datap)
-        def jsonResultMap = new PropertyMap(jsonResult)
-
-        def log = Mock(Logger)
-        LoggerFactory.getInstance(_, _, _) >> log
-
-        expect:
-        underTest_.map_job_values(jsonResultMap)
-    }
-
-    def "Test hexStringToByteArray"() {
-        expect:
-        underTest_.hexStringToByteArray("00000000000000000000000040922409")
-    }
-
 }

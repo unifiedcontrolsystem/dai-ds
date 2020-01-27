@@ -14,16 +14,18 @@
     <link rel="stylesheet" href="js/jquery-ui-1.12.1.structure.min.css">
     <link rel="stylesheet" href="js/dataTables-1.10.15.jqueryui.css">
     <link rel="stylesheet" href="js/rowGroup.dataTables.min.css">
+    <link rel="stylesheet" href="js/select.dataTables.min.css">
     <script language="javascript" type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery-ui-1.12.1.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery.dataTables-1.10.15.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/dataTables.rowGroup.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/dataTables.select.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/classes_required.js"></script>
     <script language="javascript" type="text/javascript" src="js/ajax_calls_functions.js"></script>
     <!-- Rack definition and layout.  This is json and will be fetched from the inventory adapter as derived from the manifest -->
     <!--<script language="javascript" type="text/javascript" src="data/nsai_floor_layout.js"></script>
 
-    <!-- Include artificial data.  This is json-like and should come from a service -->
+    Include artificial data.  This is json-like and should come from a service -->
     <script language="javascript" type="text/javascript" src="data/sampledata.js"></script>
     <script language="javascript" type="text/javascript" src="data/sampledata2.js"></script>
 
@@ -186,6 +188,9 @@
             color: #454545;
             font-size: 30px;
         }
+       /* div.tabdata.hide { display: none; }
+        div.tabdata { }
+        ul#tabsul li a.selected { }*/
     </style>
 </head>
 <body>
@@ -208,7 +213,7 @@
     </canvas>
 </div>
 <div id="tabs" class="tabs-panel">
-    <ul>
+    <ul id="maintabs">
         <li><a class="nre" href="#hardware-view">Hardware</a></li>
         <li><a class="nre" href="#nodestate-view">System State</a></li>
         <li><a class="nre" href="#ras-view">RAS</a></li>
@@ -222,7 +227,7 @@
         <li><a class="non-nre" href="#serviceop-view"> Service Operations</a></li>
     </ul>
 
-    <div id="hardware-view">
+    <div class= "tabdata" id="hardware-view">
         <div class="tab-heading">System Hardware</div>
         <div id="tabs2" class="tabs-panel">
             <ul>
@@ -238,7 +243,7 @@
         </div>
     </div>
 
-    <div id="nodestate-view">
+    <div class= "tabdata" id="nodestate-view">
         <div class="tab-heading">Compute Node State Summary</div>
         <div id="tabs3" class="tabs-panel">
             <p>Compute Node State Summary</p>
@@ -246,23 +251,23 @@
             </table>
         </div>
     </div>
-    <div id="ras-view">
+    <div class= "tabdata" id="ras-view">
         <div class="tab-heading">System RAS Events</div>
         <table class='RASTable' id="RAS"></table>
     </div>
-    <div id="env-view">
+    <div class= "tabdata" id="env-view">
         <div class="tab-heading">System Environmental Monitoring</div>
         <table class='RASTable' id="Env"></table>
     </div>
-    <div id="invinfo-view">
+    <div class= "tabdata" id="invinfo-view">
         <div class="tab-heading">Inventory Info</div>
         <table class='RASTable' id="InvInfo"></table>
     </div>
-    <div id="replacement-view">
+    <div class= "tabdata" id="replacement-view">
         <div class="tab-heading">Replacement History</div>
         <table class='RASTable' id="ReplacementHistory"></table>
     </div>
-    <div id="jobs-view">
+    <div class= "tabdata" id="jobs-view">
         <div class="tab-heading">Job State Summary</div>
         <div id="tabs4" class="tabs-panel">
             <ul>
@@ -278,19 +283,19 @@
             </div>
         </div>
     </div>
-    <div id="diags-view">
+    <div class= "tabdata" id="diags-view">
         <div class="tab-heading">Diagnostics</div>
         <table class='RASTable' id="Diags"></table>
     </div>
-    <div id="wlm-reservation-view">
+    <div class= "tabdata" id="wlm-reservation-view">
         <div class="tab-heading">Reservations</div>
         <table class='WLMRESTable' id="WLMReservations"></table>
     </div>
-    <div id="invsnap-view">
+    <div class= "tabdata" id="invsnap-view">
         <div class="tab-heading">Inventory Snapshot</div>
         <table class='RASTable' id="InvSnap"></table>
     </div>
-    <div id="serviceop-view">
+    <div class= "tabdata" id="serviceop-view">
         <div class="tab-heading">Service Operations</div>
         <table class='RASTable' id="ServiceOp"></table>
     </div>

@@ -28,11 +28,12 @@ function fetchHistoryStart(callback)
 function dbHistoryStartResponse(data)
 {
     var status= (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
-        setTimeout(fetchHistoryStart(dbHistoryStartResponse), 6000000);
+        setTimeout(fetchHistoryInit, 6000);
         return;
     }
+    setTimeout(fetchHistoryInit, 6000);
     var resp = JSON.parse((JSON.parse(data)).Result);
     if (resp.length > 0) {
         starthistory = resp.lastchgtimestamp;
@@ -44,7 +45,6 @@ function dbHistoryStartResponse(data)
 
 function fetchDBChangeTimestamps(callback)
 {
-
     $.ajax({
         url: '/query/changets',
         success : callback
@@ -54,7 +54,7 @@ function fetchDBChangeTimestamps(callback)
 function fetchDBChangeTimestampsResponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -80,13 +80,13 @@ function fetchDBChangeTimestampsResponse(data)
             }
         }
     }
-    setTimeout(fetchDBChangeTimestamps(fetchDBChangeTimestampsResponse), 6000000);		// kick it off again in the future.
+    //setTimeout(fetchDBChangeTimestamps(fetchDBChangeTimestampsResponse), 6000000);		// kick it off again in the future.
 }
 
 function fetchDBChangeTimestampsResponseNonTrivial(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -131,13 +131,12 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
         else if (name == "InvSS_Max_Timestamp") {
             if (invSSMaxTimestamp != val && !nre) {
                 updateInventorySnapshotFromDB(dbInventorySnapShotResponse, invSSMaxTimestamp, val);
-
                 invSSMaxTimestamp = val;
             }
         }
         else if (name == "Replacement_Max_Timestamp") {
             if (replacementMaxTimestamp != val) {
-                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, invMaxTimestamp, null);
+                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, null);
                 replacementMaxTimestamp = val;
             }
         }
@@ -154,12 +153,24 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
                 serviceOperationTimestamp = val;
             }
         }
+        else if (name == "Service_Node_LastChg_Timestamp") {
+            if (serviceNodeTimestamp != val) {
+            updateServiceInventoryFromDB(dbServiceInventory, serviceNodeTimestamp, val);
+                serviceNodeTimestamp = val;
+            }
+        }
+        else if (name == "Compute_Node_LastChg_Timestamp") {
+            if (computeNodeTimestamp != val) {
+            updateComputeInventoryFromDB(dbComputeInventory, computeNodeTimestamp, val);
+                computeNodeTimestamp = val;
+            }
+        }
 
     }
-    setTimeout(fetchDBChangeTimestamps(fetchDBChangeTimestampsResponseNonTrivial), 6000000);		// kick it off again in the future.
+    //setTimeout(fetchDBChangeTimestamps(fetchDBChangeTimestampsResponseNonTrivial), 6000000);		// kick it off again in the future.
 }
-updateComputeInventoryFromDB(dbComputeInventory, -1);
-updateServiceInventoryFromDB(dbServiceInventory, -1);
+
+
 // Update the current page based on contexttime
 // contextime == null means "Now" so we use nodeMaxDBUpdatedTimestamp,
 // else we really want to see the context time.
@@ -176,7 +187,7 @@ function updateNodeStatesFromDB(callback, startTime, EndTime)
 function dbNodeStatesResponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -214,17 +225,18 @@ function updateNodeStates(data)
 }
 
 // Simple fetch all RAS
-function updateServiceInventoryFromDB(callback, seq_num){
+function updateServiceInventoryFromDB(callback, startTime, endTime){
     $.ajax({
-        url: '/query/serviceinv?SeqNum='+seq_num,
+        url: '/query/serviceinv?StartTime='+startTime+'&EndTime='+endTime,
         success : callback
     });
 }
 
-function updateComputeInventoryFromDB(callback, seq_num)
+function updateComputeInventoryFromDB(callback, startTime, endTime)
 {
+console.log("/query/computeinv?StartTime="+startTime+"&EndTime="+endTime)
     $.ajax({
-        url: '/query/computeinv?SeqNum='+seq_num,
+        url: '/query/computeinv?StartTime='+startTime+'&EndTime='+endTime,
         success : callback
     });
 }
@@ -233,30 +245,41 @@ function updateComputeInventoryFromDB(callback, seq_num)
 function dbComputeInventory(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
     var resp = JSON.parse((JSON.parse(data)).Result);
-    if (!computenodestable.data().any()) {
-        computenodestable.rows().remove();}	// removes all rows
+     if (!computenodestable.data().any()) {
+         computenodestable.rows().remove();}    // removes all rows
+
     for (var i=0; i < resp.length; i++) {
         var location = resp[i].lctn;
-        var hostname = resp[i].hostname;
-        var bootimg = resp[i].bootimageid;
-        var environment = resp[i].environment;
-        var ipadd = resp[i].ipaddr;
-        var macadd = resp[i].macaddr;
-        var seqnum = resp[i].sequencenumber;
-        computenodestable.row.add([location, hostname, bootimg, environment, ipadd, macadd, seqnum]);
+        var computenodeInfo = {
+        hostname :resp[i].hostname,
+        bootimg : resp[i].bootimageid,
+        environment : resp[i].environment,
+        ipadd : resp[i].ipaddr,
+        macadd : resp[i].macaddr,
+        seqnum : resp[i].sequencenumber};
+        updateComputenodeData(location, computenodeInfo);
     }
     computenodestable.draw(false);
+}
+
+function updateComputenodeData(location, computenodeInfo)
+{
+if (computenodestable.rows('[location=' + location +']').any()){
+console.log("exists");
+computenodestable.row('[location='+location +']').remove();
+}
+computenodestable.row.add([location, computenodeInfo.hostname, computenodeInfo.bootimg, computenodeInfo.environment, computenodeInfo.ipadd, computenodeInfo.macadd, computenodeInfo.seqnum]);
 }
 
 function dbServiceInventory(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -266,15 +289,24 @@ function dbServiceInventory(data)
 
     for (var i=0; i < resp.length; i++) {
         var location = resp[i].lctn;
-        var hostname = resp[i].hostname;
-        var bootimg = resp[i].bootimageid;
-        var ipadd = resp[i].ipaddr;
-        var macadd = resp[i].macaddr;
-        servicenodestable.row.add([location, hostname, bootimg,ipadd,macadd]);
-    }
+        var servicenodeInfo = {
+        hostname: resp[i].hostname,
+        bootimg : resp[i].bootimageid,
+        ipadd: resp[i].ipaddr,
+        macadd : resp[i].macaddr};
+        updateServiceData(location, servicenodeInfo);
+   }
     servicenodestable.draw(false);
 }
 
+function updateServiceData(location, servicenodeInfo)
+{
+if (servicenodestable.rows('[location=' + location +']').any()){
+console.log("exists");
+servicenodestable.row('[location='+location +']').remove();
+}
+servicenodestable.row.add([location, servicenodeInfo.hostname, servicenodeInfo.bootimg, servicenodeInfo.ipadd, servicenodeInfo.macadd, servicenodeInfo.seqnum]);
+}
 
 // Simple fetch all Jobs.  We kick off a fetch for both active and non-active
 function updateAJobsFromDB(callback, EndTime)
@@ -300,7 +332,7 @@ function updateNJobsFromDB(callback, EndTime)
 function dbAJobsresponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -328,7 +360,7 @@ function dbAJobsresponse(data)
 function dbNJobsresponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -359,7 +391,7 @@ function dbNJobsresponse(data)
     systemInventory.notifyObservers(null);
 
     // Now kick off an active job update.
-    updateAJobsFromDB();
+    updateAJobsFromDB(dbAJobsresponse, jobMaxDBUpdatedTimestamp);
 }
 
 
@@ -412,7 +444,7 @@ function updateRasFromDB(callback, startTime, EndTime){
 
 function updateRasResult(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -423,7 +455,7 @@ function updateRasResult(data){
     // removes all rows
     for (var i=0; i < resp.length; i++) {
         var eventtype = resp[i].eventtype;
-        var timestamp = resp[i].dbupdatedtimestamp;
+        var timestamp = resp[i].lastchgtimestamp;
         var severity = resp[i].severity;
         var location = resp[i].lctn;
         var job = resp[i].jobId;
@@ -445,7 +477,7 @@ function updateEnvFromDB(callback, startTime, EndTime){
 }
 
 function updateEnvResult(data){
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -483,7 +515,7 @@ function updateNDiagsFromDB(callback, EndTime){
 
 function updateADiagResult(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -507,7 +539,7 @@ function updateADiagResult(data){
 
 function updateNDiagResult(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -536,7 +568,7 @@ function updateServiceOperationsFromDB(callback, EndTime){
 
 function updateServiceOperationResult(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -576,7 +608,7 @@ function updateReservationFromDB(callback, startTime, EndTime)
 function dbReservationResponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -615,7 +647,7 @@ function updateInventorySnapshotFromDB(callback, startTime, EndTime){
 
 function dbInventorySnapShotResponse(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -661,7 +693,7 @@ function updateInventoryInfoFromDB(callback, startTime, EndTime){
 
 function dbInventoryInfoResponse(data){
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
@@ -692,7 +724,7 @@ function dbInventoryInfoResponse(data){
                 "<a class='test'  href='#' class='expand-table-show-hidden-rows' onclick='show_table_details(this)'>More</a></td></tr>" + html_table + "</table>";
             //total_html_table_data = html_table_shown_data + html_table;
         }
-        inventoryinfotable.row.add([resp[i].lctn, dashifnull(resp[i].lastchgtimestamp), "<div class='inner_table_inventory_ss'>" +total_html_table_data +"</div>"]);
+        inventoryinfotable.row.add([resp[i].lctn, dashifnull(resp[i].inventorytimestamp), "<div class='inner_table_inventory_ss'>" +total_html_table_data +"</div>"]);
     }
     inventoryinfotable.draw(false);
 }
@@ -738,7 +770,7 @@ function updateReplacementHistoryFromDB(callback, startTime, EndTime)
 function dbReplacementHistoryResponse(data)
 {
     var status = (JSON.parse(data)).Status;
-    if (status == "Failed") {
+    if (status == "FE") {
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }

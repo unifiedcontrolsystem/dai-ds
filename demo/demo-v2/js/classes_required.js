@@ -745,6 +745,7 @@ var colormap = {
     "dense-compute-node-state-D" : "#0073e6",
     "dense-compute-node-state-I" : "#3399ff",
     "dense-compute-node-state-L" : "#66ccff",
+    "dense-compute-node-state-K" : "#aaddff",
 
     "dense-swblade-state-A"      : "#ffd9b3",
     "dense-rectifier-state-A"    : "#ffd9b3",
@@ -783,11 +784,13 @@ var jobcolors = {
 
 var systemDescriptions = null;	// mapping of "type"->"description
 var systemInventory = null;	// HardwareSet mapping of all location -> hwitems
-
 var floorv = null;			// Global for zoom buttons for now.  May be a subset of the system.
-
 var jobset = null;			// Known jobs...active and completed.
 
+var curviewidxmain = 1;
+var serviceNodeTimestamp = null;
+var jobset = null;			// Known jobs...active and completed.
+var computeNodeTimestamp = null;
 var curviewidx = 1;
 var tabsobj;
 var tabsobj2;
@@ -805,8 +808,12 @@ var computenodestable;
 var inventorysnapshottable;
 var inventoryinfotable;
 var replacementhistorytable;
-
+var tabids = ['hardware-view','nodestate-view', 'ras-view','env-view', 'invinfo-view', 'replacement-view',
+'jobs-view', 'diags-view', 'wlm-reservation-view', 'invsnap-view', 'serviceop-view', 'alert-view'];			// tab id names (discovered on startup)
+var urloptions;
 var contextList = ["Now", "RAS 2017-06-01 22:15:12.004000 R00-CH2-CB1-PM0-CN0"];
+    var tabLinks = new Array();
+    var contentDivs = new Array();
 
 // This state table should be queried from the datastore.  Colors are in the colormap.
 var States = {
@@ -815,6 +822,7 @@ var States = {
     D: {name: "Discovered", description: "Nodes just Discovered"},
     I: {name: "IP Assigned",   description: "Nodes having IP addresses just assigned"},
     L: {name: "Loading", description: "Nodes that are Loading image"},
+    K: {name: "Kernel Boot", description: "Linux kernel starting to boot"},
     A: {name: "Active", description: "Nodes that are Active (booted)"},
     E: {name: "Error",  description: "Nodes in Error"},
     S: {name: "Service", description: "Nodes in Service"},

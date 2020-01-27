@@ -208,6 +208,7 @@ CREATE TABLE public.tier2_computenode_history (
     aggregator character varying(63) NOT NULL,
     inventorytimestamp timestamp without time zone,
     wlmnodestate character varying(1) NOT NULL,
+    ConstraintId character varying(50),
     entrynumber bigint NOT NULL
 );
 
@@ -447,6 +448,7 @@ CREATE TABLE public.tier2_servicenode_history (
     owner character varying(1) NOT NULL,
     aggregator character varying(63) NOT NULL,
     inventorytimestamp timestamp without time zone,
+    ConstraintId character varying(50),
     entrynumber bigint NOT NULL
 );
 
@@ -1109,19 +1111,18 @@ CREATE OR REPLACE FUNCTION public.computenodehistoryoldesttimestamp() RETURNS ti
     select min(LastChgTimestamp) from Tier2_ComputeNode_History;
 $$;
 
-
 --
 -- Name: computenodeinventorylist(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.computenodeinventorylist(p_sequence_num integer) RETURNS SETOF public.tier2_computenode_history
+CREATE OR REPLACE FUNCTION public.computenodeinventorylist(p_starttime timestamp without time zone, p_endtime timestamp without time zone) RETURNS SETOF public.tier2_computenode_history
     LANGUAGE sql
     AS $$
-    select DISTINCT ON (sequencenumber) lctn, sequencenumber, state, hostname, sernum, bootimageid, environment, ipaddr, macaddr, type, bmcipaddr,
-    bmcmacaddr, bmchostname, dbupdatedtimestamp,  lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, inventoryinfo
-    from  tier2_computenode_history where sequencenumber > p_sequence_num order by sequencenumber, dbupdatedtimestamp desc limit 500;
-
-$$;
+select DISTINCT ON (sequencenumber) lctn, sequencenumber, state, hostname, bootimageid, environment, ipaddr, macaddr, bmcipaddr,
+    bmcmacaddr, bmchostname, dbupdatedtimestamp,  lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, aggregator, inventorytimestamp,
+    wlmnodestate, constraintid, entrynumber from  tier2_computenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS')
+    and lastchgtimestamp <= coalesce(p_endtime, current_timestamp at time zone 'UTC') order by sequencenumber, dbupdatedtimestamp desc;
+   $$;
 
 --
 -- Name: dbchgtimestamps(); Type: FUNCTION; Schema: public; Owner: -
@@ -1169,7 +1170,7 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
       return query
           select 'Inv_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from Tier2_computenode_history;
+          from Tier2_nodeinventory_history;
 
       return query
           select 'InvSS_Max_Timestamp'::varchar,
@@ -1190,6 +1191,16 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
           select 'Service_Operation_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
           from Tier2_serviceoperation_history;
+
+      return query
+          select 'Service_Node_LastChg_Timestamp'::varchar,
+             max(lastchgtimestamp)
+          from tier2_servicenode_history;
+
+      return query
+          select 'Compute_Node_LastChg_Timestamp'::varchar,
+              max(lastchgtimestamp)
+          from tier2_computenode_history;
 
       return;
     END
@@ -1720,7 +1731,7 @@ BEGIN
         if get_bit(p_job_nodes, v_bit_index) = 1 then
             select Lctn into v_lctn
             from Tier2_ComputeNode_History
-            where SequenceNumber = i
+            where SequenceNumber = v_bit_index
             order by DbUpdatedTimestamp
             limit 1;
 
@@ -1763,7 +1774,7 @@ BEGIN
         v_bit_index := v_num_bits - 1 - i;
         if get_bit(p_job_nodes, v_bit_index) = 1 then
             select Lctn into v_lctn from Tier2_ComputeNode_History
-            where SequenceNumber = i
+            where SequenceNumber = v_bit_index
             order by DbUpdatedTimestamp limit 1;
 
             if v_lctn is null then
@@ -2137,21 +2148,21 @@ $$;
 -- Name: inventoryinfolist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.inventorytype
+CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), lastchgtimestamp TIMESTAMP, Sernum VarChar(50))
     LANGUAGE plpgsql
     AS $$
 BEGIN
     if (p_start_time is not null) then
         return query
-            select distinct on (lctn) lctn, lastchgtimestamp, inventoryinfo from tier2_computenode_history
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-                dbupdatedtimestamp >= p_start_time and lastchgadaptertype != 'POPULATE'
-            order by lctn, lastchgtimestamp desc;
+            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp, ni.Sernum  from tier2_nodeinventory_history ni
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                dbupdatedtimestamp >= p_start_time
+            order by Lctn, dbupdatedtimestamp desc;
     else
         return query
-            select distinct on (lctn) lctn, lastchgtimestamp, inventoryinfo from tier2_computenode_history
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and lastchgadaptertype != 'POPULATE'
-            order by lctn, lastchgtimestamp desc;
+            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp , ni.Sernum  from tier2_nodeinventory_history ni
+                        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            order by Lctn, dbupdatedtimestamp desc;
     end if;
     return;
 END
@@ -2437,24 +2448,12 @@ BEGIN
             v_rec.EndTimestamp := v_job.EndTimestamp;
             v_rec.ExitStatus := v_job.ExitStatus;
             v_rec.NumNodes := v_job.NumNodes;
-            v_rec.Nodes := v_job.Nodes;
+            v_rec.Nodes := GetListNodeLctns(v_job.Nodes);
             v_rec.JobAcctInfo := v_job.JobAcctInfo;
             v_rec.Wlmjobstate := v_job.Wlmjobstate;
             return next v_rec;
         end if;
     end loop;
-    return;
-END
-$$;
-
-CREATE OR REPLACE FUNCTION public.rankstolocations(p_ranks character varying) RETURNS TABLE(location VarChar(25))
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    return query
-        select distinct lctn
-        from tier2_computenode_history
-        where sequencenumber::varchar(255) = ANY(string_to_array(p_ranks, ','));
     return;
 END
 $$;
@@ -2522,15 +2521,15 @@ CREATE OR REPLACE FUNCTION public.GetServiceNodeSummary() RETURNS SETOF public.s
 $$;
 
 --
--- Name: serviceinventorylist(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: servicenodeinventorylist(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.serviceinventorylist() RETURNS SETOF public.tier2_servicenode_history
+CREATE OR REPLACE FUNCTION public.servicenodeinventorylist(p_starttime timestamp without time zone, p_endtime timestamp without time zone) RETURNS SETOF public.tier2_servicenode_history
     LANGUAGE sql
     AS $$
-    select DISTINCT ON (lctn) lctn, hostname, state, sernum, bootimageid, ipaddr, macaddr, type, bmcipaddr, bmcmacaddr,
-    bmchostname,  dbupdatedtimestamp, lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, inventoryinfo
-    from  tier2_servicenode_history order by lctn, dbupdatedtimestamp desc;
+    select DISTINCT ON (lctn) lctn, sequencenumber, hostname, state, bootimageid, ipaddr, macaddr, bmcipaddr, bmcmacaddr,
+        bmchostname,  dbupdatedtimestamp, lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, aggregator, inventorytimestamp, constraintid, entrynumber
+        from  tier2_servicenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and lastchgtimestamp <= coalesce(p_endtime, current_timestamp at time zone 'UTC') order by lctn, dbupdatedtimestamp desc;
 $$;
 
 
