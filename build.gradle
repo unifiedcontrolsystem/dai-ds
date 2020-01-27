@@ -1014,6 +1014,52 @@ project(':resource_managers') {
     }
 }
 
+project(':eventsim') {
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':dai_core')
+        compile project(':logging')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':runtime_utils')
+        compile project(':dai_network_listener')
+        compile project(":foreign_bus")
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+    project.mainClassName = project.hasProperty("main") ? project.getProperty("main") : 'com.intel.dai.EventSimApp'
+
+    jar {
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Summarize coverage HTML                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1479,7 +1525,7 @@ exit 0
 #
 # SPDX-License-Identifier: Apache-2.0
 
-java -cp "${lib_dir}/foreign_bus-${packageVersion}.jar" com.intel.dai.eventsim.EventSim \$@
+java -cp ${lib_dir}/\\* com.intel.dai.eventsim.EventSimApp \$@
 """
         new File((String)"${buildDir}/tmp/hw-discovery-2.sh").text ="""#!/bin/bash -x
 
