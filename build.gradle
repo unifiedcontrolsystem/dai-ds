@@ -530,6 +530,7 @@ project(':dai_core') {
         compile group: 'info.picocli', name: 'picocli', version: picocli_version
         compile group: 'commons-io', name: 'commons-io', version: commonsio_version
         compile "com.google.code.gson:gson:${gson_version}"
+        compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
@@ -1624,7 +1625,7 @@ exit \$?
     fileMode = 0600
     dirMode = 0700
 
-    from ("${projectDir}/docker-preview4/dai.yml") {
+    from ("${projectDir}/docker-deploy/dai.yml") {
         into("opt/dai-docker")
     }
     from("${buildDir}/jars") {
@@ -1632,7 +1633,7 @@ exit \$?
         exclude("**/populate_schema-${packageVersion}.jar")
         into("opt/dai-docker/lib")
     }
-    from("${projectDir}/docker-preview4/etc") {
+    from("${projectDir}/docker-deploy/etc") {
         exclude("**/SystemManifest.json")
         exclude("**/MachineConfig.json")
         into("opt/dai-docker/etc")
@@ -1643,7 +1644,7 @@ exit \$?
     from("${projectDir}/config-files/log4j2.xml") {
         into("opt/dai-docker/etc")
     }
-    from("${projectDir}/docker-preview4/dai/entryPoint.sh") {
+    from("${projectDir}/docker-deploy/dai/entryPoint.sh") {
         into("opt/dai-docker/dai")
         fileMode = 0700
     }
@@ -1657,10 +1658,10 @@ exit \$?
     from("${projectDir}/config-files/InventoryNodeProcessorMemory.json") {
         into("opt/ucs/etc")
     }
-    from("${projectDir}/docker-preview4/etc/SystemManifest.json") {
+    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
         into("opt/ucs/etc")
     }
-    from("${projectDir}/docker-preview4/etc/LocationTranslationMap.json") {
+    from("${projectDir}/docker-deploy/etc/LocationTranslationMap.json") {
         into("opt/ucs/etc")
     }
     from("${buildDir}/tmp/eventsim-server.sh") {
@@ -1767,7 +1768,7 @@ exit \$?
     dirMode = 0700
 
     // Postgres setup
-    from("${projectDir}/docker-preview4/postgres.yml") {
+    from("${projectDir}/docker-deploy/postgres.yml") {
         into("opt/dai-docker")
     }
     from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
@@ -1775,14 +1776,14 @@ exit \$?
         fileMode(0644)
     }
     // RabbitMQ setup
-    from("${projectDir}/docker-preview4/rabbitmq.yml") {
+    from("${projectDir}/docker-deploy/rabbitmq.yml") {
         into("opt/dai-docker")
     }
     //VoltDB setup
-    from("${projectDir}/docker-preview4/voltdb.yml") {
+    from("${projectDir}/docker-deploy/voltdb.yml") {
         into("opt/dai-docker")
     }
-    from("${projectDir}/docker-preview4/tier1/init.d/docker-entrypoint.sh") {
+    from("${projectDir}/docker-deploy/tier1/init.d/docker-entrypoint.sh") {
         into("opt/dai-docker/tier1/init.d")
         fileMode(0700)
     }
@@ -1819,13 +1820,13 @@ exit \$?
         exclude("**/procedures-${packageVersion}.jar")
         into("opt/dai-docker/lib")
     }
-    from("${projectDir}/docker-preview4/etc/MachineConfig.json") {
+    from("${projectDir}/docker-deploy/etc/MachineConfig.json") {
         into("opt/dai-docker/etc/")
     }
-    from("${projectDir}/docker-preview4/etc/SystemManifest.json") {
+    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
         into("opt/dai-docker/etc/")
     }
-    from("${projectDir}/docker-preview4/etc/NearlineConfig.json") {
+    from("${projectDir}/docker-deploy/etc/NearlineConfig.json") {
         into("opt/dai-docker/etc/")
     }
     from("${projectDir}/config-files/RasEventMetaData.json") {

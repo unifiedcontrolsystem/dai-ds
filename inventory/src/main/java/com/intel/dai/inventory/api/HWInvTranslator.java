@@ -1,10 +1,14 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import com.intel.dai.dsapi.HWInvSlot;
+import com.intel.dai.dsapi.HWInvLoc;
 import com.intel.dai.dsapi.HWInvTree;
 import com.intel.dai.dsapi.HWInvUtil;
 import com.intel.logging.Logger;
@@ -108,39 +112,52 @@ public class HWInvTranslator {
      * </p>
      * @since 1.0.0
      */
-    int foreignToCanonical() {
+    String foreignToCanonical() {
+        String id;
         try {
             HWInvTree canonicalTree;
             try {
+                logger.info("Attempt toForeignHWInvByLocList");
                 ForeignHWInvByLoc[] frus = toForeignHWInvByLocList();
-                logger.info("Parsed HW Loc List");
+                logger.info("Parsed toForeignHWInvByLocList");
                 canonicalTree = toCanonical(frus);
+                id = "";
             } catch (JsonIOException | JsonSyntaxException e) {
+                logger.info("Attempt toForeignHWInventory");
                 ForeignHWInventory foreignTree = toForeignHWInventory();
+                logger.info("Parsed toForeignHWInventory");
                 if (foreignTree.XName != null) {
                     if (foreignTree.Format == null) {
                         logger.error("Missing format field");
-                        return 1;
+                        return null;
                     }
                     logger.info("Parsed HW Inventory");
                     canonicalTree = toCanonical(foreignTree);
+                    id = foreignTree.XName;
                 } else {
+                    logger.info("Attempt toForeignHWInvByLocNode");
                     ForeignHWInvByLocNode node = toForeignHWInvByLocNode();
+                    logger.info("Parsed toForeignHWInvByLocNode");
                     if (!node.Type.equals("Node")) {  // only support node for now
                         logger.error("Unsupported hw Loc type: %s", node.Type);
-                        return 1;
+                        return null;
                     }
                     logger.info("Parsed HW Loc Node");
                     canonicalTree = toCanonical(node);
+                    id = node.ID;
                 }
             }
             String canonicalJson = util.toCanonicalJson(canonicalTree);
+            logger.info("Location: %s Writing translated JSON to %s", id, outputFileName);
             util.fromStringToFile(canonicalJson, outputFileName);
         } catch (Exception e) {
             logger.error("Conversion failed: Exception: %s", e.getMessage());
-            return 1;
+            return null;
         }
-        return 0;
+        if (isValidLocationName(id)) {
+            return id;
+        }
+        return null;
     }
 
     /**
@@ -326,17 +343,17 @@ public class HWInvTranslator {
 
         int numSlotsAdded = 0;
         for (ForeignHWInvByLoc loc: foreignLocList) {
-            HWInvSlot slot = toCanonical(loc);
+            HWInvLoc slot = toCanonical(loc);
             if (slot == null) {
                 continue;   //ignore failed conversions
             }
             logger.info("Adding %s", slot.toString());
-            canonicalTree.FRUS.add(slot);
+            canonicalTree.locs.add(slot);
             numSlotsAdded++;
         }
         return numSlotsAdded;
     }
-    HWInvSlot toCanonical(ForeignHWInvByLoc foreignLoc) {
+    HWInvLoc toCanonical(ForeignHWInvByLoc foreignLoc) {
         logger.info("foreignLoc: %s", foreignLoc.toString());
         if (foreignLoc.ID == null) {
             return null;
@@ -350,10 +367,9 @@ public class HWInvTranslator {
         if (foreignLoc.Status == null) {
             return null;
         }
-        HWInvSlot canonicalFru = new HWInvSlot();
+        HWInvLoc canonicalFru = new HWInvLoc();
 
         canonicalFru.ID = foreignLoc.ID;    // + nodeTypeAbbreviation.get(foreignLoc.Type) + foreignLoc.Ordinal;
-        canonicalFru.ParentID = extractParentId(foreignLoc.ID);
         canonicalFru.Type = foreignLoc.Type;
         canonicalFru.Ordinal = foreignLoc.Ordinal;
 
@@ -389,6 +405,15 @@ public class HWInvTranslator {
             return "";
         } catch (NullPointerException e) {
             return null;
+        }
+    }
+    boolean isValidLocationName(String location) {
+        try {
+            Pattern pattern = Pattern.compile("^([a-z]\\d+)*$");
+            Matcher matcher = pattern.matcher(location);
+            return matcher.find();
+        } catch (NullPointerException e) {
+            return false;
         }
     }
 }

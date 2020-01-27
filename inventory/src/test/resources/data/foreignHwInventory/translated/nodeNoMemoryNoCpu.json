@@ -1,0 +1,12 @@
+{
+  "locs": [
+    {
+      "ID": "x0c0s21b0n0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "FRUID": "Dell-99999-1234.1234.2345",
+      "FRUType": "Node",
+      "FRUSubType": "River"
+    }
+  ]
+}

@@ -1,38 +1,47 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.dsimpl.voltdb
 
 import com.intel.dai.dsapi.*
 import java.nio.file.*
 
 class HWInvUtilImplSpec extends spock.lang.Specification {
-    HWInvSlot slot
+    HWInvLoc loc
     HWInvUtilImpl util
 
     def setup() {
-        slot = new HWInvSlot()
+        loc = new HWInvLoc()
         util = new HWInvUtilImpl()
         "rm -f build/tmp/readOnly.json build/tmp/somefile.json".execute().text
     }
 
-    def "Test toCanonicalJson" () {
+    def "toCanonicalJson"() {
         expect: util.toCanonicalJson(null) == "null"
     }
-    def "Test fromStringToFile" () {
+    def "fromStringToFile"() {
         when: util.fromStringToFile("Ming", "build/tmp/somefile.json")
         then: notThrown IOException
     }
-    def "Test fromStringToFile - cannot write to read only file" () {
+    def "fromStringToFile - cannot write to read only file"() {
         "touch build/tmp/readOnly.json".execute().text
         "chmod -w build/tmp/readOnly.json".execute().text
         when: util.fromStringToFile("Merciless", "build/tmp/readOnly.json")
         then: thrown IOException
     }
-    def "Test fromFile - negative"() {
+    def "fromFile - negative"() {
         when: util.fromFile(Paths.get("noSuchFile"))
         then: thrown IOException
     }
-    def "Test fromFile"() {
+    def "fromFile"() {
         setup: "touch build/tmp/empty.txt".execute().text
         when: util.fromFile(Paths.get("build/tmp/empty.txt"))
         then: notThrown IOException
+    }
+    def "subtract"() {
+        def emptyList = new ArrayList<HWInvLoc>()
+        expect: util.subtract(emptyList, emptyList) == emptyList
+
     }
 }
