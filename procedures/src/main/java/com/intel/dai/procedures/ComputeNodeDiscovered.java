@@ -72,7 +72,6 @@ public class ComputeNodeDiscovered extends ComputeNodeCommon {
         else {
             // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
             bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
-            String sCurRecordsState = aNodeData[0].getString("State");
             // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
             voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
             aNodeData = voltExecuteSQL();

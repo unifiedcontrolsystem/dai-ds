@@ -51,7 +51,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, String> getComputeHostnameFromLocationMap() throws DataStoreException {
+    public synchronized Map<String, String> getComputeHostnameFromLocationMap() throws DataStoreException {
         if (locationToComputeNodeHostname_ == null) {
             try {
                 locationToComputeNodeHostname_ = new HashMap<>();
@@ -68,7 +68,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, String> getServiceHostnameFromLocationMap() throws DataStoreException {
+    public synchronized Map<String, String> getServiceHostnameFromLocationMap() throws DataStoreException {
         if (locationToServiceNodeHostname_ == null) {
             try {
                 locationToServiceNodeHostname_ = new HashMap<>();
@@ -97,7 +97,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, Long> getComputeNodeSequenceNumberFromLocationMap() throws DataStoreException {
+    public synchronized Map<String, Long> getComputeNodeSequenceNumberFromLocationMap() throws DataStoreException {
         if (locationToSequenceNumber_ == null) {
             try {
                 locationToSequenceNumber_ = new HashMap<>();
@@ -116,7 +116,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, String> getAggregatorLocationFromNodeLocationMap() throws DataStoreException {
+    public synchronized Map<String, String> getAggregatorLocationFromNodeLocationMap() throws DataStoreException {
         if (locationToAggregator_ == null) {
             locationToAggregator_ = new HashMap<>();
             try {
@@ -142,7 +142,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, NodeIpAndBmcIp> getNodeAndBmcIPsFromLocationMap() throws DataStoreException {
+    public synchronized Map<String, NodeIpAndBmcIp> getNodeAndBmcIPsFromLocationMap() throws DataStoreException {
         if (locationToNodeIpAndBmcIP_ == null) {
             locationToNodeIpAndBmcIP_ = new HashMap<>();
             locationToComputeNodeIpAndBmcIP_ = new HashMap<>();
@@ -200,16 +200,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public void close() throws IOException {
-        try {
-            voltDb_.close();
-        } catch(InterruptedException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public List<String> getComputeNodeLocations() throws DataStoreException {
+    public synchronized List<String> getComputeNodeLocations() throws DataStoreException {
         if(computeNodeLocationsSorted_ == null) {
             Map<String, String> locationMap = getComputeHostnameFromLocationMap();
             computeNodeLocationsSorted_ = new ArrayList<>(locationMap.keySet());
@@ -219,7 +210,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public List<String> getServiceNodeLocations() throws DataStoreException {
+    public synchronized List<String> getServiceNodeLocations() throws DataStoreException {
         if(serviceNodeLocationsSorted_ == null) {
             Map<String, String> locationMap = getServiceHostnameFromLocationMap();
             serviceNodeLocationsSorted_ = new ArrayList<>(locationMap.keySet());
@@ -229,7 +220,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public List<String> getNodeLocations() throws DataStoreException {
+    public synchronized List<String> getNodeLocations() throws DataStoreException {
         if(nodeLocationsSorted_ == null) {
             nodeLocationsSorted_ = new ArrayList<>(getComputeNodeLocations());
             nodeLocationsSorted_.addAll(getServiceNodeLocations());

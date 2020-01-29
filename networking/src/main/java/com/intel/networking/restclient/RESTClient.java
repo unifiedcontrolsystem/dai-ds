@@ -218,26 +218,6 @@ public abstract class RESTClient {
      * @param otherArgs Extra information for the request builder object.
      * @throws RESTClientException when OAuth token retrieval fails.
      */
-    @Deprecated // Only GET is supported for SSE in the specification.
-    public final void subscribeToSSEPOST(URI uri, Collection<String> eventTypes, ResponseCallback callback,
-                                         SSEEvent eventsCallback, Map<String,String> otherArgs)
-            throws RESTClientException {
-        String document = builder_.buildRequest(eventTypes, otherArgs);
-        Map<String,String> headers = new HashMap<>();
-        getHeaders(headers);
-        doSSERequest(new RequestInfo(HttpMethod.POST, uri, document, headers), callback, eventsCallback);
-    }
-
-    /**
-     * Subscribes to server side events at the URI specified. The request is a POST with the subjects in the body
-     * formatted by the SSERequestBuilder. This request is always asynchronous due the nature of the SSE protocol.
-     *
-     * @param uri The URI of the SSE subscription request (server must support this on the URI).
-     * @param eventTypes The list of event types to be formatted by the current SSERequestBuilder instance.
-     * @param callback The callback for events
-     * @param otherArgs Extra information for the request builder object.
-     * @throws RESTClientException when OAuth token retrieval fails.
-     */
     public final void subscribeToSSEGET(URI uri, Collection<String> eventTypes, ResponseCallback callback,
                                          SSEEvent eventsCallback, Map<String,String> otherArgs)
             throws RESTClientException {

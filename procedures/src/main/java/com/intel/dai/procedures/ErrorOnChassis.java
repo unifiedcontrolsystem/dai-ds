@@ -28,16 +28,16 @@ import org.voltdb.*;
 
 public class ErrorOnChassis extends VoltProcedure {
 
-    final String selectChassis = "SELECT * FROM Chassis WHERE Lctn = ? Order By Lctn;";
+    static final String selectChassis = "SELECT * FROM Chassis WHERE Lctn = ? Order By Lctn;";
     public final SQLStmt selectChassisSql = new SQLStmt(selectChassis);
 
     // final String selectChildChassissThatAreActive = "SELECT Lctn, State FROM Chassis WHERE Lctn LIKE ? AND State = 'A' Order By Lctn;";
     // public final SQLStmt selectChildChassissThatAreActiveSql = new SQLStmt(selectChildChassissThatAreActive);
 
-    final String insertChassisHistory = "INSERT INTO Chassis_History (Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, LastChgTimestamp, Owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    static final String insertChassisHistory = "INSERT INTO Chassis_History (Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, LastChgTimestamp, Owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     public final SQLStmt insertChassisHistorySql = new SQLStmt(insertChassisHistory);
 
-    final String updateChassis = "UPDATE Chassis SET State = ?, LastChgTimestamp = CURRENT_TIMESTAMP WHERE Lctn = ?;";
+    static final String updateChassis = "UPDATE Chassis SET State = ?, LastChgTimestamp = CURRENT_TIMESTAMP WHERE Lctn = ?;";
     public final SQLStmt updateChassisSql = new SQLStmt(updateChassis);
 
 

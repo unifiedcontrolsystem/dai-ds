@@ -190,9 +190,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private Map<String, String> translateBootImageInfo(PropertyMap info) {
         // TODO: Translate the REAL foreign result into ours when known....
         Map<String,String> bootInfo = new HashMap<>();
-        for(String key: info.keySet()) {
-            bootInfo.put(key.toLowerCase(), fixNull(info.get(key)));
-            log_.debug("translateBootImageInfo: %s = '%s'", key.toLowerCase(), bootInfo.get(key));
+        for(Map.Entry<String,Object> entry: info.entrySet()) {
+            bootInfo.put(entry.getKey().toLowerCase(), fixNull(entry.getValue()));
+            log_.debug("translateBootImageInfo: %s = '%s'", entry.getKey().toLowerCase(), entry.getValue());
         }
         return bootInfo;
     }
@@ -231,7 +231,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private AtomicBoolean updating_ = new AtomicBoolean(false);
 
     private final static String FOREIGN_IMAGE_ID_KEY = "bootImageId";
-    private final long DELTA_UPDATE_MS = Long.valueOf(System.getProperty("daiBootImagePollingMs",
+    private final long DELTA_UPDATE_MS = Long.parseLong(System.getProperty("daiBootImagePollingMs",
             "7200000")); // Default is 2 hours.
     private static final Object OBJECT = new Object();
 

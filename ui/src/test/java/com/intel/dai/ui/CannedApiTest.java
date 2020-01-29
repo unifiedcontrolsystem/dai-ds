@@ -3,20 +3,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package com.intel.dai.ui;
-import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.exceptions.ProviderException;
-import com.intel.logging.LoggerFactory;
-import com.intel.properties.PropertyArray;
+import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.ExcludeCategories;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -25,11 +20,11 @@ public class CannedApiTest {
     HashMap<String,String> input_map = new HashMap<>();
     CallableStatement mockstmt = mock(CallableStatement.class);
     ResultSet mockrs = mock(ResultSet.class);
-    ResultSetMetaData mockmd = mock(ResultSetMetaData.class);
     Connection mockconn = mock(Connection.class);
 
     class MockCannedApi extends CannedAPI {
         MockCannedApi() {
+            super(mock(Logger.class));
             jsonConverter = new MockJsonConverter();
         }
 
@@ -40,7 +35,7 @@ public class CannedApiTest {
         }
     }
 
-    class MockJsonConverter extends JsonConverter {
+    static class MockJsonConverter extends JsonConverter {
         MockJsonConverter(){
 
         }

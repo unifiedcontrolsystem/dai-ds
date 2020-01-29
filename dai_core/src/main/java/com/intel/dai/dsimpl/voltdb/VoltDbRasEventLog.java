@@ -204,7 +204,7 @@ public class VoltDbRasEventLog implements RasEventLog {
         return VoltDbWorkQueue.fromOldAdapter(adapter);
     }
 
-    private void loadRasMetadata() {
+    private synchronized void loadRasMetadata() {
         if(mRasDescNameToEventTypeMap == null) {
             ClientResponse response;
             try {

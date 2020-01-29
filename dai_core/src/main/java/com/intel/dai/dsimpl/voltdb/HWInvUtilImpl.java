@@ -54,7 +54,7 @@ public class HWInvUtilImpl implements HWInvUtil {
         }
     }
     public String fromFile(Path inputFilePath) throws IOException {
-        return new String(Files.readAllBytes(inputFilePath));
+        return Files.readString(inputFilePath, StandardCharsets.UTF_8);
     }
 
     public List<HWInvLoc> subtract(List<HWInvLoc> list0, List<HWInvLoc> list1) {

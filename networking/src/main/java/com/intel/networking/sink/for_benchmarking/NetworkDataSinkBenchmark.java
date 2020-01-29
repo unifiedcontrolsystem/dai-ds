@@ -12,6 +12,7 @@ import com.intel.networking.sink.NetworkDataSinkFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,8 +35,8 @@ public class NetworkDataSinkBenchmark implements NetworkDataSink {
         initialDelaySeconds_ = Integer.parseInt(args.getOrDefault("initialDelaySeconds", "30"));
         rawDataFileName_ = args.getOrDefault("rawDataFileName", "/opt/ucs/etc/RawBenchmarkData.txt");
         publishedSubject_ = args.getOrDefault("publishedSubject", "events");
-        for(String key: args.keySet())
-            log_.info("*** ARGUMENT: '%s' = '%s'", key, args.get(key));
+        for(Map.Entry<String,String> entry: args.entrySet())
+            log_.info("*** ARGUMENT: '%s' = '%s'", entry.getKey(), entry.getValue());
     }
 
     @Override public void initialize() {}
@@ -121,7 +122,7 @@ public class NetworkDataSinkBenchmark implements NetworkDataSink {
     private void processFile() throws IOException {
         log_.info("*** Processing the file '%s'...", rawDataFileName_);
         List<String> lines = new ArrayList<>();
-        try (FileReader reader = new FileReader(rawDataFileName_)) {
+        try (FileReader reader = new FileReader(rawDataFileName_, StandardCharsets.UTF_8)) {
             try (Scanner scanner = new Scanner(reader)) {
                 while(scanner.hasNext())
                     lines.add(scanner.nextLine().trim());

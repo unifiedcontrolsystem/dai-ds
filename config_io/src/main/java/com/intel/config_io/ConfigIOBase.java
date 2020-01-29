@@ -7,6 +7,8 @@ package com.intel.config_io;
 import com.intel.properties.PropertyDocument;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 abstract class ConfigIOBase implements ConfigIO {
     @Override
@@ -23,7 +25,7 @@ abstract class ConfigIOBase implements ConfigIO {
 
     @Override
     public PropertyDocument readConfig(InputStream stream) throws IOException, ConfigIOParseException {
-        try (Reader reader = new InputStreamReader(stream)) {
+        try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             return readConfig(reader);
         }
     }
@@ -55,7 +57,7 @@ abstract class ConfigIOBase implements ConfigIO {
 
     @Override
     public void writeConfig(PropertyDocument document, OutputStream stream) throws IOException {
-        try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
             writeConfig(document, writer);
         }
     }

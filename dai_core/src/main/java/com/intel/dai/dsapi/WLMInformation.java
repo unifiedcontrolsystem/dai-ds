@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * Description of interface WLMInformation.
  */
-public interface WLMInformation extends AutoCloseable, Closeable {
+public interface WLMInformation {
     /**
      * Get state of a compute node
      *

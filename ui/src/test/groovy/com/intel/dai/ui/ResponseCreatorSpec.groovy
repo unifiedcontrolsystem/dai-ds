@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 
-class responseCreatorSpec extends Specification {
+class ResponseCreatorSpec extends Specification {
 
     def underTest_
 

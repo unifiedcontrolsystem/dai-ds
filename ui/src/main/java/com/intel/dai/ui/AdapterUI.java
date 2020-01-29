@@ -46,7 +46,7 @@ public abstract class AdapterUI {
         }   // End try
         catch (Exception e) {
             log_.exception(e);
-            System.exit(-1);
+            System.exit(1); // shell uses 0-255 unsigned.
         }
     }
 

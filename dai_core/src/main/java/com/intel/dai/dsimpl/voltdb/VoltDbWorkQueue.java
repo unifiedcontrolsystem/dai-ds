@@ -14,6 +14,8 @@ import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.dai.dsapi.WorkQueue;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
@@ -563,7 +565,7 @@ public class VoltDbWorkQueue implements WorkQueue {
 
     private static String compressStringToStream(String data, ByteArrayOutputStream byteStream,
                                                  GZIPOutputStream compressorStream) throws IOException {
-        byte[] dataBytes = data.getBytes();
+        byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
         compressorStream.write(dataBytes);
         compressorStream.flush();
         compressorStream.finish();
@@ -607,7 +609,7 @@ public class VoltDbWorkQueue implements WorkQueue {
             resultBytes.write(chunk, 0, read);
             read = decompressedStream.read(chunk, 0, BYTE_BUFFER_BLOCK_SIZE);
         }
-        return new String(resultBytes.toByteArray());
+        return new String(resultBytes.toByteArray(), StandardCharsets.UTF_8);
     }
 
     @Override

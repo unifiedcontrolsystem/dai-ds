@@ -84,7 +84,8 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             systemActions.publishNormalizedData(rawTopic_, data.getTelemetryDataType(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getValue());
         }
-        if(data.getAverage() != Double.MIN_VALUE) { // Store and publish aggregate data it available...
+        if(Math.abs(data.getAverage() - Double.MIN_VALUE) >= 0.000001) {
+            // Store and publish aggregate data it available...
             log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
                     data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
                     data.getMinimum(), data.getMaximum(), data.getAverage());

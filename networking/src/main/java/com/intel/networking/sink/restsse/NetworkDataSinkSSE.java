@@ -68,8 +68,8 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
             if(builder_ == null) throw new NetworkException("Failed to create a network REST request builder");
         }
         requestType_ = "GET";
-        for(String key: args_.keySet())
-            extraArgs_.put(key, args_.get(key));
+        for(Map.Entry<String,String> entry: args_.entrySet())
+            extraArgs_.put(entry.getKey(), entry.getValue());
         if(args_.containsKey("connectTimeout"))
             connectionTimeoutSeconds_ = Integer.parseInt(args_.get("connectTimeout"));
         String tokenProviderName = args_.getOrDefault("tokenAuthProvider", null);

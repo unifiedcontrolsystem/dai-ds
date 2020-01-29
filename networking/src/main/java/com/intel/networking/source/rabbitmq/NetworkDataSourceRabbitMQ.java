@@ -14,6 +14,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -143,7 +144,7 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
             if (!queue_.isEmpty()) {
                 PublishData data = queue_.poll();
                 // data cannot be null, look at the source of items in the queue (sensMessage).
-                channel_.basicPublish(exchangeName_, data.subject, null, data.message.getBytes());
+                channel_.basicPublish(exchangeName_, data.subject, null, data.message.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

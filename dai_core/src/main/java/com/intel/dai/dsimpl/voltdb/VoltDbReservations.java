@@ -99,15 +99,6 @@ public class VoltDbReservations implements Reservations {
         }
     }
 
-    @Override
-    public void close() throws IOException {
-        try {
-            voltDb_.close();
-        } catch(InterruptedException e) {
-            throw new IOException(e);
-        }
-    }
-
     // Object state...
     private Logger log_;
     private Client voltDb_;

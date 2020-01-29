@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * Queries to retrieve location from a given node hostname and viceversa.
  */
-public interface Location extends AutoCloseable, Closeable {
+public interface Location {
     /**
      * Get the location string of a given compute or non-compute node hostname
      *

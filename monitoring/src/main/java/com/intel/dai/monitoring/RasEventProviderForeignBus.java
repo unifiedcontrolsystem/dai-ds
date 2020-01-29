@@ -152,7 +152,7 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
         CommonDataFormat addEvent(CommonDataFormat event) {
             synchronized (this) {
                 if (suppressionWindowsNanoSeconds_ == Long.MIN_VALUE)
-                    suppressionWindowsNanoSeconds_ = suppressionWindowsSeconds_ * 1000000; // to ns once...
+                    suppressionWindowsNanoSeconds_ = (long)suppressionWindowsSeconds_ * 1000000L; // to ns once...
                 events_.add(event);
                 if (timeExpired() || events_.size() >= suppressionCount_)
                     return doSuppressionExit(event);

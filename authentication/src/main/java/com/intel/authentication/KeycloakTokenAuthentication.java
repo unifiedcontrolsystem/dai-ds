@@ -14,6 +14,7 @@ import org.keycloak.representations.AccessTokenResponse;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of TokenAuthentication using Keycloak libraries. Supported arguments in the passes map are:
@@ -41,8 +42,8 @@ public class KeycloakTokenAuthentication implements TokenAuthentication {
         if(arguments == null) throw new IllegalArgumentException("'arguments' is null but not allowed to be null");
         log_ = logger;
         log_.debug("OAuth Bearer Token configuration values:");
-        for(String key: arguments.keySet())
-            log_.debug("    ===>>> '%s' = '%s'", key, arguments.get(key));
+        for(Map.Entry<String,String> entry: arguments.entrySet())
+            log_.debug("    ===>>> '%s' = '%s'", entry.getKey(), entry.getValue());
         KeycloakBuilder builder = getBuilder()
                 .clientId(getRequiredArgumentValue(arguments, "clientId"))
                 .clientSecret(getRequiredArgumentValue(arguments, "clientSecret"))

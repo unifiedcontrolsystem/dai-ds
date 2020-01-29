@@ -18,6 +18,7 @@ import org.voltdb.client.*;
 import org.voltdb.types.TimestampType;
 
 import java.lang.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.File;
 import java.io.FileReader;
@@ -569,7 +570,7 @@ public class DefaultOnlineTierDataLoader {
     public void populateRasEventMetaData(String sRasEventMetaDataFileName)
             throws ProcCallException, PropertyNotExpectedType, IOException {
         PropertyMap pmRasMetaData;
-        try (FileReader configReader = new FileReader(sRasEventMetaDataFileName)) {
+        try (FileReader configReader = new FileReader(sRasEventMetaDataFileName, StandardCharsets.UTF_8)) {
             pmRasMetaData = jsonParser_.readConfig(configReader).getAsMap();
         } catch (ConfigIOParseException | IOException e) {
             pmRasMetaData = null;
@@ -668,7 +669,7 @@ public class DefaultOnlineTierDataLoader {
             // Open up the machine configuration file.
             //------------------------------------------------------------------
             PropertyMap pmMachCfg;
-            try (FileReader configReader = new FileReader(sMachineConfig)) {
+            try (FileReader configReader = new FileReader(sMachineConfig, StandardCharsets.UTF_8)) {
                 pmMachCfg = jsonParser_.readConfig(configReader).getAsMap();
             }
             catch(ConfigIOParseException | IOException e) {
@@ -777,10 +778,14 @@ public class DefaultOnlineTierDataLoader {
             //------------------------------------------------------------------
             // Read the system manifest file into a string - so we can save its content in the Machine table
             // (so available for later reference).
-            String sEntireManifestFile = new Scanner(new File(sMnfstFileName)).useDelimiter("\\A").next();
+            ;
             // Process the manifest's contents.
             PropertyMap oJsonMnfstObj = null;
-            try { oJsonMnfstObj = jsonParser_.fromString(sEntireManifestFile).getAsMap(); }
+            String sEntireManifestFile = null;
+            try (Scanner scanner = new Scanner(new File(sMnfstFileName), StandardCharsets.UTF_8)) {
+                sEntireManifestFile = scanner.useDelimiter("\\A").next();
+                oJsonMnfstObj = jsonParser_.fromString(sEntireManifestFile).getAsMap();
+            }
             catch(ConfigIOParseException e) { /* Defaults to null */ }
             if (oJsonMnfstObj == null)  throw new RuntimeException("Failed to parse the System Manifest file!");
 

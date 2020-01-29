@@ -26,6 +26,7 @@ public class CannedAPI {
     private Connection conn = null;
     JsonConverter jsonConverter = new JsonConverter();
     private static ConfigIO jsonParser = ConfigIOFactory.getInstance("json");
+    private final Logger log_;
 
     private static final Map<String, String> owner_map = Collections.unmodifiableMap(
             new HashMap<String, String>() {{
@@ -62,8 +63,10 @@ public class CannedAPI {
                 put("S", "Started");
             }});
 
-    CannedAPI() {
+    CannedAPI(Logger logger) {
         assert jsonParser != null: "Failed to get a JSON parser!";
+        assert logger != null: "Passed a null logger to the ctor!";
+        log_ = logger;
     }
 
     public Connection get_connection() throws DataStoreException {
@@ -73,9 +76,9 @@ public class CannedAPI {
     public synchronized String getData(String requestKey, Map<String, String> params_map)
             throws SQLException, DataStoreException, ProviderException {
         assert params_map != null : "Input parameters should be provided";
-        Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
         log_.info("Establishing DB connection");
-        conn = get_connection();
+        if(conn == null)
+            conn = get_connection();
         try {
             Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
             Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
@@ -140,7 +143,6 @@ public class CannedAPI {
     private PropertyMap map_state_values(PropertyMap jsonResult)
     {
         try {
-            Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
             Integer owner_pos = null;
             Integer state_pos = null;
             Integer wlmnodestate_pos = null;
@@ -184,7 +186,6 @@ public class CannedAPI {
     private PropertyMap map_job_values(PropertyMap jsonResult)
     {
         try {
-            Logger log_ = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "log4j2");
             Integer state_pos = null;
 
             PropertyArray schema = jsonResult.getArray("schema");
@@ -193,7 +194,7 @@ public class CannedAPI {
                 for(int i = 0; i < schema.size(); i++){
                     PropertyMap m = schema.getMap(i);
                     if (m.getString("data").equals("state"))
-                        state_pos = Integer.valueOf(i);
+                        state_pos = i;
                 }
 
                 PropertyArray data = jsonResult.getArray("data");
@@ -201,14 +202,14 @@ public class CannedAPI {
                 for (int i = 0; i < data.size(); i++){
                     PropertyArray items = data.getArray(i);
                     if (state_pos != null)
-                        items.set(state_pos.intValue(), jobstate_map.get(items.getString(state_pos.intValue())));
+                        items.set(state_pos, jobstate_map.get(items.getString(state_pos)));
                 }
 
                 jsonResult.put("data", data);
             }
 
         }
-        catch(Exception e){
+        catch(PropertyNotExpectedType e) {
             return jsonResult;
         }
 

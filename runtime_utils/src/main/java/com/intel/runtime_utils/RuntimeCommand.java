@@ -10,7 +10,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class RuntimeCommand {
@@ -28,7 +30,7 @@ public class RuntimeCommand {
 
     public RuntimeCommand(String[] command, Logger log) {
         this();
-        this.command = command;
+        this.command = Arrays.copyOf(command, command.length);
         this.log = log;
     }
 
@@ -68,7 +70,7 @@ public class RuntimeCommand {
     }
 
     private String extractFromStream(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         StringBuilder strBuilder = new StringBuilder();
 
         String line = reader.readLine();

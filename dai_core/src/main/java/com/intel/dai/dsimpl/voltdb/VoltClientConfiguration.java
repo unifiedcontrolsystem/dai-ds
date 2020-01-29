@@ -12,7 +12,7 @@ class VoltClientConfiguration {
 
     private VoltClientConfiguration() { }
 
-    static ClientConfig getVoltClientConfiguration() {
+    static synchronized ClientConfig getVoltClientConfiguration() {
         if(config == null) {
             config = new ClientConfig("", "", null);
             config.setReconnectOnConnectionLoss(true);

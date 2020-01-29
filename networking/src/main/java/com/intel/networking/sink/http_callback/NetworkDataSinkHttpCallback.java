@@ -208,7 +208,7 @@ public class NetworkDataSinkHttpCallback implements NetworkDataSink {
 
     private void unsubscribe() {
         try {
-            BlockingResult result = client_.methodRESTRequestBlocking(unsubscribeMethod_, subscriptionRemoveUrl_, null);
+            client_.methodRESTRequestBlocking(unsubscribeMethod_, subscriptionRemoveUrl_, null);
             try {
                 server_.removeHandler(subscriptionUri_.toString(), subscribeMethod_);
             } catch(RESTServerException e) {

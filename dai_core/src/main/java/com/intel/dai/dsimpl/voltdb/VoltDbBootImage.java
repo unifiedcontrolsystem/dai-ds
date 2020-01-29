@@ -127,8 +127,8 @@ public class VoltDbBootImage implements BootImage {
         };
         Map<String, String> mergedMap = new HashMap<>();
         Map<String,String> modifiedExisting = new HashMap<>();
-        for(String key: existingBootImageInfo.keySet())
-            modifiedExisting.put(key.toLowerCase(), existingBootImageInfo.get(key));
+        for(Map.Entry<String,String> entry: existingBootImageInfo.entrySet())
+            modifiedExisting.put(entry.getKey().toLowerCase(), entry.getValue());
         mergedMap.put("id", bootImage.get("id"));
         for(String key: expectedKeys)
             mergedMap.put(key, bootImage.getOrDefault(key, modifiedExisting.get(key)));
@@ -227,7 +227,6 @@ public class VoltDbBootImage implements BootImage {
     public Map<String, String> retrieveBootImageProfile(String profile_id) throws DataStoreException
     {
         ClientResponse response;
-        Map<String, String> result = new HashMap<>();
         try {
             // Queue this base work item for this particular adapter.
             logger.info(profile_id);
@@ -248,7 +247,6 @@ public class VoltDbBootImage implements BootImage {
     public List<String> listBootImageProfiles() throws DataStoreException
     {
         ClientResponse response;
-        List<String> result = new ArrayList<>();
         try {
             // Queue this base work item for this particular adapter.
             response = voltClient.callProcedure("BootImageGetIds");

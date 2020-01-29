@@ -76,15 +76,6 @@ public class VoltDbLocation implements Location {
     }
 
     @Override
-    public void close() throws IOException {
-        try {
-            voltDb_.close();
-        } catch(InterruptedException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
     public PropertyMap getSystemLocations() {
         PropertyMap system = new PropertyMap();
         system.put("node_locations", new PropertyMap(hostMap_));

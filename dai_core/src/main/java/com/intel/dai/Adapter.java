@@ -1576,7 +1576,9 @@ public class Adapter implements IAdapter {
                                         );
             mAdapterShutdownStarted = true;  // Set flag indicating that we are going through adapter shutdown.
             abend("exception");
-        } catch (Exception e2) {}
+        } catch (Exception e2) {
+            mLogger.exception(e2);
+        }
     }   // End handleMainlineAdapterException(Exception e)
 
 

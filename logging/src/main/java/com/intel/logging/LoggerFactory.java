@@ -14,7 +14,7 @@ final public class LoggerFactory {
         return instance_;
     }
 
-    public static Logger getInstance(String adapterType, String adapterName, String implementation) {
+    public synchronized static Logger getInstance(String adapterType, String adapterName, String implementation) {
         if(instance_ != null) return instance_;
         if(implementation == null || implementation.trim().equals("") || implementation.trim().equals("console")) {
             instance_ = new LoggerConsole(adapterType, adapterName);

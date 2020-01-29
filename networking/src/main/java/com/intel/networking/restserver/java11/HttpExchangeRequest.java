@@ -10,6 +10,7 @@ import com.intel.networking.restserver.RequestException;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ class HttpExchangeRequest implements Request {
 
     private String readBody(InputStream bodyInputStream) throws IOException {
         byte[] bytes = bodyInputStream.readAllBytes();
-        return new String(bytes).trim();
+        return new String(bytes, StandardCharsets.UTF_8).trim();
     }
 
     private final HttpExchange exchange_;

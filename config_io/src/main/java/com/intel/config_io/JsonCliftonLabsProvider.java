@@ -15,6 +15,7 @@ import com.intel.properties.PropertyMap;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Map;
 
 class JsonCliftonLabsProvider extends ConfigIOBase {
     JsonCliftonLabsProvider() {}
@@ -92,21 +93,21 @@ class JsonCliftonLabsProvider extends ConfigIOBase {
     }
 
     private void walkJsonObject(JsonObject jObject, PropertyMap map) {
-        for(String key: jObject.keySet()) {
-            Object value = jObject.get(key);
-            if(value == null) map.put(key, null);
+        for(Map.Entry<String,Object> entry: jObject.entrySet()) {
+            Object value = entry.getValue();
+            if(value == null) map.put(entry.getKey(), null);
             else {
                 String type = value.getClass().getSimpleName();
                 if(type.equals("JsonArray")) {
                     PropertyArray subArray = new PropertyArray();
                     walkJsonArray((JsonArray) value, subArray);
-                    map.put(key, subArray);
+                    map.put(entry.getKey(), subArray);
                 } else if(type.equals("JsonObject")) {
                     PropertyMap subMap = new PropertyMap();
                     walkJsonObject((JsonObject) value, subMap);
-                    map.put(key, subMap);
+                    map.put(entry.getKey(), subMap);
                 } else
-                    map.put(key, value);
+                    map.put(entry.getKey(), value);
             }
         }
     }
@@ -131,21 +132,21 @@ class JsonCliftonLabsProvider extends ConfigIOBase {
     }
 
     private void walkPropertyMap(PropertyMap map, JsonObject jObj) {
-        for(String key: map.keySet()) {
-            Object item = map.get(key);
-            if(item == null) jObj.put(key, null);
+        for(Map.Entry<String,Object> entry: map.entrySet()) {
+            Object item = entry.getValue();
+            if(item == null) jObj.put(entry.getKey(), null);
             else {
                 String type = item.getClass().getSimpleName();
                 if(type.equals("PropertyArray")) {
                     JsonArray subArray = new JsonArray();
                     walkPropertyArray((PropertyArray) item, subArray);
-                    jObj.put(key, subArray);
+                    jObj.put(entry.getKey(), subArray);
                 } else if(type.equals("PropertyMap")) {
                     JsonObject subObject = new JsonObject();
                     walkPropertyMap((PropertyMap) item, subObject);
-                    jObj.put(key, subObject);
+                    jObj.put(entry.getKey(), subObject);
                 } else
-                    jObj.put(key, item);
+                    jObj.put(entry.getKey(), item);
             }
         }
     }

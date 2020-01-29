@@ -86,5 +86,5 @@ public class ResponseCreator {
         return jsonParser_.toString(convertToStandardFormat(output));
     }
 
-    private static ConfigIO jsonParser_ = null;
+    private ConfigIO jsonParser_ = null;
 }

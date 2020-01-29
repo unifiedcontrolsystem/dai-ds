@@ -14,6 +14,7 @@ buildscript {
 
 plugins {
     id 'nebula.ospackage' version '6.1.4'
+    id 'com.github.spotbugs' version '3.0.0'
 }
 
 apply plugin: 'nebula.rpm'
@@ -156,6 +157,7 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'jacoco'
     apply plugin: 'pmd'
+    apply plugin: 'com.github.spotbugs'
 
     repositories {
         jcenter()
@@ -184,12 +186,19 @@ subprojects {
     }
 
     dependencies {
+        spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
+
         testCompile 'junit:junit:4.12+'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22+'
     }
 
     sourceCompatibility = 11
     targetCompatibility = 11
+
+    spotbugs {
+        toolVersion = '3.1.12'
+        sourceSets = [ sourceSets.main ]
+    }
 
     jacoco {
         toolVersion = "0.8.2"
@@ -247,6 +256,19 @@ subprojects {
         }
 
         finalizedBy "jacocoTestReport"
+    }
+
+    tasks.withType(com.github.spotbugs.SpotBugsTask) {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+            html.destination = file("${rootProject.buildDir}/reports/spotbugs/${project.name}.html")
+            xml.destination = file("${rootProject.buildDir}/spotbugs/results-${project.name}.xml")
+        }
+        effort = 'default'
+        reportLevel = 'medium'
+        ignoreFailures = false
+        excludeFilter = file("${rootProject.projectDir}/findBugsExclusions.xml")
     }
 
     jacocoTestReport {
@@ -1376,11 +1398,11 @@ LOGNAME="AdapterDaiMgr-MotherSuperior.log"
 java -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 """
         new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
-# Copyright (C) 2018-${thisYear} Intel Corporation
+# Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
-pgrep -af java | grep "com.intel." | grep -v "AdapterDaiMgr" | awk '{print \$1 " " \$6}'
+jps -l | grep "com.intel.dai." | grep -v AdapterDaiMgr
 exit 0
 """
         new File((String)"${buildDir}/tmp/environment").text = """DAI_VERSION="${packageVersion}"
@@ -1575,7 +1597,7 @@ task makeDockerInstallTarballDai(type: Tar) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
         new File((String)"${buildDir}/tmp/dockerDai.yml").text = """# DAI Docker Deployment Config
-name: docker_cp4_dai_${packageVersion}
+name: docker_dai_${packageVersion}
 tarball: ${buildDir}/tmp/docker-deploy-dai.tar.gz
 destination_folder: ${buildDir}/distributions
 services:
@@ -1697,7 +1719,7 @@ task makeDockerInstallTarball3rdParty(type: Tar) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
         new File((String)"${buildDir}/tmp/docker3rdParty.yml").text = """# DAI 3rd Party Docker Deployment Config
-name: docker_cp4_3rd_party_${packageVersion}
+name: docker_3rd_party_${packageVersion}
 tarball: ${buildDir}/tmp/dai-deploy-3rd-party.tar.gz
 destination_folder: ${buildDir}/distributions
 services:
