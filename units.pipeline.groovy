@@ -11,7 +11,7 @@ pipeline {
 
     stages {
         stage('Unit') {
-            agent { label 'NRE-BUILD' }
+            agent { label 'Nightly-Build' }
             steps {
                 lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
                         matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
