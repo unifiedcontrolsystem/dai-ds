@@ -28,6 +28,8 @@ import java.security.cert.X509Certificate;
  * fail.
  *
  * This class is still backward compatible with regular non-SSL HTTP.
+ *
+ * NOTE: This class cannot be used for gzip or deflate encoding, only identity or plain text.
  */
 public class Java11RESTClient extends RESTClient {
     /**
@@ -39,24 +41,7 @@ public class Java11RESTClient extends RESTClient {
         super(log);
         try { // This SSLContext accepts ALL certificates and should NEVER be used to talk to the internet!!!
             SSLContext context = SSLContext.getInstance("TLS");
-            TrustManager[] tm = new TrustManager[] {
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
-                                throws CertificateException {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
-                                throws CertificateException {
-                        }
-
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                    }
-            };
+            TrustManager[] tm = new TrustManager[] { new PermissiveX509TrustManager() };
             context.init(null, tm, new SecureRandom());
             client_ = HttpClient.newBuilder().sslContext(context).build();
         } catch(NoSuchAlgorithmException | KeyManagementException e) {
@@ -78,7 +63,7 @@ public class Java11RESTClient extends RESTClient {
             HttpRequest request = makeRESTRequest(requestInfo);
             log_.debug("*** SSE Request: method='%s'; uri='%s'; body='%s'", requestInfo.method(), requestInfo.uri(),
                     requestInfo.body());
-            SSELineSubscriber lineSub = new SSELineSubscriber(requestInfo, eventsCallback, log_);
+            SSELineSubscriber lineSub = new SSELineSubscriber(eventsCallback, log_);
             HttpResponse.BodyHandler<Void> handler = HttpResponse.BodyHandlers.fromLineSubscriber(lineSub);
             try {
                 client_.send(request, handler);

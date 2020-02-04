@@ -17,7 +17,7 @@ public class SSELineSubscriberTest {
         eventId_ = null;
         eventData_ = null;
         info_ = mock(RequestInfo.class);
-        subscriber_ = new SSELineSubscriber(info_, this::events, mock(Logger.class));
+        subscriber_ = new SSELineSubscriber(this::events, mock(Logger.class));
     }
 
     private void events(String eventType, String event, String id) {
@@ -55,7 +55,7 @@ public class SSELineSubscriberTest {
 
     @Test
     public void onNextNoCallback() {
-        subscriber_ = new SSELineSubscriber(info_, null, mock(Logger.class));
+        subscriber_ = new SSELineSubscriber(null, mock(Logger.class));
         commonMessageStream();
     }
 

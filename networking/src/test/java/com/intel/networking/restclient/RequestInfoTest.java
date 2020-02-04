@@ -29,5 +29,11 @@ public class RequestInfoTest {
             put("X-Unknown", "value");
         }};
         RequestInfo info = new RequestInfo(HttpMethod.GET, URI.create("http://localhost"), "Body Text.", headers);
+        assertEquals("com.intel.networking.restclient.RequestInfo instance:\n" +
+                "  method=GET\n" +
+                "  uri=http://localhost\n" +
+                "  body=Body Text.\n" +
+                "  headers:\n" +
+                "    X-Unknown: value\n", info.toString());
     }
 }
