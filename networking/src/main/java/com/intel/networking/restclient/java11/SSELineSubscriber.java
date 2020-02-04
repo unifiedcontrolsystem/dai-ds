@@ -5,24 +5,14 @@
 package com.intel.networking.restclient.java11;
 
 import com.intel.logging.Logger;
+import com.intel.networking.restclient.EventSource;
 import com.intel.networking.restclient.RequestInfo;
 import com.intel.networking.restclient.SSEEvent;
 
 import java.util.concurrent.Flow;
 
 class SSELineSubscriber implements Flow.Subscriber<String> {
-    private static class EventSource {
-        void reset() {
-            event = "";
-            data = "";
-        }
-        String event = "";
-        String data = "";
-        String id = null;
-    }
-
-    SSELineSubscriber(RequestInfo info, SSEEvent callback, Logger log) {
-        info_ = info;
+    SSELineSubscriber(SSEEvent callback, Logger log) {
         callback_ = callback;
         log_ = log;
     }
@@ -35,23 +25,7 @@ class SSELineSubscriber implements Flow.Subscriber<String> {
 
     @Override
     public void onNext(String s) {
-        if (s.startsWith(":"))
-            return;
-        if(s.isBlank()) { // do dispatch...
-            if(event.data.isBlank()) { // empty event; reset and abort
-                event.reset();
-                return;
-            }
-            if(callback_ != null)
-                callback_.event(event.event, event.data, event.id);
-            event.reset();
-        }
-        else if (s.startsWith("event:"))
-            event.event = s.substring(6).trim();
-        else if(s.startsWith("data:"))
-            event.data += s.substring(5).trim();
-        else if(s.startsWith("id:"))
-            event.id = s.substring(3).trim();
+        event.processLine(s, callback_);
     }
 
     @Override
@@ -64,7 +38,6 @@ class SSELineSubscriber implements Flow.Subscriber<String> {
         log_.debug("*** LineSubscriber completed.");
     }
 
-    private final RequestInfo info_;
     private final SSEEvent callback_;
     private EventSource event = new EventSource();
     private Logger log_;

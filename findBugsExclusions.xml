@@ -30,6 +30,10 @@
         <Bug code="DE" />
     </Match>
     <Match> <!-- False positive -->
+        <Class name="com.intel.networking.restclient.apache.ApacheRESTClient" />
+        <Bug code="RCN" />
+    </Match>
+    <Match> <!-- False positive -->
         <Class name="com.intel.dai.ras.AdapterRasForeignBus" />
         <Method name="fillInRasEventsWithMissingJobId" />
         <Bug code="DLS" />
@@ -138,7 +142,7 @@
     **************************************************************************************************************-->
 
     <Match> <!-- TODO: This is technically an issue, it will need to be resolved in the future -->
-        <Class name="com.intel.networking.restclient.java11.Java11RESTClient$1" />
+        <Class name="com.intel.networking.restclient.PermissiveX509TrustManager" />
         <Bug code="SECWTM" />
     </Match>
     <Match> <!-- TODO: This should be fixed at some point, the code is WIP -->

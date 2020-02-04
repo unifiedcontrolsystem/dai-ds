@@ -84,5 +84,6 @@ public final class RESTClientFactory {
 
     static final Map<String, Class<? extends RESTClient>> implementations_ = new HashMap<>() {{
         put("jdk11", com.intel.networking.restclient.java11.Java11RESTClient.class);
+        put("apache", com.intel.networking.restclient.apache.ApacheRESTClient.class);
     }};
 }

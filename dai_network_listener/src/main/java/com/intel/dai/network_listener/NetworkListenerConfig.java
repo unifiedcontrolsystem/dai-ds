@@ -32,7 +32,8 @@ public class NetworkListenerConfig {
         adapter_ = adapter;
         parser_ = ConfigIOFactory.getInstance("json");
         if(parser_ == null) throw new RuntimeException("Failed to get a JSON parser"); // Cannot happen, for compile
-        useDebugPrint_ = Boolean.valueOf(System.getProperty(this.getClass().getCanonicalName() + ".DEBUG", "false"));
+        useDebugPrint_ = Boolean.parseBoolean(System.getProperty(this.getClass().getCanonicalName() + ".DEBUG",
+                "false"));
     }
 
     public void loadFromStream(InputStream stream) throws IOException, ConfigIOParseException {
