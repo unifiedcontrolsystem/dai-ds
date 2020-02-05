@@ -11,6 +11,10 @@ class HWInvTreeSpec extends spock.lang.Specification {
     def "Test HWInvTree toString" () {
         def t0 = new HWInvTree()
         def t1 = new HWInvTree()
+
+        t0.locs = new ArrayList<>()
+        t1.locs = new ArrayList<>()
+
         expect: t0.toString() == t1.toString()
     }
     def "Test HWInvLoc toString" () {

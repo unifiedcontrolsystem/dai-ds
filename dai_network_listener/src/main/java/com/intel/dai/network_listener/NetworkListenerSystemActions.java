@@ -8,17 +8,22 @@ import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.*;
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.inventory.api.HWInvTranslator;
 import com.intel.logging.Logger;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.intel.dai.inventory.api.HWInvDiscovery.queryHWInvTree;
 
 /**
  * Description of class PartitionedMonitorSystemActions.
@@ -35,6 +40,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         eventActions_ = factory_.createRasEventLog(adapter_);
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
+        hwInvApi_ = factory_.createHWInvApi();
     }
 
     @Override
@@ -173,6 +179,85 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
                 adapter_.getBaseWorkItemId());
     }
 
+    /**
+     * <p> Determines if the HW inventory DB is currently empty. </p>
+     * @return true if the DB is empty, otherwise false
+     * @throws IOException I/O exception
+     * @throws DataStoreException datastore exception
+     */
+    @Override
+    public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
+        return hwInvApi_.numberOfLocationsInHWInv() == 0;
+    }
+
+    /**
+     * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
+     * @param root root location in foreign format
+     */
+    @Override
+    public void upsertHWInventory(String root) {
+        ingestCanonicalHWInvJson(
+                toCanonicalHWInvJson(
+                        getForeignHWInvJson(
+                                root)));
+    }
+
+    /**
+     * <p> Ingests the HW inventory locations in canonical form. </p>
+     * @param canonicalHwInvJson json containing the HW inventory locations in canonical format
+     */
+    private void ingestCanonicalHWInvJson(String canonicalHwInvJson) {
+        if (canonicalHwInvJson == null) return;
+
+        try {
+            hwInvApi_.ingest(canonicalHwInvJson);
+        } catch (InterruptedException e) {
+            log_.error("InterruptedException: %s", e.getMessage());
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+    }
+
+    /**
+     * <p> Converts the HW inventory locations in foreign format into canonical format. </p>
+     * @param foreignHWInvJson json containing the HW inventory in foreign format
+     * @return json containing the HW inventory in canonical format
+     */
+    private String toCanonicalHWInvJson(String foreignHWInvJson) {
+        if (foreignHWInvJson == null) return null;
+
+        HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
+        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
+        if (canonicalHwInv.getKey() == null) {
+            log_.error("failed to translate foreign HW inventory json");
+            return null;
+        }
+        return canonicalHwInv.getValue();
+    }
+
+    /**
+     * <p> Obtains the HW inventory locations at the given root.  If the root is "", all locations of the
+     * HPC is returned. </p>
+     * @param root root location for a HW inventory tree or "" for the root of the entire HPC
+     * @return json containing the requested locations
+     */
+    private String getForeignHWInvJson(String root) {
+        if (root == null) return null;
+
+        ImmutablePair<Integer, String> foreignHwInv;
+        if (root.equals("")) {
+            foreignHwInv = queryHWInvTree();
+        } else {
+            foreignHwInv = queryHWInvTree(root);
+        }
+        if (foreignHwInv.getLeft() != 0) {
+            log_.error("failed to acquire foreign HW inventory json");
+            return null;
+        }
+        return foreignHwInv.getRight();
+    }
 
     @Override
     public void close() throws IOException {
@@ -249,6 +334,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private RasEventLog eventActions_;
     private BootImage bootImage_;
     private AdapterOperations operations_;
+    private HWInvApi hwInvApi_;
     private AdapterInformation adapter_;
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;

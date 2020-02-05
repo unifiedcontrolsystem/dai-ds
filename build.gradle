@@ -710,6 +710,7 @@ project(':dai_network_listener') {
         compile project(':dai_core')
         compile project(':properties')
         compile project(':config_io')
+        compile project(':inventory_api')
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
@@ -776,6 +777,39 @@ project(":inventory") {
         compile project(':dai_core')
         compile project(':dai_network_listener')
         compile project(":foreign_bus")
+
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceJacoco
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.61
+                }
+            }
+        }
+    }
+}
+
+project(":inventory_api") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':dai_core')
+
         compile "com.google.code.gson:gson:${gson_version}"
         compile "commons-cli:commons-cli:${commonscli_version}"
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
@@ -1521,7 +1555,7 @@ exit \$?
     }
 
     // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
         into(etc_dir)
     }
 
@@ -1694,7 +1728,7 @@ exit \$?
         into("opt/ucs/log")
     }
     // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
         into("opt/ucs/etc")
     }
     from("${buildDir}/tmp/hw-discovery.sh") {

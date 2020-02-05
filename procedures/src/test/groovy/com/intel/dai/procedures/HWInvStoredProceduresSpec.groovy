@@ -55,4 +55,18 @@ class HWInvStoredProceduresSpec extends spock.lang.Specification {
         then:
         res == null
     }
+
+    def "NumberOfLocationsInHWInv"() {
+        def res = new VoltTable()
+        res.m_rowCount = 42
+        def vt = new VoltTable[1]
+        vt[0] = res
+
+        given:
+        def testSubject = Spy(NumberOfLocationsInHWInv)
+        testSubject.voltQueueSQL(*_) >> {}
+        testSubject.voltExecuteSQL(*_) >> vt;
+
+        expect: testSubject.run() == 42
+    }
 }

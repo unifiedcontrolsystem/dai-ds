@@ -4,8 +4,10 @@ import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
 import com.intel.logging.LoggerFactory
 import org.voltdb.client.Client
+import spock.lang.Specification
+import java.nio.file.Paths
 
-class VoltHWInvApiSpec extends spock.lang.Specification {
+class VoltHWInvApiSpec extends Specification {
     VoltHWInvApi api
     Logger logger = LoggerFactory.getInstance("Test", "VoltHWInvApiSpec", "console");
 
@@ -21,11 +23,11 @@ class VoltHWInvApiSpec extends spock.lang.Specification {
     }
     // Ingesting nonexistent file now results in a no-op
     def "ingest -- nonexistent file"() {
-        when: api.ingest "noSuchFile"
+        when: api.ingest Paths.get("noSuchFile")
         then: notThrown IOException
     }
-    def "ingest -- null client"() {
-        when: api.ingest "src/test/resources/data/empty.json"
+    def "ingest -- empty json"() {
+        when: api.ingest Paths.get("src/test/resources/data/empty.json")
         then: thrown DataStoreException
     }
     def "delete - null client"() {
