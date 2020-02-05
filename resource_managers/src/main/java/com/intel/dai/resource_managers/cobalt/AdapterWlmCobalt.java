@@ -44,7 +44,6 @@ public class AdapterWlmCobalt implements WlmProvider {
     private SimpleDateFormat sqlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     public Reservations reservations;
     public Jobs jobs;
-    public EventsLog eventlog;
     public RasEventLog raseventlog;
     public NodeInformation nodeinfo;
 
@@ -56,7 +55,6 @@ public class AdapterWlmCobalt implements WlmProvider {
 
         jobs = factory.createJobApi();
         reservations = factory.createReservationApi();
-        eventlog = factory.createEventsLog(adapter.getName(), adapter.getType());
         raseventlog = factory.createRasEventLog(adapter);
         workQueue = factory.createWorkQueue(adapter);
         nodeinfo = factory.createNodeInformation();
@@ -104,7 +102,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm");
                 parameters.put("eventtype", raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                raseventlog.logRasEventSyncNoEffectedJob(parameters);
                 log_.error("Unable to connect to network sink");
                 rc = 1;
             }
@@ -155,7 +153,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
                 parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                raseventlog.logRasEventSyncNoEffectedJob(parameters);
             }
         }
         catch (Exception e) {
@@ -165,7 +163,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
                 parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                raseventlog.logRasEventSyncNoEffectedJob(parameters);
             }
             catch (Exception ex) {
                 log_.exception(ex, "Unable to log RAS EVENT");
@@ -219,7 +217,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("instancedata", "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName());
                 parameters.put("eventtype", raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                raseventlog.logRasEventSyncNoEffectedJob(parameters);
             }
         }
         // Also associate all of these nodes with this job in the InternalCachedJobs table - so information is available for others to use when checking which nodes are being used by which jobs, and visa versa.
