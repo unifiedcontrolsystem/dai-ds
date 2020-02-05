@@ -99,10 +99,9 @@ public class AdapterWlmCobalt implements WlmProvider {
         }
         catch (InterruptedException | NetworkDataSinkFactory.FactoryException e) {
             try {
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm");
-                parameters.put("eventtype", raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId()));
-                raseventlog.logRasEventSyncNoEffectedJob(parameters);
+                String eventtype = raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm";
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
                 log_.error("Unable to connect to network sink");
                 rc = 1;
             }
@@ -150,20 +149,18 @@ public class AdapterWlmCobalt implements WlmProvider {
             catch (Exception e) {
                 // Log the exception, generate a RAS event and continue parsing the console and varlog messages
                 log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                raseventlog.logRasEventSyncNoEffectedJob(parameters);
+                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         catch (Exception e) {
             // Log the exception, generate a RAS event and continue parsing the console and varlog messages
             try {
                 log_.exception(e, "handleDelivery - Exception occurred!");
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                raseventlog.logRasEventSyncNoEffectedJob(parameters);
+                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
             catch (Exception ex) {
                 log_.exception(ex, "Unable to log RAS EVENT");
@@ -214,10 +211,9 @@ public class AdapterWlmCobalt implements WlmProvider {
                 // unable to find the node's lctn.
                 log_.error("getBitSetOfCobaltNodes - JobId=%s - unexpected Node (%s), could not find it in the map of compute node names to node lctns!", sJobId, sNode);
                 // Cut RAS event indicating that the job has been killed - we do know which job was effected by this occurrence.
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId()));
-                raseventlog.logRasEventSyncNoEffectedJob(parameters);
+                String eventtype = raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId());
+                String instancedata = "instancedata", "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         // Also associate all of these nodes with this job in the InternalCachedJobs table - so information is available for others to use when checking which nodes are being used by which jobs, and visa versa.
