@@ -212,7 +212,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 log_.error("getBitSetOfCobaltNodes - JobId=%s - unexpected Node (%s), could not find it in the map of compute node names to node lctns!", sJobId, sNode);
                 // Cut RAS event indicating that the job has been killed - we do know which job was effected by this occurrence.
                 String eventtype = raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId());
-                String instancedata = "instancedata", "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
+                String instancedata = "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
                 raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
