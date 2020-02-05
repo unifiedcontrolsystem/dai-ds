@@ -69,23 +69,34 @@ public class AdapterWlmCobalt implements WlmProvider {
     //      Since this is the adapter for Cobalt, this method monitors the input log file looking for things we need to take action on.
     //---------------------------------------------------------
     @Override
-    public long handleInputFromExternalComponent(Map<String, String> aWiParms) throws ProviderException {
+    public long handleInputFromExternalComponent(String[] aWiParms) throws ProviderException {
 
         long rc = 0;
 
         try {
             HashMap<String, String> args = new HashMap<String, String>();
-            args.put("exchangeName","");
+            args.put("exchangeName","cobalt");
             args.put("subjects","InputFromLogstashForAdapterWlm");
+
+            String rabbitMQ = "amqp://127.0.0.1";
+            for(String nameValue: aWiParms) {
+                if(nameValue.startsWith("RabbitMQHost="))
+                    rabbitMQ = "amqp://" + nameValue.substring(nameValue.indexOf("=")+1).trim();
+            }
+            log_.info("rabbitMQ: " + rabbitMQ);
+            args.put("uri", rabbitMQ);
+            log_.info("Before create instance");
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "rabbitmq", args);
-
+            log_.info("Before set logger");
             sink.setLogger(log_);
+            log_.info("Before set callback delegate");
             sink.setCallbackDelegate(this::processSinkMessage);
+            log_.info("Before start listening");
             sink.startListening();
-
+            log_.info("Before processing messages");
             // Keep this "thread" active (processing messages off the queue) until we want the adapter to go away.
             waitUntilFinishedProcessingMessages();
-            log_.warn("handleInputFromExternalComponent - exiting");
+            log_.info("handleInputFromExternalComponent - exiting");
 
         }
         catch (InterruptedException | NetworkDataSinkFactory.FactoryException e) {
@@ -113,7 +124,7 @@ public class AdapterWlmCobalt implements WlmProvider {
 
 
     private void processSinkMessage(String subject, String message) {
-        log_.debug("Received message for subject: %s", subject);
+        log_.info("Received message for subject: %s", subject);
         try {
             //--------------------------------------------------------------
             // Process the message that just came in.

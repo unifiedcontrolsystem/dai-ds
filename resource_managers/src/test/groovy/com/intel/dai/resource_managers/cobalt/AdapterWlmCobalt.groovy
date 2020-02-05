@@ -265,14 +265,15 @@ class AdapterWlmCobaltSpec extends Specification {
         expect: underTest_.processSinkMessage("subject", null)
     }
 
-// TODO: This test cannot succeed. NetworkDataSinkFactory.createInstance is NOT mocked below! PDA
-//    def "Test handleInputFromExternalComponent Exception"() {
-//        underTest_.shutDown()
-//        def sink_ = Mock(NetworkDataSink)
-//        NetworkDataSinkFactory.createInstance(_,_,_) >> sink_
-//
-//        expect: underTest_.handleInputFromExternalComponent(new HashMap<String, String>()) == 1
-//    }
+
+    def "Test handleInputFromExternalComponent"() {
+        underTest_.shutDown()
+
+        String[] args = new String[1]
+        args[0] = "RabbitMQHost=rabbitmq"
+
+        expect: underTest_.handleInputFromExternalComponent(args) == 0
+    }
 
     def "Test main nullargs"() {
 
