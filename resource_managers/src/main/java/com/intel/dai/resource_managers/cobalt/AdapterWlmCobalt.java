@@ -85,7 +85,9 @@ public class AdapterWlmCobalt implements WlmProvider {
             args.put("uri", rabbitMQ);
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "rabbitmq", args);
             sink.setLogger(log_);
+            log_.info("Before set callback delegate");
             sink.setCallbackDelegate(this::processSinkMessage);
+            log_.info("Before start listening");
             sink.startListening();
             // Keep this "thread" active (processing messages off the queue) until we want the adapter to go away.
             waitUntilFinishedProcessingMessages();
