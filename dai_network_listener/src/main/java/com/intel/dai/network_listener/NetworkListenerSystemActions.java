@@ -72,8 +72,12 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.exception(e);
             return;
         }
-        eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
-                adapter_.getType(), adapter_.getBaseWorkItemId());
+        if(location == null || location.isBlank())
+            eventActions_.logRasEventNoEffectedJob(type, instanceData, location, nsTimestamp,
+                    adapter_.getType(), adapter_.getBaseWorkItemId());
+        else
+            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
+                    adapter_.getType(), adapter_.getBaseWorkItemId());
     }
 
     @Override
