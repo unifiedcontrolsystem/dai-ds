@@ -1203,7 +1203,8 @@ function is_running() {
 }
 
 function start_db_and_wait() {
-  \${VOLT_BIN}/voltdb create --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/voltdb init -f 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/voltdb start --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
   if [ \${PIPESTATUS[0]} -ne 0 ]; then
     return \${PIPESTATUS[0]}
   fi
