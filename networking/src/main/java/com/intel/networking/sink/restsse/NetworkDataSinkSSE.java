@@ -29,7 +29,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
      * @param args The arguments to the publisher. Supported argument keys are:
      *
      *   parser            - (def: "json")      The payload parser to use, mainly for SSE's "id:" tag.
-     *   implementation    - (def: "jdk11")     The implementation for the REST client.
+     *   implementation    - (def: "apache")    The implementation for the REST client.
      *   connectAddress    - (def: "127.0.0.1") The address to connect to.
      *   connectPort       - (def: 19216)       The port to connect to.
      *   urlPath           - (def: "/restsse/") The url path to send subscription request to.
@@ -62,7 +62,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
         uri_ = URI.create(String.format("http%s://%s:%d%s", ssl, args_.getOrDefault("connectAddress", "127.0.0.1"),
                 Integer.parseInt(args_.getOrDefault("connectPort", "19216")),
                 args_.getOrDefault("urlPath", "/restsse/")));
-        implementation_ = args_.getOrDefault("implementation", "jdk11");
+        implementation_ = args_.getOrDefault("implementation", "apache");
         if(args_.getOrDefault("requestBuilder", null) != null) {
             createBuilder(args_.getOrDefault("requestBuilder", null));
             if(builder_ == null) throw new NetworkException("Failed to create a network REST request builder");
