@@ -57,7 +57,7 @@ public class ReservationUpdated extends VoltProcedure {
 
         if (lStartTsInMicroSecs == 0L)
             lStartTsInMicroSecs = aReservationData[0].getTimestampAsLong("StartTimestamp");
-        
+
         //---------------------------------------------------------------------
         // Insert this information into the WlmReservation_History table.
         //---------------------------------------------------------------------

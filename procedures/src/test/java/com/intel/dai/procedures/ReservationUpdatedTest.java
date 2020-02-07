@@ -26,6 +26,21 @@ public class ReservationUpdatedTest {
 
         @Override
         public VoltTable[] voltExecuteSQL(boolean value) {
+            VoltTable[] result = new VoltTable[1];
+            result[0] = new VoltTable(
+                    new VoltTable.ColumnInfo("Users", VoltType.STRING),
+                    new VoltTable.ColumnInfo("Nodes", VoltType.STRING),
+                    new VoltTable.ColumnInfo("StartTimestamp", VoltType.TIMESTAMP),
+                    new VoltTable.ColumnInfo("EndTimestamp", VoltType.TIMESTAMP)
+            );
+            if(!doZeroRows)
+                result[0].addRow("Users", "Nodes", new TimestampType(Date.from(Instant.now())),
+                        new TimestampType(Date.from(Instant.now())));
+            return result;
+        }
+
+        @Override
+        public VoltTable[] voltExecuteSQL(boolean value) {
             return null;
         }
 
