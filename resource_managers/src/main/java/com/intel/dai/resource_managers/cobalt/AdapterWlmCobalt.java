@@ -266,20 +266,23 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Note: the node list uses node hostnames.
         BitSet bsJobNodes = getBitSetOfCobaltNodes(sNodeList, sJobId, dLineTimestamp, DoAssociateJobIdAndNodeInCachedJobsTable);  // since this is a job start method, do associate job id in cached jobs table.
 
-        //--------------------------------------------------------------
-        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
-        //--------------------------------------------------------------
-        HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, (dLineTimestamp.getTime() * 1000L));
-
         String sJobName  = aLineCols[Job_Name_Pos].substring( aLineCols[Job_Name_Pos].indexOf(Job_Name_Prefix) + Job_Name_Prefix.length());
         String sUserName = aLineCols[Username_Pos].substring( aLineCols[Username_Pos].indexOf(User_Prefix) + User_Prefix.length());
         String sJobStartTs  = (aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())).split("\\.")[0];
+        log_.info("aLineCols[Job_Start_Pos]" + aLineCols[Job_Start_Pos]);
+        log_.info("aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())" + aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length()));
+        log_.info("sJobStartTs" + sJobStartTs);
+        -------------------------------------------------------------
+
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
+        //--------------------------------------------------------------
+        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
+        //--------------------------------------------------------------
+        HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, lStartTsInMicroSecs);
 
         //--------------------------------------------------------------
         // Put a 'Job Started' record into the Job table.
-        //--------------------------------------------------------------
-
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
+        //-
         jobs.startJob(sJobId, sJobName, adapter.getHostname(), bsJobNodes.cardinality(), bsJobNodes.toByteArray(), sUserName, lStartTsInMicroSecs, adapter.getType(), workQueue.workItemId());
 
         //--------------------------------------------------------------
@@ -328,6 +331,13 @@ public class AdapterWlmCobalt implements WlmProvider {
         String sJobStartTs  = (aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())).split("\\.")[0];
         String sJobEndTs  = (aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length())).split("\\.")[0];
 
+        log_.info("aLineCols[Job_Start_Pos]" + aLineCols[Job_Start_Pos]);
+        log_.info("aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())" + aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length()));
+        log_.info("sJobStartTs" + sJobStartTs);
+
+        log_.info("aLineCols[Job_End_Pos]" + aLineCols[Job_End_Pos]);
+        log_.info("aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length())" + aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length()));
+        log_.info("sJobEndTs" + sJobEndTs);
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
