@@ -278,8 +278,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
         HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, lStartTsInMicroSecs);
-
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
+        
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
