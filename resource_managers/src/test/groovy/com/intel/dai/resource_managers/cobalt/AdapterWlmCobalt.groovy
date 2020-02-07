@@ -175,8 +175,8 @@ class AdapterWlmCobaltSpec extends Specification {
     }
 
     def "Test handleEndOfJobProcessing"() {
-        Date   startTime    = underTest_.oldDateFormat.parse("2019-04-03 00:35:40");
-        Date   endTime    = underTest_.oldDateFormat.parse("2019-04-03 01:35:40");
+        long   startTime  = 1581103966000L;
+        long   endTime    = 1581104966000L;
         HashMap<String, Object> jobInfo = new HashMap<String,Object>() {{ put("WlmJobStarted","T"); put("WlmJobCompleted","T"); put("WlmJobWorkDir","/tmp");
             put("WlmJobState","T"); put("WlmJobEndTime", startTime); put("WlmJobStartTime", endTime)}}
 
