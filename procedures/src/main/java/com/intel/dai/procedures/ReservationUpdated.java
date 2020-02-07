@@ -57,10 +57,7 @@ public class ReservationUpdated extends VoltProcedure {
 
         if (lStartTsInMicroSecs == 0L)
             lStartTsInMicroSecs = aReservationData[0].getTimestampAsLong("StartTimestamp");
-
-        if (lEndTsInMicroSecs == null)
-            lEndTsInMicroSecs = aReservationData[0].getTimestampAsLong("EndTimestamp");
-
+        
         //---------------------------------------------------------------------
         // Insert this information into the WlmReservation_History table.
         //---------------------------------------------------------------------
@@ -69,7 +66,7 @@ public class ReservationUpdated extends VoltProcedure {
                     ,sUsers
                     ,sNodes
                     ,lStartTsInMicroSecs        // StartTimestamp
-                    ,lEndTsInMicroSecs          // EndTimestamp
+                    ,aReservationData[0].getTimestampAsLong("EndTimestamp")          // EndTimestamp
                     ,null                       // DeletedTimestamp
                     ,lTsInMicroSecs             // LastChgTimestamp
                     ,this.getTransactionTime()  // DbUpdatedTimestamp
