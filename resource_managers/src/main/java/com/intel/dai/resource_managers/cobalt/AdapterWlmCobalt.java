@@ -81,17 +81,12 @@ public class AdapterWlmCobalt implements WlmProvider {
                 if(nameValue.startsWith("RabbitMQHost="))
                     rabbitMQ = "amqp://" + nameValue.substring(nameValue.indexOf("=")+1).trim();
             }
-            log_.info("rabbitMQ: " + rabbitMQ);
+
             args.put("uri", rabbitMQ);
-            log_.info("Before create instance");
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "rabbitmq", args);
-            log_.info("Before set logger");
             sink.setLogger(log_);
-            log_.info("Before set callback delegate");
             sink.setCallbackDelegate(this::processSinkMessage);
-            log_.info("Before start listening");
             sink.startListening();
-            log_.info("Before processing messages");
             // Keep this "thread" active (processing messages off the queue) until we want the adapter to go away.
             waitUntilFinishedProcessingMessages();
             log_.info("handleInputFromExternalComponent - exiting");
@@ -269,11 +264,8 @@ public class AdapterWlmCobalt implements WlmProvider {
         String sJobName  = aLineCols[Job_Name_Pos].substring( aLineCols[Job_Name_Pos].indexOf(Job_Name_Prefix) + Job_Name_Prefix.length());
         String sUserName = aLineCols[Username_Pos].substring( aLineCols[Username_Pos].indexOf(User_Prefix) + User_Prefix.length());
         String sJobStartTs  = (aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())).split("\\.")[0];
-        log_.info("aLineCols[Job_Start_Pos]" + aLineCols[Job_Start_Pos]);
-        log_.info("aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())" + aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length()));
-        log_.info("sJobStartTs" + sJobStartTs);
 
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000000L;
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
@@ -331,18 +323,11 @@ public class AdapterWlmCobalt implements WlmProvider {
         String sJobStartTs  = (aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())).split("\\.")[0];
         String sJobEndTs  = (aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length())).split("\\.")[0];
 
-        log_.info("aLineCols[Job_Start_Pos]" + aLineCols[Job_Start_Pos]);
-        log_.info("aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())" + aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length()));
-        log_.info("sJobStartTs" + sJobStartTs);
-
-        log_.info("aLineCols[Job_End_Pos]" + aLineCols[Job_End_Pos]);
-        log_.info("aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length())" + aLineCols[Job_End_Pos].substring( aLineCols[Job_End_Pos].indexOf(End_Time_Prefix) + End_Time_Prefix.length()));
-        log_.info("sJobEndTs" + sJobEndTs);
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
-        long lEndTsInMicroSecs = Long.parseLong(sJobEndTs) *1000L;
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000000L;
+        long lEndTsInMicroSecs = Long.parseLong(sJobEndTs) *1000000L;
         HashMap<String, Object> jobinfo = jobs.completeJobInternal(sJobId, sWorkDir, sWlmJobState, lEndTsInMicroSecs, lStartTsInMicroSecs);
 
         //--------------------------------------------------------------
@@ -411,10 +396,10 @@ public class AdapterWlmCobalt implements WlmProvider {
         String sNodes = aLineCols[Nodes_Pos].split("'")[1];
 
         String sTempStartTs = aLineCols[Start_Ts_Pos].split("\\.")[0];
-        long lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000L;
+        long lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000000L;
 
         String sDuration = aLineCols[Duration_Pos].split(",")[0];
-        long lReservationsEndTsInMicroSecs = (Long.parseLong(sTempStartTs) + Long.parseLong(sDuration)) * 1000L;
+        long lReservationsEndTsInMicroSecs = (Long.parseLong(sTempStartTs) + Long.parseLong(sDuration)) * 1000000L;
 
         //------------------------------------------------------
         // Insert a record for this reservation into the table.
@@ -458,7 +443,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 sNodes = aLineCols[i+1].split("'")[1];
             if (sColInfo.contains(StartTsPrefix)) {
                 String sTempStartTs = aLineCols[i+1].split("'")[1].split("\\.")[0];
-                lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000L;
+                lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000000L;
             }
             i++;
         }
@@ -525,15 +510,15 @@ public class AdapterWlmCobalt implements WlmProvider {
         String reservation_indicator = aLineCols[4];
 
         if (reservation_indicator.equals("adding")){
-            log_.info("FOUND a 'Job Started' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Started' log message - %s", sLine);
             handleReservationCreatedMsg(aLineCols);
         }
         else if (reservation_indicator.equals("modifying")){
-            log_.info("FOUND a 'Job Completed' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Modified' log message - %s", sLine);
             handleReservationUpdatedMsg(aLineCols);
         }
         else if (reservation_indicator.equals("releasing")){
-            log_.info("FOUND a 'Job Completed' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Deleted' log message - %s", sLine);
             handleReservationDeletedMsg(aLineCols);
         }
 
