@@ -143,6 +143,7 @@ public class AdapterWlmCobalt implements WlmProvider {
             }
             catch (Exception e) {
                 // Log the exception, generate a RAS event and continue parsing the console and varlog messages
+                e.printStackTrace();
                 log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
                 String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
                 String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
@@ -433,7 +434,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Grab all the pertinent reservation data out of the msg.
         //------------------------------------------------------
         String sUsers=null, sNodes=null, sReservationsStartSqlTimestamp=null, sReservationsEndSqlTimestamp=null;
-        long   lReservationsStartTsInMicroSecs=-99999;
+        long lReservationsStartTsInMicroSecs = 0L;
 
         int i = 0;
         for (String sColInfo: aLineCols) {
