@@ -74,7 +74,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         try {
             HashMap<String, String> args = new HashMap<String, String>();
             args.put("exchangeName","cobalt");
-            args.put("subjects","InputFromLogstashForAdapterWlm");
+            args.put("subjects","InputFromLogstashForReservationData,InputFromLogstashForJobData");
 
             String rabbitMQ = "amqp://127.0.0.1";
             for(String nameValue: aWiParms) {
@@ -134,11 +134,11 @@ public class AdapterWlmCobalt implements WlmProvider {
                 String[] aLineCols = message.split(" ");
 
                 // This record came in via bgsched log.
-                if (aLineCols[0].contains("bgsched")) {
+                if (subject.equals("InputFromLogstashForReservationData")) {
                     handleCobaltReservationMessages(message, aLineCols);
                 }
                 // This record came in via cqm log.
-                else if (aLineCols[0].contains("cqm")) {
+                else if (subject.equals("InputFromLogstashForJobData")) {
                     handleCobaltJobMessages(message, aLineCols);
                 }
                 else {
@@ -278,7 +278,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
         HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, lStartTsInMicroSecs);
-        
+
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
