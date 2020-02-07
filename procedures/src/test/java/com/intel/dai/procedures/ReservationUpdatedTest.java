@@ -40,19 +40,24 @@ public class ReservationUpdatedTest {
         }
 
         @Override
-        public VoltTable[] voltExecuteSQL(boolean value) {
-            return null;
-        }
-
-        @Override
         public Date getTransactionTime() {
             return Date.from(Instant.now());
         }
+
+        private boolean doZeroRows = false;
     }
 
     @Test
     public void run() {
         MockReservationUpdated proc = new MockReservationUpdated();
+        proc.run("Name", "Users", "Nodes", 0L, 10L,
+                20L, "RAS", 9999L);
+    }
+
+    @Test(expected = VoltProcedure.VoltAbortException.class)
+    public void run2() {
+        MockReservationDeleted proc = new MockReservationDeleted();
+        proc.doZeroRows = true;
         proc.run("Name", "Users", "Nodes", 0L, 10L,
                 20L, "RAS", 9999L);
     }
