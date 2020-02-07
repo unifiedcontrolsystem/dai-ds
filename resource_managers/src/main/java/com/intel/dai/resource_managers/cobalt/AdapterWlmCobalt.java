@@ -44,7 +44,6 @@ public class AdapterWlmCobalt implements WlmProvider {
     private SimpleDateFormat sqlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     public Reservations reservations;
     public Jobs jobs;
-    public EventsLog eventlog;
     public RasEventLog raseventlog;
     public NodeInformation nodeinfo;
 
@@ -56,7 +55,6 @@ public class AdapterWlmCobalt implements WlmProvider {
 
         jobs = factory.createJobApi();
         reservations = factory.createReservationApi();
-        eventlog = factory.createEventsLog(adapter.getName(), adapter.getType());
         raseventlog = factory.createRasEventLog(adapter);
         workQueue = factory.createWorkQueue(adapter);
         nodeinfo = factory.createNodeInformation();
@@ -69,31 +67,36 @@ public class AdapterWlmCobalt implements WlmProvider {
     //      Since this is the adapter for Cobalt, this method monitors the input log file looking for things we need to take action on.
     //---------------------------------------------------------
     @Override
-    public long handleInputFromExternalComponent(Map<String, String> aWiParms) throws ProviderException {
+    public long handleInputFromExternalComponent(String[] aWiParms) throws ProviderException {
 
         long rc = 0;
 
         try {
             HashMap<String, String> args = new HashMap<String, String>();
-            args.put("exchangeName","");
-            args.put("subjects","InputFromLogstashForAdapterWlm");
-            NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "rabbitmq", args);
+            args.put("exchangeName","cobalt");
+            args.put("subjects","InputFromLogstashForReservationData,InputFromLogstashForJobData");
 
+            String rabbitMQ = "amqp://127.0.0.1";
+            for(String nameValue: aWiParms) {
+                if(nameValue.startsWith("RabbitMQHost="))
+                    rabbitMQ = "amqp://" + nameValue.substring(nameValue.indexOf("=")+1).trim();
+            }
+
+            args.put("uri", rabbitMQ);
+            NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "rabbitmq", args);
             sink.setLogger(log_);
             sink.setCallbackDelegate(this::processSinkMessage);
             sink.startListening();
-
             // Keep this "thread" active (processing messages off the queue) until we want the adapter to go away.
             waitUntilFinishedProcessingMessages();
-            log_.warn("handleInputFromExternalComponent - exiting");
+            log_.info("handleInputFromExternalComponent - exiting");
 
         }
         catch (InterruptedException | NetworkDataSinkFactory.FactoryException e) {
             try {
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm");
-                parameters.put("eventtype", raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                String eventtype = raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm";
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
                 log_.error("Unable to connect to network sink");
                 rc = 1;
             }
@@ -113,7 +116,7 @@ public class AdapterWlmCobalt implements WlmProvider {
 
 
     private void processSinkMessage(String subject, String message) {
-        log_.debug("Received message for subject: %s", subject);
+        log_.info("Received message for subject: %s", subject);
         try {
             //--------------------------------------------------------------
             // Process the message that just came in.
@@ -126,11 +129,11 @@ public class AdapterWlmCobalt implements WlmProvider {
                 String[] aLineCols = message.split(" ");
 
                 // This record came in via bgsched log.
-                if (aLineCols[0].contains("bgsched")) {
+                if (subject.equals("InputFromLogstashForReservationData")) {
                     handleCobaltReservationMessages(message, aLineCols);
                 }
                 // This record came in via cqm log.
-                else if (aLineCols[0].contains("cqm")) {
+                else if (subject.equals("InputFromLogstashForJobData")) {
                     handleCobaltJobMessages(message, aLineCols);
                 }
                 else {
@@ -140,21 +143,20 @@ public class AdapterWlmCobalt implements WlmProvider {
             }
             catch (Exception e) {
                 // Log the exception, generate a RAS event and continue parsing the console and varlog messages
+                e.printStackTrace();
                 log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         catch (Exception e) {
             // Log the exception, generate a RAS event and continue parsing the console and varlog messages
             try {
                 log_.exception(e, "handleDelivery - Exception occurred!");
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "AdapterName=" + adapter.getName() + ", Exception=" + e.toString());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasProvException", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
             catch (Exception ex) {
                 log_.exception(ex, "Unable to log RAS EVENT");
@@ -205,10 +207,9 @@ public class AdapterWlmCobalt implements WlmProvider {
                 // unable to find the node's lctn.
                 log_.error("getBitSetOfCobaltNodes - JobId=%s - unexpected Node (%s), could not find it in the map of compute node names to node lctns!", sJobId, sNode);
                 // Cut RAS event indicating that the job has been killed - we do know which job was effected by this occurrence.
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("instancedata", "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName());
-                parameters.put("eventtype", raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId()));
-                eventlog.createRasEvent(parameters);
+                String eventtype = raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId());
+                String instancedata = "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
+                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         // Also associate all of these nodes with this job in the InternalCachedJobs table - so information is available for others to use when checking which nodes are being used by which jobs, and visa versa.
@@ -261,20 +262,20 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Note: the node list uses node hostnames.
         BitSet bsJobNodes = getBitSetOfCobaltNodes(sNodeList, sJobId, dLineTimestamp, DoAssociateJobIdAndNodeInCachedJobsTable);  // since this is a job start method, do associate job id in cached jobs table.
 
-        //--------------------------------------------------------------
-        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
-        //--------------------------------------------------------------
-        HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, (dLineTimestamp.getTime() * 1000L));
-
         String sJobName  = aLineCols[Job_Name_Pos].substring( aLineCols[Job_Name_Pos].indexOf(Job_Name_Prefix) + Job_Name_Prefix.length());
         String sUserName = aLineCols[Username_Pos].substring( aLineCols[Username_Pos].indexOf(User_Prefix) + User_Prefix.length());
         String sJobStartTs  = (aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())).split("\\.")[0];
 
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000000L;
         //--------------------------------------------------------------
-        // Put a 'Job Started' record into the Job table.
+        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
+        //--------------------------------------------------------------
+        HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, lStartTsInMicroSecs);
+
+        //--------------------------------------------------------------
+        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
 
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
         jobs.startJob(sJobId, sJobName, adapter.getHostname(), bsJobNodes.cardinality(), bsJobNodes.toByteArray(), sUserName, lStartTsInMicroSecs, adapter.getType(), workQueue.workItemId());
 
         //--------------------------------------------------------------
@@ -326,8 +327,8 @@ public class AdapterWlmCobalt implements WlmProvider {
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
-        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
-        long lEndTsInMicroSecs = Long.parseLong(sJobEndTs) *1000L;
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000000L;
+        long lEndTsInMicroSecs = Long.parseLong(sJobEndTs) *1000000L;
         HashMap<String, Object> jobinfo = jobs.completeJobInternal(sJobId, sWorkDir, sWlmJobState, lEndTsInMicroSecs, lStartTsInMicroSecs);
 
         //--------------------------------------------------------------
@@ -353,18 +354,18 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Put the 'Job Termination' record into the Job table.
         //--------------------------------------------------------------
         if (jobInfo != null) {
-            jobs.terminateJob(sJobId, null, Integer.parseInt(sExitStatus), (String) jobInfo.get("WlmJobWorkDir"), (String) jobInfo.get("WlmJobState"), ((Date) jobInfo.get("WlmJobEndTime")).getTime(), adapter.getType(), workQueue.workItemId());
+            jobs.terminateJob(sJobId, null, Integer.parseInt(sExitStatus), (String) jobInfo.get("WlmJobWorkDir"), (String) jobInfo.get("WlmJobState"), ((Long) jobInfo.get("WlmJobEndTime")).longValue(), adapter.getType(), workQueue.workItemId());
 
             //--------------------------------------------------------------
             // Put the appropriate 'Job Completion' information into the Internal Cached Jobs table (note this table is different from the InternalJobInfo table).
             //--------------------------------------------------------------
             // Update the Internal Cached Jobs table to fill in this job's termination time.
-            jobs.terminateJobInternal(((Date) jobInfo.get("WlmJobEndTime")).getTime(), System.currentTimeMillis() * 1000L, sJobId);
+            jobs.terminateJobInternal(((Long) jobInfo.get("WlmJobEndTime")).longValue(), System.currentTimeMillis() * 1000L, sJobId);
 
             //----------------------------------------------------------
             // Remove this job's JobInfo entry.
             //----------------------------------------------------------
-            jobs.removeJobInternal(sJobId, ((Date) jobInfo.get("WlmJobStartTime")).getTime());
+            jobs.removeJobInternal(sJobId, ((Long) jobInfo.get("WlmJobStartTime")).longValue());
         }
 
     }   // End handleEndOfJobProcessing(String sJobId, HashMap<String, Object> jobInfo)
@@ -396,10 +397,10 @@ public class AdapterWlmCobalt implements WlmProvider {
         String sNodes = aLineCols[Nodes_Pos].split("'")[1];
 
         String sTempStartTs = aLineCols[Start_Ts_Pos].split("\\.")[0];
-        long lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000L;
+        long lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000000L;
 
         String sDuration = aLineCols[Duration_Pos].split(",")[0];
-        long lReservationsEndTsInMicroSecs = (Long.parseLong(sTempStartTs) + Long.parseLong(sDuration)) * 1000L;
+        long lReservationsEndTsInMicroSecs = (Long.parseLong(sTempStartTs) + Long.parseLong(sDuration)) * 1000000L;
 
         //------------------------------------------------------
         // Insert a record for this reservation into the table.
@@ -433,7 +434,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Grab all the pertinent reservation data out of the msg.
         //------------------------------------------------------
         String sUsers=null, sNodes=null, sReservationsStartSqlTimestamp=null, sReservationsEndSqlTimestamp=null;
-        long   lReservationsStartTsInMicroSecs=-99999;
+        long lReservationsStartTsInMicroSecs = 0L;
 
         int i = 0;
         for (String sColInfo: aLineCols) {
@@ -443,7 +444,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 sNodes = aLineCols[i+1].split("'")[1];
             if (sColInfo.contains(StartTsPrefix)) {
                 String sTempStartTs = aLineCols[i+1].split("'")[1].split("\\.")[0];
-                lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000L;
+                lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000000L;
             }
             i++;
         }
@@ -510,15 +511,15 @@ public class AdapterWlmCobalt implements WlmProvider {
         String reservation_indicator = aLineCols[4];
 
         if (reservation_indicator.equals("adding")){
-            log_.info("FOUND a 'Job Started' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Started' log message - %s", sLine);
             handleReservationCreatedMsg(aLineCols);
         }
         else if (reservation_indicator.equals("modifying")){
-            log_.info("FOUND a 'Job Completed' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Modified' log message - %s", sLine);
             handleReservationUpdatedMsg(aLineCols);
         }
         else if (reservation_indicator.equals("releasing")){
-            log_.info("FOUND a 'Job Completed' log message - %s", sLine);
+            log_.info("FOUND a 'Reservation Deleted' log message - %s", sLine);
             handleReservationDeletedMsg(aLineCols);
         }
 

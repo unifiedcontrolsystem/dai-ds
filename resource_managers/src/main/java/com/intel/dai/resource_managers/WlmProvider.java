@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface WlmProvider {
     static final String CONSUMER_TAG = "AdapterWlm";
-    static final long SHUTDOWN_CHECK_INTERVAL_MS = 1000L;
+    static final long SHUTDOWN_CHECK_INTERVAL_MS = 100L;
 
 
     //---------------------------------------------------------
@@ -20,6 +20,6 @@ public interface WlmProvider {
     // that the Wlm component is active.
     // It does not start and stop, it starts and stays active processing the Wlm component's log for state changes, etc.
     //---------------------------------------------------------
-    long handleInputFromExternalComponent(Map<String, String> aWiParms) throws InterruptedException, IOException, ProviderException;
+    long handleInputFromExternalComponent(String[] aWiParms) throws InterruptedException, IOException, ProviderException;
 
 }
