@@ -9,6 +9,7 @@ import org.voltdb.Expectation;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
+import org.voltdb.VoltProcedure;
 import org.voltdb.types.TimestampType;
 
 import java.time.Instant;
@@ -56,7 +57,7 @@ public class ReservationUpdatedTest {
 
     @Test(expected = VoltProcedure.VoltAbortException.class)
     public void run2() {
-        MockReservationDeleted proc = new MockReservationDeleted();
+        MockReservationUpdated proc = new MockReservationUpdated();
         proc.doZeroRows = true;
         proc.run("Name", "Users", "Nodes", 0L, 10L,
                 20L, "RAS", 9999L);
