@@ -354,18 +354,18 @@ public class AdapterWlmCobalt implements WlmProvider {
         // Put the 'Job Termination' record into the Job table.
         //--------------------------------------------------------------
         if (jobInfo != null) {
-            jobs.terminateJob(sJobId, null, Integer.parseInt(sExitStatus), (String) jobInfo.get("WlmJobWorkDir"), (String) jobInfo.get("WlmJobState"), ((Date) jobInfo.get("WlmJobEndTime")).getTime(), adapter.getType(), workQueue.workItemId());
+            jobs.terminateJob(sJobId, null, Integer.parseInt(sExitStatus), (String) jobInfo.get("WlmJobWorkDir"), (String) jobInfo.get("WlmJobState"), ((Long) jobInfo.get("WlmJobEndTime")).longValue(), adapter.getType(), workQueue.workItemId());
 
             //--------------------------------------------------------------
             // Put the appropriate 'Job Completion' information into the Internal Cached Jobs table (note this table is different from the InternalJobInfo table).
             //--------------------------------------------------------------
             // Update the Internal Cached Jobs table to fill in this job's termination time.
-            jobs.terminateJobInternal(((Date) jobInfo.get("WlmJobEndTime")).getTime(), System.currentTimeMillis() * 1000L, sJobId);
+            jobs.terminateJobInternal(((Long) jobInfo.get("WlmJobEndTime")).longValue(), System.currentTimeMillis() * 1000L, sJobId);
 
             //----------------------------------------------------------
             // Remove this job's JobInfo entry.
             //----------------------------------------------------------
-            jobs.removeJobInternal(sJobId, ((Date) jobInfo.get("WlmJobStartTime")).getTime());
+            jobs.removeJobInternal(sJobId, ((Long) jobInfo.get("WlmJobStartTime")).longValue());
         }
 
     }   // End handleEndOfJobProcessing(String sJobId, HashMap<String, Object> jobInfo)
