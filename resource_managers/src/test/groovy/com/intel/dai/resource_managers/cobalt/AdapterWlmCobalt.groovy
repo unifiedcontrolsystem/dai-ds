@@ -175,8 +175,8 @@ class AdapterWlmCobaltSpec extends Specification {
     }
 
     def "Test handleEndOfJobProcessing"() {
-        Date   startTime    = underTest_.oldDateFormat.parse("2019-04-03 00:35:40");
-        Date   endTime    = underTest_.oldDateFormat.parse("2019-04-03 01:35:40");
+        long   startTime  = 1581103966000L;
+        long   endTime    = 1581104966000L;
         HashMap<String, Object> jobInfo = new HashMap<String,Object>() {{ put("WlmJobStarted","T"); put("WlmJobCompleted","T"); put("WlmJobWorkDir","/tmp");
             put("WlmJobState","T"); put("WlmJobEndTime", startTime); put("WlmJobStartTime", endTime)}}
 
@@ -265,14 +265,15 @@ class AdapterWlmCobaltSpec extends Specification {
         expect: underTest_.processSinkMessage("subject", null)
     }
 
-// TODO: This test cannot succeed. NetworkDataSinkFactory.createInstance is NOT mocked below! PDA
-//    def "Test handleInputFromExternalComponent Exception"() {
-//        underTest_.shutDown()
-//        def sink_ = Mock(NetworkDataSink)
-//        NetworkDataSinkFactory.createInstance(_,_,_) >> sink_
-//
-//        expect: underTest_.handleInputFromExternalComponent(new HashMap<String, String>()) == 1
-//    }
+
+    def "Test handleInputFromExternalComponent"() {
+        underTest_.shutDown()
+
+        String[] args = new String[1]
+        args[0] = "RabbitMQHost=rabbitmq"
+
+        expect: underTest_.handleInputFromExternalComponent(args) == 0
+    }
 
     def "Test main nullargs"() {
 

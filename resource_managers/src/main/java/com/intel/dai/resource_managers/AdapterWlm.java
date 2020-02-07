@@ -73,7 +73,7 @@ public class AdapterWlm {
                 boolean bGotWorkItem = workQueue.grabNextAvailWorkItem();
                 if (bGotWorkItem == true) {
                     // did get a work item
-                    Map<String, String> aWiParms  = workQueue.getClientParameters();
+                    String[] aWiParms  = workQueue.getClientParameters(",");
                     switch(workQueue.workToBeDone()) {
                         case "HandleInputFromExternalComponent":
                             //---------------------------------------------------------
@@ -106,6 +106,7 @@ public class AdapterWlm {
             adapter.handleMainlineAdapterCleanup(adapter.adapterAbnormalShutdown());
         }   // End try
         catch (Exception e) {
+            log.exception(e, "Main Processing Flow Ending");
             adapter.handleMainlineAdapterException(e);
         }
         return 0;
