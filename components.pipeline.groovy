@@ -10,7 +10,7 @@ pipeline {
     }    
     stages {
         stage('Component Tests') {
-            agent { label 'NRE-TEST' }
+            agent { label 'Nightly-Build' }
             environment {
                 PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
             }

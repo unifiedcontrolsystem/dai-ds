@@ -7,6 +7,7 @@ package com.intel.dai.network_listener;
 import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.BootState;
 import com.intel.dai.dsapi.DataStoreFactory;
+import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 
 import java.io.IOException;
@@ -71,6 +72,15 @@ public class BenchmarkingSystemActions implements SystemActions, Initializer {
 
     @Override
     public void logFailedToUpdateBootImageInfo(String instanceData) { }
+
+    @Override
+    public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
+        return true;
+    }
+
+    @Override
+    public void upsertHWInventory(String location) {
+    }
 
     @Override
     public void close() throws IOException { }

@@ -110,9 +110,9 @@ System.getProperty("ucs.includeDbgSymbols", "false")))
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-def enforcePmd = true
+def enforceStaticAnalysis = includeDbgSymbols
 def pmdScanLevel = 2
-def enforceJacoco = includeDbgSymbols
+def enforceCodeCoverage = includeDbgSymbols
 import java.time.Instant
 def thisYear = Instant.now().toDate().toYear().toString()
 
@@ -230,7 +230,7 @@ subprojects {
         group = "Reporting"
         consoleOutput = true
         rulePriority = pmdScanLevel
-        ignoreFailures = !enforcePmd
+        ignoreFailures = !enforceStaticAnalysis
         ruleSets = []
         ruleSetFiles = files("${rootProject.projectDir}/pmd.xml")
         reports {
@@ -267,7 +267,7 @@ subprojects {
         }
         effort = 'default'
         reportLevel = 'medium'
-        ignoreFailures = false
+        ignoreFailures = !enforceStaticAnalysis
         excludeFilter = file("${rootProject.projectDir}/findBugsExclusions.xml")
     }
 
@@ -312,14 +312,14 @@ project(':xdg') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -336,14 +336,14 @@ project(':properties') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -362,14 +362,14 @@ project(':logging') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -388,14 +388,14 @@ project(':runtime_utils') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -417,14 +417,14 @@ project(':config_io') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -452,14 +452,14 @@ project(':procedures') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -484,14 +484,14 @@ project(':authentication') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -518,14 +518,14 @@ project(':networking') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -573,14 +573,14 @@ project(':dai_core') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.81
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.52
@@ -627,14 +627,14 @@ project(':ui') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -678,14 +678,14 @@ project(':populate_schema') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -710,6 +710,7 @@ project(':dai_network_listener') {
         compile project(':dai_core')
         compile project(':properties')
         compile project(':config_io')
+        compile project(':inventory_api')
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
@@ -718,14 +719,14 @@ project(':dai_network_listener') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -751,14 +752,14 @@ project(":provisioners") {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -776,6 +777,39 @@ project(":inventory") {
         compile project(':dai_core')
         compile project(':dai_network_listener')
         compile project(":foreign_bus")
+
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.61
+                }
+            }
+        }
+    }
+}
+
+project(":inventory_api") {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':dai_core')
+
         compile "com.google.code.gson:gson:${gson_version}"
         compile "commons-cli:commons-cli:${commonscli_version}"
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
@@ -789,14 +823,14 @@ project(":inventory") {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.61
@@ -822,14 +856,14 @@ project(":monitoring") {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -853,14 +887,14 @@ project(":ras") {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -876,14 +910,14 @@ project(':perflogging') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -917,14 +951,14 @@ project(':foreign_bus') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -963,14 +997,14 @@ project(':resource_managers') {
     jacocoTestCoverageVerification {
         violationRules {
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
                     minimum = 0.90
                 }
             }
             rule {
-                enabled = enforceJacoco
+                enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
                     minimum = 0.70
@@ -1169,7 +1203,8 @@ function is_running() {
 }
 
 function start_db_and_wait() {
-  \${VOLT_BIN}/voltdb create --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/voltdb init -f 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/voltdb start --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
   if [ \${PIPESTATUS[0]} -ne 0 ]; then
     return \${PIPESTATUS[0]}
   fi
@@ -1521,7 +1556,7 @@ exit \$?
     }
 
     // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
         into(etc_dir)
     }
 
@@ -1650,6 +1685,9 @@ exit \$?
     from ("${projectDir}/docker-deploy/dai.yml") {
         into("opt/dai-docker")
     }
+    from ("${projectDir}/docker-deploy/test_app.yml") {
+        into("opt/dai-docker")
+    }
     from("${buildDir}/jars") {
         exclude("**/procedures-${packageVersion}.jar")
         exclude("**/populate_schema-${packageVersion}.jar")
@@ -1667,6 +1705,10 @@ exit \$?
         into("opt/dai-docker/etc")
     }
     from("${projectDir}/docker-deploy/dai/entryPoint.sh") {
+        into("opt/dai-docker/dai")
+        fileMode = 0700
+    }
+    from("${projectDir}/docker-deploy/dai/testEntryPoint.sh") {
         into("opt/dai-docker/dai")
         fileMode = 0700
     }
@@ -1694,7 +1736,7 @@ exit \$?
         into("opt/ucs/log")
     }
     // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryCLIConfig.json") {
+    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
         into("opt/ucs/etc")
     }
     from("${buildDir}/tmp/hw-discovery.sh") {

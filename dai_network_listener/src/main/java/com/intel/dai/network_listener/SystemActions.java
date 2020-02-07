@@ -5,8 +5,10 @@
 package com.intel.dai.network_listener;
 
 import com.intel.dai.dsapi.BootState;
+import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,4 +32,7 @@ public interface SystemActions extends AutoCloseable, Closeable {
     void upsertBootImages(List<Map<String,String>> bootImageInfoList);
     void logFailedToUpdateNodeBootImageId(String location, String instanceData);
     void logFailedToUpdateBootImageInfo(String instanceData);
+
+    boolean isHWInventoryEmpty() throws IOException, DataStoreException;
+    void upsertHWInventory(String location);
 }

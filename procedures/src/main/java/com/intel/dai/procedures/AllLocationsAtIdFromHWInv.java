@@ -9,7 +9,7 @@ import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
 /**
- * Select the children of the given location.
+ * Select the nodes at the given location.
  */
 public class AllLocationsAtIdFromHWInv extends VoltProcedure {
     private static final String SQL_TEXT =
