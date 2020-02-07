@@ -272,7 +272,6 @@ public class AdapterWlmCobalt implements WlmProvider {
         log_.info("aLineCols[Job_Start_Pos]" + aLineCols[Job_Start_Pos]);
         log_.info("aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length())" + aLineCols[Job_Start_Pos].substring( aLineCols[Job_Start_Pos].indexOf(Start_Time_Prefix) + Start_Time_Prefix.length()));
         log_.info("sJobStartTs" + sJobStartTs);
-        -------------------------------------------------------------
 
         long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
         //--------------------------------------------------------------
@@ -280,9 +279,11 @@ public class AdapterWlmCobalt implements WlmProvider {
         //--------------------------------------------------------------
         HashMap<String, Object> jobinfo = jobs.startJobinternal(sJobId, lStartTsInMicroSecs);
 
+        long lStartTsInMicroSecs = Long.parseLong(sJobStartTs) *1000L;
         //--------------------------------------------------------------
-        // Put a 'Job Started' record into the Job table.
-        //-
+        // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
+        //--------------------------------------------------------------
+
         jobs.startJob(sJobId, sJobName, adapter.getHostname(), bsJobNodes.cardinality(), bsJobNodes.toByteArray(), sUserName, lStartTsInMicroSecs, adapter.getType(), workQueue.workItemId());
 
         //--------------------------------------------------------------
