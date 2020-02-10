@@ -40,10 +40,10 @@ public class ConnectionManager {
             return null;
         }
         PropertyArray result = new PropertyArray();
-        for (ConnectionObject connectionObject : connectionsToId.keySet()) {
+        for (Map.Entry<ConnectionObject, Long> connectionObject : connectionsToId.entrySet()) {
             PropertyMap data = new PropertyMap();
-            data.put("ID", connectionsToId.get(connectionObject));
-            data.putAll(connectionObject.connProperties());
+            data.put("ID", connectionObject.getValue());
+            data.putAll(connectionObject.getKey().connProperties());
             result.add(data);
         }
         PropertyMap output = new PropertyMap();
@@ -54,11 +54,12 @@ public class ConnectionManager {
     public PropertyMap getSubscription(@NotNull final String url, @NotNull final String subscriber) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
-        for (ConnectionObject connection : connectionsToId.keySet()) {
-            if (connection.url_.equals(url) && connection.subscriber_.equals(subscriber)) {
+        for (Map.Entry<ConnectionObject, Long> connection : connectionsToId.entrySet()) {
+            ConnectionObject currentConnection = connection.getKey();
+            if (currentConnection != null && currentConnection.url_.equals(url) && currentConnection.subscriber_.equals(subscriber)) {
                 PropertyMap result = new PropertyMap();
-                result.put("ID", connectionsToId.get(connection));
-                result.putAll(connection.connProperties());
+                result.put("ID", connection.getValue());
+                result.putAll(currentConnection.connProperties());
                 return result;
             }
         }
@@ -133,5 +134,5 @@ public class ConnectionManager {
     private final Logger log_;
     private HashMap<ConnectionObject, Long> connectionsToId = new HashMap<>();
     private HashMap<Long, ConnectionObject> idToConnections = new HashMap<>();
-    private static long connId = 1;
+    private long connId = 1;
 }

@@ -71,7 +71,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
                 publishedEvents = bootEvents.size();
             }
-        } catch (final RESTClientException e) {
+        } catch (final RESTClientException | NetworkListenerProviderException e) {
             throw new SimulatorException(e.getMessage());
         }
     }

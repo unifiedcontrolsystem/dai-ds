@@ -119,11 +119,13 @@ public class ApiReqData {
             return null;
         PropertyMap payloadParameters = parser_.fromString(payload).getAsMap();
         Map<String, String> payLoadMap = new HashMap<>();
-        for (String key : payloadParameters.keySet()) {
-            if (payloadParameters.get(key) == null)
-                payLoadMap.put(key, null);
+        for (Map.Entry<String, Object> parameter : payloadParameters.entrySet()) {
+            String paramKey = parameter.getKey();
+            Object paramValue = parameter.getKey();
+            if (paramValue == null)
+                payLoadMap.put(paramKey, null);
             else
-                payLoadMap.put(key, payloadParameters.get(key).toString());
+                payLoadMap.put(paramKey, paramValue.toString());
         }
         return payLoadMap;
     }

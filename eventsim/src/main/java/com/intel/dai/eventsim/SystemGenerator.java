@@ -37,7 +37,7 @@ class SystemGenerator {
      * @param bfValue probability of number of failure vents can be generated.
      * @return generated boot events
      */
-    List<String> publishBootEventsForLocation(final float bfValue) {
+    List<String> publishBootEventsForLocation(final float bfValue) throws NetworkListenerProviderException {
         float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
         long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
         List<String> bootEvents = new ArrayList<>();
