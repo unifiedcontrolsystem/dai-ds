@@ -1,0 +1,25 @@
+{
+  "conversion_node_map": {
+    "x0":         "R0",
+    "sms":        "R0-SMS",
+    "sns1":       "R0-SNS1",
+    "sns2":       "R0-SNS2",
+    "sns3":       "R0-SNS3",
+    "esw1":       "R0-SW1",
+    "esw2":       "R0-SW2",
+    "fsw1":       "R0-FABRICSW1",
+    "pdu1":       "R0-PDU1",
+    "pdu2":       "R0-PDU2",
+    "smu1":       "R0-SMU1",
+    "mmu1":       "R0-MMU1",
+    "ssu1":       "R0-SSU1",
+    "x0c0":       "R0-CH0",
+    "x0c0s0b0n0": "R0-CH0-CN0",
+    "x0c0s1b0n0": "R0-CH0-CN1",
+    "x0c0s2b0n0": "R0-CH0-CN2",
+    "x0c0s3b0n0": "R0-CH0-CN3"
+  },
+  "sensor_embedded_cpu_pattern": "_CPU[0-9]+",
+  "sensor_embedded_channel_pattern": "_CH[0-9]+",
+  "sensor_embedded_dimm_pattern": "_DIMM[0-9]+"
+}

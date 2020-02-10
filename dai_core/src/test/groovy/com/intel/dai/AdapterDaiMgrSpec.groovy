@@ -7,6 +7,7 @@ import com.intel.dai.dsapi.Location
 import com.intel.dai.dsapi.WorkQueue
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
+import org.junit.Ignore
 import org.voltdb.VoltTable
 import org.voltdb.VoltType
 import org.voltdb.client.Client

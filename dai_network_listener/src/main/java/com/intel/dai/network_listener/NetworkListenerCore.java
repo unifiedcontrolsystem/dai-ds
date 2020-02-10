@@ -333,7 +333,7 @@ public class NetworkListenerCore {
                     array[i] = map.getArrayOrDefault(entry.getKey(), null).get(i).toString();
                 result.put(entry.getKey(), String.join(",", array));
             }
-            result.put("requestBuilderSelectors." + entry, entry.getValue().toString());
+            result.put("requestBuilderSelectors." + entry.getKey(), entry.getValue().toString());
         }
     }
 
