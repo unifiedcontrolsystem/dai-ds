@@ -3,15 +3,14 @@ package com.intel.dai.eventsim;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.dsapi.NodeInformation;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class DataLoaderEngine {
 
@@ -56,10 +55,23 @@ public class DataLoaderEngine {
             processSensorMetadata();
             processRASMetadata();
             loadSystemManifestFromDB();
-
+            loadXnameLocationData();
+            validateXnameLocationsWithDB();
         } catch (final IOException | ConfigIOParseException e) {
-           throw new SimulatorException("Error while loading data into data loader engine");
+           throw new SimulatorException("Error while loading data into data loader engine: " + e.getMessage());
         }
+    }
+
+    private void validateXnameLocationsWithDB() throws SimulatorException {
+        List<String> locations = getNodeLocationData();
+        locations.addAll(getNonNodeLocationData());
+        if(!allLocations.containsAll(locations)) {
+            throw new SimulatorException("Not all locations in database has the mapping foreign location");
+        }
+    }
+
+    private void loadXnameLocationData() {
+       allLocations = CommonFunctions.getLocations();
     }
 
     private void processSensorMetadata() throws IOException, ConfigIOParseException {
@@ -99,18 +111,13 @@ public class DataLoaderEngine {
     }
 
     private EventDefinitionType sortEventByDefinition(String eventDescription) {
-        String denseRackPattern = new String("^CC_.*");
-        String denseChassisPattern = new String("^BC_(T|V|P|F|I|L)_NODE[0-3]_(?!(CPU[0-3]|KNC)).*");
-        String genericDenseChassisPattern = new String("^BC_.*");
-        String denseComputeNodePattern = new String("^BC_(T|V|P|F|I|L)_NODE[0-3]_(CPU[0-3]|KNC).*");
-
         if (eventDescription.matches(denseRackPattern)) {
             return EventDefinitionType.DENSE_RACK;
         }
         if (eventDescription.matches(denseComputeNodePattern)) {
             return EventDefinitionType.DENSE_COMPUTE_NODE;
         }
-        if (eventDescription.matches(denseChassisPattern) | eventDescription.matches(genericDenseChassisPattern)) {
+        if (eventDescription.matches(denseChassisPattern) || eventDescription.matches(genericDenseChassisPattern)) {
             return EventDefinitionType.DENSE_CHASSIS;
         }
 
@@ -162,7 +169,11 @@ public class DataLoaderEngine {
     public String getHwInventoryDiscStatusUrl() {return hwInventoryDiscStatusUrl_;}
     public String getHwInventoryFileLocationPath() {return hwInventoryLocationPath_;}
     public String getHwInventoryQueryLocationPath() {return hwInventoryQueryLocationPath_;}
-
+    private Collection<Object> allLocations = null;
+    private static final String denseRackPattern = "^CC_.*";
+    private static final String denseChassisPattern ="^BC_(T|V|P|F|I|L)_NODE[0-3]_(?!(CPU[0-3]|KNC)).*";
+    private static final String genericDenseChassisPattern = "^BC_.*";
+    private static final String denseComputeNodePattern = "^BC_(T|V|P|F|I|L)_NODE[0-3]_(CPU[0-3]|KNC).*";
     private final PropertyMap engineconfiguration_;
     private final Logger log_;
     private final NodeInformation nodeInfo_;
