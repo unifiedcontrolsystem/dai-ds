@@ -135,11 +135,7 @@ public class AdapterUIRest extends AdapterUI {
 
     private static Set<String> convertToSet(String devices)
     {
-        Set<String> deviceSet = new HashSet<>(Arrays.asList(devices.split(",")));
-        if(deviceSet.isEmpty()) {
-            return null;
-        }
-        return deviceSet;
+        return new HashSet<>(Arrays.asList(devices.split(",")));
     }
 
     @Override

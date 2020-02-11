@@ -34,7 +34,7 @@ public final class AdapterSingletonFactory {
      * @return The IAdapter for this process.
      * @throws IOException Thrown if the IAdapter implementation fails to launch.
      */
-    public static IAdapter getAdapter()
+    synchronized public static IAdapter getAdapter()
             throws IOException {
         if(adapter_ != null) return adapter_;
         if(type_ == null || name_ == null) {
@@ -51,7 +51,7 @@ public final class AdapterSingletonFactory {
      * Intended for testing of this module and modules using this module
      * @param adapter - Usually a Mock adapter is passed
      */
-    public static void setAdapter(IAdapter adapter) {
+    synchronized public static void setAdapter(IAdapter adapter) {
         adapter_ = adapter;
     }
 

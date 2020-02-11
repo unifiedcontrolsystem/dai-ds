@@ -153,13 +153,13 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
         if(channel_ != null) {
             try {
                 channel_.close();
-            } catch(Exception e) { /* Ignore*/ }
+            } catch(Exception e) { log_.exception(e); }
             channel_ = null;
         }
         if(connection_ != null) {
             try {
                 connection_.close();
-            } catch(Exception e) { /* Ignore*/ }
+            } catch(Exception e) { log_.exception(e); }
             connection_ = null;
         }
         publisherThread_ = null;
@@ -170,6 +170,7 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
         factory.setUri(connectionUri_);
         connection_ = factory.newConnection();
         channel_ = connection_.createChannel();
+        if(channel_ == null) throw new Exception("Failed to create the RabbitMQ channel!");
         channel_.exchangeDeclare(exchangeName_, BuiltinExchangeType.TOPIC);
     }
 

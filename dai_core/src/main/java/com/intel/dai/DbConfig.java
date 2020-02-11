@@ -5,6 +5,7 @@
 package com.intel.dai;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class DbConfig {
             throw new FileNotFoundException(String.format("Filename '%s' was not found in the XDG_PATH!", fileName));
         PropertyMap obj;
         try (InputStream stream = new FileInputStream(fullFileName)) {
-            try (InputStreamReader reader = new InputStreamReader(stream)) {
+            try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 ConfigIO parser = ConfigIOFactory.getInstance("json");
                 assert parser != null: "Failed to create JSON parser!";
                 obj = parser.readConfig(reader).getAsMap();

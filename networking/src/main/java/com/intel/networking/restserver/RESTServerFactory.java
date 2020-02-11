@@ -105,7 +105,7 @@ public final class RESTServerFactory {
                 for (RESTServer server : singletons_.values()) {
                     try {
                         server.close();
-                    } catch (Exception e) { /* Too late to do anything here */ }
+                    } catch (Exception e) { e.printStackTrace(); }
                 }
                 singletons_.clear();
             }));

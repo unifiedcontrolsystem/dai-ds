@@ -34,7 +34,8 @@ class SyncAdapterShutdownHandler implements AdapterShutdownHandler {
                     log.warn("Adapter shutdown exceeded time limit.  Forcing shutdown...");
                 }
             } else {
-                shutdownComplete.await();
+                if(!shutdownComplete.await(5, TimeUnit.MINUTES))
+                    log.warn("Awaiting shutdown for 5 minutes failed");
             }
         } catch (InterruptedException ex) {
             log.exception(ex, "Shutdown process in Adapter interrupted");
@@ -46,8 +47,13 @@ class SyncAdapterShutdownHandler implements AdapterShutdownHandler {
 
     public void signalShutdownComplete() {
         shutdownLock.lock();
-        shutdownComplete.signalAll();
-        shutdownLock.unlock();
+        try {
+            shutdownComplete.signalAll();
+        } catch(Exception e) {
+            log.exception(e);
+        } finally {
+            shutdownLock.unlock();
+        }
     }
 
     private Lock shutdownLock;

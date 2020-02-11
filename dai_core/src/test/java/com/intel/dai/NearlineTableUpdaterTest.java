@@ -24,8 +24,8 @@ public class NearlineTableUpdaterTest {
         Connection connection = mock(Connection.class);
         NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class));
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
-        updater.Update("Adapter", makeTable());
-        updater.Update("Adapter", makeTable());
+        updater.update("Adapter", makeTable());
+        updater.update("Adapter", makeTable());
     }
 
     @Test
@@ -33,8 +33,8 @@ public class NearlineTableUpdaterTest {
         Connection connection = mock(Connection.class);
         NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class));
         when(connection.prepareCall(ArgumentMatchers.anyString())).thenReturn(mock(CallableStatement.class));
-        updater.Update("RasMetaData", makeTable());
-        updater.Update("RasMetaData", makeTable());
+        updater.update("RasMetaData", makeTable());
+        updater.update("RasMetaData", makeTable());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class NearlineTableUpdaterTest {
         NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class));
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
         try {
-            updater.Update("Adapter_TEST", makeTable());
+            updater.update("Adapter_TEST", makeTable());
         }
         catch (DataStoreException e){}
     }

@@ -18,6 +18,7 @@ import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcCallException;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.*;
 
@@ -53,8 +54,13 @@ public class VoltDbManager implements Configuration, Groups {
                 if(resultData.getColumnType(column)== VoltType.TIMESTAMP){
                     if (rowData.getTimestampAsSqlTimestamp(column_name) == null)
                         obj.put(resultData.getColumnName(column), null);
-                    else
-                        obj.put(column_name, rowData.getTimestampAsSqlTimestamp(column).toString());
+                    else {
+                        Timestamp ts = rowData.getTimestampAsSqlTimestamp(column);
+                        if(ts != null)
+                            obj.put(column_name, ts.toString());
+                        else
+                            obj.put(column_name, null);
+                    }
                 }
                 else {
                     obj.put(resultData.getColumnName(column), rowData.get(column, rowData.getColumnType(column)));
@@ -114,14 +120,12 @@ public class VoltDbManager implements Configuration, Groups {
 
 
     private int upsertToLogicalGroupsTable(String groupName, String devices) {
-        ClientResponse response;
         try {
-            response = client_.callProcedure("UpsertLogicalGroups", groupName, devices);
+            client_.callProcedure("UpsertLogicalGroups", groupName, devices);
         } catch (IOException | ProcCallException ie) {
             ie.printStackTrace();
             return -1;
         }
-        response.getResults();
         return 0;
     }
 
@@ -192,7 +196,7 @@ public class VoltDbManager implements Configuration, Groups {
     public String addDevicesToGroup(String groupName, Set<String> devices) throws DataStoreException {
 
         Set<String> devicesInGroup;
-        logger.info("Add Devices %s to a group %s", devices.toString(), groupName);
+        logger.info("Add Devices %s to a group %s", (devices==null)?"<empty>":devices.toString(), groupName);
         PropertyArray jsonArray = getTableData("ListLogicalGroups", groupName);
         if (jsonArray.size() == 0) {
             return modifyDevicesInGroup(groupName, devices);

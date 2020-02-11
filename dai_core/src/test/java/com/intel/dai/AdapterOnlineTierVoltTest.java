@@ -89,7 +89,7 @@ public class AdapterOnlineTierVoltTest {
         doAnswer((Answer)invoke -> null).when(online.adapter).logRasEventNoEffectedJob(ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyLong());
-        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
+        online.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(-1L, 1L);
     }
 
@@ -109,7 +109,7 @@ public class AdapterOnlineTierVoltTest {
         when(client.callProcedure(ArgumentMatchers.matches("NodePurgeInventory_History"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(clientResponse.getResults()).thenReturn(one);
         when(online.adapter.client()).thenReturn(client);
-        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
+        online.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(5L, 1L);
     }
 
@@ -129,7 +129,7 @@ public class AdapterOnlineTierVoltTest {
         when(client.callProcedure(ArgumentMatchers.matches("NodePurgeInventory_History"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(clientResponse.getResults()).thenReturn(one);
         when(online.adapter.client()).thenReturn(client);
-        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
+        online.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(5L, 1L);
     }
 

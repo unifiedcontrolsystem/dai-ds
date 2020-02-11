@@ -116,6 +116,7 @@ public class NetworkDataSourceSSE implements NetworkDataSource {
         String implName = args.getOrDefault("implementation", "jdk11");
         try {
             server_ = RESTServerFactory.getSingletonInstance(implName, log_);
+            assert server_ != null: "Failed to get a RESTServer implementation called '" + implName + "'";
             server_.setAddress(args.getOrDefault("bindAddress", "127.0.0.1"));
             server_.setPort(Integer.parseInt(args.getOrDefault("bindPort", "19216")));
             server_.addSSEHandler(args.getOrDefault("urlPath", "/restsse/"), null); // null means support all subjects.
