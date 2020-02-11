@@ -28,7 +28,7 @@ public class DataReceiverAmqp {
                 else
                     log.error("ConnectionFactory returned a null connection - will keep trying!");
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 if (iConnectionRetryCntr++ == 0) {
                     // only cut this RAS event the first time we try, NOT every time we retry the connection!
                     // Cut RAS event indicating that we currently cannot connect to RabbitMQ and that we will retry until we can.
@@ -41,10 +41,11 @@ public class DataReceiverAmqp {
                             );
                 }
                 log.error("Unable to connect to AMQP (RabbitMQ) - will keep trying!");
-                try { Thread.sleep(5 * 1000); }  catch (Exception e2) {}
+                try { Thread.sleep(5 * 1000); }  catch (Exception e2) { log.exception(e2); }
             }
         }
         mChannel = mConnection.createChannel();     // channel has most of the API for getting things done resides (virtual connection or AMQP connection) - you can use 1 channel for everything going via the tcp connection.
+        assert mChannel != null : "No RabbitMQ channel created!";
         // Create a queue that is used by the DataMover to send Tier1 data to Tier2 - set up so messages have to be manually acknowledged and won't be lost.
         mChannel.queueDeclare(Adapter.DataMoverQueueName, Durable, false, false, null);  // set up our queue from DataMover to the DataReceiver.
         // Configure this consumer of DataMover queue messages to prefetch up to 100 message at a time from the queue.
@@ -62,7 +63,7 @@ public class DataReceiverAmqp {
     Channel getChannel()  { return mChannel; }
 
     // Member data
-    final boolean           Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
+    final static boolean    Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
     ConnectionFactory       mFactory;
     Connection              mConnection;
     Channel                 mChannel;

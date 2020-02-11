@@ -51,6 +51,7 @@ public class ApacheRESTClient extends RESTClient {
                     setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).
                     build();
         } catch(NoSuchAlgorithmException | KeyManagementException e) {
+            log_.exception(e);
             throw new RuntimeException("Failed to setup permissive SSL connection", e);
         }
     }
@@ -74,19 +75,27 @@ public class ApacheRESTClient extends RESTClient {
                 int code = response.getStatusLine().getStatusCode();
                 if(code >= 200 && code < 300) {
                     callback.responseCallback(code, null, request);
-                    try (Reader baseReader = new InputStreamReader(response.getEntity().getContent(),
-                            StandardCharsets.UTF_8)) {
-                        try (LineNumberReader reader = new LineNumberReader(baseReader)) {
-                            String line = reader.readLine();
-                            while(line != null) {
-                                event_.processLine(line, eventsCallback);
-                                line = reader.readLine();
+                    new Thread(()-> {
+                        try (Reader baseReader = new InputStreamReader(response.getEntity().getContent(),
+                                StandardCharsets.UTF_8)) {
+                            try (LineNumberReader reader = new LineNumberReader(baseReader)) {
+                                String line = reader.readLine();
+                                while (line != null) {
+                                    event_.processLine(line, eventsCallback);
+                                    line = reader.readLine();
+                                }
+                            } catch (IOException e) {
+                                throw e;
                             }
+                        } catch(IOException e) {
+                            log_.exception(e);
+                        } finally {
+                            log_.debug("*** Closing the content stream #1...");
+                            try {
+                                response.getEntity().getContent().close();
+                            } catch(IOException e) { log_.exception(e); }
                         }
-                    } finally {
-                        log_.debug("*** Closing the content stream #1...");
-                        response.getEntity().getContent().close();
-                    }
+                    }).start();
                 } else {
                     callback.responseCallback(code, streamToBody(response.getEntity().getContent()), request);
                     log_.debug("*** Closing the content stream #2...");
@@ -115,7 +124,8 @@ public class ApacheRESTClient extends RESTClient {
             try (InputStreamReader reader = new InputStreamReader(response.getEntity().getContent(),
                     StandardCharsets.UTF_8)) {
                 StringWriter writer = new StringWriter();
-                reader.transferTo(writer);
+                if(reader.transferTo(writer) == 0L)
+                    log_.warn("Failed to transfer data from network to StringWriter.");
                 return new BlockingResult(response.getStatusLine().getStatusCode(), writer.toString(), request);
             }
         } catch (IOException e) {
@@ -127,7 +137,8 @@ public class ApacheRESTClient extends RESTClient {
     private String streamToBody(InputStream stream) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             StringWriter writer = new StringWriter();
-            reader.transferTo(writer);
+            if(reader.transferTo(writer) == 0L)
+                log_.warn("Failed to transfer data from network to StringWriter.");
             return writer.toString();
         }
     }

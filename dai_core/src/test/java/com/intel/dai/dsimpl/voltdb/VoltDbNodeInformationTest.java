@@ -56,14 +56,6 @@ public class VoltDbNodeInformationTest {
 
     @Before
     public void setUp() throws IOException, ProcCallException {
-        VoltDbNodeInformation.locationToComputeNodeHostname_   = null;
-        VoltDbNodeInformation.locationToServiceNodeHostname_   = null;
-        VoltDbNodeInformation.hostnameToComputeNodeLocation_   = null;
-        VoltDbNodeInformation.hostnameToServiceNodeLocation_   = null;
-        VoltDbNodeInformation.locationToSequenceNumber_        = null;
-        VoltDbNodeInformation.locationToAggregator_            = null;
-        VoltDbNodeInformation.locationToNodeIpAndBmcIP_        = null;
-        VoltDbNodeInformation.locationToComputeNodeIpAndBmcIP_ = null;
         client_ = mock(Client.class);
 
         List<String> allColumnNames = new ArrayList<>() {{

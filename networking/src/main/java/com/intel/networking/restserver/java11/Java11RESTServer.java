@@ -54,7 +54,7 @@ public class Java11RESTServer extends RESTServer {
             running_.set(true);
         } catch (IOException cause) {
             server_ = null;
-            try { connectionManager_.close(); } catch(IOException e) { /* Cannot happen! */ }
+            try { connectionManager_.close(); } catch(IOException e) { log_.exception(e); }
             connectionManager_ = null;
             failedServer_ = true;
             throw new RESTServerException("Failed to bind the Java11RESTServer", cause);
@@ -65,7 +65,7 @@ public class Java11RESTServer extends RESTServer {
     protected void stopServer() throws RESTServerException {
         checkFailedServer();
         running_.set(false);
-        try { connectionManager_.close(); } catch (IOException e) { /* Cannot happen! */ }
+        try { connectionManager_.close(); } catch (IOException e) { log_.exception(e); }
         connectionManager_ = null;
         server_.stop(DEFAULT_SERVER_LINGER_SECONDS);
         server_ = null;

@@ -69,7 +69,7 @@ public class NetworkListenerCore {
         } catch(AdapterException e) {
             log_.exception(e, "Problem occurred while attempting to shutdown the adapter");
         }
-        try { actions_.close(); } catch(IOException e) { /* Ignore from close */ }
+        try { actions_.close(); } catch(IOException e) { log_.exception(e); }
     }
 
     private boolean connectToAllDataSources() {
@@ -156,6 +156,7 @@ public class NetworkListenerCore {
             sink.setCallbackDelegate(this::processSinkMessage);
             sink.startListening();
         }
+        log_.debug("*** Done Creating all network connections.");
         safeSleep(1500); // stabilize for 1.5 seconds...
         for(NetworkDataSink sink: sinks_) {
             if(!sink.isListening())
@@ -309,7 +310,9 @@ public class NetworkListenerCore {
                     break;
                 case "tokenAuthProvider":
                     result.put(entry.getKey(), entry.getValue().toString());
-                    parseTokenConfig(config_.getProviderConfigurationFromClassName(entry.getValue().toString()), result);
+                    Object value = entry.getValue();
+                    if(value != null)
+                        parseTokenConfig(config_.getProviderConfigurationFromClassName(value.toString()), result);
                     break;
                 default: // Drop any unexpected keys...
                     result.put(entry.getKey(), entry.getValue().toString());

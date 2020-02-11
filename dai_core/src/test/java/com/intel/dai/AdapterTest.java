@@ -69,13 +69,6 @@ public class AdapterTest {
         }
 
         @Override
-        ClientResponse response() {
-            if (callBase_)
-                return super.response();
-            return response_;
-        }
-
-        @Override
         void adapterTerminating(String sBaseWorkItemResults)
                 throws IOException, InterruptedException, AdapterException {
             super.adapterTerminating(sBaseWorkItemResults);
@@ -287,7 +280,6 @@ public class AdapterTest {
         adapter_.client(mock(Client.class));
         adapter_.dataMoverResultTblIndxToTableNameMap();
         adapter_.callBase_ = true;
-        adapter_.response();
         adapter_.callBase_ = false;
         adapter_.signalHandler();
     }

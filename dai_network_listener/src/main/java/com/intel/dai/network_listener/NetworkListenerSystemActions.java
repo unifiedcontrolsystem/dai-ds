@@ -328,6 +328,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
                 args.put(key, value.toString());
         }
         publisher_ = NetworkDataSourceFactory.createInstance(log_, publisherName, args);
+        assert publisher_ != null: "Failed to create a NetworkDataSource object of type '" + publisherName + "'";
         publisher_.connect(null);
     }
 

@@ -218,7 +218,7 @@ public class NetworkDataSinkRabbitMQ implements NetworkDataSink {
     private void closeChannelObject() {
         try {
             channel_.close();
-        } catch(Exception e2) { /* Do Nothing...*/ }
+        } catch(Exception e2) { log_.exception(e2); }
         channel_ = null;
         queueName_ = null;
     }
@@ -237,7 +237,7 @@ public class NetworkDataSinkRabbitMQ implements NetworkDataSink {
     private void closeConnection() {
         try {
             connection_.close();
-        } catch(Exception e2) { /* Do Nothing...*/ }
+        } catch(Exception e2) { log_.exception(e2); }
         connection_ = null;
     }
 
@@ -255,7 +255,9 @@ public class NetworkDataSinkRabbitMQ implements NetworkDataSink {
         if(tag_ != null) {
             try {
                 channel_.basicCancel(tag_);
-            } catch(Exception e) { /* Do Nothing... */ }
+            } catch(Exception e) {
+                log_.exception(e);
+            }
             tag_ = null;
         }
         if(channel_ != null) {

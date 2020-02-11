@@ -21,4 +21,6 @@ public interface DataLoaderApi {
     void populateOnlineTierFromNearlineTier() throws DataStoreException;
 
     void dropSnapshotTablesFromNearlineTier();
+
+    void disconnectAll();
 }

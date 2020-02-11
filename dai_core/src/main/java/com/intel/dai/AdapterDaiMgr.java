@@ -37,11 +37,11 @@ public class AdapterDaiMgr {
     private static final long    MaxNumMillisecDifferenceForDataMover    = 15 * 1000L; // Maximum number of millisecs difference between DataMover and DataReceiver work items (before classifying DataReceiver being stuck).
     private static final String  TimestampPrefix           = "Timestamp=";
     private static final String  MillisecPrefix            = "Millisecs=";
-    private static String DbServers                 = null;                 // IP addresses for the VoltDB servers on this machine.  E.g., 192.168.10.1
+    private String DbServers                 = null;                 // IP addresses for the VoltDB servers on this machine.  E.g., 192.168.10.1
     private static String JavaExe                   = null;                 // Java executable path for this machine
-    private static String UcsClassPath              = null;                 // Classpath for UCS for this machine
-    private static String UcsLogfileDirectory       = null;                 // UCS's log file directory for this machine
-    private static String UcsLog4jConfigurationFile = null;                 // UCS's Log4j configuration file for this machine
+    private String UcsClassPath              = null;                 // Classpath for UCS for this machine
+    private String UcsLogfileDirectory       = null;                 // UCS's log file directory for this machine
+    private String UcsLog4jConfigurationFile = null;                 // UCS's Log4j configuration file for this machine
 
     private static final long CONNECTION_LOOP_DELAY    = 15 * 1000L;     // Each attempt to connect to VoltDB will pause up to 15 seconds per loop of all servers.
     private static final long CONNECTION_TOTAL_TIMEOUT = 900 * 1000L;    // Total timeout for attempts to connect to VoltDB will last up to 15 minutes.
@@ -200,7 +200,7 @@ public class AdapterDaiMgr {
         return str.replaceAll(regex, value);
     }
 
-    static String keywordSubstitutions(String sTempStr, String sHostname, String sLctn, long lAdapterTypeInstanceNum) {
+    String keywordSubstitutions(String sTempStr, String sHostname, String sLctn, long lAdapterTypeInstanceNum) {
         sTempStr = replaceVariable(sTempStr, "$JAVA", JavaExe);
         sTempStr = replaceVariable(sTempStr, "$CLASSPATH", UcsClassPath);
         sTempStr = replaceVariable(sTempStr, "$UCSCLASSPATH", UcsClassPath);
@@ -836,8 +836,8 @@ public class AdapterDaiMgr {
                     }   // working results have been filled in.
                     else {
                         // working results have not yet been filled in.
-                        log_.warn("ensureDaiMgrsStillActive - work item's working results have not yet been filled in - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s, WorkingResults=%s!",
-                                  sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                        log_.warn("ensureDaiMgrsStillActive - work item's working results have not yet been filled in - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s!",
+                                  sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone);
                     }   // working results have not yet been filled in.
 
                 }   // loop through the work items.
@@ -906,7 +906,7 @@ public class AdapterDaiMgr {
             String sTempChildNodeLctn   = vt.getString("Lctn");
             String sTempChildNodeIpAddr = vt.getString("IpAddr");
             // Check & see if the node is already active.
-            int pingTimeout = Integer.valueOf(System.getProperty("daiAdapterDaiMgr.pingTimeoutSeconds", "2"));
+            int pingTimeout = Integer.parseInt(System.getProperty("daiAdapterDaiMgr.pingTimeoutSeconds", "2"));
             String sTempCmd = String.format("/usr/bin/ping -W %s -q -c 1 -s 8 %s", pingTimeout, sTempChildNodeIpAddr);
             log_.info("determineInitialNodeStates - checking to see if %s (%s) is already active - issuing '%s'", sTempChildNodeLctn, sTempChildNodeIpAddr, sTempCmd);
             // Process process = Runtime.getRuntime().exec(sTempCmd);
@@ -914,8 +914,8 @@ public class AdapterDaiMgr {
             // Save away info about this node's ping.
             alNodePingInfo.add( new NodePingInfo(sTempChildNodeLctn, sTempChildNodeIpAddr, process) );
             // Ensure that don't consume too many processes doing these pings.
-            int sleepAfterNNodes = Integer.valueOf(System.getProperty("daiAdapterDaiMgr.sleepAfterNNodes", "500"));
-            long sleepTime = Long.valueOf(System.getProperty("daiAdapterDaiMgr.pingSleepMilliSeconds", "1000"));
+            int sleepAfterNNodes = Integer.parseInt(System.getProperty("daiAdapterDaiMgr.sleepAfterNNodes", "500"));
+            long sleepTime = Long.parseLong(System.getProperty("daiAdapterDaiMgr.pingSleepMilliSeconds", "1000"));
             if (iNodeCntr % sleepAfterNNodes == 0)
                 Thread.sleep(sleepTime); // delay a little so we don't run out of processes (i.e., Too many open files)
             ++iNodeCntr;
@@ -1339,7 +1339,7 @@ public class AdapterDaiMgr {
                                                         ,workQueue.baseWorkItemId()         // requesting work item
                                                         );
                 }
-                catch (Exception e2) {}
+                catch (Exception e2) { log_.exception(e2); }
             }
         }   // End while loop
         return -99999;
@@ -1393,7 +1393,7 @@ public class AdapterDaiMgr {
                                                         ,workQueue.baseWorkItemId()         // requesting work item
                                                         );
                 }
-                catch (Exception e2) {}
+                catch (Exception e2) { log_.exception(e2); }
             }
         }   // End while loop
         return -99999;
@@ -1413,7 +1413,7 @@ public class AdapterDaiMgr {
                 oTempField.setAccessible(false);
             }
         }
-        catch (Exception e) {
+        catch (IllegalAccessException | NoSuchFieldException e) {
             lPid = -2;
         }
         return lPid;
@@ -1690,7 +1690,7 @@ public class AdapterDaiMgr {
                                                             ,workQueue.baseWorkItemId()         // requesting work item
                                                             );
                     }
-                    catch (Exception e2) {}
+                    catch (Exception e2) { log_.exception(e2); }
                 }
             }   // End while loop - handle any work items that have been queued for this type of adapter.
 
@@ -1700,7 +1700,8 @@ public class AdapterDaiMgr {
             adapter.handleMainlineAdapterCleanup(adapter.adapterAbnormalShutdown());
             return;
         }   // End try
-        catch (Exception e) {
+        catch (NullPointerException | InterruptedException | AdapterException | DataStoreException |
+                ProcCallException e) {
             adapter.handleMainlineAdapterException(e);
         }
     }   // End mainProcessingFlow(String[] args)
