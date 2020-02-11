@@ -44,13 +44,8 @@ public class Component {
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
                 ForeignEvent ev = createRandomRASEvent(i + seed, location, regexMatchedLabelDescriptions);
-                if (ev != null) {
-                    String data = ev.getJSON();
-                    rasEvents.add(data);
-                } else {
-                    System.out.println("Unable to create ras event");
-                    i--;
-                }
+                String data = ev.getJSON();
+                rasEvents.add(data);
             }
         }
         return rasEvents;
@@ -72,13 +67,9 @@ public class Component {
             if(eventsTobeGenerated == 0)
                 return rasEvents;
             ForeignEvent ev = createRandomRASEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
-            if (ev != null) {
-                String data = ev.getJSON();
-                rasEvents.add(data);
-                eventsTobeGenerated--;
-            } else {
-                System.out.println("Unable to create ras event");
-            }
+            String data = ev.getJSON();
+            rasEvents.add(data);
+            eventsTobeGenerated--;
         }
         return rasEvents;
     }
@@ -92,18 +83,13 @@ public class Component {
      * @return sensor events.
      * @throws NetworkListenerProviderException unable to create sensor event.
      */
-    List<String> publishSensorEvents(final long eventsPerLocation, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException {
+    List<String> publishSensorEvents(final long eventsPerLocation, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException, SimulatorException {
         List<String> rasEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
                 ForeignEvent ev = createRandomSensorEvent(i + seed, location, regexMatchedLabelDescriptions);
-                if (ev != null) {
-                    String data = ev.getJSON();
-                    rasEvents.add(data);
-                } else {
-                    System.out.println("Unable to create Sensor event");
-                    i--;
-                }
+                String data = ev.getJSON();
+                rasEvents.add(data);
             }
         }
         return rasEvents;
@@ -118,20 +104,16 @@ public class Component {
      * @return sensor events.
      * @throws NetworkListenerProviderException unable to create sensor event.
      */
-    List<String> publishRemSensorEvents(final long remEvents, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException {
+    List<String> publishRemSensorEvents(final long remEvents, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException, SimulatorException {
         long eventsTobeGenerated = remEvents;
         List<String> sensorEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
             if(eventsTobeGenerated == 0)
                 return sensorEvents;
             ForeignEvent ev = createRandomSensorEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
-            if (ev != null) {
-                String data = ev.getJSON();
-                sensorEvents.add(data);
-                eventsTobeGenerated--;
-            } else {
-                System.out.println("Unable to create sensor event");
-            }
+            String data = ev.getJSON();
+            sensorEvents.add(data);
+            eventsTobeGenerated--;
         }
         return sensorEvents;
     }
@@ -140,17 +122,14 @@ public class Component {
      * This method is to create available boot events.
      * @param regexMatchedLocations locations matching the location-regex input.
      * @return available boot events.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    List<String> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) {
+    List<String> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) throws NetworkListenerProviderException {
         List<String> bootAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
-                ForeignEvent ev = createAvailableEvent(location);
-                if(ev != null) {
-                    String data = ev.getJSON();
-                    bootAvailableEvents.add(data);
-                } else {
-                    System.out.println("Unable to create available boot event for location = " + location);
-                }
+            ForeignEvent ev = createAvailableEvent(location);
+            String data = ev.getJSON();
+            bootAvailableEvents.add(data);
         }
         return bootAvailableEvents;
     }
@@ -160,8 +139,9 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param totalFailureEventsToGenerate number of failure boot events to create.
      * @return boot events for a given location
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    List<String> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations, final long totalFailureEventsToGenerate) {
+    List<String> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations, final long totalFailureEventsToGenerate) throws NetworkListenerProviderException {
         List<String> bootingEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
             if(totalFailureEventsToGenerate == regexMatchedLocations.size()) {
@@ -192,17 +172,14 @@ public class Component {
      * This method is to create unavailable boot events.
      * @param regexMatchedLocations locations matching the location-regex input.
      * @return unavailable boot events.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    List<String> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) {
+    List<String> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) throws NetworkListenerProviderException {
         List<String> bootUnAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
-                ForeignEvent ev = createUnavailableEvent(location);
-                if(ev != null) {
-                    String data = ev.getJSON();
-                    bootUnAvailableEvents.add(data);
-                } else {
-                    System.out.println("Unable to create unavailable boot event for location = " + location);
-                }
+            ForeignEvent ev = createUnavailableEvent(location);
+            String data = ev.getJSON();
+            bootUnAvailableEvents.add(data);
         }
         return bootUnAvailableEvents;
     }
@@ -232,7 +209,7 @@ public class Component {
      * @return sensor event.
      * @throws NetworkListenerProviderException unable to create ras event.
      */
-    private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws NetworkListenerProviderException {
+    private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws NetworkListenerProviderException, SimulatorException {
         // Ignore seed in the current implementation of randomization
         ForeignEventSensor ev = new ForeignEventSensor();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
@@ -240,7 +217,7 @@ public class Component {
 
         PropertyMap sensorDetails = (PropertyMap) definitionSensorMetadata_.get(generateRandomNumberBetween(0, definitionSensorMetadata_.size(), seed));
         if (sensorDetails == null) {
-            throw new RuntimeException("Unable to find sensor details for a component of type: ");
+            throw new SimulatorException("Unable to find sensor details for a component of type: ");
         }
         ev.setSensorName(sensorDetails.getStringOrDefault("id", "UNKNOWN"));
         ev.setSensorUnits(sensorDetails.getStringOrDefault("unit", "UNKNOWN"));
@@ -256,15 +233,12 @@ public class Component {
      * This method is to create node failure event.
      * @param location where node failure event is created.
      * @return node failure event.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    private ForeignEvent createNodeFailureEvent(String location) {
+    private ForeignEvent createNodeFailureEvent(String location) throws NetworkListenerProviderException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        try {
-            ev.setLocation(CommonFunctions.convertLocationToXName(location));
-        } catch (NetworkListenerProviderException e) {
-            log_.error("error while converting location to xname");
-        }
+        ev.setLocation(CommonFunctions.convertLocationToXName(location));
         ev.setRole("Compute");
         ev.setState("Empty");
         ev.setStatus("AdminDown");
@@ -275,15 +249,12 @@ public class Component {
      * This method is to create node unavailable event.
      * @param location where node unavailable event is created.
      * @return node unavailable event.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    private ForeignEvent createUnavailableEvent(String location) {
+    private ForeignEvent createUnavailableEvent(String location) throws NetworkListenerProviderException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        try {
-            ev.setLocation(CommonFunctions.convertLocationToXName(location));
-        } catch (NetworkListenerProviderException e) {
-            log_.error("error while converting location to xname");
-        }
+        ev.setLocation(CommonFunctions.convertLocationToXName(location));
         ev.setRole("Compute");
         ev.setState("Off");
         ev.setStatus("AdminDown");
@@ -294,15 +265,12 @@ public class Component {
      * This method is to create node booting event.
      * @param location where node booting event is created.
      * @return node booting event.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    private ForeignEvent createBootingEvent(String location) {
+    private ForeignEvent createBootingEvent(String location) throws NetworkListenerProviderException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        try {
-            ev.setLocation(CommonFunctions.convertLocationToXName(location));
-        }  catch (NetworkListenerProviderException e) {
-            log_.error("error while converting location to xname");
-        }
+        ev.setLocation(CommonFunctions.convertLocationToXName(location));
         ev.setRole("Compute");
         ev.setState("On");
         ev.setStatus("AdminDown");
@@ -313,15 +281,12 @@ public class Component {
      * This method is to create node available event.
      * @param location where node available event is created.
      * @return node available event.
+     * @throws NetworkListenerProviderException when unable to find foreign location
      */
-    private ForeignEvent createAvailableEvent(String location) {
+    private ForeignEvent createAvailableEvent(String location) throws NetworkListenerProviderException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        try {
-            ev.setLocation(CommonFunctions.convertLocationToXName(location));
-        } catch (NetworkListenerProviderException e) {
-            log_.error("error while converting location to xname");
-        }
+        ev.setLocation(CommonFunctions.convertLocationToXName(location));
         ev.setRole("Compute");
         ev.setState("Ready");
         ev.setStatus("AdminDown");

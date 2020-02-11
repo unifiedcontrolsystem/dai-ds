@@ -434,14 +434,13 @@ public class SimulatorEngineTest {
         NodeInformation nodeInfoMock = mock(NodeInformation.class);
         List<String> locations = new ArrayList();
         locations.add("R0");
-        locations.add("SMS");
         when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
         when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
         eventSimTestMock.initialise(args);
         SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishBootEvents(".*", "50", "false");
-        assertEquals(6, simulatorEngineTest.getNumberOfEventsPublished());
+        assertEquals(3, simulatorEngineTest.getNumberOfEventsPublished());
     }
 
     private void loadDataIntoFile(File file, String data) throws Exception {

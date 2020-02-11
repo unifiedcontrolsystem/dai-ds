@@ -29,7 +29,6 @@ public class EventSimApp extends EventSim {
 
     EventSimApp(Logger log) {
         super(log);
-        log_ = log;
     }
 
     public static void main(String args[]) {
@@ -140,7 +139,6 @@ public class EventSimApp extends EventSim {
         locations = locations.substring(1,locations.length() - 1);
         List<String> xnames = Arrays.asList(locations.split(","));
         numOfXnamesDiscovery = xnames.size();
-        boolean force = Boolean.valueOf(parameters.getOrDefault("force", "false"));
         List<PropertyMap> xnameDiscovery = new ArrayList<>();
         for(int i = 0; i < numOfXnamesDiscovery; i++) {
             PropertyMap xnameUri = new PropertyMap();

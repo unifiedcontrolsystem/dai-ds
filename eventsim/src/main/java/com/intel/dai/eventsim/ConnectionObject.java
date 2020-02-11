@@ -12,8 +12,8 @@ public class ConnectionObject {
     }
 
     protected void initialiseProperties(Map<String, String> properties) {
-        for(String prop : properties.keySet())
-            prop_.put(prop, properties.get(prop));
+        for(Map.Entry<String, String> property : properties.entrySet())
+            prop_.put(property.getKey(), property.getValue());
     }
 
     protected PropertyMap connProperties() {

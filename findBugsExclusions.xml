@@ -170,10 +170,6 @@
         <Method name="createRestClient" />
         <Bug code="DMI" />
     </Match>
-    <Match> <!-- TODO: These should all be fixed or marked as designed, the code is WIP -->
-        <Package name="com.intel.dai.eventsim" />
-        <Bug code="ES,RV,MS,Bx,Dm,UuF,WMI,DLS,NS,RCN,ST" />
-    </Match>
     <Match> <!-- TODO: These are all in legacy code nad need to be dis-positioned! -->
         <Package name="com.intel.dai" />
     </Match>
