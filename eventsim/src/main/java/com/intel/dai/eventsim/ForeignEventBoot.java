@@ -31,4 +31,6 @@ public class ForeignEventBoot extends ForeignEvent{
     public void setStatus(String status) {
         props_.put("SoftwareStatus", status);
     }
+
+    public void setBootImageId(String bootImageId) { props_.put("bootImageId", bootImageId);  }
 }

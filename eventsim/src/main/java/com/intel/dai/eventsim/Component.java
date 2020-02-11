@@ -1,13 +1,16 @@
 package com.intel.dai.eventsim;
 
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import com.sun.istack.NotNull;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +25,12 @@ public class Component {
 
     Component(Logger log, String bootImageFileLocation) {
         log_ = log;
-       /* try {
+        try {
             bootImageInfo_ = LoadFileLocation.fromFileLocation(bootImageFileLocation).getAsMap().
                     getMapOrDefault("boot-images", new PropertyMap()).getArrayOrDefault("content", new PropertyArray());
         } catch(IOException | ConfigIOParseException e) {
             bootImageInfo_ = new PropertyArray();
-        }*/
+        }
     }
 
     /**
@@ -290,16 +293,17 @@ public class Component {
         ev.setRole("Compute");
         ev.setState("Ready");
         ev.setStatus("AdminDown");
+        ev.setBootImageId(getRandomBootImageId());
         return ev;
     }
 
-/*    private String getRandomBootImageId() { // This is currently VERY specific. Needs generalization.
+    private String getRandomBootImageId() { // This is currently VERY specific. Needs generalization.
         String id = "mOS";
         try {
             id = bootImageInfo_.getMap(0).getStringOrDefault("id", ""); // Not really random but the first id.
-        } catch(IndexOutOfBoundsException | PropertyNotExpectedType e) { *//* Live with the first default choice! *//* }
+        } catch(IndexOutOfBoundsException | PropertyNotExpectedType e) { /* Live with the first default choice! */ }
         return id;
-    }*/
+    }
 
     /**
      * This method is to pick index between ranges.
@@ -330,7 +334,7 @@ public class Component {
     }
 
     private final Logger log_;
-    //private PropertyArray bootImageInfo_;
+    private PropertyArray bootImageInfo_;
     private Random randomNumberWithSeed;
     private Random randomNumber;
 }
