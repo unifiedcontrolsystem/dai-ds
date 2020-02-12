@@ -68,14 +68,14 @@ public class ApacheRESTClient extends RESTClient {
     protected void doSSERequest(RequestInfo request, ResponseCallback callback, SSEEvent eventsCallback) {
         HttpGet methodRequest = new HttpGet(request.uri());
         log_.debug("*** SSE Request: uri='%s'", request.uri());
-        try {
-            client_.execute(methodRequest, (response) -> {
-                for(Header header: response.getAllHeaders())
-                    log_.debug("HEADER: %s: %s", header.getName(), header.getValue());
-                int code = response.getStatusLine().getStatusCode();
-                if(code >= 200 && code < 300) {
-                    callback.responseCallback(code, null, request);
-                    new Thread(()-> {
+        new Thread(()-> {
+            try {
+                client_.execute(methodRequest, (response) -> {
+                    for (Header header : response.getAllHeaders())
+                        log_.debug("HEADER: %s: %s", header.getName(), header.getValue());
+                    int code = response.getStatusLine().getStatusCode();
+                    if (code >= 200 && code < 300) {
+                        callback.responseCallback(code, null, request);
                         try (Reader baseReader = new InputStreamReader(response.getEntity().getContent(),
                                 StandardCharsets.UTF_8)) {
                             try (LineNumberReader reader = new LineNumberReader(baseReader)) {
@@ -87,26 +87,28 @@ public class ApacheRESTClient extends RESTClient {
                             } catch (IOException e) {
                                 throw e;
                             }
-                        } catch(IOException e) {
+                        } catch (IOException e) {
                             log_.exception(e);
                         } finally {
                             log_.debug("*** Closing the content stream #1...");
                             try {
                                 response.getEntity().getContent().close();
-                            } catch(IOException e) { log_.exception(e); }
+                            } catch (IOException e) {
+                                log_.exception(e);
+                            }
                         }
-                    }).start();
-                } else {
-                    callback.responseCallback(code, streamToBody(response.getEntity().getContent()), request);
-                    log_.debug("*** Closing the content stream #2...");
-                    response.getEntity().getContent().close();
-                }
-                return null;
-            });
-        } catch(IOException e) {
-            log_.exception(e, "Failed to create SSE connection!");
-            callback.responseCallback(-1, exceptionToString(e), request);
-        }
+                    } else {
+                        callback.responseCallback(code, streamToBody(response.getEntity().getContent()), request);
+                        log_.debug("*** Closing the content stream #2...");
+                        response.getEntity().getContent().close();
+                    }
+                    return null;
+                });
+            } catch (IOException e) {
+                log_.exception(e, "Failed to create SSE connection!");
+                callback.responseCallback(-1, exceptionToString(e), request);
+            }
+        }).start();
     }
 
     /**
