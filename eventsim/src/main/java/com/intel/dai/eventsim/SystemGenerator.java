@@ -70,7 +70,6 @@ class SystemGenerator {
         List<String> rasEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {
             rasEvents = component_.publishRASEvents(eventsPerLocation, seed, regexMatchedLocations, regexMatchedLabelDescriptions);
-            eventsCount = eventsCount - rasEvents.size();
         }
 
         long remRasEvents = eventsCount % regexMatchedLocations.size();
@@ -96,7 +95,6 @@ class SystemGenerator {
         List<String> sensorEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {
             sensorEvents = component_.publishSensorEvents(eventsPerLocation, seed, regexMatchedLocations, regexMatchedLabelDescriptions);
-            eventsCount = eventsCount - sensorEvents.size();
         }
 
         long remEvents = eventsCount % regexMatchedLocations.size();
