@@ -123,7 +123,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                                                             // processed/executing, that is requesting/issuing this
                                                             // invocation
                 );
-            } catch (Exception e2) { /* Do Nothing */ }
+            } catch (Exception e2) { log_.exception(e2); }
             result = 1;
             reason = "Adapter terminating by exception!";
         }

@@ -86,6 +86,24 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         } finally{closeStmt(stmt);}
     }
 
+    @Override
+    public void disconnectAll() {
+        if(onlineTierConn != null) {
+            try {
+                onlineTierConn.close();
+            } catch (SQLException e) {
+                log.exception(e);
+            }
+        }
+        if(nearlineTierConn != null) {
+            try {
+                nearlineTierConn.close();
+            } catch (SQLException e) {
+                log.exception(e);
+            }
+        }
+    }
+
     private void populateOnlineTableFromNearline(String tableName) throws DataStoreException {
         PreparedStatement loadStmt = null;
         PreparedStatement activeStoreStmt = null;

@@ -45,6 +45,7 @@ public class Java11RESTClient extends RESTClient {
             context.init(null, tm, new SecureRandom());
             client_ = HttpClient.newBuilder().sslContext(context).build();
         } catch(NoSuchAlgorithmException | KeyManagementException e) {
+            log_.warn("Failed to setup permissive SSL connection");
             throw new RuntimeException("Failed to setup permissive SSL connection", e);
         }
     }

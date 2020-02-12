@@ -30,7 +30,7 @@ public class DataMoverAmqp {
                 else
                     log.error("ConnectionFactory returned a null connection - will keep trying!");
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 if (iConnectionRetryCntr++ == 0) {
                     // only cut this RAS event the first time we try, NOT every time we retry the connection!
                     // Cut RAS event indicating that we currently cannot connect to RabbitMQ and that we will retry until we can.
@@ -43,7 +43,7 @@ public class DataMoverAmqp {
                             );
                 }
                 log.error("Unable to connect to AMQP (RabbitMQ) - will keep trying!");
-                try { Thread.sleep(5 * 1000); }  catch (Exception e2) {}
+                try { Thread.sleep(5 * 1000); }  catch (Exception e2) { log.exception(e2);}
             }
         }
         mChannel = mConnection.createChannel();     // channel has most of the API for getting things done resides (virtual connection or AMQP connection) - you can use 1 channel for everything going via the tcp connection.
@@ -59,7 +59,7 @@ public class DataMoverAmqp {
     Channel getChannel()  { return mChannel; }
 
     // Member data
-    final boolean           Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
+    static final boolean    Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
     ConnectionFactory       mFactory;
     Connection              mConnection;
     Channel                 mChannel;

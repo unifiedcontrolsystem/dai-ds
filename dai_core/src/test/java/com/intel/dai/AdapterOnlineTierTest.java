@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,10 +32,8 @@ public class AdapterOnlineTierTest {
             workQueue_ = mock(WorkQueue.class);
             this.workQueue = workQueue_;
             try {
-                when(adapter.setUpAdapter(anyString(), anyString())).thenReturn(workQueue);
-            } catch(AdapterException e) {
-
-            }
+                when(adapter.setUpAdapter(anyString(), anyString(), any())).thenReturn(workQueue);
+            } catch(AdapterException e) { /**/ }
         }
 
         @Override

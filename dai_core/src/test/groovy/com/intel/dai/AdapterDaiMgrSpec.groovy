@@ -131,7 +131,7 @@ class AdapterDaiMgrSpec extends Specification {
 
     def "Test for keywordSubstitutions"() {
         def str = "\$HOSTNAME \$LCTN \$INSTANCE"
-        def replaced = AdapterDaiMgr.keywordSubstitutions(str, "hostname", "location", 42L)
+        def replaced = underTest_.keywordSubstitutions(str, "hostname", "location", 42L)
 
         expect: replaced == "hostname location 42"
     }

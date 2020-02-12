@@ -4,11 +4,13 @@
 
 package com.intel.dai;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 import com.intel.logging.*;
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.dsapi.WorkQueue;
+import org.json_voltpatches.JSONException;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
 import java.util.*;
@@ -303,8 +305,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 }
 
                 String sAmqpRoutingKey = sTableName;  // use the table name as the routing key.
-
-                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, ConfigIOFactory.getInstance("json").toString(jsonMsgObject).getBytes());
+                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, parser.toString(jsonMsgObject).getBytes(StandardCharsets.UTF_8));
                 log_.info("Published AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, RoutingKey=%s, TableName=%s, Part %d Of %d",
                           lAmqpMessageId, lIntervalId, sEndIntvlTimeMs, sStartIntvlTimeMs, sAmqpRoutingKey,
                           sTableName, lThisMsgsPartNum, lTotalNumParts);
@@ -313,7 +314,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 VoltTable vtFromMsg = VoltTable.fromJSONString(sAmqpMsg);
 
                 // Update the corresponding table in nearline tier
-                mTableUpdater.Update(sTableName, vtFromMsg);
+                mTableUpdater.update(sTableName, vtFromMsg);
 
                 log_.info("AmqpDataReceiverMsgConsumer - updated nearline table - "
                               + "AmqpMessageId=%d, TableName=%s", lAmqpMessageId, sTableName);
@@ -328,7 +329,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 // Save the AmqpMessageId that we just used (so we have it available for the next
                 // message).
                 mPrevAmqpMessageId = lAmqpMessageId;
-            } catch (Exception e) {
+            } catch (JSONException | PropertyNotExpectedType | ConfigIOParseException | DataStoreException e) {
                 log_.error("AmqpDataReceiverMsgConsumer - Exception occurred (msg will be skipped): %s!", e.getMessage());
                 log_.error("%s", Adapter.stackTraceToString(e));
                 log_.error("Message that incurred the above exception - %s", sAmqpMsg);

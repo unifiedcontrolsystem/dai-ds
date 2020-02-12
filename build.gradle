@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -576,7 +576,7 @@ project(':dai_core') {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
-                    minimum = 0.81
+                    minimum = 0.80
                 }
             }
             rule {

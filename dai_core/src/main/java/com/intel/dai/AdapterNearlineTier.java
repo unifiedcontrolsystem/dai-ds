@@ -4,6 +4,7 @@
 
 package com.intel.dai;
 
+import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.*;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsimpl.DataStoreFactoryImpl;
@@ -68,10 +69,10 @@ public abstract class AdapterNearlineTier {
             //-----------------------------------------------------------------
             // Main processing loop
             //-----------------------------------------------------------------
-            while(adapter.adapterShuttingDown() == false) {
+            while(!adapter.adapterShuttingDown()) {
                 // Handle any work items that have been queued for this type of adapter.
                 boolean bGotWorkItem = workQueue.grabNextAvailWorkItem();
-                if (bGotWorkItem == true) {
+                if (bGotWorkItem) {
                     // did get a work item
                     processClientParams(workQueue.getClientParameters(","));
                     switch(workQueue.workToBeDone()) {
@@ -100,7 +101,7 @@ public abstract class AdapterNearlineTier {
             //-----------------------------------------------------------------
             adapter.handleMainlineAdapterCleanup(adapter.adapterAbnormalShutdown());
         }   // End try
-        catch (Exception e) {
+        catch (RuntimeException | InterruptedException | AdapterException | ProcCallException | DataStoreException e) {
             adapter.handleMainlineAdapterException(e);
         }
     }   // End mainProcessingFlow(String[] args)

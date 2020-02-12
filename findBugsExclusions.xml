@@ -21,13 +21,12 @@
             <Class name="com.intel.dai.dsimpl.voltdb.HWInvUtilImpl" />
             <Class name="com.intel.dai.ui.QueryAPI" />
             <Class name="com.intel.dai.dsimpl.jdbc.DataLoaderApiJdbc" />
+            <Class name="com.intel.dai.AdapterDaiMgr" />
+            <Class name="com.intel.dai.Adapter" />
+            <Class name="com.intel.dai.DbConfig" />
+            <Class name="com.intel.dai.NearlineTableUpdater" />
         </Or>
-        <Bug code="SECPTI,SECPTO,SECSQLIJDBC" />
-    </Match>
-    <Match> <!-- False positive -->
-        <Class name="com.intel.dai.network_listener.NetworkListenerCore" />
-        <Method name="shutdownAdapter" />
-        <Bug code="DE" />
+        <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
     <Match> <!-- False positive -->
         <Class name="com.intel.networking.restclient.apache.ApacheRESTClient" />
@@ -67,6 +66,11 @@
         <Method name="doPopulate" />
         <Bug code="REC" />
     </Match>
+    <Match> <!-- As designed not an issue -->
+        <Class name="com.intel.dai.AdapterDaiMgr" />
+        <Method name="mainProcessingFlow" />
+        <Bug code="REC" />
+    </Match>
     <Match> <!-- As designed not an issue; intentional process exit. -->
         <Class name="com.intel.dai.ui.AdapterUI" />
         <Method name="initialize" />
@@ -79,30 +83,6 @@
             <Class name="com.intel.dai.ui.QueryAPI" />
         </Or>
         <Bug code="RCN" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.networking.restserver.java11.Java11RESTServer" />
-        <Method name="stopServer" />
-        <Bug code="DE" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.networking.restserver.RESTServerFactory" />
-        <Method name="lambda$addShutdownTask$0" />
-        <Bug code="DE" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ" />
-        <Method name="destroyPublisher" />
-        <Bug code="DE" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ" />
-        <Or>
-            <Method name="closeChannelObject" />
-            <Method name="closeConnection" />
-            <Method name="tearDownChannel" />
-        </Or>
-        <Bug code="DE" />
     </Match>
     <Match> <!-- As designed not an issue -->
         <Package name="com.intel.dai.eventsim" />
@@ -128,13 +108,28 @@
         <Bug code="Nm" />
     </Match>
     <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.dai.dsimpl.voltdb.VoltDbAdapterOperations" />
-        <Method name="shutdownAdapter" />
-        <Bug code="DE" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
         <Package name="com.intel.dai.dsimpl.voltdb" />
         <Bug code="EI2" />
+    </Match>
+    <Match> <!-- As designed not an issue -->
+        <Class name="com.intel.dai.AdapterInformation" />
+        <Or>
+            <Method name="getServers"/>
+            <Method name="setServers"/>
+        </Or>
+        <Bug code="EI,EI2" />
+    </Match>
+    <Match> <!-- As designed not an issue -->
+        <Or>
+            <Class name="com.intel.dai.Adapter$2" />
+            <Class name="com.intel.dai.Adapter" />
+        </Or>
+        <Or>
+            <Method name="abend" />
+            <Method name="addRasMetaDataIntoDataStore" />
+            <Method name="handle" />
+        </Or>
+        <Bug code="Dm" />
     </Match>
 
     <!--*************************************************************************************************************
@@ -161,16 +156,8 @@
         <Bug code="UwF" />
     </Match>
     <Match> <!-- TODO: This should be fixed, the code is WIP -->
-        <Class name="com.intel.dai.inventory.NetworkListenerProviderForeignBus" />
-        <Field name="log_" />
-        <Bug code="UrF" />
-    </Match>
-    <Match> <!-- TODO: This should be fixed, the code is WIP -->
         <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
         <Method name="createRestClient" />
         <Bug code="DMI" />
-    </Match>
-    <Match> <!-- TODO: These are all in legacy code nad need to be dis-positioned! -->
-        <Package name="com.intel.dai" />
     </Match>
 </FindBugsFilter>

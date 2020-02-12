@@ -203,7 +203,7 @@ public abstract class RESTClient {
                     }
                 }
             } catch(RESTClientException e) {
-                callback.responseCallback(-1, null, null);
+                callback.responseCallback(-1, null, new RequestInfo(method, uri, body));
             }
         }).start();
     }

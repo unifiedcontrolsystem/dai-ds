@@ -5,6 +5,7 @@
 package com.intel.dai;
 
 import com.intel.config_io.ConfigIOParseException;
+import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.dai.dsapi.DataStoreFactory;
@@ -13,6 +14,7 @@ import com.intel.dai.dsapi.WorkQueue;
 
 import org.voltdb.client.*;
 import java.lang.*;
+import java.text.ParseException;
 import java.util.*;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -159,7 +161,8 @@ public abstract class AdapterOnlineTier {
             shutdownHandler.signalShutdownComplete();
             return;
         }   // End try
-        catch (Exception e) {
+        catch (RuntimeException | InterruptedException | ParseException | ConfigIOParseException | ProcCallException |
+                AdapterException e) {
             adapter.handleMainlineAdapterException(e);
         }
     }   // End mainProcessingFlow(String[] args)
