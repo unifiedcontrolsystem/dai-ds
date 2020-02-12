@@ -8,6 +8,7 @@ import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClient;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.restclient.RESTClientFactory;
+import com.intel.xdg.XdgConfigFile;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.BufferedReader;
@@ -58,7 +59,9 @@ public class HWInvDiscovery {
     private static void createRestClient() throws RESTClientException {
         HWDiscoverySession sess;
 
-        String configPath = "/opt/ucs/etc/HWInvDiscoveryConfig.json";
+        XdgConfigFile xdg = new XdgConfigFile("ucs");
+        String configPath = xdg.FindFile("HWInvDiscoveryConfig.json");
+        assert configPath != null:"Was unable to find the configuration file: HWInvDiscoveryConfig.json";
         sess = toHWDiscoverySession(configPath);
         log.info("config:%n%s", sess.toString());
 

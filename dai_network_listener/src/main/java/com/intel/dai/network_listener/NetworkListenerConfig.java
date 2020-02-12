@@ -48,10 +48,10 @@ public class NetworkListenerConfig {
             if(!config_.containsKey(required))
                 throw new ConfigIOParseException(String.format("The key '%s' is missing", required));
         useBenchmarking_ = config_.getBooleanOrDefault("useBenchmarkingActions", false);
-        profiles_ = config_.getMapOrDefault("adapterProfiles", null);
-        networkStreams_ = config_.getMapOrDefault("networkStreams", null);
-        subjectMap_ = config_.getMapOrDefault("subjectMap", null);
-        providers_ = config_.getMapOrDefault("providerClassMap", null);
+        profiles_ = config_.getMapOrDefault("adapterProfiles", new PropertyMap());
+        networkStreams_ = config_.getMapOrDefault("networkStreams", new PropertyMap());
+        subjectMap_ = config_.getMapOrDefault("subjectMap", new PropertyMap());
+        providers_ = config_.getMapOrDefault("providerClassMap", new PropertyMap());
         providerConfigs_ = config_.getMapOrDefault("providerConfigurations", new PropertyMap());
         for(String provider: providers_.keySet())
             log_.debug("Loaded Provider: %s = %s", provider, providers_.getStringOrDefault(provider, null));
@@ -102,6 +102,7 @@ public class NetworkListenerConfig {
         checkProfile();
         // networkStreamName checked already, its value cannot be null or missing.
         PropertyMap network = networkStreams_.getMapOrDefault(networkStreamName, null);
+        assert network != null: "Network stream arguments were unexpectedly null, check the configuration!";
         return network.getStringOrDefault("name", null);
     }
 
@@ -173,7 +174,8 @@ public class NetworkListenerConfig {
     }
 
     private boolean validateNetworkStreams(PropertyArray networkStreams) {
-        boolean result = networkStreams.size() > 0;
+        boolean result = networkStreams != null && networkStreams.size() > 0;
+        if(!result) return false;
         for(Object oSubject: networkStreams) {
             result = oSubject instanceof String && validateNetworkStream(oSubject.toString());
             if(!result) break;
@@ -225,11 +227,12 @@ public class NetworkListenerConfig {
 
     private boolean validateSubjects(PropertyArray subjects) {
         log_.debug("Validating subjects...");
-        boolean result = subjects.size() > 0;
-        for(Object oSubject: subjects) {
-            result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
-            if(!result) break;
-        }
+        boolean result = subjects != null && subjects.size() > 0;
+        if(result)
+            for(Object oSubject: subjects) {
+                result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
+                if(!result) break;
+            }
         return result;
     }
     //////////////////////////////////////////////////////////////////////////
