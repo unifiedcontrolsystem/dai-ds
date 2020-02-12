@@ -914,7 +914,9 @@ public class AdapterDaiMgr {
             // Save away info about this node's ping.
             alNodePingInfo.add( new NodePingInfo(sTempChildNodeLctn, sTempChildNodeIpAddr, process) );
             // Ensure that don't consume too many processes doing these pings.
-            int sleepAfterNNodes = Integer.parseInt(System.getProperty("daiAdapterDaiMgr.sleepAfterNNodes", "500"));
+            int sleepAfterNNodes = Math.max(10,
+                    Integer.parseInt(System.getProperty("daiAdapterDaiMgr.sleepAfterNNodes", "500")));
+
             long sleepTime = Long.parseLong(System.getProperty("daiAdapterDaiMgr.pingSleepMilliSeconds", "1000"));
             if (iNodeCntr % sleepAfterNNodes == 0)
                 Thread.sleep(sleepTime); // delay a little so we don't run out of processes (i.e., Too many open files)

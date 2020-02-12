@@ -194,9 +194,9 @@ public class VoltDbManager implements Configuration, Groups {
     }
 
     public String addDevicesToGroup(String groupName, Set<String> devices) throws DataStoreException {
-
+        assert devices != null:"Passed devices==null into method addDevicesToGroup";
         Set<String> devicesInGroup;
-        logger.info("Add Devices %s to a group %s", (devices==null)?"<empty>":devices.toString(), groupName);
+        logger.info("Add Devices %s to a group %s", devices.toString(), groupName);
         PropertyArray jsonArray = getTableData("ListLogicalGroups", groupName);
         if (jsonArray.size() == 0) {
             return modifyDevicesInGroup(groupName, devices);

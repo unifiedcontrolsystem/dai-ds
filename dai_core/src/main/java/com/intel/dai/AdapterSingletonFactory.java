@@ -21,7 +21,7 @@ public final class AdapterSingletonFactory {
      * @param name The DAI name for this adapter.
      * @param logger The logger to use in the single class.
      */
-    public static void initializeFactory(String type, String name, Logger logger) {
+    synchronized public static void initializeFactory(String type, String name, Logger logger) {
         if (type == null || type.trim().equals("")) throw new IllegalArgumentException("type");
         if (name == null || name.trim().equals("")) throw new IllegalArgumentException("name");
         logger_ = logger;

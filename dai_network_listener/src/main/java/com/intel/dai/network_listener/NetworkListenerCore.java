@@ -38,6 +38,9 @@ public class NetworkListenerCore {
     }
 
     public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory) {
+        assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
+        assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
+        assert factory != null:"Passed a null DataStoreFactory to NetworkListenerCore.ctor()!";
         log_ = logger;
         config_ = configuration;
         adapter_ = config_.getAdapterInformation();
@@ -142,7 +145,9 @@ public class NetworkListenerCore {
         List<NetworkDataSink> removeList = new ArrayList<>();
         for(String networkStreamName: config_.getProfileStreams()) {
             PropertyMap arguments = config_.getNetworkArguments(networkStreamName);
+            assert (arguments != null):"A null arguments object";
             String name = config_.getNetworkName(networkStreamName);
+            assert name != null: "A null network name is not allowed!";
             log_.debug("*** Creating a network sink of type '%s'...", name);
             arguments.put("subjects", subjects_);
             Map<String,String> args = buildArgumentsForNetwork(arguments);
@@ -323,8 +328,11 @@ public class NetworkListenerCore {
     }
 
     void parseTokenConfig(PropertyMap config, Map<String,String> result) {
-        for(String subKey: config.keySet())
-            result.put(subKey, config.getStringOrDefault(subKey, null));
+        for(Map.Entry<String,Object> subKey: config.entrySet())
+            if(subKey.getValue() != null)
+                result.put(subKey.getKey(), subKey.getValue().toString());
+            else
+                result.put(subKey.getKey(), null);
     }
 
     void parseSelector(PropertyMap map, Map<String,String> result) {
