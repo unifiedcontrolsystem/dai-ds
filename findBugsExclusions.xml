@@ -25,6 +25,7 @@
             <Class name="com.intel.dai.Adapter" />
             <Class name="com.intel.dai.DbConfig" />
             <Class name="com.intel.dai.NearlineTableUpdater" />
+            <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
         </Or>
         <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
@@ -131,16 +132,7 @@
         </Or>
         <Bug code="Dm" />
     </Match>
-
-    <!--*************************************************************************************************************
-    TODO: These issues below need to be addressed!!!
-    **************************************************************************************************************-->
-
-    <Match> <!-- TODO: This is technically an issue, it will need to be resolved in the future -->
-        <Class name="com.intel.networking.restclient.PermissiveX509TrustManager" />
-        <Bug code="SECWTM" />
-    </Match>
-    <Match> <!-- TODO: This should be fixed at some point, the code is WIP -->
+    <Match> <!-- These are as designed, fields are written to by the Gson serializer via introspection. -->
         <Or>
             <Class name="com.intel.dai.inventory.api.ForeignFRU" />
             <Class name="com.intel.dai.inventory.api.ForeignHWInvByLoc" />
@@ -155,9 +147,13 @@
         </Or>
         <Bug code="UwF" />
     </Match>
-    <Match> <!-- TODO: This should be fixed, the code is WIP -->
-        <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
-        <Method name="createRestClient" />
-        <Bug code="DMI" />
+
+    <!--*************************************************************************************************************
+    TODO: These issues below need to be addressed!!!
+    **************************************************************************************************************-->
+
+    <Match> <!-- TODO: This is technically an issue, it may need to be resolved in the future -->
+        <Class name="com.intel.networking.restclient.PermissiveX509TrustManager" />
+        <Bug code="SECWTM" />
     </Match>
 </FindBugsFilter>

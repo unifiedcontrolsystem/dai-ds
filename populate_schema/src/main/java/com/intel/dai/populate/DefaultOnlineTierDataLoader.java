@@ -819,8 +819,11 @@ public class DefaultOnlineTierDataLoader {
             for (Object listOfObject : paManifestContentObjects) {
                 if(listOfObject instanceof PropertyMap) {
                     PropertyMap object = (PropertyMap) listOfObject;
-                    alFloorManifestContentObjects.add(new ManifestContent(object.getStringOrDefault("name", null),
-                            object.getStringOrDefault("definition", null)));
+                    String name = object.getStringOrDefault("name", null);
+                    String definition = object.getStringOrDefault("definition", null);
+                    assert name != null && !name.isBlank():"System Manifest has a null or empty name!";
+                    assert definition != null && !definition.isBlank():"System Manifest has a null or empty definition!";
+                    alFloorManifestContentObjects.add(new ManifestContent(name, definition));
                 } else
                     log_.warn("Skipping a paManifestContentObjects value due to a unexpected null or non map value");
             }

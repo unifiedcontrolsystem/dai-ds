@@ -48,12 +48,13 @@ public class DataMoverAmqp {
         }
         mChannel = mConnection.createChannel();     // channel has most of the API for getting things done resides (virtual connection or AMQP connection) - you can use 1 channel for everything going via the tcp connection.
         // Create a queue that is used by the DataMover for sending Tier1 data to Tier2 - set up so messages have to be manually acknowledged and won't be lost.
+        assert mChannel != null:"Failed to create a RabbitMQ channel!";
         mChannel.queueDeclare(Adapter.DataMoverQueueName, Durable, false, false, null);  // set up our queue from DataMover to the DataReceiver.
     }   // End ctor
 
     void close() throws IOException, TimeoutException {
-        mChannel.close();
-        mConnection.close();
+        if(mConnection != null) mConnection.close();
+        if(mChannel != null) mChannel.close();
     }
 
     Channel getChannel()  { return mChannel; }

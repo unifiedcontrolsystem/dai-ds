@@ -100,13 +100,7 @@ def commonslang3_version = '3.9'
 //                                                                                     //
 // The default behavior of 'false' will be for github default build behaviors.         //
 /////////////////////////////////////////////////////////////////////////////////////////
-if(System.getProperty("ucs.includeDbgSymbols") != null) {
-    System.err.println("""
-*** The property 'ucs.includeDbgSymbols' is deprecated!
-    Please use 'includeDebugSymbols' instead.")""")
-}
-def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSymbols",
-System.getProperty("ucs.includeDbgSymbols", "false")))
+def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSymbols", "false"))
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
