@@ -23,7 +23,39 @@ class EventSimAppSpec extends Specification {
         eventSimApiTest.bootParamsApi_ = new BootParameters();
         Map<String, String> parameters = new HashMap<>()
         expect :
-            eventSimApiTest.getBootParameters(parameters).contains("boot-image-id")
+        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
+    }
+
+    def "Read EventSim config file, fetch boot parameters for a known location" () {
+        Logger log = Mock(Logger)
+        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
+        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
+        EventSimApp eventSimApiTest = new EventSimApp(log)
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
+        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
+        eventSimApiTest.bootParamsApi_ = new BootParameters();
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("hosts", "x0")
+        expect :
+        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
+        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).getArrayOrDefault("hosts", null).get(0).equals("x0")
+    }
+
+    def "Read EventSim config file, fetch boot parameters for a default location" () {
+        Logger log = Mock(Logger)
+        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
+        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
+        EventSimApp eventSimApiTest = new EventSimApp(log)
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
+        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
+        eventSimApiTest.bootParamsApi_ = new BootParameters();
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("hosts", "s0")
+        expect :
+        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
+        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).getArrayOrDefault("hosts", null).get(0).equals("Default")
     }
 
     def "Fetch boot parameters, occured exception" () {
@@ -185,61 +217,40 @@ class EventSimAppSpec extends Specification {
         FileUtils.writeStringToFile(file, data);
     }
 
-    private final String eventSimConfig = "{\n" +
-            "    \"eventsimConfig\" : {\n" +
-            "        \"SystemManifest\": \"/opt/ucs/etc/SystemManifest.json\",\n" +
-            "        \"SensorMetadata\": \"/resources/ForeignSensorMetaData.json\",\n" +
-            "        \"RASMetadata\": \"/resources/ForeignEventMetaData.json\",\n" +
-            "        \"BootParameters\" : \"/opt/ucs/etc/BootParameters.json\",\n" +
-            "        \"HWInventory\" : \"/opt/ucs/etc/HWInventory.json\",\n" +
-            "        \"HWInventoryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryQueryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryDiscStatUrl\" : \"/Inventory/DiscoveryStatus\",\n" +
-            "        \"eventCount\": 10,\n" +
-            "        \"timeDelayMus\": 1,\n" +
-            "        \"eventRatioSensorToRas\": 1,\n" +
-            "        \"randomizerSeed\": \"234\"\n" +
-            "    },\n" +
-            "    \"networkConfig\" : {\n" +
-            "        \"network\" : \"sse\",\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"*\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
-            "            \"urls\": {\n" +
-            "                \"/v1/stream/cray-telemetry-fan\": [\n" +
-            "                    \"telemetry\"\n" +
-            "                ] ,\n" +
-            "                \"/streams/nodeBootEvents\": [\n" +
-            "                    \"stateChanges\"\n" +
-            "                ] ,\n" +
-            "                \"/v1/stream/cray-dmtf-resource-event\": [\n" +
-            "                    \"events\"\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        } ,\n" +
-            "        \"rabbitmq\": {\n" +
-            "            \"exchangeName\": \"simulator\" ,\n" +
-            "            \"uri\": \"amqp://127.0.0.1\"\n" +
-            "        }\n" +
-            "    }\n" +
-            "}\n"
-
-    private final String bootParametersConfig = "{\n" +
-            "  \"boot-images\": {\n" +
-            "    \"content\": [\n" +
-            "      {\n" +
-            "        \"id\": \"boot-image-id\",\n" +
-            "        \"description\": \"boot-image-description\",\n" +
-            "        \"BootImageFile\": \"boot-image-file\",\n" +
-            "        \"BootImageChecksum\": \"boot-image-checksum\",\n" +
-            "        \"BootOptions\": null,\n" +
-            "        \"KernelArgs\": null,\n" +
-            "        \"BootStrapImageFile\": \"boot-strap-image-file\",\n" +
-            "        \"BootStrapImageChecksum\": \"boot-strap-image-checksum\"\n" +
-            "      }\n" +
-            "    ]\n" +
+    private final String bootParametersConfig = "[\n" +
+            "  {\n" +
+            "    \"hosts\": [\n" +
+            "      \"Default\"\n" +
+            "    ],\n" +
+            "    \"initrd\": \"initird\",\n" +
+            "    \"kernel\": \"kernel\",\n" +
+            "    \"params\": \"params-data\",\n" +
+            "    \"id\": \"boot-image-id\",\n" +
+            "    \"description\": \"boot-image-description\",\n" +
+            "    \"BootImageFile\": \"boot-image-file\",\n" +
+            "    \"BootImageChecksum\": \"boot-image-checksum\",\n" +
+            "    \"BootOptions\": null,\n" +
+            "    \"KernelArgs\": null,\n" +
+            "    \"BootStrapImageFile\": \"bootstrap-file\",\n" +
+            "    \"BootStrapImageChecksum\": \"bootstrap-checksum\"\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"hosts\": [\n" +
+            "      \"x0\"\n" +
+            "    ],\n" +
+            "    \"initrd\": \"initird.img\",\n" +
+            "    \"kernel\": \"kernel\",\n" +
+            "    \"params\": \"parms-data\",\n" +
+            "    \"id\": \"boot-image-id-1\",\n" +
+            "    \"description\": \"bootimage-description\",\n" +
+            "    \"BootImageFile\": \"boot-image-file-1\",\n" +
+            "    \"BootImageChecksum\": \"boot-image-checksum\",\n" +
+            "    \"BootOptions\": null,\n" +
+            "    \"KernelArgs\": null,\n" +
+            "    \"BootStrapImageFile\": \"bootstrap-file\",\n" +
+            "    \"BootStrapImageChecksum\": \"bootstrap-checksum\"\n" +
             "  }\n" +
-            "}\n"
+            "]"
 
     private final String hwInventoryConfig = "[{\n" +
             "  \"Nodes\": [\n" +
@@ -261,5 +272,4 @@ class EventSimAppSpec extends Specification {
             "    }\n" +
             "  ]\n" +
             "}]"
-
 }
