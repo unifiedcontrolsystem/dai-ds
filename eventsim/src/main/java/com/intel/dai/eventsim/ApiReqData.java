@@ -121,7 +121,7 @@ public class ApiReqData {
         Map<String, String> payLoadMap = new HashMap<>();
         for (Map.Entry<String, Object> parameter : payloadParameters.entrySet()) {
             String paramKey = parameter.getKey();
-            Object paramValue = parameter.getKey();
+            Object paramValue = parameter.getValue();
             if (paramValue == null)
                 payLoadMap.put(paramKey, null);
             else
