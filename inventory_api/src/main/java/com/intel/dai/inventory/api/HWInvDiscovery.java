@@ -61,8 +61,11 @@ public class HWInvDiscovery {
 
         XdgConfigFile xdg = new XdgConfigFile("ucs");
         String configPath = xdg.FindFile("HWInvDiscoveryConfig.json");
-        assert configPath != null:"Was unable to find the configuration file: HWInvDiscoveryConfig.json";
+        if(configPath == null)
+            throw new NullPointerException("Was unable to find the configuration file: HWInvDiscoveryConfig.json");
         sess = toHWDiscoverySession(configPath);
+        if(sess == null)
+            throw new NullPointerException("Session section of the JSON was empty: HWInvDiscoveryConfig.json");
         log.info("config:%n%s", sess.toString());
 
         RESTClient restClient = RESTClientFactory.getInstance("jdk11", log);
