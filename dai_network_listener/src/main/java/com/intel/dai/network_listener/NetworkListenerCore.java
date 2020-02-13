@@ -328,11 +328,12 @@ public class NetworkListenerCore {
     }
 
     void parseTokenConfig(PropertyMap config, Map<String,String> result) {
-        for(Map.Entry<String,Object> subKey: config.entrySet())
-            if(subKey.getValue() != null)
-                result.put(subKey.getKey(), subKey.getValue().toString());
-            else
-                result.put(subKey.getKey(), null);
+        if(config != null)
+            for(Map.Entry<String,Object> subKey: config.entrySet())
+                if(subKey.getValue() != null)
+                    result.put(subKey.getKey(), subKey.getValue().toString());
+                else
+                    result.put(subKey.getKey(), null);
     }
 
     void parseSelector(PropertyMap map, Map<String,String> result) {
