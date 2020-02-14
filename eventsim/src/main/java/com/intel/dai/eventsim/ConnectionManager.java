@@ -37,7 +37,7 @@ public class ConnectionManager {
 
     public PropertyMap getAllSubscriptions() {
         if (connectionsToId.size() == 0) {
-            return null;
+            return new PropertyMap();
         }
         PropertyArray result = new PropertyArray();
         for (Map.Entry<ConnectionObject, Long> connectionObject : connectionsToId.entrySet()) {
@@ -63,7 +63,7 @@ public class ConnectionManager {
                 return result;
             }
         }
-        return null;
+        return new PropertyMap();
     }
 
     public PropertyMap getSubscriptionForId(long id) {
@@ -71,7 +71,7 @@ public class ConnectionManager {
         if (conn != null) {
             return conn.connProperties();
         }
-        return null;
+        return new PropertyMap();
     }
 
     public boolean removeSubscriptionId(final long removeId) {

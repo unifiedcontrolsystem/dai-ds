@@ -229,8 +229,14 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateNetworkConfigurations() throws SimulatorException {
+        validateNetworkType();
         validateSSEConfig();
         validateRabbitMqConfig();
+    }
+
+    private void validateNetworkType() throws SimulatorException {
+        if(!config_.containsKey("network"))
+            throw new SimulatorException("EventSim Configuration file doesn't contain 'network' entry");
     }
 
     /**
@@ -239,6 +245,9 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateRabbitMqConfig() throws SimulatorException {
+        if(!config_.containsKey("rabbitmq"))
+            throw new SimulatorException("EventSim Configuration file doesn't contain 'rabbitmq' entry");
+
         PropertyMap config = getRabbitMQConfiguration();
         if (!config.containsKey("exchangeName"))
             throw new SimulatorException("EventSim Configuration file doesn't contain 'exchangeName' entry");
@@ -253,6 +262,9 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateSSEConfig() throws SimulatorException {
+        if(!config_.containsKey("sseConfig"))
+            throw new SimulatorException("EventSim Configuration file doesn't contain 'sseConfig' entry");
+
         PropertyMap config = getSSEConfiguration();
         if (!config.containsKey("serverAddress"))
             throw new SimulatorException("EventSim Configuration file doesn't contain serverAddress entry");
