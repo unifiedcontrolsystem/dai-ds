@@ -36,7 +36,7 @@ public class ApiReqData {
      */
     public void apiCallBack(final Request request, final Response response) throws RequestException, ConfigIOParseException {
         // Read the payload and create map with parameters
-        Map<String, String> parameters = null;
+        Map<String, String> parameters = new HashMap<>();
         if (request.getMethod() == HttpMethod.POST) {
             parameters = convertHttpBodytoMap(request.getBody());
             String[] sub_component = request.getPath().split("/");

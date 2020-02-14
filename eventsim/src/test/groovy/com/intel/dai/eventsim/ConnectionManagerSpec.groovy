@@ -24,7 +24,7 @@ class ConnectionManagerSpec extends Specification {
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
         connectionManagerTest.removeAllSubscriptions()
         when:
-            connectionManagerTest.addSubscription(null, "test", new HashMap<String, String>()) == false
+        !connectionManagerTest.addSubscription(null, "test", new HashMap<String, String>())
         then :
             def e = thrown(RESTClientException)
             e.getMessage() == "Could not add subscription: url or subscriber null value(s)"
@@ -91,7 +91,7 @@ class ConnectionManagerSpec extends Specification {
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
         expect :
-            connectionManagerTest.getSubscription("http://test1.com", "test") == null
+            connectionManagerTest.getSubscription("http://test1.com", "test").size() == 0
     }
 
     def "Exists subscriptions, fetch subscription subscriber details which does not exists" () {
@@ -101,7 +101,7 @@ class ConnectionManagerSpec extends Specification {
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
         expect :
-        connectionManagerTest.getSubscription("http://test.com", "test1") == null
+        connectionManagerTest.getSubscription("http://test.com", "test1").size() == 0
     }
 
     def "Exists subscriptions, fetch subscription with subscriber as null value" () {
@@ -136,7 +136,7 @@ class ConnectionManagerSpec extends Specification {
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
         connectionManagerTest.removeAllSubscriptions()
         expect :
-            connectionManagerTest.getAllSubscriptions() == null
+            connectionManagerTest.getAllSubscriptions().size() == 0
     }
 
     def "Exists subscriptions, fetch subscription for a given valid id" () {
@@ -158,14 +158,14 @@ class ConnectionManagerSpec extends Specification {
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
         expect :
-        connectionManagerTest.getSubscriptionForId(2) == null
+        connectionManagerTest.getSubscriptionForId(2).size() == 0
     }
 
     def "Exists subscriptions, publish generated events in constant mode" () {
         RESTClient client = Mock(RESTClient.class)
         Logger log = Mock(Logger.class)
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
-        client.postRESTRequestBlocking(any(), any()) >> BlockingResult.class
+        client.postRESTRequestBlocking(any() as URI, any() as String) >> BlockingResult.class
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
         List<String> events = new ArrayList<>();
