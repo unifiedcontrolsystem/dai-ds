@@ -205,9 +205,7 @@ public class AdapterUIRestTest {
 
         ConfigIO jsonParser_ = ConfigIOFactory.getInstance("json");
         obj.responseCreator.setParser(jsonParser_);
-
-        assertEquals("{\"system\":\"mock\",\"nodes\":{\"node1\":\"location1\"}}", obj.getLocations());
+            assertEquals("{\"system\":\"mock\",\"nodes\":{\"node1\":\"location1\"}}", obj.getLocations());
+        }
     }
-
-}
 

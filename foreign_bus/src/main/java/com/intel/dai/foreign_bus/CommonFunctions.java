@@ -18,7 +18,9 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,6 +93,26 @@ final public class CommonFunctions {
         } catch(PropertyNotExpectedType e) {
             throw new RuntimeException("Its possible the resource file for XName translation has been corrupted", e);
         }
+    }
+
+    /**
+     * Fetch all xnames mapped to DAI locations
+     * @return all xnames information
+     */
+    public static Set<String> getXNames() {
+        if(nodeMap_ == null)
+            loadCall_.loadMaps();
+        return (nodeMap_ != null ? nodeMap_.keySet() : null);
+    }
+
+    /**
+     * Fetch all DAI locations in system
+     * @return all dai locations information
+     */
+    public static Collection<Object> getLocations() {
+        if(nodeMap_ == null)
+            loadCall_.loadMaps();
+        return (nodeMap_ != null ? nodeMap_.values() : null);
     }
 
     private static String reduceDaiLocation(String location) {

@@ -94,4 +94,14 @@ public class CommonFunctionsTest {
     public void negativeConvertLocationToXNameTests() throws Exception {
         CommonFunctions.convertLocationToXName("R3-CH0-CN0");
     }
+
+    @Test
+    public void testAllXnames() {
+       assertTrue(CommonFunctions.getLocations().containsAll(CommonFunctions.nodeMap_ .values()));
+    }
+
+    @Test
+    public void testAllLocations() {
+        assertTrue(CommonFunctions.getXNames().containsAll(CommonFunctions.nodeMap_ .keySet()));
+    }
 }

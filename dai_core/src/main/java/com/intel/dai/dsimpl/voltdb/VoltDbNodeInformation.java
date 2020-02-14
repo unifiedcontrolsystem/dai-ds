@@ -27,7 +27,7 @@ public class VoltDbNodeInformation implements NodeInformation {
         servers_ = servers;
     }
 
-    public void initialize() {
+    public synchronized void initialize() {
         if(servers_ != null)
             VoltDbClient.initializeVoltDbClient(servers_);
         voltDb_ = getClient();
@@ -38,7 +38,7 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public String getComputeNodeState(String location) throws DataStoreException {
+    public synchronized String getComputeNodeState(String location) throws DataStoreException {
         try {
             ClientResponse response = voltDb_.callProcedure("ComputeNodeState", location);
             log_.info("called stored procedure %s, Location=%s", "ComputeNodeState", location);
@@ -85,13 +85,13 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, String> getComputeNodeLocationFromHostnameMap() throws DataStoreException {
+    public synchronized Map<String, String> getComputeNodeLocationFromHostnameMap() throws DataStoreException {
         getComputeHostnameFromLocationMap();
         return hostnameToComputeNodeLocation_;
     }
 
     @Override
-    public Map<String, String> getServiceNodeLocationFromHostnameMap() throws DataStoreException {
+    public synchronized Map<String, String> getServiceNodeLocationFromHostnameMap() throws DataStoreException {
         getServiceHostnameFromLocationMap();
         return hostnameToServiceNodeLocation_;
     }
@@ -174,28 +174,28 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
-    public Map<String, NodeIpAndBmcIp> getComputeNodeAndBmcIPsFromLocationMap() throws DataStoreException {
+    public synchronized Map<String, NodeIpAndBmcIp> getComputeNodeAndBmcIPsFromLocationMap() throws DataStoreException {
         getNodeAndBmcIPsFromLocationMap();
         return locationToComputeNodeIpAndBmcIP_;
     }
 
     @Override
-    public boolean isComputeNodeLocation(String location) throws DataStoreException {
+    public synchronized boolean isComputeNodeLocation(String location) throws DataStoreException {
         return getComputeHostnameFromLocationMap().containsKey(location);
     }
 
     @Override
-    public boolean isServiceNodeLocation(String location) throws DataStoreException {
+    public synchronized boolean isServiceNodeLocation(String location) throws DataStoreException {
         return getServiceHostnameFromLocationMap().containsKey(location);
     }
 
     @Override
-    public String getNodesBmcIpAddress(String location) throws DataStoreException {
+    public synchronized String getNodesBmcIpAddress(String location) throws DataStoreException {
         return getNodeAndBmcIPsFromLocationMap().get(location).bmcIpAddress;
     }
 
     @Override
-    public String getNodesIpAddress(String location) throws DataStoreException {
+    public synchronized String getNodesIpAddress(String location) throws DataStoreException {
         return getNodeAndBmcIPsFromLocationMap().get(location).nodeIpAddress;
     }
 
@@ -247,15 +247,15 @@ public class VoltDbNodeInformation implements NodeInformation {
     private Logger log_;
     private Client voltDb_;
     private String[] servers_;
-    static Map<String, String> locationToComputeNodeHostname_ = null;
-    static Map<String, String> locationToServiceNodeHostname_ = null;
-    static Map<String, String> hostnameToComputeNodeLocation_ = null;
-    static Map<String, String> hostnameToServiceNodeLocation_ = null;
-    static Map<String, Long> locationToSequenceNumber_ = null;
-    static Map<String, String> locationToAggregator_ = null;
-    static Map<String, NodeIpAndBmcIp> locationToNodeIpAndBmcIP_ = null;
-    static Map<String, NodeIpAndBmcIp> locationToComputeNodeIpAndBmcIP_ = null;
-    private static List<String> computeNodeLocationsSorted_ = null;
-    private static List<String> serviceNodeLocationsSorted_ = null;
-    private static List<String> nodeLocationsSorted_ = null;
+    Map<String, String> locationToComputeNodeHostname_ = null;
+    Map<String, String> locationToServiceNodeHostname_ = null;
+    Map<String, String> hostnameToComputeNodeLocation_ = null;
+    Map<String, String> hostnameToServiceNodeLocation_ = null;
+    Map<String, Long> locationToSequenceNumber_ = null;
+    Map<String, String> locationToAggregator_ = null;
+    Map<String, NodeIpAndBmcIp> locationToNodeIpAndBmcIP_ = null;
+    Map<String, NodeIpAndBmcIp> locationToComputeNodeIpAndBmcIP_ = null;
+    private List<String> computeNodeLocationsSorted_ = null;
+    private List<String> serviceNodeLocationsSorted_ = null;
+    private List<String> nodeLocationsSorted_ = null;
 }

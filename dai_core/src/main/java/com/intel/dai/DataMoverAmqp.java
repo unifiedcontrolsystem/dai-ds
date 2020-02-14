@@ -30,7 +30,7 @@ public class DataMoverAmqp {
                 else
                     log.error("ConnectionFactory returned a null connection - will keep trying!");
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 if (iConnectionRetryCntr++ == 0) {
                     // only cut this RAS event the first time we try, NOT every time we retry the connection!
                     // Cut RAS event indicating that we currently cannot connect to RabbitMQ and that we will retry until we can.
@@ -43,23 +43,24 @@ public class DataMoverAmqp {
                             );
                 }
                 log.error("Unable to connect to AMQP (RabbitMQ) - will keep trying!");
-                try { Thread.sleep(5 * 1000); }  catch (Exception e2) {}
+                try { Thread.sleep(5 * 1000); }  catch (Exception e2) { log.exception(e2);}
             }
         }
         mChannel = mConnection.createChannel();     // channel has most of the API for getting things done resides (virtual connection or AMQP connection) - you can use 1 channel for everything going via the tcp connection.
         // Create a queue that is used by the DataMover for sending Tier1 data to Tier2 - set up so messages have to be manually acknowledged and won't be lost.
+        assert mChannel != null:"Failed to create a RabbitMQ channel!";
         mChannel.queueDeclare(Adapter.DataMoverQueueName, Durable, false, false, null);  // set up our queue from DataMover to the DataReceiver.
     }   // End ctor
 
     void close() throws IOException, TimeoutException {
-        mChannel.close();
-        mConnection.close();
+        if(mConnection != null) mConnection.close();
+        if(mChannel != null) mChannel.close();
     }
 
     Channel getChannel()  { return mChannel; }
 
     // Member data
-    final boolean           Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
+    static final boolean    Durable = true;  // make sure that RabbitMQ will never lose our QUEUE.
     ConnectionFactory       mFactory;
     Connection              mConnection;
     Channel                 mChannel;

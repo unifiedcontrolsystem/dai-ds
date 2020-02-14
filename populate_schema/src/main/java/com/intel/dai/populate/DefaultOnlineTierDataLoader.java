@@ -817,9 +817,15 @@ public class DefaultOnlineTierDataLoader {
             if (paManifestContentObjects == null)
                 throw new ConfigIOParseException("Missing 'content' in System Manifest!");
             for (Object listOfObject : paManifestContentObjects) {
-                PropertyMap object = (PropertyMap)listOfObject;
-                alFloorManifestContentObjects.add(new ManifestContent(object.getStringOrDefault("name", null),
-                                                  object.getStringOrDefault("definition", null)));
+                if(listOfObject instanceof PropertyMap) {
+                    PropertyMap object = (PropertyMap) listOfObject;
+                    String name = object.getStringOrDefault("name", null);
+                    String definition = object.getStringOrDefault("definition", null);
+                    assert name != null && !name.isBlank():"System Manifest has a null or empty name!";
+                    assert definition != null && !definition.isBlank():"System Manifest has a null or empty definition!";
+                    alFloorManifestContentObjects.add(new ManifestContent(name, definition));
+                } else
+                    log_.warn("Skipping a paManifestContentObjects value due to a unexpected null or non map value");
             }
             // Sort the list of racks (floor manifest content entities) by their name field (so that they will
             // be looped through in order).

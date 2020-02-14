@@ -20,6 +20,7 @@ import org.voltdb.VoltTable;
 import java.io.*;
 import java.lang.*;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -44,14 +45,14 @@ import sun.misc.SignalHandler;
  */
 
 public class Adapter implements IAdapter {
-    public static String XDG_COMPONENT = "ucs"; // For the XDG configuration file locator library.
-    static String RASMETADATA_FILE = "RasEventMetaData.json"; // File for RAS metadata.
+    public final static String XDG_COMPONENT = "ucs"; // For the XDG configuration file locator library.
+    final static String RASMETADATA_FILE = "RasEventMetaData.json"; // File for RAS metadata.
     private ConfigIO mParser;
     public final static String DataMoverQueueName    = "DAI-DataMover-Queue";
     public final static String DataMoverExchangeName = "DAI-DataMover-Exchange";
-    public final String KeyForLctn = "Lctn=";
-    public final String KeyForTimeInMicroSecs = "TimeInMicroSecs=";
-    public final String KeyForUsingSynthData = "UsingSynthData";
+    public final static String KeyForLctn = "Lctn=";
+    public final static String KeyForTimeInMicroSecs = "TimeInMicroSecs=";
+    public final static String KeyForUsingSynthData = "UsingSynthData";
 
     //--------------------------------------------------------------------------
     // Data Members
@@ -61,8 +62,6 @@ public class Adapter implements IAdapter {
     private long                    mAdapterId                            = -99999L;
     private String                  mAdapterType                          = null;
     private String                  mAdapterName                          = null;
-    private long                    mSconRank                             = -99999L;
-    private ClientResponse          mResponse                             = null;
     private Client                  mClient                               = null;
     private Connection              mNearlineConn                         = null;
     private PreparedStatement       mAggEnvDataStmt                       = null;
@@ -394,7 +393,6 @@ public class Adapter implements IAdapter {
         return mCompNodeLctnToIpAddrAndBmcIpAddr;
     }   // End mapCompNodeLctnToIpAddrAndBmcIpAddr()
 
-    ClientResponse response()       { return mResponse; }
     SignalHandler  signalHandler()  { return mSignalHandler; }
 
     // Constructor
@@ -547,7 +545,7 @@ public class Adapter implements IAdapter {
     //      String sPertinentInfo       - Info that might be pertinent to this particular execution of this callback
     //      long   lWorkItemId          - The work item id that the adapter is "processing" during which it ends up using this callback
     //-------------------------------------------------------------------------
-    class MyCallbackForHouseKeepingNoRtrnValue implements ProcedureCallback {
+    static class MyCallbackForHouseKeepingNoRtrnValue implements ProcedureCallback {
         // Class constructor
         MyCallbackForHouseKeepingNoRtrnValue(Adapter obj, String sAdapterType, String sAdapterName, String sSpThisIsCallbackFor, String sPertinentInfo, long lWorkItemId) {
             mObj            = obj;
@@ -753,10 +751,12 @@ public class Adapter implements IAdapter {
                             bLoggedRasEvent = true;
                         }
                         break;
+                    default:
+                        mLogger.warn("Default case for was hit: %s", mSpThisIsCallbackFor);
                 }
 
                 // IFF another RAS event has not been logged, log the generic callback failed RAS event.
-                if (bLoggedRasEvent == false) {
+                if (!bLoggedRasEvent) {
                     mObj.logRasEventNoEffectedJob(mObj.getRasEventType("RasGenAdapterMyCallbackForHouseKeepingLongRtrnValueFailed")
                                                  ,("AdapterName=" + mAdapterName + ", SpThisIsCallbackFor=" + mSpThisIsCallbackFor + ", " + "PertinentInfo=" + mPertinentInfo + ", StatusString=" + response.getStatusString())
                                                  ,null                                  // Lctn
@@ -919,7 +919,6 @@ public class Adapter implements IAdapter {
         mAdapterId = lThisAdaptersAdapterId;
         // Set/save the lctn string of the service node this adapter instance is running on.
         mSnLctn = sSnLctn;
-        mSconRank = lThisAdaptersAdapterId;  // we are temporarily using the new AdapterId also as the SCON rank - until we figure out what to do with and how to assign scon ranks.
         mLogger.info("registerAdapter - successfully started adapter, AdapterType=%s, AdapterId=%d, Lctn=%s, Pid=%d", mAdapterType, mAdapterId, sSnLctn, pid());
     }   // End registerAdapter(String sSnLctn)
 
@@ -1874,7 +1873,8 @@ public class Adapter implements IAdapter {
 
         // Get the command's stdout (i.e. its InputStream).
         String sLine = "";
-        try (BufferedReader brStdOut = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+        try (BufferedReader brStdOut = new BufferedReader(new InputStreamReader(process.getInputStream(),
+                StandardCharsets.UTF_8))) {
             while ((sLine = brStdOut.readLine()) != null) {
                 ///mLogger.warn("%s - extractListOfWlmNodes - JobId=%s - %s - stdout - '%s'", adapterName(), sJobId, sNodeList, sLine);
                 // Add this node to the list of nodes.
@@ -1884,7 +1884,8 @@ public class Adapter implements IAdapter {
 
         // Get the command's stderr (i.e. its ErrorStream).
         boolean bErrorOccurredDuringExpansionOfNodeList = false;
-        try (BufferedReader brStdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+        try (BufferedReader brStdErr = new BufferedReader(new InputStreamReader(process.getErrorStream(),
+                StandardCharsets.UTF_8))) {
             while ((sLine = brStdErr.readLine()) != null) {
                 mLogger.error("extractListOfWlmNodes - JobId=%s - %s - stderr - '%s'", sJobId, sNodeList, sLine);
                 bErrorOccurredDuringExpansionOfNodeList = true;

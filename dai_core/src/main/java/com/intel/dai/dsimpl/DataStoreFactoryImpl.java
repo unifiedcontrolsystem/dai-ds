@@ -125,7 +125,15 @@ public class DataStoreFactoryImpl implements DataStoreFactory {
         Connection nearlineConn = createTier2Connection();
         Connection onlineConn = createTier1Connection();
 
-        return new DataLoaderApiJdbc(onlineConn, nearlineConn, logger_);
+        DataLoaderApi api = new DataLoaderApiJdbc(onlineConn, nearlineConn, logger_);
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            try {
+                api.disconnectAll();
+            } catch(Exception e) {
+                logger_.exception(e);
+            }
+        }));
+        return api;
     }
 
     @Override

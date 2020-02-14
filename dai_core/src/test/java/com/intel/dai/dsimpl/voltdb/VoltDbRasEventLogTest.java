@@ -30,7 +30,6 @@ public class VoltDbRasEventLogTest {
 
     @Before
     public void setUp() throws IOException, ProcCallException {
-        VoltDbRasEventLog.mRasDescNameToEventTypeMap = null;
         client_ = mock(Client.class);
         adapter_ = mock(IAdapter.class);
         when(adapter_.adapterType()).thenReturn("TestType");

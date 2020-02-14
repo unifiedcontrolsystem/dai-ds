@@ -149,7 +149,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
      *               and method.
      * @throws RESTServerException If the underlying implementation fails to set the route.
      */
-    public final void addHandler(String url, HttpMethod method, RESTServerHandler handler)
+    synchronized public final void addHandler(String url, HttpMethod method, RESTServerHandler handler)
             throws RESTServerException {
         synchronized (this) {
             if (routes_.containsKey(url) && routes_.get(url).containsKey(method)) {
@@ -178,7 +178,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
      * @param url The URL that responds to SSE eventing requests.
      * @throws RESTServerException  If the underlying implementation fails to set the route.
      */
-    public final void addSSEHandler(String url, Collection<String> possibleEventTypes) throws RESTServerException {
+    synchronized public final void addSSEHandler(String url, Collection<String> possibleEventTypes) throws RESTServerException {
         synchronized (this) {
             HttpMethod method = HttpMethod.GET;
             if (routes_.containsKey(url) && routes_.get(url).containsKey(method))
@@ -206,7 +206,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
      * @param method The HTTP method to map in conjunction with the url above.
      * @throws RESTServerException If the underlying implementation fails to remove the route.
      */
-    public final void removeHandler(String url, HttpMethod method) throws RESTServerException {
+    synchronized public final void removeHandler(String url, HttpMethod method) throws RESTServerException {
         synchronized (this) {
             if (routes_.containsKey(url) && routes_.get(url).containsKey(method)) {
                 RouteObject removing = routes_.get(url).get(method);
@@ -332,14 +332,16 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
     protected RouteObject matchUrlPathAndMethod(String path, HttpMethod method) {
         Map<HttpMethod, RouteObject> routeMap;
         RouteObject route;
-        for(String possiblePath: routes_.descendingKeySet()) {
-            routeMap = routes_.get(possiblePath);
-            if(routeMap.containsKey(method)) {
-                route = routeMap.get(method);
-                if(route.wildcard && path.startsWith(possiblePath))
-                    return route;
-                else if(path.equals(possiblePath))
-                    return route;
+        synchronized (this) {
+            for (String possiblePath : routes_.descendingKeySet()) {
+                routeMap = routes_.get(possiblePath);
+                if (routeMap.containsKey(method)) {
+                    route = routeMap.get(method);
+                    if (route.wildcard && path.startsWith(possiblePath))
+                        return route;
+                    else if (path.equals(possiblePath))
+                        return route;
+                }
             }
         }
         return null;

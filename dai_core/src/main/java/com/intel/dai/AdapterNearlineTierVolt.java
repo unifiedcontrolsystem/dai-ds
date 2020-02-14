@@ -7,9 +7,11 @@ package com.intel.dai;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import org.json_voltpatches.JSONException;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
 import java.lang.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -380,7 +382,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 // Publish this message on the pub-sub bus.
                 //--------------------------------------------------------------
                 String sAmqpRoutingKey = sTableName;  // use the table name as the routing key.
-                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, jsonMsgObject.toString().getBytes());
+                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, jsonMsgObject.toString().getBytes(StandardCharsets.UTF_8));
                 log_.info("Published AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, RoutingKey=%s, TableName=%s, Part %d Of %d",
                           lAmqpMessageId, lIntervalId, sEndIntvlTimeMs, sStartIntvlTimeMs, sAmqpRoutingKey,
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable);
@@ -559,7 +561,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 // Save the AmqpMessageId that we just used (so we have it available for the next message).
                 mPrevAmqpMessageId = lAmqpMessageId;
             }
-            catch (Exception e) {
+            catch (ProcCallException | ConfigIOParseException | JSONException | PropertyNotExpectedType e) {
                 log_.error("AmqpDataReceiverMsgConsumer - Exception occurred (msg will be skipped): %s!", e.getMessage());
                 log_.error("%s", Adapter.stackTraceToString(e));
                 log_.error("Message that incurred the above exception - %s", sAmqpMsg);

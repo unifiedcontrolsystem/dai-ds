@@ -25,7 +25,7 @@ public class VoltDbRasEventLog implements RasEventLog {
     private String adapterName;
     private String adapterType;
     // Map that takes a RAS DescriptiveName and gives you the corresponding EventType.
-            static Map<String, String> mRasDescNameToEventTypeMap = null;
+            Map<String, String> mRasDescNameToEventTypeMap = null;
     // "0001000013" is a Ras EventType indicating that the specified descriptive name does not exist in RasEventMetaData
     private static final String NON_DESCRIPTIVE_RAS_EVENT = "0001000013";
     private static final String query = "select EventType, DescriptiveName from RasMetaData;";
@@ -54,7 +54,7 @@ public class VoltDbRasEventLog implements RasEventLog {
     }
 
     // This method gets the Ras EventType that corresponds to the specified DescriptiveName.
-    public String getRasEventType(String sDescriptiveName, long workItemId) throws IOException {
+    public synchronized String getRasEventType(String sDescriptiveName, long workItemId) throws IOException {
         String sRasEventType = mRasDescNameToEventTypeMap.get(sDescriptiveName);
         // Ensure that we got a "valid" EventType back.
         if (sRasEventType != null && !sRasEventType.isEmpty()) {

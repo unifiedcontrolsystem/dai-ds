@@ -38,6 +38,9 @@ public class NetworkListenerCore {
     }
 
     public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory) {
+        assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
+        assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
+        assert factory != null:"Passed a null DataStoreFactory to NetworkListenerCore.ctor()!";
         log_ = logger;
         config_ = configuration;
         adapter_ = config_.getAdapterInformation();
@@ -69,7 +72,7 @@ public class NetworkListenerCore {
         } catch(AdapterException e) {
             log_.exception(e, "Problem occurred while attempting to shutdown the adapter");
         }
-        try { actions_.close(); } catch(IOException e) { /* Ignore from close */ }
+        try { actions_.close(); } catch(IOException e) { log_.exception(e); }
     }
 
     private boolean connectToAllDataSources() {
@@ -142,7 +145,9 @@ public class NetworkListenerCore {
         List<NetworkDataSink> removeList = new ArrayList<>();
         for(String networkStreamName: config_.getProfileStreams()) {
             PropertyMap arguments = config_.getNetworkArguments(networkStreamName);
+            assert (arguments != null):"A null arguments object";
             String name = config_.getNetworkName(networkStreamName);
+            assert name != null: "A null network name is not allowed!";
             log_.debug("*** Creating a network sink of type '%s'...", name);
             arguments.put("subjects", subjects_);
             Map<String,String> args = buildArgumentsForNetwork(arguments);
@@ -156,6 +161,7 @@ public class NetworkListenerCore {
             sink.setCallbackDelegate(this::processSinkMessage);
             sink.startListening();
         }
+        log_.debug("*** Done Creating all network connections.");
         safeSleep(1500); // stabilize for 1.5 seconds...
         for(NetworkDataSink sink: sinks_) {
             if(!sink.isListening())
@@ -309,7 +315,9 @@ public class NetworkListenerCore {
                     break;
                 case "tokenAuthProvider":
                     result.put(entry.getKey(), entry.getValue().toString());
-                    parseTokenConfig(config_.getProviderConfigurationFromClassName(entry.getValue().toString()), result);
+                    Object value = entry.getValue();
+                    if(value != null)
+                        parseTokenConfig(config_.getProviderConfigurationFromClassName(value.toString()), result);
                     break;
                 default: // Drop any unexpected keys...
                     result.put(entry.getKey(), entry.getValue().toString());
@@ -320,8 +328,12 @@ public class NetworkListenerCore {
     }
 
     void parseTokenConfig(PropertyMap config, Map<String,String> result) {
-        for(String subKey: config.keySet())
-            result.put(subKey, config.getStringOrDefault(subKey, null));
+        if(config != null)
+            for(Map.Entry<String,Object> subKey: config.entrySet())
+                if(subKey.getValue() != null)
+                    result.put(subKey.getKey(), subKey.getValue().toString());
+                else
+                    result.put(subKey.getKey(), null);
     }
 
     void parseSelector(PropertyMap map, Map<String,String> result) {
@@ -333,7 +345,7 @@ public class NetworkListenerCore {
                     array[i] = map.getArrayOrDefault(entry.getKey(), null).get(i).toString();
                 result.put(entry.getKey(), String.join(",", array));
             }
-            result.put("requestBuilderSelectors." + entry, entry.getValue().toString());
+            result.put("requestBuilderSelectors." + entry.getKey(), entry.getValue().toString());
         }
     }
 
