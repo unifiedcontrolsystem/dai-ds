@@ -147,10 +147,10 @@ class SystemGenerator {
 
             case SENSOR  :  PropertyMap data = dataLoaderEngine.getSensorMetaData().getAsMap();
                             for(String itemKey : data.keySet()) {
-                                PropertyArray compKey = data.getArrayOrDefault(itemKey, null);
+                                PropertyArray compKey = data.getArray(itemKey);
                                 for(int i = 0; i < compKey.size(); i++) {
                                     PropertyMap itemData = compKey.getMap(i);
-                                    String itemDescription = itemData.getStringOrDefault("description", null);
+                                    String itemDescription = itemData.getStringOrDefault("description", "");
                                     if(itemDescription.matches(regexLabelDesc))
                                         regexMatchedLabelDescList.add(itemData);
                                 }
