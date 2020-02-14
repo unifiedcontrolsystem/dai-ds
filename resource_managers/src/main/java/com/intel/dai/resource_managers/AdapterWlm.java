@@ -11,6 +11,8 @@ import com.intel.logging.*;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.AdapterInformation;
+import com.intel.dai.dsapi.AdapterOperations;
+import org.voltdb.client.ProcCallException;
 
 import java.lang.*;
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class AdapterWlm {
     private Jobs jobs;
     private EventsLog eventlog;
     private AdapterInformation baseAdapter;
+    private AdapterOperations adapterOperations = null;
     private RasEventLog raseventlog;
     long mTimeLastCheckedStaleData = 0L;  // timestamp that we last checked for stale data in wlm tables.
 
@@ -42,12 +45,22 @@ public class AdapterWlm {
             e.printStackTrace(System.err);
             throw new RuntimeException("Failed to start the base Adapter: " + e.getMessage());
         }
+
         this.provider = provider;
         this.log = log;
         jobs = factory.createJobApi();
         eventlog = factory.createEventsLog(baseAdapter.getName(), baseAdapter.getType());
         raseventlog = factory.createRasEventLog(baseAdapter);
         workQueue = factory.createWorkQueue(baseAdapter);
+
+        adapterOperations = factory.createAdapterOperations(baseAdapter);
+        if (!workQueue.isThisNewWorkItem())
+            log.info("In a re-queued HandleInputFromExternalComponent flow");
+        try {
+            adapterOperations.registerAdapter();
+        } catch(ProcCallException | IOException e) {
+            log.exception(e, "Failed to register the adapter");
+        }
     }   // ctor
 
     /**
