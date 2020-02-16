@@ -14,24 +14,24 @@
   },
   "networkConfig" : {
       "network" : "sse",
-          "sseConfig": {
-              "serverAddress": "*" ,
-              "serverPort": "5678" ,
-              "urls": {
-                "/v1/stream/cray-telemetry-fan": [
-                  "telemetry"
-                ] ,
-                "/streams/nodeBootEvents": [
-                  "stateChanges"
-                ] ,
-                "/v1/stream/cray-dmtf-resource-event": [
-                  "events"
-                ]
-              }
-          } ,
-          "rabbitmq": {
-              "exchangeName": "simulator" ,
-              "uri": "amqp://127.0.0.1"
+      "sseConfig": {
+          "serverAddress": "*" ,
+          "serverPort": "5678" ,
+          "urls": {
+            "/v1/stream/cray-telemetry-fan": [
+              "telemetry"
+            ] ,
+            "/streams/nodeBootEvents": [
+              "stateChanges"
+            ] ,
+            "/v1/stream/cray-dmtf-resource-event": [
+              "events"
+            ]
           }
+      } ,
+      "rabbitmq": {
+          "exchangeName": "simulator" ,
+          "uri": "amqp://127.0.0.1"
+      }
   }
 }
