@@ -128,8 +128,10 @@ public class EventSimApp extends EventSim {
      */
     public String getBootParameters(final Map<String, String> parameters) throws SimulatorException {
         bootParamsApi_.setBootParamsConfigFile(simEngineDataLoader.getBootParamsFileLocation());
-        PropertyMap data = (PropertyMap) bootParamsApi_.getBootParameters();
-        return jsonParser_.toString(data.getArrayOrDefault("content", new PropertyArray()));
+        String location = parameters.getOrDefault("hosts",null);
+        if(location == null || location.equals("null"))
+            return jsonParser_.toString(bootParamsApi_.getBootParameters());
+        return jsonParser_.toString(bootParamsApi_.getBootParametersForLocation(location));
     }
 
     public String initiateInventoryDiscovery(final Map<String, String> parameters) throws ResultOutputException {
