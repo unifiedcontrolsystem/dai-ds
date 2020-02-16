@@ -10,5 +10,6 @@ package com.intel.dai.dsapi;
 public enum BootState {
     NODE_OFFLINE,
     NODE_ONLINE,
-    NODE_BOOTING
+    NODE_BOOTING,
+    EMPTY
 }
