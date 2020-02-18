@@ -53,7 +53,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             PropertyMap message = parser_.fromString(data).getAsMap();
             log_.debug("*** Message: %s", data);
             checkMessage(message);
-            String[] xnameLocations = message.getStringOrDefault(FOREIGN_LOCATION_KEY, "").split(",");
+            PropertyArray locationArray = message.getArrayOrDefault(FOREIGN_LOCATION_KEY, new PropertyArray());
+            String[] xnameLocations = locationArray.toArray(new String[0]);
             String nodeState = message.getStringOrDefault(FOREIGN_NODE_STATE_KEY, null);
             if(!conversionMap_.containsKey(nodeState))
                 throw new NetworkListenerProviderException("The '" + FOREIGN_NODE_STATE_KEY + "' boot state field in JSON is " +
@@ -212,7 +213,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private String extractBootImageId(String xnameLocation) throws NetworkListenerProviderException {
         // TODO: Coded assuming the FOREIGN_IMAGE_ID_KEY is in the NODE_ONLINE message.
         // NOTE: The foreign boot image ID will be the DAI boot image id.
-        /*try {
+        try {
             if(client_ == null)
                 client_ = createClient();
             BlockingResult result = client_.getRESTRequestBlocking(makeUri(xnameLocation));
@@ -225,7 +226,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         } catch(RESTClientException | URISyntaxException | ConfigIOParseException | PropertyNotExpectedType e) {
             log_.exception(e);
             actions_.logFailedToUpdateBootImageInfo(String.format("Full URL=%s%s", baseUrl_, bootInfoUrlPath_));
-        }*/
+        }
         return "mOS";
     }
 

@@ -83,9 +83,9 @@ public class BootParameters {
         PropertyArray defaultBootImage = new PropertyArray();
         for(int i = 0; i < data.size(); i++) {
             PropertyMap bootImageData = data.getMap(i);
-            if(bootImageData.getArrayOrDefault("hosts", null).contains("Default"))
+            if(bootImageData.getArrayOrDefault("hosts", new PropertyArray()).contains("Default"))
                 defaultBootImage.add(bootImageData);
-            if(bootImageData.getArrayOrDefault("hosts", null).contains(location)) {
+            if(bootImageData.getArrayOrDefault("hosts", new PropertyArray()).contains(location)) {
                 defaultBootImage.clear();
                 defaultBootImage.add(bootImageData);
                 return defaultBootImage;
