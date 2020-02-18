@@ -91,7 +91,7 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.getSubscription("http://test.com", "test").get("ID") == 1
         networkObjectTest.getSubscriptionForId(1).getAsMap().get("url") == "http://test.com"
         networkObjectTest.unRegisterId(1)
-        networkObjectTest.getSubscription("http://test.com", "test") == null
+        networkObjectTest.getSubscription("http://test.com", "test").size() == 0
     }
 
     def "Test exceptions for invalid config file missing serverAddress details" () {
@@ -283,7 +283,7 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.getAllSubscriptions().getAsMap().size() == 1
         networkObjectTest.getAllSubscriptions().getAsMap().getArray("SubscriptionList").getMap(0).getString("ID") == "1"
         networkObjectTest.unRegisterAll()
-        networkObjectTest.getAllSubscriptions() == null
+        networkObjectTest.getAllSubscriptions().isEmpty()
     }
 
     void loadData(String networkConfig) {
