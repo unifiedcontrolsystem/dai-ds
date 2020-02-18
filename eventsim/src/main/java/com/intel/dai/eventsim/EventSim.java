@@ -90,6 +90,7 @@ public class EventSim {
         jsonParser_ = ConfigIOFactory.getInstance("json");
         bootParamsApi_ = new BootParameters();
         hwInvApi_ = new HardwareInventory();
+        wlmApi = new WlmApi(log_);
         ApiReqData apiReq = new ApiReqData(log_);
         PropertyMap ntwkConfig = serverConfiguration_.getMapOrDefault("networkConfig", null);
         source_ = new NetworkObject(ntwkConfig, log_, apiReq);
@@ -106,4 +107,5 @@ public class EventSim {
     SimulatorEngine eventSimEngine;
     private NodeInformation nodeinfo;
     protected DataLoaderEngine simEngineDataLoader;
+    private WlmApi wlmApi;
 }

@@ -213,6 +213,138 @@ class EventSimAppSpec extends Specification {
             e.getMessage() == "Invalid or null hardware inventory query path"
     }
 
+    def "createReservation" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = new HashMap<>()
+        params.put("name", "testres")
+        params.put("users", "root")
+        params.put("nodes", "node01 node02")
+        params.put("starttime", "2019-02-14 02:15:58")
+        params.put("duration", "3600000")
+
+        expect :
+        test.createReservation(params).contains("{\"Status\":\"F\"")
+    }
+
+    def "createReservation Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.createReservation(params).contains("{\"Status\":\"E\"")
+    }
+
+    def "modifyReservation" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = new HashMap<>()
+        params.put("name", "testres")
+        params.put("users", "root")
+        params.put("nodes", "node01 node02")
+        params.put("starttime", "2019-02-14 02:15:58")
+
+        expect :
+        test.modifyReservation(params).contains("{\"Status\":\"F\"")
+    }
+
+    def "modifyReservation Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.modifyReservation(params).contains("{\"Status\":\"E\"")
+    }
+
+    def "deleteReservation" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = new HashMap<>()
+        params.put("name", "testres")
+
+        expect :
+        test.deleteReservation(params).contains("{\"Status\":\"F\"")
+    }
+
+    def "deleteReservation Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.deleteReservation(params).contains("{\"Status\":\"E\"")
+    }
+
+    def "startJob" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = new HashMap<>()
+        params.put("jobid", "10")
+        params.put("name", "testjob")
+        params.put("users", "root")
+        params.put("nodes", "node01 node02")
+        params.put("starttime", "2019-02-14 02:15:58")
+        params.put("workdir", "/home")
+
+        expect :
+        test.startJob(params).contains("{\"Status\":\"F\"")
+    }
+
+    def "startJob Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.startJob(params).contains("{\"Status\":\"E\"")
+    }
+
+    def "terminateJob" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = new HashMap<>()
+        params.put("jobid", "10")
+        params.put("name", "testjob")
+        params.put("users", "root")
+        params.put("nodes", "node01 node02")
+        params.put("starttime", "2019-02-14 02:15:58")
+        params.put("workdir", "/home")
+        params.put("exitstatus", "0")
+
+        expect :
+        test.terminateJob(params).contains("{\"Status\":\"F\"")
+    }
+
+    def "terminateJob Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.terminateJob(params).contains("{\"Status\":\"E\"")
+    }
+
+//    def "simulateWlm" () {
+//        Logger log = Mock(Logger)
+//        EventSimApiApp test = new EventSimApp(log)
+//        Map<String, String> params = new HashMap<>()
+//        params.put("reservations", "10")
+//
+//        expect :
+//        test.simulateWlm(params).contains("{\"Status\":\"F\"")
+//    }
+
+    def "simulateWlm Exception" () {
+        Logger log = Mock(Logger)
+        EventSimApiApp test = new EventSimApp(log)
+        Map<String, String> params = null
+
+        expect :
+        test.simulateWlm(params).contains("{\"Status\":\"E\"")
+    }
+
     private void loadDataIntoFile(File file, String data) throws Exception {
         FileUtils.writeStringToFile(file, data);
     }
