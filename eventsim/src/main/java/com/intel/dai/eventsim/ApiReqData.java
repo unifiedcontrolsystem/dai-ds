@@ -116,7 +116,7 @@ public class ApiReqData {
     private Map<String, String> convertHttpBodytoMap(String payload) throws ConfigIOParseException {
         /* Convert request body which is name value pair to a Map */
         if (payload.isEmpty())
-            return null;
+            return new HashMap<>();
         PropertyMap payloadParameters = parser_.fromString(payload).getAsMap();
         Map<String, String> payLoadMap = new HashMap<>();
         for (Map.Entry<String, Object> parameter : payloadParameters.entrySet()) {
