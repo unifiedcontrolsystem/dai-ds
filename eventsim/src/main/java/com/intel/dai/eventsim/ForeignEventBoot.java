@@ -1,5 +1,8 @@
 package com.intel.dai.eventsim;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Description of class ForeignEventBoot.
  * creates boot events
@@ -9,7 +12,10 @@ public class ForeignEventBoot extends ForeignEvent{
     /**
      * This method is used to set creation location of boot event
      */
-    public void setLocation(String location) { props_.put("Components",location); }
+    public void setLocation(String location) {
+        locations.add(location);
+        props_.put("Components",locations);
+    }
 
     /**
      * This method is used to set role of event.
@@ -31,4 +37,6 @@ public class ForeignEventBoot extends ForeignEvent{
     public void setStatus(String status) {
         props_.put("SoftwareStatus", status);
     }
+
+    private List<String> locations = new ArrayList<>();
 }
