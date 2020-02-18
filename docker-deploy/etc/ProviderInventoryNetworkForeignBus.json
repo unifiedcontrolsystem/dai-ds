@@ -1,6 +1,6 @@
 {
   "providerClassMap": {
-    "bootEventData": "com.intel.dai.provisioners.NetworkListenerProviderForeignBus"
+    "inventoryEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
   },
 
   "networkStreams": {
@@ -9,12 +9,12 @@
         "connectAddress": "localhost",
         "connectPort": 8081,
         "bindAddress": "*",
-        "bindPort": 54321,
+        "bindPort": 54322,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "subjects": "stateChange",
-        "requestBuilder": "com.intel.dai.provisioners.ForeignSubscriptionRequest",
-        "responseParser": "com.intel.dai.provisioners.ForeignSubscriptionResponseParser",
-        "subscriberName": "daiSubscriptionID",
+        "requestBuilder": "com.intel.dai.inventory.ForeignSubscriptionRequest",
+        "responseParser": "com.intel.dai.inventory.ForeignSubscriptionResponseParser",
+        "subscriberName": "daiInvSubscriptionID",
         "use-ssl": false
       },
       "name": "http_callback"
@@ -29,7 +29,7 @@
       "subjects": [
         "stateChanges"
       ],
-      "adapterProvider": "bootEventData"
+      "adapterProvider": "inventoryEventData"
     }
   },
 
@@ -39,10 +39,9 @@
       "exchangeName": "ucs",
       "uri": "amqp://127.0.0.1"
     },
-    "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
-      "publishTopic": "ucs_boot_event",
+    "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
+      "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
-      "bootImageInfoUrlPath": "/bootparameters",
       "publish": true
     }
   },
