@@ -32,6 +32,7 @@ public class EventSim {
     //for unit test cases
     EventSim(Logger log) {
         log_ = log;
+        wlmApi = new WlmApi(log_);
     }
 
     /**
@@ -107,5 +108,5 @@ public class EventSim {
     SimulatorEngine eventSimEngine;
     private NodeInformation nodeinfo;
     protected DataLoaderEngine simEngineDataLoader;
-    private WlmApi wlmApi;
+    protected WlmApi wlmApi;
 }

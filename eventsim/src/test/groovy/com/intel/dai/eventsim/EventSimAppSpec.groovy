@@ -215,7 +215,8 @@ class EventSimAppSpec extends Specification {
 
     def "createReservation" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
         params.put("users", "root")
@@ -229,7 +230,8 @@ class EventSimAppSpec extends Specification {
 
     def "createReservation Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
@@ -238,7 +240,8 @@ class EventSimAppSpec extends Specification {
 
     def "modifyReservation" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
         params.put("users", "root")
@@ -251,7 +254,8 @@ class EventSimAppSpec extends Specification {
 
     def "modifyReservation Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
@@ -260,7 +264,8 @@ class EventSimAppSpec extends Specification {
 
     def "deleteReservation" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
 
@@ -270,7 +275,8 @@ class EventSimAppSpec extends Specification {
 
     def "deleteReservation Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
@@ -279,7 +285,8 @@ class EventSimAppSpec extends Specification {
 
     def "startJob" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = new HashMap<>()
         params.put("jobid", "10")
         params.put("name", "testjob")
@@ -294,7 +301,8 @@ class EventSimAppSpec extends Specification {
 
     def "startJob Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
@@ -303,7 +311,8 @@ class EventSimAppSpec extends Specification {
 
     def "terminateJob" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = new HashMap<>()
         params.put("jobid", "10")
         params.put("name", "testjob")
@@ -319,7 +328,8 @@ class EventSimAppSpec extends Specification {
 
     def "terminateJob Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
@@ -328,7 +338,8 @@ class EventSimAppSpec extends Specification {
 
 //    def "simulateWlm" () {
 //        Logger log = Mock(Logger)
-//        EventSimApiApp test = new EventSimApp(log)
+//        EventSimApp test = new EventSimApp(log)
+//        test.jsonParser_ = ConfigIOFactory.getInstance("json")
 //        Map<String, String> params = new HashMap<>()
 //        params.put("reservations", "10")
 //
@@ -338,7 +349,8 @@ class EventSimAppSpec extends Specification {
 
     def "simulateWlm Exception" () {
         Logger log = Mock(Logger)
-        EventSimApiApp test = new EventSimApp(log)
+        EventSimApp test = new EventSimApp(log)
+        test.jsonParser_ = ConfigIOFactory.getInstance("json")
         Map<String, String> params = null
 
         expect :
