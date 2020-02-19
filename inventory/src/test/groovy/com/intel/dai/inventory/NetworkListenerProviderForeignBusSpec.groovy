@@ -63,15 +63,24 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
 
     def "processRawStringData - unsupported boot state"() {
         when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
-        then: thrown exception
+        then: notThrown exception
 
         where:
         scnJson                                                     || exception
         '{Components: ["x0c0s21b0n0"], State: "Populated"}'         || NetworkListenerProviderException
         '{Components: ["x0c0s21b0n0"], State: "Empty"}'             || NetworkListenerProviderException
-        '{Components: ["x0c0s21b0n0"], State: "Cow"}'               || NetworkListenerProviderException
     }
 
+    def "processRawStringData - erroneous boot state"() {
+        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        then: thrown exception
+
+        where:
+        scnJson                                                     || exception
+        '{Components: ["x0c0s21b0n0"], State: ""}'                  || NetworkListenerProviderException
+        '{Components: ["x0c0s21b0n0"], State: "Chicken"}'           || NetworkListenerProviderException
+        '{Components: ["x0c0s21b0n0"], State: "Cow"}'               || NetworkListenerProviderException
+    }
     def "processRawStringData - common usages - sizes"() {
         expect: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig)).size() == size
 
