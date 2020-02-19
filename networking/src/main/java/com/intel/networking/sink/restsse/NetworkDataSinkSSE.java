@@ -158,7 +158,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
                     if(client_ == null)
                         log_.warn("SSE Connection failed, retrying the connection...");
                 } catch (RESTClientException e) {
-                    client_ = null;
+                    log_.warn("SSE Connection failed, retrying the connection...");
                 }
             }
         }
