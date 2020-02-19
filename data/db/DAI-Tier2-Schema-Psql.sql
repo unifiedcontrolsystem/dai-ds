@@ -2936,7 +2936,17 @@ AS $$
        tier2_ucsconfigvalue_ss, tier2_uniquevalues_ss, tier2_workitem_ss, tier2_rasevent_ss;
 $$;
 
-
+CREATE PROCEDURE public.create_first_partition()
+LANGUAGE plpgsql
+AS $$
+declare monthStart date := date_trunc('MONTH', current_timestamp);
+declare monthEndExclusive date := monthStart + interval '1 MONTH';
+declare tablepostfix text := to_char(current_timestamp, 'YYYYmm');
+BEGIN
+    execute format('create table %s partition of public.tier2_rasevent for values from (%L) to (%L)', 'public.tier2_rasevent_' || tablepostfix, monthStart, monthEndExclusive);
+    execute format('create table %s partition of public.tier2_aggregatedenvdata for values from (%L) to (%L)', 'public.tier2_aggregatedenvdata_'|| tablepostfix, monthStart, monthEndExclusive);
+END;
+$$;
 
 ----- ALTER TABLE SQLS START HERE ------
 
@@ -4172,6 +4182,7 @@ CREATE UNIQUE INDEX machineadapterinstancebysnlctnandadaptertype ON public.tier2
 
 CREATE UNIQUE INDEX workitembyadaptertypeandid ON public.tier2_workitem_ss USING btree (workingadaptertype, id);
 
+call public.create_first_partition();
 --
 -- PostgreSQL database dump complete
 --
