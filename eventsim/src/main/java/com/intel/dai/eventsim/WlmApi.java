@@ -14,6 +14,8 @@ public class WlmApi {
 
     Logger logger_;
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String bgschedPath = "/var/log/bgsched.log";
+    String cqmPath = "/var/log/cqm.log";
 
     public WlmApi(Logger logger) {
         logger_ = logger;
@@ -22,7 +24,7 @@ public class WlmApi {
     public void createReservation(String name, String users, String nodes, Timestamp starttime, String duration) throws IOException {
 
         logger_.info("Generate create reservation log line");
-        FileWriter bgschedLog = new FileWriter("/var/log/bgsched.log");
+        FileWriter bgschedLog = new FileWriter(bgschedPath);
         String[] userArr = users.split(" ");
         String[] nodeArr = nodes.split(" ");
 
@@ -36,7 +38,7 @@ public class WlmApi {
     public void modifyReservation(String name, String users, String nodes, String starttime) throws IOException {
 
         logger_.info("Generate modify reservation log line");
-        FileWriter bgschedLog = new FileWriter("/var/log/bgsched.log");
+        FileWriter bgschedLog = new FileWriter(bgschedPath);
         String updateStr = "[{";
         if (!"false".equals(users))
             updateStr += "'users': '" + users.replace(",",":").replace(" ",":") + "',";
@@ -56,7 +58,7 @@ public class WlmApi {
     public void deleteReservation(String name) throws IOException {
 
         logger_.info("Generate delete reservation log line");
-        FileWriter bgschedLog = new FileWriter("/var/log/bgsched.log");
+        FileWriter bgschedLog = new FileWriter(bgschedPath);
 
         Reservation reservation = new Reservation(name, null, null, null, 0);
         String logstring = reservation.deleteReservation();
@@ -69,7 +71,7 @@ public class WlmApi {
     public void startJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir) throws IOException {
 
         logger_.info("Generate start job log line");
-        FileWriter cqmLog = new FileWriter("/var/log/cqm.log");
+        FileWriter cqmLog = new FileWriter(cqmPath);
         String[] userArr = users.split(" ");
         String[] nodeArr = nodes.split(" ");
 
@@ -83,7 +85,7 @@ public class WlmApi {
     public void terminateJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir, String exitStatus) throws IOException {
 
         logger_.info("Generate terminate job log line");
-        FileWriter cqmLog = new FileWriter("/var/log/cqm.log");
+        FileWriter cqmLog = new FileWriter(cqmPath);
         Date now = new Date();
         long endTime = now.getTime();
         String[] userArr = users.split(" ");
@@ -115,8 +117,8 @@ public class WlmApi {
         String[] startChoice = new String[2];
         startChoice[0] = "false";
         startChoice[1] = sdfDate.format(new Date());
-        FileWriter cqmLog = new FileWriter("/var/log/cqm.log");
-        FileWriter bgschedLog = new FileWriter("/var/log/bgsched.log");
+        FileWriter cqmLog = new FileWriter(cqmPath);
+        FileWriter bgschedLog = new FileWriter(bgschedPath);
 
         for(int i = 0; i < numRes; i++) {
             int numReservedNodes = rand.nextInt(nodes.length);
