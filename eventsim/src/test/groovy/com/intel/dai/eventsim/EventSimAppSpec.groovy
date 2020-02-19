@@ -217,6 +217,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
         params.put("users", "root")
@@ -232,6 +233,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
 
         expect :
@@ -242,6 +244,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
         params.put("users", "root")
@@ -256,6 +259,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
 
         expect :
@@ -266,6 +270,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
         params.put("name", "testres")
 
@@ -277,6 +282,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
 
         expect :
@@ -287,6 +293,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = new HashMap<>()
         params.put("jobid", "10")
         params.put("name", "testjob")
@@ -303,6 +310,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null
 
         expect :
@@ -313,6 +321,7 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = new HashMap<>()
         params.put("jobid", "10")
         params.put("name", "testjob")
@@ -330,27 +339,18 @@ class EventSimAppSpec extends Specification {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null
 
         expect :
         test.terminateJob(params).contains("{\"Status\":\"E\"")
     }
 
-//    def "simulateWlm" () {
-//        Logger log = Mock(Logger)
-//        EventSimApp test = new EventSimApp(log)
-//        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-//        Map<String, String> params = new HashMap<>()
-//        params.put("reservations", "10")
-//
-//        expect :
-//        test.simulateWlm(params).contains("{\"Status\":\"F\"")
-//    }
-
     def "simulateWlm Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
+        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null
 
         expect :
