@@ -64,6 +64,9 @@ public class NetworkListenerSystemActionsTest {
         factory_ = mock(DataStoreFactory.class);
         storeTelemetry_ = mock(StoreTelemetry.class);
         bootImage_ = mock(BootImage.class);
+        NodeInformation info = mock(NodeInformation.class);
+        when(info.isServiceNodeLocation(anyString())).thenReturn(true);
+        when(factory_.createNodeInformation()).thenReturn(info);
         when(factory_.createStoreTelemetry()).thenReturn(storeTelemetry_);
         when(factory_.createRasEventLog(any(AdapterInformation.class))).thenReturn(mock(RasEventLog.class));
         when(factory_.createAdapterOperations(any(AdapterInformation.class))).
