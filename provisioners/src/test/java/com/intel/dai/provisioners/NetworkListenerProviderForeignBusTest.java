@@ -120,6 +120,7 @@ public class NetworkListenerProviderForeignBusTest {
     private PropertyMap map_;
     private SystemActions system_;
 
+
     private static final String sample1 = "{\"State\":\"Ready\",\"Components\":\"all\",\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
     private static final String sample2 = "{\"State\":\"Off\",\"Components\":\"all\",\"timestamp\":" +
@@ -131,6 +132,7 @@ public class NetworkListenerProviderForeignBusTest {
     private static final String badSample1 = "\"State\":\"unknown\",\"Components\":\"all\",\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
     private static final String badSample2 = "{\"State\":\"unknown\",\"Components\":\"all\"}";
+
 
     private static final String imageListStr_ = "[{\"hosts\":[\"Default\"],\"kernel\":\"http:\\/\\/api-gw-service-nmn.local\\/apis\\/ars\\/assets\\/artifacts\\/generic\\/vmlinuz-4.12.14-15.5_8.1.96-cray_shasta_c\",\"BootImageFile\":\"centos7.3-vtune\",\"BootStrapImageFile\":\"3.10.0-514.16.1.el7.x86_64\",\"KernelArgs\":null,\"description\":\"Centos 7.3 w\\/ Vtune VNFS\",\"BootImageChecksum\":\"ecaa78c6c36a3442a45f20852f99a7cf\",\"id\":\"boot-image\",\"params\":\"console=tty0 console=ttyS0,115200n8 initrd=initrd-4.12.14-15.5_8.1.96-cray_shasta_c root=crayfs nfsserver=10.2.0.1 nfspath=\\/var\\/opt\\/cray\\/boot_images imagename=\\/SLES15 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https:\\/\\/api-gw-service-nmn.local\\/a                            pis\\/hbtd\\/hmi\\/v1\\/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_                            order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999\",\"BootStrapImageChecksum\":\"93a94d8985aa3b10e38122d2bd8bbba1\",\"BootOptions\":null,\"initrd\":\"http:\\/\\/api-gw-service-nmn.local\\/apis\\/ars\\/assets\\/artifacts\\/generic\\/initrd-4.12.14-15.5_8.1.96-cray_shasta_c\"}]";
 }
