@@ -213,7 +213,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private String extractBootImageId(String xnameLocation) throws NetworkListenerProviderException {
         // TODO: Coded assuming the FOREIGN_IMAGE_ID_KEY is in the NODE_ONLINE message.
         // NOTE: The foreign boot image ID will be the DAI boot image id.
-        /*try {
+        try {
 
             if(client_ == null)
                 client_ = createClient();
@@ -227,7 +227,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         } catch(RESTClientException | URISyntaxException | ConfigIOParseException | PropertyNotExpectedType e) {
             log_.exception(e);
             actions_.logFailedToUpdateBootImageInfo(String.format("Full URL=%s%s", baseUrl_, bootInfoUrlPath_));
-        }*/
+        }
         return "mOS";
     }
 
