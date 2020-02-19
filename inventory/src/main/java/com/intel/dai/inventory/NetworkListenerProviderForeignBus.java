@@ -48,13 +48,13 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
 
         ForeignHWInvChangeNotification notif = new HWInvNotificationTranslator().toPOJO(scnJson);
         if (notif == null) {
-            throw new NetworkListenerProviderException("scnJson is null");
+            throw new NetworkListenerProviderException("scnJson translation failed");
         }
 
         BootState newComponentState = toBootState(notif.State);
         if (newComponentState == null) {
-            throw new NetworkListenerProviderException(
-                    String.format("Unsupported scn notification state: %s", notif.State));
+            log_.info("ignoring unsupported scn notification state: %s", notif.State);
+            return new ArrayList<>();
         }
 
         List<CommonDataFormat> workItems = new ArrayList<>();
