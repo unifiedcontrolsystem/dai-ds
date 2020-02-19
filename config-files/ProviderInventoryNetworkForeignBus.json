@@ -1,0 +1,57 @@
+{
+  "providerClassMap": {
+    "bootEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "stateChangeSource": {
+      "arguments": {
+        "connectAddress": "loki-n2",
+        "connectPort": 5678,
+        "bindAddress": "loki-n1.ra.intel.com",
+        "bindPort": 54321,
+        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
+        "subjects": "stateChanges",
+        "requestBuilder": "com.intel.dai.inventory.ForeignSubscriptionRequest",
+        "responseParser": "com.intel.dai.inventory.ForeignSubscriptionResponseParser",
+        "subscriberName": "daiSubscriptionID",
+        "use-ssl": false
+      },
+      "name": "http_callback"
+    }
+  },
+
+  "adapterProfiles": {
+    "default": {
+      "networkStreamsRef": [
+        "stateChangeSource"
+      ],
+      "subjects": [
+        "stateChanges"
+      ],
+      "adapterProvider": "bootEventData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://127.0.0.1"
+    },
+    "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
+      "publishTopic": "ucs_boot_event",
+      "informWorkLoadManager": false,
+      "bootImageInfoUrlPath": "/bootparameters",
+      "publish": false
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}
