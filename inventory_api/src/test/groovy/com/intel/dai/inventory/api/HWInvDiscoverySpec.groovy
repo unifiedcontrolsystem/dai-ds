@@ -27,10 +27,12 @@ class HWInvDiscoverySpec extends spock.lang.Specification {
         expect: HWInvDiscovery.pollForDiscoveryProgress() == 1
     }
     def "queryHWInvTree - entire tree" () {
+        HWInvDiscovery.log = Mock(Logger)
         given: HWInvDiscovery.requester_ = null
         expect: HWInvDiscovery.queryHWInvTree().getLeft() == 1
     }
     def "queryHWInvTree - partial tree" () {
+        HWInvDiscovery.log = Mock(Logger)
         given: HWInvDiscovery.requester_ = null
         expect: HWInvDiscovery.queryHWInvTree(null).getLeft() == 1
     }
