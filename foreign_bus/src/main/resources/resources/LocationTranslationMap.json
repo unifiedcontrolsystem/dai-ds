@@ -6,7 +6,7 @@
     "sns2":       "R0-SNS2",
     "sns3":       "R0-SNS3",
     "x0c0":       "R0-CH0-CB0",
-    "x0c0s28b0n0": "R0-CH0-CB0-CN0",
+    "x0c0s28b0n0": "R0-00-CH00-CN0",
     "x0c0s26b0n0": "R0-CH0-CB0-CN1",
     "x0c0s24b0n0": "R0-CH0-CB0-CN2",
     "x0c0s21b0n0": "R0-CH0-CB0-CN3"

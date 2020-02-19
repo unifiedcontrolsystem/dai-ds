@@ -4,6 +4,7 @@ package com.intel.dai.resource_managers
 import com.intel.logging.Logger;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.AdapterInformation;
+import com.intel.dai.dsapi.AdapterOperations;
 import spock.lang.Specification
 import com.intel.dai.AdapterSingletonFactory;
 import com.intel.dai.IAdapter;
@@ -35,11 +36,13 @@ class AdapterWlmSpec extends Specification {
         baseadapter_.getName() >>> "AdapterWlm"
         def provider_ = Mock(WlmProvider)
         provider_.handleInputFromExternalComponent(_) >> 0
+        def adapterOp = Mock(AdapterOperations)
         def factory = Mock(DataStoreFactory)
         factory.createEventsLog(_, _) >> eventlog_
         factory.createRasEventLog(_) >> raseventlog_
         factory.createWorkQueue(_) >> workQueue_
         factory.createJobApi() >> jobs_
+        factory.createAdapterOperations(_) >> adapterOp
         def log_ = Mock(Logger)
         def adapter_ = Mock(IAdapter)
         adapter_.adapterAbnormalShutdown() >> false

@@ -53,12 +53,13 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             PropertyMap message = parser_.fromString(data).getAsMap();
             log_.debug("*** Message: %s", data);
             checkMessage(message);
-            String[] xnameLocations = message.getStringOrDefault(FOREIGN_LOCATION_KEY, "").split(",");
-            String eventType = message.getStringOrDefault(FOREIGN_EVENT_TYPE_KEY, null);
-            if(!conversionMap_.containsKey(eventType))
-                throw new NetworkListenerProviderException("The '" + FOREIGN_EVENT_TYPE_KEY + "' boot state field in JSON is " +
-                        "not a known name: " + eventType);
-            BootState ucsEvent = conversionMap_.get(eventType);
+            PropertyArray locationArray = message.getArrayOrDefault(FOREIGN_LOCATION_KEY, new PropertyArray());
+            String[] xnameLocations = locationArray.toArray(new String[0]);
+            String nodeState = message.getStringOrDefault(FOREIGN_NODE_STATE_KEY, null);
+            if(!conversionMap_.containsKey(nodeState))
+                throw new NetworkListenerProviderException("The '" + FOREIGN_NODE_STATE_KEY + "' boot state field in JSON is " +
+                        "not a known name: " + nodeState);
+            BootState curNodeState = conversionMap_.get(nodeState);
             List<CommonDataFormat> commonList = new ArrayList<>();
             for(String xnameLocation: xnameLocations) {
                 String location;
@@ -66,12 +67,11 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 CommonDataFormat common = new CommonDataFormat(
                         CommonFunctions.convertISOToLongTimestamp(message.getString(FOREIGN_TIMESTAMP_KEY)), location,
                         DataType.StateChangeEvent);
-                common.setStateChangeEvent(ucsEvent);
+                common.setStateChangeEvent(curNodeState);
                 commonList.add(common);
                 if(common.getStateEvent() == BootState.NODE_ONLINE) {
                     // This is a contract with the BootEventActions class.
                     common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, xnameLocation);
-                    common.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(message, xnameLocation));
                 }
             }
             return commonList;
@@ -91,8 +91,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         long dataTimestamp = data.getNanoSecondTimestamp();
         actions_.changeNodeStateTo(data.getStateEvent(), data.getLocation(),
                 dataTimestamp, informWlm_);
-        if(data.getStateEvent() == BootState.NODE_ONLINE)
+        if(data.getStateEvent() == BootState.NODE_ONLINE) {
+            try {
+                data.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(data.getLocation()));
+            } catch (Exception e) {
+                log_.error(e.getMessage());
+            }
             updateNodeBootImageId(data);
+        }
         if(data.getStateEvent() == BootState.NODE_OFFLINE)
             actions_.storeRasEvent("RasMntrForeignNodeFailed", "No reason given by foreign software",
                     data.getLocation(), dataTimestamp);
@@ -142,7 +148,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         try {
             if(client_ == null)
                 client_ = createClient();
-            BlockingResult result = client_.getRESTRequestBlocking(makeUri());
+            BlockingResult result = client_.getRESTRequestBlocking(makeUri(null));
             if(result.code == 200) // HTTP 200 OK
                 updateImageInformation(result.responseDocument);
             else
@@ -162,8 +168,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return client;
     }
 
-    private URI makeUri() throws URISyntaxException {
-        return new URI(String.format("%s%s", baseUrl_, bootInfoUrlPath_));
+    private URI makeUri(String location) throws URISyntaxException {
+        return new URI(String.format("%s%s%s%s", baseUrl_, bootInfoUrlPath_, FOREIGN_QUERY_PARAM, location));
     }
 
     private void updateImageInformation(String result) {
@@ -204,10 +210,24 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             return obj.toString();
     }
 
-    private String extractBootImageId(PropertyMap message, String xnameLocation) throws NetworkListenerProviderException {
+    private String extractBootImageId(String xnameLocation) throws NetworkListenerProviderException {
         // TODO: Coded assuming the FOREIGN_IMAGE_ID_KEY is in the NODE_ONLINE message.
         // NOTE: The foreign boot image ID will be the DAI boot image id.
-        return message.getStringOrDefault(FOREIGN_IMAGE_ID_KEY, "");
+        try {
+            if(client_ == null)
+                client_ = createClient();
+            BlockingResult result = client_.getRESTRequestBlocking(makeUri(xnameLocation));
+            if(result.code != 200)
+                throw new RESTClientException("RESTClient resulted in HTTP code: " + result.code +
+                        ":" + result.responseDocument);
+            PropertyMap bootImageData = parser_.fromString(result.responseDocument).getAsArray().getMap(0);
+            return bootImageData.getStringOrDefault("id", "");
+
+        } catch(RESTClientException | URISyntaxException | ConfigIOParseException | PropertyNotExpectedType e) {
+            log_.exception(e);
+            actions_.logFailedToUpdateBootImageInfo(String.format("Full URL=%s%s", baseUrl_, bootInfoUrlPath_));
+        }
+        return "mOS";
     }
 
     private void checkMessage(PropertyMap message) throws NetworkListenerProviderException {
@@ -236,17 +256,17 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private static final Object OBJECT = new Object();
 
     private ConfigIO parser_;
-    private static final String[] requiredInMessage_ = new String[] {"event-type", "timestamp", "location"};
+    private static final String[] requiredInMessage_ = new String[] {"Components", "State", "timestamp"};
     private final static Map<String, BootState> conversionMap_ = new HashMap<>() {{
-        put("ec_node_available", BootState.NODE_ONLINE);
-        put("ec_node_unavailable", BootState.NODE_OFFLINE);
-        put("ec_node_halt", BootState.NODE_OFFLINE);
-        put("ec_node_failed", BootState.NODE_OFFLINE);
-        put("ec_boot", BootState.NODE_BOOTING);
+        put("Ready", BootState.NODE_ONLINE);
+        put("Off", BootState.NODE_OFFLINE);
+        put("Empty", BootState.EMPTY);
+        put("On", BootState.NODE_BOOTING);
     }};
 
-    private final static String FOREIGN_LOCATION_KEY = "location";
+    private final static String FOREIGN_LOCATION_KEY = "Components";
     private final static String ORIG_FOREIGN_LOCATION_KEY = "xnameLocation";
-    private final static String FOREIGN_EVENT_TYPE_KEY = "event-type";
+    private final static String FOREIGN_NODE_STATE_KEY = "State";
     private final static String FOREIGN_TIMESTAMP_KEY = "timestamp";
+    private final static String FOREIGN_QUERY_PARAM = "?hosts=";
 }

@@ -23,5 +23,6 @@ include 'inventory_api'
 include 'inventory'
 include 'monitoring'
 include 'ras'
+include 'eventsim'
 
 rootProject.name = 'dai'

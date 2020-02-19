@@ -32,7 +32,8 @@ public class NetworkListenerConfig {
         adapter_ = adapter;
         parser_ = ConfigIOFactory.getInstance("json");
         if(parser_ == null) throw new RuntimeException("Failed to get a JSON parser"); // Cannot happen, for compile
-        useDebugPrint_ = Boolean.valueOf(System.getProperty(this.getClass().getCanonicalName() + ".DEBUG", "false"));
+        useDebugPrint_ = Boolean.parseBoolean(System.getProperty(this.getClass().getCanonicalName() + ".DEBUG",
+                "false"));
     }
 
     public void loadFromStream(InputStream stream) throws IOException, ConfigIOParseException {
@@ -47,10 +48,10 @@ public class NetworkListenerConfig {
             if(!config_.containsKey(required))
                 throw new ConfigIOParseException(String.format("The key '%s' is missing", required));
         useBenchmarking_ = config_.getBooleanOrDefault("useBenchmarkingActions", false);
-        profiles_ = config_.getMapOrDefault("adapterProfiles", null);
-        networkStreams_ = config_.getMapOrDefault("networkStreams", null);
-        subjectMap_ = config_.getMapOrDefault("subjectMap", null);
-        providers_ = config_.getMapOrDefault("providerClassMap", null);
+        profiles_ = config_.getMapOrDefault("adapterProfiles", new PropertyMap());
+        networkStreams_ = config_.getMapOrDefault("networkStreams", new PropertyMap());
+        subjectMap_ = config_.getMapOrDefault("subjectMap", new PropertyMap());
+        providers_ = config_.getMapOrDefault("providerClassMap", new PropertyMap());
         providerConfigs_ = config_.getMapOrDefault("providerConfigurations", new PropertyMap());
         for(String provider: providers_.keySet())
             log_.debug("Loaded Provider: %s = %s", provider, providers_.getStringOrDefault(provider, null));
@@ -74,7 +75,7 @@ public class NetworkListenerConfig {
 
     public List<String> getProfileSubjects() {
         checkProfile();
-        PropertyMap profile = profiles_.getMapOrDefault(currentProfile_, null);
+        PropertyMap profile = profiles_.getMapOrDefault(currentProfile_, null); // cannot return null.
         PropertyArray subjects = profile.getArrayOrDefault("subjects", null);
         List<String> result = new ArrayList<>();
         for(Object item: subjects) result.add(item.toString());
@@ -89,7 +90,7 @@ public class NetworkListenerConfig {
 
     public Collection<String> getProfileStreams() {
         checkProfile();
-        PropertyMap profile = profiles_.getMapOrDefault(currentProfile_, null);
+        PropertyMap profile = profiles_.getMapOrDefault(currentProfile_, new PropertyMap());
         PropertyArray array = profile.getArrayOrDefault("networkStreamsRef", new PropertyArray());
         List<String> result = new ArrayList<>();
         for (Object item : array)
@@ -99,11 +100,14 @@ public class NetworkListenerConfig {
 
     public String getNetworkName(String networkStreamName) {
         checkProfile();
+        // networkStreamName checked already, its value cannot be null or missing.
         PropertyMap network = networkStreams_.getMapOrDefault(networkStreamName, null);
+        assert network != null: "Network stream arguments were unexpectedly null, check the configuration!";
         return network.getStringOrDefault("name", null);
     }
 
     public PropertyMap getNetworkArguments(String networkStreamName) {
+        // networkStreamName checked already, its value cannot be null or missing.
         PropertyMap network = networkStreams_.getMapOrDefault(networkStreamName, null);
         return new PropertyMap(network.getMapOrDefault("arguments", null));
     }
@@ -140,7 +144,11 @@ public class NetworkListenerConfig {
     private boolean validateProfile(String profileName) {
         log_.debug("Validating profileName: %s", profileName);
         boolean result = profiles_.containsKey(profileName);
-        for (Map.Entry<String, Object> entry : profiles_.getMapOrDefault(profileName, null).entrySet()) {
+        PropertyMap profile = profiles_.getMapOrDefault(profileName, new PropertyMap());
+        result = (result && profile.containsKey("adapterProvider"));
+        result = (result && profile.containsKey("networkStreamsRef"));
+        result = (result && profile.containsKey("subjects"));
+        for (Map.Entry<String, Object> entry : profile.entrySet()) {
             if (!result) break;
             log_.debug("    Validating key: %s", entry.getKey());
             switch (entry.getKey()) {
@@ -148,12 +156,12 @@ public class NetworkListenerConfig {
                     result = providers_.containsKey(entry.getValue().toString());
                     break;
                 case "networkStreamsRef":
-                    result = entry.getValue() instanceof PropertyArray;
+                    result = (entry.getValue() instanceof PropertyArray) && ((PropertyArray)entry.getValue()).size() > 0;
                     if (result)
                         result = validateNetworkStreams((PropertyArray) entry.getValue());
                     break;
                 case "subjects":
-                    result = entry.getValue() instanceof PropertyArray;
+                    result = (entry.getValue() instanceof PropertyArray) && ((PropertyArray)entry.getValue()).size() > 0;
                     if (result)
                         result = validateSubjects((PropertyArray) entry.getValue());
                     break;
@@ -166,7 +174,8 @@ public class NetworkListenerConfig {
     }
 
     private boolean validateNetworkStreams(PropertyArray networkStreams) {
-        boolean result = networkStreams.size() > 0;
+        boolean result = networkStreams != null && networkStreams.size() > 0;
+        if(!result) return false;
         for(Object oSubject: networkStreams) {
             result = oSubject instanceof String && validateNetworkStream(oSubject.toString());
             if(!result) break;
@@ -177,8 +186,11 @@ public class NetworkListenerConfig {
     private boolean validateNetworkStream(String networkStream) {
         log_.debug("Validating networkStream: %s", networkStream);
         boolean result = networkStreams_.containsKey(networkStream);
+        PropertyMap stream = networkStreams_.getMapOrDefault(networkStream, new PropertyMap());
+        result = (result && stream.containsKey("name"));
+        result = (result && stream.containsKey("arguments"));
         if(result) {
-            for (Map.Entry<String, Object> entry : networkStreams_.getMapOrDefault(networkStream, null).entrySet()) {
+            for (Map.Entry<String, Object> entry : stream.entrySet()) {
                 log_.debug("    Validating key: %s", entry.getKey());
                 switch (entry.getKey()) {
                     case "name":
@@ -215,11 +227,12 @@ public class NetworkListenerConfig {
 
     private boolean validateSubjects(PropertyArray subjects) {
         log_.debug("Validating subjects...");
-        boolean result = subjects.size() > 0;
-        for(Object oSubject: subjects) {
-            result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
-            if(!result) break;
-        }
+        boolean result = subjects != null && subjects.size() > 0;
+        if(result)
+            for(Object oSubject: subjects) {
+                result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
+                if(!result) break;
+            }
         return result;
     }
     //////////////////////////////////////////////////////////////////////////

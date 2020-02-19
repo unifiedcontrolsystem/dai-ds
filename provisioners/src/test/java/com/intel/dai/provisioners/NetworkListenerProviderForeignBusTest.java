@@ -120,67 +120,17 @@ public class NetworkListenerProviderForeignBusTest {
     private PropertyMap map_;
     private SystemActions system_;
 
-    private static final String sample1 = "{\"event-type\":\"ec_node_available\",\"location\":\"all\",\"timestamp\":" +
+    private static final String sample1 = "{\"State\":\"Ready\",\"Components\": [\"all\"],\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample2 = "{\"event-type\":\"ec_node_unavailable\",\"location\":\"all\",\"timestamp\":" +
+    private static final String sample2 = "{\"State\":\"Off\",\"Components\":[\"all\"],\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample3 = "{\"event-type\":\"ec_boot\",\"location\":\"all\",\"timestamp\":" +
+    private static final String sample3 = "{\"State\":\"On\",\"Components\":[\"all\"],\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample4 = "{\"event-type\":\"unknown\",\"location\":\"all\",\"timestamp\":" +
+    private static final String sample4 = "{\"State\":\"unknown\",\"Components\":[\"all\"],\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String badSample1 = "\"event-type\":\"unknown\",\"location\":\"all\",\"timestamp\":" +
+    private static final String badSample1 = "\"State\":\"unknown\",\"Components\":[\"all\"],\"timestamp\":" +
             "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String badSample2 = "{\"event-type\":\"ec_node_failed\",\"location\":\"all\"}";
+    private static final String badSample2 = "{\"State\":\"unknown\",\"Components\":[\"all\"]}";
 
-    private static final String imageListStr_ = "[\n" +
-            "                    {\"id\": \"centos7.3-special\",\n" +
-            "                     \"description\": \"Centos 7.3 w/ Special VNFS\",\n" +
-            "                     \"BootImageFile\": \"centos7.3-special\",\n" +
-            "                     \"BootImageChecksum\": \"ecaa78c6c36a3442a45f20852f99a7cf\",\n" +
-            "                     \"BootOptions\": null,\n" +
-            "                     \"KernelArgs\": null,\n" +
-            "                     \"BootStrapImageFile\": \"3.10.0-514.16.1.el7.x86_64\",\n" +
-            "                     \"BootStrapImageChecksum\": \"93a94d8985aa3b10e38122d2bd8bbba1\"\n" +
-            "                    },\n" +
-            "\n" +
-            "                    {\"id\": \"centos7.3-slurm\",\n" +
-            "                     \"description\": \"Centos 7.3 w/ Slurm VNFS\",\n" +
-            "                     \"BootImageFile\": \"centos7.3-1611-slurm\",\n" +
-            "                     \"BootImageChecksum\": \"7427dbf6ec4e028f22d595195fe72563\",\n" +
-            "                     \"BootOptions\": null,\n" +
-            "                     \"KernelArgs\": null,\n" +
-            "                     \"BootStrapImageFile\": \"3.10.0-514.16.1.el7.x86_64\",\n" +
-            "                     \"BootStrapImageChecksum\": \"93a94d8985aa3b10e38122d2bd8bbba1\"\n" +
-            "                    },\n" +
-            "\n" +
-            "                    {\"id\": \"centos7.3-slurm-special\",\n" +
-            "                     \"description\": \"Centos 7.3 w/ Slurm and Special VNFS\",\n" +
-            "                     \"BootImageFile\": \"centos7.3-1611-slurm-special\",\n" +
-            "                     \"BootImageChecksum\": \"d94a4a134d1ea146afc7a82a084ae1a4\",\n" +
-            "                     \"BootOptions\": null,\n" +
-            "                     \"KernelArgs\": null,\n" +
-            "                     \"BootStrapImageFile\": \"3.10.0-514.16.1.el7.x86_64\",\n" +
-            "                     \"BootStrapImageChecksum\": \"93a94d8985aa3b10e38122d2bd8bbba1\"\n" +
-            "                    },\n" +
-            "\n" +
-            "                    {\"id\": \"mOS\",\n" +
-            "                     \"description\": \"mOS\",\n" +
-            "                     \"BootImageFile\": \"mOS\",\n" +
-            "                     \"BootImageChecksum\": \"589a4eedbf582d5e96bd62d6ec0bf1c0\",\n" +
-            "                     \"BootOptions\": null,\n" +
-            "                     \"KernelArgs\": \"console=tty0 console=ttyS0,115200 selinux=0 intel_idle.max_cstate=1 intel_pstate=disable nmi_watchdog=0 tsc=reliable lwkcpus=40.1-19,41-59:60.21-39,61-79 lwkmem=108G kernelcore=16G\",\n" +
-            "                     \"BootStrapImageFile\": \"4.9.61-attaufer-mos-8139\",\n" +
-            "                     \"BootStrapImageChecksum\": \"4c09b8f5908802ce64fb898eda8964d6\"\n" +
-            "                    },\n" +
-            "\n" +
-            "                    {\"id\": \"diagImage\",\n" +
-            "                     \"description\": \"HPC Offline Diagnostics Image\",\n" +
-            "                     \"BootImageFile\": \"centos7.3-1611-slurm-special\",\n" +
-            "                     \"BootImageChecksum\": \"d94a4a134d1ea146afc7a82a084ae1a4\",\n" +
-            "                     \"BootOptions\": null,\n" +
-            "                     \"KernelArgs\": null,\n" +
-            "                     \"BootStrapImageFile\": \"sklDiagImage\",\n" +
-            "                     \"BootStrapImageChecksum\": \"addc1dce586cf6b96d28bc5eb099773f\"\n" +
-            "                    }\n" +
-            "                ]";
+    private static final String imageListStr_ = "[{\"hosts\":[\"Default\"],\"kernel\":\"http:\\/\\/api-gw-service-nmn.local\\/apis\\/ars\\/assets\\/artifacts\\/generic\\/vmlinuz-4.12.14-15.5_8.1.96-cray_shasta_c\",\"BootImageFile\":\"centos7.3-vtune\",\"BootStrapImageFile\":\"3.10.0-514.16.1.el7.x86_64\",\"KernelArgs\":null,\"description\":\"Centos 7.3 w\\/ Vtune VNFS\",\"BootImageChecksum\":\"ecaa78c6c36a3442a45f20852f99a7cf\",\"id\":\"boot-image\",\"params\":\"console=tty0 console=ttyS0,115200n8 initrd=initrd-4.12.14-15.5_8.1.96-cray_shasta_c root=crayfs nfsserver=10.2.0.1 nfspath=\\/var\\/opt\\/cray\\/boot_images imagename=\\/SLES15 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https:\\/\\/api-gw-service-nmn.local\\/a                            pis\\/hbtd\\/hmi\\/v1\\/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_                            order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999\",\"BootStrapImageChecksum\":\"93a94d8985aa3b10e38122d2bd8bbba1\",\"BootOptions\":null,\"initrd\":\"http:\\/\\/api-gw-service-nmn.local\\/apis\\/ars\\/assets\\/artifacts\\/generic\\/initrd-4.12.14-15.5_8.1.96-cray_shasta_c\"}]";
 }

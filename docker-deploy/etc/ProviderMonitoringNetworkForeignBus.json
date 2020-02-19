@@ -1,104 +1,36 @@
 {
   "providerClassMap": {
-    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
-    "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
+    "environmentalData": "com.intel.dai.monitoring.DemoEnvironmentalProviderForeignBus",
+    "rasData": "com.intel.dai.monitoring.DemoEventProviderForeignBus"
   },
 
   "networkStreams": {
-    "fanTelemetry": {
+    "demoTelemetry": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-fan",
+        "connectPort": 8080,
+        "connectAddress": "10.25.24.156",
+        "urlPath": "/v1/stream/cray-node",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
+        "use-ssl": true,
         "requestBuilderSelectors": {
-          "stream_id": "fanMetrics"
+          "stream_id": "demoTelemetry"
         }
       },
       "name": "sse"
     },
-    "voltageTelemetry": {
+    "demoEvents": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-voltage",
+        "connectPort": 8080,
+        "connectAddress": "10.25.24.156",
+        "urlPath": "/v1/stream/cray-logs-containers",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
+        "use-ssl": true,
         "requestBuilderSelectors": {
-          "stream_id": "voltageMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "pressureTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-pressure",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "pressureMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "powerTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-power",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "powerMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "energyTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-energy",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "energyMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "temperatureTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-temperature",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "temperatureMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "dtmfResourceEvents": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-dmtf-resource-event",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "dmtfEvents"
+          "stream_id": "demoEvents"
         }
       },
       "name": "sse"
@@ -108,12 +40,7 @@
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
-        "temperatureTelemetry",
-        "energyTelemetry",
-        "powerTelemetry",
-        "pressureTelemetry",
-        "voltageTelemetry",
-        "fanTelemetry"
+        "demoTelemetry"
       ],
       "subjects": [
         "telemetry"
@@ -122,7 +49,7 @@
     },
     "ras_events": {
       "networkStreamsRef": [
-        "dtmfResourceEvents"
+        "demoEvents"
       ],
       "subjects": [
         "events"
@@ -137,12 +64,12 @@
       "exchangeName": "ucs",
       "uri": "amqp://127.0.0.1"
     },
-    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+    "com.intel.dai.monitoring.DemoEnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
       "publish": true
     },
-    "com.intel.dai.monitoring.RasEventProviderForeignBus": {
+    "com.intel.dai.monitoring.DemoEventProviderForeignBus": {
       "publishTopic": "ucs_ras_event",
       "publish": true
     }

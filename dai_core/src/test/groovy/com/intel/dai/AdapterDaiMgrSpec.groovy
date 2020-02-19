@@ -7,6 +7,7 @@ import com.intel.dai.dsapi.Location
 import com.intel.dai.dsapi.WorkQueue
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
+import org.junit.Ignore
 import org.voltdb.VoltTable
 import org.voltdb.VoltType
 import org.voltdb.client.Client
@@ -130,7 +131,7 @@ class AdapterDaiMgrSpec extends Specification {
 
     def "Test for keywordSubstitutions"() {
         def str = "\$HOSTNAME \$LCTN \$INSTANCE"
-        def replaced = AdapterDaiMgr.keywordSubstitutions(str, "hostname", "location", 42L)
+        def replaced = underTest_.keywordSubstitutions(str, "hostname", "location", 42L)
 
         expect: replaced == "hostname location 42"
     }

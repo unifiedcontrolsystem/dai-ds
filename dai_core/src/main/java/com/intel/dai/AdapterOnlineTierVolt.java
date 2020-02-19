@@ -9,6 +9,7 @@ import com.intel.logging.LoggerFactory;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
 import java.lang.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -146,7 +147,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         jsonAmqpObj.put("EOM", true);
         jsonAmqpObj.put("IntervalId", -1);
         jsonAmqpObj.put("AmqpMessageId", -1);
-        oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes());
+        oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes(StandardCharsets.UTF_8));
         log_.info("DataMover sent final message");
     }
 
@@ -160,7 +161,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
     //      long lTimeOfLastMovedTier1DataInMillis          - the timestamp (in number of millisecs) of the last historical data that has been moved to Tier2.
     //      long lTimeToKeepMovedDataBeforePurgingInMillis  - the number of millisecs that we want to also retain the data in Tier1 even AFTER it has been moved to Tier2.
     //---------------------------------------------------------
-    static long lSavePreviousPurgeTimeInMillis = -1L;
+    long lSavePreviousPurgeTimeInMillis = -1L;
     final public long handlePurgingData(long lTimeOfLastMovedTier1DataInMillis, long lTimeToKeepMovedDataBeforePurgingInMillis) throws InterruptedException, IOException, ProcCallException {
         // Calculate the timestamp of data that we want to purge (any record with a DbUpdatedTimestamp earlier than this value will be deleted)
         // Note: take the earlier of these 2 values:
@@ -394,7 +395,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
                 }
                 jsonAmqpObj.put("data", jaDataRows);
                 // Put this message onto the DataMover queue (MessageProperties.PERSISTENT_BASIC says to mark this message as persistent, i.e. save the message to disk).
-                oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes());
+                oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes(StandardCharsets.UTF_8));
                 log_.info("DataMover sent AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, AmqpQueue=%s, TableName=%s, Part %d Of %d, NumDataRows=%s",
                           mDataMoverAmqpMessageId, mDataMoverIntervalId, sEndIntvlTimestamp, sStartIntvlTimestamp, Adapter.DataMoverQueueName,
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable, decimalFormatter.format(iNumRowsAddedToAmqpMsg));

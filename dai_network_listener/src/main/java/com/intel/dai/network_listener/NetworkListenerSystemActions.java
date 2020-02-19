@@ -44,7 +44,9 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     }
 
     @Override
-    public void initialize() { /* Not used but is required. */ }
+    public void initialize() {
+        log_.debug("Initialized NetworkListenerSystemActions");
+    }
 
     @Override
     public void storeNormalizedData(String dataType, String location, long nanoSecondsTimeStamp, double value) {
@@ -72,16 +74,19 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.exception(e);
             return;
         }
-        eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
-                adapter_.getType(), adapter_.getBaseWorkItemId());
+        if(location == null || location.isBlank())
+            eventActions_.logRasEventNoEffectedJob(type, instanceData, location, nsTimestamp,
+                    adapter_.getType(), adapter_.getBaseWorkItemId());
+        else
+            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
+                    adapter_.getType(), adapter_.getBaseWorkItemId());
     }
 
     @Override
     public void publishNormalizedData(String topic, String dataType, String location, long nanoSecondsTimeStamp,
                                       double value) {
         try {
-            if (!publisherConfigured_)
-                setUpPublisher();
+            setUpPublisher();
             if(publisher_ != null) {
                 String message = formatRawMessage(dataType, location, nanoSecondsTimeStamp, value);
                 publisher_.sendMessage(topic, message);
@@ -96,8 +101,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     public void publishAggregatedData(String topic, String dataType, String location, long nanoSecondsTimeStamp,
                                       double min, double max, double average) {
         try {
-            if (!publisherConfigured_)
-                setUpPublisher();
+            setUpPublisher();
             if(publisher_ != null) {
                 String message = formatAggregateMessage(dataType, location, nanoSecondsTimeStamp, min, max, average);
                 publisher_.sendMessage(topic, message);
@@ -112,8 +116,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     public void publishRasEvent(String topic, String eventName, String instanceData, String location,
                                 long nsTimestamp) {
         try {
-            if (!publisherConfigured_)
-                setUpPublisher();
+            setUpPublisher();
             if(publisher_ != null) {
                 String message = formatEventMessage(eventName, location, nsTimestamp, instanceData);
                 publisher_.sendMessage(topic, message);
@@ -127,8 +130,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     @Override
     public void publishBootEvent(String topic, BootState event, String location, long nsTimestamp) {
         try {
-            if (!publisherConfigured_)
-                setUpPublisher();
+            setUpPublisher();
             if(publisher_ != null) {
                 String message = formatBootMessage(event, location, nsTimestamp);
                 publisher_.sendMessage(topic, message);
@@ -313,18 +315,23 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     }
 
     private void setUpPublisher() throws NetworkDataSourceFactory.FactoryException {
-        publisherConfigured_ = true;
-        Map<String,String> args = new HashMap<>();
-        String publisherName = config_.getStringOrDefault("sourceType", null);
-        if(publisherName == null || publisherName.isBlank())
-            return;
-        for(String key: config_.keySet()) {
-            Object value = config_.getOrDefault(key, null);
-            if (!key.equals("sourceType") && value != null)
-                args.put(key, value.toString());
+        if(!publisherConfigured_) {
+            publisherConfigured_ = true;
+            Map<String, String> args = new HashMap<>();
+            String publisherName = config_.getStringOrDefault("sourceType", null);
+            if (publisherName == null || publisherName.isBlank())
+                return;
+            for (Map.Entry<String,Object> entry : config_.entrySet()) {
+                Object value = config_.getOrDefault(entry, null);
+                if (entry.getValue() != null)
+                    args.put(entry.getKey(), entry.getValue().toString());
+                else
+                    args.put(entry.getKey(), null);
+            }
+            publisher_ = NetworkDataSourceFactory.createInstance(log_, publisherName, args);
+            assert publisher_ != null : "Failed to create a NetworkDataSource object of type '" + publisherName + "'";
+            publisher_.connect(null);
         }
-        publisher_ = NetworkDataSourceFactory.createInstance(log_, publisherName, args);
-        publisher_.connect(null);
     }
 
     private Logger log_;

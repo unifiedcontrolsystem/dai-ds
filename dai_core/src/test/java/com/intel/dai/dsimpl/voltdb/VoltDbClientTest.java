@@ -13,11 +13,13 @@ public class VoltDbClientTest {
 
     @Test
     public void initializeVoltDbClient() {
+        VoltDbClient.voltClient = null;
         VoltDbClient.initializeVoltDbClient(new String[] {"localhost"});
     }
 
     @Test
     public void initializeVoltDbClientNoServers() {
+        VoltDbClient.voltClient = null;
         VoltDbClient.initializeVoltDbClient(null);
     }
 

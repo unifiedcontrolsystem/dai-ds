@@ -54,7 +54,7 @@ public class DbConnectionFactory {
         String username = dbParams.get("username");
         String password = dbParams.get("password");
         String dbType = dbParams.get("type");
-        Boolean autoCommit = Boolean.parseBoolean(dbParams.get("auto-commit"));
+        boolean autoCommit = Boolean.parseBoolean(dbParams.get("auto-commit"));
         if (url.contains("postgresql")) {
             autoCommit = Boolean.parseBoolean("false");
         }
@@ -88,8 +88,8 @@ public class DbConnectionFactory {
 //            return null;
 //        }
 
+        Connection connObj = null;
         try {
-            Connection connObj = null;
             if (username != null) {
                 if (password == null) {
                     throw new IllegalArgumentException("Fatal Security Error: null password!");
@@ -108,6 +108,11 @@ public class DbConnectionFactory {
             connObj.setAutoCommit(autoCommit);
             return connObj;
         } catch (SQLException ex) {
+            if(connObj != null) {
+                try {
+                    connObj.close();
+                } catch (Exception e) { /* There is no logging so do nothing here. */ }
+            }
             throw new DataStoreException("An error occurred while establishing a connection to database at: " +
                     url, ex);
         }

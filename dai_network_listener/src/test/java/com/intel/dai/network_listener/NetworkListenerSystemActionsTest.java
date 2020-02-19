@@ -11,6 +11,7 @@ import com.intel.logging.Logger;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 
 public class NetworkListenerSystemActionsTest {
     public static class MockNetworkDataSource implements NetworkDataSource {
-        public MockNetworkDataSource(Map<String, String> args) {}
+        public MockNetworkDataSource(Logger logger, Map<String, String> args) {}
 
         @Override public void initialize() { }
         @Override public void connect(String info) { }
@@ -36,7 +37,7 @@ public class NetworkListenerSystemActionsTest {
         @Override public void close() throws IOException { }
     }
     static class BadMockNetworkDataSource implements NetworkDataSource {
-        BadMockNetworkDataSource(Map<String, String> args) {}
+        BadMockNetworkDataSource(Logger logger, Map<String, String> args) {}
 
         @Override public void initialize() { }
         @Override public void connect(String info) { }
@@ -50,6 +51,12 @@ public class NetworkListenerSystemActionsTest {
     public static void setUpClass() {
         NetworkDataSourceFactory.registerNewImplementation("mock_action_source", MockNetworkDataSource.class);
         NetworkDataSourceFactory.registerNewImplementation("bad_mock_action_source", BadMockNetworkDataSource.class);
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        NetworkDataSourceFactory.unregisterImplementation("bad_mock_action_source");
+        NetworkDataSourceFactory.unregisterImplementation("mock_action_source");
     }
 
     @Before

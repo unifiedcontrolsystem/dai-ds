@@ -39,10 +39,11 @@ public class NearlineTableUpdater {
         mConn = tier2DbConn;
     }
 
-    public void Update(String tableName, VoltTable tableData) throws DataStoreException {
+    public void update(String tableName, VoltTable tableData) throws DataStoreException {
         PreparedStatement stmt = getStmt(tableName);
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
+        log_.info("*** Starting update process...");
         if (stmt == null) {
             throw new DataStoreException("Unsupported table in nearline tier: " + tableName);
         }
@@ -93,7 +94,7 @@ public class NearlineTableUpdater {
                     stmt.setTimestamp(i + 1, (Timestamp) value, cal);
                 }
                 else {
-                    stmt.setObject(i + 1, value, sqlType);
+                    stmt.setObject(i + 1, null, sqlType);
                 }
             } else {
                 value = tableData.get(i, voltType);
