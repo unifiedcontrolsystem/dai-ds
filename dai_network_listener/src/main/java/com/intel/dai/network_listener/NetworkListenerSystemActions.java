@@ -10,8 +10,10 @@ import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.inventory.api.HWInvDiscovery;
 import com.intel.dai.inventory.api.HWInvTranslator;
 import com.intel.logging.Logger;
+import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
@@ -247,6 +249,15 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     private String getForeignHWInvJson(String root) {
         if (root == null) return null;
+
+        try {
+            HWInvDiscovery.initialize(log_);
+            log_.info("rest client created");
+
+        } catch (RESTClientException e) {
+            log_.fatal("Fail to create REST client: %s", e.getMessage());
+            return null;
+        }
 
         ImmutablePair<Integer, String> foreignHwInv;
         if (root.equals("")) {

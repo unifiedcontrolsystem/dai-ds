@@ -44,6 +44,7 @@ public class HWInvDiscovery {
     }
     public static ImmutablePair<Integer, String> queryHWInvTree(String xname) {
         if (requester_ == null) {
+            log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
         }
         return requester_.getHwInventory(xname);
@@ -51,6 +52,7 @@ public class HWInvDiscovery {
 
     public static ImmutablePair<Integer, String> queryHWInvTree() {
         if (requester_ == null) {
+            log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
         }
         return requester_.getHwInventory();
