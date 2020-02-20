@@ -1995,6 +1995,7 @@ CREATE TABLE Tier2_Config (
 --------------------------------------------------------------
 -- Foreign HW Inventory
 --------------------------------------------------------------
+-- Records all FRUs that are and were in the HPC.
 CREATE TABLE HW_Inventory_FRU (
     FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
     FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
@@ -2002,7 +2003,7 @@ CREATE TABLE HW_Inventory_FRU (
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
--- This table encodes an 1-1 onto between populated HW Inventory locations and installed FRU.
+-- Corresponds to the current HPC HW architecture wrt to HW locations.
 -- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
 CREATE TABLE HW_Inventory_Location (
     ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
@@ -2012,6 +2013,8 @@ CREATE TABLE HW_Inventory_Location (
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
+-- History of FRU installation and removal from the HPC.  Note that the timestamp marks
+-- the DB update event.  The foreign data does not have the time of actual HW modification.
 CREATE TABLE HW_Inventory_History (
     Action VARCHAR(16) NOT NULL, -- INSERTED/DELETED
     ID VARCHAR(64) NOT NULL,     -- perhaps xname (path); as is from JSON

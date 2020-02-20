@@ -6,8 +6,6 @@ package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 import com.intel.dai.dsapi.HWInvLoc;
 import com.intel.dai.dsapi.HWInvTree;
 import com.intel.dai.dsapi.HWInvUtil;
@@ -22,26 +20,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Performs translation of foreign json data to canonical representation.
+ */
 public class HWInvTranslator {
     private static Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
 
-    private static final Map<String, String> nodeTypeAbbreviation;
     private static final String emptyPrefix = "empty-";
-
-    static {
-        nodeTypeAbbreviation = new HashMap<>();
-        nodeTypeAbbreviation.put("Cabinet", "x");
-        nodeTypeAbbreviation.put("Chassis", "c");
-        nodeTypeAbbreviation.put("ComputeModule", "s"); // best guess - insufficient information in spec
-        nodeTypeAbbreviation.put("NodeEnclosure", "b"); // best guess - insufficient information in spec
-        nodeTypeAbbreviation.put("Node", "n");
-        nodeTypeAbbreviation.put("Memory", "d");
-        nodeTypeAbbreviation.put("Processor", "p");
-    }
 
     private transient Gson gson;
     private transient HWInvUtil util;
 
+    /**
+     * <p> Constructor for the HW inventory translator. </p>
+     * @param util utility library containing file I/O code and code to manipulate HW inventory in canonical form
+     */
     public HWInvTranslator(HWInvUtil util) {
         this.util = util;
 
@@ -51,18 +44,14 @@ public class HWInvTranslator {
     }
 
     /**
-     * Parses a node JSON format
-     * Implicit Format: FullyFlat or Hierarchical
-     * The hierarchical parser can handle the other format.  So, only one parser is necessary.
-     * Since this format has no defining feature, so this parser should be used only when the other parsers defined
-     * below have failed.
+     * <p> Parses a node JSON format.
+     * The json can be in one of two different formats: FullyFlat or Hierarchical.
+     * This hierarchical parser can handle the other format.  So, only one parser is necessary. </p>
      *
-     * @return
-     * @throws IOException
-     * @throws JsonIOException
-     * @throws JsonSyntaxException
+     * @param foreignJson string containing a node in foreign format
+     * @return POJO containing the parsed json, or null if parsing failed
      */
-    public ForeignHWInvByLocNode toForeignHWInvByLocNode(String foreignJson) {
+    private ForeignHWInvByLocNode toForeignHWInvByLocNode(String foreignJson) {
         try {
             return gson.fromJson(foreignJson, ForeignHWInvByLocNode.class);
         } catch (Exception e) {
@@ -72,15 +61,12 @@ public class HWInvTranslator {
     }
 
     /**
-     * Parses an array of FullyFlat ForeignHWInvByLocNodes.
-     * The defining feature is the json is an array.
+     * <p> Parses an array of FullyFlat ForeignHWInvByLocNodes.
+     * The defining feature is the json is an array. </p>
      *
-     * @return
-     * @throws IOException
-     * @throws JsonIOException
-     * @throws JsonSyntaxException
+     * @return a list of POJOs each encoding a HW inventory location
      */
-    public ForeignHWInvByLoc[] toForeignHWInvByLocList(String foreignJson) {
+    private ForeignHWInvByLoc[] toForeignHWInvByLocList(String foreignJson) {
         try {
             return gson.fromJson(foreignJson, ForeignHWInvByLoc[].class);
         } catch (Exception e) {
@@ -90,16 +76,14 @@ public class HWInvTranslator {
     }
 
     /**
-     * Parses a structure of named lists of ForeignHWInvByLocNodes.
+     * <p> Parses a structure of named lists of ForeignHWInvByLocNodes.
      * Explicit Format: FullyFlat, Hierarchical or NestNodesOnly
-     * The defining attribute is "Format".
+     * The defining attribute is "Format". </p>
      *
-     * @return
-     * @throws IOException
-     * @throws JsonIOException
-     * @throws JsonSyntaxException
+     * @param foreignJson string containing a json containing a node in foreign format
+     * @return POJO containing the parsed foreign inventory
      */
-    public ForeignHWInventory toForeignHWInventory(String foreignJson) {
+    private ForeignHWInventory toForeignHWInventory(String foreignJson) {
         try {
             return gson.fromJson(foreignJson, ForeignHWInventory.class);
         } catch (Exception e) {
@@ -123,88 +107,94 @@ public class HWInvTranslator {
         }
     }
 
+    /**
+     * <p> Convert a json string containing a HW inventory in foreign format to its
+     * canonical representation. Note that if the foreign json is a list, the
+     * HW inventory may not be a tree. </p>
+     *
+     * @param foreignJson json string containing a HW inventory in foreign format
+     * @return a pair of the subject of the HW inventory and the json string
+     * containing the HW inventory in canonical form
+     */
     public ImmutablePair<String, String> foreignToCanonical(String foreignJson) {
-        HWInvTree canonicalTree = null;
-        String subject = null;
-
-        // Make several attempts at translating the location described by the input file.
-        // Exit do break block upon the first success.  Return from function upon obvious failures.
-        do {
-            logger.info("Attempt toForeignHWInvByLocList");
-            ForeignHWInvByLoc[] frus = toForeignHWInvByLocList(foreignJson);
-            if (frus != null) {
-                logger.info("Parsed toForeignHWInvByLocList");
-                canonicalTree = toCanonical(frus);
-                subject = "";   // location list has no explicit subject
-                break;
-            }
-
-            logger.info("Attempt toForeignHWInventory");
-            ForeignHWInventory foreignTree = toForeignHWInventory(foreignJson);
-            if (foreignTree != null) {
-                logger.info("Parsed toForeignHWInventory");
-                if (foreignTree.XName != null) {
-                    if (foreignTree.Format == null) {
-                        logger.error("Missing format field");
-                        return new ImmutablePair<String, String>(null, null);
-                    }
-                    logger.info("Parsed HW Inventory");
-                    canonicalTree = toCanonical(foreignTree);
-                    subject = foreignTree.XName;
-                    if (subject == "") {
-                        logger.error("ForeignHWInventory must have explicit subject");
-                        return new ImmutablePair<String, String>(null, null);
-                    }
-                    break;
-                }
-            }
-
-            logger.info("Attempt toForeignHWInvByLocNode");
-            ForeignHWInvByLocNode node = toForeignHWInvByLocNode(foreignJson);
-            if (node != null) {
-                logger.info("Parsed toForeignHWInvByLocNode");
-                if (!node.Type.equals("Node")) {  // only support node for now
-                    logger.error("Unsupported hw Loc type: %s", node.Type);
-                    return new ImmutablePair<String, String>(null, null);
-                }
-                logger.info("Parsed HW Loc Node");
-                canonicalTree = toCanonical(node);
-                subject = node.ID;
-                if (subject.equals("")) {
-                    logger.error("ForeignHWInvByLocNode must have explicit subject");
-                    return new ImmutablePair<String, String>(null, null);
-                }
-            }
-        } while (false);
-
-        if (canonicalTree == null || subject == null) {
-            logger.error("All attempts at conversion failed");
-            return new ImmutablePair<String, String>(null, null);
-        }
-        if (!isValidLocationName(subject)) {
-            return new ImmutablePair<String, String>(null, null);
-        }
-
+        ImmutablePair<String, HWInvTree> translatedResult = toCanonical(foreignJson);
+        String subject = translatedResult.getKey();
+        HWInvTree canonicalTree = translatedResult.getValue();
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
     /**
-     * I decided not to implement this using reflection for now.  Using reflection may
-     * make the parser too general.  However, it may reduce the number of lines of code.
-     *
-     * @param node
-     * @return
+     * <p> Make several attempts at translating the location described by the input file.  Return upon the first
+     * success.
+     * </p>
+     * @param foreignJson string contain a json of a HW inventory locations in foreign format
+     * @return pair containing subject of the input HW inventory json and its content as a HWInvTree object
      */
-    HWInvTree toCanonical(ForeignHWInvByLocNode node) {
+    private ImmutablePair<String, HWInvTree> toCanonical(String foreignJson) {
+        logger.info("Attempt toForeignHWInvByLocList");
+        ForeignHWInvByLoc[] frus = toForeignHWInvByLocList(foreignJson);
+        if (frus != null) {
+            logger.info("Parsed toForeignHWInvByLocList");
+            return new ImmutablePair<>("", toCanonical(frus));      // location list has no explicit subject
+        }
+
+        logger.info("Attempt toForeignHWInventory");
+        ForeignHWInventory foreignTree = toForeignHWInventory(foreignJson);
+        if (foreignTree != null) {
+            logger.info("Parsed toForeignHWInventory");
+            if (foreignTree.XName != null) {
+                if (foreignTree.Format == null) {
+                    logger.error("Missing format field");
+                    return ImmutablePair.nullPair();
+                }
+                logger.info("Parsed HW Inventory");
+                String root = foreignTree.XName;
+                if (!isValidLocationName(root)) {
+                    logger.error("ForeignHWInventory must have valid subject");
+                    return ImmutablePair.nullPair();
+                }
+                return new ImmutablePair<>(root, toCanonical(foreignTree));
+            }
+            logger.error("XName is null");
+        }
+
+        logger.info("Attempt toForeignHWInvByLocNode");
+        ForeignHWInvByLocNode node = toForeignHWInvByLocNode(foreignJson);
+        if (node != null) {
+            logger.info("Parsed toForeignHWInvByLocNode");
+            if (!node.Type.equals("Node")) {  // only support node for now
+                logger.error("Unsupported hw Loc type: %s", node.Type);
+                return ImmutablePair.nullPair();
+            }
+            logger.info("Parsed HW Loc Node");
+            String root = node.ID;
+            if (!isValidLocationName(root)) {
+                logger.error("ForeignHWInventory must have valid subject");
+                return ImmutablePair.nullPair();
+            }
+            return new ImmutablePair<>(root, toCanonical(node));
+        }
+
+        return ImmutablePair.nullPair();
+    }
+
+    /**
+     * <p> I decided not to implement this using reflection for now.  Using reflection may
+     * make the parser too general.  However, it may reduce the number of lines of code. </p>
+     *
+     * @param node a POJO containing a node location in foreign format
+     * @return a canonical HW inventory tree containing the input node
+     */
+    private HWInvTree toCanonical(ForeignHWInvByLocNode node) {
         HWInvTree canonicalTree = new HWInvTree();
         ArrayList<ForeignHWInvByLocNode> singletonNode = new ArrayList<>();
         singletonNode.add(node);
         addForeignNodesToCanonical(singletonNode, canonicalTree);
         return canonicalTree;
     }
-    HWInvTree toCanonical(ForeignHWInvByLoc[] frus) {
+    private HWInvTree toCanonical(ForeignHWInvByLoc[] frus) {
         HWInvTree canonicalTree = new HWInvTree();
-        addForeignFlatFRUToCanonical(
+        addForeignFlatFRUsToCanonical(
                 Arrays.stream(frus).collect(Collectors.toList()),
                 canonicalTree);
         return canonicalTree;
@@ -217,28 +207,30 @@ public class HWInvTranslator {
      * @return the canonical POJO containing the HW inventory
      * @since 1.0.0
      */
-    HWInvTree toCanonical(ForeignHWInventory foreignTree) {
+    private HWInvTree toCanonical(ForeignHWInventory foreignTree) {
         HWInvTree canonicalTree = new HWInvTree();
+        int numLocAdded = 0;
 
-        addForeignCabinetsCanonical(foreignTree.Cabinets, canonicalTree);
-        addForeignChassisToCanonical(foreignTree.Chassis, canonicalTree);
-        addForeignComputeModulesToCanonical(foreignTree.ComputeModules, canonicalTree);
-        addForeignRouterModulesToCanonical(foreignTree.RouterModules, canonicalTree);
+        numLocAdded += addForeignCabinetsCanonical(foreignTree.Cabinets, canonicalTree);
+        numLocAdded += addForeignChassisToCanonical(foreignTree.Chassis, canonicalTree);
+        numLocAdded += addForeignComputeModulesToCanonical(foreignTree.ComputeModules, canonicalTree);
+        numLocAdded += addForeignRouterModulesToCanonical(foreignTree.RouterModules, canonicalTree);
 
-        addForeignNodeEnclosuresToCanonical(foreignTree.NodeEnclosures, canonicalTree);
-        addForeignHSNBoardsToCanonical(foreignTree.HSNBoards, canonicalTree);
-        addForeignNodesToCanonical(foreignTree.Nodes, canonicalTree);
-        addForeignProcessorsToCanonical(foreignTree.Processors, canonicalTree);
+        numLocAdded += addForeignNodeEnclosuresToCanonical(foreignTree.NodeEnclosures, canonicalTree);
+        numLocAdded += addForeignHSNBoardsToCanonical(foreignTree.HSNBoards, canonicalTree);
+        numLocAdded += addForeignNodesToCanonical(foreignTree.Nodes, canonicalTree);
+        numLocAdded += addForeignProcessorsToCanonical(foreignTree.Processors, canonicalTree);
 
-        addForeignMemoryToCanonical(foreignTree.Memory, canonicalTree);
-        addForeignCabinetPDUToCanonical(foreignTree.CabinetPDU, canonicalTree);
-        addForeignCabinetPDUOutletsToCanonical(foreignTree.CabinetPDUOutlets, canonicalTree);
+        numLocAdded += addForeignMemoryToCanonical(foreignTree.Memory, canonicalTree);
+        numLocAdded += addForeignCabinetPDUToCanonical(foreignTree.CabinetPDU, canonicalTree);
+        numLocAdded += addForeignCabinetPDUOutletsToCanonical(foreignTree.CabinetPDUOutlets, canonicalTree);
 
+        logger.info("num HW locations added = %d", numLocAdded);
         return canonicalTree;
     }
 
     private int addForeignCabinetPDUOutletsToCanonical(List<ForeignHWInvByLocCabinetPDUOutlet> cabinetPDUOutlets,
-                                                        HWInvTree canonicalTree) {
+                                                       HWInvTree canonicalTree) {
         return addForeignFRUsNotChildrenToCanonical(cabinetPDUOutlets, canonicalTree);
     }
 
@@ -260,7 +252,7 @@ public class HWInvTranslator {
     }
 
     private int addForeignCabinetsCanonical(List<ForeignHWInvByLocCabinet> foreignCabinets,
-                                                HWInvTree canonicalTree) {
+                                            HWInvTree canonicalTree) {
         int numAdded = addForeignFRUsNotChildrenToCanonical(foreignCabinets, canonicalTree);
         if (numAdded == 0) {
             return 0;
@@ -273,7 +265,7 @@ public class HWInvTranslator {
     }
 
     private int addForeignChassisToCanonical(List<ForeignHWInvByLocChassis> foreignChassis,
-                                            HWInvTree canonicalTree) {
+                                             HWInvTree canonicalTree) {
         int numAdded = addForeignFRUsNotChildrenToCanonical(foreignChassis, canonicalTree);
         if (numAdded == 0) {
             return 0;
@@ -325,7 +317,7 @@ public class HWInvTranslator {
         return numAdded;
     }
     private int addForeignCabinetPDUToCanonical(List<ForeignHWInvByLocCabinetPDU> foreigncabinetPduList,
-                                              HWInvTree canonicalTree) {
+                                                HWInvTree canonicalTree) {
         int numAdded = addForeignFRUsNotChildrenToCanonical(foreigncabinetPduList, canonicalTree);
         if (numAdded == 0) {
             return 0;
@@ -338,17 +330,16 @@ public class HWInvTranslator {
     }
 
     /**
-     * Add only the FRU denoted by the vertex to the specified canonical tree.  Their children will be added by other
-     * code.
+     * <p> Add only the FRU denoted by the vertex of the specified canonical tree. </p>
      *
-     * @param foreignFRUList
-     * @param canonicalTree
+     * @param foreignFRUList list of FRUs to be added to the canonical tree
+     * @param canonicalTree POJO representing the HW inventory in canonical form
      * @return number of entries added to the DB.
      */
     private <T> int addForeignFRUsNotChildrenToCanonical(List<T> foreignFRUList,
                                                          HWInvTree canonicalTree) {
         List<ForeignHWInvByLoc> flatFrus = downcastToForeignHWInvByLocList(foreignFRUList);
-        return addForeignFlatFRUToCanonical(flatFrus, canonicalTree);
+        return addForeignFlatFRUsToCanonical(flatFrus, canonicalTree);
     }
 
     private <T> List<ForeignHWInvByLoc> downcastToForeignHWInvByLocList(List<T> foreignFRUList) {
@@ -363,8 +354,8 @@ public class HWInvTranslator {
         return flatFrus;
     }
 
-    private int addForeignFlatFRUToCanonical(List<ForeignHWInvByLoc> foreignLocList,
-                                             HWInvTree canonicalTree) {
+    private int addForeignFlatFRUsToCanonical(List<ForeignHWInvByLoc> foreignLocList,
+                                              HWInvTree canonicalTree) {
         if (foreignLocList == null) {
             return 0;
         }
@@ -435,13 +426,20 @@ public class HWInvTranslator {
             return null;
         }
     }
+
+    /**
+     * Detemine if this is a valid location name.  An example of a valid
+     * location name looks like a0b34c89.  Specially, null and "" are not
+     * valid location names.
+     * @param location HW inventory location
+     * @return true iff the given location is valid
+     */
     boolean isValidLocationName(String location) {
-        try {
-            Pattern pattern = Pattern.compile("^([a-z]\\d+)*$");
-            Matcher matcher = pattern.matcher(location);
-            return matcher.find();
-        } catch (NullPointerException e) {
+        if (location == null) {
             return false;
         }
+        Pattern pattern = Pattern.compile("^([a-z]\\d+)+$");
+        Matcher matcher = pattern.matcher(location);
+        return matcher.find();
     }
 }
