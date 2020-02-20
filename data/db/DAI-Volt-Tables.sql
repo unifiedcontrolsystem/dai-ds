@@ -1998,7 +1998,8 @@ CREATE TABLE Tier2_Config (
 CREATE TABLE HW_Inventory_FRU (
     FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
     FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
-    FRUSubType VARCHAR(32)                      -- perhaps specific model; NULL:unspecifed
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
 -- This table encodes an 1-1 onto between populated HW Inventory locations and installed FRU.
@@ -2007,14 +2008,15 @@ CREATE TABLE HW_Inventory_Location (
     ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
     Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
     Ordinal INTEGER NOT NULL,            -- singleton:0
-    FRUID VARCHAR(80) NOT NULL           -- perhaps <manufacturer>-<serial#>
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
 CREATE TABLE HW_Inventory_History (
-	TimeStamp TIMESTAMP NOT NULL PRIMARY KEY,
-	Action VARCHAR(16) NOT NULL, -- INSERT/DELETE
+    Action VARCHAR(16) NOT NULL, -- INSERTED/DELETED
     ID VARCHAR(64) NOT NULL,     -- perhaps xname (path); as is from JSON
-	FRUID VARCHAR(80) NOT NULL   -- perhaps <manufacturer>-<serial#>
+    FRUID VARCHAR(80) NOT NULL,  -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL PRIMARY KEY
 );
 
 END_OF_BATCH
