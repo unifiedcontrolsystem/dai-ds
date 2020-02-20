@@ -107,6 +107,9 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 def enforceStaticAnalysis = includeDbgSymbols
 def pmdScanLevel = 2
 def enforceCodeCoverage = includeDbgSymbols
+
+import com.github.spotbugs.SpotBugsTask
+
 import java.time.Instant
 def thisYear = Instant.now().toDate().toYear().toString()
 
@@ -139,7 +142,8 @@ clean.finalizedBy(rootClean)
 // Root project and all project definitions                                            //
 /////////////////////////////////////////////////////////////////////////////////////////
 allprojects {
-    version = "${packageVersion}"
+//    version = "${packageVersion}"
+    version = ""
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -252,7 +256,7 @@ subprojects {
         finalizedBy "jacocoTestReport"
     }
 
-    tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    tasks.withType(SpotBugsTask) {
         reports {
             xml.enabled = false
             html.enabled = true
@@ -1617,18 +1621,6 @@ exit \$?
     link("/usr/bin/eventsim-server", bin_dir + '/eventsim-server')
 }
 
-task makeStaticAnalysisZip(type: Zip) {
-    archiveFileName = "${project.name}-static-analysis-src-${project.version}.zip"
-    destinationDirectory = file("${buildDir}/distributions")
-    from("${projectDir}/") {
-        exclude("**/test/", "**/tests/", "**/build/", "build-scripts/", "data/", ".idea", ".gradle", "**/gradle/",
-                "docker*/", "config-files", "*.log", "**/out/", "**/LICENSES/**", "build.gradle", "**/*.json",
-                "**/resources/", "offline-configs", "docs", ".gitreview", ".travis.yml", "*.txt", "pmd.xml",
-                "settings.gradle", "COPYRIGHT")
-    }
-    into(project.name)
-}
-
 task makeDeveloperDockerTarball(type: Tar) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
@@ -1729,8 +1721,8 @@ exit \$?
         into("opt/dai-docker")
     }
     from("${buildDir}/jars") {
-        exclude("**/procedures-${packageVersion}.jar")
-        exclude("**/populate_schema-${packageVersion}.jar")
+        exclude("**/procedures.jar")
+        exclude("**/populate_schema.jar")
         into("opt/dai-docker/lib")
     }
     from("${projectDir}/docker-deploy/etc") {
@@ -1858,7 +1850,7 @@ WantedBy=multi-user.target
 
 LOG="/opt/ucs/log/populate_schema.log"
 ARGS="\${VOLTDB_SERVER} /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
-JAR="/opt/ucs/lib/populate_schema-${packageVersion}.jar"
+JAR="/opt/ucs/lib/populate_schema.jar"
 
 java -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
@@ -1895,17 +1887,17 @@ exit \$?
         into("opt/dai-docker/tier1/init.d")
         rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
     }
-    from("${buildDir}/libs/properties-${packageVersion}.jar") {
+    from("${buildDir}/libs/properties.jar") {
         into("opt/dai-docker/tier1/init.d")
-        rename("properties-${packageVersion}.jar", "20-properties-${packageVersion}.jar")
+        rename("properties.jar", "20-properties.jar")
     }
-    from("${buildDir}/libs/config_io-${packageVersion}.jar") {
+    from("${buildDir}/libs/config_io.jar") {
         into("opt/dai-docker/tier1/init.d")
-        rename("config_io-${packageVersion}.jar", "50-config_io-${packageVersion}.jar")
+        rename("config_io.jar", "50-config_io.jar")
     }
-    from("${buildDir}/libs/procedures-${packageVersion}.jar") {
+    from("${buildDir}/libs/procedures.jar") {
         into("opt/dai-docker/tier1/init.d")
-        rename("procedures-${packageVersion}.jar", "99-procedures-${packageVersion}.jar")
+        rename("procedures.jar", "99-procedures.jar")
     }
     from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
         into("opt/dai-docker/tier1/init.d")
@@ -1921,7 +1913,7 @@ exit \$?
         fileMode(0700)
     }
     from("${buildDir}/jars") {
-        exclude("**/procedures-${packageVersion}.jar")
+        exclude("**/procedures.jar")
         into("opt/dai-docker/lib")
     }
     from("${projectDir}/docker-deploy/etc/MachineConfig.json") {
@@ -1965,7 +1957,7 @@ tarball: ${buildDir}/tmp/eventsim.tar.gz
 destination_folder: ${buildDir}/distributions
 
 python_installers:
-  - '${install_dir}/python/eventsim_cli-${pythonVersion}-py3-none-any.whl'
+  - '${install_dir}/python/eventsim_cli-install-py3-none-any.whl'
 
 soft_links:
   - from: '${bin_dir}/eventsim'
@@ -1975,10 +1967,10 @@ soft_links:
             workingDir = "${projectDir}/cli_eventsim"
             errorOutput = standardOutput
             environment("DAIVER", "${pythonVersion}")
-            commandLine "python3", "${projectDir}/cli_eventsim/setup-eventsim.py", "bdist_wheel"
+            commandLine "python3", "setup-eventsim.py", "bdist_wheel"
         }
         copy {
-            from("${projectDir}/cli_eventsim/dist/eventsim_cli-${pythonVersion}-py3-none-any.whl")
+            from("${projectDir}/cli_eventsim/dist/")
             into("${buildDir}/tmp")
         }
         delete("${projectDir}/cli_eventsim/dist", "${projectDir}/cli_eventsim/eventsim_cli.egg-info",
@@ -1998,6 +1990,7 @@ soft_links:
         into("etc")
     }
     from("${buildDir}/tmp/eventsim_cli-${pythonVersion}-py3-none-any.whl") {
+        rename("eventsim_cli-${pythonVersion}-py3-none-any.whl", "eventsim_cli-install-py3-none-any.whl")
         into("python")
     }
     into("/opt/ucs")
@@ -2019,7 +2012,7 @@ tarball: ${buildDir}/tmp/ucs_cli.tar.gz
 destination_folder: ${buildDir}/distributions
 
 python_installers:
-  - '${install_dir}/python/ucs_cli-${pythonVersion}-py3-none-any.whl'
+  - '${install_dir}/python/ucs_cli-install-py3-none-any.whl'
 
 soft_links:
   - from: '${bin_dir}/ucs'
@@ -2029,7 +2022,7 @@ soft_links:
             workingDir = "${projectDir}/cli"
             errorOutput = standardOutput
             environment("DAIVER", "${pythonVersion}")
-            commandLine "python3", "${projectDir}/cli/setup.py", "bdist_wheel"
+            commandLine "python3", "setup.py", "bdist_wheel"
         }
         copy {
             from("${projectDir}/cli/dist/ucs_cli-${pythonVersion}-py3-none-any.whl")
@@ -2052,6 +2045,7 @@ soft_links:
     }
     from("${buildDir}/tmp/ucs_cli-${pythonVersion}-py3-none-any.whl") {
         into("opt/ucs/python")
+        rename("ucs_cli-${pythonVersion}-py3-none-any.whl", "ucs_cli-install-py3-none-any.whl")
     }
     from("${projectDir}/cli/ucs_completion.sh") {
         into("etc/bash_completion.d")
@@ -2070,8 +2064,7 @@ soft_links:
 task makeAllArtifacts {
     dependsOn subprojects.jar
     finalizedBy "makeDaiRpm", "makeDaiVoltRpm", "makeEventSimCliInstaller", "makeUcsCliInstaller",
-            "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai", "makeDeveloperDockerTarball",
-            "makeStaticAnalysisZip"
+            "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai", "makeDeveloperDockerTarball"
 }
 rootProject.build.finalizedBy(makeAllArtifacts)
 
