@@ -284,7 +284,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     private ConfigIO parser_;
     private Logger log_;
     private URI uri_;
-    private int connectionTimeoutSeconds_ = 300;
+    private int connectionTimeoutSeconds_ = 30;
     private NetworkDataSinkDelegate callback_;
     private RESTClient client_ = null;
     private String implementation_;
