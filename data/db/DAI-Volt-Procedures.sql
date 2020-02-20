@@ -681,6 +681,12 @@ CREATE PROCEDURE FROM
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.NumberOfLocationsInHWInv;
 
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.HwInventoryHistoryInsert;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.HwInventoryHistoryDump;
+
 END_OF_BATCH
 
 UPDATE DbStatus SET Status='schema-loaded', Description='', SchemeCompletedStamp=CURRENT_TIMESTAMP WHERE Id=0;

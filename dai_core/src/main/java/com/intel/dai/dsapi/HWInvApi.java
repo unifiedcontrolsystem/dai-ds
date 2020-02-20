@@ -8,6 +8,7 @@ import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Interface that allows HW inventory to be stored in an underlying DB.  The HW
@@ -41,4 +42,9 @@ public interface HWInvApi {
     void delete(String locationName) throws IOException, DataStoreException;
     HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws IOException, DataStoreException;
     long numberOfLocationsInHWInv() throws IOException, DataStoreException;
+
+    void insertHistoricalRecord(String action, String id, String fru) throws
+            InterruptedException, IOException, DataStoreException;
+
+    List<String> dumpHistoricalRecords() throws IOException, DataStoreException;
 }

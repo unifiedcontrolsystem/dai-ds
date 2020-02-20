@@ -9,14 +9,22 @@ pipeline {
                 description: 'Functional Test Pipeline to extract the script to clean the machine.')
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Speeds up build by only performing a partial gradle clean')
-    }    
+        choice(name: 'AGENT', choices: [
+                'NRE-TEST',
+                'cmcheung-centos-7-test',
+                'css-centos-8-00-test',
+                'css-centos-8-01-test'
+        ], description: 'Agent label')
+    }
     stages {
         stage('Component Tests') {
-            agent { label 'NRE-TEST' }
+            agent { label "${AGENT}" }
             environment {
                 PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
             }
             steps {
+                echo "Building on ${AGENT}"
+                sh 'hostname'
                 lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
                         matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                         specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
@@ -29,15 +37,11 @@ pipeline {
                     script { utilities.CleanUpMachine() }
                 }
 
-                copyArtifacts filter: '**', fingerprintArtifacts: true,
-                        projectName: "external-components",
-                        selector: lastWithArtifacts()
-
                 script {
-                    utilities.FixFilesPermission()
+                    def scriptDir = 'inventory_api/src/integration/resources/scripts/'
 
+                    utilities.FixFilesPermission()
                     StopHWInvDb()
-                    StartHWInvDb()
 
                     if ( "${params.QUICK_BUILD}" == 'true' ) {
                         utilities.InvokeGradle(":inventory_api:clean")
@@ -45,8 +49,13 @@ pipeline {
                         utilities.InvokeGradle("clean")
                     }
 
+                    utilities.InvokeGradle(":procedures:jar")
+                    StartHWInvDb(scriptDir)
+
+                    TestStoredProcedures(scriptDir, 'tests.sql', 'testOutput.txt')
                     utilities.InvokeGradle("compilejava compiletestjava compileIntegrationGroovy")
                     utilities.InvokeGradle("integrationTest || true")
+
                     StopHWInvDb()
                 }
 
@@ -61,11 +70,18 @@ pipeline {
     }
 }
 
-def StartHWInvDb() {
-    sh './init-voltdb.sh'
-    sh './start-voltdb.sh'
-    sh './wait-for-voltdb.sh 21211'
-    sh 'sqlcmd < hw-inv.sql'
+def TestStoredProcedures(def scriptDir, def tests, def testOutput) {
+    sh "rm -f ${testOutput}"
+    sh "sqlcmd < ${scriptDir}${tests} > ${testOutput}"
+//            "| sed '/Returned/ d' > ${testOutput}"
+//    sh "diff ${testOutput} ${scriptDir}${testOutput}"
+}
+
+def StartHWInvDb(def scriptDir) {
+    sh "${scriptDir}init-voltdb.sh"
+    sh "${scriptDir}start-voltdb.sh"
+    sh "${scriptDir}wait-for-voltdb.sh 21211"
+    sh "sqlcmd < ${scriptDir}hw-inv.sql"
 }
 def StopHWInvDb() {
     StopHWInvDocker()

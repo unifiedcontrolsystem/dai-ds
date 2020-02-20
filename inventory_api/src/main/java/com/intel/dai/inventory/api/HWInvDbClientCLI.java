@@ -64,6 +64,7 @@ public class HWInvDbClientCLI {
         return 1;
     }
     private int run(HWInvApi client) throws InterruptedException, IOException, DataStoreException {
+        // TODO: Add modes for number of items in DB and dumping history
         switch (mode) {
             case "v2d":
                 logger.info("v2d: vendorInputFileName: %s", vendorInputFileName);
@@ -90,7 +91,6 @@ public class HWInvDbClientCLI {
 
     private int ingest(HWInvApi client, String inputFile, boolean update) throws
             InterruptedException, IOException, DataStoreException {
-//        final String canonicalTreeFileName = inputFile + ".tr";
         HWInvUtilImpl util = new HWInvUtilImpl();
         HWInvTranslator tr = new HWInvTranslator(util);
         ImmutablePair<String, String> res = tr.foreignToCanonical(Paths.get(inputFile));
@@ -107,11 +107,13 @@ public class HWInvDbClientCLI {
             HWInvTree after = client.allLocationsAt(locationName, null);
             List<HWInvLoc> delList = util.subtract(before.locs, after.locs);
             for (HWInvLoc s : delList) {
-                logger.info("Deleted: %s", s.ID);
+                logger.info("Deleted: %s from %s", s.FRUID, s.ID);
+                client.insertHistoricalRecord("DELETED", s.ID, s.FRUID);
             }
             List<HWInvLoc> addList = util.subtract(after.locs, before.locs);
             for (HWInvLoc s : addList) {
-                logger.info("Added: %s", s.ID);
+                logger.info("INSERTED: %s into %s", s.FRUID, s.ID);
+                client.insertHistoricalRecord("INSERTED", s.ID, s.FRUID);
             }
             logger.info("ingest %s: %d", inputFile, status);
             return status;

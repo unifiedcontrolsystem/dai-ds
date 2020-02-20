@@ -9,9 +9,9 @@ import org.voltdb.VoltProcedure;
 
 public class UpsertLocationIntoHWInv extends VoltProcedure {
     private static final String upsertFruSqlCmd =
-            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType) VALUES (?, ?, ?);";
+            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType, DbUpdatedTimestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
     private static final String upsertLocSqlCmd =
-            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID) VALUES (?, ?, ?, ?);";
+            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID, DbUpdatedTimestamp) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);";
 
     public static final long SUCCESSFUL = 0;
     public static final long FAILED = 1;

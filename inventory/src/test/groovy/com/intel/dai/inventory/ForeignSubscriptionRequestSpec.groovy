@@ -14,8 +14,8 @@ class ForeignSubscriptionRequestSpec extends Specification {
         PropertyMap map = parser.fromString(post).getAsMap()
         expect: map.getString("Url") == "http://127.0.0.1:54321/callback"
         and:    map.getString("Subscriber") == "test_id"
-        and:    map.getArray("Roles").size() == 5
+        and:    map.getArray("Roles").size() == 2
         and:    map.getArray("SoftwareStatus").size() == 3
-        and:    map.getArray("States").size() == 10
+        and:    map.getArray("States").size() == 2
     }
 }

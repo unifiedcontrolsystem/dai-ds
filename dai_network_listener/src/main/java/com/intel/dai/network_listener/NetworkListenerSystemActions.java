@@ -200,10 +200,56 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     @Override
     public void upsertHWInventory(String root) {
+        HWInvTree before = getHWInvSnapshot(root);
+
         ingestCanonicalHWInvJson(
                 toCanonicalHWInvJson(
                         getForeignHWInvJson(
                                 root)));
+
+        HWInvTree after = getHWInvSnapshot(root);
+
+        if (before == null || after == null) {
+            log_.error("before or after is null");
+            return;
+        }
+        HWInvUtilImpl util = new HWInvUtilImpl();
+        List<HWInvLoc> delList = util.subtract(before.locs, after.locs);
+        for (HWInvLoc s : delList) {
+            log_.info("deleted: %s from %s", s.FRUID, s.ID);
+            insertHistoricalRecord("DELETED", s);
+        }
+        List<HWInvLoc> addList = util.subtract(after.locs, before.locs);
+        for (HWInvLoc s : addList) {
+            log_.info("inserted: %s into %s", s.FRUID, s.ID);
+            insertHistoricalRecord("INSERTED", s);
+        }
+    }
+
+    private void insertHistoricalRecord(String action, HWInvLoc s) {
+        try {
+            hwInvApi_.insertHistoricalRecord(action, s.ID, s.FRUID);
+        } catch (InterruptedException e) {
+            log_.error("InterruptedException: %s", e.getMessage());
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+    }
+
+    private HWInvTree getHWInvSnapshot(String root) {
+        if (root == null) {
+            return null;
+        }
+        try {
+            return hwInvApi_.allLocationsAt(root, null);
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+        return null;
     }
 
     /**

@@ -69,4 +69,33 @@ class HWInvStoredProceduresSpec extends spock.lang.Specification {
 
         expect: testSubject.run() == -1
     }
+
+    def "HwInventoryHistoryInsert"() {
+        given:
+        def testSubject = Spy(HwInventoryHistoryInsert)
+        testSubject.voltQueueSQL(*_) >> {}
+        testSubject.voltExecuteSQL(*_) >> {}
+
+        expect: testSubject.run(Action, ID, FRUID) == Res
+
+        where:
+        Action      | ID    | FRUID     || Res
+        'INSERTED'  | 'x0'  | 'model-T' || HwInventoryHistoryInsert.SUCCESSFUL
+        'DELETED'   | 'x0'  | 'model-T' || HwInventoryHistoryInsert.SUCCESSFUL
+        'INSErTED'  | 'x0'  | 'model-T' || HwInventoryHistoryInsert.SUCCESSFUL
+        'INVALIDED' | 'x0'  | 'model-T' || HwInventoryHistoryInsert.FAILED
+        null        | 'x0'  | 'model-T' || HwInventoryHistoryInsert.FAILED
+        'INSERTED'  | null  | 'model-T' || HwInventoryHistoryInsert.FAILED
+        'INSERTED'  | 'x0'  | null      || HwInventoryHistoryInsert.FAILED
+    }
+
+    def "HwInventoryHistoryDump"() {
+        given:
+        def testSubject = Spy(HwInventoryHistoryDump)
+        testSubject.voltQueueSQL(*_) >> {}
+        testSubject.voltExecuteSQL(*_) >> new VoltTable[1]
+
+        when: testSubject.run('x0')
+        then: notThrown Exception
+    }
 }

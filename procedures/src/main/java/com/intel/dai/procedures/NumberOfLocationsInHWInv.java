@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.procedures;
 
 import org.voltdb.SQLStmt;
@@ -13,7 +17,7 @@ public class NumberOfLocationsInHWInv extends VoltProcedure {
     public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
 
     public long run()
-            throws VoltProcedure.VoltAbortException {
+            throws VoltAbortException {
         voltQueueSQL(sqlStmt);
         VoltTable result = voltExecuteSQL()[0];
         if (result.getRowCount() < 1) {

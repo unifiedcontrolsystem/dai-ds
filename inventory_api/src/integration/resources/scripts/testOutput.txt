@@ -1,0 +1,482 @@
+
+--- User Tables ----------------------------------------------
+HW_INVENTORY_FRU
+HW_INVENTORY_HISTORY
+HW_INVENTORY_LOCATION
+
+
+--- User Views -----------------------------------------------
+
+
+--- User Export Streams --------------------------------------
+
+
+
+--- Potential Procedure Classes ------------------------------
+ com.intel.dai.procedures.AdapterInfoUsingTypeLctnPid                       
+ com.intel.dai.procedures.AdapterListOfActiveAndWorkItems                   
+ com.intel.dai.procedures.AdapterStarted                                    
+ com.intel.dai.procedures.AdapterTerminated                                 
+ com.intel.dai.procedures.AggregatedEnvDataListAtTime                       
+ com.intel.dai.procedures.AggregatedEnvDataStore                            
+ com.intel.dai.procedures.ComputeNodeCommon                                 
+ com.intel.dai.procedures.ComputeNodeDiscovered                             
+ com.intel.dai.procedures.ComputeNodeHistoryListOfStateAtTime               
+ com.intel.dai.procedures.ComputeNodeReplaced                               
+ com.intel.dai.procedures.ComputeNodeSaveBootImageInfo                      
+ com.intel.dai.procedures.ComputeNodeSaveEnvironmentInfo                    
+ com.intel.dai.procedures.ComputeNodeSaveIpAddr                             
+ com.intel.dai.procedures.ComputeNodeSetOwner                               
+ com.intel.dai.procedures.ComputeNodeSetState                               
+ com.intel.dai.procedures.ComputeNodeSetStates                              
+ com.intel.dai.procedures.ComputeNodeSetWlmNodeState                        
+ com.intel.dai.procedures.ComputeNodeStates                                 
+ com.intel.dai.procedures.ComputeNodesFromListWithoutAndWithTheseStates     
+ com.intel.dai.procedures.ComputeNodesFromListWithoutThisBootImageId        
+ com.intel.dai.procedures.DataMoverGetListOfRecsToMove                      
+ com.intel.dai.procedures.DbChgTimestamps                                   
+ com.intel.dai.procedures.DiagGetDiagToolId                                 
+ com.intel.dai.procedures.DiagListOfActiveDiagsAtTime                       
+ com.intel.dai.procedures.DiagListOfNonActiveDiagsAtTime                    
+ com.intel.dai.procedures.DiagResultSavePerUnit                             
+ com.intel.dai.procedures.DiagStarted                                       
+ com.intel.dai.procedures.DiagTerminated                                    
+ com.intel.dai.procedures.ErrorOnChassis                                    
+ com.intel.dai.procedures.ErrorOnComputeNode                                
+ com.intel.dai.procedures.ErrorOnComputeNodeViaMacAddr                      
+ com.intel.dai.procedures.ErrorOnRack                                       
+ com.intel.dai.procedures.ErrorOnServiceNode                                
+ com.intel.dai.procedures.GetUniqueId                                       
+ com.intel.dai.procedures.InternalCachedJobsAddNodeEntry                    
+ com.intel.dai.procedures.InternalJobInfoCheckForStaleData                  
+ com.intel.dai.procedures.InternalJobInfoJobCompleted                       
+ com.intel.dai.procedures.InternalJobInfoJobRemove                          
+ com.intel.dai.procedures.InternalJobInfoJobStarted                         
+ com.intel.dai.procedures.InternalJobInfoSpecialJobCleanup                  
+ com.intel.dai.procedures.InternalJobStepInfoJobStepEnded                   
+ com.intel.dai.procedures.InternalJobStepInfoJobStepStarted                 
+ com.intel.dai.procedures.InternalJobStepInfoSpecialJobCleanup              
+ com.intel.dai.procedures.JobCommon                                         
+ com.intel.dai.procedures.JobHistoryListOfActiveJobsAtTime                  
+ com.intel.dai.procedures.JobHistoryListOfNonActiveJobsAtTime               
+ com.intel.dai.procedures.JobStarted                                        
+ com.intel.dai.procedures.JobStepCleanup                                    
+ com.intel.dai.procedures.JobStepCommon                                     
+ com.intel.dai.procedures.JobStepStarted                                    
+ com.intel.dai.procedures.JobStepTerminated                                 
+ com.intel.dai.procedures.JobTerminated                                     
+ com.intel.dai.procedures.MachineAdapterInstanceBumpNextInstanceNumAndReturn
+ com.intel.dai.procedures.MachineAdapterInvocationInformation               
+ com.intel.dai.procedures.MachineUpdateSynthesizedDataFlag                  
+ com.intel.dai.procedures.NodePurgeInventory_History                        
+ com.intel.dai.procedures.RasEventListAtTime                                
+ com.intel.dai.procedures.RasEventListByLimit                               
+ com.intel.dai.procedures.RasEventListThatNeedJobId                         
+ com.intel.dai.procedures.RasEventProcessNewControlOperations               
+ com.intel.dai.procedures.RasEventStore                                     
+ com.intel.dai.procedures.ReservationCreated                                
+ com.intel.dai.procedures.ReservationDeleted                                
+ com.intel.dai.procedures.ReservationListAtTime                             
+ com.intel.dai.procedures.ReservationUpdated                                
+ com.intel.dai.procedures.ServiceCloseOperation                             
+ com.intel.dai.procedures.ServiceEndRepair                                  
+ com.intel.dai.procedures.ServiceEndRepairError                             
+ com.intel.dai.procedures.ServiceForceCloseOperation                        
+ com.intel.dai.procedures.ServiceNodeCommon                                 
+ com.intel.dai.procedures.ServiceNodeDiscovered                             
+ com.intel.dai.procedures.ServiceNodeHistoryListOfStateAtTime               
+ com.intel.dai.procedures.ServiceNodeReplaced                               
+ com.intel.dai.procedures.ServiceNodeSaveIpAddr                             
+ com.intel.dai.procedures.ServiceNodeSetOwner                               
+ com.intel.dai.procedures.ServiceNodeSetState                               
+ com.intel.dai.procedures.ServiceStartFailed                                
+ com.intel.dai.procedures.ServiceStartPrepared                              
+ com.intel.dai.procedures.ServiceStarted                                    
+ com.intel.dai.procedures.TempUpdateNodeMacAddrs                            
+ com.intel.dai.procedures.UcsConfigValueSet                                 
+ com.intel.dai.procedures.WorkItemDone                                      
+ com.intel.dai.procedures.WorkItemFindAndOwn                                
+ com.intel.dai.procedures.WorkItemFinished                                  
+ com.intel.dai.procedures.WorkItemFinishedDueToError                        
+ com.intel.dai.procedures.WorkItemQueue                                     
+ com.intel.dai.procedures.WorkItemRequeueZombies                            
+ com.intel.dai.procedures.WorkItemSaveRestartData                           
+
+--- Active Procedure Classes ---------------------------------
+ com.intel.dai.procedures.AllLocationsAtIdFromHWInv                         
+ com.intel.dai.procedures.DeleteAllLocationsAtIdFromHWInv                   
+ com.intel.dai.procedures.HwInventoryHistoryDump                            
+ com.intel.dai.procedures.HwInventoryHistoryInsert                          
+ com.intel.dai.procedures.NumberOfLocationsInHWInv                          
+ com.intel.dai.procedures.UpsertLocationIntoHWInv                           
+
+
+exec UpsertLocationIntoHWInv '1', '2', 3,  '4', '5', '6';
+
+exec UpsertLocationIntoHWInv 'n0', 'Type1', 1, 'fruId0', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n0p0', 'Type1', 1, 'fruId1', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n0p1', 'Type1', 1, 'fruId2', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n0p0g0', 'Type1', 1, 'fruId3', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n0p1g0', 'Type1', 1, 'fruId4', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n1', 'Type1', 1, 'fruId1', 'fruType1', 'fruSubType1';
+
+exec UpsertLocationIntoHWInv 'n3', 'Type1', 1, 'fruId1', 'fruType1', 'fruSubType1';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID      TYPE   ORDINAL  FRUID  
+------- ------ -------- -------
+1       2             3 4      
+n0      Type1         1 fruId0 
+n0p0    Type1         1 fruId1 
+n0p0g0  Type1         1 fruId3 
+n0p1    Type1         1 fruId2 
+n0p1g0  Type1         1 fruId4 
+n1      Type1         1 fruId1 
+n3      Type1         1 fruId1 
+
+
+SELECT * FROM HW_Inventory_Location WHERE ID LIKE '%';
+ID      TYPE   ORDINAL  FRUID  
+------- ------ -------- -------
+1       2             3 4      
+n0      Type1         1 fruId0 
+n0p0    Type1         1 fruId1 
+n0p1    Type1         1 fruId2 
+n0p0g0  Type1         1 fruId3 
+n0p1g0  Type1         1 fruId4 
+n1      Type1         1 fruId1 
+n3      Type1         1 fruId1 
+
+
+SELECT * FROM HW_Inventory_Location WHERE ID LIKE 'n0%';
+ID      TYPE   ORDINAL  FRUID  
+------- ------ -------- -------
+n0      Type1         1 fruId0 
+n0p0    Type1         1 fruId1 
+n0p0g0  Type1         1 fruId3 
+n0p1    Type1         1 fruId2 
+n0p1g0  Type1         1 fruId4 
+
+
+SELECT * FROM HW_Inventory_Location FULL OUTER JOIN HW_Inventory_FRU ON
+    HW_Inventory_Location.FRUID=HW_Inventory_FRU.FRUID ORDER BY ID;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location, HW_Inventory_FRU WHERE
+    HW_Inventory_Location.FRUID=HW_Inventory_FRU.FRUID ORDER BY ID;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location I, HW_Inventory_FRU F WHERE I.FRUID = F.FRUID;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location I, HW_Inventory_FRU F WHERE
+    I.FRUID = F.FRUID ORDER BY I.ID;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+SELECT * FROM
+    (SELECT * FROM HW_Inventory_Location, HW_Inventory_FRU WHERE HW_Inventory_Location.FRUID = HW_Inventory_FRU.FRUID)
+        AS HW_Inventory;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+SELECT * FROM
+    (SELECT * FROM HW_Inventory_Location, HW_Inventory_FRU WHERE HW_Inventory_Location.FRUID = HW_Inventory_FRU.FRUID)
+        AS HW_Inventory
+            WHERE HW_Inventory.ID = 'n0';
+ID  TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+--- ------ -------- ------- ------- --------- ------------
+n0  Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+
+
+SELECT * FROM
+    (SELECT * FROM HW_Inventory_Location, HW_Inventory_FRU WHERE HW_Inventory_Location.FRUID = HW_Inventory_FRU.FRUID)
+        AS HW_Inventory
+            WHERE HW_Inventory.ID = 'n0'
+                ORDER BY HW_Inventory.ID;
+ID  TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+--- ------ -------- ------- ------- --------- ------------
+n0  Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+
+
+SELECT * FROM
+    (SELECT * FROM HW_Inventory_Location I, HW_Inventory_FRU F WHERE I.FRUID = F.FRUID)
+        AS HW_Inventory
+            WHERE HW_Inventory.ID = 'n0'
+                ORDER BY HW_Inventory.ID;
+ID  TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+--- ------ -------- ------- ------- --------- ------------
+n0  Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+
+
+SELECT * FROM
+    (SELECT * FROM HW_Inventory_Location I, HW_Inventory_FRU F WHERE I.FRUID = F.FRUID)
+        AS HW_Inventory
+            WHERE HW_Inventory.ID STARTS WITH 'n0'
+                ORDER BY HW_Inventory.ID;
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location WHERE ID STARTS WITH 'n0';
+ID      TYPE   ORDINAL  FRUID  
+------- ------ -------- -------
+n0      Type1         1 fruId0 
+n0p0    Type1         1 fruId1 
+n0p0g0  Type1         1 fruId3 
+n0p1    Type1         1 fruId2 
+n0p1g0  Type1         1 fruId4 
+
+
+SELECT COUNT(ID) FROM HW_Inventory_Location;
+C1 
+---
+  8
+
+
+exec AllLocationsAtIdFromHWInv '';
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+1       2             3 4       4       5         6           
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+n1      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n3      Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+exec AllLocationsAtIdFromHWInv 'n0';
+ID      TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+------- ------ -------- ------- ------- --------- ------------
+n0      Type1         1 fruId0  fruId0  fruType1  fruSubType1 
+n0p0    Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+n0p0g0  Type1         1 fruId3  fruId3  fruType1  fruSubType1 
+n0p1    Type1         1 fruId2  fruId2  fruType1  fruSubType1 
+n0p1g0  Type1         1 fruId4  fruId4  fruType1  fruSubType1 
+
+
+exec AllLocationsAtIdFromHWInv 'n1';
+ID  TYPE   ORDINAL  FRUID   FRUID   FRUTYPE   FRUSUBTYPE  
+--- ------ -------- ------- ------- --------- ------------
+n1  Type1         1 fruId1  fruId1  fruType1  fruSubType1 
+
+
+exec AllLocationsAtIdFromHWInv 'none';
+ID  TYPE  ORDINAL  FRUID  FRUID  FRUTYPE  FRUSUBTYPE 
+--- ----- -------- ------ ------ -------- -----------
+
+
+exec DeleteAllLocationsAtIdFromHWInv '1';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID      TYPE   ORDINAL  FRUID  
+------- ------ -------- -------
+n0      Type1         1 fruId0 
+n0p0    Type1         1 fruId1 
+n0p0g0  Type1         1 fruId3 
+n0p1    Type1         1 fruId2 
+n0p1g0  Type1         1 fruId4 
+n1      Type1         1 fruId1 
+n3      Type1         1 fruId1 
+
+
+exec DeleteAllLocationsAtIdFromHWInv 'n0';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE   ORDINAL  FRUID  
+--- ------ -------- -------
+n1  Type1         1 fruId1 
+n3  Type1         1 fruId1 
+
+
+exec DeleteAllLocationsAtIdFromHWInv 'none';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE   ORDINAL  FRUID  
+--- ------ -------- -------
+n1  Type1         1 fruId1 
+n3  Type1         1 fruId1 
+
+
+exec DeleteAllLocationsAtIdFromHWInv 'n1';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE   ORDINAL  FRUID  
+--- ------ -------- -------
+n3  Type1         1 fruId1 
+
+
+exec DeleteAllLocationsAtIdFromHWInv 'n3';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE  ORDINAL  FRUID 
+--- ----- -------- ------
+
+
+exec DeleteAllLocationsAtIdFromHWInv 'none';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE  ORDINAL  FRUID 
+--- ----- -------- ------
+
+
+exec DeleteAllLocationsAtIdFromHWInv '';
+
+SELECT * FROM HW_Inventory_FRU ORDER BY FRUID;
+FRUID   FRUTYPE   FRUSUBTYPE  
+------- --------- ------------
+4       5         6           
+fruId0  fruType1  fruSubType1 
+fruId1  fruType1  fruSubType1 
+fruId2  fruType1  fruSubType1 
+fruId3  fruType1  fruSubType1 
+fruId4  fruType1  fruSubType1 
+
+
+SELECT * FROM HW_Inventory_Location ORDER BY ID;
+ID  TYPE  ORDINAL  FRUID 
+--- ----- -------- ------
+
+
+SELECT COUNT(ID) FROM HW_Inventory_Location;
+C1 
+---
+  0
+

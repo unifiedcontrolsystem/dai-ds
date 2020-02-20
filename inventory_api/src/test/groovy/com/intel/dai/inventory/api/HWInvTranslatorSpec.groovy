@@ -116,7 +116,7 @@ class HWInvTranslatorSpec extends Specification {
         "ID"    | "Type"    | 0         | "Empty"           | new ForeignFRU()
     }
     def "foreignToCanonical - negative"() {
-        def ts = new HWInvTranslator(null)
+        def ts = new HWInvTranslator(new HWInvUtilImpl())
         expect: ts.foreignToCanonical(inputFile).getKey() == res
 
         where:
