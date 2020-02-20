@@ -21,9 +21,9 @@ public class ForeignSubscriptionRequest implements SubscriptionRequestBuilder {
         roles_ = new PropertyArray(new ArrayList<String>(){{
             add("Compute");
             add("Service");
-            add("System");
-            add("Application");
-            add("Storage");
+//            add("System");
+//            add("Application");
+//            add("Storage");
         }});
         statuses_ = new PropertyArray(new ArrayList<String>() {{
             add("Unknown");
@@ -31,16 +31,16 @@ public class ForeignSubscriptionRequest implements SubscriptionRequestBuilder {
             add("Others");
         }});
         states_ = new PropertyArray(new ArrayList<String>(){{
-            add("Unknown");
-            add("Empty");
-            add("Populated");
+//            add("Unknown");
+//            add("Empty");
+//            add("Populated");
             add("Off");
             add("On");
-            add("Active");
-            add("Standby");
-            add("Halt");
-            add("Ready");
-            add("Paused");
+//            add("Active");
+//            add("Standby");
+//            add("Halt");
+//            add("Ready");
+//            add("Paused");
         }});
     }
 
