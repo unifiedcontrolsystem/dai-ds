@@ -9,7 +9,7 @@
         "connectAddress": "loki-n2",
         "connectPort": 5678,
         "bindAddress": "loki-n1.ra.intel.com",
-        "bindPort": 54321,
+        "bindPort": 54322,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "subjects": "stateChanges",
         "requestBuilder": "com.intel.dai.inventory.ForeignSubscriptionRequest",
@@ -40,7 +40,7 @@
       "uri": "amqp://127.0.0.1"
     },
     "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
-      "publishTopic": "ucs_boot_event",
+      "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
       "bootImageInfoUrlPath": "/bootparameters",
       "publish": false
