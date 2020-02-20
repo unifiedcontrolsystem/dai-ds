@@ -4,8 +4,8 @@
 
 LOCATION="${SERVICE_LOCATION}"
 LOG="/opt/ucs/log/Eventsim-${LOCATION}.log"
-ARGS=""
-CLASS=com.intel.dai.eventsim.EventSimApiApp
+ARGS="localhost /opt/ucs/etc/EventSim.json"
+CLASS=com.intel.dai.eventsim.EventSimApp
 PROPS="-DdaiLoggingLevel=${DAI_LOGGING_LEVEL}"
 
 hostname ${HOSTNAME}

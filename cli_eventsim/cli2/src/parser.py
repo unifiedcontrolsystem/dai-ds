@@ -12,6 +12,7 @@ import argparse
 import pkg_resources
 
 from .events import EventsCli
+from .wlm import WlmCli
 from .command_result import CommandResult
 
 
@@ -30,6 +31,7 @@ class Parser(object):
             description='List of Valid Sub Commands', dest='subparser_name')
         self._add_simple_args()
         EventsCli(self.subparser.add_parser('events', help='Generate events of specified type.'))
+        WlmCli(self.subparser.add_parser('wlm', help='Generate wlm events of specified type.'))
 
     def _add_simple_args(self):
         """Add the simple arguments here"""
