@@ -6,7 +6,7 @@ import org.voltdb.VoltTable;
 
 public class HwInventoryHistoryDump extends VoltProcedure {
     private static final String SQL_TEXT =
-            "SELECT * FROM HW_Inventory_History ORDER BY DbUpdateTimestamp;";
+            "SELECT * FROM HW_Inventory_History WHERE ID STARTS WITH ? ORDER BY DbUpdatedTimestamp;";
 
     public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
 

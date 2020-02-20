@@ -203,7 +203,7 @@ public class VoltHWInvApi implements HWInvApi {
     public List<String> dumpHistoricalRecords() throws IOException, DataStoreException {
         try {
             ArrayList<String> hist = new ArrayList<>();
-            ClientResponse cr = client.callProcedure("HwInventoryHistoryDump");
+            ClientResponse cr = client.callProcedure("HwInventoryHistoryDump", "");
             VoltTable vt = cr.getResults()[0];
             for (int iCnCntr = 0; iCnCntr < vt.getRowCount(); ++iCnCntr) {
                 vt.advanceRow();

@@ -2016,10 +2016,10 @@ CREATE TABLE HW_Inventory_Location (
 -- History of FRU installation and removal from the HPC.  Note that the timestamp marks
 -- the DB update event.  The foreign data does not have the time of actual HW modification.
 CREATE TABLE HW_Inventory_History (
-    Action VARCHAR(16) NOT NULL, -- INSERTED/DELETED
-    ID VARCHAR(64) NOT NULL,     -- perhaps xname (path); as is from JSON
-    FRUID VARCHAR(80) NOT NULL,  -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL PRIMARY KEY
+    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
 END_OF_BATCH

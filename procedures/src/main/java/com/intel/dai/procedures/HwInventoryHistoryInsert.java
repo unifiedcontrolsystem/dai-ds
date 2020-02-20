@@ -10,7 +10,7 @@ import org.voltdb.VoltTable;
 
 public class HwInventoryHistoryInsert extends VoltProcedure {
     private static final String SQL_TEXT =
-            "INSERT INTO HW_Inventory_History (Action, ID, FRUID, DbUpdateTimestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
+            "INSERT INTO HW_Inventory_History (Action, ID, FRUID, DbUpdatedTimestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
 
     public static final long SUCCESSFUL = 0;
     public static final long FAILED = 1;

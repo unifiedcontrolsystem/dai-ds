@@ -72,8 +72,9 @@ pipeline {
 
 def TestStoredProcedures(def scriptDir, def tests, def testOutput) {
     sh "rm -f ${testOutput}"
-    sh "sqlcmd < ${scriptDir}${tests} | sed '/Returned/ d' > ${testOutput}"
-    // sh "diff ${testOutput} ${scriptDir}${testOutput}"
+    sh "sqlcmd < ${scriptDir}${tests} > ${testOutput}"
+//            "| sed '/Returned/ d' > ${testOutput}"
+//    sh "diff ${testOutput} ${scriptDir}${testOutput}"
 }
 
 def StartHWInvDb(def scriptDir) {
