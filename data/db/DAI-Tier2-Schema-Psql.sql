@@ -1646,32 +1646,73 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_replacement_history
+CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_hwinventory_history
     LANGUAGE plpgsql
     AS $$
     DECLARE
-        p_sernum character varying;
+        p_fruid character varying;
     BEGIN
-        p_sernum := (select distinct on (newsernum) newsernum from tier2_replacement_history where newsernum = p_lctn);
-        if (p_sernum is not null) then
+        p_fruid := (select distinct on (fruid) fruid from tier2_hwinventory_history where fruid = p_lctn);
+        if (p_fruid is not null) then
         return query
-            select * from  tier2_replacement_history
+            select * from  tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                newsernum like (p_sernum || '%')
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+                fruid like (p_fruid || '%')
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
 
         else
         return query
-            select * from  tier2_replacement_history
+            select * from  tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+                (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
         end if;
         return;
     END
 
+$$;
+
+
+--
+-- Name: getinventoryhistoryforlctn(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryhistoryforlctn(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), fruid character varying(80))
+    LANGUAGE sql
+    AS $$
+        select id, fruid from  tier2_hwinventory_history
+        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+            dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+            (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+        order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
+$$;
+
+
+--
+-- Name: getinventoryinfoforlctn(tcharacter varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
+    LANGUAGE sql
+    AS $$
+        select HI.id,
+        HI.dbupdatedtimestamp,
+        HI.ordinal,
+        HI.fruid,
+        HI.type,
+        HF.frutype,
+        HF.frusubtype
+        from tier2_hwinventorylocation HI
+        inner join tier2_hwinventoryfru HF on
+        HI.fruid = HF.fruid
+        where
+            case
+                when p_lctn is null then (HI.id ~ '.*' or HI.id is null)
+                when p_lctn is not null then (HI.id not like '') and ((select string_to_array(HI.id, '')) <@ (select string_to_array(p_lctn, ',')))
+            end
+        order by HI.DbUpdatedTimestamp, HI.id desc LIMIT p_limit;
 $$;
 
 
