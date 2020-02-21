@@ -995,6 +995,30 @@ CREATE TABLE PUBLIC.tier2_authorized_user (
     roleid character varying NOT NULL
 );
 
+CREATE TABLE public.Tier2_HWInventoryFRU (
+    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
+    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    entrynumber bigint NOT NULL
+);
+
+CREATE TABLE public.Tier2_HWInventoryLocation (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
+    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
+    Ordinal INTEGER NOT NULL,            -- singleton:0
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    entrynumber bigint NOT NULL
+);
+
+CREATE TABLE public.tier2_HWInventory_History (
+    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber bigint NOT NULL
+);
 
 
 --- FUNCTION DEFINITIONS START HERE ----
@@ -2937,6 +2961,67 @@ AS $$
 $$;
 
 
+CREATE OR REPLACE FUNCTION public.insertorupdatehwinventoryfru(p_fruid character varying, p_frutype character varying, p_frusubtype character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ BEGIN
+    insert into Tier2_HWInventoryFRU(
+        FRUId,
+        FRUType,
+        FRUSubType,
+        DbUpdatedTimestamp)
+    values(
+        p_fruid,
+        p_frutype,
+        p_frusubtype,
+        p_dbupdatedtimestamp)
+    on conflict(FRUId) do update set
+        FRUType = p_frutype,
+        FRUSubType = p_frusubtype,
+        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.insertorupdatehwinventorylocation(p_id character varying, p_type character varying, p_ordinal integer, p_fruid character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ BEGIN
+    insert into Tier2_HWInventoryLocation(
+        Id,
+        Type,
+        Ordinal,
+        FruId,
+        DbUpdatedTimestamp)
+    values(
+        p_id,
+        p_type,
+        p_ordinal,
+        p_fruid,
+        p_dbupdatedtimestamp)
+    on conflict(Id) do update set
+        FRUId = p_fruid,
+        Type = p_type,
+        Ordinal = p_ordinal,
+        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventoryhistory_records() RETURNS SETOF public.tier2_HWInventory_History
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HwInventory_History;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventoryfru_records() RETURNS SETOF public.Tier2_HWInventoryFRU
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HWInventoryFRU;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventorylocation_records() RETURNS SETOF public.Tier2_HWInventoryLocation
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HWInventoryLocation;
+$$;
 
 ----- ALTER TABLE SQLS START HERE ------
 
@@ -3383,7 +3468,7 @@ CREATE SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq
 ALTER SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq OWNED BY public.tier2_nodeinventory_history.entrynumber;
 
 
-CREATE SEQUENCE public.tier2_nonodehw_history_entrynumber_seq
+CREATE SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -3391,7 +3476,44 @@ CREATE SEQUENCE public.tier2_nonodehw_history_entrynumber_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tier2_adapter_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
+ALTER SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
+
+
+CREATE SEQUENCE public.tier2_HWInventory_History_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventory_History_entrynumber_seq OWNED BY public.tier2_HWInventory_History.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventory_History_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventory_History_entrynumber_seq', 1, false);
+
+CREATE SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq OWNED BY public.tier2_HWInventoryFRU.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventoryFRU ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryFRU_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventoryFRU_entrynumber_seq', 1, false);
+
+CREATE SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq OWNED BY public.tier2_HWInventoryLocation.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventoryLocation ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryLocation_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventoryLocation_entrynumber_seq', 1, false);
 
 --
 -- Name: tier2_adapter_history entrynumber; Type: DEFAULT; Schema: public; Owner: -

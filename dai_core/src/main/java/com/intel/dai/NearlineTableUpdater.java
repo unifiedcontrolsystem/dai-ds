@@ -285,6 +285,20 @@ public class NearlineTableUpdater {
                                 + "Results, DbUpdatedTimestamp)"
                                 + "values(?,?,?,?,?)",
                         false));
+        SQL_STMTS.put("HW_Inventory_Fru",
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateHWInventoryFru(?,?,?,?)}",
+                        true));
+        SQL_STMTS.put("HW_Inventory_Location",
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateHWInventoryLocation(?,?,?,?,?)}",
+                        true));
+        SQL_STMTS.put("HW_Inventory_History",
+                new DataUpdateStmt(
+                        "insert into Tier2_HWInventory_History(Action, id, fruid, DbUpdatedTimestamp)"
+                                + "values(?,?,?,?)",
+                        false));
+
     }
 
     private static void addSSTables() {

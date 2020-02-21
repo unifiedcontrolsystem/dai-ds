@@ -64,6 +64,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_SWITCH_HISTORY                 = -99999L;
         mEntryNumber_WLMRESERVATION_HISTORY         = -99999L;
         mEntryNumber_WORKITEM_HISTORY               = -99999L;
+        mEntryNumber_HWINVENTORY_FRU                = -99999L;
+        mEntryNumber_HWINVENTORY_LOCATION           = -99999L;
+        mEntryNumber_HWINVENTORY_HISTORY            = -99999L;
     }   // ctor
 
 
@@ -97,6 +100,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_SWITCH_HISTORY;                 // the last used entry number for the Tier2_SWITCH_HISTORY table.
     private long        mEntryNumber_WLMRESERVATION_HISTORY;         // the last used entry number for the Tier2_WLMRESERVATION_HISTORY table.
     private long        mEntryNumber_WORKITEM_HISTORY;               // the last used entry number for the Tier2_WORKITEM_HISTORY table.
+    private long        mEntryNumber_HWINVENTORY_FRU;               // the last used entry number for the Tier2_HWINVENTORY_FRU table.
+    private long        mEntryNumber_HWINVENTORY_LOCATION;               // the last used entry number for the Tier2_HWINVENTORY_LOCATION table.
+    private long        mEntryNumber_HWINVENTORY_HISTORY;               // the last used entry number for the Tier2_HWINVENTORY_HISTORY table.
 
 
     long getTablesMaxEntryNum(String sTableName) throws IOException, ProcCallException {
@@ -167,6 +173,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_SWITCH_HISTORY                 = getTablesMaxEntryNum("Tier2_SWITCH_HISTORY;");
         mEntryNumber_WLMRESERVATION_HISTORY         = getTablesMaxEntryNum("Tier2_WLMRESERVATION_HISTORY;");
         mEntryNumber_WORKITEM_HISTORY               = getTablesMaxEntryNum("Tier2_WORKITEM_HISTORY;");
+        mEntryNumber_HWINVENTORY_FRU                = getTablesMaxEntryNum("Tier2_HW_Inventory_Fru;");
+        mEntryNumber_HWINVENTORY_LOCATION           = getTablesMaxEntryNum("Tier2_HW_Inventory_Location;");
+        mEntryNumber_HWINVENTORY_HISTORY            = getTablesMaxEntryNum("Tier2_HW_Inventory_History;");
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2 (via the DataMover queue) AND for publishing that data for any components that subscribe for it (via the DataMoverExchange).
         DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
@@ -474,6 +483,15 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                         break;
                     case "WlmReservation_History":
                         mEntryNumber_WLMRESERVATION_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_WLMRESERVATION_HISTORY.insert", lAmqpMessageId, mEntryNumber_WLMRESERVATION_HISTORY);
+                        break;
+                    case "HW_Inventory_Location":
+                        mEntryNumber_HWINVENTORY_LOCATION = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_HW_Inventory_Location.upsert", lAmqpMessageId, mEntryNumber_HWINVENTORY_LOCATION);
+                        break;
+                    case "HW_Inventory_Fru":
+                        mEntryNumber_HWINVENTORY_FRU = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_HW_Inventory_Fru.upsert", lAmqpMessageId, mEntryNumber_HWINVENTORY_FRU);
+                        break;
+                    case "HW_Inventory_History":
+                        mEntryNumber_HWINVENTORY_HISTORY = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_HW_Inventory_History.insert", lAmqpMessageId, mEntryNumber_HWINVENTORY_HISTORY);
                         break;
                     case "WorkItem":
                         // Loop through each of the entries in the VoltTable.
