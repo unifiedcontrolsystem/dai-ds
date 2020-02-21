@@ -67,7 +67,6 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
             createBuilder(args_.getOrDefault("requestBuilder", null));
             if(builder_ == null) throw new NetworkException("Failed to create a network REST request builder");
         }
-        requestType_ = "GET";
         for(Map.Entry<String,String> entry: args_.entrySet())
             extraArgs_.put(entry.getKey(), entry.getValue());
         if(args_.containsKey("connectTimeout"))
@@ -143,24 +142,29 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
             long timeoutTargetSeconds = Instant.now().getEpochSecond() + connectionTimeoutSeconds_;
             while(Instant.now().getEpochSecond() <= timeoutTargetSeconds && !isListening()) {
                 try {
-                    client_ = RESTClientFactory.getInstance(implementation_, log_);
-                    if (client_ != null) {
-                        client_.setSSERequestBuilder(builder_);
-                        client_.setTokenOAuthRetriever(tokenProvider_);
-                        client_.subscribeToSSEGET(uri_, subjects_, this::responseCallback, this::eventCallback,
-                                extraArgs_);
-                    } else {
-                        log_.error("The RESTClientFactory returned null for the implementation: %s", implementation_);
-                        break;
+                    if(client_ == null) {
+                        client_ = RESTClientFactory.getInstance(implementation_, log_);
+                        if(client_ == null) {
+                            log_.error("The factory for a REST client returned null for implementation: %s",
+                                    implementation_);
+                            return;
+                        }
                     }
+                    client_.setSSERequestBuilder(builder_);
+                    client_.setTokenOAuthRetriever(tokenProvider_);
+                    client_.subscribeToSSEGET(uri_, subjects_, this::responseCallback, this::eventCallback,
+                            extraArgs_);
                     // Wait to see if the connection worked asynchronously...
-                    try { Thread.sleep(2500); } catch(InterruptedException intr) { /* Ignore this exception. */ }
-                    if(client_ == null)
-                        log_.warn("SSE Connection failed, retrying the connection...");
+                    try { Thread.sleep(2500); } catch(InterruptedException intr) { log_.warn("sleep #1 interrupted"); }
+                    if(isListening())
+                        return;
                 } catch (RESTClientException e) {
-                    client_ = null;
+                    log_.warn("SSE Connection failed, retrying the connection...");
+                    try { Thread.sleep(2500); } catch(InterruptedException intr) { log_.warn("sleep #2 interrupted"); }
                 }
             }
+            if(!isListening())
+                log_.error("Timed out waiting for a connection to uri='%s'", uri_);
         }
     }
 
@@ -171,7 +175,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     @Override
     public void stopListening() {
         if(isListening()) {
-            client_ = null;
+            isListening_ = false;
         }
     }
 
@@ -180,7 +184,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
      */
     @Override
     public boolean isListening() {
-        return client_ != null;
+        return isListening_;
     }
 
     /**
@@ -212,10 +216,12 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     }
 
     private void responseCallback(int code, String responseBody, RequestInfo originalInfo) {
-        if(code != 200) {
+        if(code >= 200 && code < 300) {
+            log_.debug("SSE subscription to '%s' succeeded.", originalInfo.uri().toString());
+            isListening_ = true;
+        } else {
             log_.warn("Subscription failed to '%s'", originalInfo.uri().toString());
-            client_ = null;
-            startListening();
+            log_.debug("code=%d; body='%s'", code, responseBody);
         }
     }
 
@@ -278,12 +284,12 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     private ConfigIO parser_;
     private Logger log_;
     private URI uri_;
-    private int connectionTimeoutSeconds_ = 300;
+    private int connectionTimeoutSeconds_ = 30;
     private NetworkDataSinkDelegate callback_;
     private RESTClient client_ = null;
     private String implementation_;
     private SSERequestBuilder builder_ = null;
     private TokenAuthentication tokenProvider_ = null;
-    private String requestType_;
     private Map<String,String> extraArgs_ = new HashMap<>();
+    private boolean isListening_ = false;
 }

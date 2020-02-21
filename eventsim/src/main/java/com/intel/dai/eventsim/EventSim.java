@@ -32,6 +32,7 @@ public class EventSim {
     //for unit test cases
     EventSim(Logger log) {
         log_ = log;
+        wlmApi = new WlmApi(log_);
     }
 
     /**
@@ -90,6 +91,7 @@ public class EventSim {
         jsonParser_ = ConfigIOFactory.getInstance("json");
         bootParamsApi_ = new BootParameters();
         hwInvApi_ = new HardwareInventory();
+        wlmApi = new WlmApi(log_);
         ApiReqData apiReq = new ApiReqData(log_);
         PropertyMap ntwkConfig = serverConfiguration_.getMapOrDefault("networkConfig", null);
         source_ = new NetworkObject(ntwkConfig, log_, apiReq);
@@ -106,4 +108,5 @@ public class EventSim {
     SimulatorEngine eventSimEngine;
     private NodeInformation nodeinfo;
     protected DataLoaderEngine simEngineDataLoader;
+    protected WlmApi wlmApi;
 }

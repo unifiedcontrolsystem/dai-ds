@@ -214,6 +214,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         // TODO: Coded assuming the FOREIGN_IMAGE_ID_KEY is in the NODE_ONLINE message.
         // NOTE: The foreign boot image ID will be the DAI boot image id.
         try {
+
             if(client_ == null)
                 client_ = createClient();
             BlockingResult result = client_.getRESTRequestBlocking(makeUri(xnameLocation));
