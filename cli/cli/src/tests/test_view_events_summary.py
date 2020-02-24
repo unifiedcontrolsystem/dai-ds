@@ -6,15 +6,13 @@
 """
 Test the ViewEventsSummary class
 """
-import sys
 import io
 import json
-import tempfile
-import os
+import sys
 from unittest import TestCase
+
 from mock import patch
 from ..parser import Parser
-from ..view import ViewCli
 from ..view_events_summary import ViewEventsSummary
 
 

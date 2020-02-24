@@ -22,15 +22,16 @@ class WlmTest(TestCase):
         sys.argv = ['eventsim', 'wlm']
         parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim wlm [-h] {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate} ...\n\n'
-                      'positional arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate}  '
-                      'Subparser for wlm\n    create_reservation              generate a log event for a created reservation.\n    '
-                      'modify_reservation           generate a log event for a modified reservation.\n'
-                      'delete_reservation           generate a log event for a deleted reservation.\n'
-                      'start_job           generate a log event for a started job.\n'
-                      'terminate_job           generate a log event for a terminated job.\n'
-                      'simulate           generate random log events for jobs and reservations.\n\n'
-                      'optional arguments:\n  -h, --help         show this help message and exit\n', capturedOutput.getvalue())
+        self.assertIn('usage: eventsim wlm [-h]\n                    {create_reservation,modify_reservation,'
+                      'delete_reservation,start_job,terminate_job,simulate}\n                    ...\n\npositional '
+                      'arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,'
+                      'terminate_job,simulate}\n                        Subparser for wlm\n    create_reservation  '
+                      'generate a log event for a created reservation.\n    modify_reservation  generate a log event '
+                      'for a modified reservation.\n    delete_reservation  generate a log event for a deleted '
+                      'reservation.\n    start_job           generate a log event for a started job.\n    '
+                      'terminate_job       generate a log event for a terminated job.\n    simulate            '
+                      'generate random log events for jobs and reservations.\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n', capturedOutput.getvalue())
         capturedOutput.close()
 
     def test_events_help_1(self):
@@ -41,15 +42,16 @@ class WlmTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim wlm [-h] {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate} ...\n\n'
-                      'positional arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate}  '
-                      'Subparser for wlm\n    create_reservation              generate a log event for a created reservation.\n    '
-                      'modify_reservation           generate a log event for a modified reservation.\n'
-                      'delete_reservation           generate a log event for a deleted reservation.\n'
-                      'start_job           generate a log event for a started job.\n'
-                      'terminate_job           generate a log event for a terminated job.\n'
-                      'simulate           generate random log events for jobs and reservations.\n\n'
-                      'optional arguments:\n  -h, --help         show this help message and exit\n', capturedOutput.getvalue())
+        self.assertIn('usage: eventsim wlm [-h]\n                    {create_reservation,modify_reservation,'
+                      'delete_reservation,start_job,terminate_job,simulate}\n                    ...\n\npositional '
+                      'arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,'
+                      'terminate_job,simulate}\n                        Subparser for wlm\n    create_reservation  '
+                      'generate a log event for a created reservation.\n    modify_reservation  generate a log event '
+                      'for a modified reservation.\n    delete_reservation  generate a log event for a deleted '
+                      'reservation.\n    start_job           generate a log event for a started job.\n    '
+                      'terminate_job       generate a log event for a terminated job.\n    simulate            '
+                      'generate random log events for jobs and reservations.\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n', capturedOutput.getvalue())
         capturedOutput.close()
 
     def test_events_help_2(self):
@@ -60,13 +62,14 @@ class WlmTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim wlm [-h] {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate} ...\n\n'
-                      'positional arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,terminate_job,simulate}  '
-                      'Subparser for wlm\n    create_reservation              generate a log event for a created reservation.\n    '
-                      'modify_reservation           generate a log event for a modified reservation.\n'
-                      'delete_reservation           generate a log event for a deleted reservation.\n'
-                      'start_job           generate a log event for a started job.\n'
-                      'terminate_job           generate a log event for a terminated job.\n'
-                      'simulate           generate random log events for jobs and reservations.\n\n'
-                      'optional arguments:\n  -h, --help         show this help message and exit\n', capturedOutput.getvalue())
+        self.assertIn('usage: eventsim wlm [-h]\n                    {create_reservation,modify_reservation,'
+                      'delete_reservation,start_job,terminate_job,simulate}\n                    ...\n\npositional '
+                      'arguments:\n  {create_reservation,modify_reservation,delete_reservation,start_job,'
+                      'terminate_job,simulate}\n                        Subparser for wlm\n    create_reservation  '
+                      'generate a log event for a created reservation.\n    modify_reservation  generate a log event '
+                      'for a modified reservation.\n    delete_reservation  generate a log event for a deleted '
+                      'reservation.\n    start_job           generate a log event for a started job.\n    '
+                      'terminate_job       generate a log event for a terminated job.\n    simulate            '
+                      'generate random log events for jobs and reservations.\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n', capturedOutput.getvalue())
         capturedOutput.close()

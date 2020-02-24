@@ -438,6 +438,9 @@ public class Adapter implements IAdapter {
         mDataMoverResultTblIndxToTableNameMap.put(25, "DiagResults");
         mDataMoverResultTblIndxToTableNameMap.put(26, "NodeInventory_History");
         mDataMoverResultTblIndxToTableNameMap.put(27, "NonNodeHwInventory_History");
+        mDataMoverResultTblIndxToTableNameMap.put(28, "HW_Inventory_Fru");
+        mDataMoverResultTblIndxToTableNameMap.put(29, "HW_Inventory_Location");
+        mDataMoverResultTblIndxToTableNameMap.put(30, "HW_Inventory_History");
     }   // End Adapter(String sThisAdaptersAdapterType, String sAdapterName)
 
     public void initialize() {

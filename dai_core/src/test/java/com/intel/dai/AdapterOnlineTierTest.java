@@ -61,7 +61,7 @@ public class AdapterOnlineTierTest {
     @Test
     public void basicTests() throws Exception {
         AdapterOnlineTier online = new MockAdapterOnlineTier();
-        assertEquals(23, online.setOfTablesToBePurged().size());
+        assertEquals(26, online.setOfTablesToBePurged().size());
         assertEquals(3600000L, online.timeBetweenCheckingForDataToPurgeInMillis());
         assertEquals(86400000L, online.timeToKeepMovedDataBeforePurgingInMillis());
     }

@@ -64,8 +64,8 @@ class ServiceTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events ras [-h] [--count COUNT] [--location LOCATION] [--burst]\n               '
-                      '           [--label LABEL]\n\noptional arguments:\n  -h, --help           show this help '
+        self.assertIn('usage: eventsim events ras [-h] [--count COUNT] [--location LOCATION]\n                        '
+                      '   [--burst] [--label LABEL]\n\noptional arguments:\n  -h, --help           show this help '
                       'message and exit\n  --count COUNT        Provide number of ras events to be generated. The\n   '
                       '                    default values are in config file.\n  --location LOCATION  generate ras '
                       'events at a given location.\n  --burst              generate events with or without delay.\n  '
@@ -80,12 +80,12 @@ class ServiceTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events sensor [-h] [--count COUNT] [--location LOCATION]\n                      '
-                      '       [--burst] [--label LABEL]\n\noptional arguments:\n  -h, --help           show this help '
-                      'message and exit\n  --count COUNT        Provide number of ras events to be generated. The\n   '
-                      '                    default values are in config file.\n  --location LOCATION  generate sensor '
-                      'events at a given location.\n  --burst              generate events with or without delay.\n  '
-                      '--label LABEL        generate sensor events of a particular type\n',
+        self.assertIn('usage: eventsim events sensor [-h] [--count COUNT] [--location LOCATION]\n                     '
+                      '         [--burst] [--label LABEL]\n\noptional arguments:\n  -h, --help           show this '
+                      'help message and exit\n  --count COUNT        Provide number of ras events to be generated. '
+                      'The\n                       default values are in config file.\n  --location LOCATION  '
+                      'generate sensor events at a given location.\n  --burst              generate events with or '
+                      'without delay.\n  --label LABEL        generate sensor events of a particular type\n',
                       capturedOutput.getvalue())
         capturedOutput.close()
 
@@ -97,8 +97,8 @@ class ServiceTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events boot [-h] [--probability PROBABILITY] [--burst]\n                        '
-                      '   [--location LOCATION]\n\noptional arguments:\n  -h, --help            show this help '
+        self.assertIn('usage: eventsim events boot [-h] [--probability PROBABILITY] [--burst]\n                       '
+                      '     [--location LOCATION]\n\noptional arguments:\n  -h, --help            show this help '
                       'message and exit\n  --probability PROBABILITY\n                        generate boot events '
                       'with probability failure\n  --burst               generate events with or without delay.\n  '
                       '--location LOCATION   generate boot events at a given location.\n', capturedOutput.getvalue())
