@@ -169,7 +169,7 @@ public class VoltHWInvApi implements HWInvApi {
             InterruptedException, IOException, DataStoreException {
 
         try {
-            logger.info("%s %s %e", action, id, fru);
+            logger.info("%s %s %s", action, id, fru);
             client.callProcedure("HwInventoryHistoryInsert", action, id, fru);
         } catch (ProcCallException e) {
             // insert errors are only logged for now
