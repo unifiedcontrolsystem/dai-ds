@@ -13,7 +13,10 @@ import org.voltdb.VoltTable;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcCallException;
+import org.voltdb.client.ProcedureCallback;
+
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +32,15 @@ public class VoltDbRasEventLog implements RasEventLog {
     // "0001000013" is a Ras EventType indicating that the specified descriptive name does not exist in RasEventMetaData
     private static final String NON_DESCRIPTIVE_RAS_EVENT = "0001000013";
     private static final String query = "select EventType, DescriptiveName from RasMetaData;";
+    private static final Map<Byte,String> statusMap_ = new HashMap<>() {{
+        put(ClientResponse.USER_ABORT, "USER_ABORT");
+        put(ClientResponse.CONNECTION_LOST, "CONNECTION_LOST");
+        put(ClientResponse.CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
+        put(ClientResponse.GRACEFUL_FAILURE, "GRACEFUL_FAILURE");
+        put(ClientResponse.RESPONSE_UNKNOWN, "RESPONSE_UNKNOWN");
+        put(ClientResponse.UNEXPECTED_FAILURE, "UNEXPECTED_FAILURE");
+        put(ClientResponse.SUCCESS, "SUCCESS");
+    }};
 
     public VoltDbRasEventLog(String[] servers, IAdapter adapter, Logger logger) throws DataStoreException {
         this(servers, fromOldAdapter(adapter), logger);
@@ -193,6 +205,37 @@ public class VoltDbRasEventLog implements RasEventLog {
             logger.error("logRasEventCheckForEffectedJob - exception occurred trying to log ras event %s!", sEventType);
             logger.exception(e, "logRasEventCheckForEffectedJob");
         }
+    }
+    @Override
+    public void markRasEventControlOperationCompleted(String newState, String eventType, String eventID,
+                                                      String adapterType) throws IOException {
+        voltClient.callProcedure(clientResponse -> {
+            if(clientResponse.getStatus() != ClientResponse.SUCCESS) {
+                String message = String.format("Failed to mark the RasEvent completed after the control operation: " +
+                                "newState=%s, type=%s, ID=%s", newState, eventType, eventID);
+                logger.error(message);
+                logRasEventNoEffectedJob(getRasEventType("", -1), message, null, getNsTimestamp(), adapterType, -1);
+            }
+        }, "RasEventUpdateControlOperationDone", newState, eventType, eventID);
+    }
+
+    @Override
+    public void setRasEventAssociatedJobID(String jobID, String rasEventType, long rasEventID) throws IOException {
+        String sTempStoredProcedure = "RasEventUpdateJobId";
+        voltClient.callProcedure(clientResponse -> {
+            if(clientResponse.getStatus() != ClientResponse.SUCCESS) {
+                String rasType =  getRasEventType("RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed", 0L);
+                String error = statusMap_.getOrDefault(clientResponse.getStatus(), "UNKNOWN_ERROR");
+                logRasEventNoEffectedJob(rasType, "AdapterName=" + adapterName + ", SpThisIsCallbackFor=" +
+                        sTempStoredProcedure + ", " + "StatusString=" + error, null, System.currentTimeMillis() * 1000L,
+                        adapterType, -1L);
+            }
+        }, "RasEventUpdateJobId", jobID, rasEventType, rasEventID);
+    }
+
+    private long getNsTimestamp() {
+        Instant point = Instant.now();
+        return (point.getEpochSecond() * 1000000000L) + point.getNano();
     }
 
     protected Client initializeVoltClient(String[] servers) {
