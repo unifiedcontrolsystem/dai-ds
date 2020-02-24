@@ -75,7 +75,9 @@ public class AdapterRasForeignBus {
 
     private long handleRasEventControlOperations() throws IOException, ProcCallException, InterruptedException {
         // Actually get the list of pertinent ras events.
-        ClientResponse response = getClientResponseforRasEventProcessNewControlOperations(client_.callProcedure("RasEventProcessNewControlOperations"), "Stored procedure RasEventProcessNewControlOperations FAILED - Status=%s, StatusString=%s, ");
+        ClientResponse response = getClientResponseforRasEventProcessNewControlOperations(
+                client_.callProcedure("RasEventProcessNewControlOperations"),
+                "Stored procedure RasEventProcessNewControlOperations FAILED - Status=%s, StatusString=%s, ");
         // Loop through each of the pertinent RAS events invoking the appropriate Control Operation.
         VoltTable vt = response.getResults()[0];
         long workDone = vt.getRowCount();
@@ -112,9 +114,7 @@ public class AdapterRasForeignBus {
             // DbUpdatedTimestamp field).
             //------------------------------------------------------------------
             String sTempStoredProcedure = "RasEventUpdateControlOperationDone";
-            ClientResponse response1 = client_.callProcedure(sTempStoredProcedure, "Y", sTempEventType, sTempEventId);
-            if(response1.getStatus() != ClientResponse.SUCCESS)
-                logRasEventOnFailure(sTempStoredProcedure, response1.getStatus());
+            rasEvents_.markRasEventControlOperationCompleted("Y", sTempEventType, sTempEventId, adapter_.getType());
         }   // Loop through each of the pertinent RAS events invoking the appropriate Control Operation.
         return workDone;
     }   // End handleRasEventControlOperations()
@@ -247,12 +247,9 @@ public class AdapterRasForeignBus {
             //       ControlOperations will see this updated Ras event and process the control operations associated
             //       with it.
             //------------------------------------------------------------------
-            String sTempStoredProcedure = "RasEventUpdateJobId";
-            ClientResponse response1 = client_.callProcedure(sTempStoredProcedure, sFndJobId, sRasEventType,
-                    lRasEventId);
-            if(response1.getStatus() != ClientResponse.SUCCESS)
-                logRasEventOnFailure(sTempStoredProcedure, response1.getStatus());
+            rasEvents_.setRasEventAssociatedJobID(sFndJobId, sRasEventType, lRasEventId);
             // Log a message indicating whether we found a JobId associated with this Ras Event.
+            String sTempStoredProcedure = "RasEventUpdateJobId";
             if (sFndJobId != null) {
                 // there was a JobId associated with this RasEvent.
                 log_.info("Called stored procedure %s - EventType=%s, EventId=%d, Lctn=%s, JobId=%s",

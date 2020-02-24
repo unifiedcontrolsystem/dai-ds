@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -456,7 +457,7 @@ public class SimulatorEngineTest {
     }
 
     private void loadDataIntoFile(File file, String data) throws Exception {
-        FileUtils.writeStringToFile(file, data);
+        FileUtils.writeStringToFile(file, data, StandardCharsets.UTF_8);
     }
 
     private String eventSimConfig = "{\n" +

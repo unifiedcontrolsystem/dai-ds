@@ -104,11 +104,9 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-def enforceStaticAnalysis = includeDbgSymbols
+def enforceStaticAnalysis = true
 def pmdScanLevel = 2
 def enforceCodeCoverage = includeDbgSymbols
-
-import com.github.spotbugs.SpotBugsTask
 
 import java.time.Instant
 def thisYear = Instant.now().toDate().toYear().toString()
@@ -142,8 +140,7 @@ clean.finalizedBy(rootClean)
 // Root project and all project definitions                                            //
 /////////////////////////////////////////////////////////////////////////////////////////
 allprojects {
-//    version = "${packageVersion}"
-    version = ""
+    version = "${packageVersion}"
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +253,7 @@ subprojects {
         finalizedBy "jacocoTestReport"
     }
 
-    tasks.withType(SpotBugsTask) {
+    tasks.withType(com.github.spotbugs.SpotBugsTask) {
         reports {
             xml.enabled = false
             html.enabled = true
@@ -1182,10 +1179,10 @@ RAS_META_DATA="\${UCS_CFG}/RasEventMetaData.json"
 
 #######################################################################
 # JAR file names
-PROPERTIES="\${UCS_LIB}/properties-\${UCS_VER}.jar"
-CONFIG_IO="\${UCS_LIB}/config_io-\${UCS_VER}.jar"
-PROCEDURES="\${UCS_LIB}/procedures-\${UCS_VER}.jar"
-POPULATE_SCHEMA="\${UCS_LIB}/populate_schema-\${UCS_VER}.jar"
+PROPERTIES="\${UCS_LIB}/properties.jar"
+CONFIG_IO="\${UCS_LIB}/config_io.jar"
+PROCEDURES="\${UCS_LIB}/procedures.jar"
+POPULATE_SCHEMA="\${UCS_LIB}/populate_schema.jar"
 
 #######################################################################
 # Low Level Functions
@@ -2062,6 +2059,9 @@ soft_links:
 }
 
 task makeAllArtifacts {
+    doFirst {
+        file("${buildDir}/distributions").mkdirs()
+    }
     dependsOn subprojects.jar
     finalizedBy "makeDaiRpm", "makeDaiVoltRpm", "makeEventSimCliInstaller", "makeUcsCliInstaller",
             "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai", "makeDeveloperDockerTarball"
