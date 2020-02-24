@@ -43,6 +43,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
         hwInvApi_ = factory_.createHWInvApi();
+        nodeInformation_ = factory_.createNodeInformation();
     }
 
     @Override
@@ -76,12 +77,19 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.exception(e);
             return;
         }
-        if(location == null || location.isBlank())
-            eventActions_.logRasEventNoEffectedJob(type, instanceData, location, nsTimestamp,
+        long usTimestamp = nsTimestamp / 1000L;
+        try {
+            if (location == null || location.isBlank() || nodeInformation_.isServiceNodeLocation(location))
+                eventActions_.logRasEventNoEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+            else
+                eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+        } catch(DataStoreException e) {
+            log_.exception(e);
+            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
                     adapter_.getType(), adapter_.getBaseWorkItemId());
-        else
-            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
-                    adapter_.getType(), adapter_.getBaseWorkItemId());
+        }
     }
 
     @Override
@@ -400,6 +408,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private AdapterOperations operations_;
     private HWInvApi hwInvApi_;
     private AdapterInformation adapter_;
+    private final NodeInformation nodeInformation_;
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;
     private boolean publisherConfigured_ = false;
