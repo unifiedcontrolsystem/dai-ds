@@ -140,7 +140,7 @@ clean.finalizedBy(rootClean)
 // Root project and all project definitions                                            //
 /////////////////////////////////////////////////////////////////////////////////////////
 allprojects {
-    version = "${packageVersion}"
+    version = ""
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1402,13 +1402,13 @@ esac
     }
     summary = 'The Data Access Interface (DAI) VoltDB Service and Utilities for HPC clusters.'
     release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
 
     os = 'LINUX'
     type = 'BINARY'
     user = 'root'
     fileMode = 0600
     dirMode = 0700
-
     packageName = 'dai-voltdb'
 
     preUninstall    file("${buildDir}/tmp/preUninstall-volt.sh")
@@ -1535,6 +1535,7 @@ exit \$?
     }
     summary = 'The Data Access Interface (DAI) for HPC clusters.'
     release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
 
     os = 'LINUX'
     type = 'BINARY'
