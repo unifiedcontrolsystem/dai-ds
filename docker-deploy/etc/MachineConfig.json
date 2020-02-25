@@ -20,42 +20,49 @@
   "AdapterInstances": [
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.AdapterNearlineTierJdbc",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.AdapterOnlineTierVolt",
       "TypeOfAdapter": "ONLINE_TIER",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.ui.AdapterUIRest",
       "TypeOfAdapter": "UI",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.ras.AdapterRasForeignBus",
       "TypeOfAdapter": "RAS",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus",
       "TypeOfAdapter": "PROVISIONER",
       "NumberOfInstances": 1
     },
     {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderInventoryNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.inventory.ProviderInventoryNetworkForeignBus",
+      "TypeOfAdapter": "INVENTORY",
+      "NumberOfInstances": 1
+    },
+    {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-SMS1",
+      "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
       "TypeOfAdapter": "MONITOR",
       "NumberOfInstances": 2
@@ -67,42 +74,49 @@
       "TypeOfAdapter": "DAI_MGR",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "MotherSuperiorDaiMgr",
-      "Queue": "X0-SMS1"
+      "Queue": "X0-CH0-SN0"
     },
     {
       "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=127.0.0.1",
       "TypeOfAdapter": "ONLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataMover",
-      "Queue": "X0-SMS1"
+      "Queue": "X0-CH0-SN0"
     },
     {
       "Parms": "RabbitMQHost=127.0.0.1",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataReceiver",
-      "Queue": "X0-SMS1"
+      "Queue": "X0-CH0-SN0"
     },
     {
       "Parms": "$Profile#environmental",
       "TypeOfAdapter": "MONITOR",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "*"
+      "Queue": "X0-CH0-SN0"
     },
     {
       "Parms": "$Profile#ras_events",
       "TypeOfAdapter": "MONITOR",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "*"
+      "Queue": "X0-CH0-SN0"
     },
     {
       "Parms": null,
       "TypeOfAdapter": "PROVISIONER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "*"
+      "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "INVENTORY",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-CH0-SN0"
     }
   ],
   "Nodes": [
@@ -116,10 +130,10 @@
       "MacAddr": "aa:bb:cc:dd:ef:80",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:00",
-      "Lctn": "X0-SMS1"
+      "Lctn": "X0-CH0-SN0"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "sms2-bmc",
       "IpAddr": "10.2.0.2",
       "BmcAddr": "10.4.0.2",
@@ -128,10 +142,10 @@
       "MacAddr": "aa:bb:cc:dd:ef:81",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:01",
-      "Lctn": "X0-SMS2"
+      "Lctn": "X0-CH1-SN1"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "sms3-bmc",
       "IpAddr": "10.2.0.3",
       "BmcAddr": "10.4.0.3",
@@ -140,10 +154,10 @@
       "MacAddr": "aa:bb:cc:dd:ef:82",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:02",
-      "Lctn": "X0-SMS3"
+      "Lctn": "X0-CH2-SN2"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "sms4-bmc",
       "IpAddr": "10.2.0.4",
       "BmcAddr": "10.4.0.4",
@@ -152,24 +166,12 @@
       "MacAddr": "aa:bb:cc:dd:ef:83",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:03",
-      "Lctn": "X0-SMS4"
-    },
-    {
-      "Aggregator": "X0-SMS1",
-      "BmcHostName": "uan01-bmc",
-      "IpAddr": "10.2.99.1",
-      "BmcAddr": "10.4.99.20",
-      "BootImageId": null,
-      "HostName": "uan01-nmn",
-      "MacAddr": "aa:bb:cc:dd:ef:84",
-      "Type": "ServiceNode",
-      "BmcMacAddr": "aa:bb:cc:dd:ef:04",
-      "Lctn": "X0-UAN1"
+      "Lctn": "X0-CH3-SN3"
     },
 
 
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "nid000001-bmc",
       "IpAddr": "10.2.0.5",
       "BmcAddr": "10.4.0.5",
@@ -179,10 +181,10 @@
       "Type": "ComputeNode",
       "BmcMacAddr": "aa:bb:cc:dd:ee:00",
       "Environment": "rich",
-      "Lctn": "X0-S28"
+      "Lctn": "X0-CH4-CN0"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "nid000002-bmc",
       "IpAddr": "10.2.0.6",
       "BmcAddr": "10.4.0.6",
@@ -192,10 +194,10 @@
       "Type": "ComputeNode",
       "BmcMacAddr": "aa:bb:cc:dd:ee:01",
       "Environment": "rich",
-      "Lctn": "X0-S26"
+      "Lctn": "X0-CH5-CN1"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "nid000003-bmc",
       "IpAddr": "10.2.0.7",
       "BmcAddr": "10.4.0.7",
@@ -205,10 +207,10 @@
       "Type": "ComputeNode",
       "BmcMacAddr": "aa:bb:cc:dd:ee:02",
       "Environment": "rich",
-      "Lctn": "X0-S24"
+      "Lctn": "X0-CH6-CN2"
     },
     {
-      "Aggregator": "X0-SMS1",
+      "Aggregator": "X0-CH0-SN0",
       "BmcHostName": "nid000004-bmc",
       "IpAddr": "10.2.0.8",
       "BmcAddr": "10.4.0.8",
@@ -218,7 +220,7 @@
       "Type": "ComputeNode",
       "BmcMacAddr": "aa:bb:cc:dd:ee:03",
       "Environment": "rich",
-      "Lctn": "X0-S21"
+      "Lctn": "X0-CH7-CN3"
     }
   ]
 }
