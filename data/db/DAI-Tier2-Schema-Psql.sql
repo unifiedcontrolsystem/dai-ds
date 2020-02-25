@@ -1708,10 +1708,7 @@ CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varyi
         inner join tier2_hwinventoryfru HF on
         HI.fruid = HF.fruid
         where
-            case
-                when p_lctn is null then (HI.id ~ '.*' or HI.id is null)
-                when p_lctn is not null then (HI.id not like '') and ((select string_to_array(HI.id, '')) <@ (select string_to_array(p_lctn, ',')))
-            end
+            HI.id like concat(p_lctn, '%')
         order by HI.DbUpdatedTimestamp, HI.id desc LIMIT p_limit;
 $$;
 
