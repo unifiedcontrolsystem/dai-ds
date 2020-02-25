@@ -10,7 +10,7 @@
       "eventCount": 10,
       "timeDelayMus": 1,
       "eventRatioSensorToRas": 1,
-      "randomizerSeed": "234"
+      "randomizerSeed": "1234"
   },
   "networkConfig" : {
       "network" : "sse",
@@ -21,17 +21,13 @@
             "/v1/stream/cray-telemetry-fan": [
               "telemetry"
             ] ,
-            "/streams/nodeBootEvents": [
+            "/apis/smd/hsm/v1/Subscriptions/SCN": [
               "stateChanges"
             ] ,
             "/v1/stream/cray-dmtf-resource-event": [
               "events"
             ]
           }
-      } ,
-      "rabbitmq": {
-          "exchangeName": "simulator" ,
-          "uri": "amqp://127.0.0.1"
       }
   }
 }

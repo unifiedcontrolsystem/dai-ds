@@ -1667,6 +1667,9 @@ tarball: ${buildDir}/tmp/docker-deploy-dai.tar.gz
 destination_folder: ${buildDir}/distributions
 services:
   - dai-manager.service
+soft_links:
+  - from: '/opt/ucs/bin/show-adapters'
+    to: '/usr/bin/show-adapters'
 """
         new File((String)"${buildDir}/tmp/dai-manager.service").text = """[Unit]
 Description=DAI Manager Service.
@@ -1704,6 +1707,14 @@ java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDbClientCLI 
 exit \$?
 """
         new File((String)"${buildDir}/tmp/empty.txt").text = """Created folder for logs."""
+        new File((String)"${buildDir}/tmp/show-adapters2").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+jps -l | grep "com.intel.dai." | grep -v AdapterDaiMgr
+exit 0
+"""
     }
     // main section
     archiveFileName = "docker-deploy-dai.tar.gz"
@@ -1740,6 +1751,11 @@ exit \$?
     }
     from("${projectDir}/docker-deploy/dai/testEntryPoint.sh") {
         into("opt/dai-docker/dai")
+        fileMode = 0700
+    }
+    from("${buildDir}/tmp/show-adapters2") {
+        into("opt/ucs/bin")
+        rename("show-adapters2", "show-adapters")
         fileMode = 0700
     }
     // EventSim Server
