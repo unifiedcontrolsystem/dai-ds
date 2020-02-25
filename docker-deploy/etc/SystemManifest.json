@@ -2,83 +2,129 @@
   "sysname": "preview4",
   "views": {
     "Full": {
+      "view": "Full",
+      "view-description": "Full Floor Layout",
+      "initzoom": 0,
+      "zoomscales": [
+        4,
+        6,
+        8
+      ],
+      "rackscale": 12,
       "floor": {
         "description": "The Single Full Preview 4 System",
+        "width": 100,
+        "height": 200,
         "content": [
           {
             "name": "X0",
-            "definition": "rack"
+            "definition": "rack",
+            "x": 10,
+            "y": 1
           }
         ]
       },
       "definitions": {
         "rack": {
           "description": "Preview 4 Rack",
+          "width": 38,
+          "height": 102,
+          "obscured": true,
           "type": "Rack",
           "content": [
             {
               "name": "FSW1",
-              "definition": "fabric-switch"
+              "definition": "fabric-switch",
+              "x": 0,
+              "y": 4
             },
             {
               "name": "ESW1",
-              "definition": "ethernet-switch"
+              "definition": "ethernet-switch",
+              "x": 0,
+              "y": 9
             },
             {
               "name": "ESW2",
-              "definition": "ethernet-switch"
+              "definition": "ethernet-switch",
+              "x": 0,
+              "y": 14
             },
             {
               "name": "SMS1",
-              "definition": "service-node"
+              "definition": "service-node",
+              "x": 0,
+              "y": 19
             },
             {
               "name": "SMS2",
-              "definition": "service-node"
+              "definition": "service-node",
+              "x": 0,
+              "y": 24
             },
             {
               "name": "SMS3",
-              "definition": "service-node"
+              "definition": "service-node",
+              "x": 0,
+              "y": 29
             },
             {
               "name": "SMS4",
-              "definition": "service-node"
+              "definition": "service-node",
+              "x": 0,
+              "y": 34
             },
             {
               "name": "S28",
-              "definition": "compute-node"
+              "definition": "compute-node",
+              "x": 0,
+              "y": 39
             },
             {
               "name": "S26",
-              "definition": "compute-node"
+              "definition": "compute-node",
+              "x": 0,
+              "y": 44
             },
             {
               "name": "S24",
-              "definition": "compute-node"
+              "definition": "compute-node",
+              "x": 0,
+              "y": 49
             },
             {
               "name": "TRAY",
-              "definition": "console-tray"
+              "definition": "console-tray",
+              "x": 0,
+              "y": 54
             },
             {
               "name": "S21",
-              "definition": "compute-node"
+              "definition": "compute-node",
+              "x": 0,
+              "y": 59
             },
             {
               "name": "UAN1",
-              "definition": "user-access-node"
+              "definition": "user-access-node",
+              "x": 0,
+              "y": 64
             }
           ]
         },
         "compute-node": {
           "description": "Compute node",
+          "width": 18,
+          "height": 2,
           "type": "ComputeNode",
           "content": []
         },
         "service-node": {
           "description": "Service Node",
           "type": "ServiceNode",
-          "content": []
+          "content": [],
+          "width": 38,
+          "height": 4
         },
         "fabric-switch": {
           "description": "100Gbe Network Switch",
