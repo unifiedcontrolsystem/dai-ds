@@ -1749,7 +1749,7 @@ exit \$?
     from("${projectDir}/config-files/BootParameters.json") {
         into("opt/ucs/etc")
     }
-    from("${projectDir}/config-files/InventoryNodeProcessorMemory.json") {
+    from("${projectDir}/config-files/HWInventory.json") {
         into("opt/ucs/etc")
     }
     from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
