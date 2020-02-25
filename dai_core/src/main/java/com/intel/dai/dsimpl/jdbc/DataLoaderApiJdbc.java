@@ -300,7 +300,7 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
 
     private static final String[] TABLES = { "BootImage", "Chassis", "ComputeNode",
             "Machine", "Rack", "ServiceNode", "ServiceOperation", "Switch", "WorkItem", "Diag_Tools", "MachineAdapterInstance", "RasMetaData", "CacheIpAddrToLctn", "CacheMacAddrToLctn",
-            "UcsConfigValue", "UniqueValues"};
+            "UcsConfigValue", "UniqueValues", "HW_Inventory_FRU", "HW_Inventory_Location", "HW_Inventory_History"};
     private static final Map<String, String> HISTORY_TABLES;
     private static final Map<String, String> TABLE_TO_PROCEDURE;
     private static final Map<String, String[]> TABLE_FIELDS;
@@ -381,6 +381,9 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         String[] cacheMacAddrToLctnFields = {"MacAddr", "Lctn"};
         String[] ucsConfigValueFields = {"Key", "Value", "DbUpdatedTimestamp"};
         String[] uniqueValuesFields = {"Entity", "NextValue", "DbUpdatedTimestamp"};
+        String[] hwinventoryfruFields = {"FruId", "FruType", "FruSubType", "DbUpdatedTimestamp"};
+        String[] hwinventorylocationFields = {"Id", "Type", "Ordinal", "FruId", "DbUpdatedTimestamp"};
+        String[] hwinventoryhistoryFields = {"Action", "Id", "FruId", "DbUpdatedTimestamp"};
 
         TABLE_FIELDS = new HashMap<>();
         TABLE_FIELDS.put("Adapter", adapterFields);
@@ -404,6 +407,9 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_FIELDS.put("CacheMacAddrToLctn", cacheMacAddrToLctnFields);
         TABLE_FIELDS.put("UcsConfigValue", ucsConfigValueFields);
         TABLE_FIELDS.put("UniqueValues", uniqueValuesFields);
+        TABLE_FIELDS.put("HW_Inventory_FRU", hwinventoryfruFields);
+        TABLE_FIELDS.put("HW_Inventory_Location", hwinventorylocationFields);
+        TABLE_FIELDS.put("HW_Inventory_History", hwinventoryhistoryFields);
 
         HISTORY_TABLES = new HashMap<>();
         HISTORY_TABLES.put("Adapter", "Adapter_History");
@@ -459,6 +465,9 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_TO_PROCEDURE.put("CacheMacAddrToLctn", "get_cachemacaddrtolctn_records()");
         TABLE_TO_PROCEDURE.put("UcsConfigValue", "get_ucsconfigvalue_records()");
         TABLE_TO_PROCEDURE.put("UniqueValues", "get_uniquevalues_records()");
+        TABLE_TO_PROCEDURE.put("HW_Inventory_FRU", "get_hwinventoryfru_records()");
+        TABLE_TO_PROCEDURE.put("HW_Inventory_Location", "get_hwinventorylocation_records");
+        TABLE_TO_PROCEDURE.put("HW_Inventory_History", "get_hwinventoryhistory_records");
     }
 
     private Connection onlineTierConn;
