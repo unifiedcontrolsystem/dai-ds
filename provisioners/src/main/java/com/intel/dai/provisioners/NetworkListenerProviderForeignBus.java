@@ -93,7 +93,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 dataTimestamp, informWlm_);
         if(data.getStateEvent() == BootState.NODE_ONLINE) {
             try {
-                data.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(data.getLocation()));
+                data.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(data.retrieveExtraData(ORIG_FOREIGN_LOCATION_KEY)));
             } catch (Exception e) {
                 log_.error(e.getMessage());
             }
