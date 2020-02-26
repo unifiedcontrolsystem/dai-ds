@@ -145,20 +145,20 @@ public class EventSimApp extends EventSim {
     public String initiateInventoryDiscovery(final Map<String, String> parameters) throws ResultOutputException {
         String locations = parameters.getOrDefault("xnames", null);
         if(locations == null)
-            throw new ResultOutputException("404::One or more requested RedfishEndpoint xname IDs was not found.");
+            throw new ResultOutputException("404::One or more requested RedfishEndpoint foreign IDs was not found.");
         locations = locations.substring(1,locations.length() - 1);
-        List<String> xnames = Arrays.asList(locations.split(","));
-        numOfXnamesDiscovery = xnames.size();
-        List<PropertyMap> xnameDiscovery = new ArrayList<>();
-        for(int i = 0; i < numOfXnamesDiscovery; i++) {
-            PropertyMap xnameUri = new PropertyMap();
-            xnameUri.put("URI", getForeignServerUrl() + simEngineDataLoader.getHwInventoryDiscStatusUrl() + "/" + i);
-            xnameDiscovery.add(xnameUri);
+        List<String> foreignLocations = Arrays.asList(locations.split(","));
+        numOfForeignNamesDiscovery = foreignLocations.size();
+        List<PropertyMap> foreignNameDiscovery = new ArrayList<>();
+        for(int i = 0; i < numOfForeignNamesDiscovery; i++) {
+            PropertyMap foreignNameUri = new PropertyMap();
+            foreignNameUri.put("URI", getForeignServerUrl() + simEngineDataLoader.getHwInventoryDiscStatusUrl() + "/" + i);
+            foreignNameDiscovery.add(foreignNameUri);
         }
 
         List<JSONObject> jsonObj = new ArrayList<>();
 
-        for(PropertyMap data : xnameDiscovery) {
+        for(PropertyMap data : foreignNameDiscovery) {
             JSONObject obj = new JSONObject(data);
             jsonObj.add(obj);
         }
@@ -169,15 +169,15 @@ public class EventSimApp extends EventSim {
 
     public String getAllInventoryDiscoveryStatus(final Map<String, String> parameters) {
         PropertyArray discoveryStatus = new PropertyArray();
-        for(int i = 0; i < numOfXnamesDiscovery; i++) {
-            PropertyMap xnameDiscoveryStatus = new PropertyMap();
-            xnameDiscoveryStatus.put("ID", String.valueOf(i));
-            xnameDiscoveryStatus.put("Status","Complete");
-            xnameDiscoveryStatus.put("LastUpdateTime", System.currentTimeMillis(
+        for(int i = 0; i < numOfForeignNamesDiscovery; i++) {
+            PropertyMap foreignNameDiscoveryStatus = new PropertyMap();
+            foreignNameDiscoveryStatus.put("ID", String.valueOf(i));
+            foreignNameDiscoveryStatus.put("Status","Complete");
+            foreignNameDiscoveryStatus.put("LastUpdateTime", System.currentTimeMillis(
 
             ));
-            xnameDiscoveryStatus.put("Details", null);
-            discoveryStatus.add(xnameDiscoveryStatus);
+            foreignNameDiscoveryStatus.put("Details", null);
+            discoveryStatus.add(foreignNameDiscoveryStatus);
         }
         return jsonParser_.toString(discoveryStatus);
     }
@@ -425,5 +425,5 @@ public class EventSimApp extends EventSim {
     }
 
     private static Logger log_;
-    private int numOfXnamesDiscovery = 1;
+    private int numOfForeignNamesDiscovery = 1;
 }

@@ -55,14 +55,14 @@ public class DataLoaderEngine {
             processSensorMetadata();
             processRASMetadata();
             loadSystemManifestFromDB();
-            loadXnameLocationData();
-            validateXnameLocationsWithDB();
+            loadForeignLocationData();
+            validateForeignLocationsWithDB();
         } catch (final IOException | ConfigIOParseException e) {
            throw new SimulatorException("Error while loading data into data loader engine: " + e.getMessage());
         }
     }
 
-    private void validateXnameLocationsWithDB() throws SimulatorException {
+    private void validateForeignLocationsWithDB() throws SimulatorException {
         List<String> locations = getNodeLocationData();
         locations.addAll(getNonNodeLocationData());
         if(!allLocations.containsAll(locations)) {
@@ -70,7 +70,7 @@ public class DataLoaderEngine {
         }
     }
 
-    private void loadXnameLocationData() {
+    private void loadForeignLocationData() {
        allLocations = CommonFunctions.getLocations();
     }
 

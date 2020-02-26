@@ -8,6 +8,7 @@ import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.CommonFunctions;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
@@ -54,20 +55,26 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
         try {
             PropertyMap message = parser_.fromString(data).getAsMap();
             checkMessage(message);
-            String[] xnameLocations = message.getStringOrDefault("location", "").split(",");
+            String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
             String eventType = message.getStringOrDefault("event-type", null);
             String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
             List<CommonDataFormat> commonList = new ArrayList<>();
-            for(String xnameLocation: xnameLocations) {
-                String location = CommonFunctions.convertXNameToLocation(xnameLocation);
-                CommonDataFormat common = new CommonDataFormat(
-                        CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
-                        location, DataType.RasEvent);
-                String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
-                common.setRasEvent(ucsEvent, payload);
-                common = suppressEvents(common);
-                if(common != null)
-                    commonList.add(common);
+            for(String foreignLocation: foreignLocations) {
+                try {
+                    String location = CommonFunctions.convertForeignToLocation(foreignLocation);
+                    CommonDataFormat common = new CommonDataFormat(
+                            CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
+                            location, DataType.RasEvent);
+                    String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
+                    common.setRasEvent(ucsEvent, payload);
+                    common = suppressEvents(common);
+                    if (common != null)
+                        commonList.add(common);
+                } catch(ConversionException e) {
+                    log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
+                            "location %s", foreignLocation);
+                    log_.debug("Skipped location for data: %s", data);
+                }
             }
             return commonList;
         } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
