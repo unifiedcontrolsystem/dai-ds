@@ -123,6 +123,10 @@ public class HWInvTranslator {
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
+    public String toCanonicalJson(HWInvTree canonicalTree) {
+        return util.toCanonicalJson(canonicalTree);
+    }
+
     /**
      * <p> Make several attempts at translating the location described by the input file.  Return upon the first
      * success.

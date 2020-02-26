@@ -295,18 +295,16 @@ class MySystemActions {
         HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
 
         ImmutablePair<String, HWInvTree> canonicalResult = tr.toCanonical(foreignHWInvJson);
+
         // Map xnames to DAI namespace
-        HWInvTree hwInv = canonicalResult.getValue();
-        for (HWInvLoc loc: hwInv.locs) {
+        // Perhaps the conversion function can be sent in as a lambda to tr.foreignToCanonical()
+        // Best to wait for some functional tests to be available before doing this
+        HWInvTree canonicalTree = canonicalResult.getValue();
+        for (HWInvLoc loc: canonicalTree.locs) {
             loc.ID = CommonFunctions.convertLocationToXName(loc.ID);
         }
 
-        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
-        if (canonicalHwInv.getKey() == null) {
-            log_.error("failed to translate foreign HW inventory json");
-            return null;
-        }
-        return canonicalHwInv.getValue();
+        return tr.toCanonicalJson(canonicalTree);
     }
 
     /**
