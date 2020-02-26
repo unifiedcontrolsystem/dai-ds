@@ -33,7 +33,7 @@ public class EventSimApp extends EventSim {
         super(log);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         log_ = LoggerFactory.getInstance("EventSimApp", "EventSimApp", "console");
         if(args.length != 2) {
             log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");

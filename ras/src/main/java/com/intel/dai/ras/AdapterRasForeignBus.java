@@ -91,13 +91,13 @@ public class AdapterRasForeignBus {
             String sTempControlOperation = vt.getString("ControlOperation");
             String sTempLctn             = vt.getString("Lctn");
             String sTempJobId            = vt.getString("JobId");
-            String sTempDescrName        = vt.getString("DescriptiveName");
             boolean bDoneWithThisEventsControlOperation = false;
 
             if (sTempLctn == null) {
                 // the specified RAS event's lctn is null, so no don't try to run any control operation.
-                log_.warn("Did NOT run this RAS event's ControlOperation because the event has no specified lctn, ignoring this ControlOperation - DescrName=%s, EventId=%s, JobId=%s, ControlOperation=%s!",
-                        sTempDescrName, sTempEventId, sTempJobId, sTempControlOperation);
+                log_.warn("Did NOT run this RAS event's ControlOperation because the event has no specified lctn, " +
+                                "ignoring this ControlOperation - EventId=%s, JobId=%s, ControlOperation=%s!",
+                        sTempEventId, sTempJobId, sTempControlOperation);
                 // Explicitly set the boolean indicating that we are done with this event's control operation.
                 // Note: yes I know that the boolean is already set to true, but I want it explicitly set here so it is never accidentally removed from this specific flow...
                 bDoneWithThisEventsControlOperation = true;
