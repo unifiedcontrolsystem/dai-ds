@@ -4,18 +4,26 @@
 //
 package com.intel.dai.inventory;
 
-import com.intel.dai.dsapi.BootState;
+import com.intel.dai.dsapi.*;
+import com.intel.dai.dsimpl.DataStoreFactoryImpl;
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.inventory.api.ForeignHWInvChangeNotification;
+import com.intel.dai.inventory.api.HWInvDiscovery;
 import com.intel.dai.inventory.api.HWInvNotificationTranslator;
+import com.intel.dai.inventory.api.HWInvTranslator;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
+import com.intel.networking.restclient.RESTClientException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.intel.dai.inventory.api.HWInvDiscovery.queryHWInvTree;
 
 /**
  * Description of class BootEventTransformer.
@@ -119,7 +127,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     @Override
     public void actOnData(CommonDataFormat workItem, NetworkListenerConfig config, SystemActions systemActions) {
         if(config_ == null)
-            getConfig(config, systemActions);
+            getConfig(config);  // , systemActions);
 
         String location = determineHWInventoryUpdateLocation(workItem);
         if (location != null) {
@@ -160,9 +168,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         }
     }
 
-    private void getConfig(NetworkListenerConfig config, SystemActions systemActions) {
+    private void getConfig(NetworkListenerConfig config) {
         config_ = config;
-        actions_ = systemActions;
+        actions_ = new MySystemActions(log_);
 
         // Possible TODOs: RAZ and Publisher config (Rabbit MQ)
     }
@@ -170,11 +178,170 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private Logger log_;
 
     private NetworkListenerConfig config_ = null;
-    private SystemActions actions_ = null;
+    private MySystemActions actions_ = null;
 
     static long lastSnapshotTimestamp = -1;
 
     private final static String XNAME_KEY = "xname";
+}
+
+class MySystemActions {
+    MySystemActions(Logger logger) {
+        log_ = logger;
+        String[] servers = new String[1];
+        String server = "localhost";
+        servers[0] = server;
+        DataStoreFactory factory = new DataStoreFactoryImpl(servers, logger);
+        hwInvApi_ = factory.createHWInvApi();
+    }
+    /**
+     * <p> Determines if the HW inventory DB is currently empty. </p>
+     * @return true if the DB is empty, otherwise false
+     * @throws IOException I/O exception
+     * @throws DataStoreException datastore exception
+     */
+    public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
+        return hwInvApi_.numberOfLocationsInHWInv() == 0;
+    }
+
+    /**
+     * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
+     * @param root root location in foreign format
+     */
+    public void upsertHWInventory(String root) {
+        HWInvTree before = getHWInvSnapshot(root);
+
+        try {
+            ingestCanonicalHWInvJson(
+                    toCanonicalHWInvJson(
+                            getForeignHWInvJson(
+                                    root)));
+        } catch (NetworkListenerProviderException e) {
+            log_.error("ingestion failed: %s", e.getMessage());
+            return;
+        }
+
+        HWInvTree after = getHWInvSnapshot(root);
+
+        if (before == null || after == null) {
+            log_.error("before or after is null");
+            return;
+        }
+        HWInvUtilImpl util = new HWInvUtilImpl();
+        List<HWInvLoc> delList = util.subtract(before.locs, after.locs);
+        for (HWInvLoc s : delList) {
+            log_.info("deleted: %s from %s", s.FRUID, s.ID);
+            insertHistoricalRecord("DELETED", s);
+        }
+        List<HWInvLoc> addList = util.subtract(after.locs, before.locs);
+        for (HWInvLoc s : addList) {
+            log_.info("inserted: %s into %s", s.FRUID, s.ID);
+            insertHistoricalRecord("INSERTED", s);
+        }
+    }
+
+    private void insertHistoricalRecord(String action, HWInvLoc s) {
+        try {
+            hwInvApi_.insertHistoricalRecord(action, s.ID, s.FRUID);
+        } catch (InterruptedException e) {
+            log_.error("InterruptedException: %s", e.getMessage());
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+    }
+
+    private HWInvTree getHWInvSnapshot(String root) {
+        if (root == null) {
+            return null;
+        }
+        try {
+            return hwInvApi_.allLocationsAt(root, null);
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * <p> Ingests the HW inventory locations in canonical form. </p>
+     * @param canonicalHwInvJson json containing the HW inventory locations in canonical format
+     */
+    private void ingestCanonicalHWInvJson(String canonicalHwInvJson) {
+        if (canonicalHwInvJson == null) return;
+
+        try {
+            hwInvApi_.ingest(canonicalHwInvJson);
+        } catch (InterruptedException e) {
+            log_.error("InterruptedException: %s", e.getMessage());
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+    }
+
+    /**
+     * <p> Converts the HW inventory locations in foreign format into canonical format. </p>
+     * @param foreignHWInvJson json containing the HW inventory in foreign format
+     * @return json containing the HW inventory in canonical format
+     */
+    private String toCanonicalHWInvJson(String foreignHWInvJson) throws NetworkListenerProviderException {
+        if (foreignHWInvJson == null) return null;
+
+        HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
+
+        ImmutablePair<String, HWInvTree> canonicalResult = tr.toCanonical(foreignHWInvJson);
+        // Map xnames to DAI namespace
+        HWInvTree hwInv = canonicalResult.getValue();
+        for (HWInvLoc loc: hwInv.locs) {
+            loc.ID = CommonFunctions.convertLocationToXName(loc.ID);
+        }
+
+        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
+        if (canonicalHwInv.getKey() == null) {
+            log_.error("failed to translate foreign HW inventory json");
+            return null;
+        }
+        return canonicalHwInv.getValue();
+    }
+
+    /**
+     * <p> Obtains the HW inventory locations at the given root.  If the root is "", all locations of the
+     * HPC is returned. </p>
+     * @param root root location for a HW inventory tree or "" for the root of the entire HPC
+     * @return json containing the requested locations
+     */
+    private String getForeignHWInvJson(String root) {
+        if (root == null) return null;
+
+        try {
+            HWInvDiscovery.initialize(log_);
+            log_.info("rest client created");
+
+        } catch (RESTClientException e) {
+            log_.fatal("Fail to create REST client: %s", e.getMessage());
+            return null;
+        }
+
+        ImmutablePair<Integer, String> foreignHwInv;
+        if (root.equals("")) {
+            foreignHwInv = queryHWInvTree();
+        } else {
+            foreignHwInv = queryHWInvTree(root);
+        }
+        if (foreignHwInv.getLeft() != 0) {
+            log_.error("failed to acquire foreign HW inventory json");
+            return null;
+        }
+        return foreignHwInv.getRight();
+    }
+
+    private Logger log_;
+    private HWInvApi hwInvApi_;
 }
 
 /**
@@ -182,9 +349,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
  */
 class HWInventoryUpdate implements Runnable {
     private String location_;
-    private SystemActions actions_;
+    private MySystemActions actions_;
 
-    public HWInventoryUpdate(String xname, SystemActions actions) {
+    public HWInventoryUpdate(String xname, MySystemActions actions) {
         location_ = xname;
         actions_ = actions;
     }

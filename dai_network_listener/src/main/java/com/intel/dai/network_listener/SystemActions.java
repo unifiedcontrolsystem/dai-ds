@@ -33,6 +33,6 @@ public interface SystemActions extends AutoCloseable, Closeable {
     void logFailedToUpdateNodeBootImageId(String location, String instanceData);
     void logFailedToUpdateBootImageInfo(String instanceData);
 
-    boolean isHWInventoryEmpty() throws IOException, DataStoreException;
-    void upsertHWInventory(String location);
+//    boolean isHWInventoryEmpty() throws IOException, DataStoreException;
+//    void upsertHWInventory(String location);
 }

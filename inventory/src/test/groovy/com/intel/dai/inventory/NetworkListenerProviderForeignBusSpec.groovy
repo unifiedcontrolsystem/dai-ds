@@ -111,14 +111,14 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         cdfs[0].getNanoSecondTimestamp() == cdfs[1].getNanoSecondTimestamp()
     }
 
-    def "Test empty actOnData"() {
-        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
-        data.storeExtraData("xname", "x0")
-        def sa = Mock(SystemActions)
-        sa.isHWInventoryEmpty() >> true
-        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
-        expect: true
-    }
+//    def "Test empty actOnData"() {
+//        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
+//        data.storeExtraData("xname", "x0")
+//        def sa = Mock(SystemActions)
+//        sa.isHWInventoryEmpty() >> true
+//        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
+//        expect: true
+//    }
 
     // foreignBs is guaranteed not to be null by the scn translator
     def "toBootState - expected foreign component state"() {

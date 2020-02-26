@@ -771,6 +771,7 @@ project(":inventory") {
         compile project(":xdg")
         compile project(':dai_core')
         compile project(':dai_network_listener')
+        compile project(':inventory_api')
         compile project(":foreign_bus")
 
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version

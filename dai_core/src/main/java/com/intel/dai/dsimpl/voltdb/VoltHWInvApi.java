@@ -80,12 +80,12 @@ public class VoltHWInvApi implements HWInvApi {
     private int ingest(HWInvTree hwInv) throws IOException, DataStoreException, InterruptedException {
         int status = 1;
         // The HWInvTree constructor guarantees that hwInv.locs is never null.
-        for (HWInvLoc slot: hwInv.locs) {
+        for (HWInvLoc loc: hwInv.locs) {
             try {
-                logger.info("Ingesting %s", slot.ID);
+                logger.info("Ingesting %s", loc.ID);
                 client.callProcedure("UpsertLocationIntoHWInv",
-                        slot.ID, slot.Type, slot.Ordinal,
-                        slot.FRUID, slot.FRUType, slot.FRUSubType);
+                        loc.ID, loc.Type, loc.Ordinal,
+                        loc.FRUID, loc.FRUType, loc.FRUSubType);
                 status = 0;
             } catch (ProcCallException e) {
                 // upsert errors are ignored

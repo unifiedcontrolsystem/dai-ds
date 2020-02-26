@@ -50,22 +50,22 @@ class NetworkListenerSystemActionsSpec extends Specification {
         NetworkDataSourceFactory.unregisterImplementation("test")
     }
 
-    def "upsertHWInventory"() {
-        when: underTest_.upsertHWInventory(null)
-        then: notThrown Exception
-    }
-
-    def "ingestCanonicalHWInvJson"() {
-        expect: underTest_.ingestCanonicalHWInvJson(null) == null
-    }
-
-    def "toCanonicalHWInvJson"() {
-        expect: underTest_.toCanonicalHWInvJson(null) == null
-    }
-
-    def "getForeignHWInvJson"() {
-        expect: underTest_.getForeignHWInvJson(null) == null
-    }
+//    def "upsertHWInventory"() {
+//        when: underTest_.upsertHWInventory(null)
+//        then: notThrown Exception
+//    }
+//
+//    def "ingestCanonicalHWInvJson"() {
+//        expect: underTest_.ingestCanonicalHWInvJson(null) == null
+//    }
+//
+//    def "toCanonicalHWInvJson"() {
+//        expect: underTest_.toCanonicalHWInvJson(null) == null
+//    }
+//
+//    def "getForeignHWInvJson"() {
+//        expect: underTest_.getForeignHWInvJson(null) == null
+//    }
 
     def "formatRawMessage"() {
         def json = """{"location":"location","type":"type","value":0.0,"timestamp":"1970-01-01 00:00:00.000000099Z"}"""
@@ -104,12 +104,12 @@ class NetworkListenerSystemActionsSpec extends Specification {
         expect: true
     }
 
-    def "isHWInventoryEmpty"() {
-        expect: underTest_.isHWInventoryEmpty()
-    }
-
-    def "insertHistoricalRecord"() {
-        given: underTest_.insertHistoricalRecord("action", new HWInvLoc())
-        expect: true
-    }
+//    def "isHWInventoryEmpty"() {
+//        expect: underTest_.isHWInventoryEmpty()
+//    }
+//
+//    def "insertHistoricalRecord"() {
+//        given: underTest_.insertHistoricalRecord("action", new HWInvLoc())
+//        expect: true
+//    }
 }

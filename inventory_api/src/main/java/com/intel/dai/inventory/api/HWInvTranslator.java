@@ -130,12 +130,12 @@ public class HWInvTranslator {
      * @param foreignJson string contain a json of a HW inventory locations in foreign format
      * @return pair containing subject of the input HW inventory json and its content as a HWInvTree object
      */
-    private ImmutablePair<String, HWInvTree> toCanonical(String foreignJson) {
+    public ImmutablePair<String, HWInvTree> toCanonical(String foreignJson) {
         logger.info("Attempt toForeignHWInvByLocList");
-        ForeignHWInvByLoc[] frus = toForeignHWInvByLocList(foreignJson);
-        if (frus != null) {
+        ForeignHWInvByLoc[] locs = toForeignHWInvByLocList(foreignJson);
+        if (locs != null) {
             logger.info("Parsed toForeignHWInvByLocList");
-            return new ImmutablePair<>("", toCanonical(frus));      // location list has no explicit subject
+            return new ImmutablePair<>("", toCanonical(locs));      // location list has no explicit subject
         }
 
         logger.info("Attempt toForeignHWInventory");
