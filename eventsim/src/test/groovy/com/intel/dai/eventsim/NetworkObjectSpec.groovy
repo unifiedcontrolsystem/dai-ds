@@ -61,16 +61,16 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.networkConnectionObject == null
     }
 
-    def "Start and stop server" () {
-        loadData(networkConfig)
-        NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
-        networkObjectTest.initialise()
-        expect:
-        networkObjectTest.startServer()
-        networkObjectTest.serverStatus() == true
-        networkObjectTest.stopServer()
-        networkObjectTest.serverStatus() == false
-    }
+//    def "Start and stop server" () {
+//        loadData(networkConfig)
+//        NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
+//        networkObjectTest.initialise()
+//        expect:
+//        networkObjectTest.startServer()
+//        networkObjectTest.serverStatus() == true
+//        networkObjectTest.stopServer()
+//        networkObjectTest.serverStatus() == false
+//    }
 
     def "No prioor subscriptions, create, fetch and delete subscription for a url and subscriber" () {
         loadData(networkConfig)
