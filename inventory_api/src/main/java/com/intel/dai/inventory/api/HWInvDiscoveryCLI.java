@@ -23,8 +23,8 @@ public class HWInvDiscoveryCLI {
 
     private static String mode = "";
     private static Path outputFilePath = Paths.get("output.json");
-    private static String discoveryXname;
-    private static String queryXname;
+    private static String discoveryForeignName;
+    private static String queryForeignName;
 
     public static void main(String[] args) {
         log.initialize();
@@ -47,8 +47,8 @@ public class HWInvDiscoveryCLI {
     private int run(String[] args) {
         try {
             getOptions(args);
-            log.info("outputFilePath:%s, discoveryXname:%s, queryXname:%s",
-                    outputFilePath, discoveryXname, queryXname);
+            log.info("outputFilePath:%s, discoveryForeignName:%s, queryForeignName:%s",
+                    outputFilePath, discoveryForeignName, queryForeignName);
             return run();
         } catch (ParseException e) {
             log.error("ParseException: %s", e.getMessage());
@@ -68,10 +68,10 @@ public class HWInvDiscoveryCLI {
                     return toFile(snapshot, outputFilePath);
 
                 case "d":
-                    return HWInvDiscovery.initiateDiscovery(discoveryXname);
+                    return HWInvDiscovery.initiateDiscovery(discoveryForeignName);
 
                 case "q":
-                    ImmutablePair<Integer, String> update = HWInvDiscovery.queryHWInvTree(queryXname);
+                    ImmutablePair<Integer, String> update = HWInvDiscovery.queryHWInvTree(queryForeignName);
                     return toFile(update, outputFilePath);
 
                 default:
@@ -140,8 +140,8 @@ public class HWInvDiscoveryCLI {
             CommandLine cmd = parser.parse(options, args);
 
             CommonCliUtil cliUtil = new CommonCliUtil();
-            discoveryXname = cliUtil.getOptionValue(cmd, "d", discoveryXname);
-            queryXname = cliUtil.getOptionValue(cmd, "q", queryXname);
+            discoveryForeignName = cliUtil.getOptionValue(cmd, "d", discoveryForeignName);
+            queryForeignName = cliUtil.getOptionValue(cmd, "q", queryForeignName);
             outputFilePath = cliUtil.getOptionValue(cmd, "o", outputFilePath);
 
             // Only first option is accepted

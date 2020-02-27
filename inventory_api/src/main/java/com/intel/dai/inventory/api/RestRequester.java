@@ -10,8 +10,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public interface RestRequester {
     void initialize(Logger logger, Requester config, RESTClient restClient);
-    int initiateDiscovery(String xname);
+    int initiateDiscovery(String foreignName);
     int getDiscoveryStatus();
     ImmutablePair<Integer, String> getHwInventory();
-    ImmutablePair<Integer, String> getHwInventory(String xname);
+    ImmutablePair<Integer, String> getHwInventory(String foreignName);
 }

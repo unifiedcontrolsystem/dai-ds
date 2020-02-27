@@ -1,6 +1,6 @@
 package com.intel.dai.eventsim;
 
-import com.intel.dai.network_listener.NetworkListenerProviderException;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyNotExpectedType;
@@ -71,7 +71,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
                 publishedEvents = bootEvents.size();
             }
-        } catch (final RESTClientException | NetworkListenerProviderException e) {
+        } catch (final RESTClientException | ConversionException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -102,7 +102,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.events.toString(), rasEvents, constantMode_, timeDelayMus_);
                 publishedEvents = rasEvents.size();
             }
-        } catch (final PropertyNotExpectedType | NetworkListenerProviderException | RESTClientException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | RESTClientException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -133,7 +133,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.telemetry.toString(), sensorEvents, constantMode_, timeDelayMus_);
                 publishedEvents = sensorEvents.size();
             }
-        } catch (final PropertyNotExpectedType | NetworkListenerProviderException | RESTClientException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | RESTClientException e) {
             throw new SimulatorException(e.getMessage());
         }
     }

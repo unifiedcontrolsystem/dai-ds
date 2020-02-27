@@ -226,8 +226,11 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     }
 
     private void eventCallback(String eventType, String event, String id) {
+        String subject = eventType;
+        if(subjects_.size() > 0)
+            subject = subjects_.iterator().next();
         if(isListening() && callback_ != null)
-            callback_.processIncomingData(eventType, processRawEvent(event, id));
+            callback_.processIncomingData(subject, processRawEvent(event, id));
     }
 
     private String processRawEvent(String event, String id) {

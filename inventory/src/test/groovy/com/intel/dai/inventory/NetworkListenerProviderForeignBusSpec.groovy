@@ -101,12 +101,12 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         cdfs[0].getLocation() == "R0-CH0-CB0-CN3"
         cdfs[0].getDataType() == DataType.InventoryChangeEvent
         cdfs[0].getStateEvent() == BootState.NODE_ONLINE
-        cdfs[0].retrieveExtraData('xname') == 'x0c0s21b0n0'
+        cdfs[0].retrieveExtraData('foreignLocationKey') == 'x0c0s21b0n0'
 
         cdfs[1].getLocation() == "R0-CH0-CB0-CN2"
         cdfs[1].getDataType() == DataType.InventoryChangeEvent
         cdfs[1].getStateEvent() == cdfs[0].getStateEvent()
-        cdfs[1].retrieveExtraData('xname') == 'x0c0s24b0n0'
+        cdfs[1].retrieveExtraData('foreignLocationKey') == 'x0c0s24b0n0'
 
         cdfs[0].getNanoSecondTimestamp() == cdfs[1].getNanoSecondTimestamp()
     }

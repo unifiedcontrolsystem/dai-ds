@@ -122,7 +122,7 @@
     "x0c0s28b0n0d11": "X0-CH6-CN2_DIMM11",
 
     "x0c0s26e0"     : "X0-CH7",
-    "x0c0s26b0n0"   : "X0-CH7_CN3",
+    "x0c0s26b0n0"   : "X0-CH7-CN3",
     "x0c0s26b0n0p0" : "X0-CH7-CN3_CPU0",
     "x0c0s26b0n0p1" : "X0-CH7-CN3_CPU1",
     "x0c0s26b0n0d0" : "X0-CH7-CN3_DIMM0",
