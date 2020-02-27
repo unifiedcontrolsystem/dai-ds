@@ -1,8 +1,8 @@
 package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIOFactory;
-import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.logging.Logger;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
@@ -180,7 +180,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateRasEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateRasEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -193,7 +193,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateRasEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateRasEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -206,7 +206,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateSensorEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateSensorEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -219,7 +219,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateSensorEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateSensorEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -232,7 +232,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateBootEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateBootEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -245,7 +245,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateBootEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateBootEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("probability", "0");

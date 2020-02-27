@@ -103,7 +103,7 @@ class EventSimAppSpec extends Specification {
             eventSimApiTest.initiateInventoryDiscovery(params)
         then:
             def e = thrown(ResultOutputException)
-            e.getMessage() == "404::One or more requested RedfishEndpoint xname IDs was not found."
+            e.getMessage() == "404::One or more requested RedfishEndpoint foreign IDs was not found."
     }
 
     def "Inventory discovery status" () {

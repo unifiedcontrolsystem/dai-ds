@@ -30,11 +30,11 @@ public class HWInvDiscovery {
         HWInvDiscovery.createRestClient();
     }
 
-    public static int initiateDiscovery(String xname) {
+    public static int initiateDiscovery(String foreignName) {
         if (requester_ == null) {
             return 1;
         }
-        return requester_.initiateDiscovery(xname);
+        return requester_.initiateDiscovery(foreignName);
     }
     public static int pollForDiscoveryProgress() {
         if (requester_ == null) {
@@ -42,12 +42,12 @@ public class HWInvDiscovery {
         }
         return requester_.getDiscoveryStatus();
     }
-    public static ImmutablePair<Integer, String> queryHWInvTree(String xname) {
+    public static ImmutablePair<Integer, String> queryHWInvTree(String foreignName) {
         if (requester_ == null) {
             log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
         }
-        return requester_.getHwInventory(xname);
+        return requester_.getHwInventory(foreignName);
     }
 
     public static ImmutablePair<Integer, String> queryHWInvTree() {
