@@ -158,8 +158,4 @@
         <Bug code="SECWTM" />
     </Match>
 
-    <Match> <!-- TODO: These were introduced with the WLM support in eventsim, they need to be fixed-->
-        <Class name="com.intel.dai.eventsim.WlmApi" />
-        <Bug code="Dm,OBL,Bx" />
-    </Match>
 </FindBugsFilter>
