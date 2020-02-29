@@ -120,15 +120,19 @@ public class HWInvTranslator {
     public ImmutablePair<String, String> foreignToCanonical(String foreignJson) {
         ImmutablePair<String, HWInvTree> translatedResult = toCanonical(foreignJson);
         String subject = translatedResult.getKey();
+        ArrayList<HWInvLoc> translatedLocs = new ArrayList<>();
         HWInvTree canonicalTree = translatedResult.getValue();
         for (HWInvLoc loc: canonicalTree.locs) {
             try {
                 loc.ID = CommonFunctions.convertForeignToLocation(loc.ID);
+                translatedLocs.add(loc);
             } catch(ConversionException e) {
                 logger.error("Failed to read JSON from stream: %s", e.getMessage());
-                return new ImmutablePair<>(null, null);
+                continue;   // drop this entry
             }
         }
+
+        canonicalTree.locs = translatedLocs;
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
@@ -164,7 +168,7 @@ public class HWInvTranslator {
                 }
                 return new ImmutablePair<>(root, toCanonical(foreignTree));
             }
-            logger.error("ForeignName is null");
+            logger.info("ForeignName is null");
         }
 
         logger.info("Attempt toForeignHWInvByLocNode");

@@ -68,11 +68,11 @@ class HWInvTranslatorSpec extends Specification {
         when:
         def retVal = ts.run(myArgs)
         then:
-        retVal == 1
-//        def inputFile = new File(expectedResultFileName)
-//        def outputFile = new File(outputFileName)
-//
-//        expect: FileUtils.contentEquals(inputFile, outputFile) == false
+        retVal == 0
+        def inputFile = new File(expectedResultFileName)
+        def outputFile = new File(outputFileName)
+
+        expect: FileUtils.contentEquals(inputFile, outputFile) == true
 
         where:
         inputFileName                                         | outputFileName                       || expectedResultFileName
