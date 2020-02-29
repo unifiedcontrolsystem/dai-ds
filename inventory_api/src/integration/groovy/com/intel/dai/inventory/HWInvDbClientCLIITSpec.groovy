@@ -33,16 +33,16 @@ class HWInvDbClientCLIITSpec extends Specification {
         fileName                                                          | dummy
         dataDir+"foreignHwByLocList/translated/preview4HWInventory.json"  | null
     }
-    def "Test run args - v2d" () {
+    def "Test run args - v2d -- mapping error" () {
         String[] myArgs = ["-v", fileName]
 
         expect:
-        cli.run(myArgs) == 0
+        cli.run(myArgs) == res
 
         where:
-        fileName                                                    | dummy
-        dataDir+"foreignHwByLoc/nestedNode.json"                    | null
-        dataDir+"foreignHwInventory/nestedNodeOnlyHWInventory.json" | null
-        dataDir+"foreignHwByLocList/preview4HWInventory.json"       | null
+        fileName                                                    | res
+        dataDir+"foreignHwByLoc/nestedNode.json"                    | 1
+        dataDir+"foreignHwInventory/nestedNodeOnlyHWInventory.json" | 1
+        dataDir+"foreignHwByLocList/preview4HWInventory.json"       | 0
     }
 }
