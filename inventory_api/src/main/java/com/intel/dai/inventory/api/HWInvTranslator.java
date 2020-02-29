@@ -122,6 +122,9 @@ public class HWInvTranslator {
         String subject = translatedResult.getKey();
         ArrayList<HWInvLoc> translatedLocs = new ArrayList<>();
         HWInvTree canonicalTree = translatedResult.getValue();
+        if (canonicalTree == null) {
+            return ImmutablePair.nullPair();
+        }
         for (HWInvLoc loc: canonicalTree.locs) {
             try {
                 loc.ID = CommonFunctions.convertForeignToLocation(loc.ID);
