@@ -290,9 +290,9 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            wlmApi.createReservation(name, users, nodes, starttime, duration);
+            String result = wlmApi.createReservation(name, users, nodes, starttime, duration);
 
-            return create_result_json("F", "Success");
+            return create_result_json("F", result);
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }
@@ -304,9 +304,9 @@ public class EventSimApp extends EventSim {
             String users = parameters.get("users");
             String nodes = parameters.get("nodes");
             String starttime = parameters.get("starttime");
-            wlmApi.modifyReservation(name, users, nodes, starttime);
+            String result = wlmApi.modifyReservation(name, users, nodes, starttime);
 
-            return create_result_json("F", "Success");
+            return create_result_json("F", result);
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }
@@ -315,9 +315,9 @@ public class EventSimApp extends EventSim {
     public String deleteReservation(final Map<String, String> parameters) {
         try {
             String name = parameters.get("name");
-            wlmApi.deleteReservation(name);
+            String result = wlmApi.deleteReservation(name);
 
-            return create_result_json("F", "Success");
+            return create_result_json("F", result);
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }
@@ -335,9 +335,9 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            wlmApi.startJob(jobid, name, users, nodes, starttime, workdir);
+            String result = wlmApi.startJob(jobid, name, users, nodes, starttime, workdir);
 
-            return create_result_json("F", "Success");
+            return create_result_json("F", result);
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }
@@ -356,9 +356,9 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            wlmApi.terminateJob(jobid, name, users, nodes, starttime, workdir, exitStatus);
+            String result = wlmApi.terminateJob(jobid, name, users, nodes, starttime, workdir, exitStatus);
 
-            return create_result_json("F", "Success");
+            return create_result_json("F", result);
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }
