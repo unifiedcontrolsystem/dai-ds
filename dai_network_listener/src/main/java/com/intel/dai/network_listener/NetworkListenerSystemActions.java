@@ -159,9 +159,14 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     @Override
     public void changeNodeBootImageId(String location, String id) {
         try {
-            bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            if(nodeInformation_.isComputeNodeLocation(location))
+                bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            else
+                logFailedToUpdateNodeBootImageId(location,
+                        "Service nodes are currently unsupported for this operation.");
         } catch(DataStoreException e) {
-            log_.exception(e, "Failed to update the boot image ID for location '%s'", location);
+            log_.exception(e, "Failed to update the boot image ID for compute node location '%s'", location);
+            logFailedToUpdateNodeBootImageId(location, "Compute node: " + e.getMessage());
         }
     }
 
@@ -232,6 +237,12 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.info("inserted: %s into %s", s.FRUID, s.ID);
             insertHistoricalRecord("INSERTED", s);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(publisher_ != null)
+            publisher_.close();
     }
 
     private void insertHistoricalRecord(String action, HWInvLoc s) {
@@ -324,12 +335,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             return null;
         }
         return foreignHwInv.getRight();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if(publisher_ != null)
-            publisher_.close();
     }
 
     private Map<String,String> translateForeignBootImageInfo(Map<String,String> entry) {
