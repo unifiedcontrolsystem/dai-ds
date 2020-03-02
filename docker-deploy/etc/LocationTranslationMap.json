@@ -137,5 +137,8 @@
     "x0c0s26b0n0d9" : "X0-CH7-CN3_DIMM9",
     "x0c0s26b0n0d10": "X0-CH7-CN3_DIMM10",
     "x0c0s26b0n0d11": "X0-CH7-CN3_DIMM11"
-  }
+  },
+  "sensor_embedded_cpu_pattern": "_CPU[0-9]+",
+  "sensor_embedded_channel_pattern": "_CH[0-9]+",
+  "sensor_embedded_dimm_pattern": "_DIMM[0-9]+"
 }
