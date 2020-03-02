@@ -6,7 +6,7 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "localhost",
+        "connectAddress": "api-gw-service-nmn.local",
         "connectPort": 8081,
         "bindAddress": "*",
         "bindPort": 54322,
