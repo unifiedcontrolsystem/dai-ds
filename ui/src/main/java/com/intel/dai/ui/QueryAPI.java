@@ -71,13 +71,13 @@ public class QueryAPI {
                     jsonResult = executeProcedureNoParams("{call ComputeNodeHistoryOldestTimestamp()}");
                     break;
                 case "inventoryss":
-                    jsonResult = executeProcedureStartEndTime("{call InventorySnapshotList(?, ?)}", starttime, endtime);
+                    jsonResult = executeProcedureStartEndTime("{call getinventoryinfoforlctn(?, ?)}", starttime, endtime);
                     break;
                 case "inventoryinfo":
-                    jsonResult = executeProcedureStartEndTime("{call InventoryInfoList(?, ?)}", starttime, endtime);
+                    jsonResult = executeProcedureStartEndTime("{call getinventoryhistoryforlctn(?, ?)}", starttime, endtime);
                     break;
                 case "replacementhistory":
-                    jsonResult = executeProcedureStartEndTime("{call ReplacementHistoryList(?, ?)}", starttime, endtime);
+                    jsonResult = executeProcedureStartEndTime("{call getinventorychange(?, ?)}", starttime, endtime);
                     break;
                 case "reservationlist":
                     jsonResult = executeProcedureStartEndTime("{call ReservationListAtTime(?, ?)}", starttime, endtime);
