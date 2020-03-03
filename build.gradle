@@ -34,13 +34,6 @@ apply plugin: 'java'
 /////////////////////////////////////////////////////////////////////////////////////////
 def JAVA8_HOME=System.getProperty("java8.bootstrapClasspath",
         System.getenv("JAVA8_BOOTSTRAP_CLASSPATH"))
-if(JAVA8_HOME == null || JAVA8_HOME =="")
-    System.err.println(
-"""*** WARNING: you are missing the java8.bootstrapClasspath property pointing to
-    the Java 8 Runtime library. This could lead to runtime errors in the
-    cross-compiled JAR files. See the project root build.gradle file for
-    details about setting this up. Official builds MUST have this defined
-    properly.""")
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Build variables                                                                     //
@@ -105,7 +98,6 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 /////////////////////////////////////////////////////////////////////////////////////////
 
 def enforceStaticAnalysis = true
-def pmdScanLevel = 2
 def enforceCodeCoverage = includeDbgSymbols
 
 import java.time.Instant
@@ -151,7 +143,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'jacoco'
-    apply plugin: 'pmd'
     apply plugin: 'com.github.spotbugs'
 
     repositories {
@@ -217,22 +208,6 @@ subprojects {
                 from configurations.compile
                 into "../build/jars"
             }
-        }
-    }
-
-    pmdTest.enabled = false
-    pmdMain {
-        group = "Reporting"
-        consoleOutput = true
-        rulePriority = pmdScanLevel
-        ignoreFailures = !enforceStaticAnalysis
-        ruleSets = []
-        ruleSetFiles = files("${rootProject.projectDir}/pmd.xml")
-        reports {
-            xml.enabled = true
-            xml.destination = file("${rootProject.buildDir}/pmd/${project.name}.xml")
-            html.enabled = true
-            html.destination = file("${rootProject.buildDir}/reports/pmd/${project.name}.html")
         }
     }
 
@@ -1685,16 +1660,6 @@ ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml down -v
 [Install]
 WantedBy=multi-user.target
 """
-        new File((String)"${buildDir}/tmp/eventsim-server.sh").text ="""#!/bin/bash -x
-
-LOG="/opt/ucs/log/eventsim-server.log"
-OPTS="-DdaiLoggingLevel=DEBUG"
-CP="/opt/dai-docker/lib/*"
-CLASS="com.intel.dai.eventsim.EventSimApiApp"
-
-java \${OPTS} -cp "\${CP}" \${CLASS} \$@ 2>&1 | tee \${LOG}
-exit \$?
-"""
         new File((String)"${buildDir}/tmp/hw-discovery.sh").text ="""#!/bin/bash -x
 
 java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDiscoveryCLI -m \$@
@@ -1725,9 +1690,6 @@ exit 0
     from ("${projectDir}/docker-deploy/dai.yml") {
         into("opt/dai-docker")
     }
-    from ("${projectDir}/docker-deploy/test_app.yml") {
-        into("opt/dai-docker")
-    }
     from("${buildDir}/jars") {
         exclude("**/procedures.jar")
         exclude("**/populate_schema.jar")
@@ -1748,37 +1710,33 @@ exit 0
         into("opt/dai-docker/dai")
         fileMode = 0700
     }
-    from("${projectDir}/docker-deploy/dai/testEntryPoint.sh") {
-        into("opt/dai-docker/dai")
-        fileMode = 0700
-    }
     from("${buildDir}/tmp/show-adapters2") {
         into("opt/ucs/bin")
         rename("show-adapters2", "show-adapters")
         fileMode = 0700
     }
     // EventSim Server
-    from("${projectDir}/config-files/EventSim.json") {
-        into("opt/ucs/etc")
+    from ("${projectDir}/docker-deploy/eventsim.yml") {
+        into("opt/dai-docker")
     }
-    from("${projectDir}/config-files/BootParameters.json") {
-        into("opt/ucs/etc")
-    }
-    from("${projectDir}/config-files/HWInventory.json") {
-        into("opt/ucs/etc")
-    }
-    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
-        into("opt/ucs/etc")
-    }
-    from("${projectDir}/docker-deploy/etc/LocationTranslationMap.json") {
-        into("opt/ucs/etc")
-    }
-    from("${buildDir}/tmp/eventsim-server.sh") {
-        into("opt/ucs/bin")
+    from("${projectDir}/docker-deploy/dai/eventsimEntryPoint.sh") {
+        into("opt/dai-docker/dai")
         fileMode = 0700
     }
-    from("${buildDir}/tmp/empty.txt") {
-        into("opt/ucs/log")
+    from("${projectDir}/docker-deploy/etc/EventSim.json") {
+       into("opt/dai-docker/etc")
+    }
+    from("${projectDir}/config-files/BootParameters.json") {
+        into("opt/dai-docker/etc")
+    }
+    from("${projectDir}/config-files/HWInventory.json") {
+        into("opt/dai-docker/etc")
+    }
+    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
+        into("opt/dai-docker/etc")
+    }
+    from("${projectDir}/docker-deploy/etc/LocationTranslationMap.json") {
+        into("opt/dai-docker/etc")
     }
     // HW Inventory
     from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {

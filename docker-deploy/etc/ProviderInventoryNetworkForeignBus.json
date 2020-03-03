@@ -6,8 +6,8 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "api-gw-service-nmn.local",
-        "connectPort": 8081,
+        "connectAddress": "sms01-nmn.local",
+        "connectPort": 8080,
         "bindAddress": "*",
         "bindPort": 54322,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
@@ -37,12 +37,12 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://sms01-nmn.local"
     },
     "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
-      "publish": true
+      "publish": false
     }
   },
 

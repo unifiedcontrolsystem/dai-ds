@@ -49,7 +49,7 @@ public class EventSimApp extends EventSim {
             eventsimServer.executeRoutes(eventsimServer);
             eventsimServer.startServer();
         } catch (SimulatorException | RESTServerException | RESTClientException | PropertyNotExpectedType e) {
-            log_.error(e.getMessage());
+            log_.exception(e);
             System.exit(1);
         }
     }
