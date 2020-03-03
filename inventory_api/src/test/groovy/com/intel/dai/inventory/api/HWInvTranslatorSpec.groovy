@@ -68,32 +68,28 @@ class HWInvTranslatorSpec extends Specification {
         when:
         def retVal = ts.run(myArgs)
         then:
-        retVal == 1
-//        def inputFile = new File(expectedResultFileName)
-//        def outputFile = new File(outputFileName)
-//
-//        expect: FileUtils.contentEquals(inputFile, outputFile) == false
+        retVal == 0
+        def inputFile = new File(expectedResultFileName)
+        def outputFile = new File(outputFileName)
+
+        expect: FileUtils.contentEquals(inputFile, outputFile) == true
 
         where:
         inputFileName                                         | outputFileName                       || expectedResultFileName
         dataDir+"foreignHwByLocList/preview4HWInventory.json" | tmpDir+"preview4HWInventory.tr.json" || dataDir+"foreignHwByLocList/translated/preview4HWInventory.json"
     }
-//    def "Translate HWInventory"() {
-//        String[] myArgs = ["-i", inputFileName, "-o", outputFileName]
-//        when:
-//        def retVal = ts.run(myArgs)
-//        then:
-//        retVal == 1
-//        def inputFile = new File(expectedResultFileName)
-//        def outputFile = new File(outputFileName)
-//
-//        expect: FileUtils.contentEquals(inputFile, outputFile) == false
-//
-//        where:
-//        inputFileName                                               | outputFileName                             || expectedResultFileName
-//        dataDir+"foreignHwInventory/nestedNodeOnlyHWInventory.json" | tmpDir+"nestedNodeOnlyHWInventory.tr.json" || dataDir+"foreignHwInventory/translated/nestedNodeOnlyHWInventory.json"
-//        dataDir+"foreignHwInventory/missingFromDoc.json"            | tmpDir+"missingFromDoc.tr.json"            || dataDir+"foreignHwInventory/translated/missingFromDoc.json"
-//    }
+    def "Translate HWInventory - bad mapping"() {
+        String[] myArgs = ["-i", inputFileName, "-o", outputFileName]
+        when:
+        def retVal = ts.run(myArgs)
+        then:
+        retVal == 1
+
+        where:
+        inputFileName                                               | outputFileName
+        dataDir+"foreignHwInventory/nestedNodeOnlyHWInventory.json" | tmpDir+"nestedNodeOnlyHWInventory.tr.json"
+        dataDir+"foreignHwInventory/missingFromDoc.json"            | tmpDir+"missingFromDoc.tr.json"
+    }
     def "toCanonical from ForeignHWInvByLoc - negative" () {
         def ts = new HWInvTranslator(null)
         def arg = new ForeignHWInvByLoc()
@@ -115,19 +111,19 @@ class HWInvTranslatorSpec extends Specification {
         "ID"    | "Type"    | 0         | "noSuchStatus"    | null
         "ID"    | "Type"    | 0         | "Empty"           | new ForeignFRU()
     }
-//    def "foreignToCanonical - negative"() {
-//        def ts = new HWInvTranslator(new HWInvUtilImpl())
-//        expect: ts.foreignToCanonical(inputFile).getKey() == res
-//
-//        where:
-//        inputFile                                               || res
-//        "doesNotExists"                                         || null
-//        dataDir+"foreignHwByLoc/translated/flatNode.json"       || null   // already translated
-//        dataDir+"foreignHwByLoc/flatProcessor.json"             || null   // only nodes are supported
-////        dataDir+"foreignHwInventory/missingFormat.json"         || null
-////        dataDir+"foreignHwInventory/missingXname.json"          || null
-////        dataDir+"foreignHwInventory/missingXnameAndFormat.json" || null
-//    }
+    def "foreignToCanonical - negative"() {
+        def ts = new HWInvTranslator(new HWInvUtilImpl())
+        expect: ts.foreignToCanonical(inputFile).getKey() == res
+
+        where:
+        inputFile                                               || res
+        "doesNotExists"                                         || null
+        dataDir+"foreignHwByLoc/translated/flatNode.json"       || null   // already translated
+        dataDir+"foreignHwByLoc/flatProcessor.json"             || null   // only nodes are supported
+        dataDir+"foreignHwInventory/missingFormat.json"         || null
+        dataDir+"foreignHwInventory/missingXname.json"          || null
+        dataDir+"foreignHwInventory/missingXnameAndFormat.json" || null
+    }
     def "extractParentId"() {
         def ts = new HWInvTranslator(null)
         expect: ts.extractParentId(candidate) == result
@@ -148,9 +144,9 @@ class HWInvTranslatorSpec extends Specification {
         where:
         inputFileName                                           | outputFileName                        | location
         dataDir+"foreignHwByLoc/flatNode.json"                  | tmpDir+"flatNode.json.tr"             | "x0c0s26b0n0"
-//        dataDir+"foreignHwByLocList/preview4HWInventory.json"   | tmpDir+"preview4HWInventory.json.tr"  | ""
-//        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | "x0c0s21b0n0"
-//        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   | tmpDir+"hsm-inv-hw-query-s0.json.tr"  | "s0"
+        dataDir+"foreignHwByLocList/preview4HWInventory.json"   | tmpDir+"preview4HWInventory.json.tr"  | ""
+        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | null
+        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   | tmpDir+"hsm-inv-hw-query-s0.json.tr"  | null
     }
     def "isValidLocationName"() {
         def ts = new HWInvTranslator(null)
