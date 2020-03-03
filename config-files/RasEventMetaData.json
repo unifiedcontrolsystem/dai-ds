@@ -425,7 +425,7 @@
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
         "ControlOperation":"ErrorAndKillJobOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"A compute node failed/died due to a Kernel Panic:"
     },
     {
@@ -465,7 +465,7 @@
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
         "ControlOperation":"ErrorAndKillJobOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"A compute node experienced a kernel oops:"
     },
     {
@@ -595,7 +595,7 @@
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected a mismatch between the data stores boot image checksum and the warewulf boot image checksum:"
     },
     {
@@ -605,7 +605,7 @@
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected a mismatch between the data stores boot strap checksum and the warewulf boot strap checksum:"
     },
     {
@@ -1045,7 +1045,7 @@
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected a NMI watchdog soft lockup, suppressing other occurrences of this event until this node is rebooted"
     },
 
@@ -1421,7 +1421,7 @@
         "Category":"Adapter",
         "Component":"AdapterNearlineTier",
         "ControlOperation":"Notify",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"DataReceiver appears to be stuck - data is not flowing to tier2 in a timely manner:"
     },
 
@@ -1693,7 +1693,7 @@
         "Category":"Adapter",
         "Component":"AdapterMonitorSensys",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Sensys detected an event from the compute node BMC's Event Logs - Memory Error:"
     },
     {
@@ -1863,7 +1863,7 @@
         "Category":"Adapter",
         "Component":"AdapterMonitorSensys",
         "ControlOperation":"Notify",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Sensys detected disk volume warning - Disk approaching full: "
     },
     {
@@ -1873,7 +1873,7 @@
         "Category":"Adapter",
         "Component":"AdapterMonitorSensys",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Sensys detected a device is not responding: "
     },
     {
@@ -2110,7 +2110,7 @@
         "Category":"Adapter",
         "Component":"AdapterDaiMgr",
         "ControlOperation":"ErrorOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected that this DaiMgr is running on a system with an unsynced clock:"
     },
     {
@@ -2120,7 +2120,7 @@
         "Category":"Adapter",
         "Component":"AdapterDaiMgr",
         "ControlOperation":"ErrorOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected that this DaiMgr instance is itself a zombie - will restart this whole systemctl service:"
     },
     {
@@ -2130,7 +2130,7 @@
         "Category":"Adapter",
         "Component":"AdapterDaiMgr",
         "ControlOperation":"ErrorOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected that this DaiMgr instance is itself a zombie - restart of systemctl service encountered an error:"
     },
     {
@@ -2140,7 +2140,7 @@
         "Category":"Adapter",
         "Component":"AdapterDaiMgr",
         "ControlOperation":"ErrorOnNode",
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Detected that this DaiMgr instance is itself a zombie - restart of systemctl service encountered an exception:"
     },
 
@@ -2296,7 +2296,7 @@
         "Category":"Adapter",
         "Component":"AdapterAlertMgr",
         "ControlOperation":null,
-        "GenerateAlert":"Y",
+        "GenerateAlert":"N",
         "Msg":"Test AlertMgr event that has GenerateAlert turned on:"
     },
     {
@@ -2357,7 +2357,7 @@
         "Severity":"ERROR",
         "Category":"Adapter",
         "Component":"AdapterMonitorHSS",
-        "ControlOperation":null,
+        "ControlOperation":"ErrorOnNode",
         "GenerateAlert":"N",
         "Msg":"Foreign node failed:"
     },
@@ -2377,7 +2377,7 @@
         "Severity":"FATAL",
         "Category":"Adapter",
         "Component":"AdapterMonitorHSS",
-        "ControlOperation":null,
+        "ControlOperation":"ErrorOnNode",
         "GenerateAlert":"N",
         "Msg":"Foreign node becomes unavailable:"
     },
