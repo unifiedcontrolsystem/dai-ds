@@ -119,7 +119,14 @@ build/distributions/install-docker_cp4_dai_{version}.sh
 
 These install package includes 4 services to control docker-compose
 containers. One each for postgres, voltdb, rabbitmq, and dai. It assumes all
-adapters run on one system.
+adapters run on one system. The EventSim application must be run as a
+standalone docker-compose application using the eventsim.yml file.
+
+__NOTE:__ This will run on a single system out-of-the box if you edit the
+___/etc/hosts___ file and add "_sms01-nmn.local_" as an alias for the system.
+Then stop using the services (see below). If you are behind a proxy please make
+sure that the no_proxy and NO_PROXY environmental variables have the "_.local_"
+domain excluded from the proxy lookups.
 
 Pre-requisites:
 ----------------
@@ -138,7 +145,7 @@ Pre-requisites:
                                     function as expected. Make sure ALL Foreign
                                     names match a DAI name and no "location" is missing
                                     or unexpected.
-5. The API (or eventsim) must be available for the
+5. The real API (or EventSim container) must be available for the
    ProviderMonitoringNetworkForeignBus and ProviderProvisionerNetworkForeignBus
    to connect.
 6. If the deployment system does not have internet access you must download and save the following docker images from Docker Hub then copy and reload them onto the target system's local docker repository:
@@ -177,6 +184,17 @@ These services all use the /opt/dai-docker/*.yml files for docker-compose
 launching.  _Do not use docker or docker-compose directly, without first stopping the services and disabling them_. Attempting to stop a container directly will just cause it to restart as the service is set to restart the container on container exit.
 
 Stopping or restarting is done as all services or all docker-compose. _Do not mix these control techniques_.
+
+__NOTE:__ If you are using EventSim instead of a real API you will need stop and disable the services and use docker-compose directly. Then start the containers in the following order as root:
+
+1. cd /opt/dai-docker
+2. docker-compose -f postgres.yml up -d
+3. docker-compose -f rabbitmq.yml up -d
+4. docker-compose -f voltdb.yml up -d _(wait 40 seconds for this to completely stablize)_
+5. docker-compose -f eventsim.yml up -d
+6. docker-compose -f dai.yml up -d
+
+Log output in either execution case will be in /opt/dai-docker/log/* for EventSim and DAI.
 
 
 Uninstalling DAI and Third Party Components

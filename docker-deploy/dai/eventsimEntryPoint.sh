@@ -3,7 +3,7 @@
 [[ -z "${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL="INFO"
 
 LOG="/opt/ucs/log/EventSim-${HOSTNAME}.log"
-ARGS=""
+ARGS="${VOLTDB_SERVERS} /opt/ucs/etc/EventSim.json"
 CLASS=com.intel.dai.eventsim.EventSimApp
 PROPS="-DdaiLoggingLevel=${DAI_LOGGING_LEVEL}"
 

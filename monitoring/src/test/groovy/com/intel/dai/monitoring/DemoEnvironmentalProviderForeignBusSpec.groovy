@@ -21,6 +21,7 @@ class DemoEnvironmentalProviderForeignBusSpec extends Specification {
     static String dataBad7_ = """{"metrics":{"messages":{}}}}"""
     static String dataBad8_ = """{"metrics":{"messages":[{"name":"TEST","timestamp":1577880000,"value":42}]}}"""
     static String badJson_ = """{]"""
+    static String multiJson_ = """{"metrics":{"messages":[{"name":"TE\\"ST","timestamp":1577880000,"value":42}]}}{"metrics":{"messages":[{"name":"T{ES}T","timestamp":1577880000,"value":42}]}}"""
     SystemActions actions_ = Mock(SystemActions)
 
     def underTest_
@@ -54,14 +55,13 @@ class DemoEnvironmentalProviderForeignBusSpec extends Specification {
         }
         expect: list.size() == RESULT
         where:
-        DATA      | RESULT
-        badJson_  | 0
-        data0_    | 0
-        data1_    | 1
-        dataBad3_ | 0
-        dataBad4_ | 0
-        dataBad7_ | 0
-        dataBad8_ | 1
+        DATA       | RESULT
+        badJson_   | 0
+        data0_     | 0
+        data1_     | 1
+        dataBad3_  | 0
+        dataBad4_  | 0
+        dataBad8_  | 1
     }
 
     def "Test ProcessRawStringData Negative"() {
@@ -74,5 +74,11 @@ class DemoEnvironmentalProviderForeignBusSpec extends Specification {
         dataBad2_ | 0
         dataBad5_ | 0
         dataBad6_ | 0
+        dataBad7_ | 0
+    }
+
+    def "Test ProcessRawStringData with multiJSON stream"() {
+        List<CommonDataFormat> list = underTest_.processRawStringData(multiJson_, config_)
+        expect: list.size() == 2
     }
 }
