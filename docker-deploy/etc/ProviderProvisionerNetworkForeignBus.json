@@ -8,7 +8,7 @@
       "arguments": {
         "connectAddress": "sms01-nmn.local",
         "connectPort": 8080,
-        "bindAddress": "*",
+        "bindAddress": "sms01-nmn.local",
         "bindPort": 54321,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "subjects": "stateChange",

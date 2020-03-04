@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
 
 /**
  * Description of class Java11RESTServer.
@@ -152,7 +153,6 @@ public class Java11RESTServer extends RESTServer {
         exchange.sendResponseHeaders(response.code_, response.body_.length());
         exchange.getResponseBody().write(response.body_.getBytes(StandardCharsets.UTF_8));
         exchange.getResponseBody().flush();
-        try { Thread.sleep(CONNECTION_LINGER); } catch(InterruptedException e) { /* Ignore interrupt */ }
         exchange.close();
     }
 
@@ -165,7 +165,6 @@ public class Java11RESTServer extends RESTServer {
             OutputStream responseBody = exchange.getResponseBody();
             responseBody.write(errorBody.getBytes(StandardCharsets.UTF_8));
             exchange.getResponseBody().flush();
-            try { Thread.sleep(CONNECTION_LINGER); } catch(InterruptedException e) { /* Ignore interrupt */ }
             responseBody.close();
         } catch(IOException e) {
             log_.exception(e, "Failed to send error reply to an exchange before closing the connection");
@@ -185,6 +184,8 @@ public class Java11RESTServer extends RESTServer {
             server_ = serverCreate();
             connectionManager_ = managerCreate();
             server_.createContext("/", this::urlHandler);
+            int poolSize = Math.max(4, Runtime.getRuntime().availableProcessors() / 2);
+            server_.setExecutor(Executors.newFixedThreadPool(poolSize));
         } catch (IOException cause) {
             failedServer_ = true;
             throw new RESTServerException("Failed to create the Java11RESTServer", cause);
