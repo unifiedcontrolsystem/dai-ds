@@ -122,7 +122,7 @@ public class NetworkListenerCore {
     }
 
     private boolean setUpAdapter() {
-        boolean useBenchmarking = config_.useBenchmarking() || Boolean.parseBoolean(System.getenv("USE_BENCHMARKING"));
+        boolean useBenchmarking = config_.useBenchmarking() || Boolean.parseBoolean(System.getenv("DAI_USE_BENCHMARKING"));
         try {
             if (useBenchmarking) {
                 actions_ = new BenchmarkingSystemActions(log_, factory_, adapter_, config_);
