@@ -206,36 +206,6 @@ function main()
     });
     rastable.draw();
 
-
-    diagstable = $("#Diags").DataTable({
-        select: 'single',
-        pageLength: 50,
-        order: [1, 'desc'],		// timestamp
-        jQueryUI: true,
-        autoWidth: false,
-        columns: [
-            {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                    var loc = rowData[3];  		// i.e., this cell
-                    $(cell).parent().attr("location", loc);		// add location to the <tr>
-                }},
-            {title: "Diag test"},
-            {title: "Start Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                    var time = rowData[1];  		// i.e., this cell
-                    $(cell).attr('history_start', ['RAS', time, rowData[3]].join(' '));
-                }},
-            {title: "End Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                    var time = rowData[1];  		// i.e., this cell
-                    $(cell).attr('history_end', ['ENV', time, rowData[3]].join(' '));
-                }},
-            {title: "Results"},
-            {title: "ServiceAction", visible: false, createdRow: function( row, data, dataIndex ) {
-                    if ( data[5] != null ) {
-                        $(row).addClass( 'diags_active' );
-                    }
-                }},
-        ],
-    });
-
     envtable = $("#Env").DataTable({
         select: 'select',
         pageLength: 50,

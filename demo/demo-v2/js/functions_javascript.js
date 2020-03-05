@@ -336,7 +336,6 @@ function main()
         }
     }).DataTable();
 
-
     envtable = $("#Env").DataTable({
         select: 'select',
         pageLength: 100,
@@ -498,41 +497,63 @@ function main()
     inventoryinfotable = $("#InvInfo").DataTable({
         select: 'single',
         pageLength: 5,
-        order: [1, 'desc'],		// timestamp
+        lengthMenu: [ 100, 200, 300, 400, 500 ],
+        order: [0, 'desc'],		// timestamp
         jQueryUI: true,
         autoWidth: false,
         columns: [
+            {title: "Timestamp"},
             {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                    var loc = rowData[0];  		// i.e., this cell
+                    var loc = rowData[1];  		// i.e., this cell
                     $(cell).parent().attr("location", loc);		// add location to the <tr>
                 }},
-            {title: "Time"},
-            {title: "Inventory Info", createdCell: function(cell,cellData, rowData){
-                    var value = rowData[2];
-                    $(cell).innerHTML = value;
-                }}
+            {title: "Type"},
+            {title: "Ordinal"},
+            {title: "Fru Id"},
+            {title: "Fru Type"},
+            {title: "Fru Sub Type"},
         ],
     });
+    inventoryinfotable.draw();
+
+    $("#InvInfo").on("page.dt", function(){
+         var table = $("#InvInfo").DataTable();
+         var table_info = table.page.info();
+         if (table_info.end == table_info.recordsTotal) {
+             var end_time_requested = (table.row(":last", {order: 'applied'}).data())[1];
+             var start_time_requested = get_start_date(end_time_requested, 30);
+             updateInventoryInfoFromDB(dbInventoryInfoResponse, start_time_requested, end_time_requested);
+         }
+     }).DataTable();
 
     replacementhistorytable = $("#ReplacementHistory").DataTable({
         select: 'single',
         pageLength: 100,
         lengthMenu: [ 100, 200, 300, 400, 500 ],
-        order: [4, 'desc'],		// timestamp
+        order: [0, 'desc'],		// timestamp
         jQueryUI: true,
         autoWidth: false,
         columns: [
+            {title: "Timestamp"},
             {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                    var loc = rowData[0];  		// i.e., this cell
+                    var loc = rowData[1];  		// i.e., this cell
                     $(cell).parent().attr("location", loc);		// add location to the <tr>
                 }},
-            {title: "New Serial Num"},
-            {title: "Old Serial Num"},
-            {title: "Fru Type"},
-            {title: "Timestamp"},
+            {title: "Action"},
+            {title: "Fru Id"},
         ],
     });
+    replacementhistorytable.draw();
 
+    $("#ReplacementHistory").on("page.dt", function(){
+             var table = $("#InvInfo").DataTable();
+             var table_info = table.page.info();
+             if (table_info.end == table_info.recordsTotal) {
+                 var end_time_requested = (table.row(":last", {order: 'applied'}).data())[1];
+                 var start_time_requested = get_start_date(end_time_requested, 30);
+                 updateReplacementHistoryFromDB(dbReplacementHistoryResponse, start_time_requested, end_time_requested);
+             }
+    }).DataTable();
 
     // Add highlight  location on touch for *both* the RAS and Service Action tables
     // Add highlight  location on touch for *both* the RAS and Service Action tables
