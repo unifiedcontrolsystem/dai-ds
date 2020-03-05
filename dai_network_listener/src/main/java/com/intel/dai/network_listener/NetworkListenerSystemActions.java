@@ -43,6 +43,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
         hwInvApi_ = factory_.createHWInvApi();
+        nodeInformation_ = factory_.createNodeInformation();
     }
 
     @Override
@@ -76,12 +77,19 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.exception(e);
             return;
         }
-        if(location == null || location.isBlank())
-            eventActions_.logRasEventNoEffectedJob(type, instanceData, location, nsTimestamp,
+        long usTimestamp = nsTimestamp / 1000L;
+        try {
+            if (location == null || location.isBlank() || nodeInformation_.isServiceNodeLocation(location))
+                eventActions_.logRasEventNoEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+            else
+                eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+        } catch(DataStoreException e) {
+            log_.exception(e);
+            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
                     adapter_.getType(), adapter_.getBaseWorkItemId());
-        else
-            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
-                    adapter_.getType(), adapter_.getBaseWorkItemId());
+        }
     }
 
     @Override
@@ -151,9 +159,14 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     @Override
     public void changeNodeBootImageId(String location, String id) {
         try {
-            bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            if(nodeInformation_.isComputeNodeLocation(location))
+                bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            else
+                logFailedToUpdateNodeBootImageId(location,
+                        "Service nodes are currently unsupported for this operation.");
         } catch(DataStoreException e) {
-            log_.exception(e, "Failed to update the boot image ID for location '%s'", location);
+            log_.exception(e, "Failed to update the boot image ID for compute node location '%s'", location);
+            logFailedToUpdateNodeBootImageId(location, "Compute node: " + e.getMessage());
         }
     }
 
@@ -224,6 +237,12 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.info("inserted: %s into %s", s.FRUID, s.ID);
             insertHistoricalRecord("INSERTED", s);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(publisher_ != null)
+            publisher_.close();
     }
 
     private void insertHistoricalRecord(String action, HWInvLoc s) {
@@ -318,12 +337,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         return foreignHwInv.getRight();
     }
 
-    @Override
-    public void close() throws IOException {
-        if(publisher_ != null)
-            publisher_.close();
-    }
-
     private Map<String,String> translateForeignBootImageInfo(Map<String,String> entry) {
         return entry; // TODO: Write the REAL translation when foreign formats are known.
     }
@@ -400,6 +413,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private AdapterOperations operations_;
     private HWInvApi hwInvApi_;
     private AdapterInformation adapter_;
+    private final NodeInformation nodeInformation_;
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;
     private boolean publisherConfigured_ = false;

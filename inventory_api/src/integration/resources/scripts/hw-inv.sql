@@ -9,7 +9,7 @@
 -- Unfortunately, a 1 table implementation is not possible because VoltDB
 -- is not ANSI-compliant.  You cannot have multiple NULL values in a UNIQUE column.
 
-LOAD CLASSES build/libs/procedures-0.0.0.jar;
+LOAD CLASSES build/libs/procedures.jar;
 
 file -inlinebatch END_OF_BATCH
 

@@ -7,31 +7,19 @@ package com.intel.dai.ui;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.IAdapter;
-import com.intel.dai.dsapi.*;
-import com.intel.dai.exceptions.BadInputException;
 import com.intel.dai.exceptions.DataStoreException;
-import com.intel.dai.exceptions.ProviderException;
-import com.intel.dai.locations.Location;
-import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
-import com.intel.properties.PropertyNotExpectedType;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.anyMap;
 
 public class AdapterUIRestTest {
     @Test
@@ -97,7 +85,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void addDevicesToGroup() throws ProviderException, DataStoreException, IOException {
+    public void addDevicesToGroup() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -109,7 +97,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void addDevicesToGroupError() throws ProviderException, DataStoreException, IOException {
+    public void addDevicesToGroupError() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -121,7 +109,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void deleteDevicesFromGroup() throws ProviderException, DataStoreException, IOException {
+    public void deleteDevicesFromGroup() throws DataStoreException, IOException {
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
         ConfigIO jsonParser_ = ConfigIOFactory.getInstance("json");
@@ -132,7 +120,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void deleteDevicesFromGroupError() throws ProviderException, DataStoreException, IOException {
+    public void deleteDevicesFromGroupError() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -144,7 +132,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void getDevicesFromGroup() throws ProviderException, DataStoreException, IOException {
+    public void getDevicesFromGroup() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -160,7 +148,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void getDevicesFromGroupError() throws ProviderException, DataStoreException, IOException {
+    public void getDevicesFromGroupError() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -172,7 +160,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void listGroups() throws ProviderException, DataStoreException, IOException {
+    public void listGroups() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -188,7 +176,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void listGroupsError() throws ProviderException, DataStoreException, IOException {
+    public void listGroupsError() throws DataStoreException, IOException {
 
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
@@ -200,7 +188,7 @@ public class AdapterUIRestTest {
     }
 
     @Test
-    public void getLocations() throws ProviderException, IOException {
+    public void getLocations() throws IOException {
         AdapterUIRestMock2 obj = new AdapterUIRestMock2(new String[]{"localhost"});
 
         ConfigIO jsonParser_ = ConfigIOFactory.getInstance("json");
@@ -208,4 +196,3 @@ public class AdapterUIRestTest {
             assertEquals("{\"system\":\"mock\",\"nodes\":{\"node1\":\"location1\"}}", obj.getLocations());
         }
     }
-

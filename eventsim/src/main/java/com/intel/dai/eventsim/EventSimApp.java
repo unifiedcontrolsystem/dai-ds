@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.sql.Timestamp;
+import java.util.Random;
 
 /**
  * Description of class CallBackNetwork.
@@ -31,7 +33,7 @@ public class EventSimApp extends EventSim {
         super(log);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         log_ = LoggerFactory.getInstance("EventSimApp", "EventSimApp", "console");
         if(args.length != 2) {
             log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");
@@ -47,7 +49,7 @@ public class EventSimApp extends EventSim {
             eventsimServer.executeRoutes(eventsimServer);
             eventsimServer.startServer();
         } catch (SimulatorException | RESTServerException | RESTClientException | PropertyNotExpectedType e) {
-            log_.error(e.getMessage());
+            log_.exception(e);
             System.exit(1);
         }
     }
@@ -67,6 +69,12 @@ public class EventSimApp extends EventSim {
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.GET.toString(), eventsimApi::getAllSubscriptionDetails );
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeStateChangeNotifications);
+        source_.register("/wlm/createRes", HttpMethod.POST.toString(), eventsimApi::createReservation);
+        source_.register("/wlm/modifyRes", HttpMethod.POST.toString(), eventsimApi::modifyReservation);
+        source_.register("/wlm/deleteRes", HttpMethod.POST.toString(), eventsimApi::deleteReservation);
+        source_.register("/wlm/startJob", HttpMethod.POST.toString(), eventsimApi::startJob);
+        source_.register("/wlm/terminateJob", HttpMethod.POST.toString(), eventsimApi::terminateJob);
+        source_.register("/wlm/simulate", HttpMethod.POST.toString(), eventsimApi::simulateWlm);
     }
 
     /**
@@ -137,20 +145,20 @@ public class EventSimApp extends EventSim {
     public String initiateInventoryDiscovery(final Map<String, String> parameters) throws ResultOutputException {
         String locations = parameters.getOrDefault("xnames", null);
         if(locations == null)
-            throw new ResultOutputException("404::One or more requested RedfishEndpoint xname IDs was not found.");
+            throw new ResultOutputException("404::One or more requested RedfishEndpoint foreign IDs was not found.");
         locations = locations.substring(1,locations.length() - 1);
-        List<String> xnames = Arrays.asList(locations.split(","));
-        numOfXnamesDiscovery = xnames.size();
-        List<PropertyMap> xnameDiscovery = new ArrayList<>();
-        for(int i = 0; i < numOfXnamesDiscovery; i++) {
-            PropertyMap xnameUri = new PropertyMap();
-            xnameUri.put("URI", getForeignServerUrl() + simEngineDataLoader.getHwInventoryDiscStatusUrl() + "/" + i);
-            xnameDiscovery.add(xnameUri);
+        List<String> foreignLocations = Arrays.asList(locations.split(","));
+        numOfForeignNamesDiscovery = foreignLocations.size();
+        List<PropertyMap> foreignNameDiscovery = new ArrayList<>();
+        for(int i = 0; i < numOfForeignNamesDiscovery; i++) {
+            PropertyMap foreignNameUri = new PropertyMap();
+            foreignNameUri.put("URI", getForeignServerUrl() + simEngineDataLoader.getHwInventoryDiscStatusUrl() + "/" + i);
+            foreignNameDiscovery.add(foreignNameUri);
         }
 
         List<JSONObject> jsonObj = new ArrayList<>();
 
-        for(PropertyMap data : xnameDiscovery) {
+        for(PropertyMap data : foreignNameDiscovery) {
             JSONObject obj = new JSONObject(data);
             jsonObj.add(obj);
         }
@@ -161,15 +169,15 @@ public class EventSimApp extends EventSim {
 
     public String getAllInventoryDiscoveryStatus(final Map<String, String> parameters) {
         PropertyArray discoveryStatus = new PropertyArray();
-        for(int i = 0; i < numOfXnamesDiscovery; i++) {
-            PropertyMap xnameDiscoveryStatus = new PropertyMap();
-            xnameDiscoveryStatus.put("ID", String.valueOf(i));
-            xnameDiscoveryStatus.put("Status","Complete");
-            xnameDiscoveryStatus.put("LastUpdateTime", System.currentTimeMillis(
+        for(int i = 0; i < numOfForeignNamesDiscovery; i++) {
+            PropertyMap foreignNameDiscoveryStatus = new PropertyMap();
+            foreignNameDiscoveryStatus.put("ID", String.valueOf(i));
+            foreignNameDiscoveryStatus.put("Status","Complete");
+            foreignNameDiscoveryStatus.put("LastUpdateTime", System.currentTimeMillis(
 
             ));
-            xnameDiscoveryStatus.put("Details", null);
-            discoveryStatus.add(xnameDiscoveryStatus);
+            foreignNameDiscoveryStatus.put("Details", null);
+            discoveryStatus.add(foreignNameDiscoveryStatus);
         }
         return jsonParser_.toString(discoveryStatus);
     }
@@ -271,6 +279,120 @@ public class EventSimApp extends EventSim {
         return jsonParser_.toString(result);
     }
 
+    public String createReservation(final Map<String, String> parameters) {
+        try {
+            String name = parameters.get("name");
+            String users = parameters.get("users");
+            String nodes = parameters.get("nodes");
+            Timestamp starttime = Timestamp.valueOf(parameters.get("starttime"));
+            String duration = parameters.get("duration");
+
+            if(nodes.equals("random"))
+                nodes = pickRandomNodes();
+
+            String result = wlmApi.createReservation(name, users, nodes, starttime, duration);
+
+            return create_result_json("F", result);
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String modifyReservation(final Map<String, String> parameters) {
+        try {
+            String name = parameters.get("name");
+            String users = parameters.get("users");
+            String nodes = parameters.get("nodes");
+            String starttime = parameters.get("starttime");
+            String result = wlmApi.modifyReservation(name, users, nodes, starttime);
+
+            return create_result_json("F", result);
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String deleteReservation(final Map<String, String> parameters) {
+        try {
+            String name = parameters.get("name");
+            String result = wlmApi.deleteReservation(name);
+
+            return create_result_json("F", result);
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String startJob(final Map<String, String> parameters) {
+        try {
+            String jobid = parameters.get("jobid");
+            String name = parameters.get("name");
+            String users = parameters.get("users");
+            String nodes = parameters.get("nodes");
+            Timestamp starttime = Timestamp.valueOf(parameters.get("starttime"));
+            String workdir = parameters.get("workdir");
+
+            if(nodes.equals("random"))
+                nodes = pickRandomNodes();
+
+            String result = wlmApi.startJob(jobid, name, users, nodes, starttime, workdir);
+
+            return create_result_json("F", result);
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String terminateJob(final Map<String, String> parameters) {
+        try {
+            String jobid = parameters.get("jobid");
+            String name = parameters.get("name");
+            String users = parameters.get("users");
+            String nodes = parameters.get("nodes");
+            Timestamp starttime = Timestamp.valueOf(parameters.get("starttime"));
+            String workdir = parameters.get("workdir");
+            String exitStatus = parameters.get("exitstatus");
+
+            if(nodes.equals("random"))
+                nodes = pickRandomNodes();
+
+            String result = wlmApi.terminateJob(jobid, name, users, nodes, starttime, workdir, exitStatus);
+
+            return create_result_json("F", result);
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String simulateWlm(final Map<String, String> parameters) {
+        try {
+            String reservations = parameters.get("reservations");
+            String[] nodes = pickRandomNodes().split(" ");
+
+            wlmApi.simulateWlm(reservations, nodes);
+
+            return create_result_json("F", "Success");
+        } catch (Exception e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    public String pickRandomNodes() throws Exception {
+
+        simEngineDataLoader.loadData();
+        List<String> locations = simEngineDataLoader.getNodeHostnameData();
+        Random rand = new Random();
+        int size = rand.nextInt(locations.size());
+        String nodes = "";
+
+        for(int i = 0; i < size; i++) {
+            int index = rand.nextInt(size);
+            nodes += " " + locations.get(index);
+        }
+
+        return nodes;
+    }
+
     /**
      * This method to start server.
      */
@@ -303,5 +425,5 @@ public class EventSimApp extends EventSim {
     }
 
     private static Logger log_;
-    private int numOfXnamesDiscovery = 1;
+    private int numOfForeignNamesDiscovery = 1;
 }

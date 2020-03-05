@@ -270,4 +270,9 @@ class AdapterRasForeignBusSpec extends Specification {
         1    | true
         0    | true
     }
+
+    def "Test logRasEventOnFailure"() {
+        underTest_.logRasEventOnFailure("", (byte)0)
+        expect: true
+    }
 }

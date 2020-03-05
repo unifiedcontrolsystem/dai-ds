@@ -8,6 +8,7 @@ import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.CommonFunctions;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
@@ -48,24 +49,26 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             PropertyMap message = parser_.fromString(data).getAsMap();
             checkMessage(message);
             log_.debug("*** Message: %s", data);
-            String[] xnameLocations = message.getString("location").split(",");
+            String[] foreignLocations = message.getString("location").split(",");
             List<CommonDataFormat> commonList = new ArrayList<>();
-            for(String xnameLocation: xnameLocations) {
+            for(String foreignLocation: foreignLocations) {
                 String sensor = message.getString("sensor");
                 if (!sensorMetaData_ForeignBus_.checkSensor(sensor))
                     throw new NetworkListenerProviderException("The 'sensor' field in JSON is not a string name");
                 String location = sensorMetaData_ForeignBus_.normalizeLocation(sensor,
-                        CommonFunctions.convertXNameToLocation(xnameLocation, sensorMetaData_ForeignBus_.getDescription(sensor)));
+                        CommonFunctions.convertForeignToLocation(foreignLocation,
+                                sensorMetaData_ForeignBus_.getDescription(sensor)));
                 CommonDataFormat common = new CommonDataFormat(
                         CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")), location,
                         DataType.EnvironmentalData);
-                common.setValueAndUnits(sensorMetaData_ForeignBus_.normalizeValue(sensor, convertValue(message.get("value"))),
-                        sensorMetaData_ForeignBus_.getUnits(sensor), sensorMetaData_ForeignBus_.getTelemetryType(sensor));
+                common.setValueAndUnits(sensorMetaData_ForeignBus_.normalizeValue(sensor,
+                        convertValue(message.get("value"))), sensorMetaData_ForeignBus_.getUnits(sensor),
+                        sensorMetaData_ForeignBus_.getTelemetryType(sensor));
                 aggregateData(common);
                 commonList.add(common);
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException | ConversionException e) {
             log_.debug("Failed to parse telemetry string: '%s'", data);
             throw new NetworkListenerProviderException("Failed to parse incoming data", e);
         }

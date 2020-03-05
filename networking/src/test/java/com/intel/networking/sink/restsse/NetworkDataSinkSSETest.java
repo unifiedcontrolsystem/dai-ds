@@ -146,7 +146,7 @@ public class NetworkDataSinkSSETest {
         MockRESTClient.fakePublish("mySubject", "{}", "some_id");
         client_.setCallbackDelegate(this::sink);
         MockRESTClient.fakePublish("mySubject", "{}", "some_id");
-        assertEquals("mySubject", subject_);
+        assertEquals("s3", subject_);
         assertEquals("{\"sse_id\":\"some_id\"}", payload_);
         MockRESTClient.fakePublish("mySubject", "{}", null);
         assertEquals("{}", payload_);

@@ -5,32 +5,32 @@
   },
 
   "networkStreams": {
-    "demoTelemetry": {
+    "telemetry": {
       "arguments": {
         "connectPort": 8080,
-        "connectAddress": "10.25.24.156",
-        "urlPath": "/v1/stream/cray-node",
+        "connectAddress": "sms01-nmn.local",
+        "urlPath": "/v1/stream/telemetry",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
-        "use-ssl": true,
+        "use-ssl": false,
         "requestBuilderSelectors": {
-          "stream_id": "demoTelemetry"
+          "stream_id": "dai-telemetry"
         }
       },
       "name": "sse"
     },
-    "demoEvents": {
+    "events": {
       "arguments": {
         "connectPort": 8080,
-        "connectAddress": "10.25.24.156",
-        "urlPath": "/v1/stream/cray-logs-containers",
+        "connectAddress": "sms01-nmn.local",
+        "urlPath": "/v1/stream/events",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
-        "use-ssl": true,
+        "use-ssl": false,
         "requestBuilderSelectors": {
-          "stream_id": "demoEvents"
+          "stream_id": "dai-events"
         }
       },
       "name": "sse"
@@ -40,7 +40,7 @@
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
-        "demoTelemetry"
+        "telemetry"
       ],
       "subjects": [
         "telemetry"
@@ -49,7 +49,7 @@
     },
     "ras_events": {
       "networkStreamsRef": [
-        "demoEvents"
+        "events"
       ],
       "subjects": [
         "events"
@@ -62,16 +62,16 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://sms01-nmn.local"
     },
     "com.intel.dai.monitoring.DemoEnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
-      "publish": true
+      "publish": false
     },
     "com.intel.dai.monitoring.DemoEventProviderForeignBus": {
       "publishTopic": "ucs_ras_event",
-      "publish": true
+      "publish": false
     }
   },
 

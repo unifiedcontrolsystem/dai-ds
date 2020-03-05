@@ -7,6 +7,7 @@ package com.intel.dai.inventory;
 import com.intel.dai.dsapi.BootState;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.foreign_bus.CommonFunctions;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.inventory.api.ForeignHWInvChangeNotification;
 import com.intel.dai.inventory.api.HWInvNotificationTranslator;
 import com.intel.dai.network_listener.*;
@@ -58,12 +59,17 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         }
 
         List<CommonDataFormat> workItems = new ArrayList<>();
-        for (String xname: notif.Components) {
-            CommonDataFormat workItem = new CommonDataFormat(
-                    currentTimestamp, CommonFunctions.convertXNameToLocation(xname), DataType.InventoryChangeEvent);
-            workItem.setStateChangeEvent(newComponentState);
-            workItem.storeExtraData(XNAME_KEY, xname);
-            workItems.add(workItem);
+        for (String foreign: notif.Components) {
+            try {
+                CommonDataFormat workItem = new CommonDataFormat(
+                        currentTimestamp, CommonFunctions.convertForeignToLocation(foreign), DataType.InventoryChangeEvent);
+                workItem.setStateChangeEvent(newComponentState);
+                workItem.storeExtraData(FOREIGN_KEY, foreign);
+                workItems.add(workItem);
+            } catch(ConversionException e) {
+                throw new NetworkListenerProviderException("Failed to convert the foreign location to a DAI location",
+                        e);
+            }
         }
 
         return workItems;
@@ -149,7 +155,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 return "";
             }
             else {
-                return workItem.retrieveExtraData(XNAME_KEY);
+                return workItem.retrieveExtraData(FOREIGN_KEY);
             }
         } catch (IOException e) {
             log_.error("IO exception: %s", e.getMessage());
@@ -174,7 +180,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
 
     static long lastSnapshotTimestamp = -1;
 
-    private final static String XNAME_KEY = "xname";
+    private final static String FOREIGN_KEY = "foreignLocationKey";
 }
 
 /**
@@ -184,8 +190,8 @@ class HWInventoryUpdate implements Runnable {
     private String location_;
     private SystemActions actions_;
 
-    public HWInventoryUpdate(String xname, SystemActions actions) {
-        location_ = xname;
+    public HWInventoryUpdate(String foreignName, SystemActions actions) {
+        location_ = foreignName;
         actions_ = actions;
     }
 

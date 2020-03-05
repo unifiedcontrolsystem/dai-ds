@@ -55,14 +55,14 @@ public class DataLoaderEngine {
             processSensorMetadata();
             processRASMetadata();
             loadSystemManifestFromDB();
-            loadXnameLocationData();
-            validateXnameLocationsWithDB();
+            loadForeignLocationData();
+            validateForeignLocationsWithDB();
         } catch (final IOException | ConfigIOParseException e) {
            throw new SimulatorException("Error while loading data into data loader engine: " + e.getMessage());
         }
     }
 
-    private void validateXnameLocationsWithDB() throws SimulatorException {
+    private void validateForeignLocationsWithDB() throws SimulatorException {
         List<String> locations = getNodeLocationData();
         locations.addAll(getNonNodeLocationData());
         if(!allLocations.containsAll(locations)) {
@@ -70,7 +70,7 @@ public class DataLoaderEngine {
         }
     }
 
-    private void loadXnameLocationData() {
+    private void loadForeignLocationData() {
        allLocations = CommonFunctions.getLocations();
     }
 
@@ -138,6 +138,7 @@ public class DataLoaderEngine {
         try {
             loadNodeLocations();
             loadNonNodeLocations();
+            loadHostnames();
         } catch (final DataStoreException e) {
             throw new SimulatorException("Error while fetching location info from database", e);
         }
@@ -149,6 +150,10 @@ public class DataLoaderEngine {
         nodeLocationdata_ = nodeInfo_.getNodeLocations();
     }
 
+    private void loadHostnames() throws DataStoreException {
+        nodeHostnamedata_ = new ArrayList<>(nodeInfo_.getComputeHostnameFromLocationMap().values());
+    }
+
     private enum EventDefinitionType {
         DENSE_RACK,
         DENSE_CHASSIS,
@@ -157,6 +162,7 @@ public class DataLoaderEngine {
         UNKNOWN
     }
 
+    public List<String> getNodeHostnameData() { return nodeHostnamedata_; }
     public PropertyDocument getSensorMetaData() { return definitionSensorMetadata_;}
     public List<String> getRasMetaData() {return rasMetadata_;}
     public List<String> getNodeLocationData() {return nodeLocationdata_;}
@@ -187,4 +193,5 @@ public class DataLoaderEngine {
     ArrayList<String> rasMetadata_;
     List<String> nodeLocationdata_;
     List<String> nonNodeLocationdata_ = new ArrayList<>();
+    List<String> nodeHostnamedata_;
 }

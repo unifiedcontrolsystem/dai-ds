@@ -26,6 +26,7 @@
             <Class name="com.intel.dai.DbConfig" />
             <Class name="com.intel.dai.NearlineTableUpdater" />
             <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
+            <Class name="com.intel.dai.eventsim.WlmApi" />
         </Or>
         <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
@@ -156,4 +157,5 @@
         <Class name="com.intel.networking.restclient.PermissiveX509TrustManager" />
         <Bug code="SECWTM" />
     </Match>
+
 </FindBugsFilter>

@@ -4,6 +4,8 @@
 
 package com.intel.dai.dsapi;
 
+import org.voltdb.client.ProcCallException;
+
 import java.io.IOException;
 
 public interface RasEventLog {
@@ -18,4 +20,8 @@ public interface RasEventLog {
                                     long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId);
     void logRasEventCheckForEffectedJob(String sEventType, String sInstanceData, String sLctn, long lTsInMicroSecs,
                                         String sReqAdapterType, long lReqWorkItemId);
+    void markRasEventControlOperationCompleted(String newState, String eventType, String eventID, String adapterType)
+            throws IOException;
+    void setRasEventAssociatedJobID(String jobID, String rasEventType, long rasEventID)
+            throws IOException;
 }
