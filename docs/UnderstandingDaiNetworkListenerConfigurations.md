@@ -86,7 +86,7 @@ This section contains the required configurations for each provider or component
 So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface in the *dai_network_listener* component (*NetworkListenerSystemActions*).  In this case it describes where to publish the raw and aggregated data from the adapter.
 
 ## 6 Network Stream Connection Definitions (`networkStreams`)
-So describe each type of connection there is a section called `networkStreams` that defines all possible connections for the given "monitoring" provider in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
+To describe each type of connection there is a section called `networkStreams` that defines all possible connections for the given "monitoring" provider in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
 
 The second is the argument containing the subset of the connection and instantiation parameters used by the named implementation. This subset excludes the query portion of **GET** operation and the subjects list to receive.
 
