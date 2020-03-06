@@ -97,9 +97,12 @@ class ServiceTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events boot [-h] [--probability PROBABILITY] [--burst]\n                       '
-                      '     [--location LOCATION]\n\noptional arguments:\n  -h, --help            show this help '
-                      'message and exit\n  --probability PROBABILITY\n                        generate boot events '
-                      'with probability failure\n  --burst               generate events with or without delay.\n  '
-                      '--location LOCATION   generate boot events at a given location.\n', capturedOutput.getvalue())
+        self.assertIn('usage: eventsim events boot [-h] [--type {off,on,ready}]\n                            ['
+                      '--probability PROBABILITY] [--burst]\n                            [--location '
+                      'LOCATION]\n\noptional arguments:\n  -h, --help            show this help message and exit\n  '
+                      '--type {off,on,ready}\n                        types of boot events to generate. Default '
+                      'will\n                        generate all types of boot events\n  --probability PROBABILITY\n '
+                      '                       generate boot events with probability failure\n  --burst               '
+                      'generate events with or without delay.\n  --location LOCATION   generate boot events at a '
+                      'given location.\n', capturedOutput.getvalue())
         capturedOutput.close()

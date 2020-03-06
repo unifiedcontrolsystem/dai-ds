@@ -57,7 +57,7 @@ public class EventSimApp extends EventSim {
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
         source_.register("/api/ras", HttpMethod.POST.toString(), eventsimApi::generatRasEvents);
         source_.register("/api/sensor", HttpMethod.POST.toString(), eventsimApi::generateEnvEvents);
-        source_.register("/api/boot", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
+        source_.register("/api/boot/*", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
         source_.register("/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
         source_.register("/Inventory/Discover", HttpMethod.POST.toString(), eventsimApi::initiateInventoryDiscovery);
         source_.register("/Inventory/DiscoveryStatus", HttpMethod.GET.toString(), eventsimApi::getAllInventoryDiscoveryStatus);
@@ -113,7 +113,7 @@ public class EventSimApp extends EventSim {
     }
 
     /**
-     * This method is used to create and send boot events to network.
+     * This method is used to create and send boot off,on,ready events to network.
      * @param parameters input details of the request.
      */
     String generateBootEvents(Map<String, String> parameters) {
@@ -121,7 +121,17 @@ public class EventSimApp extends EventSim {
             String location = parameters.get("location");
             String bfValue = parameters.get("probability");
             String burst = parameters.get("burst");
-            eventSimEngine.publishBootEvents(location, bfValue, burst);
+            String sub_cmd = parameters.get("sub_component");
+            switch (sub_cmd) {
+                case "off"   :   eventSimEngine.publishBootOffEvents(location, burst);
+                                 break;
+                case "on"    :   eventSimEngine.publishBootOnEvents(location, bfValue, burst);
+                                 break;
+                case "ready" :   eventSimEngine.publishBootReadyEvents(location, burst);
+                                 break;
+                default      :   eventSimEngine.publishBootEvents(location, bfValue, burst);
+                                 break;
+            }
             return create_result_json("F", "Success");
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
