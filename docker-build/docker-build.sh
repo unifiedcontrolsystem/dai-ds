@@ -22,7 +22,7 @@ build_docker="false"
 [ "${1}" = "--rebuild-docker" ] && build_docker="true" && shift
 
 # Conditionally build the docker container if not already built.
-if [ -z "$(docker images | grep dai_builder)" || "${build_docker}" = "true" ]; then
+if [[ -z "$(docker images | grep dai_builder)" || "${build_docker}" = "true" ]]; then
   cat <<EOF1 >~/.gradle/docker/gradle.properties
 systemProp.ucs.includeDbgSymbols=true
 systemProp.java8.bootstrapClasspath=/usr/lib64/jvm/java-1.8.0
