@@ -75,7 +75,9 @@ public class AdapterRasForeignBus {
 
     private long handleRasEventControlOperations() throws IOException, ProcCallException, InterruptedException {
         // Actually get the list of pertinent ras events.
-        ClientResponse response = getClientResponseforRasEventProcessNewControlOperations(client_.callProcedure("RasEventProcessNewControlOperations"), "Stored procedure RasEventProcessNewControlOperations FAILED - Status=%s, StatusString=%s, ");
+        ClientResponse response = getClientResponseforRasEventProcessNewControlOperations(
+                client_.callProcedure("RasEventProcessNewControlOperations"),
+                "Stored procedure RasEventProcessNewControlOperations FAILED - Status=%s, StatusString=%s, ");
         // Loop through each of the pertinent RAS events invoking the appropriate Control Operation.
         VoltTable vt = response.getResults()[0];
         long workDone = vt.getRowCount();
@@ -89,13 +91,13 @@ public class AdapterRasForeignBus {
             String sTempControlOperation = vt.getString("ControlOperation");
             String sTempLctn             = vt.getString("Lctn");
             String sTempJobId            = vt.getString("JobId");
-            String sTempDescrName        = vt.getString("DescriptiveName");
             boolean bDoneWithThisEventsControlOperation = false;
 
             if (sTempLctn == null) {
                 // the specified RAS event's lctn is null, so no don't try to run any control operation.
-                log_.warn("Did NOT run this RAS event's ControlOperation because the event has no specified lctn, ignoring this ControlOperation - DescrName=%s, EventId=%s, JobId=%s, ControlOperation=%s!",
-                        sTempDescrName, sTempEventId, sTempJobId, sTempControlOperation);
+                log_.warn("Did NOT run this RAS event's ControlOperation because the event has no specified lctn, " +
+                                "ignoring this ControlOperation - EventId=%s, JobId=%s, ControlOperation=%s!",
+                        sTempEventId, sTempJobId, sTempControlOperation);
                 // Explicitly set the boolean indicating that we are done with this event's control operation.
                 // Note: yes I know that the boolean is already set to true, but I want it explicitly set here so it is never accidentally removed from this specific flow...
                 bDoneWithThisEventsControlOperation = true;
@@ -112,9 +114,7 @@ public class AdapterRasForeignBus {
             // DbUpdatedTimestamp field).
             //------------------------------------------------------------------
             String sTempStoredProcedure = "RasEventUpdateControlOperationDone";
-            ClientResponse response1 = client_.callProcedure(sTempStoredProcedure, "Y", sTempEventType, sTempEventId);
-            if(response1.getStatus() != ClientResponse.SUCCESS)
-                logRasEventOnFailure(sTempStoredProcedure, response1.getStatus());
+            rasEvents_.markRasEventControlOperationCompleted("Y", sTempEventType, sTempEventId, adapter_.getType());
         }   // Loop through each of the pertinent RAS events invoking the appropriate Control Operation.
         return workDone;
     }   // End handleRasEventControlOperations()
@@ -247,12 +247,9 @@ public class AdapterRasForeignBus {
             //       ControlOperations will see this updated Ras event and process the control operations associated
             //       with it.
             //------------------------------------------------------------------
-            String sTempStoredProcedure = "RasEventUpdateJobId";
-            ClientResponse response1 = client_.callProcedure(sTempStoredProcedure, sFndJobId, sRasEventType,
-                    lRasEventId);
-            if(response1.getStatus() != ClientResponse.SUCCESS)
-                logRasEventOnFailure(sTempStoredProcedure, response1.getStatus());
+            rasEvents_.setRasEventAssociatedJobID(sFndJobId, sRasEventType, lRasEventId);
             // Log a message indicating whether we found a JobId associated with this Ras Event.
+            String sTempStoredProcedure = "RasEventUpdateJobId";
             if (sFndJobId != null) {
                 // there was a JobId associated with this RasEvent.
                 log_.info("Called stored procedure %s - EventType=%s, EventId=%d, Lctn=%s, JobId=%s",

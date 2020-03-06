@@ -25,11 +25,11 @@ class ForeignHwInventoryRequester implements RestRequester {
     }
 
     @Override
-    public int initiateDiscovery(String xname) {
+    public int initiateDiscovery(String foreignName) {
         try {
             URI uri = makeUri(config.initiateDiscovery.endpoint, config.initiateDiscovery.resource);
             logger.info("uri: %s", uri.toString());
-            String payload = String.format("{\"xnames\": [\"%s\"], \"force\": false}", xname);
+            String payload = String.format("{\"xnames\": [\"%s\"], \"force\": false}", foreignName);
             BlockingResult result = restClient.postRESTRequestBlocking(uri, payload);
             return interpretedInitiateDiscoveryServerResult(uri, result);
         } catch (URISyntaxException e) {
@@ -68,9 +68,9 @@ class ForeignHwInventoryRequester implements RestRequester {
         return new ImmutablePair<>(1, "");
     }
     @Override
-    public ImmutablePair<Integer, String> getHwInventory(String xname) {
+    public ImmutablePair<Integer, String> getHwInventory(String foreignName) {
         try {
-            URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, xname);
+            URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, foreignName);
             logger.info("uri: %s", uri.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvTreeResult(uri, result);

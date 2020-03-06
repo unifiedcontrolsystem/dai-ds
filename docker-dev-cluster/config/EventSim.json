@@ -1,25 +1,37 @@
 {
-    "network" : "sse",
     "eventsimConfig" : {
-        "SystemManifest": "/opt/ucs/etc/SystemManifest.json",
         "SensorMetadata": "/resources/ForeignSensorMetaData.json",
         "RASMetadata": "/resources/ForeignEventMetaData.json",
+        "BootParameters" : "/opt/ucs/etc/BootParameters.json",
+        "HWInventory" : "/opt/ucs/etc/HWInventory.json",
+        "HWInventoryPath" : "/opt/ucs/etc",
+        "HWInventoryQueryPath" : "/opt/ucs/etc/HwInvQuery_",
+        "HWInventoryDiscStatUrl" : "/Inventory/DiscoveryStatus",
         "eventCount": 10,
         "timeDelayMus": 1,
         "eventRatioSensorToRas": 1,
         "randomizerSeed": "234"
     },
-    "sseConfig" : {
-        "serverAddress": "*",
-        "serverPort": "5678",
-        "urls" : {
-            "/streams/nodeTelemetry" : ["telemetry"],
-            "/streams/nodeBootEvents" : ["stateChanges"],
-            "/streams/nodeRasEvents" : ["events"]
+    "networkConfig" : {
+        "network" : "sse",
+        "sseConfig": {
+            "serverAddress": "*" ,
+            "serverPort": "8081" ,
+            "urls": {
+                "/v1/stream/cray-telemetry-fan": [
+                    "telemetry"
+                ] ,
+                "/streams/nodeBootEvents": [
+                    "stateChanges"
+                ] ,
+                "/v1/stream/cray-dmtf-resource-event": [
+                    "events"
+                ]
+            }
+        } ,
+        "rabbitmq": {
+            "exchangeName": "simulator" ,
+            "uri": "amqp://127.0.0.1"
         }
-    },
-    "rabbitmq" : {
-        "exchangeName" : "simulator",
-        "uri"          : "amqp://127.0.0.1"
     }
 }

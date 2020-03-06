@@ -41,7 +41,7 @@ public class CannedApiTest {
         }
 
         @Override
-        public PropertyMap convertToJsonResultSet(ResultSet resultsetinp) throws SQLException{
+        public PropertyMap convertToJsonResultSet(ResultSet resultsetinp) {
             PropertyMap resultJson = new PropertyMap();
             resultJson.put("TEST", "CANNED API TESTING");
             return resultJson;
@@ -122,4 +122,30 @@ public class CannedApiTest {
         assertNotNull(result);
     }
 
+    @Test
+    public void getReplacementHistory() throws Exception {
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("getinvchanges", input_map);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getInventoryHistory() throws Exception {
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("getinvhislctn", input_map);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getInventoryInfoForLctn() throws Exception {
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        String result = canned.getData("getnodeinvinfo", input_map);
+        assertNotNull(result);
+    }
 }

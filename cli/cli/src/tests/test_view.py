@@ -26,7 +26,7 @@ class ViewTest(TestCase):
         sys.argv = ['ucs', 'view']
         parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,job,network-config,'
+        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -38,7 +38,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,job,network-config,'
+        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -50,7 +50,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,job,network-config,'
+        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -352,7 +352,7 @@ class ViewTest(TestCase):
                                                                             "shutdown DaiMgr: InvokedBy="
                                                                             "ucs-stop-dai-mgr\"]],"
                                                                             "\"result-data-columns\":8}"}
-                                                                 )
+                )
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('controloperation', captured_output.getvalue())
@@ -585,7 +585,8 @@ class ViewTest(TestCase):
                                           "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
                                           "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
                                           "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\","
+                                          "\"heading\":\"wlmnodestate\"}, "
                                           "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
                                           "\"result-data-lines\":1,\"result-status-code\":0,"
                                           "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
@@ -635,7 +636,8 @@ class ViewTest(TestCase):
                                           "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
                                           "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
                                           "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\","
+                                          "\"heading\":\"wlmnodestate\"}, "
                                           "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
                                           "\"result-data-lines\":1,\"result-status-code\":0,"
                                           "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
@@ -719,13 +721,16 @@ class ViewTest(TestCase):
                                           "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
                                           "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
                                           "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
-                                          "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
+                                          "{\"unit\":\"string\",\"data\":\"starttimestamp\","
+                                          "\"heading\":\"starttimestamp\"}, "
+                                          "{\"unit\":\"string\",\"data\":\"endtimestamp\","
+                                          "\"heading\":\"endtimestamp\"}, "
                                           "{\"unit\":\"string\",\"data\":\"jobacctinfo\",\"heading\":\"jobacctinfo\"},"
                                           "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"}],"
                                           "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
                                           "\"test\",\"A\",\"root\",\"16\","
-                                          "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\",\"nodes\"]],"
+                                          "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\","
+                                          "\"nodes\"]], "
                                           "\"result-data-columns\":9}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
@@ -772,13 +777,16 @@ class ViewTest(TestCase):
                 type(patched_get.return_value).text = \
                     json.dumps({"Status": "F",
                                 "Result":
-                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\",\"heading\":\"reservationname\"},"
+                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\","
+                                    "\"heading\":\"reservationname\"}, "
                                     "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
                                     "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
                                     "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
                                     "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\",\"heading\":\"deletedtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\",\"heading\":\"lastchgtimestamp\"}],"
+                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\","
+                                    "\"heading\":\"deletedtimestamp\"}, "
+                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                    "\"heading\":\"lastchgtimestamp\"}], "
                                     "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
                                     "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
                                     "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
@@ -800,13 +808,16 @@ class ViewTest(TestCase):
                 type(patched_get.return_value).text = \
                     json.dumps({"Status": "F",
                                 "Result":
-                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\",\"heading\":\"reservationname\"},"
+                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\","
+                                    "\"heading\":\"reservationname\"}, "
                                     "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
                                     "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
                                     "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
                                     "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\",\"heading\":\"deletedtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\",\"heading\":\"lastchgtimestamp\"}],"
+                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\","
+                                    "\"heading\":\"deletedtimestamp\"}, "
+                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                    "\"heading\":\"lastchgtimestamp\"}], "
                                     "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
                                     "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
                                     "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
@@ -814,6 +825,162 @@ class ViewTest(TestCase):
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('reservationname', captured_output.getvalue())
+        captured_output.close()
+
+    def test_view_replacement_history_execute_positive(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'replacement-history', 'R8-21-CH11-CN0']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"action\","
+                                                         "\"heading\":\"action\"},{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
+                                                         "\"data\":\"dbupdatedtimestamp\","
+                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                                         "\"result-data-lines\":3,\"result-status-code\":0,\"data\":[["
+                                                         "\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN0\","
+                                                         "\"2020-02-06 16:12:44.0\",1],[\"DELETE\",\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\",\"2020-02-07 16:12:44.0\",2],"
+                                                         "[\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN1\","
+                                                         "\"2020-02-08 16:12:44.0\",3]],\"result-data-columns\":5}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('ID', captured_output.getvalue())
+        captured_output.close()
+
+    def test_view_replacement_history_execute_positive_json(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'replacement-history', 'R8-21-CH11-CN0', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"action\","
+                                                         "\"heading\":\"action\"},{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
+                                                         "\"data\":\"dbupdatedtimestamp\","
+                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                                         "\"result-data-lines\":3,\"result-status-code\":0,\"data\":[["
+                                                         "\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN0\","
+                                                         "\"2020-02-06 16:12:44.0\",1],[\"DELETE\",\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\",\"2020-02-07 16:12:44.0\",2],"
+                                                         "[\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN1\","
+                                                         "\"2020-02-08 16:12:44.0\",3]],\"result-data-columns\":5}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('id', captured_output.getvalue())
+        captured_output.close()
+
+    def test_view_inventory_change_execute_positive_positive(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory-history', 'R8-21-CH11-CN0']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"}],\"result-data-lines\":3,"
+                                                         "\"result-status-code\":0,\"data\":[[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN1\"]],\"result-data-columns\":2}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('FRUID', captured_output.getvalue())
+        captured_output.close()
+
+    def test_view_inventory_change_execute_positive_json(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory-history', 'R8-21-CH11-CN0', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"}],\"result-data-lines\":3,"
+                                                         "\"result-status-code\":0,\"data\":[[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
+                                                         "\"FRUIDforR8-21-CH11-CN1\"]],\"result-data-columns\":2}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('fruid', captured_output.getvalue())
+        captured_output.close()
+
+    def test_view_inventory_info_execute_positive(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory-info', 'x0c0s24b0n0']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\","
+                                                         "\"data\":\"dbupdatedtimestamp\","
+                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"ordinal\",\"heading\":\"ordinal\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
+                                                         "\"data\":\"type\", "
+                                                         "\"heading\":\"type\"},{\"unit\":\"string\","
+                                                         "\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"frusubtype\","
+                                                         "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
+                                                         "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
+                                                         "\"2020-02-06 16:12:44.0\",0,\"FRUIDforx0c0s24b0n0d4\","
+                                                         "\"Memory\",\"Memory\",\"Memory\"]],\"result-data-columns\":7}"
+                                })
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('FRUSUBTYPE', captured_output.getvalue())
+        captured_output.close()
+
+    def test__view_inventory_info_execute_positive_json(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory-info', 'x0c0s24b0n0', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
+                                                         "\"heading\":\"id\"},{\"unit\":\"string\","
+                                                         "\"data\":\"dbupdatedtimestamp\","
+                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"ordinal\",\"heading\":\"ordinal\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"fruid\","
+                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
+                                                         "\"data\":\"type\", "
+                                                         "\"heading\":\"type\"},{\"unit\":\"string\","
+                                                         "\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"frusubtype\","
+                                                         "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
+                                                         "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
+                                                         "\"2020-02-06 16:12:44.0\",0,\"FRUIDforx0c0s24b0n0d4\","
+                                                         "\"Memory\",\"Memory\",\"Memory\"]],\"result-data-columns\":7}"
+                                })
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('frusubtype', captured_output.getvalue())
         captured_output.close()
 
     def test_is_bad_input(self):

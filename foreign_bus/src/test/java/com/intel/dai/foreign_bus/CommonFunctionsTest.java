@@ -3,7 +3,6 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import org.junit.AfterClass;
@@ -58,50 +57,50 @@ public class CommonFunctionsTest {
     }
 
     @Test
-    public void positiveConvertXNameLocationTests() throws Exception {
-        assertEquals("R0-SMS", CommonFunctions.convertXNameToLocation("sms"));
-        assertEquals("R0", CommonFunctions.convertXNameToLocation("x0"));
-        assertEquals("R0-CH0", CommonFunctions.convertXNameToLocation("x0c0"));
-        assertEquals("R0-CH0-CN3", CommonFunctions.convertXNameToLocation("x0c0s3b0n0"));
-        assertEquals("R0-BC_C_I_YY", CommonFunctions.convertXNameToLocation("x0", "BC_C_I_YY"));
-        assertEquals("R0-CH0-CN3-BC_I_NODE4_YY-EXTRA", CommonFunctions.convertXNameToLocation("x0c0s3b0n0",
+    public void positiveConvertForeignLocationTests() throws Exception {
+        assertEquals("R0-SMS", CommonFunctions.convertForeignToLocation("sms"));
+        assertEquals("R0", CommonFunctions.convertForeignToLocation("x0"));
+        assertEquals("R0-CH0", CommonFunctions.convertForeignToLocation("x0c0"));
+        assertEquals("R0-CH0-CN3", CommonFunctions.convertForeignToLocation("x0c0s3b0n0"));
+        assertEquals("R0-BC_C_I_YY", CommonFunctions.convertForeignToLocation("x0", "BC_C_I_YY"));
+        assertEquals("R0-CH0-CN3-BC_I_NODE4_YY-EXTRA", CommonFunctions.convertForeignToLocation("x0c0s3b0n0",
                 "BC_I_NODE4_YY", "EXTRA"));
         assertEquals("R0-CH0-CN2-CPU2-BC_I_NODE2_CPU2_DIMM3_YY",
-                CommonFunctions.convertXNameToLocation("x0c0s2b0n0", "BC_I_NODE2_CPU2_DIMM3_YY"));
+                CommonFunctions.convertForeignToLocation("x0c0s2b0n0", "BC_I_NODE2_CPU2_DIMM3_YY"));
         assertEquals("R0-CH0-CN1-CPU2-CH1-DIMM3-BC_I_NODE1_CPU2_CH1_DIMM3_YY",
-                CommonFunctions.convertXNameToLocation("x0c0s1b0n0", "BC_I_NODE1_CPU2_CH1_DIMM3_YY"));
-        assertEquals("R0-CH0-CN3-BC_I_NODE3_YY-EXTRA", CommonFunctions.convertXNameToLocation("x0c0s3b0n0",
+                CommonFunctions.convertForeignToLocation("x0c0s1b0n0", "BC_I_NODE1_CPU2_CH1_DIMM3_YY"));
+        assertEquals("R0-CH0-CN3-BC_I_NODE3_YY-EXTRA", CommonFunctions.convertForeignToLocation("x0c0s3b0n0",
                 "BC_I_NODE3_YY", "EXTRA"));
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
-    public void negativeconvertXNameLocationTest1() throws Exception {
-        CommonFunctions.convertXNameToLocation("x0c1s0n0");
+    @Test(expected = ConversionException.class)
+    public void negativeconvertForeignLocationTest1() throws Exception {
+        CommonFunctions.convertForeignToLocation("x0c1s0n0");
     }
 
     @Test
-    public void positiveConvertLocationToXNameTests() throws Exception {
-        assertEquals("all", CommonFunctions.convertLocationToXName("all"));
-        assertEquals("sms", CommonFunctions.convertLocationToXName("R0-SMS"));
-        assertEquals("x0", CommonFunctions.convertLocationToXName("R0"));
-        assertEquals("x0c0", CommonFunctions.convertLocationToXName("R0-CH0"));
-        assertEquals("x0c0s2b0n0", CommonFunctions.convertLocationToXName("R0-CH0-CN2"));
-        assertEquals("x0c0s1b0n0", CommonFunctions.convertLocationToXName("R0-CH0-CN1"));
-        assertEquals("x0c0s3b0n0", CommonFunctions.convertLocationToXName("R0-CH0-CN3-BC_I_NODE3_YY-EXTRA"));
+    public void positiveConvertLocationToForeignTests() throws Exception {
+        assertEquals("all", CommonFunctions.convertLocationToForeign("all"));
+        assertEquals("sms", CommonFunctions.convertLocationToForeign("R0-SMS"));
+        assertEquals("x0", CommonFunctions.convertLocationToForeign("R0"));
+        assertEquals("x0c0", CommonFunctions.convertLocationToForeign("R0-CH0"));
+        assertEquals("x0c0s2b0n0", CommonFunctions.convertLocationToForeign("R0-CH0-CN2"));
+        assertEquals("x0c0s1b0n0", CommonFunctions.convertLocationToForeign("R0-CH0-CN1"));
+        assertEquals("x0c0s3b0n0", CommonFunctions.convertLocationToForeign("R0-CH0-CN3-BC_I_NODE3_YY-EXTRA"));
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
-    public void negativeConvertLocationToXNameTests() throws Exception {
-        CommonFunctions.convertLocationToXName("R3-CH0-CN0");
+    @Test(expected = ConversionException.class)
+    public void negativeConvertLocationToForeignTests() throws Exception {
+        CommonFunctions.convertLocationToForeign("R3-CH0-CN0");
     }
 
     @Test
-    public void testAllXnames() {
+    public void testAllForeignNames() {
        assertTrue(CommonFunctions.getLocations().containsAll(CommonFunctions.nodeMap_ .values()));
     }
 
     @Test
     public void testAllLocations() {
-        assertTrue(CommonFunctions.getXNames().containsAll(CommonFunctions.nodeMap_ .keySet()));
+        assertTrue(CommonFunctions.getForeignLocations().containsAll(CommonFunctions.nodeMap_ .keySet()));
     }
 }

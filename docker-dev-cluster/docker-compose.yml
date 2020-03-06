@@ -154,7 +154,7 @@ services:
       - HOSTNAME=eventsim
       - DAI_LOGGING_LEVEL=DEBUG
     ports:
-      - "5678:5678/tcp"
+      - "8081:8081/tcp"
     volumes:
       - "./config:/opt/ucs/etc"
       - "./jars:/opt/ucs/lib"

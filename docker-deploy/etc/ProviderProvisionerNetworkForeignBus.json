@@ -6,9 +6,9 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "localhost",
-        "connectPort": 5678,
-        "bindAddress": "*",
+        "connectAddress": "sms01-nmn.local",
+        "connectPort": 8080,
+        "bindAddress": "sms01-nmn.local",
         "bindPort": 54321,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "subjects": "stateChange",
@@ -37,7 +37,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://sms01-nmn.local"
     },
     "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_boot_event",

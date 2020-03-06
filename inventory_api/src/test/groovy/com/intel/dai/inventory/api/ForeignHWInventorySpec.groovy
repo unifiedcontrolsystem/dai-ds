@@ -77,8 +77,8 @@ class ForeignHWInventorySpec extends spock.lang.Specification {
         def tree0 = new ForeignHWInventory()
         def tree1 = new ForeignHWInventory()
 
-        tree0.XName = "c0n0"
-        tree1.XName = "c0n0"
+        tree0.ForeignName = "c0n0"
+        tree1.ForeignName = "c0n0"
         tree0.Format = "NodeOnly"
         tree1.Format = "NodeOnly"
 

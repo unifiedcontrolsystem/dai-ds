@@ -576,7 +576,7 @@ class HardwareSet {
      */
     locationsToRankSpec(locations) {
         // Start with a "long hand" rankspec, then compress later.
-        var numcns = this.hwtypes.get('dense-compute-node').length;
+        var numcns = this.hwtypes.get('compute-node').length;
         var spec = [];	// array of single chars.   String would be nice, but they are immutable in javascript
         if (locations != null) {
             locations.split(' ').forEach(function (loc) {
@@ -630,21 +630,21 @@ class HardwareSet {
      * Use tag=null to remove the tag.
      */
     assignJob(job) {
-        var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+        var hwt = this.hwtypes.get("compute-node");  //QQQ what about "other" compute nodes??
         if (!hwt) return 0;	// empty set
         return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
             arg[rank].changeJob(job);
         }, job.rankspec, hwt);
     }
     selectJob(job) {
-        var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+        var hwt = this.hwtypes.get("compute-node");  //QQQ what about "other" compute nodes??
         if (!hwt) return 0;	// empty set
         return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
             arg[rank].changeSelected(true);
         }, job.rankspec, hwt);
     }
     unselectJob(job) {
-        var hwt = this.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+        var hwt = this.hwtypes.get("compute-node");  //QQQ what about "other" compute nodes??
         if (!hwt) return 0;	// empty set
         return HardwareSet.iterateRankSpec(function(rank, charval, arg) {
             arg[rank].changeSelected(false);
@@ -669,7 +669,7 @@ class Job {
         this.color = null;			// only applies to active jobs
 
         var rackset = new Set();
-        var hwt = systemInventory.hwtypes.get("dense-compute-node");  //QQQ what about "other" compute nodes??
+        var hwt = systemInventory.hwtypes.get("compute-node");  //QQQ what about "other" compute nodes??
         var count=0;
         HardwareSet.iterateRankSpec(function(rank, charval, arg) {
             rackset.add(hwt[rank].rack);    // Every node HWitem has a rack reference
@@ -737,15 +737,15 @@ class JobSet {
 }
 
 var colormap = {
-    "dense-compute-node-state-M" : "#000d1a",
-    "dense-compute-node-state-A" : "#cce5ff",
-    "dense-compute-node-state-E" : "red",
-    "dense-compute-node-state-S" : "violet",
-    "dense-compute-node-state-B" : "#004d99",
-    "dense-compute-node-state-D" : "#0073e6",
-    "dense-compute-node-state-I" : "#3399ff",
-    "dense-compute-node-state-L" : "#66ccff",
-    "dense-compute-node-state-K" : "#aaddff",
+    "compute-node-state-M" : "#000d1a",
+    "compute-node-state-A" : "#cce5ff",
+    "compute-node-state-E" : "red",
+    "compute-node-state-S" : "violet",
+    "compute-node-state-B" : "#004d99",
+    "compute-node-state-D" : "#0073e6",
+    "compute-node-state-I" : "#3399ff",
+    "compute-node-state-L" : "#66ccff",
+    "compute-node-state-K" : "#aaddff",
 
     "dense-swblade-state-A"      : "#ffd9b3",
     "dense-rectifier-state-A"    : "#ffd9b3",
@@ -761,8 +761,8 @@ var colormap = {
     "service-chassis-state-3"		: "#f5f5f5",
     "service-chassis-state-4"		: "#f5f5f5",
     "chassis-power-supply-state-A"	: "#ffbfbf",
-    "dense-compute-fan-state-A" 	: "#df9f9f",
-    "dense-compute-opa-hfi-state-A" : "#ffd9b3",
+    "compute-fan-state-A" 	: "#df9f9f",
+    "compute-opa-hfi-state-A" : "#ffd9b3",
     "vCDU-state-A"               : "#eeeeee",
     "io-node-state-A"            : "#cce5ff",
     "storage-drawer-state-A"     : "#ffbfbf",

@@ -142,12 +142,12 @@ public class NetworkListenerCore {
     }
 
     private boolean startAllConnections() throws NetworkDataSinkFactory.FactoryException {
-        List<NetworkDataSink> removeList = new ArrayList<>();
+        ArrayList<NetworkDataSink> unconnectedList = new ArrayList<>();
         for(String networkStreamName: config_.getProfileStreams()) {
             PropertyMap arguments = config_.getNetworkArguments(networkStreamName);
-            assert (arguments != null):"A null arguments object";
+            if (arguments == null) throw new NullPointerException("A null arguments object");
             String name = config_.getNetworkName(networkStreamName);
-            assert name != null: "A null network name is not allowed!";
+            if (name == null) throw new NullPointerException("A null network name is not allowed!");
             log_.debug("*** Creating a network sink of type '%s'...", name);
             arguments.put("subjects", subjects_);
             Map<String,String> args = buildArgumentsForNetwork(arguments);
@@ -165,20 +165,33 @@ public class NetworkListenerCore {
         safeSleep(1500); // stabilize for 1.5 seconds...
         for(NetworkDataSink sink: sinks_) {
             if(!sink.isListening())
-                removeList.add(sink);
+                unconnectedList.add(sink);
         }
-        for(NetworkDataSink remove: removeList)
-            sinks_.remove(remove);
-        if(sinks_.isEmpty()) {
-            log_.error("ALL of the connections failed for this monitoring adapter");
-            return false;
-        } else if(!removeList.isEmpty()) {
-            log_.error("One or more of the connections failed for this monitoring adapter");
-            return false;
-        } else {
-            log_.info("Connected %d of %d connections", sinks_.size(), config_.getProfileStreams().size());
-            return true;
+        if(!unconnectedList.isEmpty()) {
+            log_.warn("One or more of the connections failed for this monitoring adapter, they will continue to " +
+                    "attempt to connection in the background");
+            new Thread(() -> backgroundContinueConnections(unconnectedList)).start();
         }
+        return true;
+    }
+
+    private void backgroundContinueConnections(List<NetworkDataSink> unconnectedList) {
+        List<NetworkDataSink> succeededList = new ArrayList<>();
+        while (!unconnectedList.isEmpty()) {
+            for (NetworkDataSink sink : unconnectedList) {
+                sink.startListening();
+                safeSleep(1500); // stabilize for 1.5 seconds...
+                if (sink.isListening()) {
+                    succeededList.add(sink);
+                    log_.info("A lazy connection was established in the background.");
+                }
+            }
+            while (!succeededList.isEmpty()) {
+                unconnectedList.remove(succeededList.get(0));
+                succeededList.remove(0);
+            }
+        }
+        log_.info("All remaining connections were completed.");
     }
 
     private void stopAllConnections() {
@@ -385,6 +398,7 @@ public class NetworkListenerCore {
     private SystemActions actions_;
     private List<String> subjects_;
             ConcurrentLinkedQueue<FullMessage> queue_ = new ConcurrentLinkedQueue<>();
+    private static long STABILIZATION_VALUE = 1500L;
 
     private static final class FullMessage {
         FullMessage(String subject, String message) {

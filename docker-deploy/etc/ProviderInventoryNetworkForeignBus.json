@@ -1,0 +1,56 @@
+{
+  "providerClassMap": {
+    "inventoryEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "stateChangeSource": {
+      "arguments": {
+        "connectAddress": "sms01-nmn.local",
+        "connectPort": 8080,
+        "bindAddress": "sms01-nmn.local",
+        "bindPort": 54322,
+        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
+        "subjects": "stateChange",
+        "requestBuilder": "com.intel.dai.inventory.ForeignSubscriptionRequest",
+        "responseParser": "com.intel.dai.inventory.ForeignSubscriptionResponseParser",
+        "subscriberName": "daiInvSubscriptionID",
+        "use-ssl": false
+      },
+      "name": "http_callback"
+    }
+  },
+
+  "adapterProfiles": {
+    "default": {
+      "networkStreamsRef": [
+        "stateChangeSource"
+      ],
+      "subjects": [
+        "stateChanges"
+      ],
+      "adapterProvider": "inventoryEventData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://sms01-nmn.local"
+    },
+    "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
+      "publishTopic": "ucs_inventory_event",
+      "informWorkLoadManager": false,
+      "publish": false
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}

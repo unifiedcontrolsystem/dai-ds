@@ -16,7 +16,6 @@ import java.lang.Integer;
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.config_io.*;
 import com.intel.dai.exceptions.ProviderException;
-import com.intel.logging.LoggerFactory;
 import com.intel.logging.Logger;
 import com.intel.properties.*;
 import com.intel.dai.exceptions.DataStoreException;
@@ -29,7 +28,7 @@ public class CannedAPI {
     private final Logger log_;
 
     private static final Map<String, String> owner_map = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
+            new HashMap<>() {{
                 put("W", "WLM");
                 put("S", "Service");
                 put("G", "General");
@@ -37,7 +36,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> state_map = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
+            new HashMap<>() {{
                 put("B", "Bios Starting");
                 put("D", "Discovered (dhcp discover)");
                 put("I", "IP address assigned (dhcp request)");
@@ -50,7 +49,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> wlmstate_map = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
+            new HashMap<>() {{
                 put("A", "Available");
                 put("U", "Unavailable");
                 put("G", "General");
@@ -58,7 +57,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> jobstate_map = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
+            new HashMap<>() {{
                 put("T", "Terminated");
                 put("S", "Started");
             }});
@@ -129,6 +128,22 @@ public class CannedAPI {
 
                     log_.info("GetServiceNodeSummary procedure called");
                     jsonResult.put("service", map_state_values(executeProcedure("{call GetServiceNodeSummary()}")));
+                    break;
+                }
+                case "getinvchanges": {
+                    String lctn = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryChange(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    break;
+                }
+                case "getinvhislctn": {
+                    String lctn = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryHistoryForLctn(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    jsonResult = map_state_values(jsonResult);
+                    break;
+                }
+                case "getnodeinvinfo": {
+                    String lctn = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryInfoForLctn(?, ?)}", lctn, limit);
                     break;
                 }
                 default:
@@ -260,6 +275,19 @@ public class CannedAPI {
         }
     }
 
+    private PropertyMap executeProcedureOneVariableFilter(String prepProcedure, String FilterVariableOne, String Limit)
+            throws SQLException
+    {
+        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
+            stmt.setString(1, FilterVariableOne);
+            handleLimit(Limit, stmt, 2);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return jsonConverter.convertToJsonResultSet(rs);
+            }
+        }
+    }
+
     private PropertyMap executeProcedureTwoVariableFilter(String prepProcedure, Timestamp StartTime,
                                                           Timestamp EndTime, String FilterVariableOne,
                                                           String FilterVariableTwo ,String Limit)
@@ -323,5 +351,4 @@ public class CannedAPI {
         else
             stmt.setNull(value, Types.INTEGER);
     }
-
 }

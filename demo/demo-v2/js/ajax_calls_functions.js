@@ -440,7 +440,7 @@ function updateRasResult(data){
         var timestamp = resp[i].lastchgtimestamp;
         var severity = resp[i].severity;
         var location = resp[i].lctn;
-        var job = resp[i].jobId;
+        var job = resp[i].jobid;
         var controlaction = resp[i].controloperation;
         var message = resp[i].msg;
         var rasdate = timestamp;
