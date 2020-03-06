@@ -130,20 +130,20 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
         }
         else if (name == "Replacement_Max_Timestamp") {
             if (replacementMaxTimestamp != val) {
-                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, null);
+                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, val);
                 replacementMaxTimestamp = val;
             }
         }
 
         else if (name == "Service_Node_LastChg_Timestamp") {
             if (serviceNodeTimestamp != val) {
-            updateServiceInventoryFromDB(dbServiceInventory, serviceNodeTimestamp, val);
+                updateServiceInventoryFromDB(dbServiceInventory, serviceNodeTimestamp, val);
                 serviceNodeTimestamp = val;
             }
         }
         else if (name == "Compute_Node_LastChg_Timestamp") {
             if (computeNodeTimestamp != val) {
-            updateComputeInventoryFromDB(dbComputeInventory, computeNodeTimestamp, val);
+                updateComputeInventoryFromDB(dbComputeInventory, computeNodeTimestamp, val);
                 computeNodeTimestamp = val;
             }
         }
