@@ -316,7 +316,7 @@ public class WlmApi {
             Date now = new Date();
             String date = sdfDate.format(now);
 
-            String logstring = date + " testuser modifying reservation: " + updateStr  + "\n";
+            String logstring = date + " testuser modifying reservation: [{'name': '" + name_ + "'}] with updates " + updateStr  + "\n";
             return logstring;
         }
 
