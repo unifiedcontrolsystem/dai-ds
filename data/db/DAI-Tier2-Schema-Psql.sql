@@ -1194,27 +1194,12 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
       return query
           select 'Inv_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from Tier2_nodeinventory_history;
-
-      return query
-          select 'InvSS_Max_Timestamp'::varchar,
-            max(snapshottimestamp)
-          from Tier2_inventorysnapshot;
-
-      return query
-          select 'Diags_Max_Timestamp'::varchar,
-            max(starttimestamp)
-          from Tier2_Diag_History;
+          from tier2_hwinventorylocation;
 
       return query
           select 'Replacement_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from Tier2_replacement_history;
-
-      return query
-          select 'Service_Operation_Max_Timestamp'::varchar,
-            max(dbupdatedtimestamp)
-          from Tier2_serviceoperation_history;
+          from tier2_hwinventory_history; 
 
       return query
           select 'Service_Node_LastChg_Timestamp'::varchar,
@@ -2210,24 +2195,26 @@ $$;
 -- Name: inventoryinfolist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), lastchgtimestamp TIMESTAMP, Sernum VarChar(50))
-    LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
+    LANGUAGE sql
     AS $$
-BEGIN
-    if (p_start_time is not null) then
-        return query
-            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp, ni.Sernum  from tier2_nodeinventory_history ni
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= p_start_time
-            order by Lctn, dbupdatedtimestamp desc;
-    else
-        return query
-            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp , ni.Sernum  from tier2_nodeinventory_history ni
-                        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-            order by Lctn, dbupdatedtimestamp desc;
-    end if;
-    return;
-END
+    select  HI.id,
+            HI.dbupdatedtimestamp,
+            HI.ordinal,
+            HI.fruid,
+            HI.type,
+            HF.frutype,
+            HF.frusubtype
+    from tier2_hwinventorylocation HI
+    inner join tier2_hwinventoryfru HF on
+    HI.fruid = HF.fruid
+    where
+        case
+            when p_start_time is null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
+            when p_start_time is not null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+                                               HI.dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp)
+        end
+    order by HI.DbUpdatedTimestamp, HI.id desc
 $$;
 
 
@@ -2405,21 +2392,21 @@ $$;
 -- Name: replacementhistorylist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_replacement_history
+CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_hwinventory_history
     LANGUAGE plpgsql
     AS $$
 BEGIN
     if (p_start_time is not null) then
         return query
-            select * from tier2_replacement_history
+            select * from tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= p_start_time
-            order by lastchgtimestamp desc;
+            order by dbupdatedtimestamp, id, action, fruid desc;
     else
         return query
-            select * from tier2_replacement_history
+            select * from tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
-            order by lastchgtimestamp desc;
+            order by dbupdatedtimestamp, id, action, fruid desc;
     end if;
     return;
 END

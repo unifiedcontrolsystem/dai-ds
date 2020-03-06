@@ -535,33 +535,19 @@ function dbInventoryInfoResponse(data){
         return;
     }
 
-    var resp = JSON.parse((JSON.parse(data)).Result);
     if (!inventoryinfotable.data().any()) {
-        inventoryinfotable.rows().remove();}
-    for (var i = 0;  i < resp.length; i++) {
-        var inv_data_key = JSON.parse(resp[i].inventoryinfo);
-        var counter = 0
-        var html_table = "" ;
-        var html_table_shown_data = "";
-        var total_html_table_data = "";
-        if (inv_data_key != null) {
-            for (var key in inv_data_key) {
-                if (counter < 1) {
-                    counter++;
-                    html_table_shown_data += "<tr class='inv_inside_table shown-content-in-tabular-form'>" + append_content_to_inner_list(inv_data_key, key) + "</tr>";
-                    //html_table_shown_data +=  append_content_to_inner_table(inv_data_key, key, 'shown');
-                }
-                else {
-                    html_table += "<tr class='inv_inside_table hidden-content-in-tabular-form'>" + append_content_to_inner_list(inv_data_key, key) + "</tr>";
-                    //html_table += append_content_to_inner_table(inv_data_key, key, 'hidden');
-                }
+        inventoryinfotable.rows().remove();}	// removes all rows
 
-            }
-            total_html_table_data = "<table class='inv_inside_table'>" + html_table_shown_data + "<tr class='shown-content-in-tabular-form'><td align='right'>" +
-                "<a class='test'  href='#' class='expand-table-show-hidden-rows' onclick='show_table_details(this)'>More</a></td></tr>" + html_table + "</table>";
-            //total_html_table_data = html_table_shown_data + html_table;
-        }
-        inventoryinfotable.row.add([resp[i].lctn, dashifnull(resp[i].inventorytimestamp), "<div class='inner_table_inventory_ss'>" +total_html_table_data +"</div>"]);
+    var resp = JSON.parse((JSON.parse(data)).Result);
+    for (var i = 0;  i < resp.length; i++) {
+        var time = resp[i].dbupdatedtimestamp;
+        var location = resp[i].id;
+        var type = resp[i].type;
+        var ordinal = resp[i].ordinal;
+        var fruid = resp[i].fruid;
+        var frutype = resp[i].frutype;
+        var frusubtype = resp[i].frusubtype;
+        inventoryinfotable.row.add([time, location, type, ordinal, fruid, frutype, frusubtype]);
     }
     inventoryinfotable.draw(false);
 }
@@ -611,17 +597,17 @@ function dbReplacementHistoryResponse(data)
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
-    var resp = JSON.parse((JSON.parse(data)).Result);
+
     if (!replacementhistorytable.data().any()) {
         replacementhistorytable.rows().remove();}	// removes all rows
 
+    var resp = JSON.parse((JSON.parse(data)).Result);
     for (var i = 0;  i < resp.length; i++) {
-        var location = resp[i].lctn;
         var time = resp[i].dbupdatedtimestamp;
-        var newsern = resp[i].newsernum;
-        var oldsernum = resp[i].oldsernum;
-        var frutype = resp[i].frutype;
-        replacementhistorytable.row.add([location, newsern, oldsernum, frutype, time]);
+        var location = resp[i].id;
+        var action = resp[i].action;
+        var fruid = resp[i].fruid;
+        replacementhistorytable.row.add([time, location, action, fruid]);
     }
     replacementhistorytable.draw(false);
 }

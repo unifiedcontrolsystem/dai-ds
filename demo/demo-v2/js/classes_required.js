@@ -817,7 +817,7 @@ var inventorysnapshottable;
 var inventoryinfotable;
 var replacementhistorytable;
 var tabids = ['hardware-view','nodestate-view', 'ras-view','env-view', 'invinfo-view', 'replacement-view',
-'jobs-view', 'diags-view', 'wlm-reservation-view', 'invsnap-view', 'serviceop-view', 'alert-view'];			// tab id names (discovered on startup)
+'jobs-view', 'wlm-reservation-view', 'alert-view'];			// tab id names (discovered on startup)
 var urloptions;
 var contextList = ["Now", "RAS 2017-06-01 22:15:12.004000 R00-CH2-CB1-PM0-CN0"];
     var tabLinks = new Array();
