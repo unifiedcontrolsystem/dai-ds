@@ -209,7 +209,7 @@ public class WlmApi {
                     if (!"false".equals(nodeChoice[nc]))
                         updateStr += "'nodes': '" + nodeChoice[nc] + "',";
                     if (startChoice[sc] != 0)
-                        updateStr += "'start': '" + startChoice[sc] + "',";
+                        updateStr += "'start': " + startChoice[sc] + ".0,";
                     updateStr += "}]";
                     logstring = logItems.get(key).modifyReservation(updateStr);
                     bgschedLog.write(logstring);
@@ -305,9 +305,9 @@ public class WlmApi {
             String nodeStr = String.join(",", nodes_);
             String userStr = String.join(":", users_);
 
-            String logstring = date + "user" + " adding reservation: [{'name': '" + name_ + "', 'partitions': '" +
-                    nodeStr + "', 'start': '" + startTime_ + "', 'duration': '" + duration_ + "', 'users': '" +
-                    userStr + "'}]";
+            String logstring = date + " testuser adding reservation: [{'name': '" + name_ + "', 'block_passthrough': False, 'partitions': '" +
+                    nodeStr + "', 'project': dai, 'start': " + startTime_ + ".0, 'duration': " + duration_ + ", 'cycle': first, 'users': '" +
+                    userStr + "'}]"  + "\n";
             return logstring;
         }
 
@@ -316,7 +316,7 @@ public class WlmApi {
             Date now = new Date();
             String date = sdfDate.format(now);
 
-            String logstring = date + " " + "testuser" + " modifying reservation: " + updateStr;
+            String logstring = date + " testuser modifying reservation: " + updateStr  + "\n";
             return logstring;
         }
 
@@ -325,7 +325,7 @@ public class WlmApi {
             Date now = new Date();
             String date = sdfDate.format(now);
 
-            String logstring = date + " " + "testuser" + " releasing reservation: [{'name': '" + name_ + "'}]";
+            String logstring = date + " testuser releasing reservation: [{'name': '" + name_ + "'}]"  + "\n";
             return logstring;
         }
 
@@ -367,7 +367,7 @@ public class WlmApi {
                     " Resource_List.nodect=" + numNodes + " Resource_List.walltime=1:00:00 " +
                     "account=xxx args= ctime=1554251516.32 cwd=" + workdir_ + " etime=1554251516.32 " +
                     "exe=/home exec_host=\"" + nodeStr + "\" group=g jobname=" + name_ + " mode=script " +
-                    "qtime=1554251516.32 queue=R.pm2 session=sss start=" + startTime_ + " user=" + userStr;
+                    "qtime=1554251516.32 queue=R.pm2 session=sss start=" + startTime_ + " user=" + userStr + "\n";
             return logstring;
         }
 
@@ -385,7 +385,7 @@ public class WlmApi {
                     workdir_ + " end=" + endTime_ + " etime=1554251516.32 exe=/home exec_host=" + nodeStr +
                     " group=g jobname=" + name_ + " mode=script priority_core_hours=2824063 qtime=1554251516.32" +
                     " queue=R.pm2 resources_used.location=" + nodeStr + " resources_used.nodect=" + numNodes +
-                    " resources_used.walltime=0:03:23 session=sss start=" + startTime_ + " user=" + userStr;
+                    " resources_used.walltime=0:03:23 session=sss start=" + startTime_ + " user=" + userStr + "\n";
             return logstring;
         }
     }
