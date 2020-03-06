@@ -63,7 +63,7 @@ public class EventSim {
         try {
             eventSimConfigFile_ = args_[1];
             PropertyDocument data = LoadFileLocation.fromFileLocation(eventSimConfigFile_);
-            if(data == null || !data.isMap())
+            if(!data.isMap() || ((PropertyMap) data).size() == 0)
                 throw new SimulatorException("Invalid or null EventSim server configuration details.");
             serverConfiguration_ = data.getAsMap();
         } catch (FileNotFoundException e) {
