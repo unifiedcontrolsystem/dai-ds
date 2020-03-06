@@ -336,6 +336,46 @@ function main()
         }
     }).DataTable();
 
+    diagstable = $("#Diags").DataTable({
+        select: 'single',
+        pageLength: 100,
+        lengthMenu: [ 100, 200, 300, 400, 500 ],
+        order: [1, 'desc'],		// timestamp
+        jQueryUI: true,
+        autoWidth: false,
+        columns: [
+            {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var loc = rowData[3];  		// i.e., this cell
+                    $(cell).parent().attr("location", loc);		// add location to the <tr>
+                }},
+            {title: "Diag test"},
+            {title: "Start Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var time = rowData[1];  		// i.e., this cell
+                    $(cell).attr('history_start', ['RAS', time, rowData[3]].join(' '));
+                }},
+            {title: "End Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var time = rowData[1];  		// i.e., this cell
+                    $(cell).attr('history_end', ['ENV', time, rowData[3]].join(' '));
+                }},
+            {title: "Results"},
+            {title: "ServiceAction", visible: false, createdRow: function( row, data, dataIndex ) {
+                    if ( data[5] != null ) {
+                        $(row).addClass( 'diags_active' );
+                    }
+                }},
+        ],
+    });
+
+    $("#Diags").on("page.dt", function(){
+        var table = $("#Diags").DataTable();
+        var table_info = table.page.info();
+        if (table_info.end == table_info.recordsTotal) {
+            var end_time_requested = (table.row(":last", {order: 'applied'}).data())[3];
+            updateADiagsFromDB(updateADiagResult, end_time_requested);
+            updateNDiagsFromDB(updateNDiagResult, end_time_requested);
+        }
+    }).DataTable();
+
 
     envtable = $("#Env").DataTable({
         select: 'select',
@@ -495,6 +535,34 @@ function main()
     }).DataTable();
 
 
+    inventorysnapshottable = $("#InvSnap").DataTable({
+        select: 'single',
+        pageLength: 5,
+        order: [1, 'desc'],		// timestamp
+        jQueryUI: true,
+        autoWidth: false,
+        columns: [
+            {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var loc = rowData[0];  		// i.e., this cell
+                    $(cell).parent().attr("location", loc);		// add location to the <tr>
+                }},
+            {title: "Time"},
+            {title: "Snapshot Info", createdCell: function(cell,cellData, rowData){
+                    var value = rowData[2];
+                    $(cell).innerHTML = value;
+                }}
+        ],
+    });
+    $("#InvSnap").on("page.dt", function(){
+         var table = $("#InvSnap").DataTable();
+         var table_info = table.page.info();
+         if (table_info.end == table_info.recordsTotal) {
+             var end_time_requested = (table.row(":last", {order: 'applied'}).data())[1];
+             var start_time_requested = get_start_date(end_time_requested, 30);
+             updateInventorySnapshotFromDB(dbInventorySnapShotResponse, start_time_requested, end_time_requested);
+         }
+     }).DataTable();
+
     inventoryinfotable = $("#InvInfo").DataTable({
         select: 'single',
         pageLength: 5,
@@ -533,6 +601,39 @@ function main()
         ],
     });
 
+    serviceOptable = $("#ServiceOp").DataTable({
+        select: 'single',
+        pageLength: 100,
+        lengthMenu: [ 100, 200, 300, 400, 500 ],
+        order: [1, 'desc'],		// timestamp
+        jQueryUI: true,
+        autoWidth: false,
+        columns: [
+            {title: "Location", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var loc = rowData[3];  		// i.e., this cell
+                    $(cell).parent().attr("location", loc);		// add location to the <tr>
+                }},
+            {title: "Type"},
+            {title: "Start Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var time = rowData[1];  		// i.e., this cell
+                    $(cell).attr('service_start', ['RAS', time, rowData[3]].join(' '));
+                }},
+            {title: "Stop Time", createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    var time = rowData[1];  		// i.e., this cell
+                    $(cell).attr('service_stop', ['ENV', time, rowData[3]].join(' '));
+                }},
+            {title: "Status"},
+        ],
+    });
+
+    $("#ServiceOp").on("page.dt", function(){
+        var table = $("#ServiceOp").DataTable();
+        var table_info = table.page.info();
+        if (table_info.end == table_info.recordsTotal) {
+            var end_time_requested = (table.row(":last", {order: 'applied'}).data())[3];
+            updateServiceOperationsFromDB(updateServiceOperationResult, end_time_requested);
+        }
+    }).DataTable();
 
     // Add highlight  location on touch for *both* the RAS and Service Action tables
     // Add highlight  location on touch for *both* the RAS and Service Action tables
