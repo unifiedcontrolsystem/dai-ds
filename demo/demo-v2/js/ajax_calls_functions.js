@@ -128,31 +128,13 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
                 invMaxTimestamp = val;
             }
         }
-        else if (name == "InvSS_Max_Timestamp") {
-            if (invSSMaxTimestamp != val && !nre) {
-                updateInventorySnapshotFromDB(dbInventorySnapShotResponse, invSSMaxTimestamp, val);
-                invSSMaxTimestamp = val;
-            }
-        }
         else if (name == "Replacement_Max_Timestamp") {
             if (replacementMaxTimestamp != val) {
                 updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, null);
                 replacementMaxTimestamp = val;
             }
         }
-        else if (name == "Diags_Max_Timestamp") {
-            if (diagsMaxTimestamp != val && !nre) {
-                updateADiagsFromDB(updateADiagResult, diagsMaxTimestamp);
-                updateNDiagsFromDB(updateNDiagResult, diagsMaxTimestamp);
-                diagsMaxTimestamp = val;
-            }
-        }
-        else if (name == "Service_Operation_Max_Timestamp") {
-            if (serviceOperationTimestamp != val && !nre) {
-                updateServiceOperationsFromDB(updateServiceOperationResult, serviceOperationTimestamp);
-                serviceOperationTimestamp = val;
-            }
-        }
+
         else if (name == "Service_Node_LastChg_Timestamp") {
             if (serviceNodeTimestamp != val) {
             updateServiceInventoryFromDB(dbServiceInventory, serviceNodeTimestamp, val);
@@ -497,105 +479,6 @@ function updateEnvResult(data){
     envtable.draw(false)
 }
 
-function updateADiagsFromDB(callback, EndTime){
-    console.log('/query/diagsact?EndTime='+EndTime);
-    $.ajax({
-        url: '/query/diagsact?EndTime='+EndTime,
-        success : callback
-    });
-}
-
-function updateNDiagsFromDB(callback, EndTime){
-    console.log('/query/diagsnonact?EndTime='+EndTime);
-    $.ajax({
-        url: '/query/diagsnonact?EndTime='+EndTime,
-        success : callback
-    });
-}
-
-function updateADiagResult(data){
-    var status = (JSON.parse(data)).Status;
-    if (status == "FE") {
-        console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
-        return;
-    }
-    var resp = JSON.parse((JSON.parse(data)).Result);
-    if (!diagstable.data().any()) {
-        diagstable.rows().remove();
-    }// removes all rows
-    for (var i=0; i < resp.length; i++) {
-        var diags_id = resp[i].diagid;
-        var location = resp[i].lctn;
-        var service_id = resp[i].serviceactionid;
-        var diag_test = resp[i].diag;
-        var state = resp[i].state;
-        var start_time = resp[i].starttimestamp;
-        var end_time = resp[i].endtimestamp;
-        var diag_results = resp[i].results;
-        diagstable.row.add([location, dashifnull(diag_test), dashifnull(start_time), dashifnull(end_time),dashifnull(diag_results), dashifnull(service_id)]);
-    }
-    diagstable.draw(false)
-}
-
-function updateNDiagResult(data){
-    var status = (JSON.parse(data)).Status;
-    if (status == "FE") {
-        console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
-        return;
-    }
-    var resp = JSON.parse((JSON.parse(data)).Result);
-    for (var i=0; i < resp.length; i++) {
-        var diags_id = resp[i].diagid;
-        var location = resp[i].lctn;
-        var service_id = resp[i].serviceactionid;
-        var diag_test = resp[i].diag;
-        var state = resp[i].state;
-        var start_time = resp[i].starttimestamp;
-        var end_time = resp[i].endtimestamp;
-        var diag_results = resp[i].results;
-        diagstable.row.add([location, dashifnull(diag_test), dashifnull(start_time), dashifnull(end_time), dashifnull(diag_results), dashifnull(service_id)]);
-    }
-    diagstable.draw(false)
-}
-
-function updateServiceOperationsFromDB(callback, EndTime){
-    console.log('/query/serviceadapterdata?EndTime='+EndTime);
-    $.ajax({
-        url: '/query/serviceadapterdata?EndTime='+EndTime,
-        success : callback
-    });
-}
-
-function updateServiceOperationResult(data){
-    var status = (JSON.parse(data)).Status;
-    if (status == "FE") {
-        console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
-        return;
-    }
-    var resp = JSON.parse((JSON.parse(data)).Result);
-    if (!serviceOptable.data().any()) {
-        serviceOptable.rows().remove();
-    }// removes all rows
-    for (var i=0; i < resp.length; i++) {
-        var serviceop_id = resp[i].serviceoperationid;
-        var location = resp[i].lctn;
-        var type = resp[i].typeofserviceoperation;
-        var user_start = resp[i].userstartedservice;
-        var user_stop = resp[i].userstoppedservice;
-        var state = resp[i].state;
-        var status = resp[i].status;
-        var starttimestamp = resp[i].starttimestamp;
-        var stoptimestamp = resp[i].stoptimestamp;
-        var startremarks = resp[i].startremarks;
-        var stopremarks = resp[i].stopremarks;
-        var dbupdatedtimestamp = resp[i].dbupdatedtimestamp;
-        var logfile = resp[i].logfile;
-        var entrynumber = resp[i].entrynumber;
-        serviceOptable.row.add([location, dashifnull(type), dashifnull(starttimestamp), dashifnull(stoptimestamp),dashifnull(status)]);
-    }
-    serviceOptable.draw(false)
-}
-
 function updateReservationFromDB(callback, startTime, EndTime)
 {
     console.log('/query/reservationlist?StartTime='+startTime+'&EndTime='+EndTime);
@@ -635,52 +518,6 @@ function dbReservationResponse(data)
         wlmrestable.row.add([name, users, location, stime, etime, dtime]);
     }
     wlmrestable.draw(false);
-}
-
-function updateInventorySnapshotFromDB(callback, startTime, EndTime){
-    console.log('/query/inventoryss?StartTime='+startTime+'&EndTime='+EndTime)
-    $.ajax({
-        url: '/query/inventoryss?StartTime='+startTime+'&EndTime='+EndTime,
-        success : callback
-    });
-}
-
-function dbInventorySnapShotResponse(data){
-    var status = (JSON.parse(data)).Status;
-    if (status == "FE") {
-        console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
-        return;
-    }
-
-    var resp = JSON.parse((JSON.parse(data)).Result);
-    if (!inventorysnapshottable.data().any()) {
-        inventorysnapshottable.rows().remove();}
-    for (var i = 0;  i < resp.length; i++) {
-        var inv_data_key = JSON.parse(resp[i].inventoryinfo);
-        var counter = 0
-        var html_table = "" ;
-        var html_table_shown_data = "";
-        var total_html_table_data = "";
-        if (inv_data_key != null) {
-            for (var key in inv_data_key) {
-                if (counter < 1) {
-                    counter++;
-                    html_table_shown_data += "<tr class='inv_inside_table shown-content-in-tabular-form'>" + append_content_to_inner_list(inv_data_key, key) + "</tr>";
-                    //html_table_shown_data +=  append_content_to_inner_table(inv_data_key, key, 'shown');
-                }
-                else {
-                    html_table += "<tr class='inv_inside_table hidden-content-in-tabular-form'>" + append_content_to_inner_list(inv_data_key, key) + "</tr>";
-                    //html_table += append_content_to_inner_table(inv_data_key, key, 'hidden');
-                }
-
-            }
-            total_html_table_data = "<table class='inv_inside_table'>" + html_table_shown_data + "<tr class='shown-content-in-tabular-form'><td align='right'>" +
-                "<a class='test'  href='#' class='expand-table-show-hidden-rows' onclick='show_table_details(this)'>More</a></td></tr>" + html_table + "</table>";
-            //total_html_table_data = html_table_shown_data + html_table;
-        }
-        inventorysnapshottable.row.add([resp[i].lctn, dashifnull(resp[i].snapshottimestamp), "<div class='inner_table_inventory_ss'>" +total_html_table_data +"</div>"]);
-    }
-    inventorysnapshottable.draw(false);
 }
 
 function updateInventoryInfoFromDB(callback, startTime, EndTime){
