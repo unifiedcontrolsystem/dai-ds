@@ -277,16 +277,11 @@ class NetworkObjectSpec extends Specification {
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
         networkObjectTest.initialise()
         Map<String, String> input_parameters = new HashMap<String, String>()
-        input_parameters.put("url", "http://test.com")
-        input_parameters.put("subscriber", "GET")
         networkObjectTest.unRegisterAll()
         networkObjectTest.register("http://test.com", "GET", input_parameters)
         expect:
         networkObjectTest.getAllSubscriptions().getAsMap().size() == 1
         networkObjectTest.getAllSubscriptions().getAsMap().getArray("SubscriptionList").getMap(0).getString("ID") == "1"
-        networkObjectTest.getSubscription("http://test.com", "GET").toString() == "[subscriber:GET, ID:1, url:http://test.com]"
-        networkObjectTest.getSubscriptionForId(1).toString() == "[subscriber:GET, url:http://test.com]"
-        networkObjectTest.unRegisterId(1)
         networkObjectTest.unRegisterAll()
         networkObjectTest.getAllSubscriptions().isEmpty()
     }

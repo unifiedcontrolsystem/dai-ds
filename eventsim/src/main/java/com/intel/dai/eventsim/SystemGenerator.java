@@ -33,9 +33,9 @@ class SystemGenerator {
     }
 
     /**
-     * This method used to create boot off,on,ready events.
-     * @param bfValue probability of number of failure events can be generated.
-     * @return generated boot off,on,ready events
+     * This method used to create boot events.
+     * @param bfValue probability of number of failure vents can be generated.
+     * @return generated boot events
      */
     List<String> publishBootEventsForLocation(final float bfValue) throws ConversionException {
         float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
@@ -49,51 +49,6 @@ class SystemGenerator {
         List<String> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
         log_.info("Booting = "+ bootingEvents.size());
         bootEvents.addAll(bootingEvents);
-
-        List<String> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations);
-        log_.info("Available = "+ availableEvents.size());
-        bootEvents.addAll(availableEvents);
-
-        return bootEvents;
-    }
-
-    /**
-     * This method used to create boot off events.
-     * @return generated boot off events
-     */
-    List<String> publishBootOffEventsForLocation() throws ConversionException {
-        List<String> bootEvents = new ArrayList<>();
-
-        List<String> unavailableEvents = component_.publishUnAvailableEventsForLocation(regexMatchedLocations);
-        log_.info("Unavailable = "+ unavailableEvents.size());
-        bootEvents.addAll(unavailableEvents);
-
-        return bootEvents;
-    }
-
-    /**
-     * This method used to create boot on events.
-     * @param bfValue probability of number of failure events can be generated.
-     * @return generated boot on events
-     */
-    List<String> publishBootOnEventsForLocation(final float bfValue) throws ConversionException {
-        float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
-        long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
-        List<String> bootEvents = new ArrayList<>();
-
-        List<String> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
-        log_.info("Booting = "+ bootingEvents.size());
-        bootEvents.addAll(bootingEvents);
-
-        return bootEvents;
-    }
-
-    /**
-     * This method used to create boot ready events.
-     * @return generated boot ready events
-     */
-    List<String> publishBootReadyEventsForLocation() throws ConversionException {
-        List<String> bootEvents = new ArrayList<>();
 
         List<String> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations);
         log_.info("Available = "+ availableEvents.size());

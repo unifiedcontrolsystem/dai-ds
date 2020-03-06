@@ -59,17 +59,6 @@ public class BootParametersTest extends BootParameters {
     }
 
     @Test
-    public void bootParametersForLocationConfigFileNotExists() {
-        BootParametersTest bootParametersTest = new BootParametersTest();
-        try {
-            bootParametersTest.setBootParamsConfigFile("Test.json");
-            bootParametersTest.getBootParametersForLocation("test");
-        } catch (SimulatorException e) {
-            assertEquals("Given boot parameters config file doesn't exists : Test.json", e.getMessage());
-        }
-    }
-
-    @Test
     public void invalidJsonBootParametersConfigData() throws Exception {
         final File bootConfigFile = tempFolder.newFile("BootParameters.json");
         loadDataIntoFile(bootConfigFile, inValidJsonBootData);
@@ -77,19 +66,6 @@ public class BootParametersTest extends BootParameters {
         bootParametersTest.setBootParamsConfigFile(bootConfigFile.getAbsolutePath());
         try {
             bootParametersTest.getBootParameters();
-        } catch (SimulatorException e) {
-            assertEquals("Error in loading boot parameters data.", e.getMessage());
-        }
-    }
-
-    @Test
-    public void invalidJsonBootParametersConfigDataForLocation() throws Exception {
-        final File bootConfigFile = tempFolder.newFile("BootParameters.json");
-        loadDataIntoFile(bootConfigFile, inValidJsonBootData);
-        BootParametersTest bootParametersTest = new BootParametersTest();
-        bootParametersTest.setBootParamsConfigFile(bootConfigFile.getAbsolutePath());
-        try {
-            bootParametersTest.getBootParametersForLocation("test");
         } catch (SimulatorException e) {
             assertEquals("Error in loading boot parameters data.", e.getMessage());
         }

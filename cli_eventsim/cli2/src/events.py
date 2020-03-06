@@ -44,9 +44,6 @@ class EventsCli(object):
 
     def _add_boot_event_parser(self, event_parser):
         boot_events_parser = event_parser.add_parser('boot', help='generate boot events.')
-        boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
-                                        help='types of boot events to generate. Default will generate all types of '
-                                             'boot events')
         boot_events_parser.add_argument('--probability', help='generate boot events with probability failure')
         boot_events_parser.add_argument('--burst', help='generate events with or without delay.', action='store_true')
         boot_events_parser.add_argument('--location', help='generate boot events at a given location.')
@@ -73,16 +70,7 @@ class EventsCli(object):
     def _generate_boot_events_execute(self, args):
         client = HttpClient()
         # URL will be GET http://127.0.0.1:9998/eventsim/boot?count=100000&burst=0&location=R3-20-CH00-CN2
-        boot_events_type = args.type
-        if boot_events_type == "all":
-            url = client.get_base_url() + 'api/boot/all'
-        elif boot_events_type == "off":
-            url = client.get_base_url() + 'api/boot/off'
-        elif boot_events_type == "on":
-            url = client.get_base_url() + 'api/boot/on'
-        elif boot_events_type == "ready":
-            url = client.get_base_url() + 'api/boot/ready'
-
+        url = client.get_base_url() + 'api/boot'
         parameters = {'burst': args.burst, 'location': args.location, 'probability': args.probability}
         response_code, response = client.send_post_request(url, parameters, 900)
         return CommandResult(response_code, response)
