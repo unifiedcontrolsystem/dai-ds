@@ -2210,9 +2210,9 @@ CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp witho
     HI.fruid = HF.fruid
     where
         case
-            when p_start_time is null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
-            when p_start_time is not null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-                                               HI.dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp)
+            when p_start_time is null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            when p_start_time is not null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                                               HI.dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp at time zone 'UTC')
         end
     order by HI.DbUpdatedTimestamp, HI.id desc
 $$;
