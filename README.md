@@ -79,7 +79,7 @@ This is more complicated but is more useful for developers.
     java-11-openjdk
     java-11-openjdk-devel
     ```
-__NOTE:__ Examine the docker-build/Dockerfile to how its done for a docker
+__NOTE:__ Examine the docker-build/Dockerfile for how it's done for a docker
     container.
 
 2. If a proxy is required for external access then please make sure of the
@@ -117,7 +117,7 @@ build/distributions/install-docker_cp4_3rd_party_{version}.sh
 build/distributions/install-docker_cp4_dai_{version}.sh
 ```
 
-These install package includes 4 services to control docker-compose
+These install packages include 4 services to control docker-compose
 containers. One each for postgres, voltdb, rabbitmq, and dai. It assumes all
 adapters run on one system. The EventSim application must be run as a
 standalone docker-compose application using the eventsim.yml file.
@@ -139,8 +139,8 @@ Pre-requisites:
     * NearlineConfig.json
     * ProviderMonitoringNetworkForeignBus.json
     * ProviderProvisionerNetworkForeignBus.json
-    * LocationTranslationMap.json - If the contents of this file do not correleate with
-                                    the MachineConfig.json file's contents then the
+    * LocationTranslationMap.json - If the contents of this file do not correlate with
+                                    the MachineConfig.json file's contents, the
                                     provisioning and monitoring providers may not
                                     function as expected. Make sure ALL Foreign
                                     names match a DAI name and no "location" is missing
@@ -159,11 +159,11 @@ Installing DAI and Third Party Components:
 -------------------------------------------
 1. As root run the third party installer:
     ```bash
-    # install-docker_cp4_3rd_party_{version}.sh
+    # install-docker_3rd_party_{version}.sh
     ```
 2. As root run the dai installer:
     ```bash
-    # install-docker_cp4_dai_{version}.sh
+    # install-docker_dai_{version}.sh
     ```
 __NOTE:__ The installed file tree is located at `/opt/dai-docker`.
 
@@ -183,7 +183,7 @@ __NOTE:__ If you start only the dai-manager service then all other services will
 These services all use the /opt/dai-docker/*.yml files for docker-compose
 launching.  _Do not use docker or docker-compose directly, without first stopping the services and disabling them_. Attempting to stop a container directly will just cause it to restart as the service is set to restart the container on container exit.
 
-Stopping or restarting is done as all services or all docker-compose. _Do not mix these control techniques_.
+Stopping or restarting is done as either services only or docker-compose only. _Do not mix these control techniques_.
 
 __NOTE:__ If you are using EventSim instead of a real API you will need stop and disable the services and use docker-compose directly. Then start the containers in the following order as root:
 
