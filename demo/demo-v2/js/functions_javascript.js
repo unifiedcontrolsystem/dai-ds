@@ -546,7 +546,7 @@ function main()
     replacementhistorytable.draw();
 
     $("#ReplacementHistory").on("page.dt", function(){
-             var table = $("#InvInfo").DataTable();
+             var table = $("#ReplacementHistory").DataTable();
              var table_info = table.page.info();
              if (table_info.end == table_info.recordsTotal) {
                  var end_time_requested = (table.row(":last", {order: 'applied'}).data())[1];
