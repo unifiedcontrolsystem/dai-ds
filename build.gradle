@@ -1052,6 +1052,8 @@ task makeDaiVoltRpm(type: Rpm) {
 
 PROG=\$(basename "\$0")
 
+umask 077
+
 [[ -z "\$LOG_LEVEL" ]] && LOG_LEVEL=INFO
 
 if [ \$# -ne 1 ]; then
@@ -1341,6 +1343,7 @@ function stopAll() {
 
 #######################################################################
 # Main Entry Point
+umask 077
 rotate_logs
 
 case "\$1" in
@@ -1822,6 +1825,7 @@ WantedBy=multi-user.target
 LOG="/opt/ucs/log/populate_schema.log"
 ARGS="\${VOLTDB_SERVER} /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
 JAR="/opt/ucs/lib/populate_schema.jar"
+umask 077
 
 java -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 

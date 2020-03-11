@@ -14,22 +14,22 @@
     },
     "requester": {
       "initiateDiscovery": {
-        "endpoint": "http://localhost:5678",
+        "endpoint": "http://sms01-nmn.local:8080",
         "verb": "POST",
         "resource": "/Inventory/Discover"
       },
       "getDiscoveryStatus": {
-        "endpoint": "http://localhost:5678",
+        "endpoint": "http://sms01-nmn.local:8080",
         "verb": "GET",
         "resource": "/Inventory/DiscoveryStatus"
       },
       "getHwInventorySnapshot": {
-        "endpoint": "http://localhost:5678",
+        "endpoint": "http://sms01-nmn.local:8080",
         "verb": "GET",
         "resource": "/Inventory/Hardware"
       },
       "getHWInventoryUpdate": {
-        "endpoint": "http://localhost:5678",
+        "endpoint": "http://sms01-nmn.local:8080",
         "verb": "GET",
         "resource": "/Inventory/Hardware/"
       }

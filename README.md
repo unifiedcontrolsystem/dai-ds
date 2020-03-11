@@ -123,10 +123,11 @@ adapters run on one system. The EventSim application must be run as a
 standalone docker-compose application using the eventsim.yml file.
 
 __NOTE:__ This will run on a single system out-of-the box if you edit the
-___/etc/hosts___ file and add "_sms01-nmn.local_" as an alias for the system.
-Then stop using the services (see below). If you are behind a proxy please make
-sure that the no_proxy and NO_PROXY environmental variables have the "_.local_"
-domain excluded from the proxy lookups.
+___/etc/hosts___ file and add "_sms01-nmn.local_" and "_sms01-nmn_" as an aliases
+for the system. Then stop using the services (see below). If you are behind a proxy
+please make sure that the no_proxy and NO_PROXY environmental variables have the
+"_.local_" domain excluded from the proxy lookups. The non-domain alias name "_sms01-nmn_"
+is required only for the voltdb container to start correctly.
 
 Pre-requisites:
 ----------------
@@ -194,10 +195,29 @@ __NOTE:__ If you are using EventSim instead of a real API you will need stop and
 5. docker-compose -f eventsim.yml up -d
 6. docker-compose -f dai.yml up -d
 
-Log output in either execution case will be in /opt/dai-docker/log/* for EventSim and DAI.
+Checking for Running DAI Components:
+-------------------------------------
+If your host system has the Java JDK 8 or newer installed (JRE anone is not enough) then there is an included
+script called ___show_adapters___ which will show a detailed list of running DAI-DS java processes. This tool
+must be run as the root user.
 
+If you don't have a new Java JDK installed, and are using the services then use the normal systemctl tool to
+check the status of the services.
 
-Uninstalling DAI and Third Party Components
+If you are using docker-compose instead of the services then the following line will show the DAI-DS running
+containers:
+```bash
+# docker ps -a | grep "dai-"
+```
+
+Log Output:
+------------
+Log output in either execution case will be in:
+* /opt/dai-docker/log/* for EventSim and DAI components.
+* /opt/dai/docker/tier1/log/* for voltdb and the schema population containers logs
+* Postgres logs are not available at this time.
+
+Uninstalling DAI and Third Party Components:
 --------------------------------------------
 Note: The following commands will stop the services if they are running.
 

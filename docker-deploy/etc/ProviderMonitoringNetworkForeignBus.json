@@ -1,7 +1,7 @@
 {
   "providerClassMap": {
-    "environmentalData": "com.intel.dai.monitoring.DemoEnvironmentalProviderForeignBus",
-    "rasData": "com.intel.dai.monitoring.DemoEventProviderForeignBus"
+    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
+    "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
   },
 
   "networkStreams": {
@@ -64,14 +64,14 @@
       "exchangeName": "ucs",
       "uri": "amqp://sms01-nmn.local"
     },
-    "com.intel.dai.monitoring.DemoEnvironmentalProviderForeignBus": {
+    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
-      "publish": false
+      "publish": true
     },
-    "com.intel.dai.monitoring.DemoEventProviderForeignBus": {
+    "com.intel.dai.monitoring.RasEventProviderForeignBus": {
       "publishTopic": "ucs_ras_event",
-      "publish": false
+      "publish": true
     }
   },
 

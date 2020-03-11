@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2019 Intel Corporation
+# Copyright (C) 2019-2020 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -29,6 +29,8 @@ function wait_for_stop() {
   is_running
   while [ $? -eq 0 ]; do sleep 5; is_running; done
 }
+
+umask 077
 
 [[ -z "${HTTP_PORT}" ]] && HTTP_PORT=8080
 
