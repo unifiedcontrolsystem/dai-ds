@@ -147,7 +147,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return String.format("ForeignLocation='%s'; UcsLocation='%s'; BootMessage='%s'",
                 data.retrieveExtraData(ORIG_FOREIGN_LOCATION_KEY), data.getLocation(), data.getStateEvent().toString());
     }
-
+    
     private void updateBootImageTable() {
         if(updating_.get())
             return;

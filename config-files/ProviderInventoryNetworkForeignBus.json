@@ -6,9 +6,9 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "loki-n2",
-        "connectPort": 5678,
-        "bindAddress": "loki-n1.ra.intel.com",
+        "connectAddress": "sms01-nmn.local",
+        "connectPort": 8080,
+        "bindAddress": "sms01-nmn.local",
         "bindPort": 54322,
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "subjects": "stateChanges",

@@ -20,29 +20,30 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class HWInvDiscovery {
-    public static void initialize(Logger logger) throws RESTClientException {
+    public HWInvDiscovery(Logger logger) {
         log = logger;
 
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         gson = builder.create();
-
-        HWInvDiscovery.createRestClient();
+    }
+    public void initialize() throws RESTClientException {
+        createRestClient();
     }
 
-    public static int initiateDiscovery(String foreignName) {
+    public int initiateDiscovery(String foreignName) {
         if (requester_ == null) {
             return 1;
         }
         return requester_.initiateDiscovery(foreignName);
     }
-    public static int pollForDiscoveryProgress() {
+    public int pollForDiscoveryProgress() {
         if (requester_ == null) {
             return 1;
         }
         return requester_.getDiscoveryStatus();
     }
-    public static ImmutablePair<Integer, String> queryHWInvTree(String foreignName) {
+    public ImmutablePair<Integer, String> queryHWInvTree(String foreignName) {
         if (requester_ == null) {
             log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
@@ -50,7 +51,7 @@ public class HWInvDiscovery {
         return requester_.getHwInventory(foreignName);
     }
 
-    public static ImmutablePair<Integer, String> queryHWInvTree() {
+    public ImmutablePair<Integer, String> queryHWInvTree() {
         if (requester_ == null) {
             log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
@@ -58,7 +59,7 @@ public class HWInvDiscovery {
         return requester_.getHwInventory();
     }
 
-    private static void createRestClient() throws RESTClientException {
+    private void createRestClient() throws RESTClientException {
         HWDiscoverySession sess;
 
         XdgConfigFile xdg = new XdgConfigFile("ucs");
@@ -95,7 +96,7 @@ public class HWInvDiscovery {
         createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
     }
 
-    private static HWDiscoverySession toHWDiscoverySession(String inputFileName) throws RESTClientException {
+    private HWDiscoverySession toHWDiscoverySession(String inputFileName) throws RESTClientException {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFileName),
                     StandardCharsets.UTF_8));
@@ -107,7 +108,7 @@ public class HWInvDiscovery {
             throw new RESTClientException(msg);
         }
     }
-    private static void createTokenProvider(String className, Map<String, String> config) {
+    private void createTokenProvider(String className, Map<String, String> config) {
         if (className == null || config == null) {
             return;
         }
@@ -128,7 +129,7 @@ public class HWInvDiscovery {
             log.exception(e, String.format("Cannot construct TokenAuthentication implementation '%s'", className));
         }
     }
-    private static void createRequester(String requester, Requester config, RESTClient restClient) {
+    private void createRequester(String requester, Requester config, RESTClient restClient) {
         if (requester == null || config == null || restClient == null) {
             return;
         }
@@ -152,6 +153,6 @@ public class HWInvDiscovery {
 
     private static RestRequester requester_ = null;
     private static TokenAuthentication tokenProvider_ = null;
-    private static Gson gson;
-    private static Logger log;
+    private Gson gson;
+    private Logger log;
 }

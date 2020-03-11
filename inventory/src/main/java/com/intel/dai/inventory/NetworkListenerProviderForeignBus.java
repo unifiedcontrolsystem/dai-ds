@@ -127,43 +127,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         if(config_ == null)
             getConfig(config, systemActions);
 
-        String location = determineHWInventoryUpdateLocation(workItem);
+        String foreignLocation = workItem.retrieveExtraData(FOREIGN_KEY);
+        String location = workItem.getLocation();
+        BootState bootState = workItem.getStateEvent();
         if (location != null) {
-            Thread t = new Thread(new HWInventoryUpdate(location, actions_));
+            Thread t = new Thread(new HWInventoryUpdate(location, foreignLocation, bootState, actions_));
             t.start();  // background updates of HW inventory
         }
         // Possible TODOs: store RAZ event and publish to Rabbit MQ
-    }
-
-    /**
-     * <p> Determine to perform HW inventory update of a component or all the components in the HPC. </p>
-     * @param workItem HW inventory work item
-     * @return node to be updated or "" if the DB is to be refreshed with all the components in the HPC
-     */
-    private String determineHWInventoryUpdateLocation(CommonDataFormat workItem) {
-        long dataTimestamp = workItem.getNanoSecondTimestamp();
-
-        if (dataTimestamp == lastSnapshotTimestamp) {
-            log_.info("snapshot is already loaded/loading for this batch of notifications: %d",
-                    lastSnapshotTimestamp);
-            return null;
-        }
-
-        try {
-            if (actions_.isHWInventoryEmpty()) {
-                lastSnapshotTimestamp = dataTimestamp;
-                return "";
-            }
-            else {
-                return workItem.retrieveExtraData(FOREIGN_KEY);
-            }
-        } catch (IOException e) {
-            log_.error("IO exception: %s", e.getMessage());
-            return null;
-        } catch (DataStoreException e) {
-            log_.error("datastore exception: %s", e.getMessage());
-            return null;
-        }
     }
 
     private void getConfig(NetworkListenerConfig config, SystemActions systemActions) {
@@ -178,8 +149,6 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private NetworkListenerConfig config_ = null;
     private SystemActions actions_ = null;
 
-    static long lastSnapshotTimestamp = -1;
-
     private final static String FOREIGN_KEY = "foreignLocationKey";
 }
 
@@ -188,14 +157,21 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
  */
 class HWInventoryUpdate implements Runnable {
     private String location_;
+    private String foreignName_;
     private SystemActions actions_;
+    private BootState bootState_;
 
-    public HWInventoryUpdate(String foreignName, SystemActions actions) {
-        location_ = foreignName;
+    public HWInventoryUpdate(String location, String foreignName, BootState bootState, SystemActions actions) {
+        location_ = location;
+        foreignName_ = foreignName;
         actions_ = actions;
+        bootState_ = bootState;
     }
 
     public void run() {
-        actions_.upsertHWInventory(location_);
+        if(bootState_ == BootState.NODE_OFFLINE)
+            actions_.deleteHWInventory(location_, foreignName_);
+        if(bootState_ == BootState.NODE_ONLINE)
+            actions_.upsertHWInventory(location_, foreignName_);
     }
 }
