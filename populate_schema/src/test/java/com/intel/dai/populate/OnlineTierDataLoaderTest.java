@@ -48,25 +48,6 @@ public class OnlineTierDataLoaderTest {
     }
 
     @Test
-    public void populatesFromNearlineTierWhenValid() throws Exception {
-        dataLoader_.client = mock(Client.class);
-        when(mockDsFactory_.createDataLoaderApi()).thenReturn(mockApi_);
-        when(mockApi_.isNearlineTierValid()).thenReturn(true); // Load from Nearline tier
-        when(mockLoader_
-                .doPopulate(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(0);
-
-        int rc = dataLoader_.populateOnlineTier();
-
-        // Data must have been populated from Nearline tier
-        verify(mockApi_, times(1)).populateOnlineTierFromNearlineTier();
-        // Data must NOT have been loaded from config
-        verify(mockLoader_, times(0))
-                .doPopulate(anyString(), anyString(), anyString(), anyString());
-        assertEquals(0, rc);
-    }
-
-    @Test
     public void populatesFromConfigWhenNearlineTierNotValid() throws Exception {
         dataLoader_.client = mock(Client.class);
         when(mockDsFactory_.createDataLoaderApi()).thenReturn(mockApi_);
