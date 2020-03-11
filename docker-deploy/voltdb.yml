@@ -21,7 +21,7 @@ services:
     entrypoint: /opt/voltdb/schema/populateSchema.sh
     container_name: dai-populate-schema
     environment:
-      - VOLTDB_SERVER=sms01-nmn
+      - VOLTDB_SERVER=sms01-nmn.local
     volumes:
       - "/opt/dai-docker/tier1/log:/opt/ucs/log"
       - "/opt/dai-docker/etc:/opt/ucs/etc"

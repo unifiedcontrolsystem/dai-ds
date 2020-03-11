@@ -9,7 +9,7 @@ services:
     environment:
       - DAI_LOGGING_LEVEL=DEBUG
       - HOSTNAME=sms01-nmn
-      - VOLTDB_SERVERS=sms01-nmn
+      - VOLTDB_SERVERS=sms01-nmn.local
     volumes:
       - "/opt/dai-docker/etc:/opt/ucs/etc"
       - "/opt/dai-docker/lib:/opt/ucs/lib"
