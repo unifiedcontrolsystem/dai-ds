@@ -41,44 +41,26 @@ public class NearlineTableUpdater {
 
     public void update(String tableName, VoltTable tableData) throws DataStoreException {
         PreparedStatement stmt = getStmt(tableName);
-        PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
         log_.info("*** Starting update process...");
         if (stmt == null) {
             throw new DataStoreException("Unsupported table in nearline tier: " + tableName);
         }
-        if (snapshotStmt != null) {
-            try {
-                // Store all the data for this table
-                while (tableData.advanceRow()) {
-                    dbUpdateHelper(snapshotStmt, tableName, tableData);
-                    dbUpdateHelper(stmt, tableName, tableData);
-                }
-                mConn.commit();
-            } catch (SQLException ex) {
-                try {
-                    mConn.rollback();
-                } catch(SQLException e) { /* Do Nothing on failure */ }
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
+        try {
+            // Store all the data for this table
+            while (tableData.advanceRow()) {
+                dbUpdateHelper(stmt, tableData);
             }
-
-        } else {
+            mConn.commit();
+        } catch (SQLException ex) {
             try {
-                // Store all the data for this table
-                while (tableData.advanceRow()) {
-                    dbUpdateHelper(stmt, tableName, tableData);
-                }
-                mConn.commit();
-            } catch (SQLException ex) {
-                try {
-                    mConn.rollback();
-                } catch(SQLException e) { /* Do Nothing on failure */ }
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
-            }
+                mConn.rollback();
+            } catch(SQLException e) { /* Do Nothing on failure */ }
+            throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
         }
     }
 
-    private void dbUpdateHelper (PreparedStatement stmt, String tableName, VoltTable tableData) throws SQLException {
+    private void dbUpdateHelper (PreparedStatement stmt, VoltTable tableData) throws SQLException {
         for (int i = 0; i < tableData.getColumnCount(); ++i) {
             VoltType voltType = tableData.getColumnType(i);
             int sqlType = voltType.getJdbcSqlType(); // Get equivalent JDBC type
@@ -142,8 +124,6 @@ public class NearlineTableUpdater {
     static {
         SQL_STMTS = new HashMap<>();
         addTables();
-        if(USE_COHERENCY)
-            addSSTables();
     }
 
     private static void addTables() {
@@ -299,57 +279,6 @@ public class NearlineTableUpdater {
                                 + "values(?,?,?,?)",
                         false));
 
-    }
-
-    private static void addSSTables() {
-        SQL_STMTS.put("ComputeNode_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateComputeNodeData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("ServiceNode_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateServiceNodeData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("Machine_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateMachineData(?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("Chassis_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateChassisData(?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("Rack_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateRackData(?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("WorkItem_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateWorkItemData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("UcsConfigValue_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateUcsConfigValue_ss(?,?,?)}",
-                        true));
-        SQL_STMTS.put("UniqueValues_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateUniqueValues_ss(?,?,?)}",
-                        true));
-        SQL_STMTS.put("Diag_Tools_SS",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateDiagTools_SS(?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("BootImage_SS",
-                new DataUpdateStmt(
-                        "{call insertorupdatebootimagedata(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("MachineAdapterInstance_SS",
-                new DataUpdateStmt(
-                        "{call insertorupdatemachineadapterinstancedata(?,?,?,?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("RasEvent_SS",
-                new DataUpdateStmt(
-                        "{call insertorupdateraseventdata_ss(?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                        true));
     }
 
     private Logger log_;
