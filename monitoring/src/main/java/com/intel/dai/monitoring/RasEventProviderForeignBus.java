@@ -54,11 +54,12 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
             setUpConfig(config);
         try {
             PropertyMap message = parser_.fromString(data).getAsMap();
-            checkMessage(message);
+            List<CommonDataFormat> commonList = new ArrayList<>();
+            if(!checkMessage(message))
+                return commonList;
             String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
             String eventType = message.getStringOrDefault("event-type", null);
             String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
-            List<CommonDataFormat> commonList = new ArrayList<>();
             for(String foreignLocation: foreignLocations) {
                 try {
                     String location = CommonFunctions.convertForeignToLocation(foreignLocation);
@@ -106,11 +107,11 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
         return getClass().getClassLoader().getResourceAsStream("resources/ForeignEventMetaData.json");
     }
 
-    private void checkMessage(PropertyMap message) throws NetworkListenerProviderException {
+    private boolean checkMessage(PropertyMap message) throws NetworkListenerProviderException {
         for(String required: requiredInMessage_)
             if (!message.containsKey(required))
-                throw new NetworkListenerProviderException(String.format("Incoming event was missing '%s' in the JSON",
-                        required));
+                return false;
+        return true;
     }
 
     private CommonDataFormat suppressEvents(CommonDataFormat raw) {

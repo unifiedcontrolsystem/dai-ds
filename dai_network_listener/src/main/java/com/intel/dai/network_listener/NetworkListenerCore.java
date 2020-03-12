@@ -95,6 +95,7 @@ public class NetworkListenerCore {
             log_.debug("*** Setting profile: %s", profile);
             config_.setCurrentProfile(profile);
             subjects_ = config_.getProfileSubjects();
+            log_.debug("Allowed subjects in this adapter instance: '%s'", String.join(",", subjects_));
             try {
                 log_.debug("*** Creating providers...");
                 createTransformAndActionProviders();
@@ -241,7 +242,7 @@ public class NetworkListenerCore {
     private void processMessage(String subject, String message) {
         if(subjects_.contains(subject) || subjects_.contains("*")) {
             try {
-                log_.debug("Transforming data...");
+                log_.debug("Transforming data for subject '%s'...", subject);
                 List<CommonDataFormat> dataList = provider_.processRawStringData(message, config_);
                 if(dataList != null) {
                     log_.debug("Performing actions...");
