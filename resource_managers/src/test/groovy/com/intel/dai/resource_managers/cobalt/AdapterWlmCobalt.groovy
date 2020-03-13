@@ -70,7 +70,7 @@ class AdapterWlmCobaltSpec extends Specification {
     }
 
     def "Test handleCobaltReservationMessages ReservationUpdated Start"() {
-        def reservationUpdated = "bgsched 2019-04-07 16:42:30 ^U94332985204799^ modifying reservation: [{'name': 'benchmarking'}] with updates {'start': '1554667200.0'}"
+        def reservationUpdated = "bgsched 2019-04-07 16:42:30 ^U94332985204799^ modifying reservation: [{'name': 'benchmarking'}] with updates {'start': 1554667200.0}"
         def aLineCols = reservationUpdated.split(" ")
         underTest_.handleCobaltReservationMessages(reservationUpdated, aLineCols)
         expect: true
@@ -163,7 +163,7 @@ class AdapterWlmCobaltSpec extends Specification {
     }
 
     def "Test handleReservationUpdatedMsg Start"() {
-        def reservationUpdated = "bgsched 2019-04-07 16:42:30 ^U94332985204799^ modifying reservation: [{'name': 'benchmarking'}] with updates {'start': '1554667200.0'}"
+        def reservationUpdated = "bgsched 2019-04-07 16:42:30 ^U94332985204799^ modifying reservation: [{'name': 'benchmarking'}] with updates {'start': 1554667200.0}"
         def aLineCols = reservationUpdated.split(" ")
         underTest_.handleReservationUpdatedMsg(aLineCols)
         expect: true
@@ -187,26 +187,6 @@ class AdapterWlmCobaltSpec extends Specification {
 
     def "Test handleEndOfJobProcessing Null"() {
         underTest_.handleEndOfJobProcessing("327220", null, "0")
-        expect: true
-    }
-
-    def "Test chkAndUpdateWorkingResults"() {
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:49")
-        expect: true
-    }
-
-    def "Test chkAndUpdateWorkingResults 10 times"() {
-
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:40")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:41")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:42")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:43")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:44")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:45")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:46")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:47")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:48")
-        underTest_.chkAndUpdateWorkingResults("2019-04-03 00:35:49")
         expect: true
     }
 
