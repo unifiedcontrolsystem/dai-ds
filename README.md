@@ -113,8 +113,8 @@ Run Requirements and Instructions (Deployment)
 =================================================
 Installers to use after build:
 ```
-build/distributions/install-docker_cp4_3rd_party_{version}.sh
-build/distributions/install-docker_cp4_dai_{version}.sh
+build/distributions/install-docker_3rd_party_{version}.sh
+build/distributions/install-docker_dai_{version}.sh
 ```
 
 These install packages include 4 services to control docker-compose
