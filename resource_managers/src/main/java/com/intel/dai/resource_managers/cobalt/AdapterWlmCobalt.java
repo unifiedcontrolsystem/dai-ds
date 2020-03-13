@@ -288,7 +288,6 @@ public class AdapterWlmCobalt implements WlmProvider {
             handleEndOfJobProcessing(sJobId, jobinfo, (String) jobinfo.get("ExitStatus"));
         }
 
-        chkAndUpdateWorkingResults(sLineSqlTimestamp);  // update this work item's working results field (to show progress) as appropriate.
     }   // End handleJobStartedMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 
 
@@ -341,7 +340,6 @@ public class AdapterWlmCobalt implements WlmProvider {
             handleEndOfJobProcessing(sJobId, jobinfo, sExitStatus);
         }
 
-        chkAndUpdateWorkingResults(sLineSqlTimestamp);  // update this work item's working results field (to show progress) as appropriate.
     }   // End handleJobCompletionMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 
 
@@ -407,7 +405,6 @@ public class AdapterWlmCobalt implements WlmProvider {
         //------------------------------------------------------
         reservations.createReservation(sReservationName, sUsers, sNodes, lReservationsStartTsInMicroSecs, lReservationsEndTsInMicroSecs, dLineTimestamp.getTime() * 1000L, adapter.getType(), workQueue.workItemId());
 
-        chkAndUpdateWorkingResults(sLineSqlTimestamp);  // update this work item's working results field (to show progress) as appropriate.
     }   // End handleReservationCreatedMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 
 
@@ -443,7 +440,7 @@ public class AdapterWlmCobalt implements WlmProvider {
             if (sColInfo.contains(NodesPrefix))
                 sNodes = aLineCols[i+1].split("'")[1];
             if (sColInfo.contains(StartTsPrefix)) {
-                String sTempStartTs = aLineCols[i+1].split("'")[1].split("\\.")[0];
+                String sTempStartTs = aLineCols[i+1].split("\\.")[0];
                 lReservationsStartTsInMicroSecs = Long.parseLong(sTempStartTs) * 1000000L;
             }
             i++;
@@ -454,7 +451,6 @@ public class AdapterWlmCobalt implements WlmProvider {
         //------------------------------------------------------
         reservations.updateReservation(sReservationName, sUsers, sNodes, lReservationsStartTsInMicroSecs, dLineTimestamp.getTime() * 1000L, adapter.getType(), workQueue.workItemId());
 
-        chkAndUpdateWorkingResults(sLineSqlTimestamp);  // update this work item's working results field (to show progress) as appropriate.
     }   // End handleReservationUpdatedMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 
 
@@ -480,7 +476,6 @@ public class AdapterWlmCobalt implements WlmProvider {
         //------------------------------------------------------
         reservations.deleteReservation(sReservationName, dLineTimestamp.getTime() * 1000L, adapter.getType(), workQueue.workItemId());
 
-        chkAndUpdateWorkingResults(sLineSqlTimestamp);  // update this work item's working results field (to show progress) as appropriate.
     }   // End handleReservationDeletedMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 
     // Handle 'Cobalt Job' log messages.
@@ -524,15 +519,6 @@ public class AdapterWlmCobalt implements WlmProvider {
         }
 
     }   // End handleCobaltReservationMessages(String sLine, String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
-
-    // Helper method that checks and sees if we want to update our working results (not done every msg to minimize overhead).
-    private final void chkAndUpdateWorkingResults(String sLineSqlTimestamp) throws IOException, DataStoreException {
-        if ((++mNumMsgsHndld % 10) == 0) {
-            // Save restart data indicating where we are in the processing of the log.
-            String sRestartData = "Processed through '" + sLineSqlTimestamp + "', NumMsgsHndld=" + mNumMsgsHndld;
-            workQueue.saveWorkItemsRestartData(workQueue.workItemId(), sRestartData, false);  // false means to update this workitem's history record rather than doing an insert of another history record - this is "unusual" (only used when a workitem is updating its working results fields very often)
-        }
-    }   // End chkAndUpdateWorkingResults(String sLineSqlTimestamp)
 
     public void shutDown() {
         log_.info("Shutting down the adapter gracefully");

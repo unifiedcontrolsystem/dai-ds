@@ -447,7 +447,7 @@ CREATE ASSUMEUNIQUE INDEX Tier2_JobStep_History_EntryNum ON Tier2_JobStep_Histor
 CREATE TABLE WlmReservation_History (
    ReservationName      Varchar(35)    NOT NULL,            -- Identifier that identifies a specific WLM reservation
    Users                VarChar(100)   NOT NULL,            -- Users of this reservation
-   Nodes                VarChar(1000),                      -- Nodes assigned to this reservation
+   Nodes                VarChar(5000),                      -- Nodes assigned to this reservation
    StartTimestamp       TIMESTAMP      NOT NULL,            -- Time that this reservation begins - from timestamp on event record
    EndTimestamp         TIMESTAMP,                          -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp     TIMESTAMP,                          -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
@@ -466,7 +466,7 @@ CREATE INDEX WlmReservation_HistoryByDbUpdatedTimestamp                 ON WlmRe
 CREATE TABLE Tier2_WlmReservation_History (
    ReservationName         Varchar(35)    NOT NULL,         -- Identifier that identifies a specific WLM reservation
    Users                   VarChar(100)   NOT NULL,         -- Users of this reservation
-   Nodes                   VarChar(1000),                   -- Nodes assigned to this reservation
+   Nodes                   VarChar(5000),                   -- Nodes assigned to this reservation
    StartTimestamp          TIMESTAMP      NOT NULL,         -- Time that this reservation begins - from timestamp on event record
    EndTimestamp            TIMESTAMP,                       -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp        TIMESTAMP,                       -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
