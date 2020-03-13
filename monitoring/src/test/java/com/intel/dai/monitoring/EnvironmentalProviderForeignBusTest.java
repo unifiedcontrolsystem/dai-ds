@@ -150,9 +150,10 @@ public class EnvironmentalProviderForeignBusTest {
         transformer_.processRawStringData(bad1, config_);
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataBadSensor() throws Exception {
-        transformer_.processRawStringData(bad2, config_);
+        List<CommonDataFormat> result = transformer_.processRawStringData(bad2, config_);
+        assertEquals(0, result.size());
     }
 
     @Test(expected = NetworkListenerProviderException.class)
