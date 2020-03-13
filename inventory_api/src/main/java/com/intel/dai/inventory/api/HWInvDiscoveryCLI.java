@@ -17,26 +17,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class HWInvDiscoveryCLI {
-    private static Logger log = LoggerFactory.getInstance("CLI", "HWInvDiscovery", "console");
 
-    private static final int invalidHTTPCode = 1;
-
-    private static String mode = "";
-    private static Path outputFilePath = Paths.get("output.json");
-    private static String discoveryForeignName;
-    private static String queryForeignName;
+    HWInvDiscoveryCLI(HWInvDiscovery hwInvDiscovery) {
+        hwInvDiscovery_ = hwInvDiscovery;
+    }
 
     public static void main(String[] args) {
-        log.initialize();
-        try {
-            HWInvDiscovery.initialize(log);
-            log.info("rest client created");
-        } catch (RESTClientException e) {
-            log.fatal("Fail to create REST client: %s", e.getMessage());
-            System.exit(1);
-        }
-
-        int status = new HWInvDiscoveryCLI().run(args);
+        log_.initialize();
+        int status = new HWInvDiscoveryCLI(new HWInvDiscovery(log_)).run(args);
 
         // Note that the return code is only from 0 to 255
         if (status != 0) {
@@ -46,12 +34,16 @@ public class HWInvDiscoveryCLI {
 
     private int run(String[] args) {
         try {
+            hwInvDiscovery_.initialize();
+            log_.info("rest client created");
             getOptions(args);
-            log.info("outputFilePath:%s, discoveryForeignName:%s, queryForeignName:%s",
+            log_.info("outputFilePath:%s, discoveryForeignName:%s, queryForeignName:%s",
                     outputFilePath, discoveryForeignName, queryForeignName);
             return run();
         } catch (ParseException e) {
-            log.error("ParseException: %s", e.getMessage());
+            log_.error("ParseException: %s", e.getMessage());
+        } catch (RESTClientException e) {
+            log_.error("Fail to create REST client: %s", e.getMessage());
         }
 
         return 1;
@@ -61,21 +53,21 @@ public class HWInvDiscoveryCLI {
         if (mode != null) {
             switch (mode) {
                 case "p":
-                    return HWInvDiscovery.pollForDiscoveryProgress();
+                    return hwInvDiscovery_.pollForDiscoveryProgress();
 
                 case "s":
-                    ImmutablePair<Integer, String> snapshot = HWInvDiscovery.queryHWInvTree();
+                    ImmutablePair<Integer, String> snapshot = hwInvDiscovery_.queryHWInvTree();
                     return toFile(snapshot, outputFilePath);
 
                 case "d":
-                    return HWInvDiscovery.initiateDiscovery(discoveryForeignName);
+                    return hwInvDiscovery_.initiateDiscovery(discoveryForeignName);
 
                 case "q":
-                    ImmutablePair<Integer, String> update = HWInvDiscovery.queryHWInvTree(queryForeignName);
+                    ImmutablePair<Integer, String> update = hwInvDiscovery_.queryHWInvTree(queryForeignName);
                     return toFile(update, outputFilePath);
 
                 default:
-                    log.error("An acceptable action option must be set: %s", mode);
+                    log_.error("An acceptable action option must be set: %s", mode);
                     return invalidHTTPCode;
             }
         }
@@ -83,7 +75,7 @@ public class HWInvDiscoveryCLI {
         return 1;
     }
 
-    private static int toFile(ImmutablePair<Integer, String> result, Path outputFile) {
+    private int toFile(ImmutablePair<Integer, String> result, Path outputFile) {
         int status = result.getLeft();
         if (status == 0) {
             HWInvUtil cliUtil = new HWInvUtilImpl();
@@ -96,7 +88,7 @@ public class HWInvDiscoveryCLI {
         return status;
     }
 
-    private static void getOptions(String[] args) throws ParseException {
+    private void getOptions(String[] args) throws ParseException {
         final Options options = new Options();
         try {
             final Option discoveryOption = Option.builder("d")
@@ -158,4 +150,13 @@ public class HWInvDiscoveryCLI {
             throw e;
         }
     }
+
+    private static Logger log_ = LoggerFactory.getInstance("CLI", "HWInvDiscovery", "console");
+
+    private static final int invalidHTTPCode = 1;
+    private String mode = "";
+    private Path outputFilePath = Paths.get("output.json");
+    private String discoveryForeignName;
+    private String queryForeignName;
+    private HWInvDiscovery hwInvDiscovery_;
 }

@@ -145,7 +145,7 @@ class HWInvTranslatorSpec extends Specification {
         inputFileName                                           | outputFileName                        | location
         dataDir+"foreignHwByLoc/flatNode.json"                  | tmpDir+"flatNode.json.tr"             | "x0c0s26b0n0"
         dataDir+"foreignHwByLocList/preview4HWInventory.json"   | tmpDir+"preview4HWInventory.json.tr"  | ""
-        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | null
+        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | "x0c0s21b0n0"
         dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   | tmpDir+"hsm-inv-hw-query-s0.json.tr"  | null
     }
     def "isValidLocationName"() {

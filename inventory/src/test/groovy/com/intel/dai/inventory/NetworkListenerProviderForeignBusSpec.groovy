@@ -111,9 +111,30 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         cdfs[0].getNanoSecondTimestamp() == cdfs[1].getNanoSecondTimestamp()
     }
 
-    def "Test empty actOnData"() {
+    def "Test empty actOnData for on event"() {
         def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
-        data.storeExtraData("xname", "x0")
+        data.setStateChangeEvent(BootState.NODE_ONLINE)
+        data.storeExtraData("foreignLocationKey", "x0")
+        def sa = Mock(SystemActions)
+        sa.isHWInventoryEmpty() >> true
+        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
+        expect: true
+    }
+
+    def "Test empty actOnData for off event"() {
+        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
+        data.setStateChangeEvent(BootState.NODE_OFFLINE)
+        data.storeExtraData("foreignLocationKey", "x0")
+        def sa = Mock(SystemActions)
+        sa.isHWInventoryEmpty() >> true
+        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
+        expect: true
+    }
+
+    def "Test empty actOnData for unknown event"() {
+        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
+        data.setStateChangeEvent(BootState.NODE_BOOTING)
+        data.storeExtraData("foreignLocationKey", "x0")
         def sa = Mock(SystemActions)
         sa.isHWInventoryEmpty() >> true
         underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)

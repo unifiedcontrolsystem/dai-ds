@@ -84,7 +84,7 @@ class BenchmarkingSystemActionsSpec extends Specification {
     }
 
     def "upsertHWInventory"() {
-        underTest_.upsertHWInventory("")
+        underTest_.upsertHWInventory("", "")
         expect: true
     }
 
