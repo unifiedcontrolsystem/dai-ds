@@ -51,7 +51,7 @@ class NetworkListenerSystemActionsSpec extends Specification {
     }
 
     def "upsertHWInventory"() {
-        when: underTest_.upsertHWInventory(null)
+        when: underTest_.upsertHWInventory(null, null)
         then: notThrown Exception
     }
 

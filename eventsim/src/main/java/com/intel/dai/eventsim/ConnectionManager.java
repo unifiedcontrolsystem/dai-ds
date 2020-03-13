@@ -113,8 +113,8 @@ public class ConnectionManager {
             log_.info("No callback subscriptions to publish events");
             droppedEvents = events.size();
         }
-        for (ConnectionObject connection : getConnections()) {
-            for(String event : events) {
+        for(String event : events) {
+            for (ConnectionObject connection : getConnections()) {
                 restClient_.postRESTRequestBlocking(URI.create(connection.url_), event);
                 publishedEvents++;
                 if(constantMode)

@@ -42,7 +42,7 @@
     "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
-      "publish": false
+      "publish": true
     }
   },
 

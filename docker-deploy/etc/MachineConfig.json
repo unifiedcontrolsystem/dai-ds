@@ -77,14 +77,14 @@
       "Queue": "X0-CH0-SN0"
     },
     {
-      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=127.0.0.1",
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=sms01-nmn.local",
       "TypeOfAdapter": "ONLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataMover",
       "Queue": "X0-CH0-SN0"
     },
     {
-      "Parms": "RabbitMQHost=127.0.0.1",
+      "Parms": "RabbitMQHost=sms01-nmn.local",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataReceiver",

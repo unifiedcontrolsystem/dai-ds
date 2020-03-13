@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.intel.dai.inventory.api.HWInvDiscovery.queryHWInvTree;
-
 /**
  * Description of class PartitionedMonitorSystemActions.
  */
@@ -44,6 +42,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         operations_ = factory_.createAdapterOperations(adapter_);
         hwInvApi_ = factory_.createHWInvApi();
         nodeInformation_ = factory_.createNodeInformation();
+        hwInvDiscovery_ = new HWInvDiscovery(logger);
     }
 
     @Override
@@ -209,33 +208,54 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
     /**
      * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
-     * @param root root location in foreign format
+     * @param location root location in foreign format
+     * @param foreignName root location in foreign format
      */
     @Override
-    public void upsertHWInventory(String root) {
-        HWInvTree before = getHWInvSnapshot(root);
+    public void upsertHWInventory(String location, String foreignName) {
+        HWInvTree before = getHWInvSnapshot(location);
 
         ingestCanonicalHWInvJson(
                 toCanonicalHWInvJson(
                         getForeignHWInvJson(
-                                root)));
+                                foreignName)));
 
-        HWInvTree after = getHWInvSnapshot(root);
+        HWInvTree after = getHWInvSnapshot(location);
 
         if (before == null || after == null) {
             log_.error("before or after is null");
             return;
         }
         HWInvUtilImpl util = new HWInvUtilImpl();
-        List<HWInvLoc> delList = util.subtract(before.locs, after.locs);
-        for (HWInvLoc s : delList) {
-            log_.info("deleted: %s from %s", s.FRUID, s.ID);
-            insertHistoricalRecord("DELETED", s);
-        }
-        List<HWInvLoc> addList = util.subtract(after.locs, before.locs);
-        for (HWInvLoc s : addList) {
+        List<HWInvLoc> diffList = util.subtract(after.locs, before.locs);
+        for (HWInvLoc s : diffList) {
             log_.info("inserted: %s into %s", s.FRUID, s.ID);
             insertHistoricalRecord("INSERTED", s);
+        }
+    }
+
+    /**
+     * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
+     * @param location root location in DAI format
+     * @param foreignName root location in foreign format
+     */
+    @Override
+    public void deleteHWInventory(String location, String foreignName) {
+        HWInvTree before = getHWInvSnapshot(location);
+
+        deleteHWInvSnapshot(location);
+
+        HWInvTree after = getHWInvSnapshot(location);
+
+        if (before == null || after == null) {
+            log_.error("before or after is null");
+            return;
+        }
+        HWInvUtilImpl util = new HWInvUtilImpl();
+        List<HWInvLoc> diffList = util.subtract(before.locs, after.locs);
+        for (HWInvLoc s : diffList) {
+            log_.info("deleted: %s from %s", s.FRUID, s.ID);
+            insertHistoricalRecord("DELETED", s);
         }
     }
 
@@ -257,18 +277,33 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         }
     }
 
-    private HWInvTree getHWInvSnapshot(String root) {
-        if (root == null) {
-            return null;
-        }
+    /**
+     * Fetch HW Inventory snapshot data for specific location.
+     * @param location DAI location to fetch hw inventory data from db.
+     */
+    private HWInvTree getHWInvSnapshot(String location) {
         try {
-            return hwInvApi_.allLocationsAt(root, null);
+            return hwInvApi_.allLocationsAt(location, null);
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
             log_.error("DataStoreException: %s", e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Deletes HW Inventory snapshot for specific location.
+     * @param location DAI location to remove hw inventory data from db.
+     */
+    private void deleteHWInvSnapshot(String location) {
+        try {
+            hwInvApi_.delete(location);
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
     }
 
     /**
@@ -316,7 +351,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         if (root == null) return null;
 
         try {
-            HWInvDiscovery.initialize(log_);
+            hwInvDiscovery_.initialize();
             log_.info("rest client created");
 
         } catch (RESTClientException e) {
@@ -326,9 +361,9 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
         ImmutablePair<Integer, String> foreignHwInv;
         if (root.equals("")) {
-            foreignHwInv = queryHWInvTree();
+            foreignHwInv = hwInvDiscovery_.queryHWInvTree();
         } else {
-            foreignHwInv = queryHWInvTree(root);
+            foreignHwInv = hwInvDiscovery_.queryHWInvTree(root);
         }
         if (foreignHwInv.getLeft() != 0) {
             log_.error("failed to acquire foreign HW inventory json");
@@ -417,4 +452,5 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;
     private boolean publisherConfigured_ = false;
+    private HWInvDiscovery hwInvDiscovery_;
 }
