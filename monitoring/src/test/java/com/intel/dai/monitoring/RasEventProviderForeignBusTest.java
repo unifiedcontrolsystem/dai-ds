@@ -84,9 +84,10 @@ public class RasEventProviderForeignBusTest {
         new MockRasEventProviderForeignBus(mock(Logger.class));
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataMissingEventType() throws Exception {
-        transformer_.processRawStringData(badSample1, config_);
+        List<CommonDataFormat> result = transformer_.processRawStringData(badSample1, config_);
+        assertEquals(0, result.size());
     }
 
     @Test // Cannot retrieve value, no assert is possible.

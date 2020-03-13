@@ -54,7 +54,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             for(String foreignLocation: foreignLocations) {
                 String sensor = message.getString("sensor");
                 if (!sensorMetaData_ForeignBus_.checkSensor(sensor))
-                    throw new NetworkListenerProviderException("The 'sensor' field in JSON is not a string name");
+                    break;
                 String location = sensorMetaData_ForeignBus_.normalizeLocation(sensor,
                         CommonFunctions.convertForeignToLocation(foreignLocation,
                                 sensorMetaData_ForeignBus_.getDescription(sensor)));
