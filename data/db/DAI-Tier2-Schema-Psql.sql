@@ -136,7 +136,7 @@ CREATE TYPE public.raseventtypewithoutmetadata AS (
 CREATE TYPE public.reservationtype AS (
 	reservationname character varying(35),
 	users character varying(100),
-	nodes character varying(1000),
+	nodes character varying(5000),
 	starttimestamp timestamp without time zone,
 	endtimestamp timestamp without time zone,
 	deletedtimestamp timestamp without time zone,
@@ -549,7 +549,7 @@ CREATE TABLE public.tier2_ucsconfigvalue (
 CREATE TABLE public.tier2_wlmreservation_history (
     reservationname character varying(35) NOT NULL,
     users character varying(100) NOT NULL,
-    nodes character varying(1000),
+    nodes character varying(5000),
     starttimestamp timestamp without time zone NOT NULL,
     endtimestamp timestamp without time zone,
     deletedtimestamp timestamp without time zone,

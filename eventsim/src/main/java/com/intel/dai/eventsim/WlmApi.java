@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Random;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Arrays;
 import java.text.SimpleDateFormat;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class WlmApi {
             String[] userArr = users.split(" ");
             String[] nodeArr = nodes.split(" ");
 
-            Reservation reservation = new Reservation(name, userArr, nodeArr, starttime.getTime()/1000, Long.parseLong(duration));
+            Reservation reservation = new Reservation(name, userArr, nodeArr, starttime.getTime()/1000, Long.parseLong(duration), 0);
             logstring = reservation.createReservation();
             bgschedLog.write(logstring);
         }
@@ -63,7 +65,7 @@ public class WlmApi {
                 updateStr += "'start': '" + Timestamp.valueOf(starttime).getTime()/1000 + "',";
             updateStr += "}]";
 
-            Reservation reservation = new Reservation(name, null, null, 0, 0);
+            Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
             logstring = reservation.modifyReservation(updateStr);
             bgschedLog.write(logstring);
         }
@@ -85,7 +87,7 @@ public class WlmApi {
         String logstring = "";
         try {
             bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
-            Reservation reservation = new Reservation(name, null, null, 0, 0);
+            Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
             logstring = reservation.deleteReservation();
             bgschedLog.write(logstring);
         }
@@ -154,22 +156,13 @@ public class WlmApi {
     public void simulateWlm(String reservations, String[] nodes) throws Exception {
 
         HashMap<String, Reservation> logItems = new HashMap<String, Reservation>();
-        String[] users = "user1 user2 user3 user4 user5 user6 user 7 user8 user9 user10".split(" ");
+        String[] users = "user1 user2 user3 user4".split(" ");
         Random rand = new Random();
         int numRes = Integer.parseInt(reservations);
         String[] reservedNodes, choices, id;
         Date now;
         String logstring, key, nextStep, updateStr;
         Reservation reservation;
-        String[] userChoice = new String[2];
-        userChoice[0] = "false";
-        userChoice[1] = String.join(":", getRandomSubArray(users));
-        String[] nodeChoice = new String[2];
-        nodeChoice[0] = "false";
-        nodeChoice[1] = String.join(",", getRandomSubArray(nodes));
-        long[] startChoice = new long[2];
-        startChoice[0] = 0;
-        startChoice[1] = (new Date()).getTime()/1000;
         FileWriter cqmLog = null;
         FileWriter bgschedLog = null;
 
@@ -178,15 +171,13 @@ public class WlmApi {
             bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
 
             for(int i = 0; i < numRes; i++) {
-                int numReservedNodes = rand.nextInt(nodes.length);
                 reservedNodes = getRandomSubArray(nodes);
                 now = new Date();
-                reservation = new Reservation("reservation" + i, getRandomSubArray(users), reservedNodes, now.getTime()/1000, rand.nextInt(86400000));
+                reservation = new Reservation("reservation" + i, getRandomSubArray(users), reservedNodes, now.getTime()/1000, rand.nextInt(86400000), i);
                 logItems.put("createRes_" + i, reservation);
             }
 
             while(!logItems.isEmpty()) {
-                Thread.sleep(1000);
                 key = logItems.keySet().toArray(new String[0])[rand.nextInt(logItems.size())];
                 id = key.split("_");
                 logger_.info("Picked item " + key);
@@ -200,16 +191,17 @@ public class WlmApi {
                     logItems.remove(key);
                 }
                 if(id[0].equals("modifyRes")) {
-                    int uc = rand.nextInt(1);
-                    int nc = rand.nextInt(1);
-                    int sc = rand.nextInt(1);
+                    int modify = rand.nextInt(7) + 1;
                     updateStr = "[{";
-                    if (!"false".equals(userChoice[uc]))
-                        updateStr += "'users': '" + userChoice[uc] + "',";
-                    if (!"false".equals(nodeChoice[nc]))
-                        updateStr += "'nodes': '" + nodeChoice[nc] + "',";
-                    if (startChoice[sc] != 0)
-                        updateStr += "'start': " + startChoice[sc] + ".0,";
+                    // Cases 1, 2, 3 and 4
+                    if (modify < 5)
+                        updateStr += "'users': '" + String.join(":", getRandomSubArray(users)) + "',";
+                    // Cases 2, 4, 6, 7
+                    if (modify % 2 == 0 || modify == 7)
+                        updateStr += "'nodes': '" + String.join(",", getRandomSubArray(nodes)) + "',";
+                    // Cases 3, 4, 5, 6
+                    if (modify > 2 && modify < 7)
+                        updateStr += "'start': " + (new Date()).getTime()/1000 + ".0,";
                     updateStr += "}]";
                     logstring = logItems.get(key).modifyReservation(updateStr);
                     bgschedLog.write(logstring);
@@ -226,13 +218,11 @@ public class WlmApi {
                 if(id[0].equals("startJob")) {
                     logstring = logItems.get(key).getJob().startJob();
                     cqmLog.write(logstring);
-                    choices = "startJob modifyRes deleteRes".split(" ");
-                    nextStep = choices[rand.nextInt(choices.length)];
                     logItems.put("terminateJob_" + id[1], logItems.get(key));
                     logItems.remove(key);
                 }
                 if(id[0].equals("terminateJob")) {
-                    logstring = logItems.get(key).getJob().terminateJob(rand.nextInt(1));
+                    logstring = logItems.get(key).getJob().terminateJob(rand.nextInt(2));
                     cqmLog.write(logstring);
                     logItems.remove(key);
                 }
@@ -270,6 +260,9 @@ public class WlmApi {
             selectedArray[i] = array[index];
         }
 
+        //Remove duplicates
+        selectedArray = new HashSet<String>(Arrays.asList(selectedArray)).toArray(new String[0]);
+
         return selectedArray;
     }
 
@@ -283,7 +276,7 @@ public class WlmApi {
         Job job_;
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        Reservation(String name, String[] users, String[] nodes, long startTime, long duration) {
+        Reservation(String name, String[] users, String[] nodes, long startTime, long duration, int jobId) {
 
             name_ = name;
             users_ = users;
@@ -294,8 +287,7 @@ public class WlmApi {
             Date now = new Date();
             long jobStartTime = now.getTime()/1000;
             long jobEndTime = jobStartTime + duration;
-            Random rand = new Random();
-            job_ = new Job(rand.nextInt(1000000), name_, nodes_, users_, jobStartTime, jobEndTime, "/home");
+            job_ = new Job(jobId, name_, nodes_, users_, jobStartTime, jobEndTime, "/home");
         }
 
         String createReservation() {
@@ -379,7 +371,7 @@ public class WlmApi {
             String userStr = String.join(",", users_);
             int numNodes = nodes_.length;
 
-            String logstring = date + " " + date + ";E;" + jobid_ + ";Exit_status==" + exitStatus +
+            String logstring = date + " " + date + ";E;" + jobid_ + ";Exit_status=" + exitStatus +
                     " Resource_List.ncpus=" + numNodes +" Resource_List.nodect=" + numNodes +
                     " Resource_List.walltime=1:00:00 account=xxx approx_total_etime=20 args= ctime=1554251516.32 cwd=" +
                     workdir_ + " end=" + endTime_ + " etime=1554251516.32 exe=/home exec_host=" + nodeStr +
