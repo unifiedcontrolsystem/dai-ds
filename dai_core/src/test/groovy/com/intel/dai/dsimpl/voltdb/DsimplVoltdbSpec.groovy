@@ -183,10 +183,12 @@ class VoltInventoryApiSpec extends Specification {
 
 class VoltDbInventoryTrackingApiSpec extends Specification {
     def "VoltDbInventoryTrackingApi"() {
-        def config = Mock(ConfigIO)
-        def logger = Mock(Logger)
         String[] servers = new String[1]
         servers[0] = "127.0.0.1"
+        def config = Mock(ConfigIO)
+        def logger = Mock(Logger)
+        def cl = Mock(Client)
+        VoltDbClient.voltClient = cl
         VoltDbClient.initializeVoltDbClient(servers)
         def ts = new VoltDbInventoryTrackingApi(config, logger)
         expect: ts != null
