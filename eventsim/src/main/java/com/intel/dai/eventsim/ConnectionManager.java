@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Description of class ConnectionManager.
+ * creates/delete/modify/fetch callback subscriptions.
+ * publish  data to all connections/subscriptions available
+ */
 public class ConnectionManager {
 
     ConnectionManager(RESTClient restClient, Logger logger) {
@@ -21,6 +26,16 @@ public class ConnectionManager {
         log_ = logger;
     }
 
+    /**
+     * This method is to add subscriptions.
+     * @param url subscription url.
+     * @param subscriber name of the subscriber.
+     * @param parameters data along with subscription details.
+     * @return true if subscription is added.
+     *         false if subscription is not added.
+     * @throws RESTClientException when null values passed to this method.
+     * expects non null values
+     */
     public boolean addSubscription(@NotNull final String url, @NotNull final String subscriber, Map<String, String> parameters) throws RESTClientException {
         if (subscriber == null || url == null)
             throw new RESTClientException("Could not add subscription: url or subscriber null value(s)");
@@ -35,6 +50,10 @@ public class ConnectionManager {
         return false;
     }
 
+    /**
+     * This method is to fetch all available subscriptions.
+     * @return all available subscription details.
+     */
     public PropertyMap getAllSubscriptions() {
         if (connectionsToId.size() == 0) {
             return new PropertyMap();
@@ -51,6 +70,13 @@ public class ConnectionManager {
         return output;
     }
 
+    /**
+     * This method is to fetch subscription for a given url and subscriber.
+     * @param url subscription url.
+     * @param subscriber name of the subscriber.
+     * @throws RESTClientException when null values passed to this method.
+     * expects non null values.
+     */
     public PropertyMap getSubscription(@NotNull final String url, @NotNull final String subscriber) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
@@ -66,6 +92,11 @@ public class ConnectionManager {
         return new PropertyMap();
     }
 
+    /**
+     * This method is to fetch subscription details for a given subscription id.
+     * @param id subscription id.
+     * @return subscription details for a given id.
+     */
     public PropertyMap getSubscriptionForId(long id) {
         ConnectionObject conn = idToConnections.get(id);
         if (conn != null) {
@@ -74,6 +105,12 @@ public class ConnectionManager {
         return new PropertyMap();
     }
 
+    /**
+     * This method is to remove subscription for a given id.
+     * @param removeId subscription id.
+     * @return true if subscription is removed.
+     *         false if subscription is not removed or not found.
+     */
     public boolean removeSubscriptionId(final long removeId) {
         if (idToConnections.containsKey(removeId)) {
             ConnectionObject conn = idToConnections.get(removeId);
@@ -85,6 +122,11 @@ public class ConnectionManager {
         return false;
     }
 
+    /**
+     * This method is to remove all subscriptions.
+     * @return true if all subscriptions are removed.
+     *         false if all subscription are not removed.
+     */
     public boolean removeAllSubscriptions() {
         idToConnections.clear();
         connectionsToId.clear();
@@ -93,6 +135,9 @@ public class ConnectionManager {
         return true;
     }
 
+    /**
+     * This method is to check whether a subscription exits for a given url and subscriber details.
+     */
     private boolean checkSubscription(final String url, final String subscriber) {
         if (connectionsToId.size() == 0)
             return false;
@@ -102,10 +147,21 @@ public class ConnectionManager {
         return false;
     }
 
+    /**
+     * This method is to fetch all subscriptions/connection object with url and its respective subscriber details.
+     */
     private Set<ConnectionObject> getConnections() {
         return connectionsToId.keySet();
     }
 
+    /**
+     * This method is to publish data to callback network.
+     * @param events data to publish.
+     * @param constantMode send data with or without delay.
+     * @param timeDelayMus delay time.
+     * @throws RESTClientException when no available subscriptions.
+     * expects non null values.
+     */
     public void publish(final List<String> events, final boolean constantMode, final long timeDelayMus) throws RESTClientException {
         long publishedEvents = 0;
         long droppedEvents = 0;
@@ -125,6 +181,10 @@ public class ConnectionManager {
         log_.info(String.format("***Dropped events = %s***", droppedEvents));
     }
 
+    /**
+     * This method is used to create a constant delay.
+     * @param delayTimeMus time to delay in microseconds.
+     */
     private void delayMicroSecond(long delayTimeMus) {
         long waitUntil = System.nanoTime() + TimeUnit.MICROSECONDS.toNanos(delayTimeMus);
         while( waitUntil > System.nanoTime());
