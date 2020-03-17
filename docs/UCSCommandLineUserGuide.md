@@ -156,15 +156,21 @@ This subcommand is set of canned queries which retrieves the information NearLin
 
 2.  Event – It retrieves the RAS Event Data.
 
-3.  Job – It prints job information of cluster
+3.  Inventory-History - It retrieves inventory history data for a given location
 
-4.  Network Config – Provides the network config data of a given location
+4.  Inventory-Info - It retrieves inventory information for a given location
 
-5.  Reservation – It prints reservation information of cluster
+5.  Job – It prints job information of cluster
 
-6.  State – Provides the state data of a given location
+6.  Network Config – Provides the network config data of a given location
 
-7.  System-info – It prints the System Map from UCS DAI’s perspective.
+7.  Replacement-History - It retrieves inventory information and history for a given location
+
+8.  Reservation – It prints reservation information of cluster
+
+9.  State – Provides the state data of a given location
+
+10.  System-info – It prints the System Map from UCS DAI’s perspective.
 
 user@uan1:~> ucs view --help
 usage: ucs view [-h]
@@ -271,6 +277,65 @@ optional arguments:
                         with --format option
 ```
 
+### View Subcommand – Inventory-History
+
+Retrieves the inventory history for a given location from UCS NearLine Tier database.
+
+```bash
+Inventory-History Subcommand:
+user@uan1:~> ucs view inventory-history  --help
+             usage: ucs view inventory-history [-h] [--start-time START_TIME]
+                                               [--end-time END_TIME] [--limit LIMIT]
+                                               [--format {json,table}] [--timeout TIMEOUT]
+                                               locations
+             
+             positional arguments:
+               locations             Filter all inventory history data for a given
+                                     locations. Provide comma separated location list or
+                                     location group. Example: R2-CH0[1-4]-N[1-4]
+             
+             optional arguments:
+               -h, --help            show this help message and exit
+               --start-time START_TIME
+                                     provide the start time. The preferred format for the
+                                     date is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher
+                                     precision
+               --end-time END_TIME   provide the end time. The preferred format for the
+                                     date is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher
+                                     precision
+               --limit LIMIT         Provide a limit to the number of records of data being
+                                     retrieved. The default value is 100
+               --format {json,table}
+                                     Display data either in JSON or table format. Default
+                                     will be to display data in tabular format
+               --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+```
+### View Subcommand – Inventory-Info
+
+Retrieves the inventory information for a given location from UCS NearLine Tier database.
+
+```bash
+Inventory-Info Subcommand:
+user@uan1:~> ucs view inventory-info  --help
+             usage: ucs view inventory-info [-h] [--limit LIMIT] [--format {json,table}]
+                                            [--timeout TIMEOUT]
+                                            locations
+             
+             positional arguments:
+               locations             Filter all inventory info data for a given locations.
+                                     Provide comma separated location list or location
+                                     group. Example: R2-CH0[1-4]-N[1-4]
+             
+             optional arguments:
+               -h, --help            show this help message and exit
+               --limit LIMIT         Provide a limit to the number of records of data being
+                                     retrieved. The default value is 100
+               --format {json,table}
+                                     Display data either in JSON or table format. Default
+                                     will be to display data in tabular format
+               --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+```
+
 ### View Subcommand – Job
 
 Retrieves the jobs that have run on the cluster.
@@ -331,6 +396,44 @@ optional arguments:
                         Display data either in JSON or table format. Default
                         will be to display data in tabular format
   --timeout TIMEOUT     Timeout value for HTTP request. Uses default of 900s
+```
+### View Subcommand – Replacement-History
+
+Retrieves the inventory information and history for a given location from UCS NearLine Tier database.
+
+```bash
+Replacement-History Subcommand:
+user@uan1:~> ucs view replacement-history  --help
+             usage: ucs view replacement-history [-h] [--start-time START_TIME]
+                                                 [--end-time END_TIME] [--limit LIMIT]
+                                                 [--format {json,table}]
+                                                 [--timeout TIMEOUT] [--all]
+                                                 (locations | sernum)
+             
+             positional arguments:
+               locations             Filter all inventory info and history for a given
+                                     locations. Provide comma separated location list or
+                                     location group. Example: R2-CH0[1-4]-N[1-4]
+               sernum                Filter all inventory history data for a given serial
+                                     number
+             
+             optional arguments:
+               -h, --help            show this help message and exit
+               --start-time START_TIME
+                                     provide the start time. The preferred format for the
+                                     date is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher
+                                     precision
+               --end-time END_TIME   provide the end time. The preferred format for the
+                                     date is "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher
+                                     precision
+               --limit LIMIT         Provide a limit to the number of records of data being
+                                     retrieved. The default value is 100
+               --format {json,table}
+                                     Display data either in JSON or table format. Default
+                                     will be to display data in tabular format
+               --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+               --all                 Specify all output fields for more information than
+                                     default view
 ```
 
 ### View Subcommand – Reservation
