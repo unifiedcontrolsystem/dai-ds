@@ -1,10 +1,10 @@
-# ***DaiNetworkListener Configurations for Adapters***
+# ***Configuration Guide for Adapters Using the "dai_network_listener" Component***
 
 ## 1. Introduction
-This documentation describes how to configure the providers using the dai_network_listener component to "monitor" multiple partitions or sources for a single DAI type (RAS Events, Environmental, Logs, etc...).
+This documentation describes how to configure the providers using the dai_network_listener component to "monitor" multiple sources for a single DAI type (RAS Events, Environmental, Logs, etc...). Currently, this component is used in the monitoring provider (RAS event and environmental data), the provisioner provider (node boot state changes), and the inventory provider (node inventory changes). The information below is limited the general cases, separate documentation is provided for the specific provider configuration.
 
 ## 2. Logger Specification & Benchmarking
-You can specify the Logger implementation by using the key `logProvider` at the root level of the configuration map.  Examples:
+You can specify the Logger implementation by using the key `logProvider` at the root level of the configuration map. Examples:
 
 ```json
 {
@@ -83,7 +83,21 @@ The getToken() object returns the OAuth 2.0 string token to be used in HTTP comm
 ## 5 Provider and Other Configurations (`providerConfigurations`)
 This section contains the required configurations for each provider or component that requires a configuration.  The map is keys of the canonical name of the class to which the configuration belongs to. The map is opaque to the *dai_network_listener* component and is only parsed by the owning provider or component.
 
-So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface in the *dai_network_listener* component (*NetworkListenerSystemActions*).  In this case it describes where to publish the raw and aggregated data from the adapter.
+So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface in the *dai_network_listener* component (*NetworkListenerSystemActions*).  In this case it describes where to publish the raw and aggregated data from the adapter. Example:
+```json
+  "providerConfigurations": {
+    "PartitionedMonitorSystemActions": {
+      "sourceType": "rabbitmq",
+      "uri": "amqp://127.0.0.1",
+      "exchange": "ucs"
+    }
+  }
+```
+This example configures the System Actions to publish to rabbitmq, at a specific url, using a specific rabbitmq exchange name. For specific shipping providers, see the provider specific files in this same folder. THere is one for each of:
+* monitoring RAS Events (ex. ProviderMonitoringNetworkForeignBus.json)
+* monitoring Environmental data (ex. ProviderMonitoringNetworkForeignBus.json)
+* monitoring Boot State changes (ex. ProviderProvisionerNetworkForeignBus.json)
+* monitoring Inventory changes (ex. ProviderInventoryNetworkForeignBus.json)
 
 ## 6 Network Stream Connection Definitions (`networkStreams`)
 To describe each type of connection there is a section called `networkStreams` that defines all possible connections for the given "monitoring" provider in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
