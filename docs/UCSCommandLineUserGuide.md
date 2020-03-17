@@ -172,26 +172,32 @@ This subcommand is set of canned queries which retrieves the information NearLin
 
 10.  System-info – It prints the System Map from UCS DAI’s perspective.
 
+```bash
 user@uan1:~> ucs view --help
 usage: ucs view [-h]
-                {env,event,job,network-config,reservation,state,system-info}
-                ...
-```bash
+             {env,event,inventory-history,inventory-info,job,network-config,replacement-history,reservation,state,system-info}
+             ...
+
 positional arguments:
-  {env,event,job,network-config,reservation,state,system-info}
-                        subparser for quering/viewing data from the database
-    env                 view the environmental data
-    event               view the events data
-    job                 view the job information for the cluster
-    network-config      view the latest network info data for a specific
-                        location
-    reservation         view the reservation information for the cluster
-    state               view the latest state info data for a specific
-                        location
-    system-info         view the system information
+{env,event,inventory-history,inventory-info,job,network-config,replacement-history,reservation,state,system-info}
+                     subparser for quering/viewing data from the database
+ env                 view the environmental data
+ event               view the events data
+ inventory-history   view the history of inventory changes for a location
+ inventory-info      view the latest inventory info data for a specific
+                     location
+ job                 view the job information for the cluster
+ network-config      view the latest network info data for a specific
+                     location
+ replacement-history
+                     view the replacement history data
+ reservation         view the reservation information for the cluster
+ state               view the latest state info data for a specific
+                     location
+ system-info         view the system information
 
 optional arguments:
-  -h, --help            show this help message and exit
+-h, --help            show this help message and exit
 ```
 
 ### View Subcommand – Env
