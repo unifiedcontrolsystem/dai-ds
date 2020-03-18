@@ -28,6 +28,7 @@ public class HWInvTranslatorCLI {
             System.exit(1);
         }
     }
+
     private int run(String[] args) {
         try {
             getOptions(args);
@@ -37,6 +38,7 @@ public class HWInvTranslatorCLI {
         }
         return 1;
     }
+
     private int run() {
         HWInvUtil util = new HWInvUtilImpl();
         HWInvTranslator tr = new HWInvTranslator(util);
@@ -59,6 +61,10 @@ public class HWInvTranslatorCLI {
         logger.info("Translated %s to %s for %s", inputFileName, outputFileName, loc);
         return 0;
     }
+
+    /**
+     * This method is used to get the options data.
+     */
     private static void getOptions(String[] args) throws ParseException {
         final Options options = new Options();
         try {

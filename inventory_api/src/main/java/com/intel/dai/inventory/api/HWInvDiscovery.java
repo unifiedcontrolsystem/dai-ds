@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class HWInvDiscovery {
+
     public HWInvDiscovery(Logger logger) {
         log = logger;
 
@@ -27,22 +28,37 @@ public class HWInvDiscovery {
         builder.setPrettyPrinting();
         gson = builder.create();
     }
+
+    /**
+     * This method is used initialise rest client.
+     */
     public void initialize() throws RESTClientException {
         createRestClient();
     }
 
+    /**
+     * This method is used to initiate discovery for foreign location.
+     */
     public int initiateDiscovery(String foreignName) {
         if (requester_ == null) {
             return 1;
         }
         return requester_.initiateDiscovery(foreignName);
     }
+
+    /**
+     * This method is used to the initiated discovery status.
+     */
     public int pollForDiscoveryProgress() {
         if (requester_ == null) {
             return 1;
         }
         return requester_.getDiscoveryStatus();
     }
+
+    /**
+     * This method is used to get the hardware inventory data for a location.
+     */
     public ImmutablePair<Integer, String> queryHWInvTree(String foreignName) {
         if (requester_ == null) {
             log.error("requester_ is null");
@@ -51,6 +67,9 @@ public class HWInvDiscovery {
         return requester_.getHwInventory(foreignName);
     }
 
+    /**
+     * This method is used to get the hardware inventory data for all locations.
+     */
     public ImmutablePair<Integer, String> queryHWInvTree() {
         if (requester_ == null) {
             log.error("requester_ is null");
@@ -59,6 +78,9 @@ public class HWInvDiscovery {
         return requester_.getHwInventory();
     }
 
+    /**
+     * This method is used to create/initialise client.
+     */
     private void createRestClient() throws RESTClientException {
         HWDiscoverySession sess;
 
@@ -108,6 +130,7 @@ public class HWInvDiscovery {
             throw new RESTClientException(msg);
         }
     }
+
     private void createTokenProvider(String className, Map<String, String> config) {
         if (className == null || config == null) {
             return;
@@ -129,6 +152,7 @@ public class HWInvDiscovery {
             log.exception(e, String.format("Cannot construct TokenAuthentication implementation '%s'", className));
         }
     }
+
     private void createRequester(String requester, Requester config, RESTClient restClient) {
         if (requester == null || config == null || restClient == null) {
             return;

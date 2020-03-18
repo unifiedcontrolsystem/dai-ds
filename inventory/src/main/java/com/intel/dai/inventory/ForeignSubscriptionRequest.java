@@ -44,6 +44,12 @@ public class ForeignSubscriptionRequest implements SubscriptionRequestBuilder {
         }});
     }
 
+    /**
+     * This method is used to build request based on subject,subscriptionId and callback url.
+     * @param subjects subject of the connection stream.
+     * @param subscriberID subscription id
+     * @param callbackUrl url of callback
+     */
     @Override
     public String buildRequest(Collection<String> subjects, String subscriberID, String callbackUrl) {
         ConfigIO parser = ConfigIOFactory.getInstance("json");
