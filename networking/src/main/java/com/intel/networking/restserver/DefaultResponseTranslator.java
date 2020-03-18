@@ -22,7 +22,7 @@ public class DefaultResponseTranslator extends ResponseTranslator {
      * @param uri     The URI the error is from on the server.
      * @param method  The invoked HTTP method that the error occurred on the server.
      * @param cause   Either null or the exception that occurred causing this error.
-     * @return
+     * @return A property map of an error to be returned to the client as JSON.
      */
     @Override
     public PropertyMap makeError(int code, String message, URI uri, String method, Throwable cause) {

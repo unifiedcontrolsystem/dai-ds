@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description of class RasEventTransformer.
+ * Specific provider for foreign bus RAS Events.
  */
 public class RasEventProviderForeignBus implements NetworkListenerProvider, Initializer {
     public RasEventProviderForeignBus(Logger logger) {

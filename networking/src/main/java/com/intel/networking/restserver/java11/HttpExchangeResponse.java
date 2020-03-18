@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description of class HttpExchangeResponse.
+ * Description of class HttpExchangeResponse. This is an internal class for HTTP responses.
  */
 class HttpExchangeResponse implements Response {
     HttpExchangeResponse(HttpExchange exchange) {

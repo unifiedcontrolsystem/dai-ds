@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description of class PartitionedMonitorConfig.
+ * Description of class NetworkListenerConfig which stores the configuration for the dai_network_listener component.
+ * The actual filename is specified by the application using this component. This class attempts to validate the
+ * configuration for valid structure.
  */
 public class NetworkListenerConfig {
     public NetworkListenerConfig(AdapterInformation adapter, Logger logger) {

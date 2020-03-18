@@ -19,7 +19,7 @@ import java.text.ParseException;
 import java.util.*;
 
 /**
- * Description of class TelemetryTransformer.
+ * Specific provider for environmental data from foreign bus.
  */
 public class EnvironmentalProviderForeignBus implements NetworkListenerProvider, Initializer {
     public EnvironmentalProviderForeignBus(Logger logger) {

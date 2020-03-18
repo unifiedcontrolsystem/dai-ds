@@ -9,7 +9,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
- * Description of class PermissiveX509TrustManager.
+ * Description of class PermissiveX509TrustManager. This manager will blindly trust the
+ * server certificate. DO NOT USE FOR INTERNET CLIENT, UDE ONLY ON A LOCAL NETWORK.
  */
 public class PermissiveX509TrustManager implements X509TrustManager {
     @Override public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
