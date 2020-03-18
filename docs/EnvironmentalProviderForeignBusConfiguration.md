@@ -39,4 +39,4 @@ If a count window is used (useTimeWindow=false), then this value is how many sam
 If a time windows is used (useTimeWindow=true), then this is the number of seconds to wait for data to accumulate before aggregating it. The default is 600 seconds.
 
 ### useMovingAverage ###
-This can change the behavior of the average from a simple window average (_false) to a moving average (_true_) over the selected window type and size. The default is _false_.
+This can change the behavior of the average from a simple window average (_false_) to a moving average (_true_) over the selected window type and size. The default is _false_.
