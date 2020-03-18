@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 /**
- * Description of class Java11RESTServer.
+ * Description of class Java11RESTServer. See RESTServer for details on public overrides.
  */
 public class Java11RESTServer extends RESTServer {
     private static final int DEFAULT_QUEUED_CONNECTIONS =

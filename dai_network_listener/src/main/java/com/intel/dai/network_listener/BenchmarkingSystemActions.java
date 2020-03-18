@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description of class BenchmarkingSystemActions.
+ * Description of class BenchmarkingSystemActions. This is used to measure throughput of the dai_network_listener by
+ * bypassing all actions and instead recording data for benchmarking. See the NetworkListenerCore class for details.
  */
 public class BenchmarkingSystemActions implements SystemActions, Initializer {
     BenchmarkingSystemActions(Logger logger, DataStoreFactory factory, AdapterInformation info,
@@ -79,14 +80,10 @@ public class BenchmarkingSystemActions implements SystemActions, Initializer {
     }
 
     @Override
-    public void upsertHWInventory(String location, String foreignName) {
-
-    }
+    public void upsertHWInventory(String location, String foreignName) { }
 
     @Override
-    public void deleteHWInventory(String location, String foreignName) {
-
-    }
+    public void deleteHWInventory(String location, String foreignName) { }
 
     @Override
     public void close() throws IOException { }

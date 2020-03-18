@@ -5,7 +5,7 @@
 package com.intel.networking.sink.http_callback;
 
 /**
- * Description of class SubjectMessagePair.
+ * Description of class SubjectMessagePair which is a specialize storage pair abstraction for subject and message pair.
  */
 public class SubjectMessagePair {
     public SubjectMessagePair(String subject, String message) {

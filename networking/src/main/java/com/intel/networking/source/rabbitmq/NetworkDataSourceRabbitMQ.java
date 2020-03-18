@@ -34,7 +34,7 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
     }
 
     /**
-     * Optionally initialize the implementation.
+     * Initialize the implementation.
      */
     @Override
     public void initialize() {

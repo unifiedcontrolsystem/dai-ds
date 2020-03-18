@@ -23,7 +23,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Description of class NetworkDataSinkHttpCallback.
+ * Description of class NetworkDataSinkHttpCallback. See this
  */
 public class NetworkDataSinkHttpCallback implements NetworkDataSink {
     /**

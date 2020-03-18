@@ -6,11 +6,14 @@ package com.intel.networking.restclient.java11;
 
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.EventSource;
-import com.intel.networking.restclient.RequestInfo;
 import com.intel.networking.restclient.SSEEvent;
 
 import java.util.concurrent.Flow;
 
+/**
+ * A line subscriber that uses the EventSource class to parse an incoming SSE stream. Please
+ * see the java documentation for class: java.util.concurrent.Flow.Subscriber.
+ */
 class SSELineSubscriber implements Flow.Subscriber<String> {
     SSELineSubscriber(SSEEvent callback, Logger log) {
         callback_ = callback;

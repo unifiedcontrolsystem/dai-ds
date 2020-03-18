@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Description of class ProviderEnvironmentalForeignBus.
+ * Application entry point derived from AdapterMonitoringNetworkBase.
  */
 public class ProviderMonitoringNetworkForeignBus extends AdapterMonitoringNetworkBase {
     private ProviderMonitoringNetworkForeignBus(Logger logger, DataStoreFactory factory, AdapterInformation info) {
