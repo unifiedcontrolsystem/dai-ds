@@ -197,7 +197,7 @@ __NOTE:__ If you are using EventSim instead of a real API you will need stop and
 
 Checking for Running DAI Components:
 -------------------------------------
-If your host system has the Java JDK 8 or newer installed (JRE anone is not enough) then there is an included
+If your host system has the Java JDK 8 or newer installed (JRE alone is not enough) then there is an included
 script called ___show_adapters___ which will show a detailed list of running DAI-DS java processes. This tool
 must be run as the root user.
 
