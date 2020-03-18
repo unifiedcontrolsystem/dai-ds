@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description of class SSEStreamBuilder.
+ * SSEStreamBuilder implementation for requests for foreign bus systems.
  */
 public class SSEStreamRequestBuilder implements SSERequestBuilder {
     public SSEStreamRequestBuilder() { }

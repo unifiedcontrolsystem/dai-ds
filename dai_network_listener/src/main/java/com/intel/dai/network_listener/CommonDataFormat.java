@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description of class CommonDataFormat.
+ * Description of class CommonDataFormat which is the common internal representation of incoming data. This is a data
+ * storage object only.
  */
 public final class CommonDataFormat {
     public CommonDataFormat(long nanoSecondTimestamp, String location, DataType type) {
