@@ -12,6 +12,12 @@ import com.intel.properties.PropertyMap;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Description of class DataLoaderEngine.
+ * load/validate configuration details of EventSim configuration file.
+ * loads nodes data from volt and store in a map.
+ * special apis to get the loaded data.
+ */
 public class DataLoaderEngine {
 
     private String bootParamsLocation_;
@@ -27,6 +33,9 @@ public class DataLoaderEngine {
         validateDataLoaderDetails();
     }
 
+    /**
+     * This method is validate loaded EventSim configuration file data.
+     */
     private void validateDataLoaderDetails() throws SimulatorException {
         sensorMetadataLocation_ = engineconfiguration_.getStringOrDefault("SensorMetadata", null);
         if (sensorMetadataLocation_ == null)
@@ -50,6 +59,9 @@ public class DataLoaderEngine {
             throw new SimulatorException("EventSim Configuration file doesn't contain 'HWInventoryDiscStatUrl' entry");
     }
 
+    /**
+     * This method is used to load meta data of ras and sensor.
+     */
     public void loadData() throws SimulatorException {
         try {
             processSensorMetadata();
@@ -62,6 +74,9 @@ public class DataLoaderEngine {
         }
     }
 
+    /**
+     * This method is used to validate all locations in db has a mapping foreign name
+     */
     private void validateForeignLocationsWithDB() throws SimulatorException {
         List<String> locations = getNodeLocationData();
         locations.addAll(getNonNodeLocationData());
@@ -70,10 +85,16 @@ public class DataLoaderEngine {
         }
     }
 
+    /**
+     * This method is used to fetch all foreign location.
+     */
     private void loadForeignLocationData() {
        allLocations = CommonFunctions.getLocations();
     }
 
+    /**
+     * This method is used to process sensor data.
+     */
     private void processSensorMetadata() throws IOException, ConfigIOParseException {
         PropertyMap sensorMetadata = loadSensorMetadataFromJSON();
         if (sensorMetadata == null)
@@ -106,10 +127,16 @@ public class DataLoaderEngine {
         definitionSensorMetadata_.put("ServiceNode", desnseComputeNodeEventList);
     }
 
+    /**
+     * This method is used to load sensor metadata from a file
+     */
     private PropertyMap loadSensorMetadataFromJSON()  throws IOException, ConfigIOParseException {
         return LoadFileLocation.fromResources(sensorMetadataLocation_).getAsMap();
     }
 
+    /**
+     * This method is used to process the sensor data.
+     */
     private EventDefinitionType sortEventByDefinition(String eventDescription) {
         if (eventDescription.matches(denseRackPattern)) {
             return EventDefinitionType.DENSE_RACK;
@@ -125,15 +152,24 @@ public class DataLoaderEngine {
         return EventDefinitionType.UNKNOWN;
     }
 
+    /**
+     * This method is used to process ras meta data.
+     */
     private void processRASMetadata() throws IOException, ConfigIOParseException {
         PropertyMap rasEvents = loadRASMetadataFromJSON();
         rasMetadata_ = new ArrayList<>(rasEvents.keySet());
     }
 
+    /**
+     * This method is used to load ras metadata from a file
+     */
     private PropertyMap loadRASMetadataFromJSON()  throws IOException, ConfigIOParseException {
         return LoadFileLocation.fromResources(rasMetadataLocation_).getAsMap();
     }
 
+    /**
+     * This method is used to load locations data from db.
+     */
     private void loadSystemManifestFromDB() throws SimulatorException {
         try {
             loadNodeLocations();
@@ -146,10 +182,16 @@ public class DataLoaderEngine {
 
     private void loadNonNodeLocations() {    }
 
+    /**
+     * This method is used to load cpmpute/service node locations.
+     */
     private void loadNodeLocations() throws DataStoreException {
         nodeLocationdata_ = nodeInfo_.getNodeLocations();
     }
 
+    /**
+     * This method is used to load hostnames for a respective locations in a list.
+     */
     private void loadHostnames() throws DataStoreException {
         nodeHostnamedata_ = new ArrayList<>(nodeInfo_.getComputeHostnameFromLocationMap().values());
     }

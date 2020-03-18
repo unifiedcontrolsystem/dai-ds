@@ -12,6 +12,9 @@ public class ForeignEventRAS extends ForeignEvent {
         props_.put("seqnum", "0x7220");
     }
 
+    /**
+     * This method is used to create ras event message.
+     */
     public String getMessage() {
         StringBuilder msg = new StringBuilder();
         msg.append("src::::");
@@ -28,15 +31,24 @@ public class ForeignEventRAS extends ForeignEvent {
         return msg.toString();
     }
 
+    /**
+     * This method is used to get ras event payload
+     */
     public String getEventPayload() {
         return props_.getStringOrDefault("payload", "UNKNOWN");
     }
 
+    /**
+     * This method is used to set ras event type
+     */
     public void setEventType(String eventType) {
         props_.put("event-type", eventType);
         props_.put("payload", "Cause:"+eventType);
     }
 
+    /**
+     * This method is used to ras event message in json format
+     */
     @Override
     public String getJSON() {
         props_.put("message", getMessage());
