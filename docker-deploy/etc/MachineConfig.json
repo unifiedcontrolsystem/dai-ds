@@ -66,6 +66,13 @@
       "Invocation": "com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
       "TypeOfAdapter": "MONITOR",
       "NumberOfInstances": 2
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt",
+      "TypeOfAdapter": "WLM",
+      "NumberOfInstances": 1
     }
   ],
   "InitialWorkItems": [
@@ -117,6 +124,13 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Parms": "RabbitMQHost=sms01-nmn.local",
+      "TypeOfAdapter": "WLM",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": ""
     }
   ],
   "Nodes": [
