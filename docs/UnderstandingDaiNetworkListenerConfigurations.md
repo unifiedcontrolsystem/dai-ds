@@ -23,8 +23,8 @@ or
 ```
 If the _logProvider_ key is missing then *log4j2* is assumed.
 
-If the _useBenchmarkingActions_ key is missing __false__ is assumed for normal operations of system actions like
- storing and publishing data. If __true__ then the normal actions are replaced with metrics gathering and more log
+If the _useBenchmarkingActions_ key is missing, __false__ is assumed for normal operations of system actions like
+ storing and publishing data. If __true__, then the normal actions are replaced with metrics gathering and more log
   output to _Logger.info()_ are made for gathering timing data. You may also use the environmental variable _DAI_USE_BENCHMARKING_ with the same __true__ or __false__ values.
 
 ## 3. Subjects Map (`subjectMap`)
@@ -67,12 +67,12 @@ git push --set-upstream origin documentation_update
 ### 4.3 Network Request Builders for SSE
 When making a new connection via an HTTP protocol like `sse`, the request is a **GET** method (“sse” only uses **GET**). For a **GET**, the url path is usually followed by a URI query string with selection, filters or other variables. The configuration cannot be stored and must be created dynamically.
 
-To solve this problem a class of providers is supported to be injected into the query (for **GET**) of the initial connection HTTP request.
+To solve this problem, a class of providers is supported to be injected into the query (for **GET**) of the initial connection HTTP request.
 
-The class implementation must implement the interface *com.intel.networking.restclient.SSERequestBuilder*. The implementation must never throw any exceptions but may return an empty string. For a **GET** URI query the “?” must be the first character of the returned string. The logger is available because it was passed into the required constructor.
+The class implementation must implement the interface *com.intel.networking.restclient.SSERequestBuilder*. The implementation must never throw any exceptions but may return an empty string. For a **GET** URI query, the “?” must be the first character of the returned string. The logger is available because it was passed into the required constructor.
 
 ### 4.4 Bearer Token Authentication (OAuth 2.0)
-When making a new connection to a REST API that is protected by token based OAuth 2.0 a implementation class is needed to retrieve the token to send with each REST request. This string token will be the value used in the HTTP header line for each request:
+When making a new connection to a REST API that is protected by token based OAuth 2.0, an implementation class is needed to retrieve the token to send with each REST request. This string token will be the value used in the HTTP header line for each request:
 ```
 Authorization: Bearer <token_string>
 ```
@@ -86,21 +86,21 @@ This section contains the required configurations for each provider or component
 So far the only non-provider component requiring a configuration is the implementation of the SystemActions interface in the *dai_network_listener* component (*NetworkListenerSystemActions*).  In this case it describes where to publish the raw and aggregated data from the adapter. Example:
 ```json
   "providerConfigurations": {
-    "PartitionedMonitorSystemActions": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "uri": "amqp://127.0.0.1",
       "exchange": "ucs"
     }
   }
 ```
-This example configures the System Actions to publish to rabbitmq, at a specific url, using a specific rabbitmq exchange name. For specific shipping providers, see the provider specific files in this same folder. THere is one for each of:
+This example configures the System Actions to publish to rabbitmq, at a specific url, using a specific rabbitmq exchange name. For specific shipping providers, see the provider specific files in this same folder. There is one for each of:
 * monitoring RAS Events (ex. ProviderMonitoringNetworkForeignBus.json)
 * monitoring Environmental data (ex. ProviderMonitoringNetworkForeignBus.json)
 * monitoring Boot State changes (ex. ProviderProvisionerNetworkForeignBus.json)
 * monitoring Inventory changes (ex. ProviderInventoryNetworkForeignBus.json)
 
 ## 6 Network Stream Connection Definitions (`networkStreams`)
-To describe each type of connection there is a section called `networkStreams` that defines all possible connections for the given "monitoring" provider in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
+To describe each type of connection, there is a section called `networkStreams` that defines all possible connections for the given "monitoring" provider in the system being monitored. Each map entry must contain the string name of the *NetworkDataSink* implementation as used in the *NetworkDataSinkFactory*.
 
 The second is the argument containing the subset of the connection and instantiation parameters used by the named implementation. This subset excludes the query portion of **GET** operation and the subjects list to receive.
 
@@ -225,7 +225,7 @@ This lists the types of subjects provided by this profile. Although it is allowe
       "timeWindowSeconds": 600,
       "useMovingAverage": false
     },
-    "PartitionedMonitorSystemActions": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "uri": "amqp://127.0.0.1",
       "exchange": "ucs"

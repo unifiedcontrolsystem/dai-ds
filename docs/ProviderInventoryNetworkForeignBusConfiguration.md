@@ -1,9 +1,9 @@
 # Configuration for Provider Class NetworkListenerProviderForeignBus #
-## Provider full Classname: __com.intel.dai.provisioners.NetworkListenerProviderForeignBus__ ##
+## Provider full Classname: __com.intel.dai.inventory.NetworkListenerProviderForeignBus__ ##
 ## Example: ##
 ```json
 "providerConfigurations": {
-    "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
+    "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
         "publishTopic": "ucs_ras_event",
         "publish": true
     }
