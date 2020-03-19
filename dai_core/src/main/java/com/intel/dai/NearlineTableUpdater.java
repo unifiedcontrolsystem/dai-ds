@@ -17,6 +17,7 @@ import java.util.TimeZone;
 
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
+import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
 
@@ -33,10 +34,11 @@ public class NearlineTableUpdater {
         boolean isProcedure;
     }
 
-    NearlineTableUpdater(Connection tier2DbConn, Logger logger) {
+    NearlineTableUpdater(Connection tier2DbConn, Logger logger, BenchmarkHelper benchmarking) {
         log_ = logger;
         mCachedStmts = new HashMap<>();
         mConn = tier2DbConn;
+        benchmarking_ = benchmarking;
     }
 
     public void update(String tableName, VoltTable tableData) throws DataStoreException {
@@ -48,10 +50,14 @@ public class NearlineTableUpdater {
         }
         try {
             // Store all the data for this table
+            if(tableName.equals("RasEvent"))
+                benchmarking_.addNamedValue("BeforeRasDataWrite", tableData.getRowCount());
             while (tableData.advanceRow()) {
                 dbUpdateHelper(stmt, tableData);
             }
             mConn.commit();
+            if(tableName.equals("RasEvent"))
+                benchmarking_.addNamedValue("WroteRasData", tableData.getRowCount());
         } catch (SQLException ex) {
             try {
                 mConn.rollback();
@@ -282,4 +288,5 @@ public class NearlineTableUpdater {
     }
 
     private Logger log_;
+    private BenchmarkHelper benchmarking_;
 }

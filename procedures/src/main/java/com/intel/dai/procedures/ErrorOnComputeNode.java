@@ -5,6 +5,8 @@
 package com.intel.dai.procedures;
 
 import java.lang.*;
+import java.time.Instant;
+
 import org.voltdb.*;
 
 /**
@@ -48,10 +50,11 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
         }
         // Get the current record in the "active" table's LastChgTimestamp (in micro-seconds since epoch).
         aComputeNodeData[0].advanceRow();
-        long lCurRecsLastChgTimestampTsInMicroSecs = aComputeNodeData[0].getTimestampAsTimestamp("LastChgTimestamp").getTime();
+        long lCurRecsLastChgTimestampTsInMicroSecs = aComputeNodeData[0].getTimestampAsLong("LastChgTimestamp");
 
         // Get this transactions timestamp in microsecs.
-        long lThisTransactionsTsInMicrosecs = this.getTransactionTime().getTime() * 1000;
+        Instant ts = Instant.now();
+        long lThisTransactionsTsInMicrosecs = (ts.getEpochSecond() * 1_000_000) + (ts.getNano() / 1_000);
 
         //----------------------------------------------------------------------
         // Ensure that we aren't updating this row with the exact same LastChgTimestamp as currently exists in the table.
@@ -124,7 +127,6 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
         //                                      "ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
         // }
 
-        putSingleComputeNodeIntoError(sLctn, sReqAdapterType, lReqWorkItemId);
-        return 0;
+        return putSingleComputeNodeIntoError(sLctn, sReqAdapterType, lReqWorkItemId);
     }
 }

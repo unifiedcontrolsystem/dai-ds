@@ -18,8 +18,9 @@ import java.io.InputStream;
  * Description of class ForeignBusProvisionerProvider.
  */
 public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkBase {
-    private ProviderInventoryNetworkForeignBus(Logger logger, DataStoreFactory factory, AdapterInformation info) {
-        super(logger, factory, info);
+    private ProviderInventoryNetworkForeignBus(Logger logger, DataStoreFactory factory, AdapterInformation info,
+                                               String benchmarkingFile, long maxBurstSeconds) {
+        super(logger, factory, info, benchmarkingFile, maxBurstSeconds);
     }
 
     public static void main(String[] args) {
@@ -34,7 +35,8 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
         adapterInfo.setServers(args[0].split(","));
         DataStoreFactory factory = new DataStoreFactoryImpl(adapterInfo.getServers(), logger);
 
-        ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory, adapterInfo);
+        ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory, adapterInfo,
+                "/opt/ucs/log/ProviderInventoryNetworkForeignBus-Benchmarking.json", 5);
         String configName = ProviderInventoryNetworkForeignBus.class.getSimpleName() + ".json";
         try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
             app.preInitialise();

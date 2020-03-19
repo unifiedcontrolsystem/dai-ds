@@ -33,9 +33,9 @@
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "X0-CH0-SN0",
-      "Invocation": "com.intel.dai.ras.AdapterRas",
+      "Invocation": "com.intel.dai.ras.AdapterRasForeignBus",
       "TypeOfAdapter": "RAS",
       "NumberOfInstances": 2
     },

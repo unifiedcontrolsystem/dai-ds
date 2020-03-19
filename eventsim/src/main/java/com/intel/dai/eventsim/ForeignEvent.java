@@ -7,6 +7,8 @@ import com.intel.properties.PropertyMap;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,7 +66,8 @@ public abstract class ForeignEvent {
      * This method is used to set time format.
      */
     private void setDateFormat() {
-        format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSX");
+        format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS'Z'", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     enum EVENT_SUB_TYPE {

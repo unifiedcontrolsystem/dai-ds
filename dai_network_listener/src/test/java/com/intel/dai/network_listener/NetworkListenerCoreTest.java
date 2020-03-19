@@ -15,6 +15,7 @@ import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;
 import com.intel.networking.sink.NetworkDataSinkDelegate;
 import com.intel.networking.sink.NetworkDataSinkFactory;
+import com.intel.perflogging.BenchmarkHelper;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import org.junit.AfterClass;
@@ -67,7 +68,7 @@ public class NetworkListenerCoreTest {
         try (InputStream stream = new ByteArrayInputStream(json_.getBytes())) {
             config_.loadFromStream(stream);
         }
-        adapter_ = new NetworkListenerCore(log, config_, mock(DataStoreFactory.class));
+        adapter_ = new NetworkListenerCore(log, config_, mock(DataStoreFactory.class), mock(BenchmarkHelper.class));
         workQueue_ = mock(WorkQueue.class);
         when(workQueue_.grabNextAvailWorkItem()).thenReturn(true);
         operations_ = mock(AdapterOperations.class);

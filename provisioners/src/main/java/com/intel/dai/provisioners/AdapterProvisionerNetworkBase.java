@@ -10,6 +10,7 @@ import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.network_listener.NetworkListenerConfig;
 import com.intel.dai.network_listener.NetworkListenerCore;
 import com.intel.logging.Logger;
+import com.intel.perflogging.BenchmarkHelper;
 import com.intel.xdg.XdgConfigFile;
 
 import java.io.FileNotFoundException;
@@ -20,10 +21,12 @@ import java.io.InputStream;
  * Description of class NetworkAdapterProvisionerBase.
  */
 abstract class AdapterProvisionerNetworkBase {
-    AdapterProvisionerNetworkBase(Logger logger, DataStoreFactory factory, AdapterInformation info) {
+    AdapterProvisionerNetworkBase(Logger logger, DataStoreFactory factory, AdapterInformation info,
+                                  String benchmarkingFile, long maxBurstSeconds) {
         log_ = logger;
         factory_ = factory;
         adapter_ = info;
+        benchmarking_ = new BenchmarkHelper(info.getType(), benchmarkingFile, maxBurstSeconds);
     }
 
     static InputStream getConfigStream(String baseFilename) throws FileNotFoundException {
@@ -42,12 +45,13 @@ abstract class AdapterProvisionerNetworkBase {
     boolean entryPoint(InputStream configStream) throws IOException, ConfigIOParseException {
         NetworkListenerConfig config = new NetworkListenerConfig(adapter_, log_);
         config.loadFromStream(configStream);
-        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config, factory_);
+        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config, factory_, benchmarking_);
         return execute(adapterCore);
     }
 
     private final AdapterInformation adapter_;
     private final Logger log_;
+    private final BenchmarkHelper benchmarking_;
     private final DataStoreFactory factory_;
     static final String ADAPTER_TYPE = "PROVISIONER";
 }

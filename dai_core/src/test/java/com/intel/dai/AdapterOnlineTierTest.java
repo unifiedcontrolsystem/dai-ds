@@ -9,6 +9,7 @@ import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import com.intel.perflogging.BenchmarkHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -75,7 +76,7 @@ public class AdapterOnlineTierTest {
         when(online.workQueue.getClientParameters(ArgumentMatchers.anyString())).thenReturn(new String[] {
                 "IntvlBtwnPurgesMs=60", "AddtlTimeToKeepMovedDataBeforePurgeMs=300", "unknown=0"});
         when(online.workQueue.amtTimeToWait()).thenReturn(0, 1);
-        online.mainProcessingFlow(new String[] {"127.0.0.1"});
+        online.mainProcessingFlow(new String[] {"127.0.0.1"}, mock(BenchmarkHelper.class));
     }
 
     @Test
@@ -83,6 +84,6 @@ public class AdapterOnlineTierTest {
         AdapterOnlineTier online = new MockAdapterOnlineTier();
         when(online.adapter.adapterShuttingDown()).thenReturn(false);
         when(online.workQueue.grabNextAvailWorkItem()).thenThrow(new RuntimeException());
-        online.mainProcessingFlow(new String[] {});
+        online.mainProcessingFlow(new String[] {}, mock(BenchmarkHelper.class));
     }
 }

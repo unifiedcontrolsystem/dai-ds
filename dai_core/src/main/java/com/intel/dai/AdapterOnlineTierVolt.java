@@ -6,6 +6,7 @@ package com.intel.dai;
 
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
 import java.lang.*;
@@ -126,6 +127,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
                 // Save current timestamp so we know when we last checked to see if there is any data to be purged.
                 lLastTimePurgeDataChkInMillis = System.currentTimeMillis();
             }
+            benchmarking_.tick();
 
             // Sleep for 1 second between iterations.
             //      Optimization would be to keep a summary indicating which tables had updates for this interval, and how many updates have shown up this interval.
@@ -350,6 +352,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
         // Check & see if there is any data to be sent for this table.
         if (sThisTablesInfoAsJson != null) {
+            boolean isRasEvents = sTableName.equalsIgnoreCase("RasEvent");
             //logger().info(" aVtJson[%02d] = %s", iVtCntr, sThisTablesInfoAsJson);  // display the json-formatted string for this table.
 
             // Get the information out of the table's results.
@@ -379,6 +382,9 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
             // Add the schema information to only the first "part" of the table's info.
             jsonAmqpObj.put("schema", listOfSchemaEntries);
 
+            if(isRasEvents)
+                benchmarking_.addNamedValue("ras_before_send", lNumRowsOfDataInThisTable);
+
             // Include the rows of "data" from the table (up to the number allowed per amqp message).
             Iterator<?> itTableDataEntries = listOfTableDataEntries.iterator();
             for (int lThisMsgsPartNum=1; lThisMsgsPartNum <= lTotalNumPartsForThisTable; ++lThisMsgsPartNum) {
@@ -400,6 +406,8 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
                           mDataMoverAmqpMessageId, mDataMoverIntervalId, sEndIntvlTimestamp, sStartIntvlTimestamp, Adapter.DataMoverQueueName,
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable, decimalFormatter.format(iNumRowsAddedToAmqpMsg));
             }   // build json messages containing the changes to this table and put them onto the DataMover queue.
+            if(isRasEvents)
+                benchmarking_.addNamedValue("ras_after_send", lNumRowsOfDataInThisTable);
         }   // there is data to be sent for this table.
     }   // End sendThisTablesChangesToTier2(...)
 
@@ -501,7 +509,8 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         final AdapterOnlineTierVolt obj = new AdapterOnlineTierVolt(logger);
         obj.initializeAdapter();
         // Start up the main processing flow for OnlineTier adapters.
-        obj.mainProcessingFlow(args);
+        obj.mainProcessingFlow(args, new BenchmarkHelper("ONLINE",
+                "/opt/ucs/log/AdapterOnlineTierVolt-Benchmarking.json", 5));
     }   // End main(String[] args)
 
 }   // End class AdapterOnlineTierVolt
