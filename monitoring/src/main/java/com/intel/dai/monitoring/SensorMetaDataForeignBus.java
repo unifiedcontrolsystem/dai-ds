@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description of class SensorMetaData.
+ * Provide lookup for foreign sensor metadata. Internal class.
  */
 class SensorMetaDataForeignBus {
     SensorMetaDataForeignBus(ConfigIO parser) {

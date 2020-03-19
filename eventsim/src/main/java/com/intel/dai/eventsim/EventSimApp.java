@@ -152,6 +152,12 @@ public class EventSimApp extends EventSim {
         return jsonParser_.toString(bootParamsApi_.getBootParametersForLocation(location));
     }
 
+    /**
+     * This method used to fetch hw inventory discovery data for all location/location
+     * @param parameters input details of the request.
+     * @return hw inventory data
+     * @throws ResultOutputException when unable to find location to initialte discovery
+     */
     public String initiateInventoryDiscovery(final Map<String, String> parameters) throws ResultOutputException {
         String locations = parameters.getOrDefault("xnames", null);
         if(locations == null)
@@ -177,6 +183,11 @@ public class EventSimApp extends EventSim {
         return (test.toString());
     }
 
+    /**
+     * This method used to fetch hw inventory discovery data for all locatios.
+     * @param parameters input details of the request.
+     * @return hw inventory data
+     */
     public String getAllInventoryDiscoveryStatus(final Map<String, String> parameters) {
         PropertyArray discoveryStatus = new PropertyArray();
         for(int i = 0; i < numOfForeignNamesDiscovery; i++) {

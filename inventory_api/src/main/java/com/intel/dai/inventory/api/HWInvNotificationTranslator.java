@@ -8,11 +8,13 @@ import com.google.gson.JsonSyntaxException;
 import java.io.EOFException;
 
 public class HWInvNotificationTranslator {
+
     public HWInvNotificationTranslator() {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting();
         gson = builder.create();
     }
+
     public ForeignHWInvChangeNotification toPOJO(String json) {
         try {
             return gson.fromJson(json, ForeignHWInvChangeNotification.class);

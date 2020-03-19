@@ -27,16 +27,24 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Description of class PartitionedMonitorAdapter.
+ * This is the core code for this component. The adapter functionality and business logic for ALL providers using
+ * this component.
  */
 public class NetworkListenerCore {
-    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors(); // Logical hw threads.
 
     @SuppressWarnings("serial")
     static class Exception extends java.lang.Exception {
         Exception(String message) { super(message); }
     }
 
+    /**
+     * Constructor for this class accepting all objects from the application needed to create all interfaces used.
+     *
+     * @param logger The application created logger.
+     * @param configuration The application created and loaded configuration object.
+     * @param factory The Data Store (DS) factory where all online and near-line tier API interfaces are created.
+     */
     public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory) {
         assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
         assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
@@ -47,6 +55,11 @@ public class NetworkListenerCore {
         factory_ = factory;
     }
 
+    /**
+     * Entry point for application run.
+     *
+     * @return a Linux shell compatible integer for the exit code if used.
+     */
     public int run() {
         int result;
         log_.info("Starting the adapter");
@@ -66,6 +79,7 @@ public class NetworkListenerCore {
         return result;
     }
 
+    // Normal application shutdown method call by run().
     private void shutdownAdapter() {
         try {
             adapterOperations_.shutdownAdapter();
@@ -75,6 +89,7 @@ public class NetworkListenerCore {
         try { actions_.close(); } catch(IOException e) { log_.exception(e); }
     }
 
+    // Based on the network configuration in the configuration object, attempt connection to all data sources.
     private boolean connectToAllDataSources() {
         try {
             return startAllConnections();
@@ -89,6 +104,7 @@ public class NetworkListenerCore {
         }
     }
 
+    // Sets up a single profile from the configuration object.
     private boolean setUpProfile(String profile) {
         if(config_.getCurrentProfile() == null) {
             adapter_.setUniqueNameExtension(profile);
@@ -109,6 +125,7 @@ public class NetworkListenerCore {
         return true;
     }
 
+    // Register the application in online tier.
     private boolean registerAdapter() {
         adapterOperations_ = factory_.createAdapterOperations(adapter_);
         if (!workQueue_.isThisNewWorkItem())
@@ -122,8 +139,12 @@ public class NetworkListenerCore {
         return false;
     }
 
+    // Setup the application's system actions object
     private boolean setUpAdapter() {
-        boolean useBenchmarking = config_.useBenchmarking() || Boolean.parseBoolean(System.getenv("DAI_USE_BENCHMARKING"));
+        // If the configuration object or the environment variable below indicate benchmarking then create an alternate
+        // SystemActions object.
+        boolean useBenchmarking = config_.useBenchmarking() ||
+                Boolean.parseBoolean(System.getenv("DAI_USE_BENCHMARKING"));
         try {
             if (useBenchmarking) {
                 actions_ = new BenchmarkingSystemActions(log_, factory_, adapter_, config_);
@@ -138,10 +159,12 @@ public class NetworkListenerCore {
         return false;
     }
 
+    // Create all dynamically create the provider class.
     private void createTransformAndActionProviders() throws ProviderException {
         provider_ = createNetworkListenerProvider(config_.getProviderName());
     }
 
+    // Start all connections; SSE, HTTP Callback, RabbitMQ, etc...
     private boolean startAllConnections() throws NetworkDataSinkFactory.FactoryException {
         ArrayList<NetworkDataSink> unconnectedList = new ArrayList<>();
         for(String networkStreamName: config_.getProfileStreams()) {
@@ -171,11 +194,13 @@ public class NetworkListenerCore {
         if(!unconnectedList.isEmpty()) {
             log_.warn("One or more of the connections failed for this monitoring adapter, they will continue to " +
                     "attempt to connection in the background");
+            // Continue to try failures in the background.
             new Thread(() -> backgroundContinueConnections(unconnectedList)).start();
         }
         return true;
     }
 
+    // Used if some connection failed, this will continue trying until list is empty (all connection made).
     private void backgroundContinueConnections(List<NetworkDataSink> unconnectedList) {
         List<NetworkDataSink> succeededList = new ArrayList<>();
         while (!unconnectedList.isEmpty()) {
@@ -195,16 +220,19 @@ public class NetworkListenerCore {
         log_.info("All remaining connections were completed.");
     }
 
+    // Stop all listening connections.
     private void stopAllConnections() {
         for(NetworkDataSink sink: sinks_)
             sink.stopListening();
     }
 
+    // Receive raw message and queue it up for processing.
     private void processSinkMessage(String subject, String message) {
         log_.debug("Received message for subject: %s", subject);
         queue_.add(new FullMessage(subject, message));
     }
 
+    // On a thread, process the incoming queued messages.
     private void processDataQueueThreaded() {
         int count = Math.min(THREAD_COUNT / 2, 3); // 1-3 threads for processing.
         if(count == 1) {
@@ -224,6 +252,7 @@ public class NetworkListenerCore {
         }
     }
 
+    // Called from threaded method above to process messages.
     private void processDataQueue() {
         long backOffSleep = 1;
         while(!adapter_.isShuttingDown()) {
@@ -239,6 +268,7 @@ public class NetworkListenerCore {
         log_.debug("*** Ending processing loop...");
     }
 
+    // process a single message.
     private void processMessage(String subject, String message) {
         if(subjects_.contains(subject) || subjects_.contains("*")) {
             try {
@@ -259,15 +289,17 @@ public class NetworkListenerCore {
         }
     }
 
+    // Shutting down the application.
     public void shutDown() {
         log_.info("Shutting down the adapter gracefully");
         adapter_.signalToShutdown();
     }
 
+    // Online tier application logic.
     private int runMainLoop() {
-        while(!adapter_.isShuttingDown()) {
+        while(!adapter_.isShuttingDown()) { // while application is running....
             try {
-                if (workQueue_.grabNextAvailWorkItem()) {
+                if (workQueue_.grabNextAvailWorkItem()) { // Get the online tier work item from online tier.
                     if (workQueue_.workToBeDone().equals("HandleInputFromExternalComponent")) {
                         adapter_.setBaseWorkItemId(workQueue_.baseWorkItemId());
                         Map<String, String> parameters = workQueue_.getClientParameters();
@@ -291,7 +323,7 @@ public class NetworkListenerCore {
                         }
                         log_.debug("*** Starting processing loop...");
                         processDataQueueThreaded();
-                    } else
+                    } else // Not a valid work item.
                         workQueue_.handleProcessingWhenUnexpectedWorkItem();
                     adapter_.setId(-1L);
                 }
@@ -304,10 +336,12 @@ public class NetworkListenerCore {
         return 0;
     }
 
+    // Sleep without fear of exception...
     private void safeSleep(long msDelay) {
         try { Thread.sleep(msDelay); } catch(InterruptedException e) { /* Ignore this exception */ }
     }
 
+    // Part of processing of the configuration object with a focus on networking.
     private Map<String,String> buildArgumentsForNetwork(PropertyMap args) {
         Map<String,String> result = new HashMap<>();
         for(Map.Entry<String,Object> entry: args.entrySet()) {

@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Description of class SSEConnectionManager.
+ * Description of class SSEConnectionManager. This is an internal class for HTTP open connection for SSE streams.
  */
 class SSEConnectionManager implements AutoCloseable, Closeable {
     private static final long PING_INTERVAL_SECONDS =

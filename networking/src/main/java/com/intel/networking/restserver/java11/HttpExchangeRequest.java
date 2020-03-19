@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description of class HttpExchangeRequest.
+ * Description of class HttpExchangeRequest. This is an internal class for HTTP requests.
  */
 class HttpExchangeRequest implements Request {
     HttpExchangeRequest(HttpExchange exchange) {

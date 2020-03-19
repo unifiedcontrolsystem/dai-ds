@@ -17,6 +17,9 @@ import java.net.URISyntaxException;
 class ForeignHwInventoryRequester implements RestRequester {
     public ForeignHwInventoryRequester() {}
 
+    /**
+     * This method is used to initialize logger, requestor and client.
+     */
     @Override
     public void initialize(Logger logger, Requester config, RESTClient restClient) {
         this.logger = logger;
@@ -24,6 +27,9 @@ class ForeignHwInventoryRequester implements RestRequester {
         this.restClient = restClient;
     }
 
+    /**
+     * This method is used to initiate and process discovery for a foreign location.
+     */
     @Override
     public int initiateDiscovery(String foreignName) {
         try {
@@ -39,6 +45,10 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return 1;
     }
+
+    /**
+     * This method is used to get the status of initiated discovery.
+     */
     @Override
     public int getDiscoveryStatus() {
         try {
@@ -53,6 +63,10 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return 1;
     }
+
+    /**
+     * This method is used to get the hardware inventory data.
+     */
     @Override
     public ImmutablePair<Integer, String> getHwInventory() {
         try {
@@ -67,6 +81,10 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return new ImmutablePair<>(1, "");
     }
+
+    /**
+     * This method is used to get the hardware inventory datafor a location.
+     */
     @Override
     public ImmutablePair<Integer, String> getHwInventory(String foreignName) {
         try {
@@ -81,9 +99,11 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return new ImmutablePair<>(1, "");
     }
+
     private URI makeUri(String endpoint, String resource) throws URISyntaxException {
         return new URI(String.format("%s%s", endpoint, resource));
     }
+
     private URI makeUri(String endpoint, String resource, String subResource) throws URISyntaxException {
         return new URI(String.format("%s%s%s", endpoint, resource, subResource));
     }

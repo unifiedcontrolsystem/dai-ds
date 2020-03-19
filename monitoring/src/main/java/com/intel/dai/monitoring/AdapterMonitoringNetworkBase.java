@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Description of class AdapterMonitoringNetworkBase.
+ * Base class for monitoring adapters using dai_network_listener component.
  */
 abstract class AdapterMonitoringNetworkBase {
     AdapterMonitoringNetworkBase(Logger logger, DataStoreFactory factory, AdapterInformation info) {

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description of class PartitionedMonitorSystemActions.
+ * Description of class PartitionedMonitorSystemActions. See parent interface for details on actions.
  */
 class NetworkListenerSystemActions implements SystemActions, Initializer {
     NetworkListenerSystemActions(Logger logger, DataStoreFactory factory, AdapterInformation info,
