@@ -7,15 +7,12 @@ package com.intel.dai.monitoring;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
-import java.io.InputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,6 +113,10 @@ public class DemoEnvironmentalProviderForeignBus implements NetworkListenerProvi
         PropertyMap document;
         try {
             document = parser_.fromString(data).getAsMap();
+            if(document == null) {
+                log_.debug("FAILED JSON: '%s'", data);
+                return commonList;
+            }
         } catch(ConfigIOParseException e) {
             log_.exception(e);
             log_.debug("FAILED JSON: '%s'", data);
@@ -123,12 +124,20 @@ public class DemoEnvironmentalProviderForeignBus implements NetworkListenerProvi
         }
         if(!document.containsKey("metrics") || document.get("metrics") == null)
             throw new NetworkListenerProviderException("Missing the 'metric' top level key.");
-        PropertyMap metrics = document.getMapOrDefault("metrics", null); // Cannot return null at this point.
+        PropertyMap metrics;
+        try {
+            metrics = document.getMap("metrics");
+        } catch(PropertyNotExpectedType e) {
+            throw new NetworkListenerProviderException("The 'metric' top level key was not a map.");
+        }
         if(!metrics.containsKey("messages") || metrics.get("messages") == null)
             throw new NetworkListenerProviderException("Missing the second level 'messages' key.");
-        PropertyArray messages = metrics.getArrayOrDefault("messages", null); // cannot return null at this point.
-        if(messages == null)
+        PropertyArray messages;
+        try {
+            messages = metrics.getArray("messages");
+        } catch(PropertyNotExpectedType e) {
             throw new NetworkListenerProviderException("Second level 'messages' key is not an array.");
+        }
         for(Object obj: messages) {
             if(obj instanceof PropertyMap) {
                 PropertyMap map = (PropertyMap)obj;
@@ -136,7 +145,7 @@ public class DemoEnvironmentalProviderForeignBus implements NetworkListenerProvi
                     log_.debug("*** Processing data item...");
                     try {
                         // The 3 values from the map cannot be null after the call to checkMessage.
-                        long nsTimestamp = map.getLong("timestamp") * 1000000; // ms to ns
+                        long nsTimestamp = map.getLong("timestamp") * 1_000_000; // ms to ns
                         String name = map.getString("name");
                         long rawValue = map.getLong("value");
                         CommonDataFormat dataObj = new CommonDataFormat(nsTimestamp, "X0-CH4-CN0",
