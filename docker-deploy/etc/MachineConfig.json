@@ -19,13 +19,6 @@
   ],
   "AdapterInstances": [
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X0-CH0-SN0",
-      "Invocation": "com.intel.dai.AdapterNearlineTierJdbc",
-      "TypeOfAdapter": "NEARLINE_TIER",
-      "NumberOfInstances": 1
-    },
-    {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
       "ServiceNode": "X0-CH0-SN0",
       "Invocation": "com.intel.dai.AdapterOnlineTierVolt",
@@ -40,10 +33,17 @@
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
       "ServiceNode": "X0-CH0-SN0",
-      "Invocation": "com.intel.dai.ras.AdapterRasForeignBus",
+      "Invocation": "com.intel.dai.ras.AdapterRas",
       "TypeOfAdapter": "RAS",
+      "NumberOfInstances": 2
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.AdapterNearlineTierJdbc",
+      "TypeOfAdapter": "NEARLINE_TIER",
       "NumberOfInstances": 1
     },
     {
@@ -82,6 +82,20 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "MotherSuperiorDaiMgr",
       "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleFillingInJobIdOnly",
+      "Queue": ""
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleControlOpsOnly",
+      "Queue": ""
     },
     {
       "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=sms01-nmn.local",

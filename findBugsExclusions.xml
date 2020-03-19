@@ -148,6 +148,10 @@
         </Or>
         <Bug code="UwF" />
     </Match>
+    <Match>
+        <Class name="com.intel.dai.ras.AdapterRas" />
+        <Bug code="DMI" />
+    </Match>
 
     <!--*************************************************************************************************************
     TODO: These issues below need to be addressed!!!

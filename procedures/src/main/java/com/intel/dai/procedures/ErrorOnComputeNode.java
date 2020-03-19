@@ -22,7 +22,7 @@ import org.voltdb.*;
  *
  */
 
-public class ErrorOnComputeNode extends VoltProcedure {
+public class ErrorOnComputeNode extends ComputeNodeCommon {
 
     public final SQLStmt selectComputeNode = new SQLStmt("SELECT * FROM ComputeNode WHERE Lctn=? Order By Lctn;");
 
@@ -40,13 +40,28 @@ public class ErrorOnComputeNode extends VoltProcedure {
         //--------------------------------------------------
         // Grab the object's pre-change values so they are available for use creating the history record.
         //--------------------------------------------------
-        voltQueueSQL(selectComputeNode, sLctn);
+        voltQueueSQL(selectComputeNode, EXPECT_ONE_ROW, sLctn);
         VoltTable[] aComputeNodeData = voltExecuteSQL();
         if (aComputeNodeData[0].getRowCount() == 0) {
             throw new VoltAbortException("ErrorOnComputeNode::putSingleComputeNodeIntoError - there is no entry in the ComputeNode table for the specified ComputeNode (" + sLctn + ") - " +
                                          "ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
         }
+        // Get the current record in the "active" table's LastChgTimestamp (in micro-seconds since epoch).
         aComputeNodeData[0].advanceRow();
+        long lCurRecsLastChgTimestampTsInMicroSecs = aComputeNodeData[0].getTimestampAsTimestamp("LastChgTimestamp").getTime();
+
+        // Get this transactions timestamp in microsecs.
+        long lThisTransactionsTsInMicrosecs = this.getTransactionTime().getTime() * 1000;
+
+        //----------------------------------------------------------------------
+        // Ensure that we aren't updating this row with the exact same LastChgTimestamp as currently exists in the table.
+        //----------------------------------------------------------------------
+        // Check & see if this timestamp is the same as the LastChgTimestamp on the current record (in the ComputeNode table).
+        if (lThisTransactionsTsInMicrosecs <= lCurRecsLastChgTimestampTsInMicroSecs)
+        {
+            lThisTransactionsTsInMicrosecs = lCurRecsLastChgTimestampTsInMicroSecs + 1;
+            lThisTransactionsTsInMicrosecs = ensureHaveUniqueComputeNodeLastChgTimestamp(sLctn, lThisTransactionsTsInMicrosecs, lCurRecsLastChgTimestampTsInMicroSecs);
+        }
 
         //----------------------------------------------------------------------
         // Insert a "history" record for these updates into the history table (start with pre-change values then overlay with these changes).
@@ -62,8 +77,8 @@ public class ErrorOnComputeNode extends VoltProcedure {
                     ,aComputeNodeData[0].getString("BmcIpAddr")
                     ,aComputeNodeData[0].getString("BmcMacAddr")
                     ,aComputeNodeData[0].getString("BmcHostName")
-                    ,this.getTransactionTime()                      // Get CURRENT_TIMESTAMP or NOW
-                    ,this.getTransactionTime()                      // Get CURRENT_TIMESTAMP or NOW
+                    ,lThisTransactionsTsInMicrosecs                 // Get CURRENT_TIMESTAMP or NOW
+                    ,lThisTransactionsTsInMicrosecs                 // LastChgTimestamp
                     ,sReqAdapterType
                     ,lReqWorkItemId
                     ,aComputeNodeData[0].getString("Owner")
@@ -75,7 +90,7 @@ public class ErrorOnComputeNode extends VoltProcedure {
         //--------------------------------------------------
         // Update the object's values.
         //--------------------------------------------------
-        voltQueueSQL(updateComputeNode, "E", this.getTransactionTime(), this.getTransactionTime(), sReqAdapterType, lReqWorkItemId, sLctn);
+        voltQueueSQL(updateComputeNode, "E", lThisTransactionsTsInMicrosecs, lThisTransactionsTsInMicrosecs, sReqAdapterType, lReqWorkItemId, sLctn);
         voltExecuteSQL();
         return 0;
     }
