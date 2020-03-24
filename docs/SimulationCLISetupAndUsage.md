@@ -347,8 +347,8 @@ In the Initial Workitems Section:
 
 For the log entries to be processed by the WLM Adapter it is necessary to have Logstash properly configured and running. 
 
-First, the files cobalt-bgsched.log and cobalt-cqm.log located in the data directory of the ucs code tree need to be copied to the logstash configuration directory: /etc/logstash/conf.d/
+First, the files cobalt-bgsched.log and cobalt-cqm.log located in the data/etc-logstash/conf.d directory of the ucs code tree need to be copied to the logstash configuration directory: /etc/logstash/conf.d/
 
-Make sure that both configuration files point to the correct rabbitMQ server.
+Make sure that both configuration files point to the correct rabbitMQ server. With the default docker deployment, this is sms01-nmn.local.
 
 After this, the logstash service needs to be restarted with the new configuration using the command: systemctl restart logstash
