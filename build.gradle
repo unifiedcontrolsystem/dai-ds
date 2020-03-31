@@ -1600,12 +1600,12 @@ task makeDeveloperDockerTarball(type: Tar) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
         new File((String)"${buildDir}/tmp/manifest.txt").text = """json-simple-3.1.0.jar
-properties-${packageVersion}.jar
-config_io-${packageVersion}.jar
-procedures-${packageVersion}.jar
+properties.jar
+config_io.jar
+procedures.jar
 """
     }
-    archiveFileName = "${project.name}-docker-dev-${project.version}.tar.gz"
+    archiveFileName = "${project.name}-docker-dev-${packageVersion}.tar.gz"
     compression = Compression.GZIP
     destinationDirectory = file("${buildDir}/distributions")
     from("${projectDir}/docker-dev-cluster")
