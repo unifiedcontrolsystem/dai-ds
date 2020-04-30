@@ -146,7 +146,6 @@ subprojects {
     apply plugin: 'com.github.spotbugs'
 
     repositories {
-        jcenter()
         mavenCentral()
     }
 
@@ -382,6 +381,45 @@ project(':config_io') {
     dependencies {
         compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
         compile project(':properties')
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':perflogging') {
+    dependencies {
+        compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
+    }
+
+    jar {
+        from {
+            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': "com.intel.perflogging.GenerateRasEvents")
+        }
     }
 
     jacocoTestCoverageVerification {
@@ -868,30 +906,7 @@ project(":ras") {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
-                    minimum = 0.70
-                }
-            }
-        }
-    }
-}
-
-project(':perflogging') {
-    dependencies { }
-
-    jacocoTestCoverageVerification {
-        violationRules {
-            rule {
-                enabled = enforceCodeCoverage
-                limit {
-                    counter = 'METHOD'
-                    minimum = 0.90
-                }
-            }
-            rule {
-                enabled = enforceCodeCoverage
-                limit {
-                    counter = 'BRANCH'
-                    minimum = 0.70
+                    minimum = 0.62
                 }
             }
         }

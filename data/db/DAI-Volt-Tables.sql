@@ -1107,8 +1107,6 @@ PARTITION TABLE RasEvent ON COLUMN EventType;
 CREATE UNIQUE INDEX RasEventByEventTypeAndId ON RasEvent(EventType, Id);
 CREATE INDEX RasEventByControlOperationDone  ON RasEvent(ControlOperationDone) WHERE ControlOperation IS NOT NULL;
 CREATE INDEX RasEventByLctnAndTime           ON RasEvent(Lctn, LastChgTimestamp) WHERE Lctn IS NOT NULL;
-CREATE INDEX RasEventByTimeEventtypeAndId    ON RasEvent(LastChgTimestamp, EventType, Id);
-CREATE INDEX RasEventByJobIdAndLctn          ON RasEvent(JobId, Lctn) WHERE JobId IS NOT NULL;
 CREATE INDEX RasEventByDbUpdatedTimestamp    ON RasEvent(DbUpdatedTimestamp);
 --------------------------------------------------------------
 -- Temporary table being used in the prototype (when do not actually have a Tier2)

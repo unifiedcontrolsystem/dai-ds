@@ -49,6 +49,7 @@ CREATE PROCEDURE
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.ErrorOnChassis;
 CREATE PROCEDURE
+   PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ErrorOnComputeNode;
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.ErrorOnComputeNodeViaMacAddr;
@@ -282,6 +283,10 @@ CREATE PROCEDURE InternalCachedJobsTerminated
    AS UPDATE InternalCachedJobs SET EndTimestamp=?, DbUpdatedTimestamp=? WHERE JobId=?;
 CREATE PROCEDURE InternalCachedJobsCleanUp
    AS DELETE FROM InternalCachedJobs WHERE JobId=?;
+-- Remove any "expired" jobs from the InternalCachedJobs table
+--    The specified timestamp will be used for determining which jobs are expired.
+CREATE PROCEDURE InternalCachedJobsRemoveExpiredJobs
+   AS DELETE FROM InternalCachedJobs WHERE ((EndTimestamp IS NOT NULL) AND (DbUpdatedTimestamp < ?));
 -- Get the JobId for the specified Node location that was active at the specified time
 --    If job is still active (EndTimestamp is null) then
 --       we want entries where the job's StartTimestamp <= the specified timestamp
@@ -290,10 +295,18 @@ CREATE PROCEDURE InternalCachedJobsCleanUp
 CREATE PROCEDURE InternalCachedJobsGetJobidForNodeLctnAndMatchingTimestamp
    PARTITION ON TABLE InternalCachedJobs COLUMN NodeLctn PARAMETER 0
    AS SELECT JobId FROM InternalCachedJobs WHERE ((NodeLctn=?) AND (StartTimestamp<=?) AND ((EndTimestamp IS NULL) OR (? <= EndTimestamp)));
--- Remove any "expired" jobs from the InternalCachedJobs table
---    The specified timestamp will be used for determining which jobs are expired.
-CREATE PROCEDURE InternalCachedJobsRemoveExpiredJobs
-   AS DELETE FROM InternalCachedJobs WHERE ((EndTimestamp IS NOT NULL) AND (DbUpdatedTimestamp < ?));
+
+-- Get the list of InternalCachedJobs information for jobs that may have been active at the specified time,
+-- this information will then be used when there are multiple entries that need to be checked for.
+-- Note: if there is only 1 entry to be checked for it is likely more efficient to use something like
+--       InternalCachedJobsGetJobidForNodeLctnAndMatchingTimestamp stored procedure.
+-- Flow:
+--    If job is still active (EndTimestamp is null) then
+--       we want entries where the job's StartTimestamp <= the specified timestamp
+--    If job has terminated (EndTimestamp is NOT null) then
+--       we want entries where the job's StartTimestamp <= the specified timestamp <= job's EndTimestamp)
+CREATE PROCEDURE InternalCachedJobsGetListOfActiveInternalCachedJobsUsingTimestamp
+   AS SELECT * FROM InternalCachedJobs WHERE ((StartTimestamp<=?) AND ((EndTimestamp IS NULL) OR (? <= EndTimestamp))) ORDER BY NodeLctn, StartTimestamp;
 
 
 
@@ -518,6 +531,9 @@ CREATE PROCEDURE
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.RasEventProcessNewControlOperations;
 
+-- This stored procedure returns an array of VoltTables:
+--    the first contains the details for the list of RasEvents which have specified that UCS should check for an associated WLM Job ID
+--    the second contains the maximum value for the LastChgTimestamp column in the above-mentioned list of RasEvents
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.RasEventListThatNeedJobId;
 
@@ -604,6 +620,9 @@ CREATE PROCEDURE UpsertLogicalGroups
 CREATE PROCEDURE DeleteGroupInLogicalGroups
    PARTITION ON TABLE LogicalGroups COLUMN GroupName PARAMETER 0
    AS DELETE FROM LogicalGroups WHERE GroupName=?;
+
+-- CREATE PROCEDURE
+--    FROM CLASS com.intel.dai.procedures.TempStoredProcToTestTimeouts;
 
 CREATE PROCEDURE GetManifestContent
    AS SELECT manifestcontent from Machine;

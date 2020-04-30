@@ -3,13 +3,14 @@ package com.intel.dai.network_listener
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.logging.Logger
 import com.intel.networking.sink.NetworkDataSink
+import com.intel.perflogging.BenchmarkHelper
 import spock.lang.Specification
 
 class NetworkListenerCoreSpec extends Specification {
     def underTest_
     void setup() {
         NetworkListenerCore.STABILIZATION_VALUE = 10L
-        underTest_ = new NetworkListenerCore(Mock(Logger), Mock(NetworkListenerConfig), Mock(DataStoreFactory))
+        underTest_ = new NetworkListenerCore(Mock(Logger), Mock(NetworkListenerConfig), Mock(DataStoreFactory), Mock(BenchmarkHelper))
     }
 
     void cleanup() {

@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,9 +35,14 @@ final public class CommonFunctions {
      * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
     public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSX");
-        Date date = df.parse(timestamp);
-        return date.getTime() * 1000000L;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSSX");
+        Instant ts = df.parse(timestamp).toInstant();
+        String[] parts = timestamp.split("\\.");
+        String fraction = parts[1].replace("Z","");
+        if(fraction.length() > 9)
+            throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
+        return (ts.getEpochSecond() * 1_000_000_000L) +
+                (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
     }
 
     /**

@@ -13,6 +13,7 @@ import com.intel.dai.exceptions.ProviderException;
 import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;
 import com.intel.networking.sink.NetworkDataSinkFactory;
+import com.intel.perflogging.BenchmarkHelper;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import org.voltdb.client.ProcCallException;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class NetworkListenerCore {
     private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors(); // Logical hw threads.
+    private static final int MAX_THREADS = 3; // Maximum processing threads.
 
     @SuppressWarnings("serial")
     static class Exception extends java.lang.Exception {
@@ -44,8 +46,10 @@ public class NetworkListenerCore {
      * @param logger The application created logger.
      * @param configuration The application created and loaded configuration object.
      * @param factory The Data Store (DS) factory where all online and near-line tier API interfaces are created.
+     * @param benchmarking Object to do benchmarking inside all providers using this component.
      */
-    public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory) {
+    public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory,
+                               BenchmarkHelper benchmarking) {
         assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
         assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
         assert factory != null:"Passed a null DataStoreFactory to NetworkListenerCore.ctor()!";
@@ -53,6 +57,7 @@ public class NetworkListenerCore {
         config_ = configuration;
         adapter_ = config_.getAdapterInformation();
         factory_ = factory;
+        benchmarking_ = benchmarking;
     }
 
     /**
@@ -143,8 +148,7 @@ public class NetworkListenerCore {
     private boolean setUpAdapter() {
         // If the configuration object or the environment variable below indicate benchmarking then create an alternate
         // SystemActions object.
-        boolean useBenchmarking = config_.useBenchmarking() ||
-                Boolean.parseBoolean(System.getenv("DAI_USE_BENCHMARKING"));
+        boolean useBenchmarking = config_.useBenchmarking();
         try {
             if (useBenchmarking) {
                 actions_ = new BenchmarkingSystemActions(log_, factory_, adapter_, config_);
@@ -234,21 +238,20 @@ public class NetworkListenerCore {
 
     // On a thread, process the incoming queued messages.
     private void processDataQueueThreaded() {
-        int count = Math.min(THREAD_COUNT / 2, 3); // 1-3 threads for processing.
-        if(count == 1) {
-            processDataQueue();
-            return;
-        }
-        Thread[] threads = new Thread[count];
+        int count = Math.min(THREAD_COUNT / 2, MAX_THREADS); // 1-MAX_THREADS threads for processing.
+        int extraThreads = count - 1;
+        Thread[] threads = new Thread[extraThreads];
         log_.info("*** Using %d threads for monitoring...", count);
-        for(int i = 0; i < count; i++) {
+        for(int i = 0; i < extraThreads; i++) {
             threads[i] = new Thread(this::processDataQueue);
             threads[i].start();
         }
-        for(int i = 0; i < count; i++) {
+        baseThreadId_ = Thread.currentThread().getId();
+        processDataQueue(); // Use this thread (current thread) for one of the processing threads...
+        for(int i = 0; i < extraThreads; i++) { // wait for extraThreads...
             try {
                 threads[i].join();
-            } catch(InterruptedException e) { /* Interrupt is good as joined */ }
+            } catch(InterruptedException e) { /* Interrupt is ignored and treated and joined */ }
         }
     }
 
@@ -263,6 +266,7 @@ public class NetworkListenerCore {
             } else {
                 safeSleep(backOffSleep);
                 if(backOffSleep < 25L) backOffSleep += 2;
+                if(Thread.currentThread().getId() == baseThreadId_) benchmarking_.tick();
             }
         }
         log_.debug("*** Ending processing loop...");
@@ -272,12 +276,14 @@ public class NetworkListenerCore {
     private void processMessage(String subject, String message) {
         if(subjects_.contains(subject) || subjects_.contains("*")) {
             try {
+                benchmarking_.addNamedValue(subject + "_messages", 1);
                 log_.debug("Transforming data for subject '%s'...", subject);
                 List<CommonDataFormat> dataList = provider_.processRawStringData(message, config_);
                 if(dataList != null) {
                     log_.debug("Performing actions...");
                     for (CommonDataFormat data : dataList)
                         provider_.actOnData(data, config_, actions_);
+                    benchmarking_.addNamedValue(subject + "_" + config_.getCurrentProfile(), dataList.size());
                 }
             } catch(NetworkListenerProviderException e) {
                 log_.exception(e, "Dropping a message on the floor due to transformation error");
@@ -305,6 +311,7 @@ public class NetworkListenerCore {
                         Map<String, String> parameters = workQueue_.getClientParameters();
                         String profile = parameters.getOrDefault("Profile", "default");
                         log_.info("*** Got valid work item and using monitoring profile '%s'...", profile);
+                        benchmarking_.replaceFilenameVariable("PROFILE", profile);
                         try {
                             if(!setUpProfile(profile)) {
                                 log_.error("Failed to connect to network data sources");
@@ -423,6 +430,7 @@ public class NetworkListenerCore {
     }
 
     private NetworkListenerConfig config_;
+    private BenchmarkHelper benchmarking_;
     private Logger log_;
     private AdapterInformation adapter_;
     private WorkQueue workQueue_;
@@ -433,6 +441,7 @@ public class NetworkListenerCore {
     private SystemActions actions_;
     private List<String> subjects_;
             ConcurrentLinkedQueue<FullMessage> queue_ = new ConcurrentLinkedQueue<>();
+    private long baseThreadId_;
     private static long STABILIZATION_VALUE = 1500L;
 
     private static final class FullMessage {

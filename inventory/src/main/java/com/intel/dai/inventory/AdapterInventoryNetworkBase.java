@@ -16,6 +16,7 @@ import com.intel.dai.network_listener.NetworkListenerConfig;
 import com.intel.dai.network_listener.NetworkListenerCore;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
+import com.intel.perflogging.BenchmarkHelper;
 import com.intel.xdg.XdgConfigFile;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -27,10 +28,12 @@ import java.io.InputStream;
  * Description of class NetworkAdapterInventoryBase.
  */
 abstract class AdapterInventoryNetworkBase {
-    AdapterInventoryNetworkBase(Logger logger, DataStoreFactory factory, AdapterInformation info) {
+    AdapterInventoryNetworkBase(Logger logger, DataStoreFactory factory, AdapterInformation info,
+                                String benchmarkingFile, long maxBurstSeconds) {
         log_ = logger;
         factory_ = factory;
         adapter_ = info;
+        benchmarking_ = new BenchmarkHelper(info.getType(), benchmarkingFile, maxBurstSeconds);
     }
 
     static InputStream getConfigStream(String baseFilename) throws FileNotFoundException {
@@ -49,7 +52,7 @@ abstract class AdapterInventoryNetworkBase {
     boolean entryPoint(InputStream configStream) throws IOException, ConfigIOParseException {
         NetworkListenerConfig config = new NetworkListenerConfig(adapter_, log_);
         config.loadFromStream(configStream);
-        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config, factory_);
+        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config, factory_, benchmarking_);
         return execute(adapterCore);
     }
 
@@ -134,6 +137,7 @@ abstract class AdapterInventoryNetworkBase {
     private final AdapterInformation adapter_;
     private final Logger log_;
     private final DataStoreFactory factory_;
+    private final BenchmarkHelper benchmarking_;
     static final String ADAPTER_TYPE = "INVENTORY";
     protected HWInvApi hwInvApi_;
     protected HWInvDiscovery hwInvDiscovery_;

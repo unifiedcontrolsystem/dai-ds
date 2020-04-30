@@ -18,8 +18,9 @@ import java.io.InputStream;
  * Application entry point derived from AdapterMonitoringNetworkBase.
  */
 public class ProviderMonitoringNetworkForeignBus extends AdapterMonitoringNetworkBase {
-    private ProviderMonitoringNetworkForeignBus(Logger logger, DataStoreFactory factory, AdapterInformation info) {
-        super(logger, factory, info);
+    private ProviderMonitoringNetworkForeignBus(Logger logger, DataStoreFactory factory, AdapterInformation info,
+                                                String benchmarkingFile, long maxBurstSeconds) {
+        super(logger, factory, info, benchmarkingFile, maxBurstSeconds);
     }
 
     public static void main(String[] args) {
@@ -34,7 +35,8 @@ public class ProviderMonitoringNetworkForeignBus extends AdapterMonitoringNetwor
         adapterInfo.setServers(args[0].split(","));
         DataStoreFactory factory = new DataStoreFactoryImpl(adapterInfo.getServers(), logger);
 
-        ProviderMonitoringNetworkForeignBus app = new ProviderMonitoringNetworkForeignBus(logger, factory, adapterInfo);
+        ProviderMonitoringNetworkForeignBus app = new ProviderMonitoringNetworkForeignBus(logger, factory, adapterInfo,
+                "/opt/ucs/log/ProviderMonitoringNetworkForeignBus-{{PROFILE}}-Benchmarking.json", 5);
         String configName = ProviderMonitoringNetworkForeignBus.class.getSimpleName() + ".json";
         try (InputStream configStream = AdapterMonitoringNetworkBase.getConfigStream(configName)) {
             app.entryPoint(configStream);

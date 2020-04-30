@@ -27,6 +27,7 @@
             <Class name="com.intel.dai.NearlineTableUpdater" />
             <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
             <Class name="com.intel.dai.eventsim.WlmApi" />
+            <Class name="com.intel.perflogging.BenchmarkHelper" />
         </Or>
         <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
@@ -147,6 +148,21 @@
             <Class name="com.intel.dai.inventory.api.TokenAuthProvider" />
         </Or>
         <Bug code="UwF" />
+    </Match>
+    <Match>
+        <Or>
+            <Class name="com.intel.dai.ras.AdapterRasForeignBus" />
+            <Class name="com.intel.dai.AdapterNearlineTierJdbc" />
+            <Class name="com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus" />
+            <Class name="com.intel.dai.inventory.ProviderInventoryNetworkForeignBus" />
+            <Class name="com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus" />
+            <Class name="com.intel.dai.AdapterOnlineTierVolt" />
+        </Or>
+        <Bug code="DMI" />
+    </Match>
+    <Match>
+        <Class name="com.intel.perflogging.GenerateRasEvents" />
+        <Bug code="SECPR" /> <!-- Predictable random numbers are what we actually want here! -->
     </Match>
 
     <!--*************************************************************************************************************
