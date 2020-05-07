@@ -1421,7 +1421,7 @@ public class Adapter implements IAdapter {
                               ,lWorkItemId);         // work item id for the work item that is being processed/executing, that is requesting/issuing this stored procedure
         mLogger.info("markNodeInErrorState - called stored procedure %s - Lctn=%s", sTempStoredProcedure, sNodeLctn);
         // Tell WLM to not use this specified node.
-        tellWlmToNotUseThisNode(sNodeLctn, sWorkItemAdapterType, lWorkItemId, "markNodeInErrorState");
+//        tellWlmToNotUseThisNode(sNodeLctn, sWorkItemAdapterType, lWorkItemId, "markNodeInErrorState");
     }   // End markNodeInErrorState(String sNodeLctn, String sWorkItemAdapterType, long lWorkItemId)
 
 
