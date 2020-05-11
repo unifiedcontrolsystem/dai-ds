@@ -102,14 +102,14 @@
       "TypeOfAdapter": "ONLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataMover",
-      "Queue": "X0-CH0-SN0"
+      "Queue": ""
     },
     {
       "Parms": "RabbitMQHost=sms01-nmn.local",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataReceiver",
-      "Queue": "X0-CH0-SN0"
+      "Queue": ""
     },
     {
       "Parms": "$Profile#environmental",
