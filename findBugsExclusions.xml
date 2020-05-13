@@ -14,8 +14,6 @@
             <Class name="com.intel.xdg.XdgConfigFile" />
             <Class name="com.intel.dai.populate.DefaultOnlineTierDataLoader" />
             <Class name="com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark" />
-            <Class name="com.intel.dai.inventory.api.HWInvTranslatorCLI" />
-            <Class name="com.intel.dai.inventory.api.HWInvDbClientCLI" />
             <Class name="com.intel.dai.inventory.api.CommonCliUtil" />
             <Class name="com.intel.dai.foreign_bus.CommonFunctions" />
             <Class name="com.intel.dai.dsimpl.voltdb.HWInvUtilImpl" />
@@ -97,11 +95,6 @@
             <Class name="com.intel.dai.foreign_bus.CommonFunctions$NodeOrCpuInfo" />
         </Or>
         <Bug code="UrF" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.dai.inventory.api.HWInvDiscoveryCLI" />
-        <Method name="createRestClient" />
-        <Bug code="NP" />
     </Match>
     <Match> <!-- As designed not an issue -->
         <Or>
