@@ -42,20 +42,3 @@ class HWInvDiscoverySpec extends Specification {
         expect: hwInvDiscovery.queryHWInvTree(null).getLeft() == 1
     }
 }
-
-class HWInvDiscoveryCLISpec extends spock.lang.Specification {
-    HWInvDiscoveryCLI app
-
-    def setup() {
-        app = new HWInvDiscoveryCLI(Mock(HWInvDiscovery))
-        HWInvDiscoveryCLI.log_ = Mock(Logger)
-    }
-
-    def "run"() {
-        expect: app.run("") == 1
-    }
-    def "run - negative"() {
-        app.mode = "notAMode"
-        expect: app.run() == 1
-    }
-}
