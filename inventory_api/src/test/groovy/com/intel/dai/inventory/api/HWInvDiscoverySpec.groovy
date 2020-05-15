@@ -41,4 +41,20 @@ class HWInvDiscoverySpec extends Specification {
         given: HWInvDiscovery.requester_ = null
         expect: hwInvDiscovery.queryHWInvTree(null).getLeft() == 1
     }
+
+    def "createRestClient()" () {
+        HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
+        when: hwInvDiscovery.createRestClient()
+        then: thrown Exception
+    }
+    def "initialize()" () {
+        HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
+        when: hwInvDiscovery.initialize()
+        then: thrown Exception
+    }
+    def "toHWDiscoverySession()" () {
+        HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
+        when: hwInvDiscovery.toHWDiscoverySession(null)
+        then: thrown Exception
+    }
 }

@@ -835,14 +835,14 @@ project(":inventory_api") {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
-                    minimum = 0.83 // TODO: Need more coverage here, was 0.90!
+                    minimum = 0.90
                 }
             }
             rule {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
-                    minimum = 0.53 // TODO: Need more coverage here, was 0.61!
+                    minimum = 0.61
                 }
             }
         }
