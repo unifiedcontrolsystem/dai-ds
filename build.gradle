@@ -98,7 +98,7 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 /////////////////////////////////////////////////////////////////////////////////////////
 
 def enforceStaticAnalysis = true
-def enforceCodeCoverage = includeDbgSymbols
+def enforceCodeCoverage = true
 
 import java.time.Instant
 def thisYear = Instant.now().toDate().toYear().toString()
@@ -638,7 +638,7 @@ project(':ui') {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
-                    minimum = 0.90
+                    minimum = 0.89
                 }
             }
             rule {
@@ -737,7 +737,7 @@ project(':dai_network_listener') {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
-                    minimum = 0.70
+                    minimum = 0.69
                 }
             }
         }
