@@ -2330,6 +2330,95 @@ BEGIN
 END
 $$;
 
+--
+-- Name: GetJobInfo(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.GetJobInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_at_time timestamp without time zone, p_jobid character varying, p_username character varying, p_state character varying, p_locations character varying, p_limit integer) RETURNS SETOF public.jobnonactivetype
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_prev_job_id varchar := '';
+    v_job Tier2_Job_History;
+    v_rec JobNonActiveType%rowtype;
+    v_nodes varchar := '';
+    v_counter integer := 0;
+
+BEGIN
+    for v_job  in
+        select *
+        from Tier2_Job_History
+        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+        and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
+        and endtimestamp >= coalesce(p_at_time, endtimestamp)
+        and starttimestamp <= coalesce(p_at_time, starttimestamp)
+        and
+        case
+                when p_jobid = '%' then (jobid ~ '.*')
+                when p_jobid != '%' then (jobid = p_jobid)
+        end
+        and
+        case
+                when p_username = '%' then (username ~ '.*')
+                when p_username != '%' then (username ~ p_username)
+        end
+                and
+        case
+                when p_state = '%' then (state ~ '.*')
+                when p_state != '%' then (state ~ p_state)
+        end
+        order by JobId desc, starttimestamp desc
+    loop
+        if v_counter < p_limit then
+            if v_job.JobId <> v_prev_job_id then
+                v_nodes := GetListNodeLctns(v_job.Nodes);
+                if p_locations = '%' or areNodesInJob(string_to_array(p_locations, ','), string_to_array(v_nodes,' ')) then
+                    v_counter := v_counter + 1;
+                    v_prev_job_id := v_job.JobId;
+                    v_rec.JobId := v_job.JobId;
+                    v_rec.JobName := v_job.JobName;
+                    v_rec.State := v_job.State;
+                    v_rec.Bsn := v_job.Bsn;
+                    v_rec.UserName := v_job.UserName;
+                    v_rec.StartTimestamp := v_job.StartTimestamp;
+                    v_rec.EndTimestamp := v_job.EndTimestamp;
+                    v_rec.ExitStatus := v_job.ExitStatus;
+                    v_rec.NumNodes := v_job.NumNodes;
+                    v_rec.Nodes := v_nodes;
+                    v_rec.JobAcctInfo := v_job.JobAcctInfo;
+                    v_rec.Wlmjobstate := v_job.Wlmjobstate;
+                    return next v_rec;
+                end if;
+            end if;
+        end if;
+    end loop;
+    return;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION public.areNodesInJob(p_locations character varying[], p_jobLocations character varying[]) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    v_areNodesInJob boolean := false;
+    v_loc varchar;
+    v_jobloc varchar;
+
+BEGIN
+
+    foreach v_loc in array p_locations
+    loop
+        foreach v_jobloc in array p_jobLocations
+        loop
+            v_areNodesInJob = v_areNodesInJob or (v_loc = v_jobloc);
+        end loop;
+    end loop;
+
+    return v_areNodesInJob;
+END
+$$;
+
 
 --
 -- Name: raseventlistattime(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
@@ -2447,62 +2536,6 @@ BEGIN
             RE.DbUpdatedTimestamp >= p_start_time
             order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT 200;
     end if;
-    return;
-END
-$$;
-
---
--- Name: GetJobInfo(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.GetJobInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_jobid character varying, p_username character varying, p_state character varying, p_limit integer) RETURNS SETOF public.jobnonactivetype
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    v_prev_job_id varchar := '';
-    v_job Tier2_Job_History;
-    v_rec JobNonActiveType%rowtype;
-
-BEGIN
-    for v_job  in
-        select *
-        from Tier2_Job_History
-        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-        and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
-        and
-        case
-                when p_jobid = '%' then (jobid ~ '.*')
-                when p_jobid != '%' then (jobid ~ p_jobid)
-        end
-        and
-        case
-                when p_username = '%' then (username ~ '.*')
-                when p_username != '%' then (username ~ p_username)
-        end
-                and
-        case
-                when p_state = '%' then (state ~ '.*')
-                when p_state != '%' then (state ~ p_state)
-        end
-        order by JobId desc, starttimestamp desc LIMIT p_limit
-    loop
-        if v_job.JobId <> v_prev_job_id then
-            v_prev_job_id := v_job.JobId;
-            v_rec.JobId := v_job.JobId;
-            v_rec.JobName := v_job.JobName;
-            v_rec.State := v_job.State;
-            v_rec.Bsn := v_job.Bsn;
-            v_rec.UserName := v_job.UserName;
-            v_rec.StartTimestamp := v_job.StartTimestamp;
-            v_rec.EndTimestamp := v_job.EndTimestamp;
-            v_rec.ExitStatus := v_job.ExitStatus;
-            v_rec.NumNodes := v_job.NumNodes;
-            v_rec.Nodes := GetListNodeLctns(v_job.Nodes);
-            v_rec.JobAcctInfo := v_job.JobAcctInfo;
-            v_rec.Wlmjobstate := v_job.Wlmjobstate;
-            return next v_rec;
-        end if;
-    end loop;
     return;
 END
 $$;

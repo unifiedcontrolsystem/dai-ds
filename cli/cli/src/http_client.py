@@ -7,7 +7,7 @@ Module to create HTTP requests.
 """
 import requests
 import json
-
+import sys
 
 class HttpClient(object):
     """Class to handle HTTP communication"""
@@ -16,6 +16,10 @@ class HttpClient(object):
         self._config_file_location = config_file_location
         self._check_non_blocking_status_interval = 1
         self._base_url = self._construct_base_url_from_configuration_file()
+        self.proxies = {
+          "http": None,
+          "https": None
+        }
 
     def _construct_base_url_from_configuration_file(self):
         try:
@@ -39,6 +43,9 @@ class HttpClient(object):
     def send_get_request(self, request_string, tval):
         try:
             response = requests.get(request_string, timeout=tval)
+            if(not response.ok):
+                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
+                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -57,6 +64,9 @@ class HttpClient(object):
     def send_put_request(self, request_string, data, tval):
         try:
             response = requests.put(request_string, data, timeout=tval)
+            if(not response.ok):
+                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
+                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -75,6 +85,9 @@ class HttpClient(object):
     def send_post_request(self, request_string, data, tval):
         try:
             response = requests.post(request_string, data, timeout=tval)
+            if(not response.ok):
+                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
+                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -93,6 +106,9 @@ class HttpClient(object):
     def send_delete_request(self, request_string, tval):
         try:
             response = requests.delete(request_string, timeout=tval)
+            if(not response.ok):
+                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
+                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)

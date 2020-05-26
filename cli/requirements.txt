@@ -7,3 +7,5 @@ pytest
 pytest-cov
 pylint
 mock
+timeout_decorator
+elasticsearch
