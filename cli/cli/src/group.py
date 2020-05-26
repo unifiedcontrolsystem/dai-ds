@@ -81,8 +81,6 @@ class GroupCli(object):
         # URL will be PUT http://hostaddress:hostport/groups/group_name?devices=devicelist
         url = client.get_base_url() + 'groups/' + args.group_name
         parameters = {'devices': (','.join(devices_to_add)), 'user': self.user}
-        # url = client.get_base_url() + 'groups/' + args.group_name + '?' + "devices=" + (','.join(devices_to_add)) +
-        #  '&user=' + self.user
         self.lgr.debug("_group_add_execute: URL for request is {0}".format(url))
         response_code, response = client.send_put_request(url, parameters, 900)
         return CommandResult(response_code, message_for_existing_devices + response)
