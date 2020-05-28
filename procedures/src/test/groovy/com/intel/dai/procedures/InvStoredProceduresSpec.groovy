@@ -6,7 +6,7 @@ package com.intel.dai.procedures
 
 import org.voltdb.VoltTable
 
-class HWInvStoredProceduresSpec extends spock.lang.Specification {
+class InvStoredProceduresSpec extends spock.lang.Specification {
     def "UpsertLocationIntoHWInv"() {
         given:
         def upserter = Spy(UpsertLocationIntoHWInv)
@@ -96,6 +96,44 @@ class HWInvStoredProceduresSpec extends spock.lang.Specification {
         testSubject.voltExecuteSQL(*_) >> new VoltTable[1]
 
         when: testSubject.run('x0')
+        then: notThrown Exception
+    }
+
+    def "FwInventoryUpsert"() {
+        given:
+        def ts = Spy(FwVersionUpsert)
+        ts.voltQueueSQL(*_) >> {}
+        ts.voltExecuteSQL() >> []
+
+        expect: ts.run("id", "targetId", "version") == FwVersionUpsert.SUCCESSFUL
+    }
+
+    def "FwVersionDump"() {
+        given:
+        def ts = Spy(FwVersionDump)
+        ts.voltQueueSQL(*_) >> {}
+        ts.voltExecuteSQL(*_) >> new VoltTable[1]
+
+        when: ts.run('x0')
+        then: notThrown Exception
+    }
+
+    def "FwVersionHistoryInsert"() {
+        given:
+        def ts = Spy(FwVersionHistoryInsert)
+        ts.voltQueueSQL(*_) >> {}
+        ts.voltExecuteSQL() >> []
+
+        expect: ts.run("id", "targetId", "version") == FwVersionUpsert.SUCCESSFUL
+    }
+
+    def "FwVersionHistoryDump"() {
+        given:
+        def ts = Spy(FwVersionHistoryDump)
+        ts.voltQueueSQL(*_) >> {}
+        ts.voltExecuteSQL(*_) >> new VoltTable[1]
+
+        when: ts.run('x0')
         then: notThrown Exception
     }
 }

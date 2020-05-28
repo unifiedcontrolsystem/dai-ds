@@ -12,6 +12,6 @@ import java.util.List;
  * Example: x0c0s0  (?)
  */
 @ToString
-class ForeignHWInvByLocComputeModule extends  ForeignHWInvByLoc {
+class ForeignHWInvByLocComputeModule extends ForeignHWInvByLoc {
     List<ForeignHWInvByLocNodeEnclosure> NodeEnclosures;
 }

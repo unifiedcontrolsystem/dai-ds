@@ -2012,7 +2012,7 @@ CREATE TABLE Tier2_HW_Inventory_FRU (
 -- Corresponds to the current HPC HW architecture wrt to HW locations.
 -- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
 CREATE TABLE HW_Inventory_Location (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
     Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
     Ordinal INTEGER NOT NULL,            -- singleton:0
     FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
@@ -2020,7 +2020,7 @@ CREATE TABLE HW_Inventory_Location (
 );
 
 CREATE TABLE tier2_HW_Inventory_Location (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
     Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
     Ordinal INTEGER NOT NULL,            -- singleton:0
     FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
@@ -2039,11 +2039,47 @@ CREATE TABLE HW_Inventory_History (
 
 CREATE TABLE tier2_HW_Inventory_History (
      Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
-     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+     ID VARCHAR(64) NOT NULL,                -- Location ID translated from JSON
      FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
      DbUpdatedTimestamp TIMESTAMP NOT NULL,
      EntryNumber BigInt NOT NULL
- );
+);
+
+--------------------------------------------------------------
+-- Foreign F/W Inventory
+--------------------------------------------------------------
+-- Records all F/W versions in the HPC.
+CREATE TABLE FW_Version (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
+    TargetID VARCHAR(64) NOT NULL,       -- BIOS, BMC, ME, SDR, etc.
+    Version VARCHAR(64) NOT NULL,
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE Tier2_FW_Version (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
+    TargetID VARCHAR(64) NOT NULL,       -- BIOS, BMC, ME, SDR, etc.
+    Version VARCHAR(64) NOT NULL,
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
+
+-- History of F/W updates on the HPC.  Note that the timestamp marks
+-- the DB update event.  The foreign data does not have the time of actual F/W update.
+CREATE TABLE FW_Version_History (
+    ID VARCHAR(64) NOT NULL,             -- Location ID translated from JSON
+    TargetID VARCHAR(64) NOT NULL,       -- BIOS, BMC, ME, SDR, etc.
+    Version VARCHAR(64) NOT NULL,
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE tier2_FW_Version_History (
+    ID VARCHAR(64) NOT NULL,             -- Location ID translated from JSON
+    TargetID VARCHAR(64) NOT NULL,       -- BIOS, BMC, ME, SDR, etc.
+    Version VARCHAR(64) NOT NULL,
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
 
 END_OF_BATCH
 
