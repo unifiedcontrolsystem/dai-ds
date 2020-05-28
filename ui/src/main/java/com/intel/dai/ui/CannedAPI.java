@@ -46,6 +46,7 @@ public class CannedAPI {
                 put("M", "Missing");
                 put("E", "Error");
                 put("U", "Unknown");
+                put("H", "Halting/Shutting Down");
             }});
 
     private static final Map<String, String> wlmstate_map = Collections.unmodifiableMap(
@@ -109,8 +110,10 @@ public class CannedAPI {
                     String username = params_map.getOrDefault("Username", "%");
                     String jobid = params_map.getOrDefault("Jobid", "%");
                     String state = params_map.getOrDefault("State", "%");
+                    String locations = params_map.getOrDefault("Lctn", "%");
+                    Timestamp atTime = getTimestamp(getStartEndTime(params_map, "AtTime"));
                     log_.info("GetJobInfo procedure called with Jobid = %s and Username = %s", jobid, username);
-                    jsonResult = executeProcedureThreeVariableFilter("{call GetJobInfo(?, ?, ?, ?,?, ?)}", starttime, endtime, jobid, username, state, limit);
+                    jsonResult = executeProcedureAtTimeFourVariableFilter("{call GetJobInfo(?, ?, ?, ?, ?, ?, ?, ?)}", starttime, endtime, atTime, jobid, username, state, locations, limit);
                     jsonResult = map_job_values(jsonResult);
                     break;
                 }
@@ -305,19 +308,21 @@ public class CannedAPI {
             }
         }
     }
-
-    private PropertyMap executeProcedureThreeVariableFilter(String prepProcedure, Timestamp StartTime,
-                                                            Timestamp EndTime, String FilterVariableOne,
-                                                            String FilterVariableTwo, String FilterVariableThree, String Limit)
+    
+    private PropertyMap executeProcedureAtTimeFourVariableFilter(String prepProcedure, Timestamp StartTime,
+                                                            Timestamp EndTime, Timestamp AtTime, String FilterVariableOne,
+                                                            String FilterVariableTwo, String FilterVariableThree, String FilterVariableFour, String Limit)
             throws SQLException
     {
         try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
             stmt.setTimestamp(1, StartTime);
             stmt.setTimestamp(2, EndTime);
-            stmt.setString(3, FilterVariableOne);
-            stmt.setString(4, FilterVariableTwo);
-            stmt.setString(5, FilterVariableThree);
-            handleLimit(Limit, stmt, 6);
+            stmt.setTimestamp(3, AtTime);
+            stmt.setString(4, FilterVariableOne);
+            stmt.setString(5, FilterVariableTwo);
+            stmt.setString(6, FilterVariableThree);
+            stmt.setString(7, FilterVariableFour);
+            handleLimit(Limit, stmt, 8);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 return jsonConverter.convertToJsonResultSet(rs);

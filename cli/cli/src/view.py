@@ -73,7 +73,7 @@ class ViewCli(object):
                                         'RASMetadata.json. \n Example: RasGen or Ras. Regex are allowed too')
         events_parser.add_argument('--severity', help='Filter all event data for a given severity {INFO, FATAL, ERROR,'
                                                       ' CRITICAL}. This option does not take wildcards or RegEx \n')
-        events_parser.add_argument('--format', choices=['json', 'table'], default='table',
+        events_parser.add_argument('--format', choices=['json', 'table'],
                                    help='Display data either in JSON or table '
                                         'format. Default will be to display '
                                         'data in tabular format')
@@ -148,9 +148,13 @@ class ViewCli(object):
         job_parser.add_argument('--end-time', dest="end_time",
                                       help='provide the end time. The preferred format for the date is'
                                            ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        job_parser.add_argument('--at-time', dest="at_time",
+                                      help='provide a time to display all jobs running at that time.. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
         job_parser.add_argument('--jobid', help='Filter all job data for a given jobid. This will also'
                                                 ' display accounting information and nodes for given jobid')
         job_parser.add_argument('--user', dest="username", help='Filter all job data for a given username')
+        job_parser.add_argument('--locations', help='Filter all job data for the given locations')
         job_parser.add_argument('--limit', default=100, type=int,
                                                   help='Provide a limit to the number of records of data being retrieved. '
                                                        'The default value is 100')
@@ -165,25 +169,24 @@ class ViewCli(object):
         job_parser.set_defaults(func=self._view_job_info_execute)
 
     def _add_reservation_info_parser(self, view_parser):
-        job_parser = view_parser.add_parser('reservation', help='view the reservation information for the cluster')
-        job_parser.add_argument('--start-time', dest="start_time",
+        reservation_parser = view_parser.add_parser('reservation', help='view the reservation information for the cluster')
+        reservation_parser.add_argument('--start-time', dest="start_time",
                                       help='provide the start time. The preferred format for the date is'
                                            ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        job_parser.add_argument('--end-time', dest="end_time",
+        reservation_parser.add_argument('--end-time', dest="end_time",
                                       help='provide the end time. The preferred format for the date is'
                                            ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        job_parser.add_argument('--name', help='Filter all reservation data for a given reservation name.')
-        job_parser.add_argument('--user', dest="username", help='Filter all reservation data for a given username')
-        job_parser.add_argument('--limit', default=100, type=int,
+        reservation_parser.add_argument('--name', help='Filter all reservation data for a given reservation name.')
+        reservation_parser.add_argument('--user', dest="username", help='Filter all reservation data for a given username')
+        reservation_parser.add_argument('--limit', default=100, type=int,
                                                   help='Provide a limit to the number of records of data being retrieved. '
                                                        'The default value is 100')
-        job_parser.add_argument('--format', choices=['json', 'table'], default='table',
+        reservation_parser.add_argument('--format', choices=['json', 'table'], default='table',
                                       help='Display data either in JSON or table format. Default will be to display '
                                            'data in tabular format')
-        job_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+        reservation_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
                                                                                'Uses a default of 900s')
-        job_parser.set_defaults(func=self._view_reservation_info_execute)
-
+        reservation_parser.set_defaults(func=self._view_reservation_info_execute)
 
     def _add_inventory_history_parser(self, view_parser):
         inventory_parser = view_parser.add_parser('inventory-history', help='view the history of inventory changes '
@@ -303,18 +306,65 @@ class ViewCli(object):
         return CommandResult(response_code, data_to_display)
 
     @staticmethod
-    def get_regex_expressions(filename):
+    def assert_regex(regex):
+        try:
+            re.compile(regex)
+            return None
+        except re.error as err:
+            return "reason: {}".format(str(err))
+
+
+    @staticmethod
+    def get_filter_path(filename):
         user_home = os.path.expanduser("~")
         filter_folder = ".ucs"
         filter_path = "{}/{}/{}".format(user_home, filter_folder, filename)
         if not os.path.exists(filter_path):
             return None
+        return filter_path
+
+    def get_regular_expressions(self, filename):
+        filter_path = self.get_filter_path(filename)
+        if not filter_path:
+            return None
         with open(filter_path, 'r') as f:
             content = f.readlines()
         expressions = []
         for expression in content:
-            expressions.append(expression.replace('\n', ''))
-        return "|".join(expressions)
+            expression = expression.replace('\n', '')
+            expressions.append(expression)
+        expressions = "|".join(expressions)
+        return expressions
+
+    @staticmethod
+    def regex_error(expression="", error=None, _file=""):
+        msg = "Error: Invalid regular expression"
+        if _file:
+            return None, "{0} \"{1}\" ({2}) {3}".format(msg, expression, _file, error)
+        return None, "{0} \"{1}\" {2}".format(msg, expression, error)
+
+
+    def get_filters(self, filter_type, arg_name, argument):
+        expressions = self.get_regular_expressions(filter_type)
+        if expressions:
+            error = self.assert_regex(expressions)
+            if error:
+                file_path = self.get_filter_path(filter_type)
+                return self.regex_error(expressions, error, file_path)
+
+        regex_args = ''
+        if argument is not None:
+            error = self.assert_regex(argument)
+            if error:
+                return self.regex_error(argument, error)
+            regex_args = "{0}={1}".format(arg_name, argument)
+
+        if regex_args and expressions:
+            regex_args = regex_args + "|" + expressions
+        elif expressions:
+            regex_args  = "{0}={1}".format(arg_name, expressions)
+        return regex_args, None
+
 
     def _view_events_execute(self, args):
         client = HttpClient()
@@ -327,25 +377,13 @@ class ViewCli(object):
         else:
             severity = ''
 
-        exclude_expressions = self.get_regex_expressions("exclude")
-        if args.exclude is not None:
-            exclude = 'Exclude=' + args.exclude
-        else:
-            exclude = ''
-        if exclude and exclude_expressions:
-            exclude = exclude + "|" + exclude_expressions
-        elif exclude_expressions:
-            exclude = 'Exclude=' + exclude_expressions
+        exclude, error = self.get_filters("exclude", "Exclude", args.exclude)
+        if error:
+            return CommandResult(1, error)
 
-        include_expressions = self.get_regex_expressions("include")
-        if args.type is not None:
-            event_type = 'EventType=' + args.type
-        else:
-            event_type = ''
-        if event_type and include_expressions:
-            event_type = event_type + "|" + include_expressions
-        elif include_expressions:
-            event_type = 'EventType=' + include_expressions
+        event_type, error = self.get_filters("include", "EventType", args.type)
+        if error:
+            return CommandResult(1, error)
 
         jobid = ''
         if args.jobid is not None:
@@ -446,7 +484,6 @@ class ViewCli(object):
         return CommandResult(response_code, data_to_display)
 
     def _view_job_info_execute(self, args):
-            args.locations = None
             client = HttpClient()
             starttime, endtime = self._retrieve_time_from_args(args)
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
@@ -463,8 +500,12 @@ class ViewCli(object):
                 state = 'State=S'
             else:
                 state = ''
+            if args.at_time is not None:
+                attime = 'AtTime=' + self._validate_input_timestamp(args.at_time)
+            else:
+                attime = ''
             url = client.get_base_url() + 'cli/getjobinfo?' + "&".join(
-                [x for x in [starttime, endtime, limit, user, username, jobid, state] if x != ""])
+                [x for x in [starttime, endtime, limit, user, username, jobid, state, lctn, attime] if x != ""])
             self.lgr.debug("_view_job_info_execute: URL for request is {0}".format(url))
             response_code, response = client.send_get_request(url, time_out)
 
@@ -474,7 +515,7 @@ class ViewCli(object):
                 data_to_display = json_display.display_raw_json()
             else:
                 columns_order = ["jobid", "jobname", "state", "numnodes", "username", "starttimestamp", "endtimestamp"]
-                if args.jobid is not None or args.all:
+                if args.jobid is not None or args.all or args.locations is not None:
                     columns_order = columns_order + ["jobacctinfo", "nodes"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
             return CommandResult(response_code, data_to_display)
