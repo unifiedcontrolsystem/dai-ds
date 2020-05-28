@@ -9,6 +9,7 @@ $(document).ready(function(){
 function get_start_date(end_time, days)
 {
     var time_slice;
+
     var time;
     var start_time_new;
     if (end_time == null){
@@ -80,6 +81,7 @@ function main()
 
     tabsobj4 = $("#tabs4").tabs({
         active: curviewidx,
+
     });
 
     tabsobj5 = $("#tabs5").tabs({
@@ -112,8 +114,8 @@ function main()
     });
     systemDescriptions = systemDescriptionsConstructFromLayoutView(floorLayout.views.Full);
     systemInventory = systemInventoryConstructFromLayoutView(floorLayout.views.Full);
-    // console.log(systemInventory.hwtypes.get("dense-compute-node").length);
-
+    console.log('computes=', systemInventory.hwtypes.get('compute-node').length,
+    				'  service=', systemInventory.hwtypes.get('service-node').length);
     floorv = new FloorView("Full", document.getElementById("floor-canvas"), document.getElementById("floor-layout"), systemInventory);
     TimeIt("floorv.applyLayoutView", function() {
         floorv.applyLayoutView(floorLayout); });
@@ -589,7 +591,8 @@ function main()
         }
     });
 
-    initStateKey();
+    initStateKey('compute-node');
+    initStateKey('service-node');
 
     // Start with fictitious, but reasonable, start/end history ranges.  These will update.
     nodeMaxLastChgTimestamp = new Date();
@@ -673,17 +676,26 @@ function systemInventoryConstructFromLayoutView(layout)
 }
 
 function systemInventoryContentFromLayoutView(parenthw, sysinv, layout)
-{
-    // Use parenthw.hwtype to add content (if any)
-    layout.definitions[parenthw.hwtype].content.forEach(
-        function(contentitem) {
-            var location = [parenthw.location, contentitem.name].join("-");
-            var hw = new HWitem(location, contentitem.definition, contentitem.definition == "dense-compute-node" ? "M" : "A");
-            this.addContent(hw);
-            sysinv.addHw(hw);
-            systemInventoryContentFromLayoutView(hw, sysinv, layout);	// add children
-        }, parenthw
-    );
+	// Use parenthw.definition to add content (if any)
+	layout.definitions[parenthw.hwtype].content.sort(function(a,b){return a.name.localeCompare(b.name)});
+	layout.definitions[parenthw.hwtype].content.forEach(
+		function(contentitem) {
+			var location = [parenthw.location, contentitem.name].join("-");
+			// A bit of a hack here.   We artificially set hardware to A=Available unless it is a compute or service node
+			// Eventually we must gather status of ALL hardware, not just these two node types
+			try {
+			var hwtype = layout.definitions[contentitem.definition].type;
+			}
+			catch(error){
+			console.log(error);
+			}
+			var hw = new HWitem(location, contentitem.definition, hwtype,
+				(hwtype == 'dense-compute-node' || hwtype == 'service-node') ? "M" : "A");
+			this.addContent(hw);
+			sysinv.addHw(hw);
+			systemInventoryContentFromLayoutView(hw, sysinv, layout);	// add children
+		}, parenthw
+	);
 }
 
 // replace the table in the state key, matching the states we have defined.
@@ -720,6 +732,42 @@ function initStateKey()
     });
 }
 
+function initStateKey(hwtype)
+{
+	var tabtxt = "";
+	for (var s in States) {
+		var sobj = States[s];
+		var color = colormap[[hwtype, '-state', s].join('-')]
+		tabtxt += "<tr title='" + sobj.description + "' class='masterTooltip'>"
+				+ "<td width='20px'>" + sobj.name + "</td>"
+				+ "<td><table width='300px'><tr>"
+				+ "<td id='stateKey" + hwtype + s + "bar' style='width:0%;background-color:" + color +  "'> </td>"
+				+ "<td id='stateKey" + hwtype + s + "val' style='width:100%; text-align:right'>0</td></tr></table></td></tr>\n"
+	}
+	$("#stateKey"+hwtype).html(tabtxt);
+	// Note: the master tooltip should probably be established elsewhere.
+	// But we do this here anyway, even though it gets repeated for diff node types.
+	$('.masterTooltip').hover(function(){
+			// Hover over code
+			var title = $(this).attr('title');
+			$(this).data('tipText', title).removeAttr('title');
+			$('<p class="tooltip" id="keytip"/p>')
+			.text(title)
+			.appendTo('body')
+			.fadeIn('slow');
+	}, function() {
+			// Hover out code
+			$(this).attr('title', $(this).data('tipText'));
+			$('#keytip').remove();
+	}).mousemove(function(e) {
+			var mousex = e.pageX + 20; //Get X coordinates
+			var mousey = e.pageY + 10; //Get Y coordinates
+			$('#keytip')
+			.css({ top: mousey, left: mousex })
+	});
+}
+
+
 /* The context autocomplete box has changed due to user input
  */
 function contextChanged(inputbox)
@@ -747,7 +795,6 @@ function changeContext(context)
 {
     // QQQ extract a date/time.  We cheat here for now by making assumptions
     if (context == "Now") {
-        console.log("go to now");
         if (contexttime == null)
             return;		// already at "Now"
         contexttime = null;
@@ -779,7 +826,9 @@ function changeContext(context)
         $('#wayback').css("display", "none");	// Hide Mister Peabody
         $('body').removeClass("wayback-mode");
     }
-    updateNodeStatesFromDB(dbNodeStatesResponse);
+    updateComputeNodeStatesFromDB(dbNodeStatesResponse);
+    updateServiceNodeStatesFromDB(dbNodeStatesResponse);
+    updateAdapterStats();
 }
 
 function addContextHistory(context)

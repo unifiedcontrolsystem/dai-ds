@@ -13,6 +13,7 @@ function test(callback) {
 }
 function get_floor(data) {
     var resp = (JSON.parse(data)).Result;
+    console.log ( "FLOOR DATA", resp);
     floorLayout = JSON.parse(JSON.parse(resp)[0].manifestcontent);
     main();
 }
@@ -189,7 +190,7 @@ function updateNodeStates(data)
             var hwitem = systemInventory.getHwByLocation(data[i].lctn);
             try {hwitem.changeState(data[i].state);}
             catch (err){
-                continue;
+                console.log(error);
             }
         }
         systemInventory.notifyObservers(null);
@@ -252,7 +253,6 @@ function dbComputeInventory(data)
 function updateComputenodeData(location, computenodeInfo)
 {
 if (computenodestable.rows('[location=' + location +']').any()){
-console.log("exists");
 computenodestable.row('[location='+location +']').remove();
 }
 computenodestable.row.add([location, computenodeInfo.hostname, computenodeInfo.bootimg, computenodeInfo.environment, computenodeInfo.ipadd, computenodeInfo.macadd, computenodeInfo.seqnum]);
@@ -284,7 +284,6 @@ function dbServiceInventory(data)
 function updateServiceData(location, servicenodeInfo)
 {
 if (servicenodestable.rows('[location=' + location +']').any()){
-console.log("exists");
 servicenodestable.row('[location='+location +']').remove();
 }
 servicenodestable.row.add([location, servicenodeInfo.hostname, servicenodeInfo.bootimg, servicenodeInfo.ipadd, servicenodeInfo.macadd, servicenodeInfo.seqnum]);
