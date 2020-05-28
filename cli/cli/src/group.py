@@ -32,7 +32,8 @@ class GroupCli(object):
                                                          'at a time. Use: group add node_regex group_name')
         add_parser.add_argument(
             'locations', help='Provide comma separated location list or location regex for the device')
-        add_parser.add_argument('group_name', help='Group name where the locations have to be added to')
+        add_parser.add_argument('group_name', metavar='group-name', help='Group name where the locations have to be '
+                                                                         'added to')
         add_parser.set_defaults(func=self._group_add_execute)
 
     def _add_remove_parser(self, group_parser):
@@ -41,13 +42,15 @@ class GroupCli(object):
                                                                'Use: group remove location_regex group_name')
         remove_parser.add_argument(
             'locations', help='Provide comma separated location list or location regex for the device')
-        remove_parser.add_argument('group_name', help='Group name where the locations have to be added to')
+        remove_parser.add_argument('group_name', metavar='group-name', help='Group name where the locations have to be '
+                                                                            'added to')
         remove_parser.set_defaults(func=self._group_remove_execute)
 
     def _add_get_parser(self, group_parser):
         get_parser = group_parser.add_parser('get', help='Get the location regex from a group. Get locations from one '
                                                          'group at a time. Use: group get group_name')
-        get_parser.add_argument('group_name', help='Group name where the locations have to be added to')
+        get_parser.add_argument('group_name', metavar='group-name', help='Group name where the locations have to be '
+                                                                         'added to')
         get_parser.set_defaults(func=self._group_get_execute)
 
     def _add_list_parser(self, group_parser):
@@ -67,7 +70,7 @@ class GroupCli(object):
 
     def _group_add_execute(self, args):
         if ',' in args.group_name:
-            return CommandResult(-1, "group name shouldn't contain comma")
+            return CommandResult(2, "group name shouldn't contain comma")
         message_for_existing_devices = ''
         devices_to_add = self._devices_that_dont_exist_in_group(args)
         if len(devices_to_add) == 0:
@@ -78,18 +81,17 @@ class GroupCli(object):
         # URL will be PUT http://hostaddress:hostport/groups/group_name?devices=devicelist
         url = client.get_base_url() + 'groups/' + args.group_name
         parameters = {'devices': (','.join(devices_to_add)), 'user': self.user}
-        #url = client.get_base_url() + 'groups/' + args.group_name + '?' + "devices=" + (','.join(devices_to_add)) + '&user=' + self.user
         self.lgr.debug("_group_add_execute: URL for request is {0}".format(url))
         response_code, response = client.send_put_request(url, parameters, 900)
         return CommandResult(response_code, message_for_existing_devices + response)
 
     def _group_remove_execute(self, args):
         if ',' in args.group_name:
-            return CommandResult(-1, "group name shouldn't contain comma")
+            return CommandResult(2, "group name shouldn't contain comma")
         client = HttpClient()
         # URL will be DELETE http://hostaddress:hostport/groups/group_name?devices=devicelist
         url = client.get_base_url() + 'groups/' + args.group_name + '?' + "devices=" \
-              + DeviceRegexResolver.get_devices(args.locations) + '&user=' + self.user
+            + DeviceRegexResolver.get_devices(args.locations) + '&user=' + self.user
         self.lgr.debug("_group_remove_execute: URL for request is {0}".format(url))
         response_code, response = client.send_delete_request(url, 900)
         return CommandResult(response_code, response)

@@ -5,6 +5,9 @@
 package com.intel.dai.ui;
 
 import java.sql.SQLException;
+import java.nio.charset.Charset;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import java.util.*;
 
 import com.intel.properties.*;
@@ -99,7 +102,8 @@ public class AdapterUIRest extends AdapterUI {
         });
         put("/groups/:group_name", (req, res) -> {
             uiRest.log_.debug("Received Request " + req.url());
-            return uiRest.addDevicesToGroup(req.params(":group_name"), req.queryParams("devices"));
+            Map<String, String> parameters = convertHttpBodytoMap(req);
+            return uiRest.addDevicesToGroup(req.params(":group_name"), parameters.get("devices"));
         });
         post("/groups/:group_name", (req, res) -> {
             uiRest.log_.debug("Received Request " + req.url());
@@ -119,6 +123,18 @@ public class AdapterUIRest extends AdapterUI {
         return responseCreator.toString(locationMgr.getSystemLocations());
     }
 
+    private static Map<String, String> convertHttpBodytoMap(Request req){
+        /* Convert request body which is name value pair to a Map
+        * */
+        List<NameValuePair> pairs = URLEncodedUtils.parse(req.body(), Charset.defaultCharset());
+        Map<String, String> map = new HashMap<>();
+        for(int index=0; index<pairs.size(); index++){
+            NameValuePair pair = pairs.get(index);
+            map.put(pair.getName(), pair.getValue());
+        }
+        return map;
+    }
+    
     private static Map<String, String> convertHttpRequestToMap(Request req) {
         /* Convert request header parameters to a Map
          * */
@@ -134,8 +150,12 @@ public class AdapterUIRest extends AdapterUI {
     }
 
     private static Set<String> convertToSet(String devices)
-    {
-        return new HashSet<>(Arrays.asList(devices.split(",")));
+        {
+        Set<String> deviceSet = new HashSet<>(Arrays.asList(devices.split(",")));
+        if(deviceSet.isEmpty()) {
+            return null;
+        }
+        return deviceSet;
     }
 
     @Override
