@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description of class RequestInfo.
+ * Description of class RequestInfo class representing a HTTP request.
  */
 public class RequestInfo {
     public RequestInfo(HttpMethod method, URI uri, String body) {

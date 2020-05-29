@@ -6,7 +6,10 @@
 package com.intel.networking.restclient;
 
 /**
- * Description for class EventSource
+ * Description for class EventSource implementing the SSE EventSource object definition.
+ * For details please see the HTML 5.0 specification:
+ *
+ * https://www.w3.org/TR/2009/WD-eventsource-20090421/
  */
 public class EventSource {
     public void processLine(String line, SSEEvent eventsCallback) {

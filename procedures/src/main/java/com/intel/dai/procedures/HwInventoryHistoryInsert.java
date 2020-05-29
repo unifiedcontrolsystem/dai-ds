@@ -39,7 +39,7 @@ public class HwInventoryHistoryInsert extends VoltProcedure {
         }
 
         voltQueueSQL(sqlStmt, action, id, fruId);
-        VoltTable[] vt = voltExecuteSQL();
+        voltExecuteSQL();
         return SUCCESSFUL;
     }
 }

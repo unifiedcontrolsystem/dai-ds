@@ -27,4 +27,14 @@ class CommonCliUtilSpec extends spock.lang.Specification {
         cmd.getOptionValue(_) >> null
         expect: cliUtil.getOptionValue(cmd,"i", Paths.get("cow.txt")) == Paths.get("cow.txt")
     }
+    def "Test getOptionValue String"() {
+        String str = "cow"
+        cmd.getOptionValue(_) >> str
+        expect: cliUtil.getOptionValue(cmd,"i") == str
+    }
+    def "Test getOptionValue String default"() {
+        String str = "cow"
+        cmd.getOptionValue(_, _) >> str
+        expect: cliUtil.getOptionValue(cmd,"i", str) == str
+    }
 }

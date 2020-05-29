@@ -12,6 +12,7 @@ import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.dsapi.WorkQueue;
 
+import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.client.*;
 import java.lang.*;
 import java.text.ParseException;
@@ -35,6 +36,7 @@ public abstract class AdapterOnlineTier {
     WorkQueue workQueue;
     SyncAdapterShutdownHandler shutdownHandler;
     String rabbitMQHost = "localhost";
+    BenchmarkHelper benchmarking_;
 
     // Constructor
     AdapterOnlineTier(Logger logger) throws IOException, TimeoutException {
@@ -73,6 +75,9 @@ public abstract class AdapterOnlineTier {
         mTablesToBePurgedSet.add("DiagResults");
         mTablesToBePurgedSet.add("NodeInventory_History");      // Index 26
         mTablesToBePurgedSet.add("NonNodeHwInventory_History"); // Index 27
+        mTablesToBePurgedSet.add("HW_Inventory_Fru");// Index 28
+        mTablesToBePurgedSet.add("HW_Inventory_Location"); // Index 29
+        mTablesToBePurgedSet.add("HW_Inventory_History"); // Index 30
     }   // ctor
 
     void initializeAdapter() throws IOException, TimeoutException {
@@ -112,8 +117,9 @@ public abstract class AdapterOnlineTier {
     //--------------------------------------------------------------------------
     // This method handles the general processing flow for NearlineTier adapters (regardless of specific implementation, e.g. VoltDB).
     //--------------------------------------------------------------------------
-    public void mainProcessingFlow(String[] args) throws IOException, TimeoutException {
+    public void mainProcessingFlow(String[] args, BenchmarkHelper benchmarking) throws IOException, TimeoutException {
         try {
+            benchmarking_ = benchmarking;
             log_.info("starting");
 
             // Get list of VoltDb servers, location of service node this adapter is running on, and service node's hostname.

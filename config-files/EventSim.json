@@ -15,8 +15,8 @@
   "networkConfig" : {
       "network" : "sse",
       "sseConfig": {
-          "serverAddress": "*" ,
-          "serverPort": "5678" ,
+          "serverAddress": "sms01-nmn.local" ,
+          "serverPort": "8080" ,
           "urls": {
             "/v1/stream/cray-telemetry-fan": [
               "telemetry"

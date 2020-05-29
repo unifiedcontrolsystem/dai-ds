@@ -1,6 +1,6 @@
 package com.intel.dai.eventsim;
 
-import com.intel.dai.network_listener.NetworkListenerProviderException;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyNotExpectedType;
@@ -49,7 +49,7 @@ public class SimulatorEngine {
     }
 
     /**
-     * This method is used to create and send boot events to network.
+     * This method is used to create and send boot off,on,ready events to network.
      *
      * @param locationRegex    regex of locations.
      * @param probFailureValue probability that nodes can be failed.
@@ -71,7 +71,83 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
                 publishedEvents = bootEvents.size();
             }
-        } catch (final RESTClientException | NetworkListenerProviderException e) {
+        } catch (final RESTClientException | ConversionException e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send boot off events to network.
+     *
+     * @param locationRegex    regex of locations.
+     * @param mode             with or without delay.
+     * @throws SimulatorException when unable to create or send boot off events.
+     */
+    void publishBootOffEvents(String locationRegex, final String mode) throws SimulatorException {
+        publishedEvents = 0;
+        try {
+            if (mode != null)
+                constantMode_ = Boolean.parseBoolean(mode);
+            if (locationRegex == null)
+                locationRegex = ".*";
+            if (ExistsLocationsMatchedRegex(locationRegex, EVENT_TYPE.BOOT)) {
+                List<String> bootEvents = system_.publishBootOffEventsForLocation();
+                source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
+                publishedEvents = bootEvents.size();
+            }
+        } catch (final RESTClientException | ConversionException e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send boot on events to network.
+     *
+     * @param locationRegex    regex of locations.
+     * @param probFailureValue probability that nodes can be failed.
+     * @param mode             with or without delay.
+     * @throws SimulatorException when unable to create or send boot off events.
+     */
+    void publishBootOnEvents(String locationRegex, String probFailureValue, final String mode) throws SimulatorException {
+        publishedEvents = 0;
+        try {
+            float bfValue = 0;
+            if (mode != null)
+                constantMode_ = Boolean.parseBoolean(mode);
+            if (probFailureValue != null)
+                bfValue = Float.parseFloat(probFailureValue);
+            if (locationRegex == null)
+                locationRegex = ".*";
+            if (ExistsLocationsMatchedRegex(locationRegex, EVENT_TYPE.BOOT)) {
+                List<String> bootEvents = system_.publishBootOnEventsForLocation(bfValue);
+                source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
+                publishedEvents = bootEvents.size();
+            }
+        } catch (final RESTClientException | ConversionException e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send boot on events to network.
+     *
+     * @param locationRegex    regex of locations.
+     * @param mode             with or without delay.
+     * @throws SimulatorException when unable to create or send boot off events.
+     */
+    void publishBootReadyEvents(String locationRegex, final String mode) throws SimulatorException {
+        publishedEvents = 0;
+        try {
+            if (mode != null)
+                constantMode_ = Boolean.parseBoolean(mode);
+            if (locationRegex == null)
+                locationRegex = ".*";
+            if (ExistsLocationsMatchedRegex(locationRegex, EVENT_TYPE.BOOT)) {
+                List<String> bootEvents = system_.publishBootReadyEventsForLocation();
+                source_.send(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString(), bootEvents, constantMode_, timeDelayMus_);
+                publishedEvents = bootEvents.size();
+            }
+        } catch (final RESTClientException | ConversionException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -102,7 +178,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.events.toString(), rasEvents, constantMode_, timeDelayMus_);
                 publishedEvents = rasEvents.size();
             }
-        } catch (final PropertyNotExpectedType | NetworkListenerProviderException | RESTClientException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | RESTClientException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -133,7 +209,7 @@ public class SimulatorEngine {
                 source_.send(ForeignEvent.EVENT_SUB_TYPE.telemetry.toString(), sensorEvents, constantMode_, timeDelayMus_);
                 publishedEvents = sensorEvents.size();
             }
-        } catch (final PropertyNotExpectedType | NetworkListenerProviderException | RESTClientException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | RESTClientException e) {
             throw new SimulatorException(e.getMessage());
         }
     }

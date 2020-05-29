@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import com.intel.logging.*;
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.dsapi.WorkQueue;
+import com.intel.perflogging.BenchmarkHelper;
 import org.json_voltpatches.JSONException;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
@@ -56,6 +57,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
     private DataLoaderApi dataLoader;
 
     private AtomicBoolean receivedEom;
+    private BenchmarkHelper benchmarking_;
 
     // Constructor
     AdapterNearlineTierJdbc(Logger logger, DataStoreFactory dsFactory)
@@ -72,7 +74,9 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
     public void initializeAdapter() throws IOException, TimeoutException, DataStoreException {
         super.initializeAdapter();
         java.sql.Connection mConn = createConnection();
-        mTableUpdater = new NearlineTableUpdater(mConn, log_);
+        benchmarking_ = new BenchmarkHelper("AdapterNearlineTier-Benchmarking.json",
+                "/opt/ucs/log/AdapterNearlineTier-Benchmarking.json", 15);
+        mTableUpdater = new NearlineTableUpdater(mConn, log_, benchmarking_);
     }
 
     java.sql.Connection createConnection() throws DataStoreException {
@@ -92,6 +96,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
             // - We must have received the signal to shut down
             // - We must have finished processing the messages in the queue (i.e. we must have received the data
             // mover's final message)
+            benchmarking_.tick();
         } while (!adapter.adapterShuttingDown() || !receivedEom.get());
         log_.info("Shutdown signal and EOM from data mover received");
     }

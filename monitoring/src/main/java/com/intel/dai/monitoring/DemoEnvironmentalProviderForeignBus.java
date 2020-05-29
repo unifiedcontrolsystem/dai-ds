@@ -7,15 +7,12 @@ package com.intel.dai.monitoring;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
-import java.io.InputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,44 +38,14 @@ public class DemoEnvironmentalProviderForeignBus implements NetworkListenerProvi
             throws NetworkListenerProviderException {
         if(!configDone_)
             setUpConfig(config);
-        List<CommonDataFormat> commonList = new ArrayList<>();
-        PropertyMap document;
-        try {
-            document = parser_.fromString(data).getAsMap();
-        } catch(ConfigIOParseException e) {
-            log_.exception(e);
-            return commonList;
+        List<String> individualMessages = breakupStreamedJSONMessages(data.trim());
+        List<CommonDataFormat> allData = new ArrayList<>();
+        for(String individual: individualMessages) {
+            List<CommonDataFormat> someData = processIndividualRawStringData(individual, config);
+            if(someData != null)
+                allData.addAll(someData);
         }
-        if(!document.containsKey("metrics") || document.get("metrics") == null)
-            throw new NetworkListenerProviderException("Missing the 'metric' top level key.");
-        PropertyMap metrics = document.getMapOrDefault("metrics", null); // Cannot return null at this point.
-        if(!metrics.containsKey("messages") || metrics.get("messages") == null)
-            throw new NetworkListenerProviderException("Missing the second level 'messages' key.");
-        PropertyArray messages = metrics.getArrayOrDefault("messages", null); // cannot return null at this point.
-        for(Object obj: messages) {
-            if(obj instanceof PropertyMap) {
-                PropertyMap map = (PropertyMap)obj;
-                if(checkMessage(map)) {
-                    log_.debug("*** Processing data item...");
-                    try {
-                        // The 3 values from the map cannot be null after the call to checkMessage.
-                        long nsTimestamp = map.getLong("timestamp") * 1000000; // ms to ns
-                        String name = map.getString("name");
-                        long rawValue = map.getLong("value");
-                        CommonDataFormat dataObj = new CommonDataFormat(nsTimestamp, "X0-SMS1",
-                                DataType.EnvironmentalData);
-                        dataObj.setDescription(name);
-                        dataObj.setValue((double)rawValue);
-                        log_.debug("*** Aggregating data...");
-                        aggregateData(dataObj);
-                        commonList.add(dataObj);
-                    } catch(PropertyNotExpectedType e) {
-                        log_.exception(e);
-                    }
-                }
-            }
-        }
-        return commonList;
+        return allData;
     }
 
     @Override
@@ -94,21 +61,107 @@ public class DemoEnvironmentalProviderForeignBus implements NetworkListenerProvi
             systemActions.publishNormalizedData(rawTopic_, data.getTelemetryDataType(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getValue());
         }
-        if(Math.abs(data.getAverage() - Double.MIN_VALUE) >= 0.000001) {
-            // Store and publish aggregate data it available...
-            log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
+        // Store and publish aggregate data it available...
+        log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
+                data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
+                data.getMinimum(), data.getMaximum(), data.getAverage());
+        systemActions.storeAggregatedData(data.getTelemetryDataType(), data.getLocation(),
+                data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
+        if(publish_) {
+            log_.debug("Publishing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
                     data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
                     data.getMinimum(), data.getMaximum(), data.getAverage());
-            systemActions.storeAggregatedData(data.getTelemetryDataType(), data.getLocation(),
+            systemActions.publishAggregatedData(aggregatedTopic_, data.getTelemetryDataType(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
-            if(publish_) {
-                log_.debug("Publishing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
-                        data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
-                        data.getMinimum(), data.getMaximum(), data.getAverage());
-                systemActions.publishAggregatedData(aggregatedTopic_, data.getTelemetryDataType(), data.getLocation(),
-                        data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
+        }
+    }
+
+    private List<String> breakupStreamedJSONMessages(String data) {
+        List<String> jsonMessages = new ArrayList<>();
+        int braceDepth = 0;
+        int startOfMessage = 0;
+        boolean inQuote = false;
+        char chr;
+        for(int index = 0; index < data.length(); index++) {
+            chr = data.charAt(index);
+            if(chr == '"')
+                inQuote = toggleQuote(data, index, inQuote);
+            if(inQuote || Character.isWhitespace(chr))
+                continue;
+            if(chr == '{')
+                braceDepth++;
+            else if(chr == '}')
+                braceDepth--;
+            if(braceDepth == 0) { // new message found
+                jsonMessages.add(data.substring(startOfMessage, index + 1).trim());
+                startOfMessage = index + 1;
             }
         }
+        return jsonMessages;
+    }
+
+    private boolean toggleQuote(String data, int index, boolean inQuote) {
+        if(inQuote && data.charAt(index - 1) == '\\')
+            return inQuote;
+        return !inQuote;
+    }
+
+    private List<CommonDataFormat> processIndividualRawStringData(String data, NetworkListenerConfig config)
+            throws NetworkListenerProviderException {
+
+        List<CommonDataFormat> commonList = new ArrayList<>();
+        PropertyMap document;
+        try {
+            document = parser_.fromString(data).getAsMap();
+            if(document == null) {
+                log_.debug("FAILED JSON: '%s'", data);
+                return commonList;
+            }
+        } catch(ConfigIOParseException e) {
+            log_.exception(e);
+            log_.debug("FAILED JSON: '%s'", data);
+            return commonList;
+        }
+        if(!document.containsKey("metrics") || document.get("metrics") == null)
+            throw new NetworkListenerProviderException("Missing the 'metric' top level key.");
+        PropertyMap metrics;
+        try {
+            metrics = document.getMap("metrics");
+        } catch(PropertyNotExpectedType e) {
+            throw new NetworkListenerProviderException("The 'metric' top level key was not a map.");
+        }
+        if(!metrics.containsKey("messages") || metrics.get("messages") == null)
+            throw new NetworkListenerProviderException("Missing the second level 'messages' key.");
+        PropertyArray messages;
+        try {
+            messages = metrics.getArray("messages");
+        } catch(PropertyNotExpectedType e) {
+            throw new NetworkListenerProviderException("Second level 'messages' key is not an array.");
+        }
+        for(Object obj: messages) {
+            if(obj instanceof PropertyMap) {
+                PropertyMap map = (PropertyMap)obj;
+                if(checkMessage(map)) {
+                    log_.debug("*** Processing data item...");
+                    try {
+                        // The 3 values from the map cannot be null after the call to checkMessage.
+                        long nsTimestamp = map.getLong("timestamp") * 1_000_000; // ms to ns
+                        String name = map.getString("name");
+                        long rawValue = map.getLong("value");
+                        CommonDataFormat dataObj = new CommonDataFormat(nsTimestamp, "X0-CH4-CN0",
+                                DataType.EnvironmentalData);
+                        dataObj.setDescription(name);
+                        dataObj.setValue((double)rawValue);
+                        log_.debug("*** Aggregating data...");
+                        aggregateData(dataObj);
+                        commonList.add(dataObj);
+                    } catch(PropertyNotExpectedType e) {
+                        log_.exception(e);
+                    }
+                }
+            }
+        }
+        return commonList;
     }
 
     private boolean checkMessage(PropertyMap message) {

@@ -1,8 +1,8 @@
 package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIOFactory;
-import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.logging.Logger;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
@@ -180,7 +180,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateRasEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateRasEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -193,7 +193,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateRasEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateRasEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -206,7 +206,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateSensorEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateSensorEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -219,7 +219,7 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateSensorEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateSensorEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
@@ -232,10 +232,11 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateBootEvents() throws SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException, RESTClientException {
+    public void generateBootEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("count", "1");
+        parameters.put("sub_component", "all");
         Logger log = mock(Logger.class);
         EventSimApp eventSimApiTest = new EventSimApp(log);
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
@@ -245,10 +246,53 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateBootEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, NetworkListenerProviderException {
+    public void generateBootOffEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("location", "test");
+        parameters.put("count", "1");
+        parameters.put("sub_component", "off");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doNothing().when(eventSimApiTest.eventSimEngine).publishBootOffEvents("test", "false");
+        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateBootEvents(parameters));
+    }
+
+    @Test
+    public void generateBootOnEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("location", "test");
+        parameters.put("count", "1");
+        parameters.put("sub_component", "on");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doNothing().when(eventSimApiTest.eventSimEngine).publishBootOnEvents("test", "0" , "false");
+        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateBootEvents(parameters));
+    }
+
+    @Test
+    public void generateBootReadyEvents() throws SimulatorException, PropertyNotExpectedType, ConversionException, RESTClientException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("location", "test");
+        parameters.put("count", "1");
+        parameters.put("sub_component", "ready");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doNothing().when(eventSimApiTest.eventSimEngine).publishBootReadyEvents("test","false");
+        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateBootEvents(parameters));
+    }
+
+    @Test
+    public void generateBootEventsWithException() throws RESTClientException, SimulatorException, PropertyNotExpectedType, ConversionException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("location", "test");
         parameters.put("probability", "0");
+        parameters.put("sub_component", "all");
         Logger log = mock(Logger.class);
         EventSimApp eventSimApiTest = new EventSimApp(log);
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");

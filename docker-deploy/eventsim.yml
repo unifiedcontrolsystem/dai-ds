@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  dai-eventsim:
+    network_mode: host
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/ucs/dai/eventsimEntryPoint.sh
+    container_name: dai-eventsim
+    environment:
+      - DAI_LOGGING_LEVEL=DEBUG
+      - HOSTNAME=sms01-nmn
+      - VOLTDB_SERVERS=sms01-nmn.local
+    volumes:
+      - "/opt/dai-docker/etc:/opt/ucs/etc"
+      - "/opt/dai-docker/lib:/opt/ucs/lib"
+      - "/opt/dai-docker/log:/opt/ucs/log"
+      - "/opt/dai-docker/dai:/opt/ucs/dai"
+    restart: always

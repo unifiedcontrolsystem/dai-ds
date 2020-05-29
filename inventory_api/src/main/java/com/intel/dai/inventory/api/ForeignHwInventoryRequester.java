@@ -17,6 +17,9 @@ import java.net.URISyntaxException;
 class ForeignHwInventoryRequester implements RestRequester {
     public ForeignHwInventoryRequester() {}
 
+    /**
+     * This method is used to initialize logger, requestor and client.
+     */
     @Override
     public void initialize(Logger logger, Requester config, RESTClient restClient) {
         this.logger = logger;
@@ -24,12 +27,15 @@ class ForeignHwInventoryRequester implements RestRequester {
         this.restClient = restClient;
     }
 
+    /**
+     * This method is used to initiate and process discovery for a foreign location.
+     */
     @Override
-    public int initiateDiscovery(String xname) {
+    public int initiateDiscovery(String foreignName) {
         try {
             URI uri = makeUri(config.initiateDiscovery.endpoint, config.initiateDiscovery.resource);
             logger.info("uri: %s", uri.toString());
-            String payload = String.format("{\"xnames\": [\"%s\"], \"force\": false}", xname);
+            String payload = String.format("{\"xnames\": [\"%s\"], \"force\": false}", foreignName);
             BlockingResult result = restClient.postRESTRequestBlocking(uri, payload);
             return interpretedInitiateDiscoveryServerResult(uri, result);
         } catch (URISyntaxException e) {
@@ -39,6 +45,10 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return 1;
     }
+
+    /**
+     * This method is used to get the status of initiated discovery.
+     */
     @Override
     public int getDiscoveryStatus() {
         try {
@@ -53,6 +63,10 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return 1;
     }
+
+    /**
+     * This method is used to get the hardware inventory data.
+     */
     @Override
     public ImmutablePair<Integer, String> getHwInventory() {
         try {
@@ -67,10 +81,14 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return new ImmutablePair<>(1, "");
     }
+
+    /**
+     * This method is used to get the hardware inventory datafor a location.
+     */
     @Override
-    public ImmutablePair<Integer, String> getHwInventory(String xname) {
+    public ImmutablePair<Integer, String> getHwInventory(String foreignName) {
         try {
-            URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, xname);
+            URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, foreignName);
             logger.info("uri: %s", uri.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvTreeResult(uri, result);
@@ -81,9 +99,11 @@ class ForeignHwInventoryRequester implements RestRequester {
         }
         return new ImmutablePair<>(1, "");
     }
+
     private URI makeUri(String endpoint, String resource) throws URISyntaxException {
         return new URI(String.format("%s%s", endpoint, resource));
     }
+
     private URI makeUri(String endpoint, String resource, String subResource) throws URISyntaxException {
         return new URI(String.format("%s%s%s", endpoint, resource, subResource));
     }

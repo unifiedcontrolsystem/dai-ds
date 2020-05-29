@@ -37,11 +37,14 @@ public class ErrorOnComputeNodeTest {
                     new VoltTable.ColumnInfo("Owner", VoltType.STRING),
                     new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
                     new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING)
+                    new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING),
+                    new VoltTable.ColumnInfo("LastChgTimestamp", VoltType.TIMESTAMP)
             );
             if(!doZeroRows) {
                 result[0].addRow("Lctn", 1L, "HostName", "BootImageId", "IpAddr", "MacAddr",
-                                 "BmcIpAddr", "BmcMacAddr", "BmcHostName", "Owner", "Agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A");
+                                 "BmcIpAddr", "BmcMacAddr", "BmcHostName", "Owner", "Agg01",
+                        new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A",
+                        new TimestampType(Date.from(Instant.ofEpochMilli(40L))));
             }
             return result;
         }

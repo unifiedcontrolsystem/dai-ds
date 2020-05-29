@@ -438,6 +438,9 @@ public class Adapter implements IAdapter {
         mDataMoverResultTblIndxToTableNameMap.put(25, "DiagResults");
         mDataMoverResultTblIndxToTableNameMap.put(26, "NodeInventory_History");
         mDataMoverResultTblIndxToTableNameMap.put(27, "NonNodeHwInventory_History");
+        mDataMoverResultTblIndxToTableNameMap.put(28, "HW_Inventory_Fru");
+        mDataMoverResultTblIndxToTableNameMap.put(29, "HW_Inventory_Location");
+        mDataMoverResultTblIndxToTableNameMap.put(30, "HW_Inventory_History");
     }   // End Adapter(String sThisAdaptersAdapterType, String sAdapterName)
 
     public void initialize() {
@@ -1239,18 +1242,18 @@ public class Adapter implements IAdapter {
         }
 
         // Send a work item to the WLM adapter/provider to kill the specified job.
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("jobid", sRasEventJobId);
-        long lKjWorkItemId = workQueue().queueWorkItem("WLM"                // type of adapter that needs to handle this work
-                                                      ,null                 // queue this work should be put on
-                                                      ,"KillJob"            // work that needs to be done
-                                                      ,parameters             // parameters for this work
-                                                      ,false                // false indicates that we do NOT want to know when this work item finishes
-                                                      ,sWorkItemAdapterType // type of adapter that requested this work to be done
-                                                      ,lWorkItemId          // work item that the requesting adapter was working on when it requested this work be done
-                                                      );
-        mLogger.info("killJob - successfully queued KillJob work item - EventType=%s, EventId=%d, ControlOperation=%s, Lctn=%s, JobId=%s, WorkItemId=%d",
-                     sRasEventType, lRasEventId, sRasEventCntrlOp, sNodeLctn, sRasEventJobId, lKjWorkItemId);
+//        Map<String, String> parameters = new HashMap<>();
+//        parameters.put("jobid", sRasEventJobId);
+//        long lKjWorkItemId = workQueue().queueWorkItem("WLM"                // type of adapter that needs to handle this work
+//                                                      ,null                 // queue this work should be put on
+//                                                      ,"KillJob"            // work that needs to be done
+//                                                      ,parameters             // parameters for this work
+//                                                      ,false                // false indicates that we do NOT want to know when this work item finishes
+//                                                      ,sWorkItemAdapterType // type of adapter that requested this work to be done
+//                                                      ,lWorkItemId          // work item that the requesting adapter was working on when it requested this work be done
+//                                                      );
+//        mLogger.info("killJob - successfully queued KillJob work item - EventType=%s, EventId=%d, ControlOperation=%s, Lctn=%s, JobId=%s, WorkItemId=%d",
+//                     sRasEventType, lRasEventId, sRasEventCntrlOp, sNodeLctn, sRasEventJobId, lKjWorkItemId);
     }   // End killJob(String sNodeLctn, String sRasEventType, long lRasEventId, String sRasEventCntrlOp, String sRasEventJobId, String sWorkItemAdapterType, long lWorkItemId)
 
 
@@ -1440,24 +1443,24 @@ public class Adapter implements IAdapter {
     public void tellWlmToNotUseThisNode(String sNodeLctn, String sWorkItemAdapterType, long lWorkItemId, String sReasonForDraining)
                 throws IOException, ProcCallException, InterruptedException
     {
-        if (isComputeNodeLctn(sNodeLctn)) {
-            Map<String, String> parameters = new HashMap<>();
-            // Send a work item to the WLM adapter/provider so the WLM will stop scheduling jobs on this node.
-            parameters.put("locations", sNodeLctn);
-            // false indicates that we do NOT want to perform the check ensuring that this node actually COMPLETES a wlm drain before proceeding.
-            parameters.put("ensure_node_drained", "false");
-            parameters.put("reason_for_draining", sReasonForDraining);  // reason we want this node to be drained.
-            String sTempWork = "DontUseNode";
-            long lDunWorkItemId = workQueue().queueWorkItem("WLM"                   // type of adapter that needs to handle this work
-                                                           ,null                    // queue this work should be put on
-                                                           ,sTempWork               // work that needs to be done
-                                                           ,parameters              // parameters for this work
-                                                           ,false                   // false indicates that we do NOT want to know when this work item finishes
-                                                           ,sWorkItemAdapterType    // type of adapter that requested this work to be done
-                                                           ,lWorkItemId             // work item that the requesting adapter was working on when it requested this work be done
-                                                           );
-            mLogger.info("tellWlmToNotUseThisNode - successfully queued %s work item - Node=%s, NewWorkItemId=%d", sTempWork, sNodeLctn, lDunWorkItemId);
-        }
+//        if (isComputeNodeLctn(sNodeLctn)) {
+//            Map<String, String> parameters = new HashMap<>();
+//            // Send a work item to the WLM adapter/provider so the WLM will stop scheduling jobs on this node.
+//            parameters.put("locations", sNodeLctn);
+//            // false indicates that we do NOT want to perform the check ensuring that this node actually COMPLETES a wlm drain before proceeding.
+//            parameters.put("ensure_node_drained", "false");
+//            parameters.put("reason_for_draining", sReasonForDraining);  // reason we want this node to be drained.
+//            String sTempWork = "DontUseNode";
+//            long lDunWorkItemId = workQueue().queueWorkItem("WLM"                   // type of adapter that needs to handle this work
+//                                                           ,null                    // queue this work should be put on
+//                                                           ,sTempWork               // work that needs to be done
+//                                                           ,parameters              // parameters for this work
+//                                                           ,false                   // false indicates that we do NOT want to know when this work item finishes
+//                                                           ,sWorkItemAdapterType    // type of adapter that requested this work to be done
+//                                                           ,lWorkItemId             // work item that the requesting adapter was working on when it requested this work be done
+//                                                           );
+//            mLogger.info("tellWlmToNotUseThisNode - successfully queued %s work item - Node=%s, NewWorkItemId=%d", sTempWork, sNodeLctn, lDunWorkItemId);
+//        }
     }   // End tellWlmToNotUseThisNode(String sNodeLctn, String sWorkItemAdapterType, long lWorkItemId, String sReasonForDraining)
 
 
@@ -1467,54 +1470,54 @@ public class Adapter implements IAdapter {
     @Override
     public void tellWlmToUseThisNode(String sNodeLctn, String sWorkItemAdapterType, long lWorkItemId) throws IOException, ProcCallException, InterruptedException
     {
-        // Ensure that this is a compute node - can not tell WLM to start using a non-compute node.
-        if (isComputeNodeLctn(sNodeLctn)) {
-            // this is a compute node.
-            // Ensure that this node is owned by the WLM - cannot tell the WLM to use this node if it is not owned by the WLM subsystem.
-            if (!isThisHwOwnedByWlm(sNodeLctn)) {
-                String sNodeOwningSubsystem = getOwningSubsystem(sNodeLctn);
-                mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this compute node because the WLM does not own this node, OwningSubsystem='%s' - Node=%s!", sNodeOwningSubsystem, sNodeLctn);
-                // Cut a RAS event to capture this occurrence.
-                logRasEventNoEffectedJob(getRasEventType("RasWlmCantTellWlmToUseUnownedNode")
-                                        ,("OwningSubsystem=" + sNodeOwningSubsystem)
-                                        ,sNodeLctn                          // Lctn
-                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                        ,sWorkItemAdapterType               // the type of adapter that ran this diagnostic
-                                        ,lWorkItemId                        // the work item id that the adapter was doing when this diagnostic ended
-                                        );
-                return;  // return without telling WLM to start using this node.
-            }
-            // Ensure that this node is not in an error state - do not want to tell the WLM to use this node if it is in an error state.
-            String sNodeState = client().callProcedure("ComputeNodeState", sNodeLctn).getResults()[0].fetchRow(0).getString(0);
-            if (sNodeState.equals("E")) {
-                mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this compute node (%s) because the node is in error state, so the WLM was not told that it can use this node!", sNodeLctn);
-                return;
-            }
-            // Send a work item to the WLM adapter/provider so the WLM knows that it can start scheduling jobs on this node.
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("locations", sNodeLctn);
-            String sTempWork = "UseNode";
-            long lUnWorkItemId = workQueue().queueWorkItem("WLM"                // type of adapter that needs to handle this work
-                                                          ,null                 // queue this work should be put on
-                                                          ,sTempWork            // work that needs to be done
-                                                          ,parameters           // parameters for this work
-                                                          ,false                // false indicates that we do NOT want to know when this work item finishes
-                                                          ,sWorkItemAdapterType // type of adapter that requested this work to be done
-                                                          ,lWorkItemId          // work item that the requesting adapter was working on when it requested this work be done
-                                                          );
-            mLogger.info("tellWlmToUseThisNode - successfully queued %s work item - Node=%s, NewWorkItemId=%d", sTempWork, sNodeLctn, lUnWorkItemId);
-        }
-        else {
-            mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this node because the specified node is NOT a compute node - Node=%s!", sNodeLctn);
-            // Cut a RAS event to capture this occurrence.
-            logRasEventNoEffectedJob(getRasEventType("RasWlmCantTellWlmToUseNonComputeNode")
-                                    ,null                               // instance data
-                                    ,sNodeLctn                          // Lctn
-                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                    ,sWorkItemAdapterType               // the type of adapter that ran this diagnostic
-                                    ,lWorkItemId                        // the work item id that the adapter was doing when this diagnostic ended
-                                    );
-        }
+//        // Ensure that this is a compute node - can not tell WLM to start using a non-compute node.
+//        if (isComputeNodeLctn(sNodeLctn)) {
+//            // this is a compute node.
+//            // Ensure that this node is owned by the WLM - cannot tell the WLM to use this node if it is not owned by the WLM subsystem.
+//            if (!isThisHwOwnedByWlm(sNodeLctn)) {
+//                String sNodeOwningSubsystem = getOwningSubsystem(sNodeLctn);
+//                mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this compute node because the WLM does not own this node, OwningSubsystem='%s' - Node=%s!", sNodeOwningSubsystem, sNodeLctn);
+//                // Cut a RAS event to capture this occurrence.
+//                logRasEventNoEffectedJob(getRasEventType("RasWlmCantTellWlmToUseUnownedNode")
+//                                        ,("OwningSubsystem=" + sNodeOwningSubsystem)
+//                                        ,sNodeLctn                          // Lctn
+//                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+//                                        ,sWorkItemAdapterType               // the type of adapter that ran this diagnostic
+//                                        ,lWorkItemId                        // the work item id that the adapter was doing when this diagnostic ended
+//                                        );
+//                return;  // return without telling WLM to start using this node.
+//            }
+//            // Ensure that this node is not in an error state - do not want to tell the WLM to use this node if it is in an error state.
+//            String sNodeState = client().callProcedure("ComputeNodeState", sNodeLctn).getResults()[0].fetchRow(0).getString(0);
+//            if (sNodeState.equals("E")) {
+//                mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this compute node (%s) because the node is in error state, so the WLM was not told that it can use this node!", sNodeLctn);
+//                return;
+//            }
+//            // Send a work item to the WLM adapter/provider so the WLM knows that it can start scheduling jobs on this node.
+//            Map<String, String> parameters = new HashMap<>();
+//            parameters.put("locations", sNodeLctn);
+//            String sTempWork = "UseNode";
+//            long lUnWorkItemId = workQueue().queueWorkItem("WLM"                // type of adapter that needs to handle this work
+//                                                          ,null                 // queue this work should be put on
+//                                                          ,sTempWork            // work that needs to be done
+//                                                          ,parameters           // parameters for this work
+//                                                          ,false                // false indicates that we do NOT want to know when this work item finishes
+//                                                          ,sWorkItemAdapterType // type of adapter that requested this work to be done
+//                                                          ,lWorkItemId          // work item that the requesting adapter was working on when it requested this work be done
+//                                                          );
+//            mLogger.info("tellWlmToUseThisNode - successfully queued %s work item - Node=%s, NewWorkItemId=%d", sTempWork, sNodeLctn, lUnWorkItemId);
+//        }
+//        else {
+//            mLogger.error("tellWlmToUseThisNode - cannot tell WLM to begin using this node because the specified node is NOT a compute node - Node=%s!", sNodeLctn);
+//            // Cut a RAS event to capture this occurrence.
+//            logRasEventNoEffectedJob(getRasEventType("RasWlmCantTellWlmToUseNonComputeNode")
+//                                    ,null                               // instance data
+//                                    ,sNodeLctn                          // Lctn
+//                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+//                                    ,sWorkItemAdapterType               // the type of adapter that ran this diagnostic
+//                                    ,lWorkItemId                        // the work item id that the adapter was doing when this diagnostic ended
+//                                    );
+//        }
     }   // End tellWlmToUseThisNode(String sNodeLctn, String sWorkItemAdapterType, long lWorkItemId)
 
 

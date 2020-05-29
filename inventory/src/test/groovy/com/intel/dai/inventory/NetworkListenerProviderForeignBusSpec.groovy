@@ -101,19 +101,40 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         cdfs[0].getLocation() == "R0-CH0-CB0-CN3"
         cdfs[0].getDataType() == DataType.InventoryChangeEvent
         cdfs[0].getStateEvent() == BootState.NODE_ONLINE
-        cdfs[0].retrieveExtraData('xname') == 'x0c0s21b0n0'
+        cdfs[0].retrieveExtraData('foreignLocationKey') == 'x0c0s21b0n0'
 
         cdfs[1].getLocation() == "R0-CH0-CB0-CN2"
         cdfs[1].getDataType() == DataType.InventoryChangeEvent
         cdfs[1].getStateEvent() == cdfs[0].getStateEvent()
-        cdfs[1].retrieveExtraData('xname') == 'x0c0s24b0n0'
+        cdfs[1].retrieveExtraData('foreignLocationKey') == 'x0c0s24b0n0'
 
         cdfs[0].getNanoSecondTimestamp() == cdfs[1].getNanoSecondTimestamp()
     }
 
-    def "Test empty actOnData"() {
+    def "Test empty actOnData for on event"() {
         def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
-        data.storeExtraData("xname", "x0")
+        data.setStateChangeEvent(BootState.NODE_ONLINE)
+        data.storeExtraData("foreignLocationKey", "x0")
+        def sa = Mock(SystemActions)
+        sa.isHWInventoryEmpty() >> true
+        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
+        expect: true
+    }
+
+    def "Test empty actOnData for off event"() {
+        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
+        data.setStateChangeEvent(BootState.NODE_OFFLINE)
+        data.storeExtraData("foreignLocationKey", "x0")
+        def sa = Mock(SystemActions)
+        sa.isHWInventoryEmpty() >> true
+        underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)
+        expect: true
+    }
+
+    def "Test empty actOnData for unknown event"() {
+        def data = new CommonDataFormat(0L,"location", DataType.InventoryChangeEvent)
+        data.setStateChangeEvent(BootState.NODE_BOOTING)
+        data.storeExtraData("foreignLocationKey", "x0")
         def sa = Mock(SystemActions)
         sa.isHWInventoryEmpty() >> true
         underTest_.actOnData(data, Mock(NetworkListenerConfig), sa)

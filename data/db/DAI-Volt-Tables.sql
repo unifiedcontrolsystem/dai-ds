@@ -447,7 +447,7 @@ CREATE ASSUMEUNIQUE INDEX Tier2_JobStep_History_EntryNum ON Tier2_JobStep_Histor
 CREATE TABLE WlmReservation_History (
    ReservationName      Varchar(35)    NOT NULL,            -- Identifier that identifies a specific WLM reservation
    Users                VarChar(100)   NOT NULL,            -- Users of this reservation
-   Nodes                VarChar(1000),                      -- Nodes assigned to this reservation
+   Nodes                VarChar(5000),                      -- Nodes assigned to this reservation
    StartTimestamp       TIMESTAMP      NOT NULL,            -- Time that this reservation begins - from timestamp on event record
    EndTimestamp         TIMESTAMP,                          -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp     TIMESTAMP,                          -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
@@ -466,7 +466,7 @@ CREATE INDEX WlmReservation_HistoryByDbUpdatedTimestamp                 ON WlmRe
 CREATE TABLE Tier2_WlmReservation_History (
    ReservationName         Varchar(35)    NOT NULL,         -- Identifier that identifies a specific WLM reservation
    Users                   VarChar(100)   NOT NULL,         -- Users of this reservation
-   Nodes                   VarChar(1000),                   -- Nodes assigned to this reservation
+   Nodes                   VarChar(5000),                   -- Nodes assigned to this reservation
    StartTimestamp          TIMESTAMP      NOT NULL,         -- Time that this reservation begins - from timestamp on event record
    EndTimestamp            TIMESTAMP,                       -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp        TIMESTAMP,                       -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
@@ -1107,8 +1107,6 @@ PARTITION TABLE RasEvent ON COLUMN EventType;
 CREATE UNIQUE INDEX RasEventByEventTypeAndId ON RasEvent(EventType, Id);
 CREATE INDEX RasEventByControlOperationDone  ON RasEvent(ControlOperationDone) WHERE ControlOperation IS NOT NULL;
 CREATE INDEX RasEventByLctnAndTime           ON RasEvent(Lctn, LastChgTimestamp) WHERE Lctn IS NOT NULL;
-CREATE INDEX RasEventByTimeEventtypeAndId    ON RasEvent(LastChgTimestamp, EventType, Id);
-CREATE INDEX RasEventByJobIdAndLctn          ON RasEvent(JobId, Lctn) WHERE JobId IS NOT NULL;
 CREATE INDEX RasEventByDbUpdatedTimestamp    ON RasEvent(DbUpdatedTimestamp);
 --------------------------------------------------------------
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
@@ -2003,6 +2001,14 @@ CREATE TABLE HW_Inventory_FRU (
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
+CREATE TABLE Tier2_HW_Inventory_FRU (
+    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
+    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
+
 -- Corresponds to the current HPC HW architecture wrt to HW locations.
 -- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
 CREATE TABLE HW_Inventory_Location (
@@ -2013,6 +2019,15 @@ CREATE TABLE HW_Inventory_Location (
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
+CREATE TABLE tier2_HW_Inventory_Location (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
+    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
+    Ordinal INTEGER NOT NULL,            -- singleton:0
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
+
 -- History of FRU installation and removal from the HPC.  Note that the timestamp marks
 -- the DB update event.  The foreign data does not have the time of actual HW modification.
 CREATE TABLE HW_Inventory_History (
@@ -2021,6 +2036,14 @@ CREATE TABLE HW_Inventory_History (
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
+
+CREATE TABLE tier2_HW_Inventory_History (
+     Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+     DbUpdatedTimestamp TIMESTAMP NOT NULL,
+     EntryNumber BigInt NOT NULL
+ );
 
 END_OF_BATCH
 

@@ -11,6 +11,7 @@ import com.intel.dai.dsapi.HWInvTree;
 import com.intel.dai.dsapi.HWInvUtil;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import com.intel.dai.foreign_bus.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
@@ -119,7 +120,22 @@ public class HWInvTranslator {
     public ImmutablePair<String, String> foreignToCanonical(String foreignJson) {
         ImmutablePair<String, HWInvTree> translatedResult = toCanonical(foreignJson);
         String subject = translatedResult.getKey();
+        ArrayList<HWInvLoc> translatedLocs = new ArrayList<>();
         HWInvTree canonicalTree = translatedResult.getValue();
+        if (canonicalTree == null) {
+            return ImmutablePair.nullPair();
+        }
+        for (HWInvLoc loc: canonicalTree.locs) {
+            try {
+                loc.ID = CommonFunctions.convertForeignToLocation(loc.ID);
+                translatedLocs.add(loc);
+            } catch(ConversionException e) {
+                logger.error("Failed to read JSON from stream: %s", e.getMessage());
+                continue;   // drop this entry
+            }
+        }
+
+        canonicalTree.locs = translatedLocs;
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
@@ -142,20 +158,20 @@ public class HWInvTranslator {
         ForeignHWInventory foreignTree = toForeignHWInventory(foreignJson);
         if (foreignTree != null) {
             logger.info("Parsed toForeignHWInventory");
-            if (foreignTree.XName != null) {
+            if (foreignTree.ForeignName != null) {
                 if (foreignTree.Format == null) {
                     logger.error("Missing format field");
                     return ImmutablePair.nullPair();
                 }
                 logger.info("Parsed HW Inventory");
-                String root = foreignTree.XName;
+                String root = foreignTree.ForeignName;
                 if (!isValidLocationName(root)) {
                     logger.error("ForeignHWInventory must have valid subject");
                     return ImmutablePair.nullPair();
                 }
                 return new ImmutablePair<>(root, toCanonical(foreignTree));
             }
-            logger.error("XName is null");
+            logger.info("ForeignName is null");
         }
 
         logger.info("Attempt toForeignHWInvByLocNode");

@@ -5,7 +5,7 @@
 package com.intel.dai.network_listener;
 
 /**
- * Description of interface DataType.
+ * Enum DataType used by the CommonDataFormat class.
  */
 public enum DataType {
     Unknown,

@@ -5,7 +5,7 @@
 package com.intel.dai.network_listener;
 
 /**
- * Description of interface Initializer.
+ * Description of interface Initializer used by MANY classes for initialization.
  */
 public interface Initializer {
     void initialize();

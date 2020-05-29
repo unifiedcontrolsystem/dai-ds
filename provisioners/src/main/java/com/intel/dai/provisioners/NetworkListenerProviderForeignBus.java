@@ -9,6 +9,7 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.dsapi.BootState;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.BlockingResult;
@@ -54,24 +55,30 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             log_.debug("*** Message: %s", data);
             checkMessage(message);
             PropertyArray locationArray = message.getArrayOrDefault(FOREIGN_LOCATION_KEY, new PropertyArray());
-            String[] xnameLocations = locationArray.toArray(new String[0]);
+            String[] foreignLocations = locationArray.toArray(new String[0]);
             String nodeState = message.getStringOrDefault(FOREIGN_NODE_STATE_KEY, null);
             if(!conversionMap_.containsKey(nodeState))
                 throw new NetworkListenerProviderException("The '" + FOREIGN_NODE_STATE_KEY + "' boot state field in JSON is " +
                         "not a known name: " + nodeState);
             BootState curNodeState = conversionMap_.get(nodeState);
             List<CommonDataFormat> commonList = new ArrayList<>();
-            for(String xnameLocation: xnameLocations) {
+            for(String foreignLocation: foreignLocations) {
                 String location;
-                location = CommonFunctions.convertXNameToLocation(xnameLocation);
-                CommonDataFormat common = new CommonDataFormat(
-                        CommonFunctions.convertISOToLongTimestamp(message.getString(FOREIGN_TIMESTAMP_KEY)), location,
-                        DataType.StateChangeEvent);
-                common.setStateChangeEvent(curNodeState);
-                commonList.add(common);
-                if(common.getStateEvent() == BootState.NODE_ONLINE) {
-                    // This is a contract with the BootEventActions class.
-                    common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, xnameLocation);
+                try {
+                    location = CommonFunctions.convertForeignToLocation(foreignLocation);
+                    CommonDataFormat common = new CommonDataFormat(
+                            CommonFunctions.convertISOToLongTimestamp(message.getString(FOREIGN_TIMESTAMP_KEY)), location,
+                            DataType.StateChangeEvent);
+                    common.setStateChangeEvent(curNodeState);
+                    commonList.add(common);
+                    if (common.getStateEvent() == BootState.NODE_ONLINE) {
+                        // This is a contract with the BootEventActions class.
+                        common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, foreignLocation);
+                    }
+                } catch(ConversionException e) {
+                    log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
+                            "location %s", foreignLocation);
+                    log_.debug("Skipped location for data: %s", data);
                 }
             }
             return commonList;
@@ -93,7 +100,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 dataTimestamp, informWlm_);
         if(data.getStateEvent() == BootState.NODE_ONLINE) {
             try {
-                data.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(data.getLocation()));
+                data.storeExtraData(FOREIGN_IMAGE_ID_KEY, extractBootImageId(data.retrieveExtraData(ORIG_FOREIGN_LOCATION_KEY)));
             } catch (Exception e) {
                 log_.error(e.getMessage());
             }
@@ -127,7 +134,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private void updateNodeBootImageId(CommonDataFormat data) {
         String bootImageId = data.retrieveExtraData(FOREIGN_IMAGE_ID_KEY);
         if(bootImageId.equals("")) {
-            // TODO: Replace with foreign API call if required to get bootImageId based on xnameLocation.
+            // TODO: Replace with foreign API call if required to get bootImageId based on foreign FoLocation.
             log_.error("Failed to update node boot image ID for location '%s'", data.getLocation());
             actions_.logFailedToUpdateNodeBootImageId(data.getLocation(), makeInstanceDataForFailedNodeUpdate(data));
         } else {
@@ -138,9 +145,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
 
     private String makeInstanceDataForFailedNodeUpdate(CommonDataFormat data) {
         return String.format("ForeignLocation='%s'; UcsLocation='%s'; BootMessage='%s'",
-                data.retrieveExtraData("xnameLocation"), data.getLocation(), data.getStateEvent().toString());
+                data.retrieveExtraData(ORIG_FOREIGN_LOCATION_KEY), data.getLocation(), data.getStateEvent().toString());
     }
-
+    
     private void updateBootImageTable() {
         if(updating_.get())
             return;
@@ -210,13 +217,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             return obj.toString();
     }
 
-    private String extractBootImageId(String xnameLocation) throws NetworkListenerProviderException {
+    private String extractBootImageId(String foreignLocation) {
         // TODO: Coded assuming the FOREIGN_IMAGE_ID_KEY is in the NODE_ONLINE message.
         // NOTE: The foreign boot image ID will be the DAI boot image id.
         try {
+
             if(client_ == null)
                 client_ = createClient();
-            BlockingResult result = client_.getRESTRequestBlocking(makeUri(xnameLocation));
+            BlockingResult result = client_.getRESTRequestBlocking(makeUri(foreignLocation));
             if(result.code != 200)
                 throw new RESTClientException("RESTClient resulted in HTTP code: " + result.code +
                         ":" + result.responseDocument);
@@ -265,7 +273,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     }};
 
     private final static String FOREIGN_LOCATION_KEY = "Components";
-    private final static String ORIG_FOREIGN_LOCATION_KEY = "xnameLocation";
+    private final static String ORIG_FOREIGN_LOCATION_KEY = "foreignLocation";
     private final static String FOREIGN_NODE_STATE_KEY = "State";
     private final static String FOREIGN_TIMESTAMP_KEY = "timestamp";
     private final static String FOREIGN_QUERY_PARAM = "?hosts=";

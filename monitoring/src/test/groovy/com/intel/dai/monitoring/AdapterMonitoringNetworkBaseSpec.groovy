@@ -9,7 +9,7 @@ import spock.lang.Specification
 class AdapterMonitoringNetworkBaseSpec extends Specification {
     static class TestProvider extends AdapterMonitoringNetworkBase {
         TestProvider(Logger logger, DataStoreFactory factory, AdapterInformation info) {
-            super(logger, factory, info)
+            super(logger, factory, info, "./build/tmp/benchmarking.json", 1)
         }
 
         @Override

@@ -5,7 +5,7 @@
 package com.intel.networking.restclient;
 
 /**
- * Description of class RESTClientException. Please the description of Exception in java.lang package.
+ * Description of class RESTClientException. Please see the description of Exception in java.lang package.
  */
 public class RESTClientException extends Exception {
     public RESTClientException() { super(); }

@@ -32,7 +32,6 @@ public class OnlineTierDataLoader {
     }
 
     public int populateOnlineTier() {
-        DataLoaderApi dataLoader = null;
         int returnCode = 0;
 
         long timeouts = Long.parseLong(System.getProperty("com.intel.dai.populate.OnlineTierDataLoader.timeout", "500"));
@@ -58,24 +57,11 @@ public class OnlineTierDataLoader {
         if(!checkInitialStatusOfOnlineTier())
             return 1;
 
-
-        dataLoader = connectToPersistentDb(timeouts);
-        if(dataLoader == null) {
-            log.error("Failed to connect to the persistent DB before the timeout period expired.");
-            returnCode = 1;
-        }
-
-        if (dataLoader != null && statusApi != null) {
+        if (statusApi != null) {
             try {
                 statusApi.setDataPopulationStarting();
-                if (dataLoader.isNearlineTierValid()) {
-                    // Load tier 1 from tier 2
-                    returnCode = populateOnlineTierFromNearlineTier(dataLoader);
-                } else {
-                    // Load tier 1 from configuration
-                    dataLoader.dropSnapshotTablesFromNearlineTier();
-                    returnCode = populateOnlineTierFromConfig();
-                }
+                // Load tier 1 from configuration
+                returnCode = populateOnlineTierFromConfig();
                 statusApi.setDataPopulationComplete("OK");
             } catch (DataStoreException ex) {
                 log.exception(ex, "Unable to check Nearline tier status or set Online tier DB status");
@@ -89,20 +75,6 @@ public class OnlineTierDataLoader {
         }
 
         return returnCode;
-    }
-
-    private DataLoaderApi connectToPersistentDb(long timeouts) {
-        DataLoaderApi api = null;
-        long target = System.currentTimeMillis() + (timeouts * 1000);
-        while(api == null && System.currentTimeMillis() < target) {
-            try {
-                api = dsFactory.createDataLoaderApi();
-            } catch(DataStoreException e) {
-                log.warn("Currently cannot connect to the persistent DB...");
-                try { Thread.sleep(LOOP_SLEEP); } catch(InterruptedException e2) { /* Ignore */ }
-            }
-        }
-        return api;
     }
 
     boolean checkInitialStatusOfOnlineTier() {
@@ -195,17 +167,6 @@ public class OnlineTierDataLoader {
                 builder.append("Caused By: ").append(current.getMessage()).append("\n");
         }
         return builder.toString();
-    }
-
-    private int populateOnlineTierFromNearlineTier(DataLoaderApi dataLoader) {
-        try {
-            dataLoader.populateOnlineTierFromNearlineTier();
-        } catch (DataStoreException ex) {
-            log.exception(ex, "An error occurred while attempting to populate the Online tier from the Nearline tier");
-            return 1;
-        }
-
-        return 0;
     }
 
     private int populateOnlineTierFromConfig() {

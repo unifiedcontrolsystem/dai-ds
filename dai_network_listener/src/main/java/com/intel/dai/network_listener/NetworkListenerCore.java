@@ -13,6 +13,7 @@ import com.intel.dai.exceptions.ProviderException;
 import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;
 import com.intel.networking.sink.NetworkDataSinkFactory;
+import com.intel.perflogging.BenchmarkHelper;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import org.voltdb.client.ProcCallException;
@@ -27,17 +28,28 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Description of class PartitionedMonitorAdapter.
+ * This is the core code for this component. The adapter functionality and business logic for ALL providers using
+ * this component.
  */
 public class NetworkListenerCore {
-    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors(); // Logical hw threads.
+    private static final int MAX_THREADS = 3; // Maximum processing threads.
 
     @SuppressWarnings("serial")
     static class Exception extends java.lang.Exception {
         Exception(String message) { super(message); }
     }
 
-    public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory) {
+    /**
+     * Constructor for this class accepting all objects from the application needed to create all interfaces used.
+     *
+     * @param logger The application created logger.
+     * @param configuration The application created and loaded configuration object.
+     * @param factory The Data Store (DS) factory where all online and near-line tier API interfaces are created.
+     * @param benchmarking Object to do benchmarking inside all providers using this component.
+     */
+    public NetworkListenerCore(Logger logger, NetworkListenerConfig configuration, DataStoreFactory factory,
+                               BenchmarkHelper benchmarking) {
         assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
         assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
         assert factory != null:"Passed a null DataStoreFactory to NetworkListenerCore.ctor()!";
@@ -45,8 +57,14 @@ public class NetworkListenerCore {
         config_ = configuration;
         adapter_ = config_.getAdapterInformation();
         factory_ = factory;
+        benchmarking_ = benchmarking;
     }
 
+    /**
+     * Entry point for application run.
+     *
+     * @return a Linux shell compatible integer for the exit code if used.
+     */
     public int run() {
         int result;
         log_.info("Starting the adapter");
@@ -66,6 +84,7 @@ public class NetworkListenerCore {
         return result;
     }
 
+    // Normal application shutdown method call by run().
     private void shutdownAdapter() {
         try {
             adapterOperations_.shutdownAdapter();
@@ -75,6 +94,7 @@ public class NetworkListenerCore {
         try { actions_.close(); } catch(IOException e) { log_.exception(e); }
     }
 
+    // Based on the network configuration in the configuration object, attempt connection to all data sources.
     private boolean connectToAllDataSources() {
         try {
             return startAllConnections();
@@ -89,12 +109,14 @@ public class NetworkListenerCore {
         }
     }
 
+    // Sets up a single profile from the configuration object.
     private boolean setUpProfile(String profile) {
         if(config_.getCurrentProfile() == null) {
             adapter_.setUniqueNameExtension(profile);
             log_.debug("*** Setting profile: %s", profile);
             config_.setCurrentProfile(profile);
             subjects_ = config_.getProfileSubjects();
+            log_.debug("Allowed subjects in this adapter instance: '%s'", String.join(",", subjects_));
             try {
                 log_.debug("*** Creating providers...");
                 createTransformAndActionProviders();
@@ -108,6 +130,7 @@ public class NetworkListenerCore {
         return true;
     }
 
+    // Register the application in online tier.
     private boolean registerAdapter() {
         adapterOperations_ = factory_.createAdapterOperations(adapter_);
         if (!workQueue_.isThisNewWorkItem())
@@ -121,8 +144,11 @@ public class NetworkListenerCore {
         return false;
     }
 
+    // Setup the application's system actions object
     private boolean setUpAdapter() {
-        boolean useBenchmarking = config_.useBenchmarking() || Boolean.parseBoolean(System.getenv("USE_BENCHMARKING"));
+        // If the configuration object or the environment variable below indicate benchmarking then create an alternate
+        // SystemActions object.
+        boolean useBenchmarking = config_.useBenchmarking();
         try {
             if (useBenchmarking) {
                 actions_ = new BenchmarkingSystemActions(log_, factory_, adapter_, config_);
@@ -137,17 +163,19 @@ public class NetworkListenerCore {
         return false;
     }
 
+    // Create all dynamically create the provider class.
     private void createTransformAndActionProviders() throws ProviderException {
         provider_ = createNetworkListenerProvider(config_.getProviderName());
     }
 
+    // Start all connections; SSE, HTTP Callback, RabbitMQ, etc...
     private boolean startAllConnections() throws NetworkDataSinkFactory.FactoryException {
-        List<NetworkDataSink> removeList = new ArrayList<>();
+        ArrayList<NetworkDataSink> unconnectedList = new ArrayList<>();
         for(String networkStreamName: config_.getProfileStreams()) {
             PropertyMap arguments = config_.getNetworkArguments(networkStreamName);
-            assert (arguments != null):"A null arguments object";
+            if (arguments == null) throw new NullPointerException("A null arguments object");
             String name = config_.getNetworkName(networkStreamName);
-            assert name != null: "A null network name is not allowed!";
+            if (name == null) throw new NullPointerException("A null network name is not allowed!");
             log_.debug("*** Creating a network sink of type '%s'...", name);
             arguments.put("subjects", subjects_);
             Map<String,String> args = buildArgumentsForNetwork(arguments);
@@ -165,51 +193,69 @@ public class NetworkListenerCore {
         safeSleep(1500); // stabilize for 1.5 seconds...
         for(NetworkDataSink sink: sinks_) {
             if(!sink.isListening())
-                removeList.add(sink);
+                unconnectedList.add(sink);
         }
-        for(NetworkDataSink remove: removeList)
-            sinks_.remove(remove);
-        if(sinks_.isEmpty()) {
-            log_.error("ALL of the connections failed for this monitoring adapter");
-            return false;
-        } else if(!removeList.isEmpty()) {
-            log_.error("One or more of the connections failed for this monitoring adapter");
-            return false;
-        } else {
-            log_.info("Connected %d of %d connections", sinks_.size(), config_.getProfileStreams().size());
-            return true;
+        if(!unconnectedList.isEmpty()) {
+            log_.warn("One or more of the connections failed for this monitoring adapter, they will continue to " +
+                    "attempt to connection in the background");
+            // Continue to try failures in the background.
+            new Thread(() -> backgroundContinueConnections(unconnectedList)).start();
         }
+        return true;
     }
 
+    // Used if some connection failed, this will continue trying until list is empty (all connection made).
+    private void backgroundContinueConnections(List<NetworkDataSink> unconnectedList) {
+        List<NetworkDataSink> succeededList = new ArrayList<>();
+        while (!unconnectedList.isEmpty()) {
+            for (NetworkDataSink sink : unconnectedList) {
+                sink.startListening();
+                safeSleep(1500); // stabilize for 1.5 seconds...
+                if (sink.isListening()) {
+                    succeededList.add(sink);
+                    log_.info("A lazy connection was established in the background.");
+                }
+            }
+            while (!succeededList.isEmpty()) {
+                unconnectedList.remove(succeededList.get(0));
+                succeededList.remove(0);
+            }
+        }
+        log_.info("All remaining connections were completed.");
+    }
+
+    // Stop all listening connections.
     private void stopAllConnections() {
         for(NetworkDataSink sink: sinks_)
             sink.stopListening();
     }
 
+    // Receive raw message and queue it up for processing.
     private void processSinkMessage(String subject, String message) {
         log_.debug("Received message for subject: %s", subject);
         queue_.add(new FullMessage(subject, message));
     }
 
+    // On a thread, process the incoming queued messages.
     private void processDataQueueThreaded() {
-        int count = Math.min(THREAD_COUNT / 2, 3); // 1-3 threads for processing.
-        if(count == 1) {
-            processDataQueue();
-            return;
-        }
-        Thread[] threads = new Thread[count];
+        int count = Math.min(THREAD_COUNT / 2, MAX_THREADS); // 1-MAX_THREADS threads for processing.
+        int extraThreads = count - 1;
+        Thread[] threads = new Thread[extraThreads];
         log_.info("*** Using %d threads for monitoring...", count);
-        for(int i = 0; i < count; i++) {
+        for(int i = 0; i < extraThreads; i++) {
             threads[i] = new Thread(this::processDataQueue);
             threads[i].start();
         }
-        for(int i = 0; i < count; i++) {
+        baseThreadId_ = Thread.currentThread().getId();
+        processDataQueue(); // Use this thread (current thread) for one of the processing threads...
+        for(int i = 0; i < extraThreads; i++) { // wait for extraThreads...
             try {
                 threads[i].join();
-            } catch(InterruptedException e) { /* Interrupt is good as joined */ }
+            } catch(InterruptedException e) { /* Interrupt is ignored and treated and joined */ }
         }
     }
 
+    // Called from threaded method above to process messages.
     private void processDataQueue() {
         long backOffSleep = 1;
         while(!adapter_.isShuttingDown()) {
@@ -220,20 +266,24 @@ public class NetworkListenerCore {
             } else {
                 safeSleep(backOffSleep);
                 if(backOffSleep < 25L) backOffSleep += 2;
+                if(Thread.currentThread().getId() == baseThreadId_) benchmarking_.tick();
             }
         }
         log_.debug("*** Ending processing loop...");
     }
 
+    // process a single message.
     private void processMessage(String subject, String message) {
         if(subjects_.contains(subject) || subjects_.contains("*")) {
             try {
-                log_.debug("Transforming data...");
+                benchmarking_.addNamedValue(subject + "_messages", 1);
+                log_.debug("Transforming data for subject '%s'...", subject);
                 List<CommonDataFormat> dataList = provider_.processRawStringData(message, config_);
                 if(dataList != null) {
                     log_.debug("Performing actions...");
                     for (CommonDataFormat data : dataList)
                         provider_.actOnData(data, config_, actions_);
+                    benchmarking_.addNamedValue(subject + "_" + config_.getCurrentProfile(), dataList.size());
                 }
             } catch(NetworkListenerProviderException e) {
                 log_.exception(e, "Dropping a message on the floor due to transformation error");
@@ -245,20 +295,23 @@ public class NetworkListenerCore {
         }
     }
 
+    // Shutting down the application.
     public void shutDown() {
         log_.info("Shutting down the adapter gracefully");
         adapter_.signalToShutdown();
     }
 
+    // Online tier application logic.
     private int runMainLoop() {
-        while(!adapter_.isShuttingDown()) {
+        while(!adapter_.isShuttingDown()) { // while application is running....
             try {
-                if (workQueue_.grabNextAvailWorkItem()) {
+                if (workQueue_.grabNextAvailWorkItem()) { // Get the online tier work item from online tier.
                     if (workQueue_.workToBeDone().equals("HandleInputFromExternalComponent")) {
                         adapter_.setBaseWorkItemId(workQueue_.baseWorkItemId());
                         Map<String, String> parameters = workQueue_.getClientParameters();
                         String profile = parameters.getOrDefault("Profile", "default");
                         log_.info("*** Got valid work item and using monitoring profile '%s'...", profile);
+                        benchmarking_.replaceFilenameVariable("PROFILE", profile);
                         try {
                             if(!setUpProfile(profile)) {
                                 log_.error("Failed to connect to network data sources");
@@ -277,7 +330,7 @@ public class NetworkListenerCore {
                         }
                         log_.debug("*** Starting processing loop...");
                         processDataQueueThreaded();
-                    } else
+                    } else // Not a valid work item.
                         workQueue_.handleProcessingWhenUnexpectedWorkItem();
                     adapter_.setId(-1L);
                 }
@@ -290,10 +343,12 @@ public class NetworkListenerCore {
         return 0;
     }
 
+    // Sleep without fear of exception...
     private void safeSleep(long msDelay) {
         try { Thread.sleep(msDelay); } catch(InterruptedException e) { /* Ignore this exception */ }
     }
 
+    // Part of processing of the configuration object with a focus on networking.
     private Map<String,String> buildArgumentsForNetwork(PropertyMap args) {
         Map<String,String> result = new HashMap<>();
         for(Map.Entry<String,Object> entry: args.entrySet()) {
@@ -375,6 +430,7 @@ public class NetworkListenerCore {
     }
 
     private NetworkListenerConfig config_;
+    private BenchmarkHelper benchmarking_;
     private Logger log_;
     private AdapterInformation adapter_;
     private WorkQueue workQueue_;
@@ -385,6 +441,8 @@ public class NetworkListenerCore {
     private SystemActions actions_;
     private List<String> subjects_;
             ConcurrentLinkedQueue<FullMessage> queue_ = new ConcurrentLinkedQueue<>();
+    private long baseThreadId_;
+    private static long STABILIZATION_VALUE = 1500L;
 
     private static final class FullMessage {
         FullMessage(String subject, String message) {

@@ -136,7 +136,7 @@ CREATE TYPE public.raseventtypewithoutmetadata AS (
 CREATE TYPE public.reservationtype AS (
 	reservationname character varying(35),
 	users character varying(100),
-	nodes character varying(1000),
+	nodes character varying(5000),
 	starttimestamp timestamp without time zone,
 	endtimestamp timestamp without time zone,
 	deletedtimestamp timestamp without time zone,
@@ -549,7 +549,7 @@ CREATE TABLE public.tier2_ucsconfigvalue (
 CREATE TABLE public.tier2_wlmreservation_history (
     reservationname character varying(35) NOT NULL,
     users character varying(100) NOT NULL,
-    nodes character varying(1000),
+    nodes character varying(5000),
     starttimestamp timestamp without time zone NOT NULL,
     endtimestamp timestamp without time zone,
     deletedtimestamp timestamp without time zone,
@@ -995,6 +995,30 @@ CREATE TABLE PUBLIC.tier2_authorized_user (
     roleid character varying NOT NULL
 );
 
+CREATE TABLE public.Tier2_HWInventoryFRU (
+    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
+    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    entrynumber bigint NOT NULL
+);
+
+CREATE TABLE public.Tier2_HWInventoryLocation (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
+    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
+    Ordinal INTEGER NOT NULL,            -- singleton:0
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    entrynumber bigint NOT NULL
+);
+
+CREATE TABLE public.tier2_HWInventory_History (
+    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber bigint NOT NULL
+);
 
 
 --- FUNCTION DEFINITIONS START HERE ----
@@ -1170,27 +1194,12 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
       return query
           select 'Inv_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from Tier2_nodeinventory_history;
-
-      return query
-          select 'InvSS_Max_Timestamp'::varchar,
-            max(snapshottimestamp)
-          from Tier2_inventorysnapshot;
-
-      return query
-          select 'Diags_Max_Timestamp'::varchar,
-            max(starttimestamp)
-          from Tier2_Diag_History;
+          from tier2_hwinventorylocation;
 
       return query
           select 'Replacement_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from Tier2_replacement_history;
-
-      return query
-          select 'Service_Operation_Max_Timestamp'::varchar,
-            max(dbupdatedtimestamp)
-          from Tier2_serviceoperation_history;
+          from tier2_hwinventory_history; 
 
       return query
           select 'Service_Node_LastChg_Timestamp'::varchar,
@@ -1622,32 +1631,70 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_replacement_history
+CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_hwinventory_history
     LANGUAGE plpgsql
     AS $$
     DECLARE
-        p_sernum character varying;
+        p_fruid character varying;
     BEGIN
-        p_sernum := (select distinct on (newsernum) newsernum from tier2_replacement_history where newsernum = p_lctn);
-        if (p_sernum is not null) then
+        p_fruid := (select distinct on (fruid) fruid from tier2_hwinventory_history where fruid = p_lctn);
+        if (p_fruid is not null) then
         return query
-            select * from  tier2_replacement_history
+            select * from  tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                newsernum like (p_sernum || '%')
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+                fruid like (p_fruid || '%')
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
 
         else
         return query
-            select * from  tier2_replacement_history
+            select * from  tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+                (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
         end if;
         return;
     END
 
+$$;
+
+
+--
+-- Name: getinventoryhistoryforlctn(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryhistoryforlctn(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), fruid character varying(80))
+    LANGUAGE sql
+    AS $$
+        select id, fruid from  tier2_hwinventory_history
+        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+            dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+            (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+        order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
+$$;
+
+
+--
+-- Name: getinventoryinfoforlctn(tcharacter varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
+    LANGUAGE sql
+    AS $$
+        select HI.id,
+        HI.dbupdatedtimestamp,
+        HI.ordinal,
+        HI.fruid,
+        HI.type,
+        HF.frutype,
+        HF.frusubtype
+        from tier2_hwinventorylocation HI
+        inner join tier2_hwinventoryfru HF on
+        HI.fruid = HF.fruid
+        where
+            HI.id like concat(p_lctn, '%')
+        order by HI.DbUpdatedTimestamp, HI.id desc LIMIT p_limit;
 $$;
 
 
@@ -2148,24 +2195,26 @@ $$;
 -- Name: inventoryinfolist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), lastchgtimestamp TIMESTAMP, Sernum VarChar(50))
-    LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
+    LANGUAGE sql
     AS $$
-BEGIN
-    if (p_start_time is not null) then
-        return query
-            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp, ni.Sernum  from tier2_nodeinventory_history ni
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= p_start_time
-            order by Lctn, dbupdatedtimestamp desc;
-    else
-        return query
-            select distinct on (ni.Lctn) ni.Lctn, ni.InventoryInfo, ni.dbupdatedtimestamp , ni.Sernum  from tier2_nodeinventory_history ni
-                        where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-            order by Lctn, dbupdatedtimestamp desc;
-    end if;
-    return;
-END
+    select  HI.id,
+            HI.dbupdatedtimestamp,
+            HI.ordinal,
+            HI.fruid,
+            HI.type,
+            HF.frutype,
+            HF.frusubtype
+    from tier2_hwinventorylocation HI
+    inner join tier2_hwinventoryfru HF on
+    HI.fruid = HF.fruid
+    where
+        case
+            when p_start_time is null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            when p_start_time is not null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                                               HI.dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp at time zone 'UTC')
+        end
+    order by HI.DbUpdatedTimestamp, HI.id desc
 $$;
 
 
@@ -2281,6 +2330,95 @@ BEGIN
 END
 $$;
 
+--
+-- Name: GetJobInfo(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.GetJobInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_at_time timestamp without time zone, p_jobid character varying, p_username character varying, p_state character varying, p_locations character varying, p_limit integer) RETURNS SETOF public.jobnonactivetype
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_prev_job_id varchar := '';
+    v_job Tier2_Job_History;
+    v_rec JobNonActiveType%rowtype;
+    v_nodes varchar := '';
+    v_counter integer := 0;
+
+BEGIN
+    for v_job  in
+        select *
+        from Tier2_Job_History
+        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+        and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
+        and endtimestamp >= coalesce(p_at_time, endtimestamp)
+        and starttimestamp <= coalesce(p_at_time, starttimestamp)
+        and
+        case
+                when p_jobid = '%' then (jobid ~ '.*')
+                when p_jobid != '%' then (jobid = p_jobid)
+        end
+        and
+        case
+                when p_username = '%' then (username ~ '.*')
+                when p_username != '%' then (username ~ p_username)
+        end
+                and
+        case
+                when p_state = '%' then (state ~ '.*')
+                when p_state != '%' then (state ~ p_state)
+        end
+        order by JobId desc, starttimestamp desc
+    loop
+        if v_counter < p_limit then
+            if v_job.JobId <> v_prev_job_id then
+                v_nodes := GetListNodeLctns(v_job.Nodes);
+                if p_locations = '%' or areNodesInJob(string_to_array(p_locations, ','), string_to_array(v_nodes,' ')) then
+                    v_counter := v_counter + 1;
+                    v_prev_job_id := v_job.JobId;
+                    v_rec.JobId := v_job.JobId;
+                    v_rec.JobName := v_job.JobName;
+                    v_rec.State := v_job.State;
+                    v_rec.Bsn := v_job.Bsn;
+                    v_rec.UserName := v_job.UserName;
+                    v_rec.StartTimestamp := v_job.StartTimestamp;
+                    v_rec.EndTimestamp := v_job.EndTimestamp;
+                    v_rec.ExitStatus := v_job.ExitStatus;
+                    v_rec.NumNodes := v_job.NumNodes;
+                    v_rec.Nodes := v_nodes;
+                    v_rec.JobAcctInfo := v_job.JobAcctInfo;
+                    v_rec.Wlmjobstate := v_job.Wlmjobstate;
+                    return next v_rec;
+                end if;
+            end if;
+        end if;
+    end loop;
+    return;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION public.areNodesInJob(p_locations character varying[], p_jobLocations character varying[]) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    v_areNodesInJob boolean := false;
+    v_loc varchar;
+    v_jobloc varchar;
+
+BEGIN
+
+    foreach v_loc in array p_locations
+    loop
+        foreach v_jobloc in array p_jobLocations
+        loop
+            v_areNodesInJob = v_areNodesInJob or (v_loc = v_jobloc);
+        end loop;
+    end loop;
+
+    return v_areNodesInJob;
+END
+$$;
+
 
 --
 -- Name: raseventlistattime(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
@@ -2343,21 +2481,21 @@ $$;
 -- Name: replacementhistorylist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_replacement_history
+CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_hwinventory_history
     LANGUAGE plpgsql
     AS $$
 BEGIN
     if (p_start_time is not null) then
         return query
-            select * from tier2_replacement_history
+            select * from tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= p_start_time
-            order by lastchgtimestamp desc;
+            order by dbupdatedtimestamp, id, action, fruid desc;
     else
         return query
-            select * from tier2_replacement_history
+            select * from tier2_hwinventory_history
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
-            order by lastchgtimestamp desc;
+            order by dbupdatedtimestamp, id, action, fruid desc;
     end if;
     return;
 END
@@ -2398,62 +2536,6 @@ BEGIN
             RE.DbUpdatedTimestamp >= p_start_time
             order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT 200;
     end if;
-    return;
-END
-$$;
-
---
--- Name: GetJobInfo(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.GetJobInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_jobid character varying, p_username character varying, p_state character varying, p_limit integer) RETURNS SETOF public.jobnonactivetype
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    v_prev_job_id varchar := '';
-    v_job Tier2_Job_History;
-    v_rec JobNonActiveType%rowtype;
-
-BEGIN
-    for v_job  in
-        select *
-        from Tier2_Job_History
-        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-        and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
-        and
-        case
-                when p_jobid = '%' then (jobid ~ '.*')
-                when p_jobid != '%' then (jobid ~ p_jobid)
-        end
-        and
-        case
-                when p_username = '%' then (username ~ '.*')
-                when p_username != '%' then (username ~ p_username)
-        end
-                and
-        case
-                when p_state = '%' then (state ~ '.*')
-                when p_state != '%' then (state ~ p_state)
-        end
-        order by JobId desc, starttimestamp desc LIMIT p_limit
-    loop
-        if v_job.JobId <> v_prev_job_id then
-            v_prev_job_id := v_job.JobId;
-            v_rec.JobId := v_job.JobId;
-            v_rec.JobName := v_job.JobName;
-            v_rec.State := v_job.State;
-            v_rec.Bsn := v_job.Bsn;
-            v_rec.UserName := v_job.UserName;
-            v_rec.StartTimestamp := v_job.StartTimestamp;
-            v_rec.EndTimestamp := v_job.EndTimestamp;
-            v_rec.ExitStatus := v_job.ExitStatus;
-            v_rec.NumNodes := v_job.NumNodes;
-            v_rec.Nodes := GetListNodeLctns(v_job.Nodes);
-            v_rec.JobAcctInfo := v_job.JobAcctInfo;
-            v_rec.Wlmjobstate := v_job.Wlmjobstate;
-            return next v_rec;
-        end if;
-    end loop;
     return;
 END
 $$;
@@ -3109,6 +3191,67 @@ END;
 $$;
 
 
+CREATE OR REPLACE FUNCTION public.insertorupdatehwinventoryfru(p_fruid character varying, p_frutype character varying, p_frusubtype character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ BEGIN
+    insert into Tier2_HWInventoryFRU(
+        FRUId,
+        FRUType,
+        FRUSubType,
+        DbUpdatedTimestamp)
+    values(
+        p_fruid,
+        p_frutype,
+        p_frusubtype,
+        p_dbupdatedtimestamp)
+    on conflict(FRUId) do update set
+        FRUType = p_frutype,
+        FRUSubType = p_frusubtype,
+        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.insertorupdatehwinventorylocation(p_id character varying, p_type character varying, p_ordinal integer, p_fruid character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ BEGIN
+    insert into Tier2_HWInventoryLocation(
+        Id,
+        Type,
+        Ordinal,
+        FruId,
+        DbUpdatedTimestamp)
+    values(
+        p_id,
+        p_type,
+        p_ordinal,
+        p_fruid,
+        p_dbupdatedtimestamp)
+    on conflict(Id) do update set
+        FRUId = p_fruid,
+        Type = p_type,
+        Ordinal = p_ordinal,
+        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventoryhistory_records() RETURNS SETOF public.tier2_HWInventory_History
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HwInventory_History;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventoryfru_records() RETURNS SETOF public.Tier2_HWInventoryFRU
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HWInventoryFRU;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_hwinventorylocation_records() RETURNS SETOF public.Tier2_HWInventoryLocation
+ LANGUAGE sql
+    AS $$
+    select *
+    from Tier2_HWInventoryLocation;
+$$;
 
 ----- ALTER TABLE SQLS START HERE ------
 
@@ -3555,7 +3698,7 @@ CREATE SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq
 ALTER SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq OWNED BY public.tier2_nodeinventory_history.entrynumber;
 
 
-CREATE SEQUENCE public.tier2_nonodehw_history_entrynumber_seq
+CREATE SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -3563,7 +3706,44 @@ CREATE SEQUENCE public.tier2_nonodehw_history_entrynumber_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tier2_adapter_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
+ALTER SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
+
+
+CREATE SEQUENCE public.tier2_HWInventory_History_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventory_History_entrynumber_seq OWNED BY public.tier2_HWInventory_History.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventory_History_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventory_History_entrynumber_seq', 1, false);
+
+CREATE SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq OWNED BY public.tier2_HWInventoryFRU.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventoryFRU ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryFRU_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventoryFRU_entrynumber_seq', 1, false);
+
+CREATE SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq OWNED BY public.tier2_HWInventoryLocation.entrynumber;
+ALTER TABLE ONLY public.tier2_HWInventoryLocation ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryLocation_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_HWInventoryLocation_entrynumber_seq', 1, false);
 
 --
 -- Name: tier2_adapter_history entrynumber; Type: DEFAULT; Schema: public; Owner: -

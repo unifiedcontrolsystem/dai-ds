@@ -18,6 +18,9 @@ import java.net.URI;
 public class ForeignSubscriptionResponseParser implements SubscriptionResponseParser {
     public ForeignSubscriptionResponseParser() {}
 
+    /**
+     * This method is used to parser response receiver.
+     */
     @Override
     public URI parseResponse(String message, String subscriptionUri) {
         ConfigIO parser = ConfigIOFactory.getInstance("json");

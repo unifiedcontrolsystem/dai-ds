@@ -25,10 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.intel.dai.inventory.api.HWInvDiscovery.queryHWInvTree;
-
 /**
- * Description of class PartitionedMonitorSystemActions.
+ * Description of class PartitionedMonitorSystemActions. See parent interface for details on actions.
  */
 class NetworkListenerSystemActions implements SystemActions, Initializer {
     NetworkListenerSystemActions(Logger logger, DataStoreFactory factory, AdapterInformation info,
@@ -43,6 +41,8 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
         hwInvApi_ = factory_.createHWInvApi();
+        nodeInformation_ = factory_.createNodeInformation();
+        hwInvDiscovery_ = new HWInvDiscovery(logger);
     }
 
     @Override
@@ -76,12 +76,19 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             log_.exception(e);
             return;
         }
-        if(location == null || location.isBlank())
-            eventActions_.logRasEventNoEffectedJob(type, instanceData, location, nsTimestamp,
+        long usTimestamp = nsTimestamp / 1000L;
+        try {
+            if (location == null || location.isBlank() || nodeInformation_.isServiceNodeLocation(location))
+                eventActions_.logRasEventNoEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+            else
+                eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
+                        adapter_.getType(), adapter_.getBaseWorkItemId());
+        } catch(DataStoreException e) {
+            log_.exception(e);
+            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, usTimestamp,
                     adapter_.getType(), adapter_.getBaseWorkItemId());
-        else
-            eventActions_.logRasEventCheckForEffectedJob(type, instanceData, location, nsTimestamp,
-                    adapter_.getType(), adapter_.getBaseWorkItemId());
+        }
     }
 
     @Override
@@ -151,9 +158,14 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     @Override
     public void changeNodeBootImageId(String location, String id) {
         try {
-            bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            if(nodeInformation_.isComputeNodeLocation(location))
+                bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
+            else
+                logFailedToUpdateNodeBootImageId(location,
+                        "Service nodes are currently unsupported for this operation.");
         } catch(DataStoreException e) {
-            log_.exception(e, "Failed to update the boot image ID for location '%s'", location);
+            log_.exception(e, "Failed to update the boot image ID for compute node location '%s'", location);
+            logFailedToUpdateNodeBootImageId(location, "Compute node: " + e.getMessage());
         }
     }
 
@@ -196,34 +208,61 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
     /**
      * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
-     * @param root root location in foreign format
+     * @param location root location in foreign format
+     * @param foreignName root location in foreign format
      */
     @Override
-    public void upsertHWInventory(String root) {
-        HWInvTree before = getHWInvSnapshot(root);
+    public void upsertHWInventory(String location, String foreignName) {
+        HWInvTree before = getHWInvSnapshot(location);
 
         ingestCanonicalHWInvJson(
                 toCanonicalHWInvJson(
                         getForeignHWInvJson(
-                                root)));
+                                foreignName)));
 
-        HWInvTree after = getHWInvSnapshot(root);
+        HWInvTree after = getHWInvSnapshot(location);
 
         if (before == null || after == null) {
             log_.error("before or after is null");
             return;
         }
         HWInvUtilImpl util = new HWInvUtilImpl();
-        List<HWInvLoc> delList = util.subtract(before.locs, after.locs);
-        for (HWInvLoc s : delList) {
-            log_.info("deleted: %s from %s", s.FRUID, s.ID);
-            insertHistoricalRecord("DELETED", s);
-        }
-        List<HWInvLoc> addList = util.subtract(after.locs, before.locs);
-        for (HWInvLoc s : addList) {
+        List<HWInvLoc> diffList = util.subtract(after.locs, before.locs);
+        for (HWInvLoc s : diffList) {
             log_.info("inserted: %s into %s", s.FRUID, s.ID);
             insertHistoricalRecord("INSERTED", s);
         }
+    }
+
+    /**
+     * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
+     * @param location root location in DAI format
+     * @param foreignName root location in foreign format
+     */
+    @Override
+    public void deleteHWInventory(String location, String foreignName) {
+        HWInvTree before = getHWInvSnapshot(location);
+
+        deleteHWInvSnapshot(location);
+
+        HWInvTree after = getHWInvSnapshot(location);
+
+        if (before == null || after == null) {
+            log_.error("before or after is null");
+            return;
+        }
+        HWInvUtilImpl util = new HWInvUtilImpl();
+        List<HWInvLoc> diffList = util.subtract(before.locs, after.locs);
+        for (HWInvLoc s : diffList) {
+            log_.info("deleted: %s from %s", s.FRUID, s.ID);
+            insertHistoricalRecord("DELETED", s);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(publisher_ != null)
+            publisher_.close();
     }
 
     private void insertHistoricalRecord(String action, HWInvLoc s) {
@@ -238,18 +277,33 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         }
     }
 
-    private HWInvTree getHWInvSnapshot(String root) {
-        if (root == null) {
-            return null;
-        }
+    /**
+     * Fetch HW Inventory snapshot data for specific location.
+     * @param location DAI location to fetch hw inventory data from db.
+     */
+    private HWInvTree getHWInvSnapshot(String location) {
         try {
-            return hwInvApi_.allLocationsAt(root, null);
+            return hwInvApi_.allLocationsAt(location, null);
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
             log_.error("DataStoreException: %s", e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Deletes HW Inventory snapshot for specific location.
+     * @param location DAI location to remove hw inventory data from db.
+     */
+    private void deleteHWInvSnapshot(String location) {
+        try {
+            hwInvApi_.delete(location);
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
     }
 
     /**
@@ -297,7 +351,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         if (root == null) return null;
 
         try {
-            HWInvDiscovery.initialize(log_);
+            hwInvDiscovery_.initialize();
             log_.info("rest client created");
 
         } catch (RESTClientException e) {
@@ -307,21 +361,15 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
         ImmutablePair<Integer, String> foreignHwInv;
         if (root.equals("")) {
-            foreignHwInv = queryHWInvTree();
+            foreignHwInv = hwInvDiscovery_.queryHWInvTree();
         } else {
-            foreignHwInv = queryHWInvTree(root);
+            foreignHwInv = hwInvDiscovery_.queryHWInvTree(root);
         }
         if (foreignHwInv.getLeft() != 0) {
             log_.error("failed to acquire foreign HW inventory json");
             return null;
         }
         return foreignHwInv.getRight();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if(publisher_ != null)
-            publisher_.close();
     }
 
     private Map<String,String> translateForeignBootImageInfo(Map<String,String> entry) {
@@ -400,7 +448,9 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private AdapterOperations operations_;
     private HWInvApi hwInvApi_;
     private AdapterInformation adapter_;
+    private final NodeInformation nodeInformation_;
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;
     private boolean publisherConfigured_ = false;
+    private HWInvDiscovery hwInvDiscovery_;
 }

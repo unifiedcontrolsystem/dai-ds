@@ -8,7 +8,7 @@ _ucs_completions()
     commands="group view"
     subcommands=(
                  "add remove get list"
-                 "system-info event env state network-config job reservation"
+                 "system-info event env state network-config job reservation inventory-history inventory-info replacement-history"
                  )
 
     case ${COMP_CWORD} in

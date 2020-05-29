@@ -79,7 +79,7 @@ This is more complicated but is more useful for developers.
     java-11-openjdk
     java-11-openjdk-devel
     ```
-__NOTE:__ Examine the docker-build/Dockerfile to how its done for a docker
+__NOTE:__ Examine the docker-build/Dockerfile for how it's done for a docker
     container.
 
 2. If a proxy is required for external access then please make sure of the
@@ -113,13 +113,21 @@ Run Requirements and Instructions (Deployment)
 =================================================
 Installers to use after build:
 ```
-build/distributions/install-docker_cp4_3rd_party_{version}.sh
-build/distributions/install-docker_cp4_dai_{version}.sh
+build/distributions/install-docker_3rd_party_{version}.sh
+build/distributions/install-docker_dai_{version}.sh
 ```
 
-These install package includes 4 services to control docker-compose
+These install packages include 4 services to control docker-compose
 containers. One each for postgres, voltdb, rabbitmq, and dai. It assumes all
-adapters run on one system.
+adapters run on one system. The EventSim application must be run as a
+standalone docker-compose application using the eventsim.yml file.
+
+__NOTE:__ This will run on a single system out-of-the box if you edit the
+___/etc/hosts___ file and add "_sms01-nmn.local_" and "_sms01-nmn_" as an aliases
+for the system. Then stop using the services (see below). If you are behind a proxy
+please make sure that the no_proxy and NO_PROXY environmental variables have the
+"_.local_" domain excluded from the proxy lookups. The non-domain alias name "_sms01-nmn_"
+is required only for the voltdb container to start correctly.
 
 Pre-requisites:
 ----------------
@@ -132,13 +140,13 @@ Pre-requisites:
     * NearlineConfig.json
     * ProviderMonitoringNetworkForeignBus.json
     * ProviderProvisionerNetworkForeignBus.json
-    * LocationTranslationMap.json - If the contents of this file do not correleate with
-                                    the MachineConfig.json file's contents then the
+    * LocationTranslationMap.json - If the contents of this file do not correlate with
+                                    the MachineConfig.json file's contents, the
                                     provisioning and monitoring providers may not
                                     function as expected. Make sure ALL Foreign
                                     names match a DAI name and no "location" is missing
                                     or unexpected.
-5. The API (or eventsim) must be available for the
+5. The real API (or EventSim container) must be available for the
    ProviderMonitoringNetworkForeignBus and ProviderProvisionerNetworkForeignBus
    to connect.
 6. If the deployment system does not have internet access you must download and save the following docker images from Docker Hub then copy and reload them onto the target system's local docker repository:
@@ -152,11 +160,11 @@ Installing DAI and Third Party Components:
 -------------------------------------------
 1. As root run the third party installer:
     ```bash
-    # install-docker_cp4_3rd_party_{version}.sh
+    # install-docker_3rd_party_{version}.sh
     ```
 2. As root run the dai installer:
     ```bash
-    # install-docker_cp4_dai_{version}.sh
+    # install-docker_dai_{version}.sh
     ```
 __NOTE:__ The installed file tree is located at `/opt/dai-docker`.
 
@@ -176,10 +184,40 @@ __NOTE:__ If you start only the dai-manager service then all other services will
 These services all use the /opt/dai-docker/*.yml files for docker-compose
 launching.  _Do not use docker or docker-compose directly, without first stopping the services and disabling them_. Attempting to stop a container directly will just cause it to restart as the service is set to restart the container on container exit.
 
-Stopping or restarting is done as all services or all docker-compose. _Do not mix these control techniques_.
+Stopping or restarting is done as either services only or docker-compose only. _Do not mix these control techniques_.
 
+__NOTE:__ If you are using EventSim instead of a real API you will need stop and disable the services and use docker-compose directly. Then start the containers in the following order as root:
 
-Uninstalling DAI and Third Party Components
+1. cd /opt/dai-docker
+2. docker-compose -f postgres.yml up -d
+3. docker-compose -f rabbitmq.yml up -d
+4. docker-compose -f voltdb.yml up -d _(wait 40 seconds for this to completely stablize)_
+5. docker-compose -f eventsim.yml up -d
+6. docker-compose -f dai.yml up -d
+
+Checking for Running DAI Components:
+-------------------------------------
+If your host system has the Java JDK 8 or newer installed (JRE alone is not enough) then there is an included
+script called ___show_adapters___ which will show a detailed list of running DAI-DS java processes. This tool
+must be run as the root user.
+
+If you don't have a new Java JDK installed, and are using the services then use the normal systemctl tool to
+check the status of the services.
+
+If you are using docker-compose instead of the services then the following line will show the DAI-DS running
+containers:
+```bash
+# docker ps -a | grep "dai-"
+```
+
+Log Output:
+------------
+Log output in either execution case will be in:
+* /opt/dai-docker/log/* for EventSim and DAI components.
+* /opt/dai/docker/tier1/log/* for voltdb and the schema population containers logs
+* Postgres logs are not available at this time.
+
+Uninstalling DAI and Third Party Components:
 --------------------------------------------
 Note: The following commands will stop the services if they are running.
 

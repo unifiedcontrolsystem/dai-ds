@@ -14,6 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Description of class JdbcStoreTelemetry.
@@ -32,7 +34,7 @@ public class JdbcStoreTelemetry implements StoreTelemetry, Closeable, AutoClosea
 
         try {
             telemetryAggregatedData_.setString(1, sLctn);
-            telemetryAggregatedData_.setTimestamp(2, new Timestamp(lTsInMicroSecs / 1000));
+            telemetryAggregatedData_.setTimestamp(2, new Timestamp(lTsInMicroSecs / 1000), gmt_);
             telemetryAggregatedData_.setString(3, sTypeOfData);
             telemetryAggregatedData_.setDouble(4, dMaxValue);
             telemetryAggregatedData_.setDouble(5, dMinValue);
@@ -85,6 +87,7 @@ public class JdbcStoreTelemetry implements StoreTelemetry, Closeable, AutoClosea
     }
 
     private static final String storeTelementryProcedureName_ = "AggregatedEnvDataStore";
+    private static final Calendar gmt_ = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     protected Connection connection_ = null;
     protected PreparedStatement telemetryAggregatedData_ = null;
     private Logger log_;

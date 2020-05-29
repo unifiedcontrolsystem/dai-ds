@@ -7,7 +7,6 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.network_listener.NetworkListenerProviderException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.intel.xdg.XdgConfigFile;
@@ -17,9 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,48 +35,55 @@ final public class CommonFunctions {
      * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
     public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSX");
-        Date date = df.parse(timestamp);
-        return date.getTime() * 1000000L;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSSX");
+        Instant ts = df.parse(timestamp).toInstant();
+        String[] parts = timestamp.split("\\.");
+        String fraction = parts[1].replace("Z","");
+        if(fraction.length() > 9)
+            throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
+        return (ts.getEpochSecond() * 1_000_000_000L) +
+                (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
     }
 
     /**
-     * Convert a xname location with sub-node information to a DAI location.
+     * Convert a foreign location with sub-node information to a DAI location.
      *
-     * @param xnameLocation The xname location string.
+     * @param foreignLocation The foreign location string.
      * @param otherArgs Args to help determine sub-node location information (1st=sensor name; 2nd=extra info).
      * @return The complete DAI location string.
-     * @throws NetworkListenerProviderException If the xname location is not recognized.
+     * @throws ConversionException If the foreign location is not recognized.
      */
-    public static String convertXNameToLocation(String xnameLocation, String... otherArgs)
-            throws NetworkListenerProviderException {
+    public static String convertForeignToLocation(String foreignLocation, String... otherArgs)
+            throws ConversionException {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
-        if(xnameLocation.equals("all"))
-            return xnameLocation;
+        if(foreignLocation.equals("all"))
+            return foreignLocation;
         String sensorName = (otherArgs.length > 0) ? otherArgs[0] : null;
         String extraLocation = (otherArgs.length > 1) ? otherArgs[1] : null;
         StringBuilder builder = new StringBuilder();
         try {
-            if(nodeMap_.containsKey(xnameLocation)) {
-                    builder.append(nodeMap_.getString(xnameLocation));
+            if(nodeMap_.containsKey(foreignLocation)) {
+                    builder.append(nodeMap_.getString(foreignLocation));
                     processName(builder, sensorName, extraLocation);
             } else
-                throw new NetworkListenerProviderException(String.format("The xname '%s' was not in the conversion map!",
-                        xnameLocation));
+                throw new ConversionException(String.format("The foreign '%s' was not in the conversion map!",
+                        foreignLocation));
         } catch(PropertyNotExpectedType e) {
-            throw new RuntimeException("Its possible the resource file for XName translation has been corrupted", e);
+            throw new ConversionException("Its possible the resource file for foreign translation has been corrupted",
+                    e);
         }
         return builder.toString();
     }
 
     /**
-     * Convert a DAI location to XName.
+     * Convert a DAI location to foreign location.
      *
      * @param daiLocation The DAI location string. May contain sub-component information.
-     * @return The basic XName location.
+     * @return The basic foreign location.
+     * @throws ConversionException If the foreign location is not recognized.
      */
-    public static String convertLocationToXName(String daiLocation) throws NetworkListenerProviderException {
+    public static String convertLocationToForeign(String daiLocation) throws ConversionException {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
         if(daiLocation.equals("all"))
@@ -87,19 +93,20 @@ final public class CommonFunctions {
             if (reverseNodeMap_.containsKey(daiLocation))
                 return reverseNodeMap_.getString(daiLocation);
             else {
-                throw new NetworkListenerProviderException(String.format("The DAI location string '%s' was not found " +
+                throw new ConversionException(String.format("The DAI location string '%s' was not found " +
                         "in the conversion map!", daiLocation));
             }
         } catch(PropertyNotExpectedType e) {
-            throw new RuntimeException("Its possible the resource file for XName translation has been corrupted", e);
+            throw new ConversionException("Its possible the resource file for foreign translation has been corrupted",
+                    e);
         }
     }
 
     /**
-     * Fetch all xnames mapped to DAI locations
-     * @return all xnames information
+     * Fetch all foreign locations mapped to DAI locations
+     * @return all foreign location information
      */
-    public static Set<String> getXNames() {
+    public static Set<String> getForeignLocations() {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
         return (nodeMap_ != null ? nodeMap_.keySet() : null);

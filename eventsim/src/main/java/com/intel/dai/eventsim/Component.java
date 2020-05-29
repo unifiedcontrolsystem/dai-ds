@@ -1,7 +1,7 @@
 package com.intel.dai.eventsim;
 
 import com.intel.dai.foreign_bus.CommonFunctions;
-import com.intel.dai.network_listener.NetworkListenerProviderException;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyArray;
@@ -37,9 +37,12 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
      * @return ras events.
-     * @throws NetworkListenerProviderException unable to create ras event.
+     * @throws ConversionException unable to create ras event.
      */
-    List<String> publishRASEvents(final long eventsPerLocation, final long seed, @NotNull final List<String> regexMatchedLocations, @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException {
+    List<String> publishRASEvents(final long eventsPerLocation, final long seed,
+                                  @NotNull final List<String> regexMatchedLocations,
+                                  @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException {
         List<String> rasEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
@@ -58,9 +61,12 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
      * @return ras events.
-     * @throws NetworkListenerProviderException unable to create ras event.
+     * @throws ConversionException unable to create ras event.
      */
-    List<String> publishRemRASEvents(final long remEvents, final long seed, @NotNull final List<String> regexMatchedLocations, @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException {
+    List<String> publishRemRASEvents(final long remEvents, final long seed,
+                                     @NotNull final List<String> regexMatchedLocations,
+                                     @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException {
         long eventsTobeGenerated = remEvents;
         List<String> rasEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
@@ -81,9 +87,12 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
      * @return sensor events.
-     * @throws NetworkListenerProviderException unable to create sensor event.
+     * @throws ConversionException unable to create sensor event.
      */
-    List<String> publishSensorEvents(final long eventsPerLocation, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException, SimulatorException {
+    List<String> publishSensorEvents(final long eventsPerLocation, final long seed,
+                                     @NotNull final List<String> regexMatchedLocations,
+                                     @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException, SimulatorException {
         List<String> rasEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
@@ -102,9 +111,12 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
      * @return sensor events.
-     * @throws NetworkListenerProviderException unable to create sensor event.
+     * @throws ConversionException unable to create sensor event.
      */
-    List<String> publishRemSensorEvents(final long remEvents, final long seed, @NotNull final List<String> regexMatchedLocations, @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions) throws NetworkListenerProviderException, SimulatorException {
+    List<String> publishRemSensorEvents(final long remEvents, final long seed,
+                                        @NotNull final List<String> regexMatchedLocations,
+                                        @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException, SimulatorException {
         long eventsTobeGenerated = remEvents;
         List<String> sensorEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
@@ -122,9 +134,10 @@ public class Component {
      * This method is to create available boot events.
      * @param regexMatchedLocations locations matching the location-regex input.
      * @return available boot events.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) throws NetworkListenerProviderException {
+    List<String> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
+            throws ConversionException {
         List<String> bootAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
             ForeignEvent ev = createAvailableEvent(location);
@@ -139,9 +152,10 @@ public class Component {
      * @param regexMatchedLocations locations matching the location-regex input.
      * @param totalFailureEventsToGenerate number of failure boot events to create.
      * @return boot events for a given location
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations, final long totalFailureEventsToGenerate) throws NetworkListenerProviderException {
+    List<String> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations,
+                                                 final long totalFailureEventsToGenerate) throws ConversionException {
         List<String> bootingEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
             if(totalFailureEventsToGenerate == regexMatchedLocations.size()) {
@@ -172,9 +186,10 @@ public class Component {
      * This method is to create unavailable boot events.
      * @param regexMatchedLocations locations matching the location-regex input.
      * @return unavailable boot events.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations) throws NetworkListenerProviderException {
+    List<String> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
+            throws ConversionException {
         List<String> bootUnAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
             ForeignEvent ev = createUnavailableEvent(location);
@@ -190,12 +205,12 @@ public class Component {
      * @param location where events should be created.
      * @param rasMetadaData metadata of ras events.
      * @return ras event.
-     * @throws NetworkListenerProviderException unable to create ras event.
+     * @throws ConversionException unable to create ras event.
      */
-    private ForeignEvent createRandomRASEvent(long seed, @NotNull final String location, @NotNull final List<PropertyDocument> rasMetadaData) throws NetworkListenerProviderException {
+    private ForeignEvent createRandomRASEvent(long seed, @NotNull final String location, @NotNull final List<PropertyDocument> rasMetadaData) throws ConversionException {
         ForeignEventRAS ev = new ForeignEventRAS();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         PropertyArray result = (PropertyArray) rasMetadaData.get(generateRandomNumberBetween(0, rasMetadaData.size(), seed));
         ev.setEventType(result.get(0).toString());
         return ev;
@@ -207,13 +222,13 @@ public class Component {
      * @param location where events should be created.
      * @param definitionSensorMetadata_ metadata of sensor events.
      * @return sensor event.
-     * @throws NetworkListenerProviderException unable to create ras event.
+     * @throws ConversionException unable to create ras event.
      */
-    private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws NetworkListenerProviderException, SimulatorException {
+    private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws ConversionException, SimulatorException {
         // Ignore seed in the current implementation of randomization
         ForeignEventSensor ev = new ForeignEventSensor();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
 
         PropertyMap sensorDetails = (PropertyMap) definitionSensorMetadata_.get(generateRandomNumberBetween(0, definitionSensorMetadata_.size(), seed));
         if (sensorDetails == null) {
@@ -233,12 +248,12 @@ public class Component {
      * This method is to create node failure event.
      * @param location where node failure event is created.
      * @return node failure event.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    private ForeignEvent createNodeFailureEvent(String location) throws NetworkListenerProviderException {
+    private ForeignEvent createNodeFailureEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Empty");
         ev.setStatus("AdminDown");
@@ -249,12 +264,12 @@ public class Component {
      * This method is to create node unavailable event.
      * @param location where node unavailable event is created.
      * @return node unavailable event.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    private ForeignEvent createUnavailableEvent(String location) throws NetworkListenerProviderException {
+    private ForeignEvent createUnavailableEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Off");
         ev.setStatus("AdminDown");
@@ -265,12 +280,12 @@ public class Component {
      * This method is to create node booting event.
      * @param location where node booting event is created.
      * @return node booting event.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    private ForeignEvent createBootingEvent(String location) throws NetworkListenerProviderException {
+    private ForeignEvent createBootingEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("On");
         ev.setStatus("AdminDown");
@@ -281,12 +296,12 @@ public class Component {
      * This method is to create node available event.
      * @param location where node available event is created.
      * @return node available event.
-     * @throws NetworkListenerProviderException when unable to find foreign location
+     * @throws ConversionException when unable to find foreign location
      */
-    private ForeignEvent createAvailableEvent(String location) throws NetworkListenerProviderException {
+    private ForeignEvent createAvailableEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
         ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
-        ev.setLocation(CommonFunctions.convertLocationToXName(location));
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Ready");
         ev.setStatus("AdminDown");

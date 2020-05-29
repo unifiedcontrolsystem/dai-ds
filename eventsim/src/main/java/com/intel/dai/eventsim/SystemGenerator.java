@@ -1,6 +1,6 @@
 package com.intel.dai.eventsim;
 
-import com.intel.dai.network_listener.NetworkListenerProviderException;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
@@ -33,11 +33,11 @@ class SystemGenerator {
     }
 
     /**
-     * This method used to create boot events.
-     * @param bfValue probability of number of failure vents can be generated.
-     * @return generated boot events
+     * This method used to create boot off,on,ready events.
+     * @param bfValue probability of number of failure events can be generated.
+     * @return generated boot off,on,ready events
      */
-    List<String> publishBootEventsForLocation(final float bfValue) throws NetworkListenerProviderException {
+    List<String> publishBootEventsForLocation(final float bfValue) throws ConversionException {
         float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
         long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
         List<String> bootEvents = new ArrayList<>();
@@ -58,24 +58,72 @@ class SystemGenerator {
     }
 
     /**
+     * This method used to create boot off events.
+     * @return generated boot off events
+     */
+    List<String> publishBootOffEventsForLocation() throws ConversionException {
+        List<String> bootEvents = new ArrayList<>();
+
+        List<String> unavailableEvents = component_.publishUnAvailableEventsForLocation(regexMatchedLocations);
+        log_.info("Unavailable = "+ unavailableEvents.size());
+        bootEvents.addAll(unavailableEvents);
+
+        return bootEvents;
+    }
+
+    /**
+     * This method used to create boot on events.
+     * @param bfValue probability of number of failure events can be generated.
+     * @return generated boot on events
+     */
+    List<String> publishBootOnEventsForLocation(final float bfValue) throws ConversionException {
+        float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
+        long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
+        List<String> bootEvents = new ArrayList<>();
+
+        List<String> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
+        log_.info("Booting = "+ bootingEvents.size());
+        bootEvents.addAll(bootingEvents);
+
+        return bootEvents;
+    }
+
+    /**
+     * This method used to create boot ready events.
+     * @return generated boot ready events
+     */
+    List<String> publishBootReadyEventsForLocation() throws ConversionException {
+        List<String> bootEvents = new ArrayList<>();
+
+        List<String> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations);
+        log_.info("Available = "+ availableEvents.size());
+        bootEvents.addAll(availableEvents);
+
+        return bootEvents;
+    }
+
+    /**
      * This method used to create ras events.
      * @param eventsCount numbers of ras events to be generated.
      * @param seed to repeat same type of data.
      * @return generated sensor events
      * @throws SimulatorException when unable to create exact number of events required.
-     * @throws NetworkListenerProviderException when unable to create ras event.
+     * @throws ConversionException when unable to create ras event.
      */
-    List<String> publishRASEventsForLocation(long eventsCount, final long seed) throws SimulatorException, NetworkListenerProviderException {
+    List<String> publishRASEventsForLocation(long eventsCount, final long seed)
+            throws SimulatorException, ConversionException {
         long eventsPerLocation = eventsCount / regexMatchedLocations.size();
         List<String> rasEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {
-            rasEvents = component_.publishRASEvents(eventsPerLocation, seed, regexMatchedLocations, regexMatchedLabelDescriptions);
+            rasEvents = component_.publishRASEvents(eventsPerLocation, seed, regexMatchedLocations,
+                    regexMatchedLabelDescriptions);
         }
 
         long remRasEvents = eventsCount % regexMatchedLocations.size();
         if (remRasEvents == 0)
             return rasEvents;
-        rasEvents.addAll(component_.publishRemRASEvents(remRasEvents, seed, regexMatchedLocations, regexMatchedLabelDescriptions));
+        rasEvents.addAll(component_.publishRemRASEvents(remRasEvents, seed, regexMatchedLocations,
+                regexMatchedLabelDescriptions));
         remRasEvents = eventsCount - rasEvents.size();
         if(remRasEvents != 0)
             throw new SimulatorException("Incorrect number of ras events generated");
@@ -88,9 +136,9 @@ class SystemGenerator {
      * @param seed to repeat same type of data.
      * @return generated sensor events
      * @throws SimulatorException when unable to create exact number of events required.
-     * @throws NetworkListenerProviderException when unable to create sensor event.
+     * @throws ConversionException when unable to create sensor event.
      */
-    List<String> publishSensorEventsForLocation(long eventsCount, final long seed) throws SimulatorException, NetworkListenerProviderException {
+    List<String> publishSensorEventsForLocation(long eventsCount, final long seed) throws SimulatorException, ConversionException {
         long eventsPerLocation = eventsCount / regexMatchedLocations.size();
         List<String> sensorEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {

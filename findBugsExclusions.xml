@@ -14,8 +14,6 @@
             <Class name="com.intel.xdg.XdgConfigFile" />
             <Class name="com.intel.dai.populate.DefaultOnlineTierDataLoader" />
             <Class name="com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark" />
-            <Class name="com.intel.dai.inventory.api.HWInvTranslatorCLI" />
-            <Class name="com.intel.dai.inventory.api.HWInvDbClientCLI" />
             <Class name="com.intel.dai.inventory.api.CommonCliUtil" />
             <Class name="com.intel.dai.foreign_bus.CommonFunctions" />
             <Class name="com.intel.dai.dsimpl.voltdb.HWInvUtilImpl" />
@@ -26,6 +24,8 @@
             <Class name="com.intel.dai.DbConfig" />
             <Class name="com.intel.dai.NearlineTableUpdater" />
             <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
+            <Class name="com.intel.dai.eventsim.WlmApi" />
+            <Class name="com.intel.perflogging.BenchmarkHelper" />
         </Or>
         <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
@@ -97,11 +97,6 @@
         <Bug code="UrF" />
     </Match>
     <Match> <!-- As designed not an issue -->
-        <Class name="com.intel.dai.inventory.api.HWInvDiscoveryCLI" />
-        <Method name="createRestClient" />
-        <Bug code="NP" />
-    </Match>
-    <Match> <!-- As designed not an issue -->
         <Or>
             <Class name="com.intel.dai.dsapi.HWInvLoc" />
             <Class name="com.intel.dai.inventory.api.ForeignHWInvChangeNotification" />
@@ -147,6 +142,21 @@
         </Or>
         <Bug code="UwF" />
     </Match>
+    <Match>
+        <Or>
+            <Class name="com.intel.dai.ras.AdapterRasForeignBus" />
+            <Class name="com.intel.dai.AdapterNearlineTierJdbc" />
+            <Class name="com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus" />
+            <Class name="com.intel.dai.inventory.ProviderInventoryNetworkForeignBus" />
+            <Class name="com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus" />
+            <Class name="com.intel.dai.AdapterOnlineTierVolt" />
+        </Or>
+        <Bug code="DMI" />
+    </Match>
+    <Match>
+        <Class name="com.intel.perflogging.GenerateRasEvents" />
+        <Bug code="SECPR" /> <!-- Predictable random numbers are what we actually want here! -->
+    </Match>
 
     <!--*************************************************************************************************************
     TODO: These issues below need to be addressed!!!
@@ -156,4 +166,5 @@
         <Class name="com.intel.networking.restclient.PermissiveX509TrustManager" />
         <Bug code="SECWTM" />
     </Match>
+
 </FindBugsFilter>

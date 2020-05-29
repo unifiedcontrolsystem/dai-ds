@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Description of class SSEConnectionManager.
+ * Description of class SSEConnectionManager. This is an internal class for HTTP open connection for SSE streams.
  */
 class SSEConnectionManager implements AutoCloseable, Closeable {
     private static final long PING_INTERVAL_SECONDS =
@@ -96,6 +96,21 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         return (lastPublishTime + PING_INTERVAL_SECONDS) < Instant.now().getEpochSecond();
     }
 
+    private void publishToConnectionsPing() {
+        List<SSEConnection> brokenConnections = new ArrayList<>();
+        synchronized (this) {
+            for(SSEConnection connection: connections_) {
+                    if (expired(connection.lastPublished))
+                        if (publishSSEPing(connection))
+                            brokenConnections.add(connection);
+            }
+            // Drop broken connections...
+            for(SSEConnection connection: brokenConnections)
+                removeConnection(connection);
+        }
+        globalLastPublish_.set(Instant.now().getEpochSecond());
+    }
+
     private boolean publishSSEPing(SSEConnection connection) {
         try {
             connection.exchange.getResponseBody().write(":Ping\n".getBytes(StandardCharsets.UTF_8));
@@ -144,7 +159,7 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
             try { Thread.sleep(1000); }
             catch(InterruptedException e) { /* Ignore */ }// 1 second sleep interval...
             if(expired(globalLastPublish_.get()))
-                publishToConnections("RESERVED_FOR_PING_TYPE", "RESERVED_FOR_PING_DATA", "RESERVED_FOR_PING_ID");
+                publishToConnectionsPing();
         }
     }
 

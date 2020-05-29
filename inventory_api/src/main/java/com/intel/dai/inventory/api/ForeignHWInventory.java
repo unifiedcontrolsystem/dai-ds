@@ -9,7 +9,7 @@ import java.util.List;
 
 @ToString
 class ForeignHWInventory {
-    String XName;
+    String ForeignName;
     String Format;
 
     List<ForeignHWInvByLocCabinet> Cabinets;
