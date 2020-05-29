@@ -15,6 +15,7 @@ class CommonFunctionsSpec extends Specification {
         "2020-03-27 12:00:00.000000001Z" || 1585310400000000001L
         "2020-03-27 12:00:00.00000001Z"  || 1585310400000000010L
         "2020-03-27 12:00:00.0001Z"      || 1585310400000100000L
+        "2020-03-27 12:00:00Z"           || 1585310400000000000L
     }
 
     def "Test ConvertISOToLongTimestamp Negative"() {
@@ -22,8 +23,10 @@ class CommonFunctionsSpec extends Specification {
         then: thrown(ParseException)
         where:
         VALUE || DUMMY
-        "2020-03-27 12:00:00Z"            || false
+        "2020-03-27 12:00:00"             || false
+        "2020-03-27 12:00:00."            || false
         "2020-03-27 12:00:00.Z"           || false
+        "2020-03-27 12:00:00.0000000000Z" || false
         "2020-03-27 12:00:00.0000000000Z" || false
     }
 }
