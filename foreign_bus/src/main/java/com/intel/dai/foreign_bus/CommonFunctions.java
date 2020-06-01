@@ -35,10 +35,11 @@ final public class CommonFunctions {
      * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
     public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSSX");
-        Instant ts = df.parse(timestamp).toInstant();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
         String[] parts = timestamp.split("\\.");
-        String fraction = parts[1].replace("Z","");
+        String fraction = parts.length == 1 ? "0" : parts[1].replace("Z","");
+        String tsToSecond = timestamp.replaceFirst("\\.[0-9]+", "");
+        Instant ts = df.parse(tsToSecond).toInstant();
         if(fraction.length() > 9)
             throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
         return (ts.getEpochSecond() * 1_000_000_000L) +
