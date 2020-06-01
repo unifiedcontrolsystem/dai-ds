@@ -74,6 +74,17 @@ class ForeignHwInventoryRequesterSpec extends Specification {
         res == 1
     }
 
+    def "getHWInventoryHistory"() {
+        setup:
+        invRequester.initialize(log, config, restClient)
+
+        when:
+        def res = invRequester.getHWInventoryHistory("t0", "t1").getLeft()
+
+        then:
+        res == 1
+    }
+
     def "makeUri" () {
         expect: invRequester.makeUri("http://localhost:5678", "/Inventory/Hardware").toString() ==
                 new URI("http://localhost:5678/Inventory/Hardware").toString()
@@ -83,6 +94,14 @@ class ForeignHwInventoryRequesterSpec extends Specification {
         expect: invRequester.makeUri("http://localhost:5678", "/Inventory/Hardware/Query/",
                 "x0c0s0b0n0").toString() ==
                 new URI("http://localhost:5678/Inventory/Hardware/Query/x0c0s0b0n0").toString()
+    }
+
+    def "makeQuery" () {
+        def uri = new URI("http://localhost:5678/Inventory/Hardware/History")
+        expect: invRequester.makeQuery(uri, "start_time", "2019-01-02T15:04:05Z07:00",
+                "end_time", "2019-02-02T15:04:05Z07:00").toString() ==
+                new URI("http://localhost:5678/Inventory/Hardware/History?start_time=2019-01-02T15:04:05Z07:00" +
+                        "&end_time=2019-02-02T15:04:05Z07:00").toString()
     }
 
     def "validBlockingResult"() {
@@ -131,12 +150,12 @@ class ForeignHwInventoryRequesterSpec extends Specification {
         400     | "Whatever"        | new RequestInfo(null, null, null) || 1
     }
 
-    def "interpreteQueryHWInvTreeResult"() {
+    def "interpreteQueryHWInvQueryResult"() {
         invRequester.logger = log
         def uri = new URI("")
         def blockingResult = new BlockingResult(code, responseDocument, requestInfo)
         expect:
-        invRequester.interpreteQueryHWInvTreeResult(uri, blockingResult).getLeft() == status
+        invRequester.interpreteQueryHWInvQueryResult(uri, blockingResult).getLeft() == status
 
         where:
         code    | responseDocument      | requestInfo                       || status

@@ -73,9 +73,9 @@ class ForeignHwInventoryRequester implements RestRequester {
             URI uri = makeUri(config.getHwInventorySnapshot.endpoint, config.getHwInventorySnapshot.resource);
             logger.info("uri: %s", uri.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
-            return interpreteQueryHWInvTreeResult(uri, result);
+            return interpreteQueryHWInvQueryResult(uri, result);
         } catch (URISyntaxException e) {
-            logger.fatal("Cannot create URI to initiate discovery");
+            logger.fatal("Cannot create URI to get HW inventory");
         } catch (RESTClientException e) {
             logger.fatal("getRESTRequestBlocking failure");
         }
@@ -83,7 +83,7 @@ class ForeignHwInventoryRequester implements RestRequester {
     }
 
     /**
-     * This method is used to get the hardware inventory datafor a location.
+     * This method is used to get the hardware inventory data for a location.
      */
     @Override
     public ImmutablePair<Integer, String> getHwInventory(String foreignName) {
@@ -91,9 +91,28 @@ class ForeignHwInventoryRequester implements RestRequester {
             URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, foreignName);
             logger.info("uri: %s", uri.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
-            return interpreteQueryHWInvTreeResult(uri, result);
+            return interpreteQueryHWInvQueryResult(uri, result);
         } catch (URISyntaxException e) {
-            logger.fatal("Cannot create URI to initiate discovery");
+            logger.fatal("Cannot create URI to get HW inventory update");
+        } catch (RESTClientException e) {
+            logger.fatal("getRESTRequestBlocking failure");
+        }
+        return new ImmutablePair<>(1, "");
+    }
+
+    /**
+     * This method is used to get the hardware inventory history over a time period .
+     */
+    @Override
+    public ImmutablePair<Integer, String> getHWInventoryHistory(String startTime, String endTime) {
+        try {
+            URI uri = makeUri(config.getHWInventoryHistory.endpoint, config.getHWInventoryHistory.resource);
+            URI query = makeQuery(uri, "start_time", startTime, "end_time", endTime);
+            logger.info("query: %s", query.toString());
+            BlockingResult result = restClient.getRESTRequestBlocking(query);
+            return interpreteQueryHWInvQueryResult(query, result);
+        } catch (URISyntaxException e) {
+            logger.fatal("Cannot create URI to get HW inventory history");
         } catch (RESTClientException e) {
             logger.fatal("getRESTRequestBlocking failure");
         }
@@ -108,7 +127,11 @@ class ForeignHwInventoryRequester implements RestRequester {
         return new URI(String.format("%s%s%s", endpoint, resource, subResource));
     }
 
-    private ImmutablePair<Integer, String> interpreteQueryHWInvTreeResult(URI uri, BlockingResult result) {
+    private URI makeQuery(URI uri, String param0, String val0, String param1, String val1) throws URISyntaxException {
+        return new URI(String.format("%s?%s=%s&%s=%s", uri.toString(), param0, val0, param1, val1));
+    }
+
+    private ImmutablePair<Integer, String> interpreteQueryHWInvQueryResult(URI uri, BlockingResult result) {
         if (validBlockingResult(uri, result) != 0) {
             return new ImmutablePair<>(1, "");
         }

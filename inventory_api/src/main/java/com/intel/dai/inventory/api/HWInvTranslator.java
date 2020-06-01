@@ -6,6 +6,8 @@ package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intel.dai.dsapi.HWInvHistory;
+import com.intel.dai.dsapi.HWInvHistoryEvent;
 import com.intel.dai.dsapi.HWInvLoc;
 import com.intel.dai.dsapi.HWInvTree;
 import com.intel.dai.dsapi.HWInvUtil;
@@ -25,12 +27,12 @@ import java.util.stream.Collectors;
  * Performs translation of foreign json data to canonical representation.
  */
 public class HWInvTranslator {
-    private static Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
+    private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
 
     private static final String emptyPrefix = "empty-";
 
-    private transient Gson gson;
-    private transient HWInvUtil util;
+    private final transient Gson gson;
+    private final transient HWInvUtil util;
 
     /**
      * <p> Constructor for the HW inventory translator. </p>
@@ -55,6 +57,20 @@ public class HWInvTranslator {
     private ForeignHWInvByLocNode toForeignHWInvByLocNode(String foreignJson) {
         try {
             return gson.fromJson(foreignJson, ForeignHWInvByLocNode.class);
+        } catch (Exception e) {
+            // EOFException can occur if the json is incomplete
+            return null;
+        }
+    }
+
+    /**
+     * <p> Parse the given json containing the foreign HW inventory history. </p>
+     * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
+     * @return POJO containing the parsed json, or null if parsing failed
+     */
+    private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
+        try {
+            return gson.fromJson(foreignHWInvHistoryJson, ForeignHWInvHistory.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
             return null;
@@ -131,12 +147,43 @@ public class HWInvTranslator {
                 translatedLocs.add(loc);
             } catch(ConversionException e) {
                 logger.error("Failed to read JSON from stream: %s", e.getMessage());
-                continue;   // drop this entry
+                // drop this entry
             }
         }
 
         canonicalTree.locs = translatedLocs;
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
+    }
+
+    public ImmutablePair<String, String> foreignHistoryToCanonical(String foreignJson) {
+        ImmutablePair<String, HWInvHistory> translatedResult = toCanonicalHistory(foreignJson);
+        String subject = translatedResult.getKey();
+        ArrayList<HWInvHistoryEvent> translatedEvents = new ArrayList<>();
+        HWInvHistory canonicalHistory = translatedResult.getValue();
+        if (canonicalHistory == null) {
+            return ImmutablePair.nullPair();
+        }
+        for (HWInvHistoryEvent evt: canonicalHistory.events) {
+            try {
+                evt.ID = CommonFunctions.convertForeignToLocation(evt.ID);
+                translatedEvents.add(evt);
+            } catch(ConversionException e) {
+                logger.error("Failed to read JSON from stream: %s", e.getMessage());
+                // drop this entry
+            }
+        }
+
+        canonicalHistory.events = translatedEvents;
+        return new ImmutablePair<>(subject, util.toCanonicalHistoryJson(canonicalHistory));
+    }
+
+    private ImmutablePair<String, HWInvHistory> toCanonicalHistory(String foreignJson) {
+        ForeignHWInvHistory hist = toForeignHWInvHistory(foreignJson);
+        if (hist != null) {
+            logger.info("Parsed toForeignHWInvHistory");
+            return new ImmutablePair<>("", toCanonical(hist));
+        }
+        return ImmutablePair.nullPair();
     }
 
     /**
@@ -208,6 +255,7 @@ public class HWInvTranslator {
         addForeignNodesToCanonical(singletonNode, canonicalTree);
         return canonicalTree;
     }
+
     private HWInvTree toCanonical(ForeignHWInvByLoc[] frus) {
         HWInvTree canonicalTree = new HWInvTree();
         addForeignFlatFRUsToCanonical(
@@ -215,6 +263,22 @@ public class HWInvTranslator {
                 canonicalTree);
         return canonicalTree;
     }
+
+    private HWInvHistory toCanonical(ForeignHWInvHistory foreignHist) {
+        HWInvHistory hist = new HWInvHistory();
+        for (ForeignHWInvHistoryAtLoc componentHistory: foreignHist.Components) {
+            for (ForeignHWInvHistoryEvent foreignEvent : componentHistory.History) {
+                HWInvHistoryEvent event = toCanonical(foreignEvent);
+                if (event == null) {
+                    continue;   //ignore failed conversions
+                }
+                logger.info("Adding %s", event.toString());
+                hist.events.add(event);
+            }
+        }
+        return hist;
+    }
+
     /**
      * <p> This method performs POJO to POJO translation of a Foreign HW Inventory tree to its
      * canonical representation.
@@ -388,6 +452,31 @@ public class HWInvTranslator {
         }
         return numSlotsAdded;
     }
+
+    HWInvHistoryEvent toCanonical(ForeignHWInvHistoryEvent foreignEvent) {
+        logger.info("foreignEvent: %s", foreignEvent.toString());
+        if (foreignEvent.ID == null) {
+            return null;
+        }
+        if (foreignEvent.FRUID == null) {
+            return null;
+        }
+        if (foreignEvent.Timestamp == null) {
+            return null;
+        }
+        if (foreignEvent.EventType == null) {
+            return null;
+        }
+        HWInvHistoryEvent event = new HWInvHistoryEvent();
+
+        event.ID = foreignEvent.ID;
+        event.Action = foreignEvent.EventType;
+        event.Timestamp = foreignEvent.Timestamp;
+        event.FRUID = foreignEvent.FRUID;
+
+        return event;
+    }
+
     HWInvLoc toCanonical(ForeignHWInvByLoc foreignLoc) {
         logger.info("foreignLoc: %s", foreignLoc.toString());
         if (foreignLoc.ID == null) {
@@ -430,6 +519,7 @@ public class HWInvTranslator {
                 return null;
         }
     }
+
     String extractParentId(String id) {
         try {
             Pattern pattern = Pattern.compile("(^.*)\\D\\d+$");
