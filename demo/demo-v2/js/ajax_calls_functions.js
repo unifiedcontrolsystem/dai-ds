@@ -13,6 +13,7 @@ function test(callback) {
 }
 function get_floor(data) {
     var resp = (JSON.parse(data)).Result;
+    console.log ( "FLOOR DATA", resp);
     floorLayout = JSON.parse(JSON.parse(resp)[0].manifestcontent);
     main();
 }
@@ -74,8 +75,9 @@ function fetchDBChangeTimestampsResponse(data)
                 // Database updating has advanced.  Track it.
                 nodeMaxDBUpdatedTimestamp = val;
                 if (contexttime == null) {
-                    updateNodeStatesFromDB(dbNodeStatesResponse, null,
-                        nodeMaxDBUpdatedTimestamp);		// Need up-to-date data if showing "Now"
+                    updateComputeNodeStatesFromDB(dbComputeNodeStatesResponse, null,nodeMaxDBUpdatedTimestamp);		// Need up-to-date data if showing "Now"
+                    updateServiceNodeStatesFromDB(dbServiceNodeStatesResponse, null,nodeMaxDBUpdatedTimestamp);		// Need up-to-date data if showing "Now"
+
                 }
             }
         }
@@ -156,17 +158,17 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
 // Update the current page based on contexttime
 // contextime == null means "Now" so we use nodeMaxDBUpdatedTimestamp,
 // else we really want to see the context time.
-function updateNodeStatesFromDB(callback, startTime, EndTime)
+function updateComputeNodeStatesFromDB(callback, startTime, EndTime)
 {
-    console.log('/query/nodestatehistory?StartTime='+startTime+'&EndTime='+EndTime);
+    console.log('/query/computenodestatehistory?StartTime='+startTime+'&EndTime='+EndTime);
 
     $.ajax({
-        url: '/query/nodestatehistory?StartTime='+startTime+'&EndTime='+EndTime,
+        url: '/query/computenodestatehistory?StartTime='+startTime+'&EndTime='+EndTime,
         success : callback
     });
 }
 
-function dbNodeStatesResponse(data)
+function dbComputeNodeStatesResponse(data)
 {
     var status = (JSON.parse(data)).Status;
     if (status == "FE") {
@@ -175,21 +177,43 @@ function dbNodeStatesResponse(data)
     }
     var resp = (JSON.parse((JSON.parse(data)).Result))
     if (resp.length > 0)
-        updateNodeStates(resp);
+        updateNodeStates(resp, 'dense-compute-node');
+}
+
+function updateServiceNodeStatesFromDB(callback, startTime, EndTime)
+{
+    console.log('/query/servicenodestatehistory?StartTime='+startTime+'&EndTime='+EndTime);
+
+    $.ajax({
+        url: '/query/servicenodestatehistory?StartTime='+startTime+'&EndTime='+EndTime,
+        success : callback
+    });
+}
+
+function dbServiceNodeStatesResponse(data)
+{
+    var status = (JSON.parse(data)).Status;
+    if (status == "FE") {
+        console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
+        return;
+    }
+    var resp = (JSON.parse((JSON.parse(data)).Result))
+    if (resp.length > 0)
+        updateNodeStates(resp, 'service-node');
 }
 
 //
 // Iterate through JSON update data.
 // The data argument is <update>.results[0].data.
 //
-function updateNodeStates(data)
+function updateNodeStates(data, nodetype)
 {
     if (data.length > 1) {
         for (var i=0; i<data.length; i++) {
             var hwitem = systemInventory.getHwByLocation(data[i].lctn);
             try {hwitem.changeState(data[i].state);}
             catch (err){
-                continue;
+                console.log(error);
             }
         }
         systemInventory.notifyObservers(null);
@@ -200,9 +224,9 @@ function updateNodeStates(data)
         for (var i=0; i<data.length; i++) // QQQ: this won't work when data is a delta.
             if (data[i].state == s)
                 val++;
-        $("#stateKey" + s + "val").html(val);
-        $("#stateKey" + s + "bar").width(((val*100)/data.length)+"%");
-        $("#stateKey" + s + "bar").css('background-color', val > 0 ? colormap[['dense-compute-node-state', s].join('-')] : "white");
+        $("#stateKey" + nodetype + s + "val").html(val);
+        $("#stateKey" + nodetype + s + "bar").width(((val*100)/data.length)+"%");
+        $("#stateKey" + nodetype + s + "bar").css('background-color', val > 0 ? colormap[[nodetype +'-state', s].join('-')] : "white");
     }
 }
 
@@ -252,7 +276,6 @@ function dbComputeInventory(data)
 function updateComputenodeData(location, computenodeInfo)
 {
 if (computenodestable.rows('[location=' + location +']').any()){
-console.log("exists");
 computenodestable.row('[location='+location +']').remove();
 }
 computenodestable.row.add([location, computenodeInfo.hostname, computenodeInfo.bootimg, computenodeInfo.environment, computenodeInfo.ipadd, computenodeInfo.macadd, computenodeInfo.seqnum]);
@@ -284,7 +307,6 @@ function dbServiceInventory(data)
 function updateServiceData(location, servicenodeInfo)
 {
 if (servicenodestable.rows('[location=' + location +']').any()){
-console.log("exists");
 servicenodestable.row('[location='+location +']').remove();
 }
 servicenodestable.row.add([location, servicenodeInfo.hostname, servicenodeInfo.bootimg, servicenodeInfo.ipadd, servicenodeInfo.macadd, servicenodeInfo.seqnum]);
