@@ -23,10 +23,10 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
     def "toCanonicalHistoryJson"() {
         expect: util.toCanonicalHistoryJson(null) == "null"
     }
-    def "toCanonicalPOJO"() {
+    def "toCanonicalPOJO from String"() {
         expect: util.toCanonicalPOJO(null as String) == null
     }
-    def "toCanonicalHistoryPOJO"() {
+    def "toCanonicalHistoryPOJO from String"() {
         expect: util.toCanonicalHistoryPOJO(null as String) == null
     }
     def "fromStringToFile"() {
