@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-package com.intel.dai.foreign_bug
+package com.intel.dai.foreign_bus
 
 import com.intel.dai.foreign_bus.ConversionException
 import spock.lang.Specification
