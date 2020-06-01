@@ -172,7 +172,7 @@ class HWitemView {
         var hwitem = hwitemv.hwitem;
         $(hwitemv.div).addClass("rack-highlight");	// QQQ: rename to hwelement-highlight?
         var msgwords = ["<b>", hwitem.location, " ", "   ", systemDescriptions[hwitem.hwtype], "</b>"];
-        msgwords.push("<br>State: ", States[hwitem.state].name, " (", hwitem.state, ")");
+        try{msgwords.push("<br>State: ", States[hwitem.state].name, " (", hwitem.state, ")");} catch (err) { }
         $('<div class="hoverinfo" id="hwhoverpop"/>').html(msgwords.join("")).appendTo('body').show(0);
     }
     mouseleave(hwitemv) {
@@ -747,6 +747,18 @@ var colormap = {
     "compute-node-state-L" : "#66ccff",
     "compute-node-state-K" : "#aaddff",
 
+    "service-node-state-M" : "#000d1a",
+    "service-node-state-A" : "#cce5ff",
+    "service-node-state-H" : "gray",
+    "service-node-state-E" : "red",
+    "service-node-state-S" : "violet",
+    "service-node-state-B" : "#004d99",
+    "service-node-state-D" : "#0073e6",
+    "service-node-state-I" : "#3399ff",
+    "service-node-state-L" : "#66ccff",
+    "service-node-state-K" : "#aaddff",
+
+
     "dense-swblade-state-A"      : "#ffd9b3",
     "dense-rectifier-state-A"    : "#ffd9b3",
     "dense-cmm-state-A"          : "#ffbfbf",
@@ -834,6 +846,7 @@ var States = {
     A: {name: "Active", description: "Nodes that are Active (booted)"},
     E: {name: "Error",  description: "Nodes in Error"},
     S: {name: "Service", description: "Nodes in Service"},
+    H: {name: "Halting", description: "Nodes are in Halting/Shutting down state"},
 };
 
 // Polling stuff
