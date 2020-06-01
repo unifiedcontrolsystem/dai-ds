@@ -6,7 +6,7 @@ import org.voltdb.VoltTable;
 
 public class FwVersionHistoryDump extends VoltProcedure {
     private static final String SQL_TEXT =
-            "SELECT * FROM FW_Version WHERE ID STARTS WITH ? ORDER BY DbUpdatedTimestamp;";
+            "SELECT * FROM FW_Version_History WHERE ID STARTS WITH ? ORDER BY DbUpdatedTimestamp;";
 
     public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
 
