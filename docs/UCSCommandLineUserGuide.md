@@ -234,6 +234,27 @@ optional arguments:
                         default view
 ```
 
+#### Example
+```bash
+user@uan1:~> sudo ucs view env
+
++----------------+---------+--------------+--------------+--------------+---------------+
+|      LCTN      |  TYPE   | MINIMUMVALUE | MAXIMUMVALUE | AVERAGEVALUE |   TIMESTAMP   |
++================+=========+==============+==============+==============+===============+
+| X0-CH2-SN2-BC_ | Temp    | 20.0         | 38.0         | 27.52        | 2020-05-28    |
+| T_NODE2_KNC_CP |         |              |              |              | 20:37:51.389  |
+| U_TEMP         |         |              |              |              |               |
++----------------+---------+--------------+--------------+--------------+---------------+
+| X0-CH3-SN3-BC_ | Power   | 20.0         | 39.0         | 30.36        | 2020-05-28    |
+| P_NODE1_KNC_IN |         |              |              |              | 20:37:51.449  |
+| ST_PWR_MAX     |         |              |              |              |               |
++----------------+---------+--------------+--------------+--------------+---------------+
+| X0-CH6-CN2-BC_ | Voltage | 21.0         | 39.0         | 30.44        | 2020-05-28    |
+| V_NODE1_KNC_PV |         |              |              |              | 20:37:51.622  |
+| _VOLT          |         |              |              |              |               |
++----------------+---------+--------------+--------------+--------------+---------------+
+```
+
 ### View Subcommand – Event
 
 Retrieves the RAS Event Data from UCS NearLine Tier database.
@@ -281,6 +302,21 @@ optional arguments:
                         default view
   --summary             Summary of RAS Events. This command is not to be used
                         with --format option
+```
+
+####Example
+```bash
+user@uan1:~> sudo ucs view event --limit 3 --location X0-CH7-CN3
+
++-------------------------+------------+---------------------------------+----------+-------+------------------+------------------------------------------------------------------+
+|          TIME           |    LCTN    |              TYPE               | SEVERITY | JOBID | CONTROLOPERATION |                              DETAIL                              |
++=========================+============+=================================+==========+=======+==================+==================================================================+
+| 2020-05-21 17:45:47.003 | X0-CH7-CN3 | RasMntrForeignUpdateNodeListRsp | INFO     | None  | None             | Foreign update node list response: Cause:ec_update_node_list_rsp |
++-------------------------+------------+---------------------------------+----------+-------+------------------+------------------------------------------------------------------+
+| 2020-05-21 17:45:47.004 | X0-CH7-CN3 | RasMntrForeignUpdateNodeListRsp | INFO     | None  | None             | Foreign update node list response: Cause:ec_update_node_list_rsp |
++-------------------------+------------+---------------------------------+----------+-------+------------------+------------------------------------------------------------------+
+| 2020-05-21 17:45:47.005 | X0-CH7-CN3 | RasMntrForeignUpdateNodeListRsp | INFO     | None  | None             | Foreign update node list response: Cause:ec_update_node_list_rsp |
++-------------------------+------------+---------------------------------+----------+-------+------------------+------------------------------------------------------------------+
 ```
 
 ### View Subcommand – Inventory-History
@@ -499,6 +535,19 @@ optional arguments:
   --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
 ```
 
+#### Example
+
+```bash
+user@uan1:~> sudo ucs view state X0-CH7-CN3
+
++------------+--------------+-------+--------------+-------+-------------+--------------+
+|    LCTN    |   HOSTNAME   | STATE | WLMNODESTATE | OWNER | ENVIRONMENT | BOOTIMAGEID  |
++============+==============+=======+==============+=======+=============+==============+
+| X0-CH7-CN3 | nid000004-nm | Error | Unavailable  | WLM   | None        | centos7.3-sl |
+|            | n            |       |              |       |             | urm-vtune    |
++------------+--------------+-------+--------------+-------+-------------+--------------+
+```
+
 ### View Subcommand – System Info
 
 Allows user to retrieve the system information which is configured in UCS
@@ -517,5 +566,31 @@ optional arguments:
                         will be to display data in tabular format
   --summary             Display a summary of cluster by showing the state
                         count of all compute and service nodes
+```
+
+#### Example
+```bash
+user@uan1:~> sudo ucs view system-info                     
++-----------+-----------+-----------+-------+----------+----------+----------+----------+
+|   LCTN    | HOSTNAME  | AGGREGATO | STATE |  IPADDR  | MACADDR  | BMCIPADD | BOOTIMAG |
+|           |           |     R     |       |          |          |    R     |   EID    |
++===========+===========+===========+=======+==========+==========+==========+==========+
+| X0-CH4-CN | nid000001 | X0-CH0-SN | E     | 10.2.0.5 | aa:bb:cc | 10.4.0.5 | centos7. |
+| 0         | -nmn      | 0         |       |          | :dd:ee:8 |          | 3-vtune  |
+|           |           |           |       |          | 0        |          |          |
++-----------+-----------+-----------+-------+----------+----------+----------+----------+
+| X0-CH5-CN | nid000002 | X0-CH0-SN | E     | 10.2.0.6 | aa:bb:cc | 10.4.0.6 | centos7. |
+| 1         | -nmn      | 0         |       |          | :dd:ee:8 |          | 3-vtune  |
+|           |           |           |       |          | 1        |          |          |
++-----------+-----------+-----------+-------+----------+----------+----------+----------+
+| X0-CH6-CN | nid000003 | X0-CH0-SN | E     | 10.2.0.7 | aa:bb:cc | 10.4.0.7 | centos7. |
+| 2         | -nmn      | 0         |       |          | :dd:ee:8 |          | 3-vtune  |
+|           |           |           |       |          | 2        |          |          |
++-----------+-----------+-----------+-------+----------+----------+----------+----------+
+| X0-CH7-CN | nid000004 | X0-CH0-SN | E     | 10.2.0.8 | aa:bb:cc | 10.4.0.8 | centos7. |
+| 3         | -nmn      | 0         |       |          | :dd:ee:8 |          | 3-slurm- |
+|           |           |           |       |          | 3        |          | vtune    |
++-----------+-----------+-----------+-------+----------+----------+----------+----------+
+
 ```
 
