@@ -11,7 +11,9 @@ import java.util.List;
 public interface HWInvUtil {
     HWInvTree toCanonicalPOJO(Path canonicalHWInvPath);
     HWInvTree toCanonicalPOJO(String canonicalHWInvJson);
+    HWInvHistory toCanonicalHistoryPOJO(String canonicalHWInvHistoryJson);
     String toCanonicalJson(HWInvTree tree);
+    String toCanonicalHistoryJson(HWInvHistory history);
     void fromStringToFile(String str, String outputFileName) throws IOException;
     String fromFile(Path inputFilePath) throws IOException;
     List<HWInvLoc> subtract(List<HWInvLoc> list0, List<HWInvLoc> list1);

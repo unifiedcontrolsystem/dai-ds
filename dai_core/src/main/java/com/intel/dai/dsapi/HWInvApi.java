@@ -35,16 +35,19 @@ public interface HWInvApi {
     /**
      * <p> Ingest part of the HW inventory tree canonical form encoded as the given json string. </p>
      * @param canonicalHWInvJson json string containing a canonical HW inventory
-     * @return 0 if any location is ingested, otherwise
+     * @return 0 if any location is ingested, otherwise 1
      */
     int ingest(String canonicalHWInvJson) throws InterruptedException, IOException, DataStoreException;
 
     void delete(String locationName) throws IOException, DataStoreException;
     HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws IOException, DataStoreException;
     long numberOfLocationsInHWInv() throws IOException, DataStoreException;
+    String lastHwInvHistoryUpdate() throws IOException, DataStoreException;
 
     void insertHistoricalRecord(String action, String id, String fru) throws
             InterruptedException, IOException, DataStoreException;
 
     List<String> dumpHistoricalRecords() throws IOException, DataStoreException;
+
+    int ingestHistory(String canonicalHWInvHistoryJson) throws InterruptedException, IOException, DataStoreException;
 }

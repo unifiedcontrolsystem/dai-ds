@@ -4,10 +4,7 @@
 //
 package com.intel.dai.dsimpl.voltdb;
 
-import com.intel.dai.dsapi.HWInvApi;
-import com.intel.dai.dsapi.HWInvLoc;
-import com.intel.dai.dsapi.HWInvTree;
-import com.intel.dai.dsapi.HWInvUtil;
+import com.intel.dai.dsapi.*;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import org.voltdb.VoltTable;
@@ -59,6 +56,35 @@ public class VoltHWInvApi implements HWInvApi {
             return 1;
         }
         return ingest(hwInv);
+    }
+
+    /**
+     * <p> Ingest json string containing HW inventory history. </p>
+     * @param canonicalHWInvHistoryJson json file containing HW inventory history in canonical form
+     * @return 0 if any location is ingested, otherwise 1
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws DataStoreException
+     */
+    @Override
+    public int ingestHistory(String canonicalHWInvHistoryJson) throws InterruptedException, IOException, DataStoreException {
+        HWInvHistory hist = util.toCanonicalHistoryPOJO(canonicalHWInvHistoryJson);
+        if (hist == null) {
+            logger.error("Foreign HW inventory history conversion to POJO failed");
+            return 1;
+        }
+        return ingest(hist);
+    }
+
+    private int ingest(HWInvHistory hist) throws IOException, DataStoreException, InterruptedException {
+        int status = 1;
+        // The HWInvHistory constructor guarantees that hwInv.locs is never null.
+        for (HWInvHistoryEvent evt: hist.events) {
+            logger.info("Ingesting %s", evt.ID);
+            insertHistoricalRecord(evt.Action, evt.ID, evt.FRUID);
+            status = 0;
+        }
+        return status;
     }
 
     /**
@@ -157,6 +183,19 @@ public class VoltHWInvApi implements HWInvApi {
             return client.callProcedure("NumberOfLocationsInHWInv").getResults()[0].asScalarLong();
         } catch (ProcCallException e) {
             logger.error("ProcCallException during AllLocationsAtIdFromHWInv");
+            throw new DataStoreException(e.getMessage());
+        } catch (NullPointerException e) {
+            logger.error("Null client");
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String lastHwInvHistoryUpdate() throws IOException, DataStoreException {
+        try {
+            return client.callProcedure("HwInventoryHistoryLastUpdateTimestamp").getResults()[0].toString();
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException during HwInventoryHistoryLastUpdateTimestamp");
             throw new DataStoreException(e.getMessage());
         } catch (NullPointerException e) {
             logger.error("Null client");
