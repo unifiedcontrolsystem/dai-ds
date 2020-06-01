@@ -33,7 +33,7 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
         when: util.fromStringToFile("Ming", "build/tmp/somefile.json")
         then: notThrown IOException
     }
-    def "fromStringToFile - cannot write to read only file"() {
+    def "fromStringToFile - cannot write to read only output file"() {
         "touch build/tmp/readOnly.json".execute().text
         "chmod -w build/tmp/readOnly.json".execute().text
         when: util.fromStringToFile("Merciless", "build/tmp/readOnly.json")
