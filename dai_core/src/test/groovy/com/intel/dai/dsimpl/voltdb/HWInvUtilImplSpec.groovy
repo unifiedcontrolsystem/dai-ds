@@ -23,6 +23,12 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
     def "toCanonicalHistoryJson"() {
         expect: util.toCanonicalHistoryJson(null) == "null"
     }
+    def "toCanonicalPOJO"() {
+        expect: util.toCanonicalPOJO(null as String) == null
+    }
+    def "toCanonicalHistoryPOJO"() {
+        expect: util.toCanonicalHistoryPOJO(null as String) == null
+    }
     def "fromStringToFile"() {
         when: util.fromStringToFile("Ming", "build/tmp/somefile.json")
         then: notThrown IOException
