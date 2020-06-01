@@ -489,10 +489,12 @@ class ViewCli(object):
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
             if args.username is not None:
+                self._validate_input(args.username)
                 username = 'Username=' + args.username
             else:
                 username = ''
             if args.jobid is not None:
+                self._validate_input(args.jobid)
                 jobid = 'Jobid=' + args.jobid
             else:
                 jobid = ''
@@ -527,10 +529,12 @@ class ViewCli(object):
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
             if args.username is not None:
+                self._validate_input(args.username)
                 username = 'Username=' + args.username
             else:
                 username = ''
             if args.name is not None:
+                self._validate_input(args.name)
                 name = 'Name=' + args.name
             else:
                 name = ''
@@ -620,6 +624,10 @@ class ViewCli(object):
             raise RuntimeError("Input timestamp is of invalid type. Try again.")
         return inpdatetime.strftime("%Y-%m-%d %H:%M:%S.%f")
 
+    def _validate_input(self, input):
+        if self.is_bad_input(input):
+            raise RuntimeError("Bad input, please try with a valid input")
+
     def _retrieve_from_args(self, args):
         MAX_TIMEOUT = 2147483647
         if args.limit is not None:
@@ -676,6 +684,6 @@ class ViewCli(object):
 
     @staticmethod
     def is_bad_input(parameter):
-        if "?" in parameter or "*" in parameter or "%" in parameter:
+        if "?" in parameter or "*" in parameter or "%" in parameter or "$" in parameter:
             return True
         return False

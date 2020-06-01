@@ -43,8 +43,11 @@ public class QueryAPI {
                 case "diagsnonact":
                     jsonResult = executeProcedureEndTime("{call DiagListOfNonActiveDiagsAtTime(?)}", endtime);
                     break;
-                case "nodestatehistory":
+                case "computenodestatehistory":
                     jsonResult = executeProcedureStartEndTime("{call ComputeNodeHistoryListOfStateAtTime(?, ?)}", starttime, endtime);
+                    break;
+                case "servicenodestatehistory":
+                    jsonResult = executeProcedureStartEndTime("{call ServiceNodeHistoryListOfStateAtTime(?, ?)}", starttime, endtime);
                     break;
                 case "rasevent":
                     jsonResult = executeProcedureStartEndTime("{call RasEventListAtTime(?, ?)}", starttime, endtime);

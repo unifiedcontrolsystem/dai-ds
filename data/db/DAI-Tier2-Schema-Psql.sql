@@ -1124,6 +1124,53 @@ BEGIN
 END
 $$;
 
+--
+-- Name: servicenodehistorylistofstateattime(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.servicenodehistorylistofstateattime(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(lctn character varying, state character varying)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    prev_lctn varchar(20) := '';
+BEGIN
+    if (p_end_time is null) then
+        for Lctn, State in
+            select CN.Lctn, CN.State from Tier2_ServiceNode_History CN
+            order by Lctn, LastChgTimestamp desc
+        loop
+            if (Lctn <> prev_lctn) then
+                prev_lctn := Lctn;
+                return next;
+            end if;
+        end loop;
+    elsif (p_start_time is null) then
+        for Lctn, State in
+            select CN.Lctn, CN.State from Tier2_ServiceNode_History CN
+            where LastChgTimestamp <= p_end_time
+            order by Lctn, LastChgTimestamp desc
+        loop
+            if (Lctn <> prev_lctn) then
+                prev_lctn := Lctn;
+                return next;
+            end if;
+        end loop;
+    else
+        for Lctn, State in
+            select CN.Lctn, CN.State from Tier2_ServiceNode_History CN
+            where LastChgTimestamp <= p_end_time and
+                LastChgTimestamp >= p_start_time
+            order by Lctn, LastChgTimestamp desc
+        loop
+            if (Lctn <> prev_lctn) then
+                prev_lctn := Lctn;
+                return next;
+            end if;
+        end loop;
+    end if;
+    return;
+END
+$$;
 
 --
 -- Name: computenodehistoryoldesttimestamp(); Type: FUNCTION; Schema: public; Owner: -
@@ -1142,9 +1189,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.computenodeinventorylist(p_starttime timestamp without time zone, p_endtime timestamp without time zone) RETURNS SETOF public.tier2_computenode_history
     LANGUAGE sql
     AS $$
-select DISTINCT ON (sequencenumber) lctn, sequencenumber, state, hostname, bootimageid, environment, ipaddr, macaddr, bmcipaddr,
-    bmcmacaddr, bmchostname, dbupdatedtimestamp,  lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, aggregator, inventorytimestamp,
-    wlmnodestate, constraintid, entrynumber from  tier2_computenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS')
+select DISTINCT ON (sequencenumber) * from  tier2_computenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS')
     and lastchgtimestamp <= coalesce(p_endtime, current_timestamp at time zone 'UTC') order by sequencenumber, dbupdatedtimestamp desc;
    $$;
 
@@ -1460,7 +1505,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_latest_machineadapterinstance_records() RETURNS SETOF public.tier2_machineadapterinstance_ss
     LANGUAGE sql
     AS $$
-    select H.SnLctn, H.AdapterType, H.NumInitialInstances, 0::bigint , H.Invocation, H.LogFile, H.DbUpdatedTimestamp
+    select *
     from Tier2_MachineAdapterInstance_ss H;
 $$;
 
@@ -1967,8 +2012,8 @@ $$;
 CREATE OR REPLACE FUNCTION public.getrefsnapshotdataforlctn(p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_inventorysnapshot
     LANGUAGE sql
     AS $$
-        select lctn, snapshottimestamp, inventoryinfo, id, reference from  tier2_inventorysnapshot
-        where (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')) and reference = true
+        select * from  tier2_inventorysnapshot
+        where (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))) and reference = true
         order by snapshottimestamp desc limit p_limit;
 $$;
 
@@ -1983,26 +2028,26 @@ CREATE OR REPLACE FUNCTION public.getsnapshotdataforlctn(p_start_time timestamp 
 BEGIN
     if p_start_time is null and p_end_time is null then
         return query
-            select lctn, snapshottimestamp, inventoryinfo, id, reference from  tier2_inventorysnapshot
-            where (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+            select * from  tier2_inventorysnapshot
+            where (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
             order by snapshottimestamp desc limit p_limit;
     elsif p_start_time is null then
         return query
-            select lctn, snapshottimestamp, inventoryinfo, id, reference from  tier2_inventorysnapshot
+            select * from  tier2_inventorysnapshot
             where snapshottimestamp <= p_end_time and
-            (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+            (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
             order by snapshottimestamp desc limit p_limit;
     elsif p_end_time is null then
         return query
-            select lctn, snapshottimestamp, inventoryinfo, id, reference from  tier2_inventorysnapshot
+            select * from  tier2_inventorysnapshot
             where snapshottimestamp > p_start_time and
-            (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+            (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
             order by snapshottimestamp desc limit p_limit;
     else
         return query
-            select lctn, snapshottimestamp, inventoryinfo, id, reference from  tier2_inventorysnapshot
+            select * from  tier2_inventorysnapshot
             where snapshottimestamp > p_start_time and snapshottimestamp <= p_end_time and
-            (select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))
+            (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
             order by snapshottimestamp desc limit p_limit;
     end if;
     return;
@@ -2348,9 +2393,9 @@ BEGIN
     for v_job  in
         select *
         from Tier2_Job_History
-        where endtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+        where coalesce(endtimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
         and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
-        and endtimestamp >= coalesce(p_at_time, endtimestamp)
+        and coalesce(endtimestamp, current_timestamp at time zone 'UTC') >= coalesce(p_at_time, coalesce(endtimestamp, current_timestamp at time zone 'UTC'))
         and starttimestamp <= coalesce(p_at_time, starttimestamp)
         and
         case
@@ -2360,12 +2405,12 @@ BEGIN
         and
         case
                 when p_username = '%' then (username ~ '.*')
-                when p_username != '%' then (username ~ p_username)
+                when p_username != '%' then (username = p_username)
         end
                 and
         case
                 when p_state = '%' then (state ~ '.*')
-                when p_state != '%' then (state ~ p_state)
+                when p_state != '%' then (state = p_state)
         end
         order by JobId desc, starttimestamp desc
     loop
@@ -2603,15 +2648,13 @@ CREATE OR REPLACE FUNCTION public.GetServiceNodeSummary() RETURNS SETOF public.s
 $$;
 
 --
--- Name: servicenodeinventorylist(); Type: FUNCTION; Schema: public; Owner: -
+-- Name: serviceinventorylist(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE OR REPLACE FUNCTION public.servicenodeinventorylist(p_starttime timestamp without time zone, p_endtime timestamp without time zone) RETURNS SETOF public.tier2_servicenode_history
     LANGUAGE sql
     AS $$
-    select DISTINCT ON (lctn) lctn, sequencenumber, hostname, state, bootimageid, ipaddr, macaddr, bmcipaddr, bmcmacaddr,
-        bmchostname,  dbupdatedtimestamp, lastchgtimestamp, lastchgadaptertype, lastchgworkitemid, owner, aggregator, inventorytimestamp, constraintid, entrynumber
-        from  tier2_servicenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and lastchgtimestamp <= coalesce(p_endtime, current_timestamp at time zone 'UTC') order by lctn, dbupdatedtimestamp desc;
+    select DISTINCT ON (sequencenumber) * from  tier2_servicenode_history where lastchgtimestamp >= coalesce(p_starttime, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and lastchgtimestamp <= coalesce(p_endtime, current_timestamp at time zone 'UTC') order by lctn, dbupdatedtimestamp desc;
 $$;
 
 
@@ -3099,7 +3142,8 @@ CREATE SEQUENCE public.tier2_adapter_history_entrynumber_seq
 -- Name: tier2_adapter_history_entrynumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.tier2_adapter_history_entrynumber_seq OWNED BY public.tier2_adapter_history.entrynumber;
+ALTER SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
+
 
 
 --
