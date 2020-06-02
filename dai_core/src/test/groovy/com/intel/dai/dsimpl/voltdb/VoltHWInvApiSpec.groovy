@@ -21,6 +21,18 @@ class VoltHWInvApiSpec extends Specification {
         when: api.initialize()
         then: notThrown Exception
     }
+    def "ingest from String failed"() {
+        util.toCanonicalPOJO(_) >> null
+        expect: api.ingest(null as String) == 1
+    }
+    def "ingest from empty HWInvHistory"() {
+        HWInvHistory hist = new HWInvHistory();
+        expect: api.ingest(hist) == 1
+    }
+    def "ingestHistory from String failed"() {
+        util.toCanonicalHistoryPOJO(_) >> null
+        expect: api.ingestHistory(null as String) == 1
+    }    
     // Ingesting nonexistent file now results in a no-op
     def "ingest -- nonexistent file"() {
         when: api.ingest Paths.get("noSuchFile")
