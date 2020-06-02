@@ -23,6 +23,9 @@ class VoltHWInvApiSpec extends Specification {
         then: notThrown Exception
     }
     def "ingest from String failed"() {
+        String[] servers = ["localhost"]
+        def util = Mock(HWInvUtilImpl)
+        api = new VoltHWInvApi(logger, util, servers)
         util.toCanonicalPOJO(_) >> null
         expect: api.ingest(null as String) == 1
     }
@@ -31,9 +34,12 @@ class VoltHWInvApiSpec extends Specification {
         expect: api.ingest(hist) == 1
     }
     def "ingestHistory from String failed"() {
+        String[] servers = ["localhost"]
+        def util = Mock(HWInvUtilImpl)
+        api = new VoltHWInvApi(logger, util, servers)
         util.toCanonicalHistoryPOJO(_) >> null
         expect: api.ingestHistory(null as String) == 1
-    }    
+    }
     // Ingesting nonexistent file now results in a no-op
     def "ingest -- nonexistent file"() {
         when: api.ingest Paths.get("noSuchFile")
