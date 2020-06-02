@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 }
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | DateTimeParseException e) {
             throw new NetworkListenerProviderException("Failed to parse the event from the component");
         }
     }

@@ -1,0 +1,33 @@
+{
+  "mode" : "repeat",
+  "group-burst" : {
+    "totalRas" : "700000",
+    "totalSensor" : "300000",
+    "totalBootOn" : "0",
+    "totalBootOff" : "0",
+    "totalBootReady" : "0",
+    "ras" : "500000",
+    "sensor" : "100000",
+    "boot-on" : "0",
+    "boot-off" : "0",
+    "boot-ready" : "0",
+    "seed" : "123"
+  },
+  "burst" : {
+    "ras" : "600000",
+    "sensor" : "400000",
+    "boot-on" : "0",
+    "boot-off" : "0",
+    "boot-ready" : "0",
+    "rate" : "500000",
+    "seed" : "123"
+  },
+  "repeat" : {
+    "mode" : "burst",
+    "clock-mode" : "duration",
+    "duration" : "1",
+    "counter" : "1",
+    "start-time" : "2020-05-27 16:34:50.607Z"
+  },
+  "delay" : "2000000"
+}

@@ -7,29 +7,29 @@ import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.NodeInformation;
 import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.logging.Logger;
-import com.intel.networking.restclient.RESTClientException;
-import com.intel.networking.restserver.RESTServerException;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
  * Description of class EventSim.
- * initialisation of all dependent components eventsim server to serve.
+ * initialisation of all dependent components that eventsim server needs to serve.
  */
 public class EventSim {
 
-    EventSim(String[] args, Logger log) throws SimulatorException, RESTClientException, RESTServerException, PropertyNotExpectedType {
+    EventSim(String[] args, Logger log) throws SimulatorException {
         log_ = log;
         loadConfigFile(args);
         validateConfig();
         initialiseInstances(args);
     }
 
-    //for unit test cases
+    /**
+     * This method is used for unit test cases.
+     * @param log
+     */
     EventSim(Logger log) {
         log_ = log;
         wlmApi = new WlmApi(log_);
@@ -48,7 +48,11 @@ public class EventSim {
         eventSimEngine.initialize();
     }
 
-    //factory method for db
+    /**
+     * This method is used to create factory method for database using input data
+     * @param args input data with db details.
+     * @return
+     */
     DataStoreFactory createDataStoreFactory(String[] args) {
         return new DataStoreFactoryImpl(args, log_);
     }
@@ -87,7 +91,7 @@ public class EventSim {
      * This method is used to initialise instances
      * @throws SimulatorException when unable to create instances.
      */
-    private void initialiseInstances(String[] args) throws SimulatorException, RESTClientException, RESTServerException {
+    private void initialiseInstances(String[] args) throws SimulatorException {
         jsonParser_ = ConfigIOFactory.getInstance("json");
         bootParamsApi_ = new BootParameters();
         hwInvApi_ = new HardwareInventory();

@@ -8,7 +8,6 @@ import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.sun.istack.NotNull;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,20 +21,21 @@ public class NetworkObject {
         log_ = log;
         apiReqData_ = apiReqData;
         validateNetworkConfigurations();
+        networkConnectionObject = NetworkConnectionObject.createConnection(getNetworkName(), log_, config_);
     }
 
     /**
      * This method is used to initialse network based on network name.
-     *
-     * @throws RESTClientException when unable to create client.
-     * @throws RESTServerException when unable to create server
      */
-    public void initialise() throws RESTClientException, RESTServerException, SimulatorException {
-        networkConnectionObject = NetworkConnectionObject.createConnection(getNetworkName(), log_, config_);
+    public void initialise() throws SimulatorException {
         if (networkConnectionObject == null)
             throw new SimulatorException(String.format("Cannot initialise the given network : %s", getNetworkName()));
-        networkConnectionObject.initialize();
-        networkConnectionObject.configureOtherNetworks();
+        try {
+            networkConnectionObject.initialize();
+            networkConnectionObject.configureOtherNetworks();
+        } catch (RESTServerException | RESTClientException e) {
+            throw new SimulatorException(e.getMessage());
+        }
     }
 
     /**
@@ -131,12 +131,10 @@ public class NetworkObject {
      *
      * @param subject      subscription subjects.
      * @param events       data to publish.
-     * @param constantMode send data with or without delay.
-     * @param timeDelayMus delay time.
      * @throws RESTClientException when null values passed to this method.
      */
-    void send(final String subject, final List<String> events, final boolean constantMode, final long timeDelayMus) throws RESTClientException {
-        networkConnectionObject.send(subject, events, constantMode, timeDelayMus);
+    void send(final String subject, final String events) throws RESTClientException {
+        networkConnectionObject.send(subject, events);
     }
 
     /**
@@ -235,8 +233,10 @@ public class NetworkObject {
     }
 
     private void validateNetworkType() throws SimulatorException {
-        if(!config_.containsKey("network"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'network' entry");
+        for(String key : NETWORK_CONFIG_KEYS) {
+            if(!config_.containsKey(key))
+                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
+        }
     }
 
     /**
@@ -245,15 +245,11 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateRabbitMqConfig() throws SimulatorException {
-        if(!config_.containsKey("rabbitmq"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'rabbitmq' entry");
-
         PropertyMap config = getRabbitMQConfiguration();
-        if (!config.containsKey("exchangeName"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'exchangeName' entry");
-
-        if (!config.containsKey("uri"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'uri' entry");
+        for(String key : RABBIT_MQ_CONFIG_KEYS) {
+            if(!config.containsKey(key))
+                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
+        }
     }
 
     /**
@@ -262,22 +258,18 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateSSEConfig() throws SimulatorException {
-        if(!config_.containsKey("sseConfig"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'sseConfig' entry");
-
         PropertyMap config = getSSEConfiguration();
-        if (!config.containsKey("serverAddress"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain serverAddress entry");
-
-        if (!config.containsKey("serverPort"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain serverPort entry");
-
-        if (!config.containsKey("urls"))
-            throw new SimulatorException("EventSim Configuration file doesn't contain urls entry");
+        for(String key : SSE_CONFIG_KEYS) {
+            if(!config.containsKey(key))
+                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
+        }
     }
 
     private final PropertyMap config_;
     private final Logger log_;
     private final ApiReqData apiReqData_;
     private NetworkConnectionObject networkConnectionObject;
+    private final String[] SSE_CONFIG_KEYS = new String[]{"serverAddress", "serverPort", "urls"};
+    private final String[] RABBIT_MQ_CONFIG_KEYS = new String[]{"exchangeName", "uri"};
+    private final String[] NETWORK_CONFIG_KEYS = new String[]{"network", "sseConfig", "rabbitmq"};
 }

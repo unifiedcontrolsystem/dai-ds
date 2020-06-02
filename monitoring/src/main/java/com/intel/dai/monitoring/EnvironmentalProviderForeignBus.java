@@ -16,6 +16,7 @@ import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.InputStream;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -68,7 +69,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
                 commonList.add(common);
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException | ConversionException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | DateTimeParseException | ConversionException e) {
             log_.debug("Failed to parse telemetry string: '%s'", data);
             throw new NetworkListenerProviderException("Failed to parse incoming data", e);
         }

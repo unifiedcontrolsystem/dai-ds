@@ -9,6 +9,10 @@ import java.util.List;
  */
 public class ForeignEventBoot extends ForeignEvent{
 
+    ForeignEventBoot() {
+        subject = EVENT_SUB_TYPE.stateChanges;
+    }
+
     /**
      * This method is used to set creation location of boot event
      */

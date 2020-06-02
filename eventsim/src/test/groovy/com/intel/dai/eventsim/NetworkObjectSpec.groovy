@@ -26,6 +26,19 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.networkConnectionObject != null
     }
 
+    def "Initialise sse network object exception" () {
+        loadData(networkConfig)
+        NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
+        networkObjectTest.networkConnectionObject = Mock(SSENetwork.class)
+        networkObjectTest.networkConnectionObject.initialize() >> {throw new RESTServerException("unable to initialise")}
+        when:
+        networkObjectTest.initialise()
+        then:
+        def e = thrown(SimulatorException.class)
+        e.getMessage() == "unable to initialise"
+        networkObjectTest.getNetworkName() == "sse"
+    }
+
     def "Initialise callback network object" () {
         loadData(callbackConfig)
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
@@ -67,12 +80,12 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.initialise()
         expect:
         networkObjectTest.startServer()
-        networkObjectTest.serverStatus() == true
+        networkObjectTest.serverStatus()
         networkObjectTest.stopServer()
-        networkObjectTest.serverStatus() == false
+        !networkObjectTest.serverStatus()
     }
 
-    def "No prioor subscriptions, create, fetch and delete subscription for a url and subscriber" () {
+    def "No prior subscriptions, create, fetch and delete subscription for a url and subscriber" () {
         loadData(networkConfig)
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
         networkObjectTest.initialise()
@@ -86,7 +99,7 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.unRegisterAll()
         networkObjectTest.register("http://test.com", "test", input)
         expect:
-        networkObjectTest.getAllSubscriptions().isMap() == true
+        networkObjectTest.getAllSubscriptions().isMap()
         networkObjectTest.getAllSubscriptions().getAsMap().size() == 1
         networkObjectTest.getSubscription("http://test.com", "test").get("ID") == 1
         networkObjectTest.getSubscriptionForId(1).getAsMap().get("url") == "http://test.com"
@@ -99,10 +112,10 @@ class NetworkObjectSpec extends Specification {
         PropertyMap config = config.getMap("networkConfig")
         config.getMap("sseConfig").remove("serverAddress")
         when:
-        NetworkObject networkObjectTest = new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
+        new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
-        e.getMessage() == "EventSim Configuration file doesn't contain serverAddress entry"
+        e.getMessage() == "EventSim Configuration file doesn't contain 'serverAddress' entry"
     }
 
     def "Test exceptions for invalid config file missing serverPort details" () {
@@ -110,10 +123,10 @@ class NetworkObjectSpec extends Specification {
         PropertyMap config = config.getMap("networkConfig")
         config.getMap("sseConfig").remove("serverPort")
         when:
-        NetworkObject networkObjectTest = new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
+        new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
-        e.getMessage() == "EventSim Configuration file doesn't contain serverPort entry"
+        e.getMessage() == "EventSim Configuration file doesn't contain 'serverPort' entry"
     }
 
     def "Test exceptions for invalid config file missing urls details" () {
@@ -121,10 +134,10 @@ class NetworkObjectSpec extends Specification {
         PropertyMap config = config.getMap("networkConfig")
         config.getMap("sseConfig").remove("urls")
         when:
-        NetworkObject networkObjectTest = new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
+        new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
-        e.getMessage() == "EventSim Configuration file doesn't contain urls entry"
+        e.getMessage() == "EventSim Configuration file doesn't contain 'urls' entry"
     }
 
     def "Test exceptions for invalid config file missing exchangeName details" () {
@@ -132,7 +145,7 @@ class NetworkObjectSpec extends Specification {
         PropertyMap config = config.getMap("networkConfig")
         config.getMap("rabbitmq").remove("exchangeName")
         when:
-        NetworkObject networkObjectTest = new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
+        new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
         e.getMessage() == "EventSim Configuration file doesn't contain 'exchangeName' entry"
@@ -143,7 +156,7 @@ class NetworkObjectSpec extends Specification {
         PropertyMap config = config.getMap("networkConfig")
         config.getMap("rabbitmq").remove("uri")
         when:
-        NetworkObject networkObjectTest = new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
+        new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
         e.getMessage() == "EventSim Configuration file doesn't contain 'uri' entry"
@@ -231,7 +244,6 @@ class NetworkObjectSpec extends Specification {
     def "Exists subscription, exception occured to get subscription" () {
         loadData(networkConfig)
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
-        networkObjectTest.initialise()
         networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
         networkObjectTest.networkConnectionObject.initialize()
         networkObjectTest.networkConnectionObject.getSubscription("http://test.com", "test") >> {throw new RESTClientException("Cannot fetch subscription")}
@@ -247,8 +259,6 @@ class NetworkObjectSpec extends Specification {
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
         networkObjectTest.initialise()
         networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
-        networkObjectTest.networkConnectionObject.initialize()
-        networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
         Map<String, String> input_parameters = new HashMap<String, String>()
         when:
         networkObjectTest.register(null, "GET", input_parameters)
@@ -260,8 +270,6 @@ class NetworkObjectSpec extends Specification {
     def "Register network with http method as null value" () {
         loadData(networkConfig)
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
-        networkObjectTest.initialise()
-        networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
         networkObjectTest.networkConnectionObject.initialize()
         networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
         Map<String, String> input_parameters = new HashMap<String, String>()
@@ -272,7 +280,7 @@ class NetworkObjectSpec extends Specification {
         e.getMessage() == "Could not register URL or HttpMethod or input params : NULL value(s)"
     }
 
-    def "Register network with valid url and httpmethod" () {
+    def "Register network with valid url and subscriber" () {
         loadData(networkConfig)
         NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
         networkObjectTest.initialise()
@@ -291,13 +299,46 @@ class NetworkObjectSpec extends Specification {
         networkObjectTest.getAllSubscriptions().isEmpty()
     }
 
+    def "Register network with valid url and httpmethod" () {
+        loadData(networkConfig)
+        NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
+        networkObjectTest.initialise()
+        networkObjectTest.register("http://test.com", "GET", Mock(NetworkSimulator))
+        expect:
+        networkObjectTest.getAllSubscriptions().getAsMap().size() == 0
+    }
+
+    def "Register url and subscriber throws exception" () {
+            loadData(networkConfig)
+            NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
+            networkObjectTest.networkConnectionObject = Mock(NetworkConnectionObject)
+            networkObjectTest.networkConnectionObject.register("test", "test", new HashMap<String, String>()) >> {throw new RESTClientException("unable to initialise")}
+            when:
+            networkObjectTest.register("test", "test", new HashMap<String, String>())
+            then:
+            def e = thrown(SimulatorException.class)
+            e.getMessage() == "unable to initialise"
+            networkObjectTest.networkConnectionObject != null
+    }
+
+    def "Send telemetry data to network" () {
+        loadData(networkConfig)
+        NetworkObject networkObjectTest = new NetworkObject(config.getMap("networkConfig"), Mock(Logger), Mock(ApiReqData))
+        networkObjectTest.initialise()
+        expect:
+        networkObjectTest.send("telemetry", "message")
+        networkObjectTest.send("stateChanges", "message")
+        networkObjectTest.send("events", "message")
+        networkObjectTest.send("other", "message")
+    }
+
     void loadData(String networkConfig) {
         final File networkConfigFile = tempFolder.newFile("NetworkConfig.json")
         loadDataIntoFile(networkConfigFile, networkConfig)
         config = LoadFileLocation.fromFileLocation(networkConfigFile.getAbsolutePath())
     }
 
-    private void loadDataIntoFile(File file, String data) throws Exception {
+    private static void loadDataIntoFile(File file, String data) throws Exception {
         FileUtils.writeStringToFile(file, data);
     }
 

@@ -7,7 +7,6 @@ import com.intel.networking.restclient.RESTClientFactory;
 import com.intel.properties.PropertyMap;
 import com.sun.istack.NotNull;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,15 +54,13 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * This method is to publish data to network.
      * @param url subscription url.
      * @param events data to publish.
-     * @param constantMode send data with or without delay.
-     * @param timeDelayMus delay time.
      * @throws RESTClientException when null values passed to this method.
      * expects non null values.
      */
-    public void publish(final String url, @NotNull final List<String> events, final boolean constantMode, final long timeDelayMus) throws RESTClientException {
+    public void publish(final String url, @NotNull final String events) throws RESTClientException {
         if (events == null)
             throw new RESTClientException("No events to publish to network");
-        connMan_.publish(events, constantMode, timeDelayMus);
+        connMan_.publish(events);
     }
 
     /**

@@ -18,6 +18,7 @@ import com.intel.properties.PropertyNotExpectedType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,7 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
                 }
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | DateTimeParseException e) {
             throw new NetworkListenerProviderException("Failed to load the event metadata");
         }
     }

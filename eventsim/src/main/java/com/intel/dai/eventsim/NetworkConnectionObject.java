@@ -8,7 +8,6 @@ import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.sun.istack.NotNull;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -100,22 +99,20 @@ public abstract class NetworkConnectionObject {
         return callBack.unSubscribeAll();
     }
 
-    public abstract void publish(final String eventTYpe, final List<String> message, final boolean constantMode, final long timeDelayMus) throws RESTClientException;
+    public abstract void publish(final String eventTYpe, final String message) throws RESTClientException;
 
     /**
      * This method is to publish data to network.
      *
      * @param subject       subscription subjects.
      * @param eventMessages data to publish.
-     * @param constantMode  send data with or without delay.
-     * @param timeDelayMus  delay time.
      * @throws RESTClientException when null values passed to this method.
      */
-    void send(final String subject, final List<String> eventMessages, final boolean constantMode, long timeDelayMus) throws RESTClientException {
+    void send(final String subject, final String eventMessages) throws RESTClientException {
         if (subject.equals(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString()))
-            callBack.publish(subject, eventMessages, constantMode, timeDelayMus);
+            callBack.publish(subject, eventMessages);
         if (subject.equals(ForeignEvent.EVENT_SUB_TYPE.events.toString()) || subject.equals(ForeignEvent.EVENT_SUB_TYPE.telemetry.toString()))
-            sseServer.publish(subject, eventMessages, constantMode, timeDelayMus);
+            sseServer.publish(subject, eventMessages);
     }
 
     public abstract void initialize() throws RESTServerException, RESTClientException;

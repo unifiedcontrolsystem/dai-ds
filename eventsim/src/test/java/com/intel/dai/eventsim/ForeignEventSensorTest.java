@@ -20,7 +20,7 @@ public class ForeignEventSensorTest {
 
     @Test
     public void CanInitTimeStamp() {
-        ev.setTimestamp(6);
+        //ev.setTimestamp(6);
         System.out.println("DATE: " + ev.getTimestampString());
         //assertEquals(51532649931, ev.getTimestamp());
     }

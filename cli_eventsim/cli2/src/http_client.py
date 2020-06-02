@@ -55,12 +55,6 @@ class HttpClient(object):
         except requests.exceptions.Timeout:
             msg = "Request timed out. Please try again"
             raise RuntimeError(msg)
-        if response.status_code != 200:
-            try:
-                reason = json.loads(response.text)['reason']
-            except Exception as e:
-                reason = str(e)
-            raise RuntimeError(reason)
         status, rs_response = self._parse_http_response(response.text)
         if status == 'E':
             raise RuntimeError(rs_response)

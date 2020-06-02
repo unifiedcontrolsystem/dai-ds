@@ -5,6 +5,9 @@ package com.intel.dai.eventsim;
  * creates sensor events
  */
 class ForeignEventSensor extends ForeignEvent {
+    ForeignEventSensor() {
+        subject = EVENT_SUB_TYPE.telemetry;
+    }
 
     /**
      * This method is used to set sensor event-id

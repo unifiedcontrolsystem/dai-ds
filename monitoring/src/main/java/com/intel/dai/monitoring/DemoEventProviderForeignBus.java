@@ -15,6 +15,7 @@ import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class DemoEventProviderForeignBus implements NetworkListenerProvider, Ini
                         CommonDataFormat dataObj = new CommonDataFormat(nsTimestamp, null, DataType.RasEvent);
                         dataObj.setRasEvent("RasUnknownEvent", logMessage);
                         commonList.add(dataObj);
-                    } catch(PropertyNotExpectedType | ParseException e) {
+                    } catch(PropertyNotExpectedType | DateTimeParseException e) {
                         log_.exception(e);
                     }
                 }
