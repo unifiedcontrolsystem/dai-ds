@@ -706,6 +706,19 @@ CREATE PROCEDURE FROM
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.HwInventoryHistoryDump;
 
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FwVersionUpsert;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FwVersionDump;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FwVersionHistoryInsert;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FwVersionHistoryDump;
+
 END_OF_BATCH
 
 UPDATE DbStatus SET Status='schema-loaded', Description='', SchemeCompletedStamp=CURRENT_TIMESTAMP WHERE Id=0;
