@@ -1,5 +1,6 @@
 package com.intel.dai.dsimpl.voltdb
 
+import com.intel.dai.dsapi.HWInvHistory
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
 import com.intel.logging.LoggerFactory
