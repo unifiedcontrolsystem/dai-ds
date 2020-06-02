@@ -66,4 +66,25 @@ previous revision by executing the following
 
 *you can get the revision_id by running the schema history command in step b of steps to upgrade schema
 
+-------------------------------
+ENABLE/DISABLE DB PARTITIONING
+-------------------------------
 
+DB Partitioning can be enabled or disabled using the python script DBPartitioning-Purging.py in the folder schema-migration. Note that partitioning can not be
+enable on a table which already contains data
+
+1. Set the database connection info in PG_DB_URL environment variable. Alternative this can be passed as command line arguments using,
+    -d or --db_url = postgresql+driver://username:password@host:port/database or
+   	% export PG_DB_URL=postgresql://[username[:password]]@host[:port]/database
+
+2. To enable partitioning execute the following :
+    % python3 DBPartitioning-Purging.py enable <table_name> <partitioned_column>  --purge <retention_policy>
+    NOTE:
+    <table_name> : takes the name of a table which you wish to partition, this table should be mentioned as a partitioned table when you create the schema.
+    <partitioned_column> : takes the column name of the column the table has been set up to be partitioned on in the create schema step initially.
+    <retention_policy> : this takes input of the number of months of data you wish to retain, to not enable this purging set this value to 0.
+
+3. To disable the partitioning execute the following :
+    % python3 DBPartitioning-Purging.py disable <table_name>
+    NOTE:
+    <table_name> : takes the name of a table which you wish to partition, this table should be mentioned as a partitioned table when you create the schema.
