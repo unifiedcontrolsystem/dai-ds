@@ -4,10 +4,12 @@
 //
 package com.intel.dai.inventory.api
 
+import spock.lang.Specification
+
 // This test is necessary because ForeignHWInventory.toString() is exercised by
 // existing test code.  The toString() annotation is added to ForeignHWInventory
 // for consistency.
-class ForeignHWInventorySpec extends spock.lang.Specification {
+class ForeignHWInventorySpec extends Specification {
     def "ForeignHWInvByLocCabinet toString" () {
         def cab0 = new ForeignHWInvByLocCabinet()
         def cab1 = new ForeignHWInvByLocCabinet()
@@ -110,5 +112,14 @@ class ForeignHWInventorySpec extends spock.lang.Specification {
         tree1.CabinetPDUOutlets = new ArrayList<ForeignHWInvByLocCabinetPDUOutlet>()
 
         expect: tree0.toString() == tree1.toString()
+    }
+}
+
+class ForeignHWInvHistorySpec extends Specification {
+    def "ToString" () {
+        expect:
+        new ForeignHWInvHistory().toString() == new ForeignHWInvHistory().toString()
+        new ForeignHWInvHistoryAtLoc().toString() == new ForeignHWInvHistoryAtLoc().toString()
+        new ForeignHWInvHistoryEvent().toString() == new ForeignHWInvHistoryEvent().toString()
     }
 }

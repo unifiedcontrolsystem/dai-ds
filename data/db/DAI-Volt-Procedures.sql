@@ -706,6 +706,8 @@ CREATE PROCEDURE FROM
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.HwInventoryHistoryDump;
 
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.HwInventoryHistoryLastUpdateTimestamp;
 
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.FwVersionUpsert;

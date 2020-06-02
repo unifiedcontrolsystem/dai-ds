@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 
 /**
  * Description of class NetworkAdapterInventoryBase.
@@ -57,12 +58,30 @@ abstract class AdapterInventoryNetworkBase {
     }
 
     /**
-     * Ingests the Initial Hw Inventory data into data base.
+     * Ingests the initial HW inventory data into data base.
+     * Patch missing HW inventory history.
      */
     void postInitialize() {
         ingestCanonicalHWInvJson(
                 toCanonicalHWInvJson(
                         getForeignHWInvJson()));
+
+        ingestCanonicalHWInvHistoryJson(
+                toCanonicalHWinvHistoryJson(
+                        getForeignHWInvHistoryJson(
+                                determineMissingStartTime(), determineMissingEndTime())));
+    }
+
+    private String toCanonicalHWinvHistoryJson(String foreignHWInvHistoryJson) {
+        if (foreignHWInvHistoryJson == null) return null;
+
+        HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
+        ImmutablePair<String, String> canonicalHwInvHistory = tr.foreignHistoryToCanonical(foreignHWInvHistoryJson);
+        if (canonicalHwInvHistory.getKey() == null) {
+            log_.error("failed to translate foreign HW inventory history json");
+            return null;
+        }
+        return canonicalHwInvHistory.getValue();
     }
 
     /**
@@ -73,6 +92,50 @@ abstract class AdapterInventoryNetworkBase {
         hwInvApi_ = factory_.createHWInvApi();
     }
 
+    private String determineMissingStartTime() {
+        try {
+            return hwInvApi_.lastHwInvHistoryUpdate();
+        } catch (IOException | DataStoreException e) {
+            return determineMissingEndTime();
+        }
+    }
+
+    private String determineMissingEndTime() {
+        return Instant.now().toString();
+    }
+
+    private  String getForeignHWInvHistoryJson(String startTime, String endTime) {
+        try {
+            hwInvDiscovery_.initialize();
+            log_.info("rest client created");
+
+        } catch (RESTClientException e) {
+            log_.fatal("Fail to create REST client: %s", e.getMessage());
+            return null;
+        }
+
+        ImmutablePair<Integer, String> foreignHwInvHistory = hwInvDiscovery_.queryHWInvHistory(startTime, endTime);
+
+        if (foreignHwInvHistory.getLeft() != 0) {
+            log_.error("failed to acquire foreign HW inventory history json");
+            return null;
+        }
+        return foreignHwInvHistory.getRight();
+    }
+
+    private void ingestCanonicalHWInvHistoryJson(String canonicalHwInvhistoryJson) {
+        if (canonicalHwInvhistoryJson == null) return;
+
+        try {
+            hwInvApi_.ingestHistory(canonicalHwInvhistoryJson);
+        } catch (InterruptedException e) {
+            log_.error("InterruptedException: %s", e.getMessage());
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+        } catch (DataStoreException e) {
+            log_.error("DataStoreException: %s", e.getMessage());
+        }
+    }
 
     /**
      * Ingests the HW inventory locations in canonical form.

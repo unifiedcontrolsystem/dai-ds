@@ -14,4 +14,5 @@ public interface RestRequester {
     int getDiscoveryStatus();
     ImmutablePair<Integer, String> getHwInventory();
     ImmutablePair<Integer, String> getHwInventory(String foreignName);
+    ImmutablePair<Integer, String> getHWInventoryHistory(String startTime, String endTime);
 }
