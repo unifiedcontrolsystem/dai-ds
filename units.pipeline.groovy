@@ -30,6 +30,7 @@ pipeline {
                     }
 
                     utilities.InvokeGradle("build || true")
+                    utilities.InvokeGradle("check || true")  //add spotbugs
 
                     jacoco classPattern: '**/classes/java/main/com/intel/'
                     junit '**/test-results/**/*.xml'
