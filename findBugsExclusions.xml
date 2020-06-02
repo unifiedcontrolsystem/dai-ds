@@ -130,6 +130,7 @@
     </Match>
     <Match> <!-- These are as designed, fields are written to by the Gson serializer via introspection. -->
         <Or>
+            <Class name="com.intel.dai.dsapi.HWInvHistoryEvent" />
             <Class name="com.intel.dai.inventory.api.ForeignFRU" />
             <Class name="com.intel.dai.inventory.api.ForeignHWInvByLoc" />
             <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocCabinet" />
