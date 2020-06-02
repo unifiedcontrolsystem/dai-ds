@@ -98,6 +98,7 @@
     </Match>
     <Match> <!-- As designed not an issue -->
         <Or>
+            <Class name="com.intel.dai.dsapi.HWInvHistoryEvent" />
             <Class name="com.intel.dai.dsapi.HWInvLoc" />
             <Class name="com.intel.dai.inventory.api.ForeignHWInvChangeNotification" />
         </Or>
