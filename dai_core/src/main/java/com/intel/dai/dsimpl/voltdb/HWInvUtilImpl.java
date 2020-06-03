@@ -6,9 +6,7 @@ package com.intel.dai.dsimpl.voltdb;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.intel.dai.dsapi.HWInvLoc;
-import com.intel.dai.dsapi.HWInvTree;
-import com.intel.dai.dsapi.HWInvUtil;
+import com.intel.dai.dsapi.*;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.*;
@@ -59,6 +57,25 @@ public class HWInvUtilImpl implements HWInvUtil {
             tree.locs.sort(compareByID);
         }
         return gson.toJson(tree);
+    }
+
+    @Override
+    public String toCanonicalHistoryJson(HWInvHistory history) {
+        Comparator<HWInvHistoryEvent> compareByID = Comparator.comparing((HWInvHistoryEvent o) -> o.ID);
+        if (history != null) {
+            history.events.sort(compareByID);
+        }
+        return gson.toJson(history);
+    }
+
+    @Override
+    public HWInvHistory toCanonicalHistoryPOJO(String canonicalHWInvHistoryJson) {
+        try {
+            return gson.fromJson(canonicalHWInvHistoryJson, HWInvHistory.class);
+        } catch (Exception e) {
+            // EOFException can occur if the json is incomplete
+            return null;
+        }
     }
 
     @Override

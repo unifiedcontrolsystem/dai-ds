@@ -108,11 +108,13 @@ class AdapterInventoryNetworkBaseSpec extends Specification {
         HWInvApi hWInvApiMock = Mock(HWInvApi)
         underTest_.hwInvApi_ = hWInvApiMock
         underTest_.hwInvApi_.ingest(any()) >> 0
+        underTest_.hwInvApi_.ingestHistory(any()) >> 0
 
         def value = new ImmutablePair<>(0, hwInvForLocation)
         HWInvDiscovery invDiscoveryMock = Mock(HWInvDiscovery)
         underTest_.hwInvDiscovery_ = invDiscoveryMock
         underTest_.hwInvDiscovery_.queryHWInvTree() >> value
+        underTest_.hwInvDiscovery_.queryHWInvHistory(*_) >> value
         underTest_.postInitialize()
         expect: true
     }

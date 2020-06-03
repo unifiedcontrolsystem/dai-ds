@@ -10,5 +10,5 @@ import lombok.ToString;
  * Example: (?)
  */
 @ToString
-class ForeignHWInvByLocHSNBoard extends  ForeignHWInvByLoc {
+class ForeignHWInvByLocHSNBoard extends ForeignHWInvByLoc {
 }

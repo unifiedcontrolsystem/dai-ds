@@ -182,7 +182,7 @@ CREATE TABLE public.tier2_aggregatedenvdata (
     adaptertype character varying(20) NOT NULL,
     workitemid bigint NOT NULL,
     entrynumber bigint NOT NULL
-);
+)PARTITION BY RANGE ("timestamp");
 
 --
 -- Name: tier2_computenode_history; Type: TABLE; Schema: public; Owner: -
@@ -692,7 +692,7 @@ CREATE TABLE public.tier2_rasevent (
     lastchgadaptertype character varying(20) NOT NULL,
     lastchgworkitemid bigint NOT NULL,
     entrynumber bigint NOT NULL
-);
+)PARTITION BY RANGE (dbupdatedtimestamp);
 
 --
 -- Name: tier2_adapter_ss; Type: TABLE; Schema: public; Owner:  
@@ -3061,6 +3061,178 @@ AS $$
        tier2_ucsconfigvalue_ss, tier2_uniquevalues_ss, tier2_workitem_ss, tier2_rasevent_ss;
 $$;
 
+CREATE OR REPLACE FUNCTION public.generate_partition_purge_ddl(table_name text, timestamp_column_name text, purge_data boolean DEFAULT false)
+ RETURNS text
+ LANGUAGE plpgsql
+ IMMUTABLE STRICT
+AS $function$
+        DECLARE
+            ddl_script TEXT;
+        BEGIN
+            ddl_script:= '';
+
+                        ddl_script := ddl_script || '
+
+                        CREATE FUNCTION ' || table_name || '_create_partition_and_insert()
+                                RETURNS trigger
+                                LANGUAGE plpgsql
+                                VOLATILE NOT LEAKPROOF
+                        AS $BODY$
+                                DECLARE
+                                  partition_month TEXT;
+                                  partition TEXT;
+                                  startdate date;
+                                  enddate date;
+                                BEGIN
+                                  partition_month := to_char(NEW.' || timestamp_column_name || ',''YYYY_MM'');
+                                  partition := TG_RELNAME || ''_'' || partition_month;
+                                  startdate:= to_char(NEW.' || timestamp_column_name || ',''YYYY-MM-01'');
+                                  enddate := date_trunc(''MONTH'', NEW.' || timestamp_column_name || ') + INTERVAL ''1 MONTH - 1 DAY'';
+                                  IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname=partition) THEN
+                                        EXECUTE ''CREATE TABLE '' || partition || '' (check (' || timestamp_column_name || ' >= DATE '''' || startdate || ''''  AND NEW.' || timestamp_column_name || ' <=  DATE '''' ||  enddate || '''' )) INHERITS ('' || TG_RELNAME || '');'';
+                                  END IF;
+                                   EXECUTE ''INSERT INTO '' || partition || '' SELECT('' || TG_RELNAME || '' ''|| quote_literal(NEW) || '').*;'';
+                           RETURN NULL;
+                           END;
+                           $BODY$;';
+                         --- END OF CREATE PARTITION FUNCTION ---
+
+                        --- CREATE A TRIGGER IF NOT ALREADY THERE FOR PARTITION INSERTS ON TABLE ---
+
+                        PERFORM 1 FROM information_schema.triggers WHERE trigger_name = 'partition_insert_' || table_name || '_trigger';
+            IF (FOUND) THEN
+                ddl_script := ddl_script || '-- Trigger of the same name already exists.
+                -- ';
+            END IF;
+            ddl_script := ddl_script || 'CREATE TRIGGER partition_insert_' || table_name || '_trigger BEFORE INSERT ON ' || table_name || ' FOR EACH ROW EXECUTE PROCEDURE ' || table_name || '_create_partition_and_insert();';
+
+            --- END OF CREATE TRIGGER FOR PARTITION FUNCTION ---
+
+            --- ENABLING TRIGGER FOR PURGING THE TABLES OLDER THAN 6 MONTHS ---
+
+                        ddl_script := ddl_script ||
+                        'CREATE OR REPLACE FUNCTION ' || table_name || '_purge_data(table_to_purge text)
+                        RETURNS trigger
+              LANGUAGE plpgsql VOLATILE
+                          AS $BODY$
+                          BEGIN
+                                EXECUTE(''DROP TABLE IF EXISTS '' || quote_ident( TG_RELNAME_'' || to_char(current_timestamp - INTERVAL ''6 MONTHS '', ''YYYYMM'')) || '' CASCADE;);
+                          RETURN NULL;
+                          END;
+                          $$;';
+
+                        IF (purge_data) THEN
+                ddl_script := ddl_script || '
+                                CREATE TRIGGER purge_' || table_name || '_trigger BEFORE INSERT ON ' || table_name || ' FOR EACH ROW EXECUTE PROCEDURE purge_' || table_name'();';
+            ELSE
+                ddl_script := ddl_script || '-- Purging is disabled.';
+            END IF;
+
+            RAISE NOTICE '%s', ddl_script;
+            RETURN ddl_script;
+        END;
+        $function$;
+
+
+CREATE OR REPLACE FUNCTION public.generate_partition_purge_rules(table_name text, timestamp_column_name text, retention_policy integer DEFAULT 6)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+            ddl_script TEXT;
+            colu_name text;
+            table_name_from_arg ALIAS FOR table_name;
+        BEGIN
+
+           PERFORM 1 FROM information_schema.columns WHERE information_schema.columns.table_name = table_name_from_arg AND column_name = timestamp_column_name AND data_type LIKE 'timestamp%';
+            IF (NOT FOUND) THEN
+                RAISE EXCEPTION 'The specified column % in table % must exists and of type timestamp', quote_literal(timestamp_column_name), quote_literal(table_name);
+            END IF;
+            ddl_script:= '';
+                ddl_script := ddl_script || '
+                                                CREATE OR REPLACE FUNCTION createfuturepartitions_' || table_name ||'(
+                                                ts timestamp without time zone)
+                                        RETURNS void
+                                        LANGUAGE ''plpgsql''
+                                        VOLATILE
+                                                AS $BODY$
+                                                declare returned_res text;
+                                                declare monthStart date;
+                                                declare monthEndExclusive date;
+                                        -- Create partition table name with suffix YYYYMM
+                                        declare futuretableName text := '''|| table_name || '_'' || to_char(ts + interval ''1 MONTH'', ''YYYYmm'');
+                                                begin
+                                        -- Check if the partition table we need exists.
+                                        if to_regclass(futuretableName) is null then
+                                        -- Generate a new partition for the table
+                                            monthStart := date_trunc(''MONTH'', ts) + interval ''1 MONTH'';
+                                            monthEndExclusive := monthStart + interval ''1 MONTH'';
+                                            execute format(''create table %%I partition of ' || table_name || ' for values from (%%L) to (%%L)'', futuretableName, monthStart, monthEndExclusive);
+                                        end if;
+                                                end;
+                                                $BODY$;
+                                                ';
+                                --- END OF CREATE PARTITION FUNCTION ---
+
+                        --- CREATE A RULE ON THE TABLE FOR EVERY INSERT ---
+                                                ddl_script := ddl_script || ' CREATE OR REPLACE RULE autocall_createfuturepartitions_' || table_name || ' AS
+                                            ON INSERT TO '|| table_name ||'
+                                        DO (
+                                                SELECT createfuturepartitions_'|| table_name || '(new.'|| timestamp_column_name ||') AS createfuturepartitions_'|| table_name || ' ;);';
+
+                --- END OF CREATE RULE FOR PARTITION FUNCTION ---
+--- ENABLING TRIGGER FOR PURGING THE TABLES OLDER THAN Retention_Policy MONTHS ---
+
+                        ddl_script := ddl_script ||
+                        'CREATE OR REPLACE FUNCTION purge_' || table_name || '()
+                        RETURNS trigger
+                                        LANGUAGE ''plpgsql''
+                                        COST 100
+                                        VOLATILE
+                                                AS $BODY$
+                                                DECLARE
+                                                startDate date;
+                                                endDate date;
+                                                tableNames text;
+                                                dropScript text := ''DROP TABLE IF EXISTS '';
+                                                partition text := '''|| table_name ||''';
+                                                dates text[];
+                                                i text;
+                                                BEGIN
+                                                        select max(' ||timestamp_column_name ||')-INTERVAL '''|| retention_policy + 1  ||' MONTHS'' from ' || table_name || ' into endDate;
+                                                        select  min(' || timestamp_column_name || ') from ' || table_name ||' into startDate;
+                                                        select array(select partition || ''_'' || to_char(GENERATE_SERIES( startDate::DATE,endDate::DATE, ''1 month'' ), ''YYYYMM'')) into dates;
+                                                        IF array_length(dates,1) > 0 THEN
+                                                        select array_to_string(dates, '','') into tableNames;
+                                                        execute(dropScript || tableNames|| '';'');
+                                                        END IF;
+                                                        return NULL;
+                                                END;
+                                                $BODY$;';
+
+            PERFORM 1 FROM information_schema.triggers WHERE trigger_name = 'purge_' || table_name || '_trigger';
+            IF (NOT FOUND and retention_policy > 0) THEN
+                ddl_script := ddl_script ||
+                       'CREATE TRIGGER purge_' || table_name || '_trigger AFTER INSERT ON ' || table_name || ' FOR EACH STATEMENT EXECUTE PROCEDURE purge_' || table_name || '();';
+            ELSE
+                ddl_script := ddl_script || '-- Purging is disabled.';
+            END IF;
+ RETURN ddl_script;
+        END;
+$function$;
+
+CREATE PROCEDURE public.create_first_partition()
+LANGUAGE plpgsql
+AS $$
+declare monthStart date := date_trunc('MONTH', current_timestamp);
+declare monthEndExclusive date := monthStart + interval '1 MONTH';
+declare tablepostfix text := to_char(current_timestamp, 'YYYYmm');
+BEGIN
+    execute format('create table %s partition of public.tier2_rasevent for values from (%L) to (%L)', 'public.tier2_rasevent_' || tablepostfix, monthStart, monthEndExclusive);
+    execute format('create table %s partition of public.tier2_aggregatedenvdata for values from (%L) to (%L)', 'public.tier2_aggregatedenvdata_'|| tablepostfix, monthStart, monthEndExclusive);
+END;
+$$;
+
 
 CREATE OR REPLACE FUNCTION public.insertorupdatehwinventoryfru(p_fruid character varying, p_frutype character varying, p_frusubtype character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
     LANGUAGE plpgsql
@@ -3142,6 +3314,7 @@ CREATE SEQUENCE public.tier2_adapter_history_entrynumber_seq
 -- Name: tier2_adapter_history_entrynumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 ALTER SEQUENCE public.tier2_adapter_history_entrynumber_seq OWNED BY public.tier2_adapter_history.entrynumber;
+
 
 --
 -- Name: tier2_aggregatedenvdata_entrynumber_seq; Type: SEQUENCE; Schema: public; Owner: -
@@ -4392,6 +4565,8 @@ CREATE UNIQUE INDEX machineadapterinstancebysnlctnandadaptertype ON public.tier2
 --
 
 CREATE UNIQUE INDEX workitembyadaptertypeandid ON public.tier2_workitem_ss USING btree (workingadaptertype, id);
+
+call public.create_first_partition();
 
 --
 -- PostgreSQL database dump complete

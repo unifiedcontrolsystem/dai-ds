@@ -78,6 +78,14 @@ public class HWInvDiscovery {
         return requester_.getHwInventory();
     }
 
+    public ImmutablePair<Integer, String> queryHWInvHistory(String startTime, String endTime) {
+        if (requester_ == null) {
+            log.error("requester_ is null");
+            return new ImmutablePair<>(1, "");
+        }
+        return requester_.getHWInventoryHistory(startTime, endTime);
+    }
+
     /**
      * This method is used to create/initialise client.
      */

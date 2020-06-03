@@ -10,5 +10,5 @@ import lombok.ToString;
  * Example: x0m0p0j1
  */
 @ToString
-class ForeignHWInvByLocCabinetPDUOutlet extends  ForeignHWInvByLoc {
+class ForeignHWInvByLocCabinetPDUOutlet extends ForeignHWInvByLoc {
 }
