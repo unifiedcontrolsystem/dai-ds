@@ -3313,9 +3313,7 @@ CREATE SEQUENCE public.tier2_adapter_history_entrynumber_seq
 --
 -- Name: tier2_adapter_history_entrynumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
-
-ALTER SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
-
+ALTER SEQUENCE public.tier2_adapter_history_entrynumber_seq OWNED BY public.tier2_adapter_history.entrynumber;
 
 
 --
