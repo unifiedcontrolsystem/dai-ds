@@ -6,6 +6,7 @@ package com.intel.dai.dsapi;
 
 import lombok.ToString;
 import java.util.ArrayList;
+import java.util.List;
 
 // Note that if locs is marked transient, GSON cannot serialize objects of this class
 
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  */
 @ToString
 public class HWInvTree {
-    public ArrayList<HWInvLoc> locs;
+    public List<HWInvLoc> locs;
     public HWInvTree() {
         locs = new ArrayList<>();
     }

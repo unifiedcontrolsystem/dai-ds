@@ -1,5 +1,6 @@
 package com.intel.dai.dsimpl.voltdb
 
+import com.intel.dai.dsapi.HWInvHistory
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
 import com.intel.logging.LoggerFactory
@@ -20,6 +21,24 @@ class VoltHWInvApiSpec extends Specification {
     def "initialize"() {
         when: api.initialize()
         then: notThrown Exception
+    }
+    def "ingest from String failed"() {
+        String[] servers = ["localhost"]
+        def util = Mock(HWInvUtilImpl)
+        api = new VoltHWInvApi(logger, util, servers)
+        util.toCanonicalPOJO(_) >> null
+        expect: api.ingest(null as String) == 1
+    }
+    def "ingest from empty HWInvHistory"() {
+        HWInvHistory hist = new HWInvHistory();
+        expect: api.ingest(hist) == 1
+    }
+    def "ingestHistory from String failed"() {
+        String[] servers = ["localhost"]
+        def util = Mock(HWInvUtilImpl)
+        api = new VoltHWInvApi(logger, util, servers)
+        util.toCanonicalHistoryPOJO(_) >> null
+        expect: api.ingestHistory(null as String) == 1
     }
     // Ingesting nonexistent file now results in a no-op
     def "ingest -- nonexistent file"() {
