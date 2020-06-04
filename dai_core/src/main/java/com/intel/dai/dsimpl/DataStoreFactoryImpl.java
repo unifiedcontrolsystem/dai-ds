@@ -195,7 +195,12 @@ public class DataStoreFactoryImpl implements DataStoreFactory {
 
     @Override
     public StoreTelemetry createStoreTelemetry() {
-        return new JdbcStoreTelemetry(logger_);
+        return createStoreTelemetry(logger_);
+    }
+
+    @Override
+    public StoreTelemetry createStoreTelemetry(Logger logger) {
+        return new JdbcStoreTelemetry(logger);
     }
 
     @Override

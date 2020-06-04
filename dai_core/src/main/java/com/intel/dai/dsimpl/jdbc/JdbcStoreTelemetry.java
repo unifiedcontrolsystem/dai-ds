@@ -20,7 +20,7 @@ import java.util.TimeZone;
 /**
  * Description of class JdbcStoreTelemetry.
  */
-public class JdbcStoreTelemetry implements StoreTelemetry, Closeable, AutoCloseable {
+public class JdbcStoreTelemetry implements StoreTelemetry {
     public JdbcStoreTelemetry(Logger log) {
         log_ = log;
     }

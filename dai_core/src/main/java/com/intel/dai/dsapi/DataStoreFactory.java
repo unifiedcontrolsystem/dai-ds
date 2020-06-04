@@ -28,6 +28,7 @@ public interface DataStoreFactory {
     AdapterOperations createAdapterOperations(AdapterInformation information);
 
     StoreTelemetry createStoreTelemetry();
+    StoreTelemetry createStoreTelemetry(Logger logger);
     NodeInformation createNodeInformation();
     EventsLog createEventsLog(String adapterName, String adapterType);
     Location createLocation();

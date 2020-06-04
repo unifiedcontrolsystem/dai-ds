@@ -15,8 +15,10 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
@@ -60,11 +62,11 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
     public void connect(String info) {
         if(publisherThread_ == null) {
             if(info != null && !info.trim().equals("")) connectionUri_ = info;
+            startingPublisher_.set(false);
             publisherThread_ = new Thread(this);
             publisherThread_.start();
-            try { // wait till the server is actually up....
-                Thread.sleep(300); // milliseconds
-            } catch(InterruptedException e) { /* Ignore */ }
+            long target = Instant.now().toEpochMilli() + 500;
+            while(!startingPublisher_.get() && Instant.now().toEpochMilli() < target); // Fast loop wait with timeout.
         }
     }
 
@@ -126,11 +128,13 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
         try {
             initializePublisher();
         } catch(Exception e) {
+            startingPublisher_.set(true);
             log_.exception(e, "Failed to start publisher!");
             destroyPublisher();
             return;
         }
         try {
+            startingPublisher_.set(true);
             processSendRequests();
         } catch(IOException e) {
             log_.exception(e, "Failed to send requests using the publisher!");
@@ -146,6 +150,11 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
                 // data cannot be null, look at the source of items in the queue (sensMessage).
                 channel_.basicPublish(exchangeName_, data.subject, null, data.message.getBytes(StandardCharsets.UTF_8));
             }
+        }
+        while (!queue_.isEmpty()) {
+            PublishData data = queue_.poll();
+            // data cannot be null, look at the source of items in the queue (sensMessage).
+            channel_.basicPublish(exchangeName_, data.subject, null, data.message.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -168,10 +177,14 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
     void initializePublisher() throws Exception {
         ConnectionFactory factory = createFactory();
         factory.setUri(connectionUri_);
-        connection_ = factory.newConnection();
-        channel_ = connection_.createChannel();
-        if(channel_ == null) throw new Exception("Failed to create the RabbitMQ channel!");
-        channel_.exchangeDeclare(exchangeName_, BuiltinExchangeType.TOPIC);
+        try {
+            connection_ = factory.newConnection();
+            channel_ = connection_.createChannel();
+            channel_.exchangeDeclare(exchangeName_, BuiltinExchangeType.TOPIC);
+        } catch(IOException | TimeoutException e) {
+            destroyPublisher();
+            throw e;
+        }
     }
 
     ConnectionFactory createFactory() {
@@ -185,6 +198,7 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
     private String connectionUri_;
     ConcurrentLinkedQueue<PublishData> queue_ = new ConcurrentLinkedQueue<>();
     AtomicBoolean stopPublisher_ = new AtomicBoolean(false);
+    AtomicBoolean startingPublisher_ = new AtomicBoolean(false);
     private Connection connection_;
     private Channel channel_;
 

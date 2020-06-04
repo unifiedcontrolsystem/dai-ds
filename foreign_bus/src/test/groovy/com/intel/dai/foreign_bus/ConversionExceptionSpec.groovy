@@ -4,7 +4,6 @@
 //
 package com.intel.dai.foreign_bus
 
-import com.intel.dai.foreign_bus.ConversionException
 import spock.lang.Specification
 
 class ConversionExceptionSpec extends Specification {

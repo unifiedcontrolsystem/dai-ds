@@ -76,37 +76,37 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         then: thrown exception
 
         where:
-        scnJson                                                     || exception
-        '{Components: ["x0c0s21b0n0"], State: ""}'                  || NetworkListenerProviderException
-        '{Components: ["x0c0s21b0n0"], State: "Chicken"}'           || NetworkListenerProviderException
-        '{Components: ["x0c0s21b0n0"], State: "Cow"}'               || NetworkListenerProviderException
+        scnJson                                              || exception
+        '{Components: ["x3000c0s34b4n0"], State: ""}'        || NetworkListenerProviderException
+        '{Components: ["x3000c0s34b4n0"], State: "Chicken"}' || NetworkListenerProviderException
+        '{Components: ["x3000c0s34b4n0"], State: "Cow"}'     || NetworkListenerProviderException
     }
     def "processRawStringData - common usages - sizes"() {
         expect: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig)).size() == size
 
         where:
-        scnJson                                                     || size
-        '{Components: [], State: "On"}'                             || 0
-        '{Components: ["x0c0s21b0n0"], State: "Off"}'               || 1
-        '{Components: ["x0c0s21b0n0", "x0c0s24b0n0"], State: "On"}' || 2
+        scnJson                                                           || size
+        '{Components: [], State: "On"}'                                   || 0
+        '{Components: ["x3000c0s34b4n0"], State: "Off"}'                  || 1
+        '{Components: ["x3000c0s34b4n0", "x3000c0s34b3n0"], State: "On"}' || 2
     }
 
     def "processRawStringData - common usages - data"() {
         given:
-        def scnJson = '{Components: ["x0c0s21b0n0", "x0c0s24b0n0"], State: "On"}'
+        def scnJson = '{Components: ["x3000c0s34b4n0", "x3000c0s34b3n0"], State: "On"}'
 
         when:
         def cdfs = underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
         then:
-        cdfs[0].getLocation() == "R0-CH0-CB0-CN3"
+        cdfs[0].getLocation() == "R0-CB3-CN0"
         cdfs[0].getDataType() == DataType.InventoryChangeEvent
         cdfs[0].getStateEvent() == BootState.NODE_ONLINE
-        cdfs[0].retrieveExtraData('foreignLocationKey') == 'x0c0s21b0n0'
+        cdfs[0].retrieveExtraData('foreignLocationKey') == 'x3000c0s34b4n0'
 
-        cdfs[1].getLocation() == "R0-CH0-CB0-CN2"
+        cdfs[1].getLocation() == "R0-CB2-CN0"
         cdfs[1].getDataType() == DataType.InventoryChangeEvent
         cdfs[1].getStateEvent() == cdfs[0].getStateEvent()
-        cdfs[1].retrieveExtraData('foreignLocationKey') == 'x0c0s24b0n0'
+        cdfs[1].retrieveExtraData('foreignLocationKey') == 'x3000c0s34b3n0'
 
         cdfs[0].getNanoSecondTimestamp() == cdfs[1].getNanoSecondTimestamp()
     }

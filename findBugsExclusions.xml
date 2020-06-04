@@ -26,6 +26,9 @@
             <Class name="com.intel.dai.inventory.api.HWInvDiscovery" />
             <Class name="com.intel.dai.eventsim.WlmApi" />
             <Class name="com.intel.perflogging.BenchmarkHelper" />
+            <Class name="com.intel.dai.fabric.FabricCritTelemetryProvider" />
+            <Class name="com.intel.dai.fabric.FabricPerfTelemetryProvider" />
+            <Class name="com.intel.dai.fabric.FabricTelemetryProvider" />
         </Or>
         <Bug code="SECPTI,SECPTO,SECSQLIJDBC,SECCI" />
     </Match>
@@ -158,6 +161,10 @@
     <Match>
         <Class name="com.intel.perflogging.GenerateRasEvents" />
         <Bug code="SECPR" /> <!-- Predictable random numbers are what we actually want here! -->
+    </Match>
+    <Match>
+        <Class name="com.intel.dai.fabric.FabricTelemetryItem" />
+        <Bug code="FE" /> <!-- These direct double compares are against a know constant value as "default" -->
     </Match>
 
     <!--*************************************************************************************************************
