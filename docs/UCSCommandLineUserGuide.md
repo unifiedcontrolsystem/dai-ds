@@ -236,7 +236,7 @@ optional arguments:
 
 #### Example
 ```bash
-user@uan1:~> sudo ucs view env
+user@uan1:~> ucs view env
 
 +----------------+---------+--------------+--------------+--------------+---------------+
 |      LCTN      |  TYPE   | MINIMUMVALUE | MAXIMUMVALUE | AVERAGEVALUE |   TIMESTAMP   |
@@ -306,7 +306,7 @@ optional arguments:
 
 ####Example
 ```bash
-user@uan1:~> sudo ucs view event --limit 3 --location X0-CH7-CN3
+user@uan1:~> ucs view event --limit 3 --location X0-CH7-CN3
 
 +-------------------------+------------+---------------------------------+----------+-------+------------------+------------------------------------------------------------------+
 |          TIME           |    LCTN    |              TYPE               | SEVERITY | JOBID | CONTROLOPERATION |                              DETAIL                              |
@@ -352,6 +352,20 @@ user@uan1:~> ucs view inventory-history  --help
                                      will be to display data in tabular format
                --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
 ```
+
+#### Example
+```bash
+user@uan1:~> ucs view inventory-history X0-CH[4-7]-CN[0-3]
+
++------------+----------------------+
+|     ID     |        FRUID         |
++============+======================+
+| X0-CH6-CN2 | Node.WO105483L01S010 |
++------------+----------------------+
+| X0-CH7-CN3 | Node.WO105483L01S005 |
++------------+----------------------+
+
+```
 ### View Subcommand – Inventory-Info
 
 Retrieves the inventory information for a given location from UCS NearLine Tier database.
@@ -376,6 +390,23 @@ user@uan1:~> ucs view inventory-info  --help
                                      Display data either in JSON or table format. Default
                                      will be to display data in tabular format
                --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+```
+
+#### Example
+```bash
+user@uan1:~> ucs view inventory-info X0-CH7-CN3 --limit 4
+             
++-------------------------+------------------+-----------+---------+-----------------------+-----------+------------+
+|   DBUPDATEDTIMESTAMP    |        ID        |   TYPE    | ORDINAL |         FRUID         |  FRUTYPE  | FRUSUBTYPE |
++=========================+==================+===========+=========+=======================+===========+============+
+| 2020-06-04 21:58:00.277 | X0-CH7-CN3       | Node      | 0       | Node.WO105483L01S005  | Node      |            |
++-------------------------+------------------+-----------+---------+-----------------------+-----------+------------+
+| 2020-06-04 21:58:00.279 | X0-CH7-CN3_CPU0  | Processor | 0       | FRUIDforx0c0s26b0n0p0 | Processor |            |
++-------------------------+------------------+-----------+---------+-----------------------+-----------+------------+
+| 2020-06-04 21:58:00.281 | X0-CH7-CN3_CPU1  | Processor | 1       | FRUIDforx0c0s26b0n0p1 | Processor |            |
++-------------------------+------------------+-----------+---------+-----------------------+-----------+------------+
+| 2020-06-04 21:58:00.283 | X0-CH7-CN3_DIMM0 | Memory    | 0       | FRUIDforx0c0s26b0n0d0 | Memory    |            |
++-------------------------+------------------+-----------+---------+-----------------------+-----------+------------+
 ```
 
 ### View Subcommand – Job
@@ -412,6 +443,18 @@ optional arguments:
                         default view
   --active              Show only jobs that are currently running
   --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+```
+
+#### Example
+```bash
+user@uan1:~> ucs view job
++-------+---------+---------+----------+----------+-----------------------+--------------+
+| JOBID | JOBNAME |  STATE  | NUMNODES | USERNAME |    STARTTIMESTAMP     | ENDTIMESTAMP |
++=======+=========+=========+==========+==========+=======================+==============+
+| 72    | job3    | Started | 2        | user4    | 2020-06-04 23:50:42.0 | None         |
++-------+---------+---------+----------+----------+-----------------------+--------------+
+| 34    | job2    | Started | 2        | user5    | 2020-06-04 23:50:23.0 | None         |
++-------+---------+---------+----------+----------+-----------------------+--------------+
 ```
 
 ### View Subcommand – Network Config
@@ -478,6 +521,18 @@ user@uan1:~> ucs view replacement-history  --help
                                      default view
 ```
 
+#### Example
+```bash
+user@uan1:~> ucs view replacement-history X0-CH7-CN3
+
++-------------------------+------------+---------+----------------------+
+|   DBUPDATEDTIMESTAMP    |     ID     | ACTION  |        FRUID         |
++=========================+============+=========+======================+
+| 2020-06-04 21:58:52.164 | X0-CH7-CN3 | DELETED | Node.WO105483L01S005 |
++-------------------------+------------+---------+----------------------+
+
+```
+
 ### View Subcommand – Reservation
 
 Retrieves the reservations that have been allocated on the cluster.
@@ -508,6 +563,16 @@ optional arguments:
                         Display data either in JSON or table format. Default
                         will be to display data in tabular format
   --timeout TIMEOUT     Timeout value for HTTP request. Uses a default of 900s
+```
+#### Example
+
+```bash
+user@uan1:~> ucs view reservation                                                                    
++-----------------+-------+---------------+-----------------------+-----------------------+------------------+
+| RESERVATIONNAME | USERS |     NODES     |    STARTTIMESTAMP     |     ENDTIMESTAMP      | DELETEDTIMESTAMP |
++=================+=======+===============+=======================+=======================+==================+
+| resv3           | user3 | node24,node52 | 2020-06-04 23:44:48.0 | 2023-03-01 23:44:48.0 | None             |
++-----------------+-------+---------------+-----------------------+-----------------------+------------------+
 ```
 
 ### View Subcommand – State
