@@ -177,7 +177,7 @@ function dbComputeNodeStatesResponse(data)
     }
     var resp = (JSON.parse((JSON.parse(data)).Result))
     if (resp.length > 0)
-        updateNodeStates(resp, 'dense-compute-node');
+        updateNodeStates(resp, 'compute-node');
 }
 
 function updateServiceNodeStatesFromDB(callback, startTime, EndTime)
