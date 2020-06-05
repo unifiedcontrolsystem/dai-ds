@@ -676,6 +676,7 @@ function systemInventoryConstructFromLayoutView(layout)
 }
 
 function systemInventoryContentFromLayoutView(parenthw, sysinv, layout)
+{
 	// Use parenthw.definition to add content (if any)
 	layout.definitions[parenthw.hwtype].content.sort(function(a,b){return a.name.localeCompare(b.name)});
 	layout.definitions[parenthw.hwtype].content.forEach(
@@ -690,7 +691,7 @@ function systemInventoryContentFromLayoutView(parenthw, sysinv, layout)
 			console.log(error);
 			}
 			var hw = new HWitem(location, contentitem.definition, hwtype,
-				(hwtype == 'dense-compute-node' || hwtype == 'service-node') ? "M" : "A");
+				(hwtype == 'compute-node' || hwtype == 'service-node') ? "M" : "A");
 			this.addContent(hw);
 			sysinv.addHw(hw);
 			systemInventoryContentFromLayoutView(hw, sysinv, layout);	// add children
@@ -704,7 +705,7 @@ function initStateKey()
     var tabtxt = "";
     for (var s in States) {
         var sobj = States[s];
-        var color = colormap[['dense-compute-node-state', s].join('-')]
+        var color = colormap[['compute-node-state', s].join('-')]
         tabtxt += "<tr title='" + sobj.description + "' class='masterTooltip'>"
             + "<td width='20px'>" + sobj.name + "</td>"
             + "<td><table width='300px'><tr>"
