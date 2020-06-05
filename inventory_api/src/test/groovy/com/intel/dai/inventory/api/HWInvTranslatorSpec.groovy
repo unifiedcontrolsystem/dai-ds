@@ -89,4 +89,35 @@ class HWInvTranslatorSpec extends Specification {
         "x0*"           | false
         "+"             | false
     }
+
+    def "toCanonical from ForeignHWInvHistoryEvent - negative" () {
+        def arg = new ForeignHWInvHistoryEvent()
+        arg.ID = ID
+        arg.EventType = EventType
+        arg.Timestamp = Timestamp
+        arg.FRUID = FRUID
+
+        expect: ts.toCanonical(arg) == null
+
+        where:
+        ID      | EventType | Timestamp | FRUID
+        null    | "Type"    | "ts"      | "FRUID"
+        "ID"    | null      | "ts"      | "FRUID"
+        "ID"    | "Type"    | null      | "FRUID"
+        "ID"    | "Type"    | "ts"      | null
+    }
+
+    def "toCanonical from ForeignHWInvHistoryEvent" () {
+        def arg = new ForeignHWInvHistoryEvent()
+        arg.ID = ID
+        arg.EventType = EventType
+        arg.Timestamp = Timestamp
+        arg.FRUID = FRUID
+
+        expect: ts.toCanonical(arg) != null
+
+        where:
+        ID      | EventType | Timestamp | FRUID
+        "ID"    | "Type"    | "ts"      | "FRUID"
+    }
 }

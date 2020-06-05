@@ -12,11 +12,13 @@ public class Requester {
     RestRequest getDiscoveryStatus;
     RestRequest getHwInventorySnapshot;
     RestRequest getHWInventoryUpdate;
+    RestRequest getHWInventoryHistory;
 
     public Requester() {
         initiateDiscovery = new RestRequest();
         getDiscoveryStatus = new RestRequest();
         getHwInventorySnapshot = new RestRequest();
         getHWInventoryUpdate = new RestRequest();
+        getHWInventoryHistory = new RestRequest();
     }
 }
