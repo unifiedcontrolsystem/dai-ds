@@ -66,10 +66,11 @@ abstract class AdapterInventoryNetworkBase {
                 toCanonicalHWInvJson(
                         getForeignHWInvJson()));
 
-        ingestCanonicalHWInvHistoryJson(
+        // Not needed for this milestone CMC
+/*        ingestCanonicalHWInvHistoryJson(
                 toCanonicalHWinvHistoryJson(
                         getForeignHWInvHistoryJson(
-                                determineMissingStartTime(), determineMissingEndTime())));
+                                determineMissingStartTime(), determineMissingEndTime())));*/
     }
 
     private String toCanonicalHWinvHistoryJson(String foreignHWInvHistoryJson) {
