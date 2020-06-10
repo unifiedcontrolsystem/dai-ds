@@ -1,16 +1,15 @@
 {
   "providerClassMap": {
-    "comment0": "tokenAuthProvider: com.intel.authentication.KeycloakTokenAuthentication",
-    "comment1" : "EventSim does not require a token",
-    "tokenAuthProvider": null,
+    "comment0" : "EventSim does not require a token",
+    "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
     "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
   },
   "providerConfigurations": {
     "tokenAuthProvider": {
-      "tokenServer": "https://sms01-nmn.local:28080/auth",
-      "realm": "realm_name",
-      "clientId": "application_id",
-      "clientSecret": "some_secret"
+      "tokenServer": "https://authentication_server:8080/auth",
+      "realm": "myKingdom",
+      "clientId": "myApplicationId",
+      "clientSecret": "shhhhhhhhhhhh"
     },
     "requester": {
       "initiateDiscovery": {

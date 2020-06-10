@@ -107,20 +107,19 @@ public class HWInvDiscovery {
         String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
 
         if (tokenAuthProvider != null) {
-            // The following dead code is causing spotbug warnings.  So, comment it out for now.
-//            Map<String, String> config = Map.of(
-//                    "tokenServer", sess.providerConfigurations.tokenAuthProvider.tokenServer,
-//                    "realm", sess.providerConfigurations.tokenAuthProvider.realm,
-//                    "clientId", sess.providerConfigurations.tokenAuthProvider.clientId,
-//                    "clientSecret", sess.providerConfigurations.tokenAuthProvider.clientSecret
-//            );
-//            createTokenProvider(tokenAuthProvider, config);
-//            if (tokenProvider_ == null) {
-//                throw new RESTClientException("Cannot create token provider");
-//            }
-//            if (restClient != null) {
-//                restClient.setTokenOAuthRetriever(tokenProvider_);
-//            }
+            Map<String, String> config = Map.of(
+                    "tokenServer", sess.providerConfigurations.tokenAuthProvider.tokenServer,
+                    "realm", sess.providerConfigurations.tokenAuthProvider.realm,
+                    "clientId", sess.providerConfigurations.tokenAuthProvider.clientId,
+                    "clientSecret", sess.providerConfigurations.tokenAuthProvider.clientSecret
+            );
+            createTokenProvider(tokenAuthProvider, config);
+            if (tokenProvider_ == null) {
+                throw new RESTClientException("Cannot create token provider");
+            }
+            if (restClient != null) {
+                restClient.setTokenOAuthRetriever(tokenProvider_);
+            }
         }
 
         createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
