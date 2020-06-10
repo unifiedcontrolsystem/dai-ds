@@ -8,7 +8,7 @@
       "arguments": {
         "connectPort": 8080,
         "connectAddress": "sms01-nmn.local",
-        "urlPath": "/v1/stream/inventory",
+        "urlPath": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-hmsstatechange-notifications",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.inventory.SSEStreamRequestBuilder",
         "requestType": "GET",
