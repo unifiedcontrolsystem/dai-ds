@@ -73,7 +73,15 @@ abstract class AdapterInventoryNetworkBase {
                                 determineMissingStartTime(), determineMissingEndTime())));*/
     }
 
-    private String toCanonicalHWinvHistoryJson(String foreignHWInvHistoryJson) {
+    /**
+     * Initialises required hardware inventory api instances used to fetch initial hw inventory data and load into db.
+     */
+    void preInitialise() {
+        hwInvDiscovery_ = new HWInvDiscovery(log_);
+        hwInvApi_ = factory_.createHWInvApi();
+    }
+
+/*  private String toCanonicalHWinvHistoryJson(String foreignHWInvHistoryJson) {
         if (foreignHWInvHistoryJson == null) return null;
 
         HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
@@ -83,14 +91,6 @@ abstract class AdapterInventoryNetworkBase {
             return null;
         }
         return canonicalHwInvHistory.getValue();
-    }
-
-    /**
-     * Initialises required hardware inventory api instances used to fetch initial hw inventory data and load into db.
-     */
-    void preInitialise() {
-        hwInvDiscovery_ = new HWInvDiscovery(log_);
-        hwInvApi_ = factory_.createHWInvApi();
     }
 
     private String determineMissingStartTime() {
@@ -136,7 +136,7 @@ abstract class AdapterInventoryNetworkBase {
         } catch (DataStoreException e) {
             log_.error("DataStoreException: %s", e.getMessage());
         }
-    }
+    }*/
 
     /**
      * Ingests the HW inventory locations in canonical form.
