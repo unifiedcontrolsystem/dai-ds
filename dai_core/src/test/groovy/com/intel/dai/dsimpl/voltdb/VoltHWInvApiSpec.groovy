@@ -53,6 +53,12 @@ class VoltHWInvApiSpec extends Specification {
         when: api.delete "x0"
         then: thrown DataStoreException
     }
+
+    def "allLocationsAt"() {
+        when: api.allLocationsAt(null, null)
+        then: thrown DataStoreException
+    }
+
     def "numberOfLocationsInHWInv"() {
         when: api.numberOfLocationsInHWInv()
         then: thrown DataStoreException
@@ -60,6 +66,17 @@ class VoltHWInvApiSpec extends Specification {
     def "insertHistoricalRecord"() {
         api.client = Mock(Client)
         when: api.insertHistoricalRecord(null, null, null)
+        then: notThrown DataStoreException
+    }
+    def "lastHwInvHistoryUpdate"() {
+        api.client = Mock(Client)
+        when: api.lastHwInvHistoryUpdate()
+        then: notThrown DataStoreException
+    }
+
+    def "dumpHistoricalRecords"() {
+        api.client = Mock(Client)
+        when: api.dumpHistoricalRecords()
         then: notThrown DataStoreException
     }
 }
