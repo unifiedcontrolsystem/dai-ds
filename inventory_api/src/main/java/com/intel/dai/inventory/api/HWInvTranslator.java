@@ -267,7 +267,8 @@ public class HWInvTranslator {
         return canonicalTree;
     }
 
-    private HWInvHistory toCanonical(ForeignHWInvHistory foreignHist) {
+    //Commented out code needed for next milestone
+/*    private HWInvHistory toCanonical(ForeignHWInvHistory foreignHist) {
         HWInvHistory hist = new HWInvHistory();
         for (ForeignHWInvHistoryAtLoc componentHistory: foreignHist.Components) {
             for (ForeignHWInvHistoryEvent foreignEvent : componentHistory.History) {
@@ -280,7 +281,7 @@ public class HWInvTranslator {
             }
         }
         return hist;
-    }
+    }*/
 
     /**
      * <p> This method performs POJO to POJO translation of a Foreign HW Inventory tree to its
