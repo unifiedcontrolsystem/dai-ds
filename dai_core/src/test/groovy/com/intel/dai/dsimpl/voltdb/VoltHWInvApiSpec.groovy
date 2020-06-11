@@ -49,6 +49,10 @@ class VoltHWInvApiSpec extends Specification {
         when: api.ingest Paths.get("src/test/resources/data/empty.json")
         then: thrown DataStoreException
     }
+    def "ingest -- string"() {
+        when: api.ingest ""
+        then: notThrown DataStoreException
+    }
     def "delete - null client"() {
         when: api.delete "x0"
         then: thrown DataStoreException
@@ -71,12 +75,12 @@ class VoltHWInvApiSpec extends Specification {
     def "lastHwInvHistoryUpdate"() {
         api.client = Mock(Client)
         when: api.lastHwInvHistoryUpdate()
-        then: notThrown DataStoreException
+        then: thrown DataStoreException
     }
 
     def "dumpHistoricalRecords"() {
         api.client = Mock(Client)
         when: api.dumpHistoricalRecords()
-        then: notThrown DataStoreException
+        then: thrown DataStoreException
     }
 }
