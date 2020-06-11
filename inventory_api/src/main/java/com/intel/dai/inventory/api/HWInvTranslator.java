@@ -63,19 +63,20 @@ public class HWInvTranslator {
         }
     }
 
+    // Commenting out code for next milestone for now.
     /**
      * <p> Parse the given json containing the foreign HW inventory history. </p>
      * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
      * @return POJO containing the parsed json, or null if parsing failed
      */
-    private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
+/*    private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
         try {
             return gson.fromJson(foreignHWInvHistoryJson, ForeignHWInvHistory.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
             return null;
         }
-    }
+    }*/
 
     /**
      * <p> Parses an array of FullyFlat ForeignHWInvByLocNodes.
@@ -155,7 +156,8 @@ public class HWInvTranslator {
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
-    public ImmutablePair<String, String> foreignHistoryToCanonical(String foreignJson) {
+    // Commenting out code for next milestone for now.
+/*    public ImmutablePair<String, String> foreignHistoryToCanonical(String foreignJson) {
         ImmutablePair<String, HWInvHistory> translatedResult = toCanonicalHistory(foreignJson);
         String subject = translatedResult.getKey();
         ArrayList<HWInvHistoryEvent> translatedEvents = new ArrayList<>();
@@ -175,16 +177,17 @@ public class HWInvTranslator {
 
         canonicalHistory.events = translatedEvents;
         return new ImmutablePair<>(subject, util.toCanonicalHistoryJson(canonicalHistory));
-    }
+    }*/
 
-    private ImmutablePair<String, HWInvHistory> toCanonicalHistory(String foreignJson) {
+    // Commenting out code for next milestone for now.
+/*    private ImmutablePair<String, HWInvHistory> toCanonicalHistory(String foreignJson) {
         ForeignHWInvHistory hist = toForeignHWInvHistory(foreignJson);
         if (hist != null) {
             logger.info("Parsed toForeignHWInvHistory");
             return new ImmutablePair<>("", toCanonical(hist));
         }
         return ImmutablePair.nullPair();
-    }
+    }*/
 
     /**
      * <p> Make several attempts at translating the location described by the input file.  Return upon the first
