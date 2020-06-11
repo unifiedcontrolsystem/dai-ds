@@ -58,14 +58,15 @@ public class VoltHWInvApi implements HWInvApi {
         return ingest(hwInv);
     }
 
-    /**
+    // Comment out code for next milestone
+/*    *//**
      * <p> Ingest json string containing HW inventory history. </p>
      * @param canonicalHWInvHistoryJson json file containing HW inventory history in canonical form
      * @return 0 if any location is ingested, otherwise 1
      * @throws InterruptedException
      * @throws IOException
      * @throws DataStoreException
-     */
+     *//*
     @Override
     public int ingestHistory(String canonicalHWInvHistoryJson) throws InterruptedException, IOException, DataStoreException {
         HWInvHistory hist = util.toCanonicalHistoryPOJO(canonicalHWInvHistoryJson);
@@ -74,7 +75,7 @@ public class VoltHWInvApi implements HWInvApi {
             return 1;
         }
         return ingest(hist);
-    }
+    }*/
 
     private int ingest(HWInvHistory hist) throws IOException, DataStoreException, InterruptedException {
         int status = 1;
@@ -177,7 +178,8 @@ public class VoltHWInvApi implements HWInvApi {
         }
     }
 
-    @Override
+    // Comment out code for next milestone
+/*    @Override
     public long numberOfLocationsInHWInv() throws IOException, DataStoreException {
         try {
             return client.callProcedure("NumberOfLocationsInHWInv").getResults()[0].asScalarLong();
@@ -201,7 +203,7 @@ public class VoltHWInvApi implements HWInvApi {
             logger.error("Null client");
             throw new DataStoreException(e.getMessage());
         }
-    }
+    }*/
 
     @Override
     public void insertHistoricalRecord(String action, String id, String fru) throws
