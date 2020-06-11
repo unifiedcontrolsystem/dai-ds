@@ -4,6 +4,7 @@
 //
 package com.intel.dai.inventory.api;
 
+import com.google.gson.internal.$Gson$Preconditions;
 import lombok.ToString;
 
 @ToString
@@ -24,11 +25,20 @@ class TokenAuthProvider {
 class ProviderConfigurations {
     TokenAuthProvider tokenAuthProvider;
     Requester requester;
+
+    ProviderConfigurations() {
+        tokenAuthProvider = new TokenAuthProvider();
+        requester = new Requester();
+    }
 }
 
 @ToString
 public class HWDiscoverySession {
     ProviderClassMap providerClassMap;
-    TokenAuthProvider tokenAuthProvider;
     ProviderConfigurations providerConfigurations;
+
+    public HWDiscoverySession() {
+        providerClassMap = new ProviderClassMap();
+        providerConfigurations = new ProviderConfigurations();
+    }
 }

@@ -19,6 +19,7 @@ pipeline {
 
                 script {
                     sh 'rm -rf build/distributions'
+                    sh 'rm -rf build/reports/spotbugs'
                     utilities.FixFilesPermission()
 
                     if ( "${params.QUICK_BUILD}" == 'true' ) {

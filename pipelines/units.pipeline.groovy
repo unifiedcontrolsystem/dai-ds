@@ -37,6 +37,7 @@ pipeline {
 
                 script {
                     sh 'rm -rf build/distributions'
+                    sh 'rm -rf build/reports/spotbugs'
                     utilities.FixFilesPermission()
 
                     if ( "${params.QUICK_BUILD}" == 'true' ) {
@@ -46,6 +47,7 @@ pipeline {
                     }
 
                     utilities.InvokeGradle("build || true")
+                    utilities.InvokeGradle("check || true")  //add spotbugs
 
                     jacoco classPattern: '**/classes/java/main/com/intel/'
                     junit '**/test-results/**/*.xml'
