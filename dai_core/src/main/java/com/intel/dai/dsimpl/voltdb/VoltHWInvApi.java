@@ -177,7 +177,8 @@ public class VoltHWInvApi implements HWInvApi {
         }
     }
 
-    @Override
+
+   @Override
     public long numberOfLocationsInHWInv() throws IOException, DataStoreException {
         try {
             return client.callProcedure("NumberOfLocationsInHWInv").getResults()[0].asScalarLong();
@@ -190,7 +191,6 @@ public class VoltHWInvApi implements HWInvApi {
         }
     }
 
-    @Override
     public String lastHwInvHistoryUpdate() throws IOException, DataStoreException {
         try {
             return client.callProcedure("HwInventoryHistoryLastUpdateTimestamp").getResults()[0].toString();
