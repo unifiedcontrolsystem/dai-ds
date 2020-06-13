@@ -105,7 +105,7 @@ public class HWInvDiscovery {
         String requesterClass = sess.providerClassMap.requester;
         String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
 
-        if (tokenAuthProvider != null && tokenAuthProvider != "") {
+        if (tokenAuthProvider != null && !tokenAuthProvider.equals("")) {
             Map<String, String> config = Map.of(
                     "tokenServer", sess.providerConfigurations.tokenAuthProvider.tokenServer,
                     "realm", sess.providerConfigurations.tokenAuthProvider.realm,
