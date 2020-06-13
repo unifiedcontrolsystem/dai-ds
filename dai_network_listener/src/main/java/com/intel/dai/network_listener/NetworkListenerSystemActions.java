@@ -10,14 +10,10 @@ import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
-import com.intel.dai.inventory.api.HWInvDiscovery;
-import com.intel.dai.inventory.api.HWInvTranslator;
 import com.intel.logging.Logger;
-import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -42,7 +38,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         operations_ = factory_.createAdapterOperations(adapter_);
         hwInvApi_ = factory_.createHWInvApi();
         nodeInformation_ = factory_.createNodeInformation();
-        hwInvDiscovery_ = new HWInvDiscovery(logger);
     }
 
     @Override
@@ -209,16 +204,13 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     /**
      * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
      * @param location root location in foreign format
-     * @param foreignName root location in foreign format
+     * @param canonicalJson contains HW inventory in canonical format
      */
     @Override
-    public void upsertHWInventory(String location, String foreignName) {
+    public void upsertHWInventory(String location, String canonicalJson) {
         HWInvTree before = getHWInvSnapshot(location);
 
-        ingestCanonicalHWInvJson(
-                toCanonicalHWInvJson(
-                        getForeignHWInvJson(
-                                foreignName)));
+        ingestCanonicalHWInvJson(canonicalJson);
 
         HWInvTree after = getHWInvSnapshot(location);
 
@@ -237,10 +229,9 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     /**
      * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
      * @param location root location in DAI format
-     * @param foreignName root location in foreign format
      */
     @Override
-    public void deleteHWInventory(String location, String foreignName) {
+    public void deleteHWInventory(String location) {
         HWInvTree before = getHWInvSnapshot(location);
 
         deleteHWInvSnapshot(location);
@@ -324,54 +315,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         }
     }
 
-    /**
-     * <p> Converts the HW inventory locations in foreign format into canonical format. </p>
-     * @param foreignHWInvJson json containing the HW inventory in foreign format
-     * @return json containing the HW inventory in canonical format
-     */
-    private String toCanonicalHWInvJson(String foreignHWInvJson) {
-        if (foreignHWInvJson == null) return null;
-
-        HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
-        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
-        if (canonicalHwInv.getKey() == null) {
-            log_.error("failed to translate foreign HW inventory json");
-            return null;
-        }
-        return canonicalHwInv.getValue();
-    }
-
-    /**
-     * <p> Obtains the HW inventory locations at the given root.  If the root is "", all locations of the
-     * HPC is returned. </p>
-     * @param root root location for a HW inventory tree or "" for the root of the entire HPC
-     * @return json containing the requested locations
-     */
-    private String getForeignHWInvJson(String root) {
-        if (root == null) return null;
-
-        try {
-            hwInvDiscovery_.initialize();
-            log_.info("rest client created");
-
-        } catch (RESTClientException e) {
-            log_.fatal("Fail to create REST client: %s", e.getMessage());
-            return null;
-        }
-
-        ImmutablePair<Integer, String> foreignHwInv;
-        if (root.equals("")) {
-            foreignHwInv = hwInvDiscovery_.queryHWInvTree();
-        } else {
-            foreignHwInv = hwInvDiscovery_.queryHWInvTree(root);
-        }
-        if (foreignHwInv.getLeft() != 0) {
-            log_.error("failed to acquire foreign HW inventory json");
-            return null;
-        }
-        return foreignHwInv.getRight();
-    }
-
     private Map<String,String> translateForeignBootImageInfo(Map<String,String> entry) {
         return entry; // TODO: Write the REAL translation when foreign formats are known.
     }
@@ -452,5 +395,4 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private PropertyMap config_;
     private NetworkDataSource publisher_ = null;
     private boolean publisherConfigured_ = false;
-    private HWInvDiscovery hwInvDiscovery_;
 }

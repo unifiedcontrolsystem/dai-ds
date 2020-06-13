@@ -103,18 +103,17 @@ class AdapterInventoryNetworkBaseSpec extends Specification {
         expect: underTest_.entryPoint(stream)
     }
 
-    def "Test preInitialise for location"() {
-        underTest_.preInitialise()
+    def "Test preInitialize for location"() {
+        underTest_.preInitialize()
         HWInvApi hWInvApiMock = Mock(HWInvApi)
         underTest_.hwInvApi_ = hWInvApiMock
         underTest_.hwInvApi_.ingest(any()) >> 0
         underTest_.hwInvApi_.ingestHistory(any()) >> 0
 
         def value = new ImmutablePair<>(0, hwInvForLocation)
-        HWInvDiscovery invDiscoveryMock = Mock(HWInvDiscovery)
-        underTest_.hwInvDiscovery_ = invDiscoveryMock
-        underTest_.hwInvDiscovery_.queryHWInvTree() >> value
-        underTest_.hwInvDiscovery_.queryHWInvHistory(*_) >> value
+        ForeignInvApi foreignInvApi = Mock(ForeignInvApi)
+        underTest_.foreignInvApi_ = foreignInvApi
+        underTest_.foreignInvApi_.getCanonicalHWInvJson() >> value
         underTest_.postInitialize()
         expect: true
     }

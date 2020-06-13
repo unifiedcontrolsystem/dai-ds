@@ -719,7 +719,6 @@ project(':dai_network_listener') {
         compile project(':dai_core')
         compile project(':properties')
         compile project(':config_io')
-        compile project(':inventory_api') // TODO: A refactor needs to happen to remove these dependency.
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
@@ -786,6 +785,7 @@ project(":inventory") {
         compile project(':dai_core')
         compile project(':dai_network_listener')
         compile project(":foreign_bus")
+        compile project(':inventory_api')
 
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
 

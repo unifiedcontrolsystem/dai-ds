@@ -39,7 +39,7 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
                 "/opt/ucs/log/ProviderInventoryNetworkForeignBus-Benchmarking.json", 5);
         String configName = ProviderInventoryNetworkForeignBus.class.getSimpleName() + ".json";
         try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
-            app.preInitialise();
+            app.preInitialize();
             app.postInitialize();
             app.entryPoint(configStream);
         } catch (IOException | ConfigIOParseException e) {

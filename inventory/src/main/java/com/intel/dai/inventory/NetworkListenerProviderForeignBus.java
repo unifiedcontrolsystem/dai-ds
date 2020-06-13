@@ -5,15 +5,14 @@
 package com.intel.dai.inventory;
 
 import com.intel.dai.dsapi.BootState;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.inventory.api.ForeignHWInvChangeNotification;
 import com.intel.dai.inventory.api.HWInvNotificationTranslator;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
+import com.intel.networking.restclient.RESTClientException;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +130,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         String location = workItem.getLocation();
         BootState bootState = workItem.getStateEvent();
         if (location != null) {
-            Thread t = new Thread(new HWInventoryUpdate(location, foreignLocation, bootState, actions_));
+            Thread t = new Thread(new HWInventoryUpdate(location, foreignLocation, bootState, actions_, log_));
             t.start();  // background updates of HW inventory
         }
         // Possible TODOs: store RAZ event and publish to Rabbit MQ
@@ -160,18 +159,21 @@ class HWInventoryUpdate implements Runnable {
     private String foreignName_;
     private SystemActions actions_;
     private BootState bootState_;
+    private ForeignInvApi foreignInvApi_;
 
-    public HWInventoryUpdate(String location, String foreignName, BootState bootState, SystemActions actions) {
+    public HWInventoryUpdate(String location, String foreignName, BootState bootState, SystemActions actions,
+                             Logger log) {
         location_ = location;
         foreignName_ = foreignName;
         actions_ = actions;
         bootState_ = bootState;
+        foreignInvApi_ = new ForeignInvApi(log);
     }
 
     public void run() {
         if(bootState_ == BootState.NODE_OFFLINE)
-            actions_.deleteHWInventory(location_, foreignName_);
+            actions_.deleteHWInventory(location_);
         if(bootState_ == BootState.NODE_ONLINE)
-            actions_.upsertHWInventory(location_, foreignName_);
+            actions_.upsertHWInventory(location_, foreignInvApi_.getCanonicalHWInvJson(foreignName_));
     }
 }

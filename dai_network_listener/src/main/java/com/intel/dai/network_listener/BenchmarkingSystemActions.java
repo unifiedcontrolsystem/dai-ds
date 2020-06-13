@@ -83,7 +83,7 @@ public class BenchmarkingSystemActions implements SystemActions, Initializer {
     public void upsertHWInventory(String location, String foreignName) { }
 
     @Override
-    public void deleteHWInventory(String location, String foreignName) { }
+    public void deleteHWInventory(String location) { }
 
     @Override
     public void close() throws IOException { }

@@ -62,9 +62,8 @@ abstract class AdapterInventoryNetworkBase {
      * Patch missing HW inventory history.
      */
     void postInitialize() {
-        ingestCanonicalHWInvJson(
-                toCanonicalHWInvJson(
-                        getForeignHWInvJson()));
+        //
+        ingestCanonicalHWInvJson(foreignInvApi_.getCanonicalHWInvJson(""));
 
         // Not needed for this milestone CMC
 /*        ingestCanonicalHWInvHistoryJson(
@@ -74,10 +73,10 @@ abstract class AdapterInventoryNetworkBase {
     }
 
     /**
-     * Initialises required hardware inventory api instances used to fetch initial hw inventory data and load into db.
+     * Initializes required hardware inventory api instances used to fetch initial hw inventory data and load into db.
      */
-    void preInitialise() {
-        hwInvDiscovery_ = new HWInvDiscovery(log_);
+    void preInitialize() {
+        foreignInvApi_ = new ForeignInvApi(log_);
         hwInvApi_ = factory_.createHWInvApi();
     }
 
@@ -140,6 +139,7 @@ abstract class AdapterInventoryNetworkBase {
 
     /**
      * Ingests the HW inventory locations in canonical form.
+     * N.B. System actions are not available to the caller of this method.
      * @param canonicalHwInvJson json containing the HW inventory locations in canonical format
      */
     private void ingestCanonicalHWInvJson(String canonicalHwInvJson) {
@@ -156,53 +156,11 @@ abstract class AdapterInventoryNetworkBase {
         }
     }
 
-    /**
-     * Converts the HW inventory locations in foreign format into canonical format.
-     * @param foreignHWInvJson json containing the HW inventory in foreign format
-     * @return json containing the HW inventory in canonical format
-     */
-    private String toCanonicalHWInvJson(String foreignHWInvJson) {
-        if (foreignHWInvJson == null) return null;
-
-        HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl());
-        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
-        if (canonicalHwInv.getKey() == null) {
-            log_.error("failed to translate foreign HW inventory json");
-            return null;
-        }
-        return canonicalHwInv.getValue();
-    }
-
-    /**
-     * Obtains the HW inventory of all locations of the HPC is returned.
-     * @return json containing the all locations
-     */
-    private String getForeignHWInvJson() {
-
-        try {
-            hwInvDiscovery_.initialize();
-            log_.info("rest client created");
-
-        } catch (RESTClientException e) {
-            log_.fatal("Fail to create REST client: %s", e.getMessage());
-            return null;
-        }
-
-        ImmutablePair<Integer, String> foreignHwInv;
-        foreignHwInv = hwInvDiscovery_.queryHWInvTree();
-
-        if (foreignHwInv.getLeft() != 0) {
-            log_.error("failed to acquire foreign HW inventory json");
-            return null;
-        }
-        return foreignHwInv.getRight();
-    }
-
     private final AdapterInformation adapter_;
     private final Logger log_;
     private final DataStoreFactory factory_;
     private final BenchmarkHelper benchmarking_;
     static final String ADAPTER_TYPE = "INVENTORY";
     protected HWInvApi hwInvApi_;
-    protected HWInvDiscovery hwInvDiscovery_;
+    protected ForeignInvApi foreignInvApi_;
 }

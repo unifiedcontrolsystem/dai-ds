@@ -149,15 +149,14 @@ public interface SystemActions extends AutoCloseable, Closeable {
      * Update or insert new inventory information.
      *
      * @param location The node for the new or changed inventory info.
-     * @param foreignName The foreign name (not DAI-DS name) of the inventory change.
+     * @param canonicalJson contains HW inventory in canonical format.
      */
-    void upsertHWInventory(String location, String foreignName);
+    void upsertHWInventory(String location, String canonicalJson);
 
     /**
      * delete inventory information for a node.
      *
      * @param location The node for the deleted inventory info.
-     * @param foreignName The foreign name (not DAI-DS name) of the inventory deletion.
      */
-    void deleteHWInventory(String location, String foreignName);
+    void deleteHWInventory(String location);
 }
