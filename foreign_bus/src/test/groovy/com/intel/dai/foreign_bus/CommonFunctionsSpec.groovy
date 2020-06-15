@@ -3,6 +3,7 @@ package com.intel.dai.foreign_bus
 import spock.lang.Specification
 
 import java.text.ParseException
+import java.time.format.DateTimeParseException
 
 class CommonFunctionsSpec extends Specification {
     def "Test ConvertISOToLongTimestamp"() {
@@ -20,7 +21,7 @@ class CommonFunctionsSpec extends Specification {
 
     def "Test ConvertISOToLongTimestamp Negative"() {
         when: CommonFunctions.convertISOToLongTimestamp(VALUE)
-        then: thrown(ParseException)
+        then: thrown(DateTimeParseException)
         where:
         VALUE || DUMMY
         "2020-03-27 12:00:00"             || false

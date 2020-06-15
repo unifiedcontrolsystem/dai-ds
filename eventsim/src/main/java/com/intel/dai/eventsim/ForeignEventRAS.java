@@ -10,6 +10,7 @@ public class ForeignEventRAS extends ForeignEvent {
         // TODO: Store some paramters as hardcoded values for now
         props_.put("pri", "0x0");
         props_.put("seqnum", "0x7220");
+        subject = EVENT_SUB_TYPE.events;
     }
 
     /**
@@ -52,7 +53,8 @@ public class ForeignEventRAS extends ForeignEvent {
     @Override
     public String getJSON() {
         props_.put("message", getMessage());
-        return super.getJSON();
+        message = super.getJSON();
+        return message;
     }
 
     public String getBootImageId() {

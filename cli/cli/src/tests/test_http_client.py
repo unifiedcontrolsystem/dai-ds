@@ -18,6 +18,7 @@ class Response(object):
 
     def __init__(self):
         self.text = json.dumps({"Location": "Test", "Status": "F", "Result": ('{"innerloop": "success"}')})
+        self.ok = True
 
 
 class HttpClientTest(TestCase):
@@ -73,6 +74,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_get.side_effect = requests.exceptions.ConnectionError
                 response_code, response = client.send_get_request('http://localhost:4567/mock', 100)
+                self.assertEqual(1, response_code)
 
     def test_send_request_Timeout(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -80,6 +82,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_get.side_effect = requests.exceptions.Timeout
                 response_code, response = client.send_get_request('http://localhost:4567/mock', 100)
+                self.assertEqual(1, response_code)
 
     def test_put_request(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -94,6 +97,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_put.side_effect = requests.exceptions.ConnectionError
                 response_code, response = client.send_put_request('http://localhost:4567/mock', None, 100)
+                self.assertEqual(1, response_code)
 
     def test_put_request_Timeout(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -101,6 +105,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_put.side_effect = requests.exceptions.Timeout
                 response_code, response = client.send_put_request('http://localhost:4567/mock', None, 100)
+                self.assertEqual(1, response_code)
 
     def test_post_request(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -115,6 +120,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_post.side_effect = requests.exceptions.ConnectionError
                 response_code, response = client.send_post_request('http://localhost:4567/mock', None, 100)
+                self.assertEqual(1, response_code)
 
     def test_post_request_Timeout(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -122,6 +128,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_post.side_effect = requests.exceptions.Timeout
                 response_code, response = client.send_post_request('http://localhost:4567/mock', None, 100)
+                self.assertEqual(1, response_code)
 
     def test_delete_request(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -136,6 +143,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_delete.side_effect = requests.exceptions.ConnectionError
                 response_code, response = client.send_delete_request('http://localhost:4567/mock', 100)
+                self.assertEqual(1, response_code)
 
     def test_delete_request_Timeout(self):
         client = HttpClient(self.temp_configuration_file_location)
@@ -143,6 +151,7 @@ class HttpClientTest(TestCase):
             with self.assertRaises(RuntimeError) as e:
                 patched_delete.side_effect = requests.exceptions.Timeout
                 response_code, response = client.send_delete_request('http://localhost:4567/mock', 100)
+                self.assertEqual(1, response_code)
 
     # def test_send_request_nb_initial_request_error(self):
     #     client = HttpClient(self.temp_configuration_file_location)

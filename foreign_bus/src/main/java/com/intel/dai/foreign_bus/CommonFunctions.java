@@ -17,6 +17,9 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -32,16 +35,15 @@ final public class CommonFunctions {
      *
      * @param timestamp String timestamp in ISO format.
      * @return The long representing the timestamp in nano seconds.
-     * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
+     * @throws DateTimeParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
-    public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+    public static long convertISOToLongTimestamp(String timestamp) throws DateTimeParseException {
+        timestamp = timestamp.replace(" ", "T");
+        Instant ts = ZonedDateTime.parse(timestamp).toInstant();
         String[] parts = timestamp.split("\\.");
         String fraction = parts.length == 1 ? "0" : parts[1].replace("Z","");
-        String tsToSecond = timestamp.replaceFirst("\\.[0-9]+", "");
-        Instant ts = df.parse(tsToSecond).toInstant();
-        if(fraction.length() > 9)
-            throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
+        if(fraction.isEmpty() || fraction.length() > 9)
+            throw new DateTimeParseException("Fraction of seconds is malformed, must be 1-9 digits", ": ", timestamp.indexOf('.'));
         return (ts.getEpochSecond() * 1_000_000_000L) +
                 (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
     }

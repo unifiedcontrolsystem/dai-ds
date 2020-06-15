@@ -9,8 +9,5 @@ package com.intel.dai.eventsim;
  */
 @SuppressWarnings("serial")
 public class ResultOutputException extends Exception {
-    public ResultOutputException(String message) { super(message); }
-    public ResultOutputException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    ResultOutputException(String message) { super(message); }
 }

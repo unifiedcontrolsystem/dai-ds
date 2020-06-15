@@ -156,38 +156,16 @@ public class ConnectionManager {
 
     /**
      * This method is to publish data to callback network.
-     * @param events data to publish.
-     * @param constantMode send data with or without delay.
-     * @param timeDelayMus delay time.
+     * @param message data to publish.
      * @throws RESTClientException when no available subscriptions.
      * expects non null values.
      */
-    public void publish(final List<String> events, final boolean constantMode, final long timeDelayMus) throws RESTClientException {
-        long publishedEvents = 0;
-        long droppedEvents = 0;
-        if(getConnections().size() == 0) {
+    public void publish(final String message) throws RESTClientException {
+        if(getConnections().size() == 0)
             log_.info("No callback subscriptions to publish events");
-            droppedEvents = events.size();
+        for (ConnectionObject connection : getConnections()) {
+            restClient_.postRESTRequestBlocking(URI.create(connection.url_), message);
         }
-        for(String event : events) {
-            for (ConnectionObject connection : getConnections()) {
-                restClient_.postRESTRequestBlocking(URI.create(connection.url_), event);
-                publishedEvents++;
-                if(constantMode)
-                    delayMicroSecond(timeDelayMus);
-            }
-        }
-        log_.info(String.format("***Successfully published events = %s***", publishedEvents));
-        log_.info(String.format("***Dropped events = %s***", droppedEvents));
-    }
-
-    /**
-     * This method is used to create a constant delay.
-     * @param delayTimeMus time to delay in microseconds.
-     */
-    private void delayMicroSecond(long delayTimeMus) {
-        long waitUntil = System.nanoTime() + TimeUnit.MICROSECONDS.toNanos(delayTimeMus);
-        while( waitUntil > System.nanoTime());
     }
 
     private final RESTClient restClient_;

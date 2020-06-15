@@ -59,7 +59,8 @@ public abstract class ForeignEvent {
      * This method is used to fetch json in string format.
      */
     public String getJSON() {
-        return parser_.toString(props_);
+        message = parser_.toString(props_);
+        return message;
     }
 
     /**
@@ -79,4 +80,6 @@ public abstract class ForeignEvent {
     PropertyMap props_;
     private ConfigIO parser_;
     private DateFormat format;
+    EVENT_SUB_TYPE subject;
+    String message;
 }

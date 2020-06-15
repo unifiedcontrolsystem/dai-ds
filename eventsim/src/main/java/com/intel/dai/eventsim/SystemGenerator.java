@@ -7,8 +7,7 @@ import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Description of class SystemGenerator.
@@ -37,20 +36,19 @@ class SystemGenerator {
      * @param bfValue probability of number of failure events can be generated.
      * @return generated boot off,on,ready events
      */
-    List<String> publishBootEventsForLocation(final float bfValue) throws ConversionException {
-        float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
+    List<ForeignEvent> publishBootEventsForLocation(final float bfValue, long numOfEvents) throws ConversionException {
+        float totalFailureEvents = (bfValue) * regexMatchedLocations.size();
         long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
-        List<String> bootEvents = new ArrayList<>();
 
-        List<String> unavailableEvents = component_.publishUnAvailableEventsForLocation(regexMatchedLocations);
+        List<ForeignEvent> unavailableEvents = component_.publishUnAvailableEventsForLocation(regexMatchedLocations, numOfEvents);
         log_.info("Unavailable = "+ unavailableEvents.size());
-        bootEvents.addAll(unavailableEvents);
+        List<ForeignEvent> bootEvents = new ArrayList<>(unavailableEvents);
 
-        List<String> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
+        List<ForeignEvent> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate, numOfEvents);
         log_.info("Booting = "+ bootingEvents.size());
         bootEvents.addAll(bootingEvents);
 
-        List<String> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations);
+        List<ForeignEvent> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations, numOfEvents);
         log_.info("Available = "+ availableEvents.size());
         bootEvents.addAll(availableEvents);
 
@@ -61,14 +59,8 @@ class SystemGenerator {
      * This method used to create boot off events.
      * @return generated boot off events
      */
-    List<String> publishBootOffEventsForLocation() throws ConversionException {
-        List<String> bootEvents = new ArrayList<>();
-
-        List<String> unavailableEvents = component_.publishUnAvailableEventsForLocation(regexMatchedLocations);
-        log_.info("Unavailable = "+ unavailableEvents.size());
-        bootEvents.addAll(unavailableEvents);
-
-        return bootEvents;
+    List<ForeignEvent> publishBootOffEventsForLocation(long numOfEvents) throws ConversionException {
+        return new ArrayList<>(component_.publishUnAvailableEventsForLocation(regexMatchedLocations, numOfEvents));
     }
 
     /**
@@ -76,55 +68,44 @@ class SystemGenerator {
      * @param bfValue probability of number of failure events can be generated.
      * @return generated boot on events
      */
-    List<String> publishBootOnEventsForLocation(final float bfValue) throws ConversionException {
-        float totalFailureEvents = ( bfValue / 100 ) * regexMatchedLocations.size();
+    List<ForeignEvent> publishBootOnEventsForLocation(final float bfValue, long numOfEvents) throws ConversionException {
+        float totalFailureEvents = (bfValue) * regexMatchedLocations.size();
         long totalFailureEventsToGenerate = Math.round(totalFailureEvents);
-        List<String> bootEvents = new ArrayList<>();
 
-        List<String> bootingEvents = component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
-        log_.info("Booting = "+ bootingEvents.size());
-        bootEvents.addAll(bootingEvents);
-
-        return bootEvents;
+        return new ArrayList<>(component_.publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate, numOfEvents));
     }
 
     /**
      * This method used to create boot ready events.
      * @return generated boot ready events
      */
-    List<String> publishBootReadyEventsForLocation() throws ConversionException {
-        List<String> bootEvents = new ArrayList<>();
-
-        List<String> availableEvents = component_.publishAvailableEventsForLocation(regexMatchedLocations);
-        log_.info("Available = "+ availableEvents.size());
-        bootEvents.addAll(availableEvents);
-
-        return bootEvents;
+    List<ForeignEvent> publishBootReadyEventsForLocation(long numOfEvents) throws ConversionException {
+        return new ArrayList<>(component_.publishAvailableEventsForLocation(regexMatchedLocations, numOfEvents));
     }
 
     /**
      * This method used to create ras events.
-     * @param eventsCount numbers of ras events to be generated.
+     * @param numOfEvents numbers of ras events to be generated.
      * @param seed to repeat same type of data.
      * @return generated sensor events
      * @throws SimulatorException when unable to create exact number of events required.
      * @throws ConversionException when unable to create ras event.
      */
-    List<String> publishRASEventsForLocation(long eventsCount, final long seed)
+    List<ForeignEvent> publishRASEventsForLocation(long numOfEvents, final long seed)
             throws SimulatorException, ConversionException {
-        long eventsPerLocation = eventsCount / regexMatchedLocations.size();
-        List<String> rasEvents = new ArrayList<>();
+        long eventsPerLocation = numOfEvents / regexMatchedLocations.size();
+        List<ForeignEvent> rasEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {
             rasEvents = component_.publishRASEvents(eventsPerLocation, seed, regexMatchedLocations,
-                    regexMatchedLabelDescriptions);
+                    rasRegexMatchedLabelDescriptions_);
         }
 
-        long remRasEvents = eventsCount % regexMatchedLocations.size();
+        long remRasEvents = numOfEvents % regexMatchedLocations.size();
         if (remRasEvents == 0)
             return rasEvents;
         rasEvents.addAll(component_.publishRemRASEvents(remRasEvents, seed, regexMatchedLocations,
-                regexMatchedLabelDescriptions));
-        remRasEvents = eventsCount - rasEvents.size();
+                rasRegexMatchedLabelDescriptions_));
+        remRasEvents = numOfEvents - rasEvents.size();
         if(remRasEvents != 0)
             throw new SimulatorException("Incorrect number of ras events generated");
         return rasEvents;
@@ -132,24 +113,24 @@ class SystemGenerator {
 
     /**
      * This method used to create sensor events.
-     * @param eventsCount numbers of sensor events to be generated.
+     * @param numOfEvents numbers of sensor events to be generated.
      * @param seed to repeat same type of data.
      * @return generated sensor events
      * @throws SimulatorException when unable to create exact number of events required.
      * @throws ConversionException when unable to create sensor event.
      */
-    List<String> publishSensorEventsForLocation(long eventsCount, final long seed) throws SimulatorException, ConversionException {
-        long eventsPerLocation = eventsCount / regexMatchedLocations.size();
-        List<String> sensorEvents = new ArrayList<>();
+    List<ForeignEvent> publishSensorEventsForLocation(long numOfEvents, final long seed) throws SimulatorException, ConversionException {
+        long eventsPerLocation = numOfEvents / regexMatchedLocations.size();
+        List<ForeignEvent> sensorEvents = new ArrayList<>();
         if(eventsPerLocation != 0) {
-            sensorEvents = component_.publishSensorEvents(eventsPerLocation, seed, regexMatchedLocations, regexMatchedLabelDescriptions);
+            sensorEvents = component_.publishSensorEvents(eventsPerLocation, seed, regexMatchedLocations, sensorRegexMatchedLabelDescriptions_);
         }
 
-        long remEvents = eventsCount % regexMatchedLocations.size();
+        long remEvents = numOfEvents % regexMatchedLocations.size();
         if (remEvents == 0)
             return sensorEvents;
-        sensorEvents.addAll(component_.publishRemSensorEvents(remEvents, seed, regexMatchedLocations, regexMatchedLabelDescriptions));
-        remEvents = eventsCount - sensorEvents.size();
+        sensorEvents.addAll(component_.publishRemSensorEvents(remEvents, seed, regexMatchedLocations, sensorRegexMatchedLabelDescriptions_));
+        remEvents = numOfEvents - sensorEvents.size();
         if(remEvents != 0)
             throw new SimulatorException("Incorrect number of sensor events generated");
         return sensorEvents;
@@ -179,37 +160,165 @@ class SystemGenerator {
      */
     int getMatchedRegexLabels(final String regexLabelDesc, final SimulatorEngine.EVENT_TYPE eventType) throws PropertyNotExpectedType {
         int value = 0;
-        List<PropertyDocument> regexMatchedLabelDescList = new ArrayList<>();
+
         switch (eventType) {
-            case RAS     :
+            case RAS     :  rasRegexMatchedLabelDescriptions_.clear();
                             for (String labelDesc : dataLoaderEngine.getRasMetaData()) {
                                 if(labelDesc.matches(regexLabelDesc)) {
                                     PropertyArray resultRas = new PropertyArray();
                                     resultRas.add(labelDesc);
-                                    regexMatchedLabelDescList.add(resultRas);
+                                    rasRegexMatchedLabelDescriptions_.add(resultRas);
                                 }
                             }
-                            regexMatchedLabelDescriptions = regexMatchedLabelDescList;
-                            value = regexMatchedLabelDescriptions.size();
+                            value = rasRegexMatchedLabelDescriptions_.size();
                             break;
 
-            case SENSOR  :  PropertyMap data = dataLoaderEngine.getSensorMetaData().getAsMap();
+            case SENSOR  :  sensorRegexMatchedLabelDescriptions_.clear();
+                            PropertyMap data = dataLoaderEngine.getSensorMetaData().getAsMap();
                             for(String itemKey : data.keySet()) {
-                                PropertyArray compKey = data.getArray(itemKey);
+                                PropertyArray compKey = data.getArrayOrDefault(itemKey, new PropertyArray());
                                 for(int i = 0; i < compKey.size(); i++) {
                                     PropertyMap itemData = compKey.getMap(i);
                                     String itemDescription = itemData.getStringOrDefault("description", "");
                                     if(itemDescription.matches(regexLabelDesc))
-                                        regexMatchedLabelDescList.add(itemData);
+                                        sensorRegexMatchedLabelDescriptions_.add(itemData);
                                 }
                             }
-                            regexMatchedLabelDescriptions = regexMatchedLabelDescList;
-                            value = regexMatchedLabelDescriptions.size();
+                            value = sensorRegexMatchedLabelDescriptions_.size();
                             break;
 
             default      :  break;
         }
         return value;
+    }
+
+    /**
+     * This method is used to generate and group events for burst scenario
+     * @param scenarioData burst scenario data.
+     * @return burst scenario events with scenario data groups.
+     * @throws PropertyNotExpectedType unable to find rate or seed parameter.
+     * @throws ConversionException unable to generate or group scenario events.
+     * @throws SimulatorException unable to generate or group scenario events.
+     */
+    Map<Long, List<ForeignEvent>> generateBurstScenario(PropertyMap scenarioData) throws PropertyNotExpectedType, ConversionException, SimulatorException {
+        long eventsRate = Long.parseLong(scenarioData.getString("rate"));
+        long randomizerSeed = Long.parseLong(scenarioData.getString("seed"));
+        List<ForeignEvent> events = generateBurstScenarioEvents(scenarioData);
+        return groupEventsForGivenRate(events, eventsRate,randomizerSeed);
+    }
+
+    /**
+     * This method is used to generate events for burst scenario.
+     * @param scenarioData burst scenario data.
+     */
+    private List<ForeignEvent> generateBurstScenarioEvents(PropertyMap scenarioData) throws PropertyNotExpectedType, SimulatorException, ConversionException {
+        long ras = Long.parseLong(scenarioData.getString("ras"));
+        long sensor = Long.parseLong(scenarioData.getString("sensor"));
+        long bootOn = Long.parseLong(scenarioData.getString("boot-on"));
+        long bootOff = Long.parseLong(scenarioData.getString("boot-off"));
+        long bootReady = Long.parseLong(scenarioData.getString("boot-ready"));
+        long randomizerSeed = Long.parseLong(scenarioData.getString("seed"));
+        float bfProbability = Float.parseFloat(scenarioData.getString("boot-prob-failure"));
+
+        List<ForeignEvent> burstEvents = new ArrayList<>(publishRASEventsForLocation(ras, randomizerSeed));
+        burstEvents.addAll(publishSensorEventsForLocation(sensor, randomizerSeed));
+        burstEvents.addAll(publishBootOffEventsForLocation(bootOff));
+        burstEvents.addAll(publishBootOnEventsForLocation(bfProbability, bootOn));
+        burstEvents.addAll(publishBootReadyEventsForLocation(bootReady));
+        return burstEvents;
+    }
+
+    /**
+     * This method is used to form group of events based on events rate.
+     * @param events All combined set of ras, sensor,boot events for a given scenario configuration.
+     * @param eventsRate rate mentioned in scenario configuration file.
+     * @param seed to select same data for a given seed.
+     * @return Map with keys as number of groups and values number of events for a given rate.
+     */
+    private Map<Long, List<ForeignEvent>> groupEventsForGivenRate(List<ForeignEvent> events, long eventsRate, long seed) {
+        Map<Long, List<ForeignEvent>> eventsMap = new HashMap<>();
+        Collections.shuffle(events,new Random(seed));
+        List<ForeignEvent> groupEvents = new ArrayList<>();
+        for(ForeignEvent event : events) {
+            if(groupEvents.size() == eventsRate) {
+                eventsMap.put((long)(eventsMap.size() + 1), new ArrayList<>(groupEvents));
+                groupEvents.clear();
+            }
+            groupEvents.add(event);
+        }
+        if(groupEvents.size() != 0)
+            eventsMap.put((long)(eventsMap.size() + 1), new ArrayList<>(groupEvents));
+        return eventsMap;
+    }
+
+
+    /**
+     * This method is used to generate events for group burst scenario.
+     * @param scenarioData group burst scenario data.
+     * @return scenario based group events.
+     */
+    Map<Long, List<ForeignEvent>> generateGroupBurstScenarioEvents(PropertyMap scenarioData) throws PropertyNotExpectedType, ConversionException, SimulatorException {
+        long totalRas = Long.parseLong(scenarioData.getString("totalRas"));
+        long totalSensor = Long.parseLong(scenarioData.getString("totalSensor"));
+        long totalBootOn = Long.parseLong(scenarioData.getString("totalBootOn"));
+        long totalBootOff = Long.parseLong(scenarioData.getString("totalBootOff"));
+        long totalBootReady = Long.parseLong(scenarioData.getString("totalBootReady"));
+        long ras = Long.parseLong(scenarioData.getString("ras"));
+        long sensor = Long.parseLong(scenarioData.getString("sensor"));
+        long bootOn = Long.parseLong(scenarioData.getString("boot-on"));
+        long bootOff = Long.parseLong(scenarioData.getString("boot-off"));
+        long bootReady = Long.parseLong(scenarioData.getString("boot-ready"));
+        long randomizerSeed = Long.parseLong(scenarioData.getString("seed"));
+        float bfProbability = Float.parseFloat(scenarioData.getString("boot-prob-failure"));
+
+        List<ForeignEvent> rasEvents = new ArrayList<>(publishRASEventsForLocation(totalRas, randomizerSeed));
+        Map<Long, List<ForeignEvent>> rasMap = groupEventsForGivenRate(rasEvents, ras, randomizerSeed);
+        List<ForeignEvent> sensorEvents = new ArrayList<>(publishSensorEventsForLocation(totalSensor, randomizerSeed));
+        Map<Long, List<ForeignEvent>> sensorMap = groupEventsForGivenRate(sensorEvents, sensor, randomizerSeed);
+        List<ForeignEvent> bootOffEvents = new ArrayList<>(publishBootOffEventsForLocation(totalBootOff));
+        Map<Long, List<ForeignEvent>> bootOffMap = groupEventsForGivenRate(bootOffEvents, bootOff, randomizerSeed);
+        List<ForeignEvent> bootOnEvents = new ArrayList<>(publishBootOnEventsForLocation(bfProbability, totalBootOn));
+        Map<Long, List<ForeignEvent>> bootOnMap = groupEventsForGivenRate(bootOnEvents, bootOn, randomizerSeed);
+        List<ForeignEvent> bootReadyEvents = new ArrayList<>(publishBootReadyEventsForLocation(totalBootReady));
+        Map<Long, List<ForeignEvent>> bootReadyMap = groupEventsForGivenRate(bootReadyEvents, bootReady, randomizerSeed);
+
+        mergeEventsWithGroups(rasMap, sensorMap);
+        mergeEventsWithGroups(rasMap, bootOnMap);
+        mergeEventsWithGroups(rasMap, bootOffMap);
+        mergeEventsWithGroups(rasMap, bootReadyMap);
+        return rasMap;
+    }
+
+    private void mergeEventsWithGroups(Map<Long, List<ForeignEvent>> map1, Map<Long, List<ForeignEvent>> map2) {
+        Set<Long> keys = new HashSet<>(map1.keySet());
+        keys.addAll(map2.keySet());
+        for(long group : keys) {
+            if(map1.containsKey(group) && map2.containsKey(group)) {
+                List<ForeignEvent> data = map1.get(group);
+                data.addAll(map2.get(group));
+                map1.put(group, data);
+            }
+
+            else if(map2.containsKey(group))
+                map1.put(group, map2.get(group));
+
+        }
+    }
+
+
+    /**
+     * This method is used to generate events for repeat scenario.
+     * @param mode scenario mode.
+     * @param modeData repeat scenario data.
+     */
+    Map<Long, List<ForeignEvent>> generateRepeatScenarioEvents(String mode, PropertyMap modeData) throws PropertyNotExpectedType, SimulatorException, ConversionException {
+        if(modeData == null)
+            throw new SimulatorException("repeat scenario mode configuration data is empty/null");
+        if(mode.equals("burst"))
+            return generateBurstScenario(modeData);
+        else if(mode.equals("group-burst"))
+            return generateGroupBurstScenarioEvents(modeData);
+        return new HashMap<>();
     }
 
     /**
@@ -243,8 +352,9 @@ class SystemGenerator {
     private DataLoaderEngine dataLoaderEngine;
     private List<String> locations = new ArrayList<>();
     private List<String> regexMatchedLocations = new ArrayList<>();
-    private List<PropertyDocument> regexMatchedLabelDescriptions = new ArrayList<>();
     private Component component_;
     private List<String> nodeLocations_;
     private List<String> nonNodeLocations_;
+    private List<PropertyDocument> rasRegexMatchedLabelDescriptions_ = new ArrayList<>();
+    private List<PropertyDocument> sensorRegexMatchedLabelDescriptions_ = new ArrayList<>();
 }

@@ -47,7 +47,7 @@ class SSENetworkSpec extends Specification {
         sseNetworkTest.server_.running_.set(true)
         sseNetworkTest.startServer()
         expect:
-        sseNetworkTest.serverStatus() == true
+        sseNetworkTest.serverStatus()
     }
 
     def "Stop server" () {
@@ -58,7 +58,7 @@ class SSENetworkSpec extends Specification {
         sseNetworkTest.server_.running_.set(false)
         sseNetworkTest.stopServer()
         expect:
-        sseNetworkTest.serverStatus() == false
+        !sseNetworkTest.serverStatus()
     }
 
     def "Get server address" () {
@@ -89,10 +89,8 @@ class SSENetworkSpec extends Specification {
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
-        List<String> eventMessages = new ArrayList<>()
-        eventMessages.add("message")
         expect:
-        sseNetworkTest.publish("telemetry", eventMessages, true, 1)
+        sseNetworkTest.publish("telemetry", "messsage")
     }
 
     def "Publish data to sse network in burst mode" () {
@@ -101,10 +99,8 @@ class SSENetworkSpec extends Specification {
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
-        List<String> eventMessages = new ArrayList<>()
-        eventMessages.add("message")
         expect:
-        sseNetworkTest.publish("telemetry", eventMessages, false, 1)
+        sseNetworkTest.publish("telemetry", "message")
     }
 
     def "Test logging occured error message while publishing data" () {
@@ -113,11 +109,9 @@ class SSENetworkSpec extends Specification {
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
-        List<String> eventMessages = new ArrayList<>()
-        eventMessages.add("message")
         sseNetworkTest.server_.ssePublish("message", "message", null) >> { throw new RESTServerException() }
         expect:
-        sseNetworkTest.publish("message", eventMessages, true, 1)
+        sseNetworkTest.publish("message", "message")
     }
 
     def "Test register to sse network with url as null value" () {
@@ -161,7 +155,7 @@ class SSENetworkSpec extends Specification {
         config = LoadFileLocation.fromFileLocation(sseConfigFile.getAbsolutePath())
     }
 
-    private void loadDataIntoFile(File file, String data) throws Exception {
+    private static void loadDataIntoFile(File file, String data) throws Exception {
         FileUtils.writeStringToFile(file, data);
     }
 

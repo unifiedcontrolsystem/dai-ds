@@ -19,6 +19,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
         eventSimApiTest.bootParamsApi_ = new BootParameters();
         Map<String, String> parameters = new HashMap<>()
@@ -33,6 +34,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
         eventSimApiTest.bootParamsApi_ = new BootParameters();
         Map<String, String> parameters = new HashMap<>()
@@ -49,6 +51,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
         eventSimApiTest.bootParamsApi_ = new BootParameters();
         Map<String, String> parameters = new HashMap<>()
@@ -65,6 +68,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> ""
         eventSimApiTest.bootParamsApi_ = new BootParameters();
         Map<String, String> parameters = new HashMap<>()
@@ -81,6 +85,7 @@ class EventSimAppSpec extends Specification {
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
         eventSimApiTest.source_ = Mock(NetworkObject.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.source_.getAddress() >> "localhost"
         eventSimApiTest.source_.getPort() >> 1234
         Map<String, String> params = new HashMap<>()
@@ -95,6 +100,7 @@ class EventSimAppSpec extends Specification {
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
         eventSimApiTest.source_ = Mock(NetworkObject.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.source_.getAddress() >> "localhost"
         eventSimApiTest.source_.getPort() >> 1234
         Map<String, String> params = new HashMap<>()
@@ -109,6 +115,7 @@ class EventSimAppSpec extends Specification {
     def "Inventory discovery status" () {
         Logger log = Mock(Logger)
         EventSimApp eventSimApiTest = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
         Map<String, String> params = new HashMap<>()
         params.put("xnames", "test1")
@@ -123,6 +130,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocation() >> hwInventoryConfigFileLocation.getAbsolutePath()
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -137,6 +145,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocation() >> ""
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -154,6 +163,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocationPath() >> hwInventoryLocationConfigFileLocation.getParent()
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -169,6 +179,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocationPath() >> ""
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -187,6 +198,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryQueryLocationPath() >> hwInventoryQueryConfigFileLoation.getParent()
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -202,6 +214,7 @@ class EventSimAppSpec extends Specification {
         EventSimApp eventSimApiTest = new EventSimApp(log)
         eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
         eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
+        EventSimApp.log_ = Mock(Logger.class)
         eventSimApiTest.simEngineDataLoader.getHwInventoryQueryLocationPath() >> ""
         eventSimApiTest.hwInvApi_ = new HardwareInventory();
         Map<String, String> parameters = new HashMap<>()
@@ -216,6 +229,7 @@ class EventSimAppSpec extends Specification {
     def "createReservation" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
@@ -232,6 +246,7 @@ class EventSimAppSpec extends Specification {
     def "createReservation Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
@@ -243,6 +258,7 @@ class EventSimAppSpec extends Specification {
     def "modifyReservation" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
@@ -258,6 +274,7 @@ class EventSimAppSpec extends Specification {
     def "modifyReservation Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
@@ -269,6 +286,7 @@ class EventSimAppSpec extends Specification {
     def "deleteReservation" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = new HashMap<>()
@@ -281,6 +299,7 @@ class EventSimAppSpec extends Specification {
     def "deleteReservation Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
         Map<String, String> params = null
@@ -292,6 +311,7 @@ class EventSimAppSpec extends Specification {
     def "startJob" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = new HashMap<>()
@@ -309,6 +329,7 @@ class EventSimAppSpec extends Specification {
     def "startJob Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null
@@ -320,6 +341,7 @@ class EventSimAppSpec extends Specification {
     def "terminateJob" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = new HashMap<>()
@@ -338,6 +360,7 @@ class EventSimAppSpec extends Specification {
     def "terminateJob Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null
@@ -349,6 +372,7 @@ class EventSimAppSpec extends Specification {
     def "simulateWlm Exception" () {
         Logger log = Mock(Logger)
         EventSimApp test = new EventSimApp(log)
+        EventSimApp.log_ = Mock(Logger.class)
         test.jsonParser_ = ConfigIOFactory.getInstance("json")
         test.wlmApi.cqmPath = "./build/tmp/cqm.log"
         Map<String, String> params = null

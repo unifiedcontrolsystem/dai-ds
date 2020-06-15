@@ -49,7 +49,7 @@ class ConnectionManagerSpec extends Specification {
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
         expect :
-            connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>()) == false
+        connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>()) == false
     }
 
     def "Remove subscription with a valid id" () {
@@ -71,7 +71,7 @@ class ConnectionManagerSpec extends Specification {
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
         connectionManagerTest.removeAllSubscriptions()
         expect :
-            connectionManagerTest.removeSubscriptionId(1) == false
+        connectionManagerTest.removeSubscriptionId(1) == false
     }
 
     def "Add subscription, get the added subscription details using url and subscriber" () {
@@ -144,7 +144,7 @@ class ConnectionManagerSpec extends Specification {
         Logger log = Mock(Logger.class)
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
         connectionManagerTest.removeAllSubscriptions()
-        Map<String, String> parameters = new HashMap<>();
+        Map<String, String> parameters = new HashMap<>()
         parameters.put("url", "http://test.com")
         connectionManagerTest.addSubscription("http://test.com", "test", parameters)
         expect :
@@ -168,34 +168,28 @@ class ConnectionManagerSpec extends Specification {
         client.postRESTRequestBlocking(any() as URI, any() as String) >> BlockingResult.class
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
-        List<String> events = new ArrayList<>();
-        events.add("message1");
         expect :
-            connectionManagerTest.publish(events, true, 1)
+            connectionManagerTest.publish("message")
     }
 
     def "Exists subscriptions, publish generated events in burst mode" () {
         RESTClient client = Mock(RESTClient.class)
         Logger log = Mock(Logger.class)
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
-        client.postRESTRequestBlocking(any(), any()) >> BlockingResult.class
+        client.postRESTRequestBlocking(any() as URI, any() as String) >> BlockingResult.class
         connectionManagerTest.removeAllSubscriptions()
         connectionManagerTest.addSubscription("http://test.com", "test", new HashMap<String, String>())
-        List<String> events = new ArrayList<>();
-        events.add("message1");
         expect :
-        connectionManagerTest.publish(events, false, 1)
+        connectionManagerTest.publish("message")
     }
 
     def "Zero subscriptions, publish generated events" () {
         RESTClient client = Mock(RESTClient.class)
         Logger log = Mock(Logger.class)
         ConnectionManager connectionManagerTest = new ConnectionManager(client, log)
-        client.postRESTRequestBlocking(any(), any()) >> BlockingResult.class
+        client.postRESTRequestBlocking(any() as URI, any() as String) >> BlockingResult.class
         connectionManagerTest.removeAllSubscriptions()
-        List<String> events = new ArrayList<>();
-        events.add("message1");
         expect :
-        connectionManagerTest.publish(events, true, 1)
+        connectionManagerTest.publish("message")
     }
 }

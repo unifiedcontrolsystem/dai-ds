@@ -8,11 +8,9 @@ import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.sun.istack.NotNull;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Description of class Component.
@@ -39,16 +37,16 @@ public class Component {
      * @return ras events.
      * @throws ConversionException unable to create ras event.
      */
-    List<String> publishRASEvents(final long eventsPerLocation, final long seed,
+    List<ForeignEvent> publishRASEvents(final long eventsPerLocation, final long seed,
                                   @NotNull final List<String> regexMatchedLocations,
                                   @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException {
-        List<String> rasEvents = new ArrayList<>();
+        List<ForeignEvent> rasEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
-                ForeignEvent ev = createRandomRASEvent(i + seed, location, regexMatchedLabelDescriptions);
-                String data = ev.getJSON();
-                rasEvents.add(data);
+                ForeignEvent event = createRandomRASEvent(seed, location, regexMatchedLabelDescriptions);
+                rasEvents.add(event);
             }
         }
         return rasEvents;
@@ -63,18 +61,18 @@ public class Component {
      * @return ras events.
      * @throws ConversionException unable to create ras event.
      */
-    List<String> publishRemRASEvents(final long remEvents, final long seed,
+    List<ForeignEvent> publishRemRASEvents(final long remEvents, final long seed,
                                      @NotNull final List<String> regexMatchedLocations,
                                      @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException {
         long eventsTobeGenerated = remEvents;
-        List<String> rasEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
+        List<ForeignEvent> rasEvents = new ArrayList<>();
         for (String location : regexMatchedLocations) {
             if(eventsTobeGenerated == 0)
                 return rasEvents;
-            ForeignEvent ev = createRandomRASEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
-            String data = ev.getJSON();
-            rasEvents.add(data);
+            ForeignEvent event = createRandomRASEvent(seed, location, regexMatchedLabelDescriptions);
+            rasEvents.add(event);
             eventsTobeGenerated--;
         }
         return rasEvents;
@@ -89,16 +87,16 @@ public class Component {
      * @return sensor events.
      * @throws ConversionException unable to create sensor event.
      */
-    List<String> publishSensorEvents(final long eventsPerLocation, final long seed,
+    List<ForeignEvent> publishSensorEvents(final long eventsPerLocation, final long seed,
                                      @NotNull final List<String> regexMatchedLocations,
                                      @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException, SimulatorException {
-        List<String> rasEvents = new ArrayList<>();
+        List<ForeignEvent> rasEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
         for (String location : regexMatchedLocations) {
             for (int i = 0; i < eventsPerLocation; i++) {
-                ForeignEvent ev = createRandomSensorEvent(i + seed, location, regexMatchedLabelDescriptions);
-                String data = ev.getJSON();
-                rasEvents.add(data);
+                ForeignEvent event = createRandomSensorEvent(i + seed, location, regexMatchedLabelDescriptions);
+                rasEvents.add(event);
             }
         }
         return rasEvents;
@@ -113,21 +111,44 @@ public class Component {
      * @return sensor events.
      * @throws ConversionException unable to create sensor event.
      */
-    List<String> publishRemSensorEvents(final long remEvents, final long seed,
+    List<ForeignEvent> publishRemSensorEvents(final long remEvents, final long seed,
                                         @NotNull final List<String> regexMatchedLocations,
                                         @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException, SimulatorException {
         long eventsTobeGenerated = remEvents;
-        List<String> sensorEvents = new ArrayList<>();
+        List<ForeignEvent> sensorEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
         for (String location : regexMatchedLocations) {
             if(eventsTobeGenerated == 0)
                 return sensorEvents;
-            ForeignEvent ev = createRandomSensorEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
-            String data = ev.getJSON();
-            sensorEvents.add(data);
+            ForeignEvent event = createRandomSensorEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
+            sensorEvents.add(event);
             eventsTobeGenerated--;
         }
         return sensorEvents;
+    }
+
+    /**
+     * This method is used to generate boot-ready events for a given count and location.
+     * @param regexMatchedLocations locations matching location-regex input.
+     * @param eventsCount number of boot-ready events to generate.
+     * @return boot-ready events.
+     * @throws ConversionException unable to create boot-ready events.
+     */
+    List<ForeignEvent> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations, long eventsCount)
+            throws ConversionException {
+        if(eventsCount == -1)
+            return publishAvailableEventsForLocation(regexMatchedLocations);
+        List<ForeignEvent> bootAvailableEvents = new ArrayList<>();
+        while(bootAvailableEvents.size() != eventsCount) {
+            for (String location : regexMatchedLocations) {
+                if (bootAvailableEvents.size() == eventsCount)
+                    break;
+                ForeignEvent event = createAvailableEvent(location);
+                bootAvailableEvents.add(event);
+            }
+        }
+        return bootAvailableEvents;
     }
 
     /**
@@ -136,15 +157,52 @@ public class Component {
      * @return available boot events.
      * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
+    private List<ForeignEvent> publishAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
             throws ConversionException {
-        List<String> bootAvailableEvents = new ArrayList<>();
+        List<ForeignEvent> bootAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
-            ForeignEvent ev = createAvailableEvent(location);
-            String data = ev.getJSON();
-            bootAvailableEvents.add(data);
+            ForeignEvent event = createAvailableEvent(location);
+            bootAvailableEvents.add(event);
         }
         return bootAvailableEvents;
+    }
+
+    /**
+     * This method is used to generate boot-on events for a given location and count.
+     * @param regexMatchedLocations locations matching the location-regex input.
+     * @param totalFailureEventsToGenerate number of failure boot-on events to create.
+     * @param eventsCount number of boot-on events to generate.
+     * @return boot-on events.
+     * @throws ConversionException
+     */
+    List<ForeignEvent> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations,
+                                                       final long totalFailureEventsToGenerate, long eventsCount) throws ConversionException {
+        if(eventsCount == -1)
+            return publishBootingEventsForLocation(regexMatchedLocations, totalFailureEventsToGenerate);
+        List<ForeignEvent> bootingEvents = new ArrayList<>();
+        while(bootingEvents.size() != eventsCount) {
+            for (String location : regexMatchedLocations) {
+                if (bootingEvents.size() == eventsCount)
+                    break;
+                if (totalFailureEventsToGenerate == regexMatchedLocations.size()) {
+                    ForeignEvent event = createNodeFailureEvent(location);
+                    bootingEvents.add(event);
+                } else if (totalFailureEventsToGenerate == 0) {
+                    ForeignEvent event = createBootingEvent(location);
+                    bootingEvents.add(event);
+                } else {
+                    int randomNumber = generateRandomNumberBetween(0, regexMatchedLocations.size());
+                    if ((randomNumber % 2) == 0) {
+                        ForeignEvent event = createNodeFailureEvent(location);
+                        bootingEvents.add(event);
+                    } else {
+                        ForeignEvent event = createBootingEvent(location);
+                        bootingEvents.add(event);
+                    }
+                }
+            }
+        }
+        return bootingEvents;
     }
 
     /**
@@ -154,32 +212,51 @@ public class Component {
      * @return boot events for a given location
      * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations,
+    private List<ForeignEvent> publishBootingEventsForLocation(final @NotNull List<String> regexMatchedLocations,
                                                  final long totalFailureEventsToGenerate) throws ConversionException {
-        List<String> bootingEvents = new ArrayList<>();
+        List<ForeignEvent> bootingEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
             if(totalFailureEventsToGenerate == regexMatchedLocations.size()) {
-                ForeignEvent ev = createNodeFailureEvent(location);
-                String data = ev.getJSON();
-                bootingEvents.add(data);
+                ForeignEvent event = createNodeFailureEvent(location);
+                bootingEvents.add(event);
             } else if(totalFailureEventsToGenerate == 0) {
-                ForeignEvent ev = createBootingEvent(location);
-                String data = ev.getJSON();
-                bootingEvents.add(data);
+                ForeignEvent event = createBootingEvent(location);
+                bootingEvents.add(event);
             } else {
-                int randomNumber = generateRandomNumberBetween(0, regexMatchedLocations.size(), null);
+                int randomNumber = generateRandomNumberBetween(0, regexMatchedLocations.size());
                 if((randomNumber % 2) == 0) {
-                    ForeignEvent ev = createNodeFailureEvent(location);
-                    String data = ev.getJSON();
-                    bootingEvents.add(data);
+                    ForeignEvent event = createNodeFailureEvent(location);
+                    bootingEvents.add(event);
                 } else {
-                    ForeignEvent ev = createBootingEvent(location);
-                    String data = ev.getJSON();
-                    bootingEvents.add(data);
+                    ForeignEvent event = createBootingEvent(location);
+                    bootingEvents.add(event);
                 }
             }
         }
         return bootingEvents;
+    }
+
+    /**
+     * This method is used to generate boot-off events for a given count and location.
+     * @param regexMatchedLocations locations matching the location-regex input.
+     * @param eventsCount number of boot-off events to generate.
+     * @return boot-off events.
+     * @throws ConversionException unable to create boot-off event.
+     */
+    List<ForeignEvent> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations, long eventsCount)
+            throws ConversionException {
+        if(eventsCount == -1)
+            return publishUnAvailableEventsForLocation(regexMatchedLocations);
+        List<ForeignEvent> bootUnAvailableEvents = new ArrayList<>();
+        while(bootUnAvailableEvents.size() != eventsCount) {
+            for (String location : regexMatchedLocations) {
+                if (bootUnAvailableEvents.size() == eventsCount)
+                    break;
+                ForeignEvent event = createUnavailableEvent(location);
+                bootUnAvailableEvents.add(event);
+            }
+        }
+        return bootUnAvailableEvents;
     }
 
     /**
@@ -188,13 +265,12 @@ public class Component {
      * @return unavailable boot events.
      * @throws ConversionException when unable to find foreign location
      */
-    List<String> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
+    private List<ForeignEvent> publishUnAvailableEventsForLocation(@NotNull final List<String> regexMatchedLocations)
             throws ConversionException {
-        List<String> bootUnAvailableEvents = new ArrayList<>();
+        List<ForeignEvent> bootUnAvailableEvents = new ArrayList<>();
         for(String location : regexMatchedLocations) {
-            ForeignEvent ev = createUnavailableEvent(location);
-            String data = ev.getJSON();
-            bootUnAvailableEvents.add(data);
+            ForeignEvent event = createUnavailableEvent(location);
+            bootUnAvailableEvents.add(event);
         }
         return bootUnAvailableEvents;
     }
@@ -209,10 +285,10 @@ public class Component {
      */
     private ForeignEvent createRandomRASEvent(long seed, @NotNull final String location, @NotNull final List<PropertyDocument> rasMetadaData) throws ConversionException {
         ForeignEventRAS ev = new ForeignEventRAS();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
-        PropertyArray result = (PropertyArray) rasMetadaData.get(generateRandomNumberBetween(0, rasMetadaData.size(), seed));
+        PropertyArray result = (PropertyArray) rasMetadaData.get(generateRandomNumberBetween(0, rasMetadaData.size()));
         ev.setEventType(result.get(0).toString());
+        ev.getJSON();
         return ev;
     }
 
@@ -227,10 +303,10 @@ public class Component {
     private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws ConversionException, SimulatorException {
         // Ignore seed in the current implementation of randomization
         ForeignEventSensor ev = new ForeignEventSensor();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
+        //ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
 
-        PropertyMap sensorDetails = (PropertyMap) definitionSensorMetadata_.get(generateRandomNumberBetween(0, definitionSensorMetadata_.size(), seed));
+        PropertyMap sensorDetails = (PropertyMap) definitionSensorMetadata_.get(generateRandomNumberBetween(0, definitionSensorMetadata_.size()));
         if (sensorDetails == null) {
             throw new SimulatorException("Unable to find sensor details for a component of type: ");
         }
@@ -238,9 +314,10 @@ public class Component {
         ev.setSensorUnits(sensorDetails.getStringOrDefault("unit", "UNKNOWN"));
         ev.setSensorID(sensorDetails.getStringOrDefault("id", "UNKNOWN"));
         if(!sensorDetails.getStringOrDefault("unit", "UNKNOWN").equals(""))
-            ev.setSensorValue(String.valueOf(generateRandomNumberBetween(20, 40, seed)));
+            ev.setSensorValue(String.valueOf(generateRandomNumberBetween(20, 40)));
         else
             ev.setSensorValue(String.valueOf(0));
+        ev.getJSON();
         return ev;
     }
 
@@ -252,11 +329,11 @@ public class Component {
      */
     private ForeignEvent createNodeFailureEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Empty");
         ev.setStatus("AdminDown");
+        ev.getJSON();
         return ev;
     }
 
@@ -268,11 +345,11 @@ public class Component {
      */
     private ForeignEvent createUnavailableEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Off");
         ev.setStatus("AdminDown");
+        ev.getJSON();
         return ev;
     }
 
@@ -284,11 +361,11 @@ public class Component {
      */
     private ForeignEvent createBootingEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("On");
         ev.setStatus("AdminDown");
+        ev.getJSON();
         return ev;
     }
 
@@ -300,11 +377,12 @@ public class Component {
      */
     private ForeignEvent createAvailableEvent(String location) throws ConversionException {
         ForeignEventBoot ev = new ForeignEventBoot();
-        ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
+        //ev.setTimestamp(convertInstantToMicrosec(Instant.now()));
         ev.setLocation(CommonFunctions.convertLocationToForeign(location));
         ev.setRole("Compute");
         ev.setState("Ready");
         ev.setStatus("AdminDown");
+        ev.getJSON();
         return ev;
     }
 
@@ -322,30 +400,17 @@ public class Component {
      * @param to end index
      * @return random number.
      */
-    private int generateRandomNumberBetween( long from, long to, Long randomizerSeed) {
-        if(randomizerSeed != null) {
-            if (randomNumberWithSeed == null)
-                randomNumberWithSeed = new Random(randomizerSeed);
-            return (int) ((randomNumberWithSeed.nextDouble() * (to - from)) + from);
-        }
-        else {
-            if (randomNumber == null)
-                randomNumber = new Random();
-            return (int) ((randomNumber.nextDouble() * (to - from)) + from);
-        }
+    private int generateRandomNumberBetween( long from, long to) {
+        return (int) ((randomNumber.nextDouble() * (to - from)) + from);
     }
 
     /**
      * This method is to convert time to micro seconds.
-     * @param timestamp current time.
-     * @return time in microseconds.
      */
-    private static long convertInstantToMicrosec(Instant timestamp) {
+/*    private static long convertInstantToMicrosec(Instant timestamp) {
         return TimeUnit.SECONDS.toMicros(timestamp.getEpochSecond())+TimeUnit.NANOSECONDS.toMicros(timestamp.getNano());
-    }
+    }*/
 
     private final Logger log_;
-    //private PropertyArray bootImageInfo_;
-    private Random randomNumberWithSeed;
-    private Random randomNumber;
+    private Random randomNumber = new Random();
 }

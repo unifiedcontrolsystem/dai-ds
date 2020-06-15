@@ -89,17 +89,15 @@ class CallBackNetworkSpec extends Specification {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
         callBackNetworkTest.connMan_ = Mock(ConnectionManager)
         callBackNetworkTest.connMan_.publish(any()) >> ""
-        List<String> events = new ArrayList<>();
-        events.add("message");
         expect:
-        callBackNetworkTest.publish("test", events, true, 1)
+        callBackNetworkTest.publish("test", "message")
     }
 
     def "publish zero events"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
         callBackNetworkTest.connMan_ = Mock(ConnectionManager)
         when:
-        callBackNetworkTest.publish("test", null, true, 1)
+        callBackNetworkTest.publish("test", null)
         then:
         def e = thrown(RESTClientException)
         e.getMessage() == "No events to publish to network"

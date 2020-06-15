@@ -12,7 +12,6 @@ import com.sun.istack.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Description of class SSENetwork.
@@ -29,34 +28,13 @@ public class SSENetwork extends NetworkConnectionObject {
     /**
      * This method is to publish data to network.
      * @param eventType subscription subject.
-     * @param messages data to publish.
-     * @param constantMode send data with or without delay.
-     * @param timeDelayMus delay time.
      */
-    public void publish(final String eventType, final List<String> messages, final boolean constantMode, final long timeDelayMus) {
-        long publishedEvents = 0;
-        long droppedEvents = 0;
+    public void publish(final String eventType, final String message) {
         try {
-            for(String message : messages) {
                 server_.ssePublish(eventType, message, null);
-                publishedEvents++;
-                if(constantMode)
-                    delayMicroSecond(timeDelayMus);
-            }
         } catch (final RESTServerException e) {
             log_.warn("Error while publishing message to network. " + e.getMessage());
-            droppedEvents = messages.size();
         }
-        log_.info(String.format("***Successfully published events = %s***", publishedEvents));
-        log_.info(String.format("***Dropped events = %s***", droppedEvents));
-    }
-
-    /**
-     * This method is used to create a constant delay.
-     */
-    private void delayMicroSecond(final long delayTimeMus) {
-        long waitUntil = System.nanoTime() + TimeUnit.MICROSECONDS.toNanos(delayTimeMus);
-        while( waitUntil > System.nanoTime());
     }
 
     /**
