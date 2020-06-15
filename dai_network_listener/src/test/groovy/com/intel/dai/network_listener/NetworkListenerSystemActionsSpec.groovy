@@ -59,14 +59,6 @@ class NetworkListenerSystemActionsSpec extends Specification {
         expect: underTest_.ingestCanonicalHWInvJson(null) == null
     }
 
-    def "toCanonicalHWInvJson"() {
-        expect: underTest_.toCanonicalHWInvJson(null) == null
-    }
-
-    def "getForeignHWInvJson"() {
-        expect: underTest_.getForeignHWInvJson(null) == null
-    }
-
     def "formatRawMessage"() {
         def json = """{"location":"location","type":"type","value":0.0,"timestamp":"1970-01-01 00:00:00.000000099Z"}"""
         expect: underTest_.formatRawMessage("type", "location", 99L, 0.0) == json
