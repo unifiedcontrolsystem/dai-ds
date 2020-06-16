@@ -30,7 +30,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
     public PropertyMap getSubscription(@NotNull final String url, @NotNull final String subscriber) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
-        return connMan_.getSubscription(url, subscriber);
+        return connectionManager_.getSubscription(url, subscriber);
     }
 
     /**
@@ -39,7 +39,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * @return subscription details for a given id.
      */
     public PropertyMap getSubscriptionForId(long subId) {
-        return connMan_.getSubscriptionForId(subId);
+        return connectionManager_.getSubscriptionForId(subId);
     }
 
     /**
@@ -47,7 +47,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * @return available subscription details.
      */
     public PropertyMap getAllSubscriptions() {
-        return connMan_.getAllSubscriptions();
+        return connectionManager_.getAllSubscriptions();
     }
 
     /**
@@ -60,7 +60,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
     public void publish(final String url, @NotNull final String events) throws RESTClientException {
         if (events == null)
             throw new RESTClientException("No events to publish to network");
-        connMan_.publish(events);
+        connectionManager_.publish(events);
     }
 
     /**
@@ -76,7 +76,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
     public boolean register(@NotNull final String url, @NotNull final String subscriber, final Map<String, String> parameters) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Could not register url or httpmethod : NULL value(s)");
-        return connMan_.addSubscription(url, subscriber, parameters);
+        return connectionManager_.addSubscription(url, subscriber, parameters);
     }
 
     /**
@@ -85,7 +85,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      *         false if all subscription are not removed.
      */
     public boolean unSubscribeAll() {
-        return connMan_.removeAllSubscriptions();
+        return connectionManager_.removeAllSubscriptions();
     }
 
     /**
@@ -95,7 +95,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      *         false if subscription is not removed or not found.
      */
     public boolean unSubscribeId(final long subId) {
-        return connMan_.removeSubscriptionId(subId);
+        return connectionManager_.removeSubscriptionId(subId);
     }
 
     /**
@@ -163,10 +163,10 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * This method creates connection manager using rest client and logger.
      */
     private void createManager() {
-        connMan_ = new ConnectionManager(restClient_, log_);
+        connectionManager_ = new ConnectionManager(restClient_, log_);
     }
 
     private final Logger log_;
-    private ConnectionManager connMan_;
+    private ConnectionManager connectionManager_;
     private RESTClient restClient_ = null;
 }

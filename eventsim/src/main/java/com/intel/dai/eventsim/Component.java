@@ -61,7 +61,7 @@ public class Component {
      * @return ras events.
      * @throws ConversionException unable to create ras event.
      */
-    List<ForeignEvent> publishRemRASEvents(final long remEvents, final long seed,
+    List<ForeignEvent> publishRemainingRASEvents(final long remEvents, final long seed,
                                      @NotNull final List<String> regexMatchedLocations,
                                      @ NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException {
@@ -111,7 +111,7 @@ public class Component {
      * @return sensor events.
      * @throws ConversionException unable to create sensor event.
      */
-    List<ForeignEvent> publishRemSensorEvents(final long remEvents, final long seed,
+    List<ForeignEvent> publishRemainingSensorEvents(final long remEvents, final long seed,
                                         @NotNull final List<String> regexMatchedLocations,
                                         @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
             throws ConversionException, SimulatorException {

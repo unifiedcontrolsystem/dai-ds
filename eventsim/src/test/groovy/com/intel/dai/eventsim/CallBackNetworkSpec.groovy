@@ -13,17 +13,17 @@ class CallBackNetworkSpec extends Specification {
         callBackNetworkTest.createClient()
         expect:
         callBackNetworkTest.restClient_ != null
-        callBackNetworkTest.connMan_ != null
+        callBackNetworkTest.connectionManager_ != null
     }
 
     def "Fetch sbscription with valid url and subscriber"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         PropertyMap output = new PropertyMap()
         output.put("url", "http://test.com")
         output.put("subscriber", "test")
         output.put("ID", "1")
-        callBackNetworkTest.connMan_.getSubscription("http://test.com", "test") >> output
+        callBackNetworkTest.connectionManager_.getSubscription("http://test.com", "test") >> output
         expect:
         PropertyMap result = callBackNetworkTest.getSubscription("http://test.com", "test")
         result.values().toString() == "[test, 1, http://test.com]"
@@ -31,12 +31,12 @@ class CallBackNetworkSpec extends Specification {
 
     def "Fetch sbscription with url as null value"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         PropertyMap output = new PropertyMap()
         output.put("url", "http://test.com")
         output.put("subscriber", "test")
         output.put("ID", "1")
-        callBackNetworkTest.connMan_.getSubscription("http://test.com", "test") >> output
+        callBackNetworkTest.connectionManager_.getSubscription("http://test.com", "test") >> output
         when:
         callBackNetworkTest.getSubscription(null, "test")
         then:
@@ -46,12 +46,12 @@ class CallBackNetworkSpec extends Specification {
 
     def "Fetch sbscription with subscriber as null value"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         PropertyMap output = new PropertyMap()
         output.put("url", "http://test.com")
         output.put("subscriber", "test")
         output.put("ID", "1")
-        callBackNetworkTest.connMan_.getSubscription("http://test.com", "test") >> output
+        callBackNetworkTest.connectionManager_.getSubscription("http://test.com", "test") >> output
         when:
         callBackNetworkTest.getSubscription("http://test.com", null)
         then:
@@ -61,12 +61,12 @@ class CallBackNetworkSpec extends Specification {
 
     def "Fetch sbscription for a given id"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         PropertyMap output = new PropertyMap()
         output.put("url", "http://test.com")
         output.put("subscriber", "test")
         output.put("ID", "1")
-        callBackNetworkTest.connMan_.getSubscriptionForId(1) >> output
+        callBackNetworkTest.connectionManager_.getSubscriptionForId(1) >> output
         expect:
         PropertyMap result = callBackNetworkTest.getSubscriptionForId(1)
         result.values().toString() == "[test, 1, http://test.com]"
@@ -74,12 +74,12 @@ class CallBackNetworkSpec extends Specification {
 
     def "Fetch all sbscription"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         PropertyMap output = new PropertyMap()
         output.put("url", "http://test.com")
         output.put("subscriber", "test")
         output.put("ID", "1")
-        callBackNetworkTest.connMan_.getAllSubscriptions() >> output
+        callBackNetworkTest.connectionManager_.getAllSubscriptions() >> output
         expect:
         PropertyMap result = callBackNetworkTest.getAllSubscriptions()
         result.values().toString() == "[test, 1, http://test.com]"
@@ -87,15 +87,15 @@ class CallBackNetworkSpec extends Specification {
 
     def "publish events"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
-        callBackNetworkTest.connMan_.publish(any()) >> ""
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_.publish(any()) >> ""
         expect:
         callBackNetworkTest.publish("test", "message")
     }
 
     def "publish zero events"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
         when:
         callBackNetworkTest.publish("test", null)
         then:
@@ -105,8 +105,8 @@ class CallBackNetworkSpec extends Specification {
 
     def "Add subscription with valid url, subscriber and other parameters"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
-        callBackNetworkTest.connMan_.addSubscription("http://test.com", "test", new HashMap<String, String>()) >> true
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_.addSubscription("http://test.com", "test", new HashMap<String, String>()) >> true
         expect:
         callBackNetworkTest.register("http://test.com", "test", new HashMap<String, String>()) == true
     }
@@ -131,16 +131,16 @@ class CallBackNetworkSpec extends Specification {
 
     def "Remove all subscriptions"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
-        callBackNetworkTest.connMan_.removeAllSubscriptions() >> true
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_.removeAllSubscriptions() >> true
         expect:
         callBackNetworkTest.unSubscribeAll() == true
     }
 
     def "Remove subsctiption for a given id"() {
         CallBackNetwork callBackNetworkTest = new CallBackNetwork(Mock(Logger))
-        callBackNetworkTest.connMan_ = Mock(ConnectionManager)
-        callBackNetworkTest.connMan_.removeSubscriptionId(1) >> true
+        callBackNetworkTest.connectionManager_ = Mock(ConnectionManager)
+        callBackNetworkTest.connectionManager_.removeSubscriptionId(1) >> true
         expect:
         callBackNetworkTest.unSubscribeId(1) == true
     }
