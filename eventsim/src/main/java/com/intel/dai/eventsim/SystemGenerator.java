@@ -136,6 +136,31 @@ class SystemGenerator {
     }
 
     /**
+     * This method used to create job events.
+     * @param numOfEvents numbers of job events to be generated.
+     * @param seed to repeat same type of data.
+     * @return generated job events
+     * @throws SimulatorException when unable to create exact number of events required.
+     * @throws ConversionException when unable to create job event.
+     */
+    List<ForeignEvent> publishJobEventsForLocation(long numOfEvents, final long seed) throws SimulatorException, ConversionException {
+        long eventsPerLocation = numOfEvents / regexMatchedLocations.size();
+        List<ForeignEvent> jobEvents = new ArrayList<>();
+        if(eventsPerLocation != 0) {
+            jobEvents = component_.publishJobEvents(eventsPerLocation, seed, regexMatchedLocations, jobsRegexMatchedLabelDescriptions_);
+        }
+
+        long remEvents = numOfEvents % regexMatchedLocations.size();
+        if (remEvents == 0)
+            return jobEvents;
+        jobEvents.addAll(component_.publishRemJobEvents(remEvents, seed, regexMatchedLocations, jobsRegexMatchedLabelDescriptions_));
+        remEvents = numOfEvents - jobEvents.size();
+        if(remEvents != 0)
+            throw new SimulatorException("Incorrect number of job events generated");
+        return jobEvents;
+    }
+
+    /**
      * This method filters regex matched locations from all the locations available.
      * @param locationRegex regex for locations.
      * @return number of matching regex locations.
@@ -184,6 +209,19 @@ class SystemGenerator {
                                 }
                             }
                             value = sensorRegexMatchedLabelDescriptions_.size();
+                            break;
+
+            case JOB  :     jobsRegexMatchedLabelDescriptions_.clear();
+                            PropertyMap jobData = dataLoaderEngine.getJobsMetaData().getAsMap();
+                            for(String jobid : jobData.keySet()) {
+                                PropertyMap jobDesc = jobData.getMapOrDefault(jobid, new PropertyMap());
+                                String jobDescription = jobDesc.getStringOrDefault("type", "");
+                                if(jobDescription.matches(regexLabelDesc)) {
+                                    jobDesc.put("id", jobid);
+                                    jobsRegexMatchedLabelDescriptions_.add(jobDesc);
+                                }
+                            }
+                            value = jobsRegexMatchedLabelDescriptions_.size();
                             break;
 
             default      :  break;
@@ -356,4 +394,5 @@ class SystemGenerator {
     private List<String> nonNodeLocations_;
     private List<PropertyDocument> rasRegexMatchedLabelDescriptions_ = new ArrayList<>();
     private List<PropertyDocument> sensorRegexMatchedLabelDescriptions_ = new ArrayList<>();
+    private List<PropertyDocument> jobsRegexMatchedLabelDescriptions_ = new ArrayList<>();
 }

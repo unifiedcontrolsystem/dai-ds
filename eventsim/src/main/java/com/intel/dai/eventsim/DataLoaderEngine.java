@@ -20,12 +20,6 @@ import java.util.*;
  */
 public class DataLoaderEngine {
 
-    private String bootParamsLocation_;
-    private String hwInventoryLocation_;
-    private String hwInventoryDiscStatusUrl_;
-    private String hwInventoryLocationPath_;
-    private String hwInventoryQueryLocationPath_;
-
     public DataLoaderEngine(PropertyMap engineconfiguration, NodeInformation nodeInfo, Logger log) throws SimulatorException {
         engineconfiguration_ = engineconfiguration;
         nodeInfo_ = nodeInfo;
@@ -44,6 +38,10 @@ public class DataLoaderEngine {
         rasMetadataLocation_ = engineconfiguration_.getStringOrDefault("RASMetadata", null);
         if (rasMetadataLocation_ == null)
             throw new SimulatorException("EventSim Configuration file doesn't contain 'RASMetadata' entry");
+
+        jobsMetadataLocation_ = engineconfiguration_.getStringOrDefault("JobsMetadata", null);
+        if (jobsMetadataLocation_ == null)
+            throw new SimulatorException("EventSim Configuration file doesn't contain 'JobsMetadata' entry");
 
         eventCount_ = engineconfiguration_.getLongOrDefault("eventCount", -1);
         timeDelayMus_ = engineconfiguration_.getLongOrDefault("timeDelayMus", 1);
@@ -66,12 +64,20 @@ public class DataLoaderEngine {
         try {
             processSensorMetadata();
             processRASMetadata();
+            loadJobsMetadata();
             loadSystemManifestFromDB();
             loadForeignLocationData();
             validateForeignLocationsWithDB();
         } catch (final IOException | ConfigIOParseException e) {
            throw new SimulatorException("Error while loading data into data loader engine: " + e.getMessage());
         }
+    }
+
+    /**
+     * This method is used to load jobs metadata from resources
+     */
+    private void loadJobsMetadata() throws IOException, ConfigIOParseException {
+        definitionJobsMetadata_ = loadJobsMetadataFromJSON();
     }
 
     /**
@@ -132,6 +138,13 @@ public class DataLoaderEngine {
      */
     private PropertyMap loadSensorMetadataFromJSON()  throws IOException, ConfigIOParseException {
         return LoadFileLocation.fromResources(sensorMetadataLocation_).getAsMap();
+    }
+
+    /**
+     * This method is used to load jobs metadata from a file
+     */
+    private PropertyMap loadJobsMetadataFromJSON()  throws IOException, ConfigIOParseException {
+        return LoadFileLocation.fromResources(jobsMetadataLocation_).getAsMap();
     }
 
     /**
@@ -207,6 +220,7 @@ public class DataLoaderEngine {
     public List<String> getNodeHostnameData() { return nodeHostnamedata_; }
     public PropertyDocument getSensorMetaData() { return definitionSensorMetadata_;}
     public List<String> getRasMetaData() {return rasMetadata_;}
+    public PropertyDocument getJobsMetaData() {return definitionJobsMetadata_;}
     public List<String> getNodeLocationData() {return nodeLocationdata_;}
     public List<String> getNonNodeLocationData() {return nonNodeLocationdata_;}
     public long getDefaultNumberOfEventsToBeGenerated() {return eventCount_;}
@@ -227,13 +241,20 @@ public class DataLoaderEngine {
     private final NodeInformation nodeInfo_;
     private String sensorMetadataLocation_;
     private String rasMetadataLocation_;
+    private String jobsMetadataLocation_;
     private long eventCount_;
     private long timeDelayMus_;
     private long randomizerSeed_;
 
     PropertyMap definitionSensorMetadata_;
+    PropertyMap definitionJobsMetadata_;
     ArrayList<String> rasMetadata_;
     List<String> nodeLocationdata_;
     List<String> nonNodeLocationdata_ = new ArrayList<>();
     List<String> nodeHostnamedata_;
+    private String bootParamsLocation_;
+    private String hwInventoryLocation_;
+    private String hwInventoryDiscStatusUrl_;
+    private String hwInventoryLocationPath_;
+    private String hwInventoryQueryLocationPath_;
 }

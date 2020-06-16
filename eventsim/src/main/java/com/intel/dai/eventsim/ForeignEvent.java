@@ -75,6 +75,7 @@ public abstract class ForeignEvent {
         events,
         stateChanges,
         telemetry,
+        jobs,
         other
     }
 

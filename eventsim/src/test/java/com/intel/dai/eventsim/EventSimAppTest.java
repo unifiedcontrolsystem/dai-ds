@@ -233,6 +233,32 @@ public class EventSimAppTest {
     }
 
     @Test
+    public void generateJobEvents() throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "test");
+        parameters.put("count", "1");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doNothing().when(eventSimApiTest.eventSimEngine).publishJobEvents("test", ".*" , "false", null, null, "1", null);
+        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateJobEvents(parameters));
+    }
+
+    @Test
+    public void generateJobEventsWithException() throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "test");
+        parameters.put("count", "1");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine).publishJobEvents("test", ".*" , "false", null, null, "1", null);
+        assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generateJobEvents(parameters));
+    }
+
+    @Test
     public void generateBootEvents() throws SimulatorException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("locations", "test");
