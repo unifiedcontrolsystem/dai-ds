@@ -103,8 +103,7 @@ class SystemGenerator {
         long remRasEvents = numOfEvents % regexMatchedLocations.size();
         if (remRasEvents == 0)
             return rasEvents;
-        rasEvents.addAll(component_.publishRemRASEvents(remRasEvents, seed, regexMatchedLocations,
-                rasRegexMatchedLabelDescriptions_));
+        rasEvents.addAll(component_.publishRemainingRASEvents(remRasEvents, seed, regexMatchedLocations, rasRegexMatchedLabelDescriptions_));
         remRasEvents = numOfEvents - rasEvents.size();
         if(remRasEvents != 0)
             throw new SimulatorException("Incorrect number of ras events generated");
@@ -129,7 +128,7 @@ class SystemGenerator {
         long remEvents = numOfEvents % regexMatchedLocations.size();
         if (remEvents == 0)
             return sensorEvents;
-        sensorEvents.addAll(component_.publishRemSensorEvents(remEvents, seed, regexMatchedLocations, sensorRegexMatchedLabelDescriptions_));
+        sensorEvents.addAll(component_.publishRemainingSensorEvents(remEvents, seed, regexMatchedLocations, sensorRegexMatchedLabelDescriptions_));
         remEvents = numOfEvents - sensorEvents.size();
         if(remEvents != 0)
             throw new SimulatorException("Incorrect number of sensor events generated");
