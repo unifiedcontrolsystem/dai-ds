@@ -74,7 +74,8 @@ public abstract class ForeignEvent {
     enum EVENT_SUB_TYPE {
         events,
         stateChanges,
-        telemetry
+        telemetry,
+        other
     }
 
     PropertyMap props_;
