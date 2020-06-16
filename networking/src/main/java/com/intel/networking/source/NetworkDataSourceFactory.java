@@ -37,15 +37,7 @@ public final class NetworkDataSourceFactory {
      */
     public static NetworkDataSource createInstance(Logger logger, String name, Map<String, String> args)
             throws FactoryException {
-        if(name.equals("rabbitmq")) {
-            NetworkDataSource instance = new NetworkDataSourceRabbitMQ(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(name.equals("sse")) {
-            NetworkDataSource instance = new NetworkDataSourceSSE(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(registeredImplementations_ != null && registeredImplementations_.containsKey(name)) {
+        if(registeredImplementations_.containsKey(name)) {
             Class<?> type = registeredImplementations_.get(name);
             try {
                 Constructor<?> ctor = type.getConstructor(Logger.class, Map.class);
@@ -60,6 +52,23 @@ public final class NetworkDataSourceFactory {
     }
 
     /**
+     * Static factory to create a {@link NetworkDataSource} object from its descriptive name. The name is returned by the
+     * {@link NetworkDataSource}.getProviderName() method of the specific provider.
+     *
+     * @param logger The logger to pass to the implementation.
+     * @param name The provider name to create.
+     * @param args Provider specific arguments defined by the individual provider. See the
+     *             {@link NetworkDataSource}.getProviderName() derived class documentation for the specific information
+     *             on the meaning of the arguments.
+     * @return The created object if successful or null if the object failed to create.
+     * @throws NetworkDataSourceFactory.FactoryException Thrown when a registered implementation cannot be created.
+     */
+    public static NetworkDataSource createInstanceWithLogger(Logger logger, String name, Map<String, String> args)
+            throws FactoryException {
+        return createInstance(logger, name, args);
+    }
+
+    /**
      * Register an new implementation of NetworkDataSource.
      *
      * @param name The name of the implementation. Name "zmq" and "rabbitmq" are reserved.
@@ -68,12 +77,8 @@ public final class NetworkDataSourceFactory {
      * registered a second time.
      */
     public static boolean registerNewImplementation(String name, Class<? extends NetworkDataSource> implClass) {
-        if(name == null || name.equals("rabbitmq") || name.equals("zmq"))
+        if(implClass == null || name == null || name.trim().isEmpty())
             return false;
-        if(implClass == null)
-            return false;
-        if(registeredImplementations_ == null)
-            registeredImplementations_ = new HashMap<>();
         if(registeredImplementations_.containsKey(name))
             return false;
         return (registeredImplementations_.putIfAbsent(name, implClass) == null);
@@ -86,10 +91,13 @@ public final class NetworkDataSourceFactory {
      * @return true if the name is removed false in all other cases.
      */
     public static boolean unregisterImplementation(String name) {
-        if(registeredImplementations_ != null && registeredImplementations_.containsKey(name))
+        if(registeredImplementations_.containsKey(name))
             return registeredImplementations_.remove(name) != null;
         return false;
     }
 
-    static Map<String, Class<? extends NetworkDataSource>> registeredImplementations_;
+    static Map<String, Class<? extends NetworkDataSource>> registeredImplementations_ = new HashMap<>() {{
+        put("rabbitmq", NetworkDataSourceRabbitMQ.class);
+        put("sse", NetworkDataSourceSSE.class);
+    }};
 }

@@ -6,6 +6,8 @@ package com.intel.networking.source;
 
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ;
+import com.intel.networking.source.restsse.NetworkDataSourceSSE;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +42,10 @@ public class NetworkDataSourceFactoryTest {
 
     @Before
     public void setUp() {
-        NetworkDataSourceFactory.registeredImplementations_ = null;
+        NetworkDataSourceFactory.registeredImplementations_ = new HashMap<>() {{
+            put("rabbitmq", NetworkDataSourceRabbitMQ.class);
+            put("sse", NetworkDataSourceSSE.class);
+        }};
     }
 
     @Test
@@ -55,7 +60,6 @@ public class NetworkDataSourceFactoryTest {
     public void registerAndUnregister() {
         assertFalse(NetworkDataSourceFactory.registerNewImplementation(null, TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("test", null));
-        assertFalse(NetworkDataSourceFactory.registerNewImplementation("zmq", TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("rabbitmq", TestImpl.class));
         assertTrue(NetworkDataSourceFactory.registerNewImplementation("test", TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("test", TestImpl.class));

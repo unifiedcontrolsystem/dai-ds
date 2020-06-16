@@ -79,7 +79,7 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
                 }
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | DateTimeParseException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
             throw new NetworkListenerProviderException("Failed to load the event metadata");
         }
     }

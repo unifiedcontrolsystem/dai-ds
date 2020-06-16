@@ -69,7 +69,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
                 commonList.add(common);
             }
             return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | DateTimeParseException | ConversionException e) {
+        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException | ConversionException e) {
             log_.debug("Failed to parse telemetry string: '%s'", data);
             throw new NetworkListenerProviderException("Failed to parse incoming data", e);
         }

@@ -115,7 +115,7 @@ def log_dir     = install_dir + "/log"
 
 println("\n*** Build Version: " + packageVersion)
 if(!includeDbgSymbols)
-    System.err.println("*** Not including debug symbols and turning off coverage compliance!")
+    System.err.println("*** Not including debug symbols!")
 
 task rootClean(type: Delete) {
     delete "${projectDir}/out", "${projectDir}/build"
@@ -585,7 +585,7 @@ project(':dai_core') {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'METHOD'
-                    minimum = 0.80
+                    minimum = 0.79
                 }
             }
             rule {
@@ -932,6 +932,41 @@ project(':foreign_bus') {
         testCompile 'cglib:cglib-nodep:3.1'
         compileOnly 'org.projectlombok:lombok:1.18.8'
         annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+}
+
+project(':fabric') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':logging')
+        compile project(":properties")
+        compile project(":config_io")
+        compile project(':dai_core')
+        compile project(':networking')
+        compile project(':foreign_bus')
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:3.1'
     }
 
     jacocoTestCoverageVerification {

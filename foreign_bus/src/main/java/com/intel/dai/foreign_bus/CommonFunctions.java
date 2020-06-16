@@ -7,6 +7,7 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
+import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.intel.xdg.XdgConfigFile;
@@ -17,12 +18,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,15 +31,32 @@ final public class CommonFunctions {
      *
      * @param timestamp String timestamp in ISO format.
      * @return The long representing the timestamp in nano seconds.
-     * @throws DateTimeParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
-    public static long convertISOToLongTimestamp(String timestamp) throws DateTimeParseException {
-        timestamp = timestamp.replace(" ", "T");
-        Instant ts = ZonedDateTime.parse(timestamp).toInstant();
+    public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
+        SimpleDateFormat[] df = new SimpleDateFormat[] {
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX"),
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"),
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+        };
         String[] parts = timestamp.split("\\.");
-        String fraction = parts.length == 1 ? "0" : parts[1].replace("Z","");
-        if(fraction.isEmpty() || fraction.length() > 9)
-            throw new DateTimeParseException("Fraction of seconds is malformed, must be 1-9 digits", ": ", timestamp.indexOf('.'));
+        // Fraction without TZ
+        String fraction = parts.length == 1 ? "0" : parts[1].replaceFirst("([A-Z]+)|([-+][0-9:]+)","");
+        // timestamp without fraction but with TZ (" " or "T" separator agnostic)
+        String tsToSecond = timestamp.replaceFirst("\\.[0-9]+", "").replace(" ", "T");
+        Instant ts = null;
+        ParseException last = new ParseException("", 0);
+        // Do appropriate parsing...
+        for(SimpleDateFormat fmt: df) {
+            try {
+                ts = fmt.parse(tsToSecond).toInstant();
+            } catch(ParseException e) {
+                last = e;
+            }
+        }
+        if(ts == null)
+            throw last; // Parsing timestamp failed.
+        if(fraction.length() > 9)
+            throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
         return (ts.getEpochSecond() * 1_000_000_000L) +
                 (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
     }
@@ -58,8 +71,13 @@ final public class CommonFunctions {
      */
     public static String convertForeignToLocation(String foreignLocation, String... otherArgs)
             throws ConversionException {
-        if(nodeMap_ == null)
-            loadCall_.loadMaps();
+        if(nodeMap_ == null) {
+            try {
+                loadCall_.loadMaps();
+            } catch(RuntimeException e) { /* Failed, drop to finally */ }
+            if(nodeMap_ == null)
+                nodeMap_ = new PropertyMap();
+        }
         if(foreignLocation.equals("all"))
             return foreignLocation;
         String sensorName = (otherArgs.length > 0) ? otherArgs[0] : null;
@@ -123,6 +141,116 @@ final public class CommonFunctions {
         if(nodeMap_ == null)
             loadCall_.loadMaps();
         return (nodeMap_ != null ? nodeMap_.values() : null);
+    }
+
+    /**
+     * Parse a foreign stream down the to leaf level then calling back to parse the leaf. Will not parse state changes.
+     *
+     * @param jsonStream The JSON object from the stream of objects...
+     * @throws ConfigIOParseException if any unexpected syntax or context is detected.
+     */
+    public static PropertyArray parseForeignTelemetry(String jsonStream) throws ConfigIOParseException {
+        PropertyArray allLeafs = new PropertyArray();
+        List<String> jsonObjects = breakupStreamedJSONMessages(jsonStream);
+        for(String singleMessage: jsonObjects) {
+            PropertyMap streamObject = parser_.fromString(singleMessage).getAsMap();
+            if(!streamObject.containsKey("metrics"))
+                throw new ConfigIOParseException("Stream object is missing the 'metrics' key");
+            PropertyMap metrics = streamObject.getMapOrDefault("metrics", null);
+            if(metrics == null)
+                throw new ConfigIOParseException("The key 'metrics' is set to 'null'");
+            if(!metrics.containsKey("messages"))
+                throw new ConfigIOParseException("The key 'messages' does not exist in the 'metrics' object");
+            PropertyArray messages = metrics.getArrayOrDefault("messages", new PropertyArray());
+            for(int i = 0; i < messages.size(); i++) {
+                PropertyMap message;
+                try {
+                    message = messages.getMap(i);
+                } catch(PropertyNotExpectedType e) {
+                    throw new ConfigIOParseException("Expected only objects under 'messages'");
+                }
+                processMessage(message, allLeafs);
+            }
+        }
+        return allLeafs;
+    }
+
+    private static void processMessage(PropertyMap message, PropertyArray allLeafs) throws ConfigIOParseException {
+        if(message.containsKey("Events"))
+            processEvents(message.getArrayOrDefault("Events", new PropertyArray()), allLeafs);
+        else
+            throw new ConfigIOParseException("Missing key 'Events' in the 'message' object");
+    }
+
+    private static void processEvents(PropertyArray events, PropertyArray allLeafs) throws ConfigIOParseException {
+        for(int i = 0; i < events.size(); i++) {
+            PropertyMap event;
+            try {
+                event = events.getMap(i);
+            } catch(PropertyNotExpectedType e) {
+                throw new ConfigIOParseException("The event object in the 'Events' array is not a object");
+            }
+            processEvent(event, allLeafs);
+        }
+    }
+
+    private static void processEvent(PropertyMap event, PropertyArray allLeafs) throws ConfigIOParseException {
+        String prefix = event.getStringOrDefault("MessageId", "Missing.Id");
+        if(!event.containsKey("Oem"))
+            throw new ConfigIOParseException("Missing the 'Oem' key in the event in 'Events'");
+        PropertyMap oem = event.getMapOrDefault("Oem", null);
+        if(oem == null)
+            throw new ConfigIOParseException("The 'Oem' key is defined as 'null' in the event");
+        if(!oem.containsKey("Sensors"))
+            throw new ConfigIOParseException("Missing the 'Sensors' key in the 'Oem' key");
+        PropertyArray sensors = oem.getArrayOrDefault("Sensors", new PropertyArray());
+        for(int i = 0; i < sensors.size(); i++) {
+            PropertyMap leaf;
+            try {
+                leaf = sensors.getMap(i);
+            } catch(PropertyNotExpectedType e) {
+                throw new ConfigIOParseException("The actual data under the 'Sensors' array was not an object");
+            }
+            leaf.put("PhysicalContext", prefix + "." + leaf.getStringOrDefault("PhysicalContext",
+                    "Missing.PhysicalContext"));
+            allLeafs.add(leaf);
+        }
+    }
+
+    /**
+     * Used to break up a stream of JSON objects into individual JSON objects.
+     *
+     * @param data THe String containing a possible stream of JSON Objects.
+     * @return A list of Strings representing each of the JSON objects.
+     */
+    private static List<String> breakupStreamedJSONMessages(String data) {
+        List<String> jsonMessages = new ArrayList<>();
+        int braceDepth = 0;
+        int startOfMessage = 0;
+        boolean inQuote = false;
+        char chr;
+        for(int index = 0; index < data.length(); index++) {
+            chr = data.charAt(index);
+            if(chr == '"')
+                inQuote = toggleQuote(data, index, inQuote);
+            if(inQuote || Character.isWhitespace(chr))
+                continue;
+            if(chr == '{')
+                braceDepth++;
+            else if(chr == '}')
+                braceDepth--;
+            if(braceDepth == 0) { // new message found
+                jsonMessages.add(data.substring(startOfMessage, index + 1).trim());
+                startOfMessage = index + 1;
+            }
+        }
+        return jsonMessages;
+    }
+
+    private static boolean toggleQuote(String data, int index, boolean inQuote) {
+        if(inQuote && data.charAt(index - 1) == '\\')
+            return inQuote;
+        return !inQuote;
     }
 
     private static String reduceDaiLocation(String location) {
@@ -220,6 +348,7 @@ final public class CommonFunctions {
     static String sensorCpuPattern_ = null;
     static String sensorDimmPattern_ = null;
     static String sensorChannelPattern_ = null;
+    static ConfigIO parser_ = ConfigIOFactory.getInstance("json");
 
     @FunctionalInterface
     public interface IndirectCall_ {

@@ -1,7 +1,6 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
-
 package com.intel.networking.sink;
 
 import com.intel.logging.Logger;
@@ -34,25 +33,11 @@ public final class NetworkDataSinkFactory {
      *             {@link NetworkDataSink}.getProviderName() derived class documentation for the specific information
      *             on the meaning of the arguments.
      * @return The created object if successful or null if the object failed to create.
+     * @throws FactoryException when the instance cannot be created.
      */
-    public static NetworkDataSink createInstance(Logger logger, String name, Map<String, String> args) throws FactoryException {
-        if(name.equals("rabbitmq")) {
-            NetworkDataSink instance = new NetworkDataSinkRabbitMQ(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(name.equals("sse")) {
-            NetworkDataSink instance = new NetworkDataSinkSSE(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(name.equals("http_callback")) {
-            NetworkDataSink instance = new NetworkDataSinkHttpCallback(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(name.equals("benchmark")) {
-            NetworkDataSink instance = new NetworkDataSinkBenchmark(logger, args);
-            instance.initialize();
-            return instance;
-        } else if(registeredImplementations_ != null && registeredImplementations_.containsKey(name)) {
+    public static NetworkDataSink createInstance(Logger logger, String name, Map<String, String> args)
+            throws FactoryException {
+        if(registeredImplementations_.containsKey(name)) {
             Class<?> type = registeredImplementations_.get(name);
             try {
                 Constructor<?> ctor = type.getConstructor(Logger.class, Map.class);
@@ -67,21 +52,30 @@ public final class NetworkDataSinkFactory {
     }
 
     /**
-     * Register an new implementation of NetworkDataSink.
+     * Alias for createInstance. See above.
      *
-     * @param name The name of the implementation. Name "zmq" and "rabbitmq" are reserved.
-     * @param implClass The class object of the implementation of NetworkDataSink.
-     * @return true only if the registration is successful; false otherwise. Will return false if the same name is
-     * registered a second time.
+     * @param logger The logger to pass to the created instance.
+     * @param name The provider name to create.
+     * @param args Provider specific arguments defined by the individual provider. See the
+     *             {@link NetworkDataSink}.getProviderName() derived class documentation for the specific information
+     *             on the meaning of the arguments.
+     * @return The created object if successful or null if the object failed to create.
+     * @throws FactoryException when the instance cannot be created.
      */
+    public static NetworkDataSink createInstanceWithLogger(Logger logger, String name, Map<String, String> args)
+            throws FactoryException {
+        return createInstance(logger, name, args);
+    }
+        /**
+         * Register an new implementation of NetworkDataSink.
+         *
+         * @param name The name of the implementation. Name "zmq" and "rabbitmq" are reserved.
+         * @param implClass The class object of the implementation of NetworkDataSink.
+         * @return true only if the registration is successful; false otherwise. Will return false if the same name is
+         * registered a second time.
+         */
     public static boolean registerNewImplementation(String name, Class<? extends NetworkDataSink> implClass) {
-        if(name == null || name.equals("rabbitmq") || name.equals("zmq"))
-            return false;
-        if(implClass == null)
-            return false;
-        if(registeredImplementations_ == null)
-            registeredImplementations_ = new HashMap<>();
-        if(registeredImplementations_.containsKey(name))
+        if(name == null || name.trim().isEmpty() || implClass == null)
             return false;
         return (registeredImplementations_.putIfAbsent(name, implClass) == null);
     }
@@ -93,10 +87,15 @@ public final class NetworkDataSinkFactory {
      * @return true if the name is removed false in all other cases.
      */
     public static boolean unregisterImplementation(String name) {
-        if(registeredImplementations_ != null && registeredImplementations_.containsKey(name))
-            return registeredImplementations_.remove(name) != null;
-        return false;
+        return registeredImplementations_.remove(name) != null;
     }
 
-    static Map<String, Class<? extends NetworkDataSink>> registeredImplementations_;
+    @SuppressWarnings("serial")
+    static Map<String, Class<? extends NetworkDataSink>> registeredImplementations_ =
+            new HashMap<String, Class<? extends NetworkDataSink>>() {{
+        put("rabbitmq", NetworkDataSinkRabbitMQ.class);
+        put("sse", NetworkDataSinkSSE.class);
+        put("http_callback", NetworkDataSinkHttpCallback.class);
+        put("benchmark", NetworkDataSinkBenchmark.class);
+    }};
 }
