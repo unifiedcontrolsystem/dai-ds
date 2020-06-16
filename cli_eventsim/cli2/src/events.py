@@ -23,6 +23,7 @@ class EventsCli(object):
         self._event_parser.set_defaults(func=self._event_help_execute)
         self._add_ras_event_parser(event_subparsers)
         self._add_sensor_event_parser(event_subparsers)
+        self._add_job_event_parser(event_subparsers)
         self._add_boot_event_parser(event_subparsers)
         self._add_scenario_event_parser(event_subparsers)
         self._add_get_seed_parser(event_subparsers)
@@ -72,6 +73,26 @@ class EventsCli(object):
         sensor_events_parser.add_argument('--seed', help='seed to duplicate data')
         sensor_events_parser.add_argument('--timeout', help='sensor sub-command execution timeout')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
+
+    """
+    This method describes 'job' sub-command arguments.
+    """
+    def _add_job_event_parser(self, event_parser):
+        job_events_parser = event_parser.add_parser('job', help='generate job events')
+        job_events_parser.add_argument('--burst',
+                                          help='generate job events without delay. Default is constant mode with delay.', action='store_true')
+        job_events_parser.add_argument('--count', type=int,
+                                          help='given number of job events are generated. The default values exists in eventsim config file.')
+        job_events_parser.add_argument('--delay',
+                                          help='pause for given value in microseconds to generate job events. The default values exists in '
+                                               'eventsim config file.')
+        job_events_parser.add_argument('--label', help='generate job events for a given type/description')
+        job_events_parser.add_argument('--locations',
+                                          help='generate job events at a given location. Provide regex for multiple locations.')
+        job_events_parser.add_argument('--output', help='store data in a file')
+        job_events_parser.add_argument('--seed', help='seed to duplicate data')
+        job_events_parser.add_argument('--timeout', help='job sub-command execution timeout')
+        job_events_parser.set_defaults(func=self._generate_job_events_execute)
 
     """
     This method describes 'boot' sub-command arguments.
@@ -156,6 +177,24 @@ class EventsCli(object):
         client = HttpClient()
         # URL will be POST http://127.0.0.1:9998/apis/events/sensor
         url = client.get_base_url() + 'apis/events/sensor'
+        parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'label': args.label,
+                      'locations': args.locations, 'output': args.output, 'seed': args.seed}
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        timeout = args.timeout
+        if timeout is None:
+            timeout = self.default_timeout
+        response_code, response = client.send_post_request(url, parameters, timeout)
+        return CommandResult(response_code, response)
+
+
+    """
+    This method generates url and send api request to generate job events.
+    """
+    def _generate_job_events_execute(self, args):
+        client = HttpClient()
+        # URL will be POST http://127.0.0.1:9998/apis/events/sensor
+        url = client.get_base_url() + 'apis/events/job'
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'label': args.label,
                       'locations': args.locations, 'output': args.output, 'seed': args.seed}
         parameters = {k: v for k, v in parameters.items() if v is not None}

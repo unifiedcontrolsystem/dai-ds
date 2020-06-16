@@ -262,6 +262,44 @@ public class SimulatorEngine {
     }
 
     /**
+     * This method is used to create and send job events to network
+     * @param regexLocation regex of locations
+     * @param regexLabel regex for event type/description
+     * @param burst true for burst mode, false for constant mode
+     * @param timeDelayMus time delay to induce while sending events to network
+     * @param randomiserSeed randomization seed to replicate data.
+     * @param numOfEvents number of sensor events to generate
+     * @param output store generated events in a file
+     * @throws SimulatorException unable to create job event
+     */
+    void publishJobEvents(@NotNull final String regexLocation, @NotNull final String regexLabel, @NotNull final String burst, final String timeDelayMus, final String randomiserSeed, final String numOfEvents, final String output) throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("location-regex", regexLocation);
+        parameters.put("label-regex", regexLabel);
+        parameters.put("burst", burst);
+
+        try {
+            validateParameters(parameters);
+            loadDefaults();
+            boolean burstMode = Boolean.parseBoolean(burst);
+            if (timeDelayMus != null)
+                timeDelayMus_ = Long.parseLong(timeDelayMus);
+            if (randomiserSeed != null)
+                randomiserSeed_ = Long.parseLong(randomiserSeed);
+            if (numOfEvents != null)
+                numOfEvents_ = Long.parseLong(numOfEvents);
+            if (ExistsLocationsMatchedRegex(regexLocation, EVENT_TYPE.JOB) && ExistsMatchedRegexLabel(regexLabel, EVENT_TYPE.JOB)) {
+                List<ForeignEvent> jobEvents = system_.publishJobEventsForLocation(numOfEvents_, randomiserSeed_);
+                Map<Long, List<ForeignEvent>> events = new HashMap<>();
+                events.put(1L, jobEvents);
+                publishGeneratedEvents(events, burstMode, output);
+            }
+        } catch (final PropertyNotExpectedType | ConversionException e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
+    /**
      * This method is used to create and send events to network for a scenario given in a file.
      * @param scenarioFile scenario configuration data.
      * @param type burst/group-burst/repeat
@@ -509,6 +547,8 @@ public class SimulatorEngine {
                 throw new SimulatorException("No Matched Regex Locations to generate RAS Events.");
             else if (eventType.equals(EVENT_TYPE.SENSOR))
                 throw new SimulatorException("No Matched Regex Locations to generate Sensor Events.");
+            else if (eventType.equals(EVENT_TYPE.JOB))
+                throw new SimulatorException("No Matched Regex Locations to generate Job Events.");
             throw new SimulatorException("No Matched Regex Locations to generate Scenario sequence.");
         }
         return true;
@@ -528,6 +568,8 @@ public class SimulatorEngine {
                 throw new SimulatorException("No Matched Regex Locations to generate RAS Events.");
             else if (eventType.equals(EVENT_TYPE.SENSOR))
                 throw new SimulatorException("No Matched Regex Locations to generate Sensor Events.");
+            else if (eventType.equals(EVENT_TYPE.JOB))
+                throw new SimulatorException("No Matched Regex Locations to generate Job Events.");
         }
         return true;
     }
@@ -572,7 +614,8 @@ public class SimulatorEngine {
         BOOT,
         RAS,
         SENSOR,
-        OTHER
+        JOB,
+        OTHER;
     }
 
     private final DataLoaderEngine dataLoaderEngine_;
