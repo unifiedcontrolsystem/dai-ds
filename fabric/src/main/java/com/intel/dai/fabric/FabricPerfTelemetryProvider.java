@@ -80,11 +80,11 @@ public final class FabricPerfTelemetryProvider extends FabricAdapter {
     private void convertSensor(PropertyMap sensor, List<FabricTelemetryItem> results)
             throws PropertyNotExpectedType {
         String location = sensor.getString("Location");
-        String name = sensor.getString("PhysicalContext");
+        String name = sensor.getString("__FullName__");
         String timestamp = sensor.getString("Timestamp");
         String sValue = sensor.getString("Value"); // The data examples had values as String types....
         if (name == null || name.trim().isEmpty()) {
-            logError("'PhysicalContext' key was 'null' or empty from the sensor, skipping this sensor");
+            logError("'__FullName__' key was 'null' or empty from the sensor, skipping this sensor");
             return;
         }
         if (timestamp == null || timestamp.trim().isEmpty()) {

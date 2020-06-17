@@ -31,6 +31,7 @@ final public class CommonFunctions {
      *
      * @param timestamp String timestamp in ISO format.
      * @return The long representing the timestamp in nano seconds.
+     * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
     public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
         SimpleDateFormat[] df = new SimpleDateFormat[] {
@@ -44,17 +45,15 @@ final public class CommonFunctions {
         // timestamp without fraction but with TZ (" " or "T" separator agnostic)
         String tsToSecond = timestamp.replaceFirst("\\.[0-9]+", "").replace(" ", "T");
         Instant ts = null;
-        ParseException last = new ParseException("", 0);
         // Do appropriate parsing...
         for(SimpleDateFormat fmt: df) {
             try {
                 ts = fmt.parse(tsToSecond).toInstant();
-            } catch(ParseException e) {
-                last = e;
-            }
+                break;
+            } catch(ParseException | NullPointerException e) { /* Not used */ }
         }
         if(ts == null)
-            throw last; // Parsing timestamp failed.
+            throw new ParseException(tsToSecond, 0); // Parsing timestamp failed.
         if(fraction.length() > 9)
             throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
         return (ts.getEpochSecond() * 1_000_000_000L) +
@@ -211,8 +210,9 @@ final public class CommonFunctions {
             } catch(PropertyNotExpectedType e) {
                 throw new ConfigIOParseException("The actual data under the 'Sensors' array was not an object");
             }
-            leaf.put("PhysicalContext", prefix + "." + leaf.getStringOrDefault("PhysicalContext",
-                    "Missing.PhysicalContext"));
+            String fullName = prefix + "." + leaf.getStringOrDefault("PhysicalContext", "Missing.PhysicalContext" +
+                    "." + leaf.getStringOrDefault("DeviceSpecificContext", "UnknownContext"));
+            leaf.put("__FullName__", fullName);
             allLeafs.add(leaf);
         }
     }

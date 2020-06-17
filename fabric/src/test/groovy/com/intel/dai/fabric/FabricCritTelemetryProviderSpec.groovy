@@ -49,6 +49,7 @@ class FabricCritTelemetryProviderSpec extends Specification {
                   "Timestamp": "2020-06-03T22:35:45Z",
                   "Location": "x3000c0s17b0",
                   "PhysicalContext": "Chassis",
+                  "DeviceSpecificContext": "sensor",
                   "Index": 0,
                   "Value": "258"
                 }
