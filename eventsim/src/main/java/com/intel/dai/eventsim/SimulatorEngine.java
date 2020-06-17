@@ -22,6 +22,7 @@ public class SimulatorEngine {
     SimulatorEngine(DataLoaderEngine dataLoaderEngine, NetworkObject source, Logger log) {
         dataLoaderEngine_ = dataLoaderEngine;
         source_ = source;
+        log_ = log;
         system_ = new SystemGenerator(log);
         scenario_ = new Scenario();
     }
@@ -478,20 +479,23 @@ public class SimulatorEngine {
      */
     private void publishGeneratedEvents(Map<Long, List<ForeignEvent>> events, boolean burstMode, String output) {
         publishedEvents_ .clear();
-        //publishedEvents1_.clear();
+        events_.clear();
         long droppedEvents = 0;
         ZonedDateTime startTime1 = ZonedDateTime.now(ZoneId.systemDefault());
         System.out.println("Start Time : " + startTime1.toString());
         for(List<ForeignEvent> event : events.values()) {
             ZonedDateTime startTime = ZonedDateTime.now(ZoneId.systemDefault());
-            //System.out.println("Rate/Group Start Time : " + startTime.toString());
-            //publishedEvents1_.clear();
+            log_.debug("Rate/Group Start Time : " + startTime.toString());
+            events_.clear();
+            loadDefaultsMap(events_);
             for(ForeignEvent item: event) {
                 try {
                     String timestamp = ZonedDateTime.now(ZoneId.of("UTC")).toInstant().toString().replace("T", " ");
                     timestamp = ",\"timestamp\":\"" + timestamp + "\"}";
+                    String subject = item.subject.toString();
                     item.message = item.message.replace("}", timestamp);
-                    source_.send(item.subject.toString(), item.message);
+                    source_.send(subject, item.message);
+                    events_.put(subject, events_.get(subject) + 1);
                     publishedEvents_.add(item.message);
                     if(!burstMode)
                         delayMicroSecond(timeDelayMus_);
@@ -501,18 +505,22 @@ public class SimulatorEngine {
                 }
             }
             ZonedDateTime endTime = ZonedDateTime.now(ZoneId.systemDefault());
-/*            System.out.println("Rate/Group End Time : " + endTime.toString());
-            System.out.println("Rate/Group Published events : " + publishedEvents1_.size());
-            System.out.println("RAS events = " + Collections.frequency(publishedEvents1_, "events"));
-            System.out.println("Sensor events = " + Collections.frequency(publishedEvents1_, "telemetry"));
-            System.out.println("Boot events = " + Collections.frequency(publishedEvents1_, "stateChanges"));*/
+            log_.debug("Rate/Group End Time : " + endTime.toString());
+            long sum = 0;
+            for(ForeignEvent.EVENT_SUB_TYPE eventType : ForeignEvent.EVENT_SUB_TYPE.values()) {
+                String key = eventType.toString();
+                long value = events_.get(key);
+                log_.debug(key + " events = " + String.valueOf(value));
+                sum = sum + value;
+            }
+            System.out.println("Rate/Group Published events : " + sum);
             delayMicroSecond(timeDelayMus_);
         }
         ZonedDateTime endTime1 = ZonedDateTime.now(ZoneId.systemDefault());
-/*        System.out.println("End Time : " + endTime1.toString());
-        System.out.println("Total Published events : " + publishedEvents_.size());
-        System.out.println("Dropped events : " + droppedEvents);*/
-        System.out.println("Total Time Main Start to Main End :" + (Duration.between(startTime1,endTime1).toSeconds()) + " seconds");
+        log_.debug("End Time : " + endTime1.toString());
+        log_.debug("Total Published events : " + publishedEvents_.size());
+        log_.debug("Dropped events : " + droppedEvents);
+        log_.debug("Total Time Main Start to Main End :" + (Duration.between(startTime1,endTime1).toSeconds()) + " seconds");
         if(output != null) {
             try {
                 scenario_.writeEventToFile(publishedEvents_, output);
@@ -610,6 +618,11 @@ public class SimulatorEngine {
         }
     }
 
+    private void loadDefaultsMap(Map<String, Long> defaultMap) {
+        for(ForeignEvent.EVENT_SUB_TYPE eventType : ForeignEvent.EVENT_SUB_TYPE.values())
+            defaultMap.put(eventType.toString(), 0L);
+    }
+
     enum EVENT_TYPE {
         BOOT,
         RAS,
@@ -626,5 +639,7 @@ public class SimulatorEngine {
     private long timeDelayMus_;
     private long randomiserSeed_;
     private List<String> publishedEvents_ = new ArrayList<>();
+    private final Logger log_;
+    private Map<String, Long> events_ = new HashMap<>();
 /*    private List<String> publishedEvents1_ = new ArrayList<>();*/
 }
