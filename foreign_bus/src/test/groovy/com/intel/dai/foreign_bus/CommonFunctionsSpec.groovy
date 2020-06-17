@@ -3,7 +3,6 @@ package com.intel.dai.foreign_bus
 import spock.lang.Specification
 
 import java.text.ParseException
-import java.time.format.DateTimeParseException
 
 class CommonFunctionsSpec extends Specification {
     def "Test ConvertISOToLongTimestamp"() {
@@ -49,6 +48,7 @@ class CommonFunctionsSpec extends Specification {
                   "Timestamp": "2020-06-03T22:35:45Z",
                   "Location": "x3000c0s17b0",
                   "PhysicalContext": "Chassis",
+                  "DeviceSpecificContext": "sensor",
                   "Index": 0,
                   "Value": "258"
                 }

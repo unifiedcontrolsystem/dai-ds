@@ -79,10 +79,10 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
     private void convertEvent(PropertyMap sensor, List<FabricCritTelemetryItem> results)
             throws PropertyNotExpectedType {
         String location = sensor.getString("Location");
-        String name = sensor.getString("PhysicalContext");
+        String name = sensor.getString("__FullName__");
         String timestamp = sensor.getString("Timestamp");
         if (name == null || name.trim().isEmpty()) {
-            logError("'PhysicalContext' key was 'null' or empty from the event, skipping this event");
+            logError("'__FullName__' key was 'null' or empty from the event, skipping this event");
             return;
         }
         if (timestamp == null || timestamp.trim().isEmpty()) {
