@@ -129,6 +129,56 @@ public class Component {
     }
 
     /**
+     * This method is to create job events.
+     * @param eventsPerLocation number of events to create at a particular location.
+     * @param seed to repeat same type of data.
+     * @param regexMatchedLocations locations matching the location-regex input.
+     * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
+     * @return job events.
+     * @throws ConversionException unable to create job event.
+     */
+    List<ForeignEvent> publishJobEvents(final long eventsPerLocation, final long seed,
+                                           @NotNull final List<String> regexMatchedLocations,
+                                           @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException, SimulatorException {
+        List<ForeignEvent> jobEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
+        for (String location : regexMatchedLocations) {
+            for (int i = 0; i < eventsPerLocation; i++) {
+                ForeignEvent event = createRandomJobEvent(i + seed, location, regexMatchedLabelDescriptions);
+                jobEvents.add(event);
+            }
+        }
+        return jobEvents;
+    }
+
+    /**
+     * This method is to create job events.
+     * @param remEvents number of events to create at a particular location.
+     * @param seed to repeat same type of data.
+     * @param regexMatchedLocations locations matching the location-regex input.
+     * @param regexMatchedLabelDescriptions descriptions matching the description-regex.
+     * @return job events.
+     * @throws ConversionException unable to create job event.
+     */
+    List<ForeignEvent> publishRemJobEvents(final long remEvents, final long seed,
+                                              @NotNull final List<String> regexMatchedLocations,
+                                              @NotNull final List<PropertyDocument> regexMatchedLabelDescriptions)
+            throws ConversionException, SimulatorException {
+        long eventsTobeGenerated = remEvents;
+        List<ForeignEvent> sensorEvents = new ArrayList<>();
+        randomNumber.setSeed(seed);
+        for (String location : regexMatchedLocations) {
+            if(eventsTobeGenerated == 0)
+                return sensorEvents;
+            ForeignEvent event = createRandomJobEvent(eventsTobeGenerated + seed, location, regexMatchedLabelDescriptions);
+            sensorEvents.add(event);
+            eventsTobeGenerated--;
+        }
+        return sensorEvents;
+    }
+
+    /**
      * This method is used to generate boot-ready events for a given count and location.
      * @param regexMatchedLocations locations matching location-regex input.
      * @param eventsCount number of boot-ready events to generate.
@@ -293,12 +343,12 @@ public class Component {
     }
 
     /**
-     * This method is to create random ras events.
+     * This method is to create random sensor events.
      * @param seed to repeat same type of data.
      * @param location where events should be created.
      * @param definitionSensorMetadata_ metadata of sensor events.
      * @return sensor event.
-     * @throws ConversionException unable to create ras event.
+     * @throws ConversionException unable to create sensor event.
      */
     private ForeignEvent createRandomSensorEvent(long seed, String location, List<PropertyDocument> definitionSensorMetadata_) throws ConversionException, SimulatorException {
         // Ignore seed in the current implementation of randomization
@@ -317,6 +367,33 @@ public class Component {
             ev.setSensorValue(String.valueOf(generateRandomNumberBetween(20, 40)));
         else
             ev.setSensorValue(String.valueOf(0));
+        ev.getJSON();
+        return ev;
+    }
+
+    /**
+     * This method is to create random job events.
+     * @param seed to repeat same type of data.
+     * @param location where events should be created.
+     * @param definitionJobMetadata_ metadata of sensor events.
+     * @return job event.
+     * @throws ConversionException unable to create job event.
+     */
+    private ForeignEvent createRandomJobEvent(long seed, String location, List<PropertyDocument> definitionJobMetadata_) throws ConversionException, SimulatorException {
+        // Ignore seed in the current implementation of randomization
+        ForeignEventJob ev = new ForeignEventJob();
+
+        PropertyMap jobDetails = (PropertyMap) definitionJobMetadata_.get(generateRandomNumberBetween(0, definitionJobMetadata_.size()));
+        if (jobDetails == null) {
+            throw new SimulatorException("Unable to find job details for a component of type: ");
+        }
+        ev.setJobValue(jobDetails.getStringOrDefault("id", "UNKNOWN"));
+        ev.setJobContext(jobDetails.getStringOrDefault("type", "UNKNOWN"));
+        ev.setTimestamp();
+        ev.setOEM();
+        ev.setMessageID("CrayJobEvent.Job");
+        ev.setLocation(CommonFunctions.convertLocationToForeign(location));
+
         ev.getJSON();
         return ev;
     }

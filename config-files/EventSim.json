@@ -2,6 +2,7 @@
   "eventsimConfig" : {
       "SensorMetadata": "/resources/ForeignSensorMetaData.json",
       "RASMetadata": "/resources/ForeignEventMetaData.json",
+      "JobsMetadata" : "/resources/ForeignJobsMetaData.json",
       "BootParameters" : "/opt/ucs/etc/BootParameters.json",
       "HWInventory" : "/opt/ucs/etc/HWInventory.json",
       "HWInventoryPath" : "/opt/ucs/etc",

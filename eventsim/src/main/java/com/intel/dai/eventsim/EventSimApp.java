@@ -60,6 +60,7 @@ public class EventSimApp extends EventSim {
         source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
         source_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
+        source_.register("/apis/events/job", HttpMethod.POST.toString(), eventsimApi::generateJobEvents);
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeAllStateChangeNotifications);
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.POST.toString(), eventsimApi::subscribeStateChangeNotifications );
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
@@ -177,6 +178,29 @@ public class EventSimApp extends EventSim {
             String output = parameters.getOrDefault("output", null);
             String seed = parameters.getOrDefault("seed", null);
             eventSimEngine.publishSensorEvents(location, label, burst, delay, seed, eventsCount, output);
+            return create_result_json("F", "Success");
+
+        } catch (SimulatorException e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send job events to network.
+     * @param parameters input details of the request.
+     * @return Status = F if events are generated, Status = E on failure
+     */
+    String generateJobEvents(Map<String, String> parameters) {
+        try {
+            log_.info("Received job api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            String burst = parameters.getOrDefault("burst", "false");
+            String eventsCount = parameters.getOrDefault("count", null);
+            String delay = parameters.getOrDefault("delay", null);
+            String label = parameters.getOrDefault("label", ".*");
+            String location = parameters.getOrDefault("locations", ".*");
+            String output = parameters.getOrDefault("output", null);
+            String seed = parameters.getOrDefault("seed", null);
+            eventSimEngine.publishJobEvents(location, label, burst, delay, seed, eventsCount, output);
             return create_result_json("F", "Success");
 
         } catch (SimulatorException e) {
