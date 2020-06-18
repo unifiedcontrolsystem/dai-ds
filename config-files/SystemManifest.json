@@ -341,10 +341,10 @@
           "description": "Dense compute chassis",
           "width": 18, "height": 15, "type": "Chassis",
           "content" : [
-            {"name": "CN0", "definition": "dense-compute-node", "x":2 , "y":1},
-            {"name": "CN1", "definition": "dense-compute-node", "x":4 , "y":1},
-            {"name": "CN2", "definition": "dense-compute-node", "x":6 , "y":1},
-            {"name": "CN3", "definition": "dense-compute-node", "x":8 , "y":1},
+            {"name": "CN0", "definition": "compute-node", "x":2 , "y":1},
+            {"name": "CN1", "definition": "compute-node", "x":4 , "y":1},
+            {"name": "CN2", "definition": "compute-node", "x":6 , "y":1},
+            {"name": "CN3", "definition": "compute-node", "x":8 , "y":1},
 
             {"name": "GS0", "definition": "dense-global-swblade", "x":0 , "y":2 },
             {"name": "GS1", "definition": "dense-global-swblade", "x":0 , "y":3 },
@@ -360,10 +360,10 @@
           "description": "Dense compute chassis",
           "width": 18, "height": 15, "type": "Chassis",
           "content" : [
-            {"name": "CN0", "definition": "dense-compute-node", "x":0, "y":1},
-            {"name": "CN1", "definition": "dense-compute-node", "x":2, "y":1},
-            {"name": "CN2", "definition": "dense-compute-node", "x":4, "y":1},
-            {"name": "CN3", "definition": "dense-compute-node", "x":6, "y":1},
+            {"name": "CN0", "definition": "compute-node", "x":0, "y":1},
+            {"name": "CN1", "definition": "compute-node", "x":2, "y":1},
+            {"name": "CN2", "definition": "compute-node", "x":4, "y":1},
+            {"name": "CN3", "definition": "compute-node", "x":6, "y":1},
 
             {"name": "GS0", "definition": "dense-global-swblade", "x":16, "y":2 },
             {"name": "GS1", "definition": "dense-global-swblade", "x":16, "y":3 },
@@ -378,7 +378,7 @@
           ]
         },
 
-        "dense-compute-node": {
+        "compute-node": {
           "description": "Dense compute node (supernode)",
           "width": 2, "height": 13, "type": "ComputeNode",
           "content" : []
@@ -553,41 +553,41 @@
           "content" : [
             { "name": "SW1",        "definition":"eth-switch"   ,"x":0, "y":0 },
 
-            { "name": "SSN01",      "definition":"subnet-sn"    ,"x":0, "y":1 },
-            { "name": "SSN02",      "definition":"subnet-sn"    ,"x":0, "y":2 },
-            { "name": "SSN03",      "definition":"subnet-sn"    ,"x":0, "y":3 },
-            { "name": "SSN04",      "definition":"subnet-sn"    ,"x":0, "y":4 },
-            { "name": "SSN05",      "definition":"subnet-sn"    ,"x":0, "y":5 },
-            { "name": "SSN06",      "definition":"subnet-sn"    ,"x":0, "y":6 },
-            { "name": "SSN07",      "definition":"subnet-sn"    ,"x":0, "y":7 },
-            { "name": "SSN08",      "definition":"subnet-sn"    ,"x":0, "y":8 },
-            { "name": "SSN09",      "definition":"subnet-sn"    ,"x":0, "y":9 },
-            { "name": "SSN10",      "definition":"subnet-sn"    ,"x":0, "y":10},
-            { "name": "SSN11",      "definition":"subnet-sn"    ,"x":0, "y":11},
-            { "name": "SSN12",      "definition":"subnet-sn"    ,"x":0, "y":12},
+            { "name": "SSN01",      "definition":"service-node"    ,"x":0, "y":1 },
+            { "name": "SSN02",      "definition":"service-node"    ,"x":0, "y":2 },
+            { "name": "SSN03",      "definition":"service-node"    ,"x":0, "y":3 },
+            { "name": "SSN04",      "definition":"service-node"    ,"x":0, "y":4 },
+            { "name": "SSN05",      "definition":"service-node"    ,"x":0, "y":5 },
+            { "name": "SSN06",      "definition":"service-node"    ,"x":0, "y":6 },
+            { "name": "SSN07",      "definition":"service-node"    ,"x":0, "y":7 },
+            { "name": "SSN08",      "definition":"service-node"    ,"x":0, "y":8 },
+            { "name": "SSN09",      "definition":"service-node"    ,"x":0, "y":9 },
+            { "name": "SSN10",      "definition":"service-node"    ,"x":0, "y":10},
+            { "name": "SSN11",      "definition":"service-node"    ,"x":0, "y":11},
+            { "name": "SSN12",      "definition":"service-node"    ,"x":0, "y":12},
 
-            { "name": "LOGIN01",    "definition":"subnet-sn"    ,"x":0, "y":10 },
-            { "name": "LOGIN02",    "definition":"subnet-sn"    ,"x":0, "y":11 },
-            { "name": "LOGIN03",    "definition":"subnet-sn"    ,"x":0, "y":12 },
-            { "name": "LOGIN04",    "definition":"subnet-sn"    ,"x":0, "y":13 },
-            { "name": "LOGIN05",    "definition":"subnet-sn"    ,"x":0, "y":14 },
-            { "name": "LOGIN06",    "definition":"subnet-sn"    ,"x":0, "y":15 },
-            { "name": "LOGIN07",    "definition":"subnet-sn"    ,"x":0, "y":16 },
-            { "name": "LOGIN08",    "definition":"subnet-sn"    ,"x":0, "y":17 },
-            { "name": "LOGIN09",    "definition":"subnet-sn"    ,"x":0, "y":18 },
-            { "name": "LOGIN10",    "definition":"subnet-sn"    ,"x":0, "y":19 },
-            { "name": "LOGIN11",    "definition":"subnet-sn"    ,"x":0, "y":20 },
-            { "name": "LOGIN12",    "definition":"subnet-sn"    ,"x":0, "y":21 },
-            { "name": "LOGIN13",    "definition":"subnet-sn"    ,"x":0, "y":22 },
-            { "name": "LOGIN14",    "definition":"subnet-sn"    ,"x":0, "y":23 },
+            { "name": "LOGIN01",    "definition":"service-node"    ,"x":0, "y":10 },
+            { "name": "LOGIN02",    "definition":"service-node"    ,"x":0, "y":11 },
+            { "name": "LOGIN03",    "definition":"service-node"    ,"x":0, "y":12 },
+            { "name": "LOGIN04",    "definition":"service-node"    ,"x":0, "y":13 },
+            { "name": "LOGIN05",    "definition":"service-node"    ,"x":0, "y":14 },
+            { "name": "LOGIN06",    "definition":"service-node"    ,"x":0, "y":15 },
+            { "name": "LOGIN07",    "definition":"service-node"    ,"x":0, "y":16 },
+            { "name": "LOGIN08",    "definition":"service-node"    ,"x":0, "y":17 },
+            { "name": "LOGIN09",    "definition":"service-node"    ,"x":0, "y":18 },
+            { "name": "LOGIN10",    "definition":"service-node"    ,"x":0, "y":19 },
+            { "name": "LOGIN11",    "definition":"service-node"    ,"x":0, "y":20 },
+            { "name": "LOGIN12",    "definition":"service-node"    ,"x":0, "y":21 },
+            { "name": "LOGIN13",    "definition":"service-node"    ,"x":0, "y":22 },
+            { "name": "LOGIN14",    "definition":"service-node"    ,"x":0, "y":23 },
 
-            { "name": "VOLT1",      "definition":"subnet-sn"    ,"x":0, "y":24},
-            { "name": "VOLT2",      "definition":"subnet-sn"    ,"x":0, "y":25},
-            { "name": "VOLT3",      "definition":"subnet-sn"    ,"x":0, "y":26},
-            { "name": "PGRES1",     "definition":"subnet-sn"    ,"x":0, "y":29},
-            { "name": "PGRES2",     "definition":"subnet-sn"    ,"x":0, "y":32},
-            { "name": "SMS1",       "definition":"subnet-sn"    ,"x":0, "y":35},
-            { "name": "SMS2",       "definition":"subnet-sn"    ,"x":0, "y":38},
+            { "name": "VOLT1",      "definition":"service-node"    ,"x":0, "y":24},
+            { "name": "VOLT2",      "definition":"service-node"    ,"x":0, "y":25},
+            { "name": "VOLT3",      "definition":"service-node"    ,"x":0, "y":26},
+            { "name": "PGRES1",     "definition":"service-node"    ,"x":0, "y":29},
+            { "name": "PGRES2",     "definition":"service-node"    ,"x":0, "y":32},
+            { "name": "SMS1",       "definition":"service-node"    ,"x":0, "y":35},
+            { "name": "SMS2",       "definition":"service-node"    ,"x":0, "y":38},
             { "name": "STOR1",      "definition":"disk-drawer"  ,"x":0, "y":41}
           ]
         },
@@ -597,7 +597,7 @@
           "width": 32, "height": 1, "type": "Switch",
           "content" : []
         },
-        "subnet-sn": {
+        "service-node": {
           "description": "Subnet Service Node", "type": "ServiceNode",
           "width": 32, "height": 1,
           "content" : []
