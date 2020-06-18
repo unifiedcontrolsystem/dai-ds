@@ -56,20 +56,25 @@ Sub Commands:
 ### EventSim events subcommand
 
 
-This subcommand can be used to generate events of 3 different types like ras, environmental and boot state change events.
+This subcommand is used to generate different types of events like ras, environmental, boot state change and job events. It also enables user to generate these different events (except job) in a group by using scenario command. 
+It helps user to get seed value used to generate events in-order to replicate data.
 
 ```bash
 user@/opt/ucs/bin:~> eventsim events --help
-usage: eventsim events [-h] {ras,sensor,boot} ...
+usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...
 
 positional arguments:
-  {ras,sensor,boot}  Subparser for events
-    ras              generate ras events.
-    sensor           generate sensor events.
-    boot             generate boot events.
+  {ras,sensor,job,boot,scenario,get-seed}
+                        subparser for events
+    ras                 generate ras events
+    sensor              generate sensor events
+    job                 generate job events
+    boot                generate boot events
+    scenario            generate events for a given scenario
+    get-seed            fetch prior seed to replicate same data.
 
 optional arguments:
-  -h, --help         show this help message and exit
+  -h, --help            show this help message and exit
 ```
 
 ### Events subcommand – RAS
@@ -79,17 +84,27 @@ This subcommand is used to generate ras events.
 Events RAS  Command:
 ##### user@/opt/ucs/bin:~> eventsim events ras --help
 ```bash
-usage: eventsim events ras [-h] [--count COUNT] [--location LOCATION]
-                           [--burst] [--label LABEL]
+usage: eventsim events ras [-h] [--burst] [--count COUNT] [--delay DELAY]
+                           [--label LABEL] [--locations LOCATIONS]
+                           [--output OUTPUT] [--seed SEED] [--timeout TIMEOUT]
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --count COUNT        Provide number of ras events to be generated. The
-                       default values are in config file.
-  --location LOCATION  generate ras events at a given location.
-  --burst              generate events with or without delay.
-  --label LABEL        generate ras events of a particular type
-
+  -h, --help            show this help message and exit
+  --burst               generate ras events without delay. Default is constant
+                        mode with delay.
+  --count COUNT         given number of ras events are generated. The default
+                        values exists in eventsim config file.
+  --delay DELAY         pause for given value in microseconds to generate ras
+                        events. The default values exists in eventsim config
+                        file.
+  --label LABEL         generate ras events for a given type/description
+  --locations LOCATIONS
+                        generate ras events at a given location. Provide regex
+                        for multiple locations.
+  --output OUTPUT       store data in a file
+  --seed SEED           seed to duplicate data
+  --timeout TIMEOUT     ras sub-command execution timeout
+  
 
 Example:
 user@/opt/ucs/bin:~> eventsim events ras --location R0.*
@@ -102,16 +117,27 @@ This subcommand is used to generate sensor events.
 Events Sensor Command:
 ##### user@/opt/ucs/bin:~> eventsim events sensor --help
 ```bash
-usage: eventsim events sensor [-h] [--count COUNT] [--location LOCATION]
-                              [--burst] [--label LABEL]
+usage: eventsim events sensor [-h] [--burst] [--count COUNT] [--delay DELAY]
+                              [--label LABEL] [--locations LOCATIONS]
+                              [--output OUTPUT] [--seed SEED]
+                              [--timeout TIMEOUT]
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --count COUNT        Provide number of ras events to be generated. The
-                       default values are in config file.
-  --location LOCATION  generate sensor events at a given location.
-  --burst              generate events with or without delay.
-  --label LABEL        generate sensor events of a particular type
+  -h, --help            show this help message and exit
+  --burst               generate sensor events without delay. Default is
+                        constant mode with delay.
+  --count COUNT         given number of sensor events are generated. The
+                        default values exists in eventsim config file.
+  --delay DELAY         pause for given value in microseconds to generate
+                        sensor events. The default values exists in eventsim
+                        config file.
+  --label LABEL         generate sensor events for a given type/description
+  --locations LOCATIONS
+                        generate sensor events at a given location. Provide
+                        regex for multiple locations.
+  --output OUTPUT       store data in a file
+  --seed SEED           seed to duplicate data
+  --timeout TIMEOUT     sensor sub-command execution timeout
 
 
 Example:
@@ -120,29 +146,162 @@ user@/opt/ucs/bin:~> eventsim events sensor --location R0.*
 
 ### Events subcommand – Boot
 
-This subcommand is used to generate boot events. (Only compute or service node)
+This subcommand is used to generate all available or specific boot types (off, on, ready). (Only compute or service node locations)
 
 Events Boot Command:
 ##### user@/opt/ucs/bin:~> eventsim events boot --help
 ```bash
-usage: eventsim events boot [-h] [--type {off,on,ready}]
-                            [--probability PROBABILITY] [--burst]
-                            [--location LOCATION]
+usage: eventsim events boot [-h] [--burst] [--delay DELAY]
+                            [--locations LOCATIONS] [--output OUTPUT]
+                            [--probability PROBABILITY] [--seed SEED]
+                            [--timeout TIMEOUT] [--type {off,on,ready}]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --type {off,on,ready}
-                        types of boot events to generate. Default will
-                        generate all types of boot events
+  --burst               generate boot events without delay. Default is
+                        constant mode with delay.
+  --delay DELAY         pause for given value in microseconds to generate boot
+                        events. The default values exists in eventsim config
+                        file.
+  --locations LOCATIONS
+                        generate boot events at a given location. Provide
+                        regex for multiple locations.
+  --output OUTPUT       store data in a file
   --probability PROBABILITY
-                        generate boot events with probability failure
-  --burst               generate events with or without delay.
-  --location LOCATION   generate boot events at a given location.
+                        generate boot events with probability failure. Default
+                        no failure.
+  --seed SEED           seed to duplicate data
+  --timeout TIMEOUT     boot sub-command execution timeout
+  --type {off,on,ready}
+                        generate given type of boot events. Default generates
+                        all [on/off/ready] types of boot events.
 
 
 Example:
 user@/opt/ucs/bin:~> eventsim events boot --location R0.*.CN* (locations should be compute/service node only)
 ```
+
+### Events subcommand – Scenario
+
+This subcommand is used to generate all types (ras, sensor, boot) events in a group. end-user should configure scenario using the template given below.
+Currently, there are 3 modes in scenario. They are
+1. burst = given ras/sensor/boot events are sent in groups (events/group-rate) randomly
+2. group-burst = given ras/sensor/boot events are sent in groups (specific ras/sensor/boot numbers)
+3. repeat = re-run above burst/group-burst mode continuosly either by using counter, duration or start-time.
+
+counter = (how many times scenario should run)
+
+duration = (how long scenario should run accepts in minutes only)
+
+start-time = (schedule to run scenario at a specific time)
+
+
+Events Scenario Command:
+##### user@/opt/ucs/bin:~> eventsim events scenario --help
+```bash
+usage: eventsim events scenario [-h] [--burst] [--counter COUNTER]
+                                [--delay DELAY] [--duration DURATION]
+                                [--locations LOCATIONS] [--output OUTPUT]
+                                [--probability PROBABILITY]
+                                [--ras-label RAS_LABEL]
+                                [--sensor-label SENSOR_LABEL] [--seed SEED]
+                                [--start-time START_TIME] [--timeout TIMEOUT]
+                                [--mode {burst,group-burst,repeat}]
+                                file
+
+positional arguments:
+  file                  scenario configuration file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --burst               generate events for a given scenario without delay.
+                        Default is constant mode with delay.
+  --counter COUNTER     repeat scenario for a given counter
+  --delay DELAY         pause for given value in microseconds to generate
+                        events for a given scenario. The default values exists
+                        in eventsim config file.
+  --duration DURATION   scenario occurs for a given duration
+  --locations LOCATIONS
+                        generate events for a given scenario at a given
+                        location. Provide regex for multiple locations.
+  --output OUTPUT       Store data in a file.
+  --probability PROBABILITY
+                        generate boot events with probability failure
+  --ras-label RAS_LABEL
+                        generate ras events of a particular type/description
+  --sensor-label SENSOR_LABEL
+                        generate sensor events of a particular
+                        type/description
+  --seed SEED           seed to duplicate data
+  --start-time START_TIME
+                        start time to generate events for a given scenario
+  --timeout TIMEOUT     scenario sub-command execution timeout
+  --mode {burst,group-burst,repeat}
+                        generate events given type of scenario. Default
+                        generates burst type scenario. Scenario data exists in
+                        scenario config file.
+
+
+Example:
+user@/opt/ucs/bin:~> eventsim events scenario /tmp/scenario.json --type repeat --counter 3
+```
+
+#####Events scenario configuration template
+```json
+{
+  "mode" : "repeat", // mode-name = {burst, group-burst, repeat}
+  "group-burst" : {
+    "totalRas" : "700000", //Total ras events to generate
+    "totalSensor" : "300000",  //Total sensor events to generate
+    "totalBootOn" : "0",  //Total boot-on events to generate
+    "totalBootOff" : "0",  //Total boot-off events to generate
+    "totalBootReady" : "0",  //Total boot-ready events to generate
+    "ras" : "500000", //In a group how many ras events to send
+    "sensor" : "100000", //In a group how many sensor events to send
+    "boot-on" : "0", //In a group how many boot-on events to send
+    "boot-off" : "0", //In a group how many boot-off events to send
+    "boot-ready" : "0", //In a group how many boot-ready events to send
+    "seed" : "123" //to replicate data
+  },
+  "burst" : {
+    "ras" : "600000", //Total ras events to generate
+    "sensor" : "400000",  //Total sensor events to generate
+    "boot-on" : "0", //Total boot-on events to generate
+    "boot-off" : "0", //Total boot-off events to generate
+    "boot-ready" : "0", //Total boot-ready events to generate
+    "rate" : "500000", //randomly picks events from ras/sensor/boot and form group of count rate
+    "seed" : "123" //to  replicate data
+  },
+  "repeat" : {
+    "mode" : "burst", //mode to repeat
+    "clock-mode" : "duration", //how to re-run counter/counter/start-time
+    "duration" : "1", //how long to run
+    "counter" : "1", //how many times
+    "start-time" : "2020-05-27 16:34:50.607Z" //schedule start-time
+  },
+  "delay" : "2000000" //delay between bursts microseconds only, here it is 2 seconds
+}
+``` 
+
+### Events subcommand – get-seed
+
+This subcommand is used to fetch prior used seed to generate events.
+
+Events Get-seed Command:
+##### user@/opt/ucs/bin:~> eventsim events get-seed --help
+```bash
+usage: eventsim events get-seed [-h] [--seed SEED] [--timeout TIMEOUT]
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --seed SEED        seed to duplicate data
+  --timeout TIMEOUT  get-seed sub-command execution timeout
+
+
+Example:
+user@/opt/ucs/bin:~> eventsim events get-seed
+```
+
 **Note:**
 
 By default, events are sent to network with constant delays between events.
