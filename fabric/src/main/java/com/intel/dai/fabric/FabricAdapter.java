@@ -60,6 +60,13 @@ public abstract class FabricAdapter {
     abstract protected void processRawMessage(String subject, String message);
 
     /**
+     * Get the adapter type from the implementation class.
+     *
+     * @return The adapter type name.
+     */
+    abstract protected String adapterType();
+
+    /**
      * Overridable method to process work item parameters from the HandleInputFromExternalComponent work item.
      * This default method loads the following variables:
      *
@@ -99,11 +106,11 @@ public abstract class FabricAdapter {
      *
      * @param config An arbitrary Map&lt;String, String&gt; representing configuration for the provider.
      */
-    final protected void mainProcessingFlow(Map<String,String> config) {
+    final protected void mainProcessingFlow(Map<String,String> config, String location) {
         if(config == null) throw new NullPointerException("The 'config' was null passed to mainProcessingFlow");
         try {
             config_ = config;
-            workQueue_ = adapter_.setUpAdapter(servers_, adapter_.snLctn());
+            workQueue_ = adapter_.setUpAdapter(servers_, location);
             try {
                 rasEventLogging_ = factory_.createRasEventLog(adapter_);
             } catch(Exception e) {
@@ -143,7 +150,7 @@ public abstract class FabricAdapter {
      */
     final protected String makeInstanceData(String error, String data) {
         return "Name='" + adapter_.adapterName() +
-                "';Type='" + ADAPTER_TYPE +
+                "';Type='" + adapterType() +
                 "';Error='" + error +
                 "';Data='" + data + "'";
     }
@@ -169,7 +176,7 @@ public abstract class FabricAdapter {
     final protected void logBenignSoftwareRasEvent(String msg, String data) {
         log_.error(msg);
         rasEventLogging_.logRasEventSyncNoEffectedJob("RasGenAdapterException",
-                makeInstanceData(msg, data), adapter_.snLctn(), usTimestamp(), ADAPTER_TYPE,
+                makeInstanceData(msg, data), adapter_.snLctn(), usTimestamp(), adapterType(),
                 workQueue_.baseWorkItemId());
     }
 
@@ -310,7 +317,7 @@ public abstract class FabricAdapter {
         config.put(PARAM_CONNECT_PORT, "65535");
         config.put(PARAM_URL, "/");
         config.put("subjects", "*");
-        config.put("requestBuilder", "com.intel.dai.fabric.SSEStreamRequest");
+        config.put("requestBuilder", "com.intel.networking.sink.restsse.SSEStreamRequestBuilder");
         config.put("connectTimeout", "600");
 
         // Environmental data aggregation...
@@ -328,7 +335,7 @@ public abstract class FabricAdapter {
         config.put("eventsTopic", "ucs_fabric_events");
 
         // Connection information...
-        config.put("use-ssl", "false");
+        config.put("use-ssl", "true");
         config.put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");
         config.put("tokenServer", null); // Default is no authentication...
 
@@ -435,6 +442,5 @@ public abstract class FabricAdapter {
     private static final String PARAM_CONNECT_PORT      = "connectPort";
     private static final String PARAM_URL               = "urlPath";
 
-    static final String ADAPTER_TYPE = "FABRIC";
     static final int INSTANCE_DATA_MAX = 9000;
 }

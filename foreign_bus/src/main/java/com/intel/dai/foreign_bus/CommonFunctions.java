@@ -210,8 +210,9 @@ final public class CommonFunctions {
             } catch(PropertyNotExpectedType e) {
                 throw new ConfigIOParseException("The actual data under the 'Sensors' array was not an object");
             }
-            String fullName = prefix + "." + leaf.getStringOrDefault("PhysicalContext", "Missing.PhysicalContext" +
-                    "." + leaf.getStringOrDefault("DeviceSpecificContext", "UnknownContext"));
+            String fullName = prefix + ".";
+            fullName += leaf.getStringOrDefault("PhysicalContext", "PhysicalContextMissing");
+            fullName += "." + leaf.getStringOrDefault("DeviceSpecificContext", "DeviceSpecificContextMissing");
             leaf.put("__FullName__", fullName);
             allLeafs.add(leaf);
         }
@@ -223,7 +224,7 @@ final public class CommonFunctions {
      * @param data THe String containing a possible stream of JSON Objects.
      * @return A list of Strings representing each of the JSON objects.
      */
-    private static List<String> breakupStreamedJSONMessages(String data) {
+    public static List<String> breakupStreamedJSONMessages(String data) {
         List<String> jsonMessages = new ArrayList<>();
         int braceDepth = 0;
         int startOfMessage = 0;

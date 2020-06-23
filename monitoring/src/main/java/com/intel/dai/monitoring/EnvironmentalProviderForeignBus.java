@@ -11,12 +11,11 @@ import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
+import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
-import java.io.InputStream;
 import java.text.ParseException;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -28,17 +27,10 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
         parser_ = ConfigIOFactory.getInstance("json");
         if(parser_ == null) throw new RuntimeException("Failed to create a JSON parser instantiating class " +
                 EnvironmentalProviderForeignBus.class.getCanonicalName());
-        sensorMetaData_ForeignBus_ = new SensorMetaDataForeignBus(parser_);
     }
 
     @Override
     public void initialize() {
-        if(!sensorMetaData_ForeignBus_.loadFromStream(getMetaDataStream()))
-            throw new RuntimeException("Failed to load the sensor metadata");
-    }
-
-    protected InputStream getMetaDataStream() {
-        return getClass().getClassLoader().getResourceAsStream("resources/ForeignSensorMetaData.json");
     }
 
     @Override
@@ -46,33 +38,43 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             throws NetworkListenerProviderException {
         if(!configDone_)
             setUpConfig(config);
+        List<CommonDataFormat> results = new ArrayList<>();
         try {
-            PropertyMap message = parser_.fromString(data).getAsMap();
-            checkMessage(message);
             log_.debug("*** Message: %s", data);
-            String[] foreignLocations = message.getString("location").split(",");
-            List<CommonDataFormat> commonList = new ArrayList<>();
-            for(String foreignLocation: foreignLocations) {
-                String sensor = message.getString("sensor");
-                if (!sensorMetaData_ForeignBus_.checkSensor(sensor))
-                    break;
-                String location = sensorMetaData_ForeignBus_.normalizeLocation(sensor,
-                        CommonFunctions.convertForeignToLocation(foreignLocation,
-                                sensorMetaData_ForeignBus_.getDescription(sensor)));
-                CommonDataFormat common = new CommonDataFormat(
-                        CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")), location,
-                        DataType.EnvironmentalData);
-                common.setValueAndUnits(sensorMetaData_ForeignBus_.normalizeValue(sensor,
-                        convertValue(message.get("value"))), sensorMetaData_ForeignBus_.getUnits(sensor),
-                        sensorMetaData_ForeignBus_.getTelemetryType(sensor));
-                aggregateData(common);
-                commonList.add(common);
-            }
-            return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException | ConversionException e) {
-            log_.debug("Failed to parse telemetry string: '%s'", data);
+            PropertyArray items = CommonFunctions.parseForeignTelemetry(data);
+            items.iterator().forEachRemaining((o) -> {
+                PropertyMap item = (PropertyMap)o;
+                if(!item.keySet().containsAll(requiredInMessage_))
+                    log_.warn("Not all expected keys were found in one of the payload object!");
+                else {
+                    try {
+                        long ts = CommonFunctions.convertISOToLongTimestamp(item.getString("Timestamp"));
+                        String location = CommonFunctions.convertForeignToLocation(item.getString("Location"));
+                        String name = item.getString("__FullName__");
+                        CommonDataFormat common = new CommonDataFormat(ts, location, DataType.EnvironmentalData);
+                        common.setDescription(name);
+                        common.setValue(Double.parseDouble(item.getString("Value")));
+                        aggregateData(common);
+                        results.add(common);
+                    } catch(PropertyNotExpectedType e) {
+                        log_.warn("One or more of the expected keys was not the right type or malformed!");
+                    } catch(ParseException e) {
+                        log_.warn("The incoming Timestamp was not valid: %s",
+                                item.getStringOrDefault("Timestamp", "<MISSING>"));
+                    } catch(NumberFormatException e) {
+                        log_.warn("The incoming Value was not valid: '%s'",
+                                item.getStringOrDefault("Value", "<MISSING>"));
+                    } catch(ConversionException e) {
+                        log_.warn("The incoming Location was not valid: %s",
+                                item.getStringOrDefault("Location", "<MISSING>"));
+                    }
+                }
+            });
+        } catch (ConfigIOParseException e) {
+            log_.warn("Failed to parse telemetry string: '%s'", data);
             throw new NetworkListenerProviderException("Failed to parse incoming data", e);
         }
+        return results;
     }
 
     @Override
@@ -122,7 +124,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             Accumulator.useTime_ = myConfig.getBooleanOrDefault("useTimeWindow", false);
             Accumulator.count_ = myConfig.getIntOrDefault("windowSize", 25);
             Accumulator.moving_ = myConfig.getBooleanOrDefault("useMovingAverage", false);
-            Accumulator.ns_ = myConfig.getLongOrDefault("timeWindowSeconds", 600) * 1000000;
+            Accumulator.ns_ = myConfig.getLongOrDefault("timeWindowSeconds", 600) * 1_000_000_000;
             doAggregation_ = myConfig.getBooleanOrDefault("useAggregation", true);
         }
     }
@@ -141,34 +143,22 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
         return raw;
     }
 
-    private double convertValue(Object oValue) throws ConfigIOParseException {
-        if(oValue instanceof Number)
-            return ((Number)oValue).doubleValue();
-        else if(oValue instanceof String)
-            return Double.valueOf((String)oValue);
-        else
-            throw new ConfigIOParseException("The 'value' was not a Number or a String and so could not be converted");
-    }
-
-    private void checkMessage(PropertyMap message) throws NetworkListenerProviderException {
-        for(String required: requiredInMessage_)
-            if (!message.containsKey(required))
-                throw new NetworkListenerProviderException(String.format("Incoming data was missing '%s' in the JSON",
-                        required));
-    }
-
-
     private Logger log_;
     private boolean configured_ = false;
     private boolean publish_ = false;
     private String rawTopic_ = "ucs_raw_data";
     private String aggregatedTopic_ = "ucs_aggregate_data";
     private ConfigIO parser_;
-    private SensorMetaDataForeignBus sensorMetaData_ForeignBus_;
     private Map<String, Accumulator> accumulators_ = new HashMap<>();
             boolean configDone_ = false;
     private boolean doAggregation_ = true;
-    private static final String[] requiredInMessage_ = new String[] {"sensor", "value", "timestamp", "location"};
+    @SuppressWarnings("serial")
+    private static final List<String> requiredInMessage_ = new ArrayList<>() {{
+        add("__FullName__");
+        add("Value");
+        add("Timestamp");
+        add("Location");
+    }};
 
     static class Accumulator {
         Accumulator(Logger logger) { log_ = logger; }

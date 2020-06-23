@@ -54,21 +54,21 @@ public class NetworkListenerProviderForeignBusTest {
         assertEquals(1, dataList.size());
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataNegative1() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(sample4,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataNegative2() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample1,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataNegative3() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample2,
                 mock(NetworkListenerConfig.class));
@@ -115,23 +115,27 @@ public class NetworkListenerProviderForeignBusTest {
         actions.actOnData(data, config_, system_);
     }
 
+    @Test
+    public void makeInstanceDataForFailedNodeUpdate() {
+        CommonDataFormat data = new CommonDataFormat(0L, "location", DataType.StateChangeEvent);
+        data.setStateChangeEvent(BootState.NODE_ONLINE);
+        data.storeExtraData("foreignLocation", "original");
+        assertEquals("ForeignLocation='original'; UcsLocation='location'; BootMessage='NODE_ONLINE'",
+                transformer_.makeInstanceDataForFailedNodeUpdate(data));
+    }
+
     private NetworkListenerProviderForeignBus transformer_;
     private NetworkListenerConfig config_;
     private PropertyMap map_;
     private SystemActions system_;
 
 
-    private static final String sample1 = "{\"State\":\"Ready\",\"Components\": [\"all\"],\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample2 = "{\"State\":\"Off\",\"Components\":[\"all\"],\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample3 = "{\"State\":\"On\",\"Components\":[\"all\"],\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String sample4 = "{\"State\":\"unknown\",\"Components\":[\"all\"],\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String badSample1 = "\"State\":\"unknown\",\"Components\":[\"all\"],\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\"}";
-    private static final String badSample2 = "{\"State\":\"unknown\",\"Components\":[\"all\"]}";
+    private static final String sample1 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"Ready\"}]}}";
+    private static final String sample2 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"Off\"}]}}";
+    private static final String sample3 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"On\"}]}}";
+    private static final String sample4 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"unknown\"}]}}";
+    private static final String badSample1 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"unknown\"}]}}";
+    private static final String badSample2 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"unknown\"}]}}";
 
 
     private static final String imageListStr_ = "[{\"hosts\":[\"Default\"],\"kernel\":\"http:\\/\\/kernel-data.com\",\"BootImageFile\":\"boot-image-file\",\"BootStrapImageFile\":\"boot-strap-image-file\",\"KernelArgs\":null,\"description\":\"boot-image-description\",\"BootImageChecksum\":\"boot-image-chceksum\",\"id\":\"boot-image-id\",\"params\":\"console=tty0 console=ttyS0,115200n8 initrd=initrd-data root=rootfs nfsserver=10.2.0.1 nfspath=\\/boot_images imagename=\\/sles  htburl=https:\\/\\/htburl.com\",\"BootStrapImageChecksum\":\"123\",\"BootOptions\":null,\"initrd\":\"http:\\/\\/initrd.com\"}]";

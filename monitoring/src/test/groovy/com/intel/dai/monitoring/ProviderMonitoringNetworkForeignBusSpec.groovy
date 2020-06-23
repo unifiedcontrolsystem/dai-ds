@@ -1,38 +1,18 @@
+// Copyright (C) 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.monitoring
 
+import com.intel.dai.AdapterInformation
+import com.intel.dai.dsapi.DataStoreFactory
+import com.intel.logging.Logger
 import spock.lang.Specification
 
 class ProviderMonitoringNetworkForeignBusSpec extends Specification {
-    def args_ = new String[3]
-    void setup() {
-        args_[0] = "127.0.0.1"
-        args_[1] = "location"
-        args_[2] = "hostname"
-    }
-
-    void cleanup() {
-    }
-
-    def "Test Main too many arguments"() {
-        def bad = new String[4]
-        when: ProviderMonitoringNetworkForeignBus.main(bad)
-        then: thrown(RuntimeException)
-    }
-
-    def "Test Main not enough arguments"() {
-        def bad = new String[2]
-        when: ProviderMonitoringNetworkForeignBus.main(bad)
-        then: thrown(RuntimeException)
-    }
-
-    def "Test Main null arguments"() {
-        def bad = null
-        when: ProviderMonitoringNetworkForeignBus.main(bad)
-        then: thrown(RuntimeException)
-    }
-
-    def "Test Main with no config file"() {
-        ProviderMonitoringNetworkForeignBus.main(args_)
+    def "Test ctor"() {
+        new ProviderMonitoringNetworkForeignBus(Mock(Logger), Mock(DataStoreFactory), Mock(AdapterInformation),
+                "./build/tmp/bmf.txt", 100L)
         expect: true
     }
 }

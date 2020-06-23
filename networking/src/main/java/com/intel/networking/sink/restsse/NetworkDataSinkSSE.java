@@ -34,8 +34,9 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
      *   connectPort       - (def: 19216)       The port to connect to.
      *   urlPath           - (def: "/restsse/") The url path to send subscription request to.
      *   subjects          - (def: null)        The comma separated list of subjects to listen for (no spaces).
-     *   requestBuilder    - (def: null)        The SSERequestBuilder implementation class name to create.
+     *   requestBuilder    - (def: SSEStreamRequestBuilder) The SSERequestBuilder implementation class name to create.
      *   connectTimeout    - (def: 300)         The connection timeout for the SSE implementation in seconds.
+     *
      *   use-ssl           - (def: "false")     The flag for SSL. Set to "true" to use SSL.
      *   tokenAuthProvider - (def: null)        The name of the provider for OAuth 2.0 token authentication.
      *   tokenServer       - (def: null)        The OAuth 2.0 token server URL.
@@ -44,8 +45,6 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
      *   clientSecret      - (def: null)        The Client Secret for the OAuth token retrieval.
      *   username          - (def: null)        The Optional username for the OAuth token retrieval.
      *   password          - (def: null)        The Optional password for the OAuth token retrieval.
-
-     NOTE: "requestType" was removed as only GET is supported in the SSE specification, POST is not allowed!
      */
     public NetworkDataSinkSSE(Logger logger, Map<String,String> args) {
         assert logger != null;
@@ -59,14 +58,16 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
     public void initialize() {
         parseSubjects(args_.getOrDefault("subjects", null));
         String ssl = (args_.getOrDefault("use-ssl", "false").toLowerCase().equals("true"))?"s":"";
-        uri_ = URI.create(String.format("http%s://%s:%d%s", ssl, args_.getOrDefault("connectAddress", "127.0.0.1"),
+        uri_ = URI.create(String.format("http%s://%s:%d%s", ssl, args_.getOrDefault("connectAddress",
+                "127.0.0.1"),
                 Integer.parseInt(args_.getOrDefault("connectPort", "19216")),
                 args_.getOrDefault("urlPath", "/restsse/")));
         implementation_ = args_.getOrDefault("implementation", "apache");
-        if(args_.getOrDefault("requestBuilder", null) != null) {
-            createBuilder(args_.getOrDefault("requestBuilder", null));
-            if(builder_ == null) throw new NetworkException("Failed to create a network REST request builder");
-        }
+        String sseBuilder = args_.getOrDefault("requestBuilder",
+                "com.intel.networking.sink.restsse.SSEStreamRequestBuilder");
+        createBuilder(sseBuilder);
+        if(builder_ == null)
+            throw new NetworkException("Failed to create a network REST request builder: " + sseBuilder);
         for(Map.Entry<String,String> entry: args_.entrySet())
             extraArgs_.put(entry.getKey(), entry.getValue());
         if(args_.containsKey("connectTimeout"))
@@ -93,7 +94,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
      */
     @Override
     public void setMonitoringSubject(String subject) {
-        if(subject != null && !subject.isBlank())
+        if(subject != null && !subject.trim().isEmpty())
             subjects_.add(subject.trim());
     }
 
@@ -155,12 +156,14 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
                     client_.subscribeToSSEGET(uri_, subjects_, this::responseCallback, this::eventCallback,
                             extraArgs_);
                     // Wait to see if the connection worked asynchronously...
-                    try { Thread.sleep(2500); } catch(InterruptedException intr) { log_.warn("sleep #1 interrupted"); }
+                    try { Thread.sleep(2500); }
+                    catch(InterruptedException intr) { log_.warn("sleep #1 interrupted"); }
                     if(isListening())
                         return;
                 } catch (RESTClientException e) {
                     log_.warn("SSE Connection failed, retrying the connection...");
-                    try { Thread.sleep(2500); } catch(InterruptedException intr) { log_.warn("sleep #2 interrupted"); }
+                    try { Thread.sleep(2500); }
+                    catch(InterruptedException intr) { log_.warn("sleep #2 interrupted"); }
                 }
             }
             if(!isListening())
@@ -278,7 +281,8 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
             log_.exception(e, String.format("Default constructor for SSERequestBuilder implementation " +
                     "'%s' must be public", requestBuilder));
         } catch (InstantiationException | InvocationTargetException e) {
-            log_.exception(e, String.format("Cannot construct SSERequestBuilder implementation '%s'", requestBuilder));
+            log_.exception(e, String.format("Cannot construct SSERequestBuilder implementation '%s'",
+                    requestBuilder));
         }
     }
 

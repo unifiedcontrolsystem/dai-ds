@@ -73,6 +73,27 @@
       "Invocation": "com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt",
       "TypeOfAdapter": "WLM",
       "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabric-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.fabric.FabricTelemetryProvider",
+      "TypeOfAdapter": "FABRIC",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricPerf-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.fabric.FabricPerfTelemetryProvider",
+      "TypeOfAdapter": "FABRICPERF",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricCrit-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X0-CH0-SN0",
+      "Invocation": "com.intel.dai.fabric.FabricCritTelemetryProvider",
+      "TypeOfAdapter": "FABRICCRIT",
+      "NumberOfInstances": 1
     }
   ],
   "InitialWorkItems": [
@@ -145,6 +166,27 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": ""
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRIC",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRICPERF",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRICCRIT",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X0-CH0-SN0"
     }
   ],
   "Nodes": [

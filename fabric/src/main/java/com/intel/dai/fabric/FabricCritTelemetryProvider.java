@@ -39,6 +39,16 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
     }
 
     /**
+     * Get the adapter type from the implementation class.
+     *
+     * @return The adapter type name.
+     */
+    @Override
+    final protected String adapterType() {
+        return ADAPTER_TYPE;
+    }
+
+    /**
      * Required method for {@link com.intel.networking.sink.NetworkDataSinkDelegate} that must be implemented by the
      * provider.
      *
@@ -109,11 +119,9 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
     }
 
     private void processItem(FabricCritTelemetryItem item) {
-//        try {
-            // TODO: Store event here when more information is available.
-//        } catch(DataStoreException e) {
-//            logException(e, "Failed to store the event: %d", item.toString());
-//        }
+        // TODO: Until more is known, use "NoEffectedJob".
+        rasEventLogging_.logRasEventNoEffectedJob("RasUnknownEvent", item.toString(), item.getLocation(),
+                item.getTimestamp() / 1_000, ADAPTER_TYPE, workQueue_.workItemId());
         publishEventData(item.toString());
     }
 
@@ -124,8 +132,11 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
 
     public static void main(String[] args) {
         String name = FabricCritTelemetryProvider.class.getSimpleName();
-        Logger logger = LoggerFactory.getInstance(FabricAdapter.ADAPTER_TYPE, name, "console");
-        AdapterSingletonFactory.initializeFactory(FabricAdapter.ADAPTER_TYPE, name, logger);
+        if(args == null || args.length != 3)
+            throw new RuntimeException(String.format("Wrong number of arguments for this provider (%s), must " +
+                    "use 3 arguments: voltdb_servers, location, and hostname in that order", name));
+        Logger logger = LoggerFactory.getInstance(ADAPTER_TYPE, name, "console");
+        AdapterSingletonFactory.initializeFactory(ADAPTER_TYPE, name, logger);
         IAdapter adapter;
         DataStoreFactory factory = new DataStoreFactoryImpl(args[0], logger);
         try {
@@ -138,11 +149,12 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
         FabricCritTelemetryProvider provider = new FabricCritTelemetryProvider(args[0], logger, factory, adapter);
         Map<String,String> config;
         try {
-            logger.info("Loading the configuration...");
+            logger.info("Loading the configuration '%s.json'...", name);
             XdgConfigFile xdg = new XdgConfigFile("ucs");
-            String filename = xdg.FindFile(name);
+            String filename = xdg.FindFile(name + ".json");
             if(filename != null && !filename.trim().isEmpty()) {
                 config = provider.buildConfig(new File(filename));
+                config.put("requestBuilderSelectors.stream_id","dai-fabric-crit");
                 String url = config.get("urlPath");
                 if(url == null || url.equals("/"))
                     config.put("urlPath", "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry");
@@ -155,7 +167,8 @@ public final class FabricCritTelemetryProvider extends FabricAdapter {
             return;
         }
         logger.info("Starting the " + name + " provider...");
-        provider.mainProcessingFlow(config);
+        provider.mainProcessingFlow(config, args[1]);
         logger.info("Exiting the " + name + " provider");
     }
+    private static final String ADAPTER_TYPE = "FABRICCRIT";
 }

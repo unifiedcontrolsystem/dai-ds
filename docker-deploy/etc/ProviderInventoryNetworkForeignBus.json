@@ -7,10 +7,10 @@
     "stateChangeSource": {
       "arguments": {
         "connectPort": 8080,
-        "connectAddress": "sms01-nmn.local",
+        "connectAddress": "api-gw-service-nmn.local",
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "use-ssl": false,
         "requestBuilderSelectors": {
