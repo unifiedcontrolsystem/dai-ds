@@ -2634,7 +2634,14 @@ $$;
 CREATE OR REPLACE FUNCTION public.GetComputeNodeSummary() RETURNS SETOF public.system_summary_count
     LANGUAGE sql
     AS $$
-    select state, count(*) as count from tier2_computenode_history group by state;
+    SELECT state, count(*)
+    FROM
+    (SELECT *
+    FROM
+    (SELECT  lctn, state, ROW_NUMBER() OVER(PARTITION BY lctn ORDER BY dbupdatedtimestamp DESC) rn
+    FROM tier2_computenode_history) a
+    WHERE rn = 1) b
+    group by state;
 $$;
 
 --
@@ -2644,7 +2651,14 @@ $$;
 CREATE OR REPLACE FUNCTION public.GetServiceNodeSummary() RETURNS SETOF public.system_summary_count
     LANGUAGE sql
     AS $$
-    select state, count(*) as count from tier2_servicenode_history group by state;
+        SELECT state, count(*)
+        FROM
+        (SELECT *
+        FROM
+        (SELECT  lctn, state, ROW_NUMBER() OVER(PARTITION BY lctn ORDER BY dbupdatedtimestamp DESC) rn
+        FROM tier2_servicenode_history) a
+        WHERE rn = 1) b
+        group by state;
 $$;
 
 --
