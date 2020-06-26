@@ -6,17 +6,16 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectPort": 443,
-        "connectAddress": "https://api-gw-service-nmn.local",
-        "urlPath": "/apis/sma-telemetry-api/v1/stream/cray-hmsstatechange-notifications",
+        "connectPort": 8080,
+        "connectAddress": "sms01-nmn.local",
+        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.inventory.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
-        "use-ssl": true,
+        "use-ssl": false,
         "requestBuilderSelectors": {
           "stream_id": "dai-inventory"
-        },
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication"
+        }
       },
       "name": "sse"
     }
@@ -35,12 +34,6 @@
   },
 
   "providerConfigurations": {
-    "tokenAuthProvider": {
-      "tokenServer": "https://authentication_server:8080/auth",
-      "realm": "myKingdom",
-      "clientId": "myApplicationId",
-      "clientSecret": "shhhhhhhhhhhh"
-    },
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",

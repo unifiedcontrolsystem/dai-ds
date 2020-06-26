@@ -1,9 +1,9 @@
 # Configuration Guide to setup and use EventSim
 
 ## 1. Introduction
-This documentation describes prerequisites, configuration and setup to start EventSim with and without using docker container.
+This documentation describes prerequisites, configuration and setup to start EventSim with docker container.
 EventSim is a simulation tool which acts as a rest-server serving several rest api's. It is used to generate events, gather and view information from DAI database through the EventSim CLI interface.
-It enables client to make subscriptions(SSE or http callback) with respective network steams(s) to gather data.
+It enables client to make subscriptions(SSE or http callback) with respective network steam(s) to gather data.
 
 ## 2. Steps to start EventSim with docker container(s).
 ### 2.1 Prerequisites with docker container
@@ -108,18 +108,18 @@ Note:
 
 #### 2.2.3.1 For SSE type client subscription
 
-In the EventSim.json file 
+**EventSim.json** file 
 
 ```json
 ...
 "networkConfig" : {
       "network" : "sse",
       "sseConfig": {
-          "serverAddress": "rest_server_ip_address_or_hostname" , //point 3
-          "serverPort": "rest_server_port" , //point 4
+          "serverAddress": "rest_server_ip_address_or_hostname" , //data-point 3
+          "serverPort": "rest_server_port" , //data-point 4
           "urls": {
-            "network_stream_telemety_url": [ //point 1
-              "monitor_adapter_profile_subject_name" //point 2
+            "network_stream_telemety_url": [ //data-point 1
+              "monitor_adapter_profile_subject_name" //data-point 2
             ]
           }
       } ,
@@ -130,16 +130,16 @@ In the EventSim.json file
   }
 ...
 ```
-In the ProvisionerMonitorForignBus.json file
+**ProviderMonitoringNetworkForeignBus.json** file
 
 ```json
 ...
   "networkStreams": {
-    "dtmfResourceEvents": { //point 5
+    "dtmfResourceEvents": { //data-point 5
       "arguments": {
-        "connectPort": "rest_server_ip_address_or_hostname", //point 3
-        "connectAddress": "rest_server_port", //point 4
-        "urlPath": "network_stream_telemety_url", //point 1
+        "connectPort": "rest_server_ip_address_or_hostname", //data-point 3
+        "connectAddress": "rest_server_port", //data-point 4
+        "urlPath": "network_stream_telemety_url", //data-point 1
         "connectTimeout": "30",
         "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
         "requestType": "GET",
@@ -165,22 +165,23 @@ In the ProvisionerMonitorForignBus.json file
 ...
 ```
 
-**Note: Point numbers should match during configuration.**
+**Note: Data-Point numbers should match between simulation server and respective SSE adapter subscription configuration file. 
+In above example compare data-points between EventSim.json (simulation-server) and ProviderMonitoringNetworkForeignBus.json (SSE adapter subscription)**
 
 #### 2.2.3.2 For Http Callback type client subscription
 
-In the EventSim.json file 
+**EventSim.json** file 
 
 ```json
 ...
 "networkConfig" : {
       "network" : "sse",
       "sseConfig": {
-          "serverAddress": "rest_server_ip_address_or_hostname" , //point 3
-          "serverPort": "rest_server_port" , //point 4
+          "serverAddress": "rest_server_ip_address_or_hostname" , //data-point 3
+          "serverPort": "rest_server_port" , //data-point 4
           "urls": {
-            "network_stream_telemety_url": [ //point 1
-              "monitor_adapter_profile_subject_name" //point 2
+            "network_stream_telemety_url": [ //data-point 1
+              "provisioner_adapter_profile_subject_name" //data-point 2
             ]
           }
       } ,
@@ -191,20 +192,20 @@ In the EventSim.json file
   }
 ...
 ```
-In the ProvisionerMonitorForignBus.json file
+**ProviderProvisionerNetworkForeignBus.json** file
 
 ```json
 ...
 
 "networkStreams": {
-    "stateChangeSource": { //point 5
+    "stateChangeSource": { //data-point 5
       "arguments": {
-        "connectAddress": "subscription_server_ip_address", //point 3
-        "connectPort": "subscription_server_port", //point 4
+        "connectAddress": "subscription_server_ip_address", //data-point 3
+        "connectPort": "subscription_server_port", //data-point 4
         "bindAddress": "callback_server_bind_address", //ip address where this adapter is launched
         "bindPort": "callback_server_bind_port", // call back listening port
-        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN", //point 1
-        "subjects": "monitor_adapter_profile_subject_name", //point 2
+        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN", //data-point 1
+        "subjects": "provisioner_adapter_profile_subject_name", //data-point 2
         "requestBuilder": "com.intel.dai.provisioners.ForeignSubscriptionRequest",
         "responseParser": "com.intel.dai.provisioners.ForeignSubscriptionResponseParser",
         "subscriberName": "daiSubscriptionID",
@@ -217,10 +218,10 @@ In the ProvisionerMonitorForignBus.json file
   "adapterProfiles": {
     "default": {
       "networkStreamsRef": [
-        "stateChangeSource" //point 5
+        "stateChangeSource" //data-point 5
       ],
       "subjects": [
-        "stateChanges" //point 2
+        "stateChanges" //data-point 2
       ],
       "adapterProvider": "bootEventData"
     }
@@ -228,7 +229,9 @@ In the ProvisionerMonitorForignBus.json file
 ...
 ```
 
-**Note: Point numbers should match during configuration.**
+**Note: Data-Point numbers should match between simulation server and respective callback adapter subscription configuration file. 
+In above example compare data-points between EventSim.json (simulation-server) and ProviderProvisionerNetworkForeignBus.json (callback adapter subscription)**
+
 
 Refer to the **README.md** for commands.
 
