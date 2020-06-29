@@ -147,18 +147,18 @@ class EventsCliTest(TestCase):
                       'repeat scenario for a given counter\n  --delay DELAY         pause for given value in '
                       'microseconds to generate\n                        events for a given scenario. The default '
                       'values exists\n                        in eventsim config file.\n  --duration DURATION   '
-                      'scenario occurs for a given duration\n  --locations LOCATIONS\n                        '
-                      'generate events for a given scenario at a given\n                        location. Provide '
-                      'regex for multiple locations.\n  --output OUTPUT       Store data in a file.\n  --probability '
-                      'PROBABILITY\n                        generate boot events with probability failure\n  '
-                      '--ras-label RAS_LABEL\n                        generate ras events of a particular '
-                      'type/description\n  --sensor-label SENSOR_LABEL\n                        generate sensor '
-                      'events of a particular\n                        type/description\n  --seed SEED           seed '
-                      'to duplicate data\n  --start-time START_TIME\n                        start time to generate '
-                      'events for a given scenario\n  --timeout TIMEOUT     scenario sub-command execution timeout\n  '
-                      '--mode {burst,group-burst,repeat}\n                        generate events given type of '
-                      'scenario. Default\n                        generates burst type scenario. Scenario data exists '
-                      'in\n                        scenario config file.\n',
+                      'scenario occurs for a given duration. The default\n                        units is minutes '
+                      'only.\n  --locations LOCATIONS\n                        generate events for a given scenario '
+                      'at a given\n                        location. Provide regex for multiple locations.\n  '
+                      '--output OUTPUT       Store data in a file.\n  --probability PROBABILITY\n                     '
+                      '   generate boot events with probability failure\n  --ras-label RAS_LABEL\n                    '
+                      '    generate ras events of a particular type/description\n  --sensor-label SENSOR_LABEL\n      '
+                      '                  generate sensor events of a particular\n                        '
+                      'type/description\n  --seed SEED           seed to duplicate data\n  --start-time START_TIME\n  '
+                      '                      start time to generate events for a given scenario\n  --timeout TIMEOUT  '
+                      '   scenario sub-command execution timeout\n  --mode {burst,group-burst,repeat}\n               '
+                      '         generate events given type of scenario. Default\n                        generates '
+                      'burst type scenario. Scenario data exists in\n                        scenario config file.\n',
             captured_output.getvalue())
         captured_output.close()
 
