@@ -2,7 +2,6 @@
 # Copyright (C) 2018 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
 from .command_result import CommandResult
 from .http_client import HttpClient
 
@@ -43,15 +42,15 @@ class EventsCli(object):
             help='generate ras events without delay. Default is constant mode with delay.', action='store_true')
         ras_events_parser.add_argument('--count', type=int,
             help='given number of ras events are generated. The default values exists in eventsim config file.')
-        ras_events_parser.add_argument('--delay',
+        ras_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate ras events. The default values exists in eventsim '
                  'config file.')
         ras_events_parser.add_argument('--label', help='generate ras events for a given type/description')
         ras_events_parser.add_argument('--locations',
             help='generate ras events at a given location. Provide regex for multiple locations.')
         ras_events_parser.add_argument('--output', help='store data in a file')
-        ras_events_parser.add_argument('--seed', help='seed to duplicate data')
-        ras_events_parser.add_argument('--timeout', help='ras sub-command execution timeout')
+        ras_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        ras_events_parser.add_argument('--timeout', type=int, help='ras sub-command execution timeout')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
 
     """
@@ -63,15 +62,15 @@ class EventsCli(object):
             help='generate sensor events without delay. Default is constant mode with delay.', action='store_true')
         sensor_events_parser.add_argument('--count', type=int,
             help='given number of sensor events are generated. The default values exists in eventsim config file.')
-        sensor_events_parser.add_argument('--delay',
+        sensor_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate sensor events. The default values exists in '
                  'eventsim config file.')
         sensor_events_parser.add_argument('--label', help='generate sensor events for a given type/description')
         sensor_events_parser.add_argument('--locations',
             help='generate sensor events at a given location. Provide regex for multiple locations.')
         sensor_events_parser.add_argument('--output', help='store data in a file')
-        sensor_events_parser.add_argument('--seed', help='seed to duplicate data')
-        sensor_events_parser.add_argument('--timeout', help='sensor sub-command execution timeout')
+        sensor_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        sensor_events_parser.add_argument('--timeout', type=int, help='sensor sub-command execution timeout')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
 
     """
@@ -80,18 +79,18 @@ class EventsCli(object):
     def _add_job_event_parser(self, event_parser):
         job_events_parser = event_parser.add_parser('job', help='generate job events')
         job_events_parser.add_argument('--burst',
-                                          help='generate job events without delay. Default is constant mode with delay.', action='store_true')
+                    help='generate job events without delay. Default is constant mode with delay.', action='store_true')
         job_events_parser.add_argument('--count', type=int,
-                                          help='given number of job events are generated. The default values exists in eventsim config file.')
-        job_events_parser.add_argument('--delay',
-                                          help='pause for given value in microseconds to generate job events. The default values exists in '
-                                               'eventsim config file.')
+                    help='given number of job events are generated. The default values exists in eventsim config file.')
+        job_events_parser.add_argument('--delay', type=int,
+                    help='pause for given value in microseconds to generate job events. The default values exists in '
+                         'eventsim config file.')
         job_events_parser.add_argument('--label', help='generate job events for a given type/description')
         job_events_parser.add_argument('--locations',
-                                          help='generate job events at a given location. Provide regex for multiple locations.')
+                    help='generate job events at a given location. Provide regex for multiple locations.')
         job_events_parser.add_argument('--output', help='store data in a file')
-        job_events_parser.add_argument('--seed', help='seed to duplicate data')
-        job_events_parser.add_argument('--timeout', help='job sub-command execution timeout')
+        job_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        job_events_parser.add_argument('--timeout', type=int, help='job sub-command execution timeout')
         job_events_parser.set_defaults(func=self._generate_job_events_execute)
 
     """
@@ -101,7 +100,7 @@ class EventsCli(object):
         boot_events_parser = event_parser.add_parser('boot', help='generate boot events')
         boot_events_parser.add_argument('--burst',
             help='generate boot events without delay. Default is constant mode with delay.', action='store_true')
-        boot_events_parser.add_argument('--delay',
+        boot_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate boot events. The default values exists in '
                  'eventsim config file.')
         boot_events_parser.add_argument('--locations',
@@ -109,8 +108,8 @@ class EventsCli(object):
         boot_events_parser.add_argument('--output', help='store data in a file')
         boot_events_parser.add_argument('--probability', default=0,
             help='generate boot events with probability failure. Default no failure.')
-        boot_events_parser.add_argument('--seed', help='seed to duplicate data')
-        boot_events_parser.add_argument('--timeout', help='boot sub-command execution timeout')
+        boot_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        boot_events_parser.add_argument('--timeout', type=int, help='boot sub-command execution timeout')
         boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
             help='generate given type of boot events. Default generates all [on/off/ready] types of boot events.')
         boot_events_parser.set_defaults(func=self._generate_boot_events_execute)
@@ -124,21 +123,23 @@ class EventsCli(object):
         scenario_events_parser.add_argument('--burst',
             help='generate events for a given scenario without delay. Default is constant mode with delay.',
             action='store_true')
-        scenario_events_parser.add_argument('--counter', help='repeat scenario for a given counter')
-        scenario_events_parser.add_argument('--delay',
+        scenario_events_parser.add_argument('--counter', type=int, help='repeat scenario for a given counter')
+        scenario_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate events for a given scenario. The default values '
                  'exists in eventsim config file.')
-        scenario_events_parser.add_argument('--duration', help='scenario occurs for a given duration')
+        scenario_events_parser.add_argument('--duration', type=int,
+            help='scenario occurs for a given duration. The default units is minutes only.')
         scenario_events_parser.add_argument('--locations',
             help='generate events for a given scenario at a given location. Provide regex for multiple locations.')
         scenario_events_parser.add_argument('--output', help='Store data in a file.')
-        scenario_events_parser.add_argument('--probability', help='generate boot events with probability failure')
+        scenario_events_parser.add_argument('--probability', type=int,
+            help='generate boot events with probability failure')
         scenario_events_parser.add_argument('--ras-label', help='generate ras events of a particular type/description')
         scenario_events_parser.add_argument('--sensor-label',
             help='generate sensor events of a particular type/description')
-        scenario_events_parser.add_argument('--seed', help='seed to duplicate data')
+        scenario_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         scenario_events_parser.add_argument('--start-time', help='start time to generate events for a given scenario')
-        scenario_events_parser.add_argument('--timeout', help='scenario sub-command execution timeout')
+        scenario_events_parser.add_argument('--timeout', type=int, help='scenario sub-command execution timeout')
         scenario_events_parser.add_argument('--mode', choices=['burst', 'group-burst', 'repeat'],
             help='generate events given type of scenario. Default generates burst type scenario. Scenario data exists '
                  'in scenario config file.')
@@ -149,8 +150,8 @@ class EventsCli(object):
     """
     def _add_get_seed_parser(self, event_parser):
         get_seed_parser = event_parser.add_parser('get-seed', help='fetch prior seed to replicate same data.')
-        get_seed_parser.add_argument('--seed', help='seed to duplicate data')
-        get_seed_parser.add_argument('--timeout', help='get-seed sub-command execution timeout')
+        get_seed_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        get_seed_parser.add_argument('--timeout', type=int, help='get-seed sub-command execution timeout')
         get_seed_parser.set_defaults(func=self._fetch_event_seed_execute)
 
     """
