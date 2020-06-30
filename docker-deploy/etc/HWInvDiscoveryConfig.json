@@ -1,6 +1,5 @@
 {
   "providerClassMap": {
-    "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
     "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
   },
   "providerConfigurations": {
