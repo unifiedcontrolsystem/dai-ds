@@ -4,19 +4,21 @@
 
 package com.intel.dai.dsimpl;
 
-import java.sql.Connection;
-
-import com.intel.dai.AdapterInformation;
-import com.intel.dai.dsapi.*;
-import com.intel.dai.dsimpl.jdbc.*;
-import com.intel.dai.dsimpl.voltdb.*;
-import org.voltdb.client.Client;
-
-import com.intel.dai.IAdapter;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
+import com.intel.dai.AdapterInformation;
+import com.intel.dai.IAdapter;
+import com.intel.dai.dsapi.*;
+import com.intel.dai.dsimpl.jdbc.DataLoaderApiJdbc;
+import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
+import com.intel.dai.dsimpl.jdbc.InventorySnapshotJdbc;
+import com.intel.dai.dsimpl.jdbc.JdbcStoreTelemetry;
+import com.intel.dai.dsimpl.voltdb.*;
+import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
+import org.voltdb.client.Client;
+
+import java.sql.Connection;
 
 public class DataStoreFactoryImpl implements DataStoreFactory {
     public DataStoreFactoryImpl(String[] args, Logger logger) {
@@ -183,8 +185,8 @@ public class DataStoreFactoryImpl implements DataStoreFactory {
         return instance;
     }
     @Override
-    public HWInvApi createHWInvApi() {
-        VoltHWInvApi instance = new VoltHWInvApi(logger_, new HWInvUtilImpl(), parsedServers);
+    public HWInvDbApi createHWInvApi() {
+        VoltHWInvDbApi instance = new VoltHWInvDbApi(logger_, new HWInvUtilImpl(logger_), parsedServers);
         instance.initialize();
         return instance;
     }

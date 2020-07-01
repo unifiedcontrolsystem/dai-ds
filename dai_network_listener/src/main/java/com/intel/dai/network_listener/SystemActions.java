@@ -137,7 +137,7 @@ public interface SystemActions extends AutoCloseable, Closeable {
     void logFailedToUpdateBootImageInfo(String instanceData);
 
     /**
-     * Check to see if the inventory data has been populated yet.
+     * Checks to see if the inventory data has been populated yet.
      *
      * @return true if the inventory is missing, false if there is inventory stored.
      * @throws IOException If the check cannot be made.
@@ -146,7 +146,7 @@ public interface SystemActions extends AutoCloseable, Closeable {
     boolean isHWInventoryEmpty() throws IOException, DataStoreException;
 
     /**
-     * Update or insert new inventory information.
+     * Updates or inserts new inventory information.
      *
      * @param location The node for the new or changed inventory info.
      * @param canonicalJson contains HW inventory in canonical format.
@@ -154,7 +154,20 @@ public interface SystemActions extends AutoCloseable, Closeable {
     void upsertHWInventory(String location, String canonicalJson);
 
     /**
-     * delete inventory information for a node.
+     * Returns the last update time of the inventory database.
+     * @return timestamp string of the last update.
+     */
+    String lastHWInventoryHistoryUpdate();
+
+    /**
+     * Updates or inserts new inventory history.
+     *
+     * @param canonicalJson contains HW inventory history in canonical format.
+     */
+    void upsertHWInventoryHistory(String canonicalJson);
+
+    /**
+     * deletes inventory information for a node.
      *
      * @param location The node for the deleted inventory info.
      */

@@ -4,13 +4,14 @@
 //
 package com.intel.dai.inventory.api
 
+import com.intel.logging.Logger;
 import spock.lang.Specification
 
 class HWInvNotificationTranslatorSpec extends Specification {
     def ts
 
     def setup() {
-        ts = new HWInvNotificationTranslator()
+        ts = new HWInvNotificationTranslator(Mock(Logger))
     }
 
     def "HWInvNotificationTranslator - failures"() {

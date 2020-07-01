@@ -4,8 +4,9 @@
 //
 package com.intel.dai.dsimpl.voltdb
 
-import com.intel.dai.dsapi.*
-import java.nio.file.*
+import com.intel.dai.dsapi.HWInvLoc
+import com.intel.logging.Logger
+import java.nio.file.Paths
 
 class HWInvUtilImplSpec extends spock.lang.Specification {
     HWInvLoc loc
@@ -13,7 +14,7 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
 
     def setup() {
         loc = new HWInvLoc()
-        util = new HWInvUtilImpl()
+        util = new HWInvUtilImpl(Mock(Logger))
         "rm -f build/tmp/readOnly.json build/tmp/somefile.json".execute().text
     }
 
@@ -30,13 +31,13 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
         expect: util.toCanonicalHistoryPOJO(null as String) == null
     }
     def "fromStringToFile"() {
-        when: util.fromStringToFile("Ming", "build/tmp/somefile.json")
+        when: util.toFile("Ming", "build/tmp/somefile.json")
         then: notThrown IOException
     }
     def "fromStringToFile - cannot write to read only file"() {
         "touch build/tmp/readOnly.json".execute().text
         "chmod -w build/tmp/readOnly.json".execute().text
-        when: util.fromStringToFile("Merciless", "build/tmp/readOnly.json")
+        when: util.toFile("Merciless", "build/tmp/readOnly.json")
         then: thrown IOException
     }
     def "fromFile - negative"() {

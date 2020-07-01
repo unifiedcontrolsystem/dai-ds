@@ -22,12 +22,12 @@
       "Model": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
       "ProcessorArchitecture": "x86",
       "ProcessorId": {
-        "EffectiveFamily": 6,
-        "EffectiveModel": 79,
-        "IdentificationRegisters": 263921,
-        "MicrocodeInfo": 184549399,
-        "Step": 1,
-        "VendorID": "GenuineIntel"
+        "EffectiveFamily": "0xb3",
+        "EffectiveModel": "0x3",
+        "IdentificationRegisters": "50-65-4",
+        "MicrocodeInfo": "",
+        "Step": "",
+        "VendorID": "Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz"
       },
       "ProcessorType": "CPU",
       "TotalCores": 24,

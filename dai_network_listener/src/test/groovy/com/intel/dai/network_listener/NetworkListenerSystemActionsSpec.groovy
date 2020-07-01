@@ -1,18 +1,11 @@
 package com.intel.dai.network_listener
 
 import com.intel.dai.AdapterInformation
-import com.intel.dai.dsapi.BootState
-import com.intel.dai.dsapi.DataStoreFactory
-import com.intel.dai.dsapi.HWInvApi
-import com.intel.dai.dsapi.HWInvLoc
-import com.intel.dai.dsapi.NodeInformation
-import com.intel.dai.dsapi.RasEventLog
-import com.intel.dai.exceptions.DataStoreException
+import com.intel.dai.dsapi.*
 import com.intel.logging.Logger
 import com.intel.networking.source.NetworkDataSource
 import com.intel.networking.source.NetworkDataSourceFactory
 import com.intel.properties.PropertyMap
-import org.apache.commons.io.IOExceptionWithCause
 import spock.lang.Specification
 
 class NetworkListenerSystemActionsSpec extends Specification {
@@ -38,7 +31,7 @@ class NetworkListenerSystemActionsSpec extends Specification {
         config_.getProviderConfigurationFromClassName(_ as String) >> listenerConfig_
         factory_ = Mock(DataStoreFactory)
         factory_.createRasEventLog(_ as AdapterInformation) >> Mock(RasEventLog)
-        invApi_ = Mock(HWInvApi)
+        invApi_ = Mock(HWInvDbApi)
         factory_.createHWInvApi() >> invApi_
         NodeInformation info = Mock(NodeInformation)
         info.isServiceNodeLocation() >> true
@@ -98,10 +91,5 @@ class NetworkListenerSystemActionsSpec extends Specification {
 
     def "isHWInventoryEmpty"() {
         expect: underTest_.isHWInventoryEmpty()
-    }
-
-    def "insertHistoricalRecord"() {
-        given: underTest_.insertHistoricalRecord("action", new HWInvLoc())
-        expect: true
     }
 }

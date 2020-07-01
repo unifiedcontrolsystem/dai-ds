@@ -15,6 +15,11 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         underTest_ = new NetworkListenerProviderForeignBus(Mock(Logger))
     }
 
+    def "initialize"() {
+        when: underTest_.initialize()
+        then: notThrown Exception
+    }
+
     def "processRawStringData - empty SCN"() {
         when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
         then: thrown exception

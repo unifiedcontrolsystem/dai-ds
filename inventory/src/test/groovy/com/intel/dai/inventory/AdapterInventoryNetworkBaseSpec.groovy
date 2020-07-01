@@ -2,8 +2,7 @@ package com.intel.dai.inventory
 
 import com.intel.dai.AdapterInformation
 import com.intel.dai.dsapi.DataStoreFactory
-import com.intel.dai.dsapi.HWInvApi
-import com.intel.dai.inventory.api.HWInvDiscovery
+import com.intel.dai.dsapi.HWInvDbApi
 import com.intel.dai.network_listener.NetworkListenerCore
 import com.intel.logging.Logger
 
@@ -105,15 +104,15 @@ class AdapterInventoryNetworkBaseSpec extends Specification {
 
     def "Test preInitialize for location"() {
         underTest_.preInitialize()
-        HWInvApi hWInvApiMock = Mock(HWInvApi)
-        underTest_.hwInvApi_ = hWInvApiMock
-        underTest_.hwInvApi_.ingest(any()) >> 0
-        underTest_.hwInvApi_.ingestHistory(any()) >> 0
+        HWInvDbApi hWInvApiMock = Mock(HWInvDbApi)
+        underTest_.hwInvDbApi_ = hWInvApiMock
+        underTest_.hwInvDbApi_.ingest(any()) >> 0
+        underTest_.hwInvDbApi_.ingestHistory(any()) >> 0
 
         def value = new ImmutablePair<>(0, hwInvForLocation)
-        ForeignInvApi foreignInvApi = Mock(ForeignInvApi)
-        underTest_.foreignInvApi_ = foreignInvApi
-        underTest_.foreignInvApi_.getCanonicalHWInvJson() >> value
+        ForeignInventoryClient foreignInvApi = Mock(ForeignInventoryClient)
+        underTest_.foreignInventoryClient_ = foreignInvApi
+        underTest_.foreignInventoryClient_.getCanonicalHWInvJson() >> value
         underTest_.postInitialize()
         expect: true
     }

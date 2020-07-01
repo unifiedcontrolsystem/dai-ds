@@ -5,8 +5,13 @@
 package com.intel.dai.inventory.api
 
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
-import java.nio.file.*
-import spock.lang.*
+import com.intel.dai.inventory.api.pojo.fru.ForeignFRU
+import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryEvent
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocMemory
+import com.intel.logging.Logger
+import spock.lang.Specification
+
+import java.nio.file.Paths
 
 class HWInvTranslatorSpec extends Specification {
     HWInvTranslator ts
@@ -17,6 +22,7 @@ class HWInvTranslatorSpec extends Specification {
     def setupSpec() {
         "rm noSuchFile".execute().text
     }
+
     def setup() {
         ts = new HWInvTranslator()
     }
@@ -31,8 +37,9 @@ class HWInvTranslatorSpec extends Specification {
         ""     || ""
         "123"  || ""
     }
+
     def "toCanonical from ForeignHWInvByLoc - negative" () {
-        def arg = new ForeignHWInvByLoc()
+        def arg = new ForeignHWInvByLocMemory()
         arg.ID = ID
         arg.Type = Type
         arg.Ordinal = Ordinal
@@ -51,6 +58,7 @@ class HWInvTranslatorSpec extends Specification {
         "ID"    | "Type"    | 0         | "noSuchStatus"    | null
         "ID"    | "Type"    | 0         | "Empty"           | new ForeignFRU()
     }
+
     def "extractParentId"() {
         expect: ts.extractParentId(candidate) == result
 
@@ -62,18 +70,24 @@ class HWInvTranslatorSpec extends Specification {
         "^#^@!"         | ""
         null            | null
     }
+
     def "foreignToCanonical - Path"() {
-        def ts = new HWInvTranslator(new HWInvUtilImpl())
+        def ts = new HWInvTranslator(new HWInvUtilImpl(Mock(Logger)))
+        def res = ts.foreignToCanonical(Paths.get(inputFileName))
+        println "Translated " + inputFileName + ":"
+        println res.getValue()
         expect:
-        ts.foreignToCanonical(Paths.get(inputFileName)).getKey() == location
+        res.getKey() == location
 
         where:
-        inputFileName                                           | outputFileName                        | location
-        dataDir+"foreignHwByLoc/flatNode.json"                  | tmpDir+"flatNode.json.tr"             | "x0c0s26b0n0"
-        dataDir+"foreignHwByLocList/preview4HWInventory.json"   | tmpDir+"preview4HWInventory.json.tr"  | ""
-        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     | tmpDir+"nodeNoMemoryNoCpu.json.tr"    | "x0c0s21b0n0"
-        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   | tmpDir+"hsm-inv-hw-query-s0.json.tr"  | null
+        inputFileName                                           || location
+        dataDir+"foreignHwByLoc/flatNode.json"                  || "x0c0s26b0n0"
+        dataDir+"foreignHwByLocList/preview4HWInventory.json"   || ""
+        dataDir+"foreignHwByLocList/inv_loc.json"               || ""
+        dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     || "x0c0s21b0n0"
+        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   || null
     }
+
     def "isValidLocationName"() {
         expect: ts.isValidLocationName(candidate) == result
 
@@ -119,5 +133,18 @@ class HWInvTranslatorSpec extends Specification {
         where:
         ID      | EventType | Timestamp | FRUID
         "ID"    | "Type"    | "ts"      | "FRUID"
+    }
+
+    def "getValue" () {
+        expect: ts.getValue(Json, Name) == Value
+
+        where:
+        Json                        | Name      || Value
+        '{"name": "value"}'         | 'name'    || '"value"'
+        '{"name": {"n": "v"}}'      | 'name'    || '{"n":"v"}'
+        '{"name": [{"n": "v"}]}'    | 'name'    || '[{"n":"v"}]'
+        '{"name": null }'           | 'name'    || 'null'
+        '{"name": true }'           | 'name'    || 'true'
+        '{"name": false }'          | 'name'    || 'false'
     }
 }

@@ -4,6 +4,23 @@
 //
 package com.intel.dai.inventory.api
 
+import com.intel.dai.inventory.api.pojo.fru.ForeignFRU
+import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistory
+import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryAtLoc
+import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryEvent
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLoc
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinet
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinetPDU
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinetPDUOutlet
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocChassis
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocComputeModule
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocHSNBoard
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocMemory
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocNode
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocNodeEnclosure
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocProcessor
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocRouterModule
+import com.intel.dai.inventory.api.pojo.loc.ForeignHWInventory
 import spock.lang.Specification
 
 // This test is necessary because ForeignHWInventory.toString() is exercised by
@@ -65,17 +82,17 @@ class ForeignHWInventorySpec extends Specification {
         def ts1 = new ForeignHWInvByLocCabinetPDUOutlet()
         expect: ts0.toString() == ts1.toString()
     }
-    def "ForeignHWInvByLoc toString" () {
+    /*def "ForeignHWInvByLoc toString" () {
         def ts0 = new ForeignHWInvByLoc()
         def ts1 = new ForeignHWInvByLoc()
         expect: ts0.toString() == ts1.toString()
-    }
+    }*/
     def "ForeignFRU toString" () {
         def ts0 = new ForeignFRU()
         def ts1 = new ForeignFRU()
         expect: ts0.toString() == ts1.toString()
     }
-    def "Test ForeignHWInventory toString" () {
+    def "ForeignHWInventory toString" () {
         def tree0 = new ForeignHWInventory()
         def tree1 = new ForeignHWInventory()
 

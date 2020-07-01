@@ -6,11 +6,13 @@ package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.intel.dai.dsapi.HWInvHistory;
+import com.google.gson.JsonObject;
 import com.intel.dai.dsapi.HWInvHistoryEvent;
 import com.intel.dai.dsapi.HWInvLoc;
 import com.intel.dai.dsapi.HWInvTree;
 import com.intel.dai.dsapi.HWInvUtil;
+import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryEvent;
+import com.intel.dai.inventory.api.pojo.loc.*;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.dai.foreign_bus.*;
@@ -24,18 +26,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Performs translation of foreign json data to canonical representation.
+ * The class translates foreign inventory jsons into canonical jsons.
+ *
+ * There are two categories of canonical inventory jsons: snapshot and history.  The canonical forms are fed to
+ * db clients so that they can be ingested into the relevant database tables.
  */
 public class HWInvTranslator {
-    private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
-
-    private static final String emptyPrefix = "empty-";
-
-    private final transient Gson gson;
-    private final transient HWInvUtil util;
-
     /**
-     * <p> Constructor for the HW inventory translator. </p>
+     * <p> Constructs the HWInvTranslator object by initializing the GSON object, and the util object. </p>
      * @param util utility library containing file I/O code and code to manipulate HW inventory in canonical form
      */
     public HWInvTranslator(HWInvUtil util) {
@@ -59,21 +57,23 @@ public class HWInvTranslator {
             return gson.fromJson(foreignJson, ForeignHWInvByLocNode.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
+            logger.warn("GSON parsing error: %s", e.getMessage());
             return null;
         }
     }
 
     // Commenting out code for next milestone for now.
-    /**
-     * <p> Parse the given json containing the foreign HW inventory history. </p>
-     * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
-     * @return POJO containing the parsed json, or null if parsing failed
-     */
+//   /**
+//    * <p> Parse the given json containing the foreign HW inventory history. </p>
+//    * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
+//    * @return POJO containing the parsed json, or null if parsing failed
+//    */
 /*    private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
         try {
             return gson.fromJson(foreignHWInvHistoryJson, ForeignHWInvHistory.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
+            logger.fatal("GSON parsing error: %s", e.getMessage());
             return null;
         }
     }*/
@@ -89,6 +89,7 @@ public class HWInvTranslator {
             return gson.fromJson(foreignJson, ForeignHWInvByLoc[].class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
+            logger.warn("GSON parsing error: %s", e.getMessage());
             return null;
         }
     }
@@ -106,6 +107,7 @@ public class HWInvTranslator {
             return gson.fromJson(foreignJson, ForeignHWInventory.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
+            logger.warn("GSON parsing error: %s", e.getMessage());
             return null;
         }
     }
@@ -126,7 +128,7 @@ public class HWInvTranslator {
     }
 
     /**
-     * <p> Convert a json string containing a HW inventory in foreign format to its
+     * <p> Converts a json string containing a HW inventory in foreign format to its
      * canonical representation. Note that if the foreign json is a list, the
      * HW inventory may not be a tree. </p>
      *
@@ -147,7 +149,7 @@ public class HWInvTranslator {
                 loc.ID = CommonFunctions.convertForeignToLocation(loc.ID);
                 translatedLocs.add(loc);
             } catch(ConversionException e) {
-                logger.error("Failed to read JSON from stream: %s", e.getMessage());
+                logger.error("DAI namespace conversion failure: %s", e.getMessage());
                 // drop this entry
             }
         }
@@ -241,6 +243,7 @@ public class HWInvTranslator {
             return new ImmutablePair<>(root, toCanonical(node));
         }
 
+        logger.fatal("All attempts to convert the foreign inventory json failed: %s", foreignJson);
         return ImmutablePair.nullPair();
     }
 
@@ -414,7 +417,7 @@ public class HWInvTranslator {
     }
 
     /**
-     * <p> Add only the FRU denoted by the vertex of the specified canonical tree. </p>
+     * <p> Adds only the FRU denoted by the vertex of the specified canonical tree. </p>
      *
      * @param foreignFRUList list of FRUs to be added to the canonical tree
      * @param canonicalTree POJO representing the HW inventory in canonical form
@@ -422,31 +425,18 @@ public class HWInvTranslator {
      */
     private <T> int addForeignFRUsNotChildrenToCanonical(List<T> foreignFRUList,
                                                          HWInvTree canonicalTree) {
-        List<ForeignHWInvByLoc> flatFrus = downcastToForeignHWInvByLocList(foreignFRUList);
-        return addForeignFlatFRUsToCanonical(flatFrus, canonicalTree);
+        return addForeignFlatFRUsToCanonical(foreignFRUList, canonicalTree);
     }
 
-    private <T> List<ForeignHWInvByLoc> downcastToForeignHWInvByLocList(List<T> foreignFRUList) {
-        if (foreignFRUList == null) {
-            return null;
-        }
-
-        List<ForeignHWInvByLoc> flatFrus = new ArrayList<>();
-        for (T fru : foreignFRUList) {
-            flatFrus.add((ForeignHWInvByLoc) fru);  // downcast to flat fru
-        }
-        return flatFrus;
-    }
-
-    private int addForeignFlatFRUsToCanonical(List<ForeignHWInvByLoc> foreignLocList,
+    private <T> int addForeignFlatFRUsToCanonical(List<T> foreignLocList,
                                               HWInvTree canonicalTree) {
         if (foreignLocList == null) {
             return 0;
         }
 
         int numSlotsAdded = 0;
-        for (ForeignHWInvByLoc loc: foreignLocList) {
-            HWInvLoc slot = toCanonical(loc);
+        for (T loc: foreignLocList) {
+            HWInvLoc slot = toCanonical((ForeignHWInvByLoc) loc);
             if (slot == null) {
                 continue;   //ignore failed conversions
             }
@@ -500,6 +490,7 @@ public class HWInvTranslator {
         canonicalFru.ID = foreignLoc.ID;    // + nodeTypeAbbreviation.get(foreignLoc.Type) + foreignLoc.Ordinal;
         canonicalFru.Type = foreignLoc.Type;
         canonicalFru.Ordinal = foreignLoc.Ordinal;
+        canonicalFru.Info = foreignLoc.info();
 
         switch (foreignLoc.Status) {
             case "Empty":
@@ -517,6 +508,7 @@ public class HWInvTranslator {
                 canonicalFru.FRUID = foreignLoc.PopulatedFRU.FRUID;
                 canonicalFru.FRUType = foreignLoc.PopulatedFRU.Type;
                 canonicalFru.FRUSubType = foreignLoc.PopulatedFRU.Subtype;
+                canonicalFru.FRUInfo = foreignLoc.PopulatedFRU.info();
                 return canonicalFru;
             default:
                 logger.error("Unknown status: %s", foreignLoc.Status);
@@ -552,4 +544,23 @@ public class HWInvTranslator {
         Matcher matcher = pattern.matcher(location);
         return matcher.find();
     }
+
+    public String getValue(String json, String name) {
+        JsonObject jsonObject;
+        try {
+            jsonObject = gson.fromJson(json, JsonObject.class);
+        } catch (Exception e) {
+            // EOFException can occur if the json is incomplete
+            logger.fatal("GSON parsing error: %s", e.getMessage());
+            return null;
+        }
+        return jsonObject.get(name).toString();
+    }
+
+    private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
+
+    private static final String emptyPrefix = "empty-";
+
+    private final Gson gson;
+    private final HWInvUtil util;
 }

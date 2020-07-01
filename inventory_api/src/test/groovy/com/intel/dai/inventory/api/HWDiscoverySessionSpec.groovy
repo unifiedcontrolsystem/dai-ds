@@ -4,6 +4,12 @@
 //
 package com.intel.dai.inventory.api
 
+import com.intel.dai.inventory.api.pojo.cfg.HWDiscoverySession
+import com.intel.dai.inventory.api.pojo.cfg.ProviderClassMap
+import com.intel.dai.inventory.api.pojo.cfg.ProviderConfigurations
+import com.intel.dai.inventory.api.pojo.cfg.TokenAuthProvider
+import com.intel.dai.inventory.api.pojo.rqst.InventoryInfoRequester
+import com.intel.dai.inventory.api.pojo.rqst.RestMethod
 import spock.lang.Specification
 
 class HWDiscoverySessionSpec extends Specification {
@@ -13,7 +19,7 @@ class HWDiscoverySessionSpec extends Specification {
         new ProviderClassMap().toString() == new ProviderClassMap().toString()
         new TokenAuthProvider().toString() == new TokenAuthProvider().toString()
         new ProviderConfigurations().toString() == new ProviderConfigurations().toString()
-        new Requester().toString() == new Requester().toString()
-        new RestRequest().toString() == new RestRequest().toString()
+        new InventoryInfoRequester().toString() == new InventoryInfoRequester().toString()
+        new RestMethod().toString() == new RestMethod().toString()
     }
 }
