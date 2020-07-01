@@ -101,7 +101,7 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
         null        | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
         'ADDED'     | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
         'ADDED'     | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
-        // 'ADDED'  | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
     }
 
     def "HwInventoryHistoryDump"() {
