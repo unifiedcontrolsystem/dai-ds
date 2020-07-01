@@ -94,14 +94,14 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
 
         where:
         Action      | ID    | FRUID     | TimeStamp || Res
-        'INSERTED'  | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'DELETED'   | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'INSERTED'  | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'REMOVED'   | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
         'INVALIDED' | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
         null        | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'INSERTED'  | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'INSERTED'  | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
-        // 'INSERTED'  | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
+        // 'ADDED'  | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
     }
 
     def "HwInventoryHistoryDump"() {
