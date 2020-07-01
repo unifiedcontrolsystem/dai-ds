@@ -70,24 +70,38 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
         expect: testSubject.run() == -1
     }
 
+    def "HwInventoryHistoryEventCount"() {
+        def res = new VoltTable()
+        res.m_rowCount = 0
+        def vt = new VoltTable[1]
+        vt[0] = res
+
+        given:
+        def testSubject = Spy(HwInventoryHistoryEventCount)
+        testSubject.voltQueueSQL(*_) >> {}
+        testSubject.voltExecuteSQL(*_) >> vt;
+
+        expect: testSubject.run(null, null, null, null) == -1
+    }
+
     def "HwInventoryHistoryInsert"() {
         given:
         def testSubject = Spy(HwInventoryHistoryInsert)
         testSubject.voltQueueSQL(*_) >> {}
         testSubject.voltExecuteSQL(*_) >> {}
 
-        expect: testSubject.run(Action, ID, FRUID) == Res
+        expect: testSubject.run(Action, ID, FRUID, TimeStamp) == Res
 
         where:
         Action      | ID    | FRUID     | TimeStamp || Res
-        'INSERTED'  | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'DELETED'   | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'INSERTED'  | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'REMOVED'   | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
+        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
         'INVALIDED' | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
         null        | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'INSERTED'  | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'INSERTED'  | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
-        // 'INSERTED'  | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
+        'ADDED'     | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
     }
 
     def "HwInventoryHistoryDump"() {
@@ -149,6 +163,6 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
         testSubject.voltQueueSQL(*_) >> {}
         testSubject.voltExecuteSQL(*_) >> vt;
 
-        expect: testSubject.run() == -1
+        expect: testSubject.run() == null
     }
 }

@@ -7,11 +7,10 @@ package com.intel.dai.inventory;
 import com.intel.dai.dsapi.BootState;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
-import com.intel.dai.inventory.api.ForeignHWInvChangeNotification;
 import com.intel.dai.inventory.api.HWInvNotificationTranslator;
+import com.intel.dai.inventory.api.pojo.scn.ForeignHWInvChangeNotification;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
-import com.intel.networking.restclient.RESTClientException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                                         // this is needed to avoid an update storm during the initial loading
                                         // of the HW inventory
 
-        ForeignHWInvChangeNotification notif = new HWInvNotificationTranslator().toPOJO(scnJson);
+        ForeignHWInvChangeNotification notif = new HWInvNotificationTranslator(log_).toPOJO(scnJson);
         if (notif == null) {
             throw new NetworkListenerProviderException("scnJson translation failed");
         }
@@ -143,7 +142,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         // Possible TODOs: RAZ and Publisher config (Rabbit MQ)
     }
 
-    private Logger log_;
+    private final Logger log_;
 
     private NetworkListenerConfig config_ = null;
     private SystemActions actions_ = null;
@@ -155,11 +154,11 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
  * Performs background update of the HW inventory DB.
  */
 class HWInventoryUpdate implements Runnable {
-    private String location_;
-    private String foreignName_;
-    private SystemActions actions_;
-    private BootState bootState_;
-    private ForeignInvApi foreignInvApi_;
+    private final String location_;
+    private final String foreignName_;
+    private final SystemActions actions_;
+    private final BootState bootState_;
+    private final ForeignInventoryClient foreignInventoryClient_;
 
     public HWInventoryUpdate(String location, String foreignName, BootState bootState, SystemActions actions,
                              Logger log) {
@@ -167,13 +166,20 @@ class HWInventoryUpdate implements Runnable {
         foreignName_ = foreignName;
         actions_ = actions;
         bootState_ = bootState;
-        foreignInvApi_ = new ForeignInvApi(log);
+        foreignInventoryClient_ = new ForeignInventoryClient(log);
     }
 
     public void run() {
-        if(bootState_ == BootState.NODE_OFFLINE)
+        actions_.upsertHWInventoryHistory(
+                foreignInventoryClient_.getCanonicalHWInvHistoryJson(
+                        actions_.lastHWInventoryHistoryUpdate()));
+
+        if(bootState_ == BootState.NODE_OFFLINE) {
             actions_.deleteHWInventory(location_);
-        if(bootState_ == BootState.NODE_ONLINE)
-            actions_.upsertHWInventory(location_, foreignInvApi_.getCanonicalHWInvJson(foreignName_));
+            return;
+        }
+        if(bootState_ == BootState.NODE_ONLINE) {
+            actions_.upsertHWInventory(location_, foreignInventoryClient_.getCanonicalHWInvJson(foreignName_));
+        }
     }
 }

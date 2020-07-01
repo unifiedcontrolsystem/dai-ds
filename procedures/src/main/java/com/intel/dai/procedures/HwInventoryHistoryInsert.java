@@ -6,18 +6,18 @@ package com.intel.dai.procedures;
 
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
-import org.voltdb.VoltTable;
 
 public class HwInventoryHistoryInsert extends VoltProcedure {
-    private static final String SQL_TEXT =
-            "INSERT INTO HW_Inventory_History (Action, ID, FRUID, DbUpdatedTimestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
+    private static final String SQL_INSERT_TEXT =
+            "INSERT INTO HW_Inventory_History (Action, ID, FRUID, ForeignServerTimestamp, DbUpdatedTimestamp) VALUES " +
+                    "(?, ?, ?, ?, CURRENT_TIMESTAMP);";
 
     public static final long SUCCESSFUL = 0;
     public static final long FAILED = 1;
 
-    public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
+    public static final SQLStmt sqlInsertStmt = new SQLStmt(SQL_INSERT_TEXT);
 
-    public long run(String action, String id, String fruId)
+    public long run(String action, String id, String fruId, String foreignServerTimestamp)
             throws VoltAbortException {
 
         if (action == null) {
@@ -29,16 +29,19 @@ public class HwInventoryHistoryInsert extends VoltProcedure {
         if (fruId == null) {
             return FAILED;
         }
+        if (foreignServerTimestamp == null) {
+            return FAILED;
+        }
 
         switch (action.toUpperCase()) {
-            case "INSERTED":
-            case "DELETED":
+            case "ADDED":
+            case "REMOVED":
                 break;
             default:
                 return FAILED;
         }
 
-        voltQueueSQL(sqlStmt, action, id, fruId);
+        voltQueueSQL(sqlInsertStmt, action, id, fruId, foreignServerTimestamp);
         voltExecuteSQL();
         return SUCCESSFUL;
     }

@@ -4,6 +4,7 @@
 //
 package com.intel.dai.inventory.api
 
+import com.intel.dai.inventory.api.pojo.scn.ForeignHWInvChangeNotification
 import spock.lang.Specification
 
 class ForeignHWInvChangeNotificationSpec extends Specification {

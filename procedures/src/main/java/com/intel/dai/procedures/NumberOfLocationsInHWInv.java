@@ -16,8 +16,7 @@ public class NumberOfLocationsInHWInv extends VoltProcedure {
 
     public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
 
-    public long run()
-            throws VoltAbortException {
+    public long run() throws VoltAbortException {
         voltQueueSQL(sqlStmt);
         VoltTable result = voltExecuteSQL()[0];
         if (result.getRowCount() < 1) {

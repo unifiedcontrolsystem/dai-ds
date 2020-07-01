@@ -36,7 +36,7 @@ public interface DataStoreFactory {
     WLMInformation createWLMInformation();
 
     InventoryApi createInventoryApi(AdapterInformation adapter);
-    HWInvApi createHWInvApi();
+    HWInvDbApi createHWInvApi();
 
     LegacyVoltDbDirectAccess createVoltDbLegacyAccess();
 

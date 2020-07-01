@@ -86,6 +86,14 @@ public class BenchmarkingSystemActions implements SystemActions, Initializer {
     public void deleteHWInventory(String location) { }
 
     @Override
+    public String lastHWInventoryHistoryUpdate() {
+        return "";
+    }
+
+    @Override
+    public void upsertHWInventoryHistory(String canonicalJson) {}
+
+    @Override
     public void close() throws IOException { }
 
     private final Record storeRaw_ = new Record("storeRaw");

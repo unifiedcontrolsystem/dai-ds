@@ -1,9 +1,15 @@
+// Copyright (C) 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.intel.authentication.TokenAuthentication;
 import com.intel.authentication.TokenAuthenticationException;
+import com.intel.dai.inventory.api.pojo.cfg.HWDiscoverySession;
+import com.intel.dai.inventory.api.pojo.rqst.InventoryInfoRequester;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClient;
 import com.intel.networking.restclient.RESTClientException;
@@ -19,8 +25,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * This class uses the foreign server inventory rest api to gather inventory information from the foreign
+ * inventory server.
+ *
+ * It configures the logger used to capture diagnostic trace, and the rest client that communicates with the foreign
+ * server.  It also determines the configuration of the rest methods required for the communication.
+ *
+ * The logger, rest client and the rest methods are are used to configure an object that implements the
+ * ForeignServerInventoryRest interface.  Most of the business logic required to gather inventory information from
+ * the foreign server reside in this object.
+ */
 public class HWInvDiscovery {
 
+    /**
+     * Constructs the HWInvDiscovery object by initializing the logger and the GSON object.
+     * @param logger logs diagnostic traces
+     */
     public HWInvDiscovery(Logger logger) {
         log = logger;
 
@@ -30,24 +51,28 @@ public class HWInvDiscovery {
     }
 
     /**
-     * This method is used initialise rest client.
+     * Initializes the rest client used to communicate with the foreign inventory server.
+     * @throws RESTClientException if the rest client cannot be created
      */
     public void initialize() throws RESTClientException {
         createRestClient();
     }
 
     /**
-     * This method is used to initiate discovery for foreign location.
+     * Initiates asynchronous inventory discovery at the specified foreign location.
+     * @param foreignLocName foreign name of the root of a subtree in the HPC inventory hierarchy
+     * @return 0 if discovery is started successfully, otherwise 1
      */
-    public int initiateDiscovery(String foreignName) {
+    public int initiateDiscovery(String foreignLocName) {
         if (requester_ == null) {
             return 1;
         }
-        return requester_.initiateDiscovery(foreignName);
+        return requester_.initiateDiscovery(foreignLocName);
     }
 
     /**
-     * This method is used to the initiated discovery status.
+     * Polls the foreign server for the completion of the inventory discovery process.
+     * @return 0 if all discovery processes have completed successfully, otherwise 1
      */
     public int pollForDiscoveryProgress() {
         if (requester_ == null) {
@@ -57,18 +82,21 @@ public class HWInvDiscovery {
     }
 
     /**
-     * This method is used to get the hardware inventory data for a location.
+     * Gets the entire HW inventory at the specified location.
+     * @param foreignLocName foreign name of the root of a subtree in the HPC inventory hierarchy
+     * @return status 0 and json containing the inventory if successful; otherwise status is 1
      */
-    public ImmutablePair<Integer, String> queryHWInvTree(String foreignName) {
+    public ImmutablePair<Integer, String> queryHWInvTree(String foreignLocName) {
         if (requester_ == null) {
             log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
         }
-        return requester_.getHwInventory(foreignName);
+        return requester_.getHwInventory(foreignLocName);
     }
 
     /**
-     * This method is used to get the hardware inventory data for all locations.
+     * Gets the entire HW inventory.
+     * @return status 0 and json containing the inventory if successful; otherwise status is 1
      */
     public ImmutablePair<Integer, String> queryHWInvTree() {
         if (requester_ == null) {
@@ -78,16 +106,21 @@ public class HWInvDiscovery {
         return requester_.getHwInventory();
     }
 
-    public ImmutablePair<Integer, String> queryHWInvHistory(String startTime, String endTime) {
+    /**
+     * Gets the hardware inventory history at the specified start start to the present.
+     * @param startTime start time of the requested inventory history
+     * @return status 0 and json containing the inventory history if successful; otherwise status is 1
+     */
+    public ImmutablePair<Integer, String> queryHWInvHistory(String startTime) {
         if (requester_ == null) {
             log.error("requester_ is null");
             return new ImmutablePair<>(1, "");
         }
-        return requester_.getHWInventoryHistory(startTime, endTime);
+        return requester_.getHWInventoryHistory(startTime);
     }
 
     /**
-     * This method is used to create/initialise client.
+     * Creates/Initializes a rest client.
      */
     private void createRestClient() throws RESTClientException {
         HWDiscoverySession sess;
@@ -121,7 +154,7 @@ public class HWInvDiscovery {
             }
         }
 
-        createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
+        createRequester(requesterClass, sess.providerConfigurations.inventoryInfoRequester, restClient);
     }
 
     private HWDiscoverySession toHWDiscoverySession(String inputFileName) throws RESTClientException {
@@ -159,14 +192,14 @@ public class HWInvDiscovery {
         }
     }
 
-    private void createRequester(String requester, Requester config, RESTClient restClient) {
+    private void createRequester(String requester, InventoryInfoRequester config, RESTClient restClient) {
         if (requester == null || config == null || restClient == null) {
             return;
         }
         try {
             Class<?> classObj = Class.forName(requester);
             Constructor<?> ctor = classObj.getDeclaredConstructor();
-            requester_ = (RestRequester) ctor.newInstance();
+            requester_ = (ForeignServerInventoryRest) ctor.newInstance();
             requester_.initialize(log, config, restClient);
         } catch (ClassNotFoundException e) {
             log.exception(e, String.format("Missing RestRequester implementation '%s'", requester));
@@ -181,8 +214,8 @@ public class HWInvDiscovery {
         }
     }
 
-    private static RestRequester requester_ = null;
+    private static ForeignServerInventoryRest requester_ = null;
     private static TokenAuthentication tokenProvider_ = null;
-    private Gson gson;
-    private Logger log;
+    private final Gson gson;
+    private final Logger log;
 }

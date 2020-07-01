@@ -14,7 +14,6 @@
             <Class name="com.intel.xdg.XdgConfigFile" />
             <Class name="com.intel.dai.populate.DefaultOnlineTierDataLoader" />
             <Class name="com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark" />
-            <Class name="com.intel.dai.inventory.api.CommonCliUtil" />
             <Class name="com.intel.dai.foreign_bus.CommonFunctions" />
             <Class name="com.intel.dai.dsimpl.voltdb.HWInvUtilImpl" />
             <Class name="com.intel.dai.ui.QueryAPI" />
@@ -94,6 +93,8 @@
     </Match>
     <Match> <!-- As designed not an issue -->
         <Or>
+            <Package name="com.intel.dai.inventory.api.pojo.fru.info" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc.info" />
             <Class name="com.intel.dai.foreign_bus.CommonFunctions$DimmInfo" />
             <Class name="com.intel.dai.foreign_bus.CommonFunctions$NodeOrCpuInfo" />
         </Or>
@@ -101,11 +102,25 @@
     </Match>
     <Match> <!-- As designed not an issue -->
         <Or>
+            <Package name="com.intel.dai.inventory.api.pojo.fru" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc" />
+            <Package name="com.intel.dai.inventory.api.pojo.fru.info" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc.info" />
+            <Package name="com.intel.dai.inventory.api.pojo.hist" />
+            <Package name="com.intel.dai.inventory.api.pojo.scn" />
             <Class name="com.intel.dai.dsapi.HWInvHistoryEvent" />
             <Class name="com.intel.dai.dsapi.HWInvLoc" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvChangeNotification" />
         </Or>
         <Bug code="Nm" />
+    </Match>
+    <Match> <!-- As designed not an issue -->
+        <Or>
+            <Package name="com.intel.dai.inventory.api.pojo.fru" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc" />
+            <Package name="com.intel.dai.inventory.api.pojo.fru.info" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc.info" />
+        </Or>
+        <Bug code="UuF" />
     </Match>
     <Match> <!-- As designed not an issue -->
         <Package name="com.intel.dai.dsimpl.voltdb" />
@@ -133,17 +148,12 @@
     </Match>
     <Match> <!-- These are as designed, fields are written to by the Gson serializer via introspection. -->
         <Or>
+            <Package name="com.intel.dai.inventory.api.pojo.fru" />
+            <Package name="com.intel.dai.inventory.api.pojo.loc" />
             <Class name="com.intel.dai.dsapi.HWInvHistoryEvent" />
-            <Class name="com.intel.dai.inventory.api.ForeignFRU" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLoc" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocCabinet" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocChassis" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocComputeModule" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocNodeEnclosure" />
-            <Class name="com.intel.dai.inventory.api.ProviderClassMap" />
-            <Class name="com.intel.dai.inventory.api.ProviderConfigurations" />
-            <Class name="com.intel.dai.inventory.api.ForeignHWInvByLocCabinetPDU" />
-            <Class name="com.intel.dai.inventory.api.TokenAuthProvider" />
+            <Class name="com.intel.dai.inventory.api.pojo.cfg.ProviderClassMap" />
+            <Class name="com.intel.dai.inventory.api.pojo.cfg.ProviderConfigurations" />
+            <Class name="com.intel.dai.inventory.api.pojo.cfg.TokenAuthProvider" />
         </Or>
         <Bug code="UwF" />
     </Match>

@@ -1,0 +1,1724 @@
+{
+  "locs": [
+    {
+      "ID": "R0-APP0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S018\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S018",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S018\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"102df700-ff5d-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-APP0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k0",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k5",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP0-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s19b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S022\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S022",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S022\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"62195180-ff4a-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-APP1-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k0",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k5",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP1-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s24b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP2",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S017\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S017",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S017\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"5033b080-ff42-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-APP2-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-APP2-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-APP2-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s30b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP2-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s30b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP2-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s30b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP2-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-APP2-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s30b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-APP2-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s30b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB0-CN0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L02S002-A\",\"Name\":\"S2600BPB\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L02S002-A",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600BPB\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"..........\",\"SerialNumber\":\"WO134838L02S002-A\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"5e179bd2-ce28-11e9-b239-a4bf015ea832\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-CPU0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"CPU1\",\"Name\":\"Processor 1\",\"Description\":\"\",\"Socket\":\"CPU 1\"}",
+      "FRUID": "FRUIDforx3000c0s34b1n0p0",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB0-CN0-CPU1",
+      "Type": "Processor",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"CPU2\",\"Name\":\"Processor 2\",\"Description\":\"\",\"Socket\":\"CPU 2\"}",
+      "FRUID": "FRUIDforx3000c0s34b1n0p1",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM0",
+      "Type": "Memory",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"Memory1\",\"Name\":\"Memory 1\",\"MemoryLocation\":{\"Socket\":0,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F96D",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F96D\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM1",
+      "Type": "Memory",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"Memory10\",\"Name\":\"Memory 10\",\"MemoryLocation\":{\"Socket\":12,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F957",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F957\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM10",
+      "Type": "Memory",
+      "Ordinal": 10,
+      "Info": "{\"Id\":\"Memory8\",\"Name\":\"Memory 8\",\"MemoryLocation\":{\"Socket\":10,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F96B",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F96B\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM11",
+      "Type": "Memory",
+      "Ordinal": 11,
+      "Info": "{\"Id\":\"Memory9\",\"Name\":\"Memory 9\",\"MemoryLocation\":{\"Socket\":11,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F96C",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F96C\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM2",
+      "Type": "Memory",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"Memory11\",\"Name\":\"Memory 11\",\"MemoryLocation\":{\"Socket\":14,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F954",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F954\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM3",
+      "Type": "Memory",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"Memory12\",\"Name\":\"Memory 12\",\"MemoryLocation\":{\"Socket\":15,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA13",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA13\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM4",
+      "Type": "Memory",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"Memory2\",\"Name\":\"Memory 2\",\"MemoryLocation\":{\"Socket\":2,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F966",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F966\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM5",
+      "Type": "Memory",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"Memory3\",\"Name\":\"Memory 3\",\"MemoryLocation\":{\"Socket\":3,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F955",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F955\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM6",
+      "Type": "Memory",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"Memory4\",\"Name\":\"Memory 4\",\"MemoryLocation\":{\"Socket\":4,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F967",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F967\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM7",
+      "Type": "Memory",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"Memory5\",\"Name\":\"Memory 5\",\"MemoryLocation\":{\"Socket\":6,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F968",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F968\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM8",
+      "Type": "Memory",
+      "Ordinal": 8,
+      "Info": "{\"Id\":\"Memory6\",\"Name\":\"Memory 6\",\"MemoryLocation\":{\"Socket\":7,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F970",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F970\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM9",
+      "Type": "Memory",
+      "Ordinal": 9,
+      "Info": "{\"Id\":\"Memory7\",\"Name\":\"Memory 7\",\"MemoryLocation\":{\"Socket\":8,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F962",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F962\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b1n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB0-CN0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b1n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB1-CN0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L02S002-B\",\"Name\":\"S2600BPB\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L02S002-B",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600BPB\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"..........\",\"SerialNumber\":\"WO134838L02S002-B\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"a8afb9d2-cdc9-11e9-a76b-a4bf015eaacb\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-CPU0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"CPU1\",\"Name\":\"Processor 1\",\"Description\":\"\",\"Socket\":\"CPU 1\"}",
+      "FRUID": "FRUIDforx3000c0s34b2n0p0",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB1-CN0-CPU1",
+      "Type": "Processor",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"CPU2\",\"Name\":\"Processor 2\",\"Description\":\"\",\"Socket\":\"CPU 2\"}",
+      "FRUID": "FRUIDforx3000c0s34b2n0p1",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM0",
+      "Type": "Memory",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"Memory1\",\"Name\":\"Memory 1\",\"MemoryLocation\":{\"Socket\":0,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA69",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA69\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM1",
+      "Type": "Memory",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"Memory10\",\"Name\":\"Memory 10\",\"MemoryLocation\":{\"Socket\":12,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F97F",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F97F\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM10",
+      "Type": "Memory",
+      "Ordinal": 10,
+      "Info": "{\"Id\":\"Memory8\",\"Name\":\"Memory 8\",\"MemoryLocation\":{\"Socket\":10,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F981",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F981\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM11",
+      "Type": "Memory",
+      "Ordinal": 11,
+      "Info": "{\"Id\":\"Memory9\",\"Name\":\"Memory 9\",\"MemoryLocation\":{\"Socket\":11,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA68",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA68\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM2",
+      "Type": "Memory",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"Memory11\",\"Name\":\"Memory 11\",\"MemoryLocation\":{\"Socket\":14,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F956",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F956\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM3",
+      "Type": "Memory",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"Memory12\",\"Name\":\"Memory 12\",\"MemoryLocation\":{\"Socket\":15,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F965",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F965\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM4",
+      "Type": "Memory",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"Memory2\",\"Name\":\"Memory 2\",\"MemoryLocation\":{\"Socket\":2,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA50",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA50\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM5",
+      "Type": "Memory",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"Memory3\",\"Name\":\"Memory 3\",\"MemoryLocation\":{\"Socket\":3,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F96A",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F96A\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM6",
+      "Type": "Memory",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"Memory4\",\"Name\":\"Memory 4\",\"MemoryLocation\":{\"Socket\":4,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA5D",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA5D\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM7",
+      "Type": "Memory",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"Memory5\",\"Name\":\"Memory 5\",\"MemoryLocation\":{\"Socket\":6,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F961",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F961\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM8",
+      "Type": "Memory",
+      "Ordinal": 8,
+      "Info": "{\"Id\":\"Memory6\",\"Name\":\"Memory 6\",\"MemoryLocation\":{\"Socket\":7,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA4F",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA4F\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DIMM9",
+      "Type": "Memory",
+      "Ordinal": 9,
+      "Info": "{\"Id\":\"Memory7\",\"Name\":\"Memory 7\",\"MemoryLocation\":{\"Socket\":8,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F952",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F952\"}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-CB1-CN0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b2n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB1-CN0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b2n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB2-CN0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L02002-C\",\"Name\":\"S2600BPB\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L02002-C",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600BPB\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"..........\",\"SerialNumber\":\"WO134838L02002-C\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"d1f93341-ce61-11e9-a650-a4bf015e9739\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-CPU0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"CPU1\",\"Name\":\"Processor 1\",\"Description\":\"\",\"Socket\":\"CPU 1\"}",
+      "FRUID": "FRUIDforx3000c0s34b3n0p0",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB2-CN0-CPU1",
+      "Type": "Processor",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"CPU2\",\"Name\":\"Processor 2\",\"Description\":\"\",\"Socket\":\"CPU 2\"}",
+      "FRUID": "FRUIDforx3000c0s34b3n0p1",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM0",
+      "Type": "Memory",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"Memory1\",\"Name\":\"Memory 1\",\"MemoryLocation\":{\"Socket\":0,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F94F",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F94F\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM1",
+      "Type": "Memory",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"Memory10\",\"Name\":\"Memory 10\",\"MemoryLocation\":{\"Socket\":12,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FB94",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FB94\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM10",
+      "Type": "Memory",
+      "Ordinal": 10,
+      "Info": "{\"Id\":\"Memory8\",\"Name\":\"Memory 8\",\"MemoryLocation\":{\"Socket\":10,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FAA5",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FAA5\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM11",
+      "Type": "Memory",
+      "Ordinal": 11,
+      "Info": "{\"Id\":\"Memory9\",\"Name\":\"Memory 9\",\"MemoryLocation\":{\"Socket\":11,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FB2A",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FB2A\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM2",
+      "Type": "Memory",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"Memory11\",\"Name\":\"Memory 11\",\"MemoryLocation\":{\"Socket\":14,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FB5A",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FB5A\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM3",
+      "Type": "Memory",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"Memory12\",\"Name\":\"Memory 12\",\"MemoryLocation\":{\"Socket\":15,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FB5D",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FB5D\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM4",
+      "Type": "Memory",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"Memory2\",\"Name\":\"Memory 2\",\"MemoryLocation\":{\"Socket\":2,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA0D",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA0D\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM5",
+      "Type": "Memory",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"Memory3\",\"Name\":\"Memory 3\",\"MemoryLocation\":{\"Socket\":3,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F94E",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F94E\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM6",
+      "Type": "Memory",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"Memory4\",\"Name\":\"Memory 4\",\"MemoryLocation\":{\"Socket\":4,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA6B",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA6B\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM7",
+      "Type": "Memory",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"Memory5\",\"Name\":\"Memory 5\",\"MemoryLocation\":{\"Socket\":6,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.T.9357FA67",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"T\",\"RankCount\":2,\"SerialNumber\":\"9357FA67\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM8",
+      "Type": "Memory",
+      "Ordinal": 8,
+      "Info": "{\"Id\":\"Memory6\",\"Name\":\"Memory 6\",\"MemoryLocation\":{\"Socket\":7,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F959",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F959\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DIMM9",
+      "Type": "Memory",
+      "Ordinal": 9,
+      "Info": "{\"Id\":\"Memory7\",\"Name\":\"Memory 7\",\"MemoryLocation\":{\"Socket\":8,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FAD0",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FAD0\"}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-CB2-CN0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b3n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB2-CN0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b3n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB3-CN0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L02S002-D\",\"Name\":\"S2600BPB\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L02S002-D",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600BPB\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"..........\",\"SerialNumber\":\"WO134838L02S002-D\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"2f4b578c-ce46-11e9-b009-a4bf015e9720\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-CPU0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"CPU1\",\"Name\":\"Processor 1\",\"Description\":\"\",\"Socket\":\"CPU 1\"}",
+      "FRUID": "FRUIDforx3000c0s34b4n0p0",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB3-CN0-CPU1",
+      "Type": "Processor",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"CPU2\",\"Name\":\"Processor 2\",\"Description\":\"\",\"Socket\":\"CPU 2\"}",
+      "FRUID": "FRUIDforx3000c0s34b4n0p1",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{\"InstructionSet\":\"x86-64\",\"Manufacturer\":\"Intel(R) Corporation\",\"MaxSpeedMHz\":4000,\"Model\":\"Intel Xeon processor\",\"ProcessorArchitecture\":\"x86\",\"ProcessorId\":{\"EffectiveFamily\":\"0xb3\",\"EffectiveModel\":\"0x3\",\"IdentificationRegisters\":\"50-65-4\",\"MicrocodeInfo\":\"\",\"Step\":\"\",\"VendorID\":\"Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\"},\"ProcessorType\":\"CPU\",\"TotalCores\":20,\"TotalThreads\":20}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM0",
+      "Type": "Memory",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"Memory1\",\"Name\":\"Memory 1\",\"MemoryLocation\":{\"Socket\":0,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F9EE",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F9EE\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM1",
+      "Type": "Memory",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"Memory10\",\"Name\":\"Memory 10\",\"MemoryLocation\":{\"Socket\":12,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA18",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA18\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM10",
+      "Type": "Memory",
+      "Ordinal": 10,
+      "Info": "{\"Id\":\"Memory8\",\"Name\":\"Memory 8\",\"MemoryLocation\":{\"Socket\":10,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F9EA",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F9EA\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM11",
+      "Type": "Memory",
+      "Ordinal": 11,
+      "Info": "{\"Id\":\"Memory9\",\"Name\":\"Memory 9\",\"MemoryLocation\":{\"Socket\":11,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA32",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA32\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM2",
+      "Type": "Memory",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"Memory11\",\"Name\":\"Memory 11\",\"MemoryLocation\":{\"Socket\":14,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA30",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA30\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM3",
+      "Type": "Memory",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"Memory12\",\"Name\":\"Memory 12\",\"MemoryLocation\":{\"Socket\":15,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA7B",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA7B\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM4",
+      "Type": "Memory",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"Memory2\",\"Name\":\"Memory 2\",\"MemoryLocation\":{\"Socket\":2,\"MemoryController\":0,\"Channel\":1,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9358020D",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9358020D\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM5",
+      "Type": "Memory",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"Memory3\",\"Name\":\"Memory 3\",\"MemoryLocation\":{\"Socket\":3,\"MemoryController\":0,\"Channel\":2,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .93580246",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"93580246\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM6",
+      "Type": "Memory",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"Memory4\",\"Name\":\"Memory 4\",\"MemoryLocation\":{\"Socket\":4,\"MemoryController\":1,\"Channel\":3,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F985",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F985\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM7",
+      "Type": "Memory",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"Memory5\",\"Name\":\"Memory 5\",\"MemoryLocation\":{\"Socket\":6,\"MemoryController\":1,\"Channel\":4,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F977",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F977\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM8",
+      "Type": "Memory",
+      "Ordinal": 8,
+      "Info": "{\"Id\":\"Memory6\",\"Name\":\"Memory 6\",\"MemoryLocation\":{\"Socket\":7,\"MemoryController\":1,\"Channel\":5,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357F96E",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357F96E\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DIMM9",
+      "Type": "Memory",
+      "Ordinal": 9,
+      "Info": "{\"Id\":\"Memory7\",\"Name\":\"Memory 7\",\"MemoryLocation\":{\"Socket\":8,\"MemoryController\":0,\"Channel\":0,\"Slot\":1}}",
+      "FRUID": "Memory.Hynix.HMA82GR7CJR8N-WM    .9357FA16",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{\"BaseModuleType\":\"RDIMM\",\"BusWidthBits\":72,\"CapacityMiB\":16384,\"DataWidthBits\":64,\"ErrorCorrection\":\"MultiBitECC\",\"Manufacturer\":\"Hynix\",\"MemoryType\":\"DRAM\",\"MemoryDeviceType\":\"DDR4\",\"OperatingSpeedMhz\":2666,\"PartNumber\":\"HMA82GR7CJR8N-WM    \",\"RankCount\":2,\"SerialNumber\":\"9357FA16\"}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-CB3-CN0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b4n0g1k1",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-CB3-CN0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s34b4n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-FABRIC0-BRD0",
+      "Type": "HSNBoard",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"Enclosure\",\"Name\":\"Enclosure\",\"Description\":\"ColumbiaSwtBrd\",\"HostName\":\"\"}",
+      "FRUID": "HSNBoard.Cray Inc.101878104.HP20020073",
+      "FRUType": "HSNBoard",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"\",\"ChassisType\":\"Enclosure\",\"Model\":\"ColumbiaSwtBrd_REV_A\",\"Manufacturer\":\"Cray Inc\",\"PartNumber\":\"101878104\",\"SerialNumber\":\"HP20020073\",\"SKU\":\"\"}"
+    },
+    {
+      "ID": "R0-MGT0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S025\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S025",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S025\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"d6dc8500-fe91-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT0-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT0-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT0-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s1b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT0-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s1b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT0-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s1b0n0g1k5",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT0-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s1b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT0-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s1b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT1",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S002\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S002",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S002\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"8a487800-fe98-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT1-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT1-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT1-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT1-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s3b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT1-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s3b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT1-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s3b0n0g1k5",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT1-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s3b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT1-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s3b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT2",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S003\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S003",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S003\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"fa342c80-ff84-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT2-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT2-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT2-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT2-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s5b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT2-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s5b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT2-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s5b0n0g1k5",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT2-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s5b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT2-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s5b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT3",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S015\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S015",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S015\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"9150b280-ff8c-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s7b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT3-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s7b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT3-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT3-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S013\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S013",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S013\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"9c84ed80-ff4e-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s9b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT4-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s9b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT4-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT4-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S005\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S005",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-005\",\"SerialNumber\":\"WO134838L01S005\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"0450da00-e6fe-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s11b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT5-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s11b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT5-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT5-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT7",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S009\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S009",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S009\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"7ca7f680-ff5b-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT7-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT7-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT7-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s15b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT7-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s15b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT7-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s15b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT7-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT7-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s15b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT7-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s15b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT8",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"WO134838L01S027\",\"Name\":\"S2600WFT\",\"Description\":\"Computer system providing compute resources\",\"HostName\":\"\",\"ProcessorSummary\":{\"Count\":2,\"Model\":\"Central Processor\"},\"MemorySummary\":{\"TotalSystemMemoryGiB\":192}}",
+      "FRUID": "Node.WO134838L01S027",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"AssetTag\":\"....................\",\"BiosVersion\":\"SE5C620.86B.02.01.0010.C0001.010620200716\",\"Model\":\"S2600WFT\",\"Manufacturer\":\"Intel Corporation\",\"PartNumber\":\"K40014-006\",\"SerialNumber\":\"WO134838L01S027\",\"SKU\":\"....................\",\"SystemType\":\"Physical\",\"UUID\":\"1e734c00-f6ef-11e9-906e-0017a4403562\"}"
+    },
+    {
+      "ID": "R0-MGT8-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{\"Id\":\"HDD1\",\"Name\":\"HDD 0 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT8-DRIVE1",
+      "Type": "Drive",
+      "Ordinal": 1,
+      "Info": "{\"Id\":\"HDD2\",\"Name\":\"HDD 1 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT8-DRIVE2",
+      "Type": "Drive",
+      "Ordinal": 2,
+      "Info": "{\"Id\":\"HDD3\",\"Name\":\"HDD 2 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s17b0n0g1k2",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT8-DRIVE3",
+      "Type": "Drive",
+      "Ordinal": 3,
+      "Info": "{\"Id\":\"HDD4\",\"Name\":\"HDD 3 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s17b0n0g1k3",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT8-DRIVE4",
+      "Type": "Drive",
+      "Ordinal": 4,
+      "Info": "{\"Id\":\"HDD5\",\"Name\":\"HDD 4 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s17b0n0g1k4",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT8-DRIVE5",
+      "Type": "Drive",
+      "Ordinal": 5,
+      "Info": "{\"Id\":\"HDD6\",\"Name\":\"HDD 5 Status\",\"Description\":\"\"}",
+      "FRUID": "Drive.",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{\"Manufacturer\":\"\",\"SerialNumber\":\"\",\"PartNumber\":\"\",\"Model\":\"\",\"SKU\":\"\",\"Protocol\":\"\",\"MediaType\":\"HDD\",\"EncryptionAbility\":\"\",\"EncryptionStatus\":\"\",\"CapacityBytes\":0,\"RotationSpeedRPM\":0,\"BlockSizeBytes\":0,\"CapableSpeedGbs\":0,\"NegotiatedSpeedGbs\":0,\"PredictedMediaLifeLeftPercent\":0,\"FailurePredicted\":false}"
+    },
+    {
+      "ID": "R0-MGT8-DRIVE6",
+      "Type": "Drive",
+      "Ordinal": 6,
+      "Info": "{\"Id\":\"HDD7\",\"Name\":\"HDD 6 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s17b0n0g1k6",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    },
+    {
+      "ID": "R0-MGT8-DRIVE7",
+      "Type": "Drive",
+      "Ordinal": 7,
+      "Info": "{\"Id\":\"HDD8\",\"Name\":\"HDD 7 Status\",\"Description\":\"\"}",
+      "FRUID": "empty-x3000c0s17b0n0g1k7",
+      "FRUType": "",
+      "FRUSubType": "",
+      "FRUInfo": ""
+    }
+  ]
+}

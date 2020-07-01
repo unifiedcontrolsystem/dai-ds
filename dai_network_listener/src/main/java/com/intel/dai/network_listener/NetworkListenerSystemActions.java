@@ -8,7 +8,6 @@ import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.*;
-import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.networking.source.NetworkDataSource;
@@ -36,7 +35,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         eventActions_ = factory_.createRasEventLog(adapter_);
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
-        hwInvApi_ = factory_.createHWInvApi();
+        hwInvDbApi_ = factory_.createHWInvApi();
         nodeInformation_ = factory_.createNodeInformation();
     }
 
@@ -198,7 +197,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     @Override
     public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
-        return hwInvApi_.numberOfLocationsInHWInv() == 0;
+        return hwInvDbApi_.numberOfLocationsInHWInv() == 0;
     }
 
     /**
@@ -208,57 +207,37 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     @Override
     public void upsertHWInventory(String location, String canonicalJson) {
-        HWInvTree before = getHWInvSnapshot(location);
+       ingestCanonicalHWInvJson(canonicalJson);
+    }
 
-        ingestCanonicalHWInvJson(canonicalJson);
-
-        HWInvTree after = getHWInvSnapshot(location);
-
-        if (before == null || after == null) {
-            log_.error("before or after is null");
-            return;
-        }
-        HWInvUtilImpl util = new HWInvUtilImpl();
-        List<HWInvLoc> diffList = util.subtract(after.locs, before.locs);
-        for (HWInvLoc s : diffList) {
-            log_.info("inserted: %s into %s", s.FRUID, s.ID);
-            insertHistoricalRecord("INSERTED", s);
+    /**
+     * Returns the last update time of the inventory database.
+     * @return timestamp string of the last update.
+     */
+    @Override
+    public String lastHWInventoryHistoryUpdate() {
+        try {
+            return hwInvDbApi_.lastHwInvHistoryUpdate();
+        } catch (IOException | DataStoreException e) {
+            return null;
         }
     }
 
     /**
-     * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
-     * @param location root location in DAI format
+     * Update or insert new inventory history.
+     *
+     * @param canonicalJson contains HW inventory history in canonical format.
      */
     @Override
-    public void deleteHWInventory(String location) {
-        HWInvTree before = getHWInvSnapshot(location);
-
-        deleteHWInvSnapshot(location);
-
-        HWInvTree after = getHWInvSnapshot(location);
-
-        if (before == null || after == null) {
-            log_.error("before or after is null");
-            return;
-        }
-        HWInvUtilImpl util = new HWInvUtilImpl();
-        List<HWInvLoc> diffList = util.subtract(before.locs, after.locs);
-        for (HWInvLoc s : diffList) {
-            log_.info("deleted: %s from %s", s.FRUID, s.ID);
-            insertHistoricalRecord("DELETED", s);
-        }
+    public void upsertHWInventoryHistory(String canonicalJson) {
+        ingestCanonicalHWInvHistoryJson(canonicalJson);
     }
 
-    @Override
-    public void close() throws IOException {
-        if(publisher_ != null)
-            publisher_.close();
-    }
+    private void ingestCanonicalHWInvHistoryJson(String canonicalHwInvHistJson) {
+        if (canonicalHwInvHistJson == null) return;
 
-    private void insertHistoricalRecord(String action, HWInvLoc s) {
         try {
-            hwInvApi_.insertHistoricalRecord(action, s.ID, s.FRUID);
+            hwInvDbApi_.ingestHistory(canonicalHwInvHistJson);
         } catch (InterruptedException e) {
             log_.error("InterruptedException: %s", e.getMessage());
         } catch (IOException e) {
@@ -269,12 +248,27 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     }
 
     /**
+     * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
+     * @param location root location in DAI format
+     */
+    @Override
+    public void deleteHWInventory(String location) {
+        deleteHWInvSnapshot(location);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(publisher_ != null)
+            publisher_.close();
+    }
+
+    /**
      * Fetch HW Inventory snapshot data for specific location.
      * @param location DAI location to fetch hw inventory data from db.
      */
     private HWInvTree getHWInvSnapshot(String location) {
         try {
-            return hwInvApi_.allLocationsAt(location, null);
+            return hwInvDbApi_.allLocationsAt(location, null);
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
@@ -289,7 +283,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     private void deleteHWInvSnapshot(String location) {
         try {
-            hwInvApi_.delete(location);
+            hwInvDbApi_.delete(location);
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
@@ -305,7 +299,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         if (canonicalHwInvJson == null) return;
 
         try {
-            hwInvApi_.ingest(canonicalHwInvJson);
+            hwInvDbApi_.ingest(canonicalHwInvJson);
         } catch (InterruptedException e) {
             log_.error("InterruptedException: %s", e.getMessage());
         } catch (IOException e) {
@@ -389,7 +383,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private RasEventLog eventActions_;
     private BootImage bootImage_;
     private AdapterOperations operations_;
-    private HWInvApi hwInvApi_;
+    private HWInvDbApi hwInvDbApi_;
     private AdapterInformation adapter_;
     private final NodeInformation nodeInformation_;
     private PropertyMap config_;
