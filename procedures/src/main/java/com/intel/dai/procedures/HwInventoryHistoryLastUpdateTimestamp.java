@@ -8,9 +8,10 @@ package com.intel.dai.procedures;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
+import org.voltdb.VoltTableRow;
 
 public class HwInventoryHistoryLastUpdateTimestamp extends VoltProcedure {
-    private static final String SQL_TEXT = "SELECT MAX(foreignServerTimestamp) FROM HW_Inventory_History;";
+    private static final String SQL_TEXT = "SELECT MAX(foreignTimestamp) FROM HW_Inventory_History;";
 
     public static final SQLStmt sqlStmt = new SQLStmt(SQL_TEXT);
 
@@ -19,13 +20,13 @@ public class HwInventoryHistoryLastUpdateTimestamp extends VoltProcedure {
      * @return string containing the latest update timestamp if it can be determined; otherwise null
      * @throws VoltAbortException volt abort exception
      */
-    public String run()
+    public VoltTable run()
             throws VoltAbortException {
         voltQueueSQL(sqlStmt);
         VoltTable result = voltExecuteSQL()[0];
         if (result.getRowCount() < 1) {
             return null;
         }
-        return result.fetchRow(0).getString(0);
+        return result;
     }
 }
