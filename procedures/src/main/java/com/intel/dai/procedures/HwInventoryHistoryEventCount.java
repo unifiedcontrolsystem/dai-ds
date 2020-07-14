@@ -11,7 +11,7 @@ import org.voltdb.VoltTable;
 public class HwInventoryHistoryEventCount extends VoltProcedure {
     private static final String SQL_COUNT_TEXT =
             "SELECT COUNT(*) FROM HW_Inventory_History WHERE " +
-                    "Action=? AND ID=? AND FRUID=? AND ForeignServerTimestamp=?";
+                    "Action=? AND ID=? AND FRUID=? AND ForeignTimestamp=?";
 
     public static final SQLStmt sqlCountstmt = new SQLStmt(SQL_COUNT_TEXT);
 
