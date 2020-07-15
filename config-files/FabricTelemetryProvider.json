@@ -1,0 +1,7 @@
+{
+  "connectAddress": "sms01-nmn.local",
+  "connectPort": 8080,
+  "urlPath": "/apis/sma-telemetry/v1/stream/cray-fabric-telemetry",
+  "exchangeName": "ucs",
+  "publishServerUrl": "amqp://sms01-nmn.local"
+}

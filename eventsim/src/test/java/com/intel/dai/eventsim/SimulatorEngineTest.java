@@ -313,7 +313,7 @@ public class SimulatorEngineTest {
         eventSimTestMock.initialise(args);
         SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents("R0.*", ".*", "true", "0", "123", "5", "false");
+        simulatorEngineTest.publishSensorEvents("R0.*", ".*", "true", "0", "123", "5", "/dev/null");
         assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
     }
 
@@ -387,7 +387,7 @@ public class SimulatorEngineTest {
         eventSimTestMock.initialise(args);
         SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishJobEvents("R0.*", ".*", "true", "0", "123", "5", "false");
+        simulatorEngineTest.publishJobEvents("R0.*", ".*", "true", "0", "123", "5", "/dev/null");
         assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
     }
 

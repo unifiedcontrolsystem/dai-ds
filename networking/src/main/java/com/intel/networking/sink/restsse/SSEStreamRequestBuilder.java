@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-package com.intel.dai.monitoring;
+package com.intel.networking.sink.restsse;
 
 import com.intel.networking.restclient.SSERequestBuilder;
 
@@ -33,7 +33,8 @@ public class SSEStreamRequestBuilder implements SSERequestBuilder {
         return result.toString();
     }
 
-    private static final List<String> allowedKeys_ = new ArrayList<>() {{
+    @SuppressWarnings("serial")
+    private static final List<String> allowedKeys_ = new ArrayList<String>() {{
         add("requestBuilderSelectors.stream_id");
         add("requestBuilderSelectors.count");
         add("requestBuilderSelectors.batchsize");

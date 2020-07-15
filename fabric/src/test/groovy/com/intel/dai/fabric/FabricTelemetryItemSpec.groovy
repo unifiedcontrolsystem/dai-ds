@@ -16,7 +16,6 @@ class FabricTelemetryItemSpec extends Specification {
     def "Test Ctor Using JSON"() {
         def json = JSON
         def inst = new FabricTelemetryItem(json)
-        println JSON
         expect: inst.getAverage() == RESULT
         where:
         JSON                                                                                                                 || RESULT

@@ -806,7 +806,7 @@ project(":inventory") {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
-                    minimum = 0.61
+                    minimum = 0.60
                 }
             }
         }

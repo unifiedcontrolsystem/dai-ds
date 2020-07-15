@@ -19,7 +19,6 @@ import com.intel.networking.sink.restsse.NetworkDataSinkSSE
 import com.intel.networking.source.NetworkDataSource
 import com.intel.networking.source.NetworkDataSourceFactory
 import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ResultTreeType
 import spock.lang.Specification
 
 import java.time.Instant
@@ -30,6 +29,7 @@ class FabricAdapterSpec extends Specification {
             super(servers, logger, factory, adapter)
         }
         @Override protected void processRawMessage(String subject, String message) { }
+        @Override protected String adapterType() { return "FABRIC" }
         @Override protected void processConfigItems(Map<String, String> config) { super.processConfigItems(config) }
     }
 
@@ -60,7 +60,7 @@ class FabricAdapterSpec extends Specification {
     }
 
     def configFile_ = new File("./build/tmp/FabricAdapterSpec.json")
-    def config_
+    Map<String,String> config_
     def workItem_
     def workQueue_
     def adapter_
@@ -119,7 +119,7 @@ class FabricAdapterSpec extends Specification {
     def "Test MainProcessingFlow"() {
         given:
         workItem_ = ITEM
-        underTest_.mainProcessingFlow(underTest_.config_)
+        underTest_.mainProcessingFlow(underTest_.config_, "location")
         expect: RESULT
         where:
         ITEM                               || RESULT
@@ -146,7 +146,7 @@ class FabricAdapterSpec extends Specification {
         params_.put("connectPort", PORT)
         params_.put("urlPath", URLPATH)
         config_.put("urlPath", URLPATH)
-        underTest_.mainProcessingFlow(config_)
+        underTest_.mainProcessingFlow(config_, "location")
 
         when:
         underTest_.consumeWorkItemParameters()
@@ -162,10 +162,12 @@ class FabricAdapterSpec extends Specification {
         "127.0.0.1" | "12b54"  | "/api"
         "127.0.0.1" | "1254"   | null
         "127.0.0.1" | "1254"   | "   "
+        "127.0.0.1" | "0"      | "/api"
+        "127.0.0.1" | "65536"  | "/api"
     }
 
     def "Test Publishing"() {
-        underTest_.mainProcessingFlow(config_)
+        underTest_.mainProcessingFlow(config_, "location")
         underTest_.publishRawData("message")
         underTest_.publishAggregatedData("message")
         underTest_.publishEventData("message")

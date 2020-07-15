@@ -16,7 +16,7 @@
   "networkConfig" : {
     "network" : "sse",
     "sseConfig": {
-      "serverAddress": "sms01-nmn.local" ,
+      "serverAddress": "api-gw-service-nmn.local" ,
       "serverPort": "8080" ,
       "urls": {
         "/v1/stream/telemetry": [
@@ -32,7 +32,7 @@
     },
     "rabbitmq": {
       "exchangeName": "simulator",
-      "uri": "amqp://sms01-nmn.local"
+      "uri": "amqp://api-gw-service-nmn.local"
     }
   }
 }

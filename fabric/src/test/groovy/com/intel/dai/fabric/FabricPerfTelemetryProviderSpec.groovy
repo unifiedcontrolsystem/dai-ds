@@ -10,6 +10,7 @@ import com.intel.dai.dsapi.RasEventLog
 import com.intel.dai.dsapi.StoreTelemetry
 import com.intel.dai.dsapi.WorkQueue
 import com.intel.logging.Logger
+import com.intel.properties.PropertyMap
 import spock.lang.Specification
 
 class FabricPerfTelemetryProviderSpec extends Specification {
@@ -132,5 +133,25 @@ class FabricPerfTelemetryProviderSpec extends Specification {
         ["storeBlacklist":null]  || true
         ["storeBlacklist":"  "]  || true
         ["storeBlacklist":"A,B"] || true
+    }
+
+    def "Test convertSensor"() {
+        PropertyMap sensor = new PropertyMap()
+        List<FabricTelemetryItem> results = new ArrayList<>()
+        sensor.put("__FullName__", NAME)
+        sensor.put("Timestamp", TS)
+        sensor.put("Value", VALUE)
+        sensor.put("Location", "location")
+        underTest_.convertSensor(sensor, results)
+        expect: results.size() == RESULT
+        where:
+        NAME   | TS                             | VALUE || RESULT
+        "name" | "20200629T07:52:00.000000000Z" | "2.0" || 0
+        null   | "20200629T07:52:00.000000000Z" | "2.0" || 0
+        "  "   | "20200629T07:52:00.000000000Z" | "2.0" || 0
+        "name" | null                           | "2.0" || 0
+        "name" | "  "                           | "2.0" || 0
+        "name" | "20200629T07:52:00.000000000Z" | null  || 0
+        "name" | "20200629T07:52:00.000000000Z" | "  "  || 0
     }
 }

@@ -221,7 +221,8 @@ public class NetworkListenerConfig {
         }
         if(arguments.containsKey("requestBuilder")) {
             log_.debug("Validating possible request references: %s", arguments.get("requestBuilder"));
-            String value = arguments.getStringOrDefault("requestBuilder", null);
+            String value = arguments.getStringOrDefault("requestBuilder",
+                    "com.intel.networking.sink.restsse.SSEStreamRequestBuilder");
             result = result || (value != null && providers_.containsKey(value));
         }
         return result;
