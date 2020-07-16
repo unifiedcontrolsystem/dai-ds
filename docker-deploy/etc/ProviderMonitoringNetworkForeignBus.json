@@ -26,7 +26,7 @@
         "connectAddress": "api-gw-service-nmn.local",
         "urlPath": "/v1/stream/events",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "use-ssl": false,
         "requestBuilderSelectors": {
