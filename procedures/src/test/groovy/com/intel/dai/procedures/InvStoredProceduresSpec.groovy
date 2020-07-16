@@ -56,20 +56,6 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
         res == null
     }
 
-    def "NumberOfLocationsInHWInv"() {
-        def res = new VoltTable()
-        res.m_rowCount = 0
-        def vt = new VoltTable[1]
-        vt[0] = res
-
-        given:
-        def testSubject = Spy(NumberOfLocationsInHWInv)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> vt;
-
-        expect: testSubject.run() == -1
-    }
-
     def "HwInventoryHistoryEventCount"() {
         def res = new VoltTable()
         res.m_rowCount = 0
@@ -150,19 +136,5 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
 
         when: ts.run('x0')
         then: notThrown Exception
-    }
-
-    def "HwInventoryHistoryLastUpdateTimestamp"() {
-        def res = new VoltTable()
-        res.m_rowCount = 0
-        def vt = new VoltTable[1]
-        vt[0] = res
-
-        given:
-        def testSubject = Spy(HwInventoryHistoryLastUpdateTimestamp)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> vt;
-
-        expect: testSubject.run() == null
     }
 }
