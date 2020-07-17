@@ -191,7 +191,9 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     }
 
     /**
-     * Return the latest HW inventory history update timestamp string in RFC-3339 format.
+     * Return the latest HW inventory history update timestamp string in RFC-3339 format.  Notice that the foreign
+     * timestamp is stored as a string in the DB.  This is because we only use this timestamp as a string argument when
+     * making a rest api call to the foreign server.
      *
      * @return string containing the latest update timestamp if it can be determined; otherwise null
      * @throws IOException io exception
@@ -200,7 +202,8 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     @Override
     public String lastHwInvHistoryUpdate() throws IOException, DataStoreException {
         try {
-            return client.callProcedure("HwInventoryHistoryLastUpdateTimestamp").getResults()[0].getString(0);
+            return client.callProcedure("HwInventoryHistoryLastUpdateTimestamp").getResults()[0].
+                    fetchRow(0).getString(0);
         } catch (ProcCallException e) {
             logger.error("ProcCallException during HwInventoryHistoryLastUpdateTimestamp");
             throw new DataStoreException(e.getMessage());

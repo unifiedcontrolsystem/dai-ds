@@ -697,8 +697,8 @@ CREATE PROCEDURE FROM
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.AllLocationsAtIdFromHWInv;
 
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.NumberOfLocationsInHWInv;
+CREATE PROCEDURE NumberOfLocationsInHWInv
+   AS SELECT COUNT(*) FROM HW_Inventory_Location;
 
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.HwInventoryHistoryInsert;
@@ -706,8 +706,8 @@ CREATE PROCEDURE FROM
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.HwInventoryHistoryDump;
 
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.HwInventoryHistoryLastUpdateTimestamp;
+CREATE PROCEDURE HwInventoryHistoryLastUpdateTimestamp
+   AS SELECT MAX(foreignTimestamp) FROM HW_Inventory_History;
 
 CREATE PROCEDURE FROM
     CLASS com.intel.dai.procedures.FwVersionUpsert;
