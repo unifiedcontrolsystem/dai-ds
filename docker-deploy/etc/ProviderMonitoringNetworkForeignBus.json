@@ -1,7 +1,7 @@
 {
   "providerClassMap": {
-    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
-    "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
+    "environmentalData": "com.intel.dai.monitoring.EventSimEnvironmentalProviderForeignBus",
+    "rasData": "com.intel.dai.monitoring.EventSimRasEventProviderForeignBus"
   },
 
   "networkStreams": {
