@@ -14,7 +14,6 @@ buildscript {
 
 plugins {
     id 'nebula.ospackage' version '6.1.4'
-    id 'com.github.spotbugs' version '3.0.0'
 }
 
 apply plugin: 'nebula.rpm'
@@ -97,7 +96,6 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-def enforceStaticAnalysis = true
 def enforceCodeCoverage = true
 
 import java.time.Instant
@@ -143,7 +141,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'jacoco'
-    apply plugin: 'com.github.spotbugs'
 
     repositories {
         mavenCentral()
@@ -171,8 +168,6 @@ subprojects {
     }
 
     dependencies {
-        spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
-
         testCompile 'junit:junit:4.12+'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22+'
     }
@@ -180,13 +175,8 @@ subprojects {
     sourceCompatibility = 11
     targetCompatibility = 11
 
-    spotbugs {
-        toolVersion = '3.1.12'
-        sourceSets = [ sourceSets.main ]
-    }
-
     jacoco {
-        toolVersion = "0.8.2"
+        toolVersion = "0.8.5"
     }
 
     clean {
@@ -225,19 +215,6 @@ subprojects {
         }
 
         finalizedBy "jacocoTestReport"
-    }
-
-    tasks.withType(com.github.spotbugs.SpotBugsTask) {
-        reports {
-            xml.enabled = false
-            html.enabled = true
-            html.destination = file("${rootProject.buildDir}/reports/spotbugs/${project.name}.html")
-            xml.destination = file("${rootProject.buildDir}/spotbugs/results-${project.name}.xml")
-        }
-        effort = 'default'
-        reportLevel = 'medium'
-        ignoreFailures = !enforceStaticAnalysis
-        excludeFilter = file("${rootProject.projectDir}/findBugsExclusions.xml")
     }
 
     jacocoTestReport {
