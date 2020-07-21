@@ -151,7 +151,7 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
      */
     private URI makeHistoryQuery(String startTime) throws URISyntaxException {
         URI uri = makeUri(config.getHWInventoryHistory.endpoint, config.getHWInventoryHistory.resource);
-        if (startTime != null) {
+        if (startTime != null && !startTime.equals("")) {
             return new URI(String.format("%s?start_time=%s", uri.toString(), startTime));
         }
         return uri;

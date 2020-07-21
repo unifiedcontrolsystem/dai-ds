@@ -62,9 +62,9 @@ public class VoltHWInvDbApi implements HWInvDbApi {
      * <p> Ingest json string containing HW inventory history. </p>
      * @param canonicalHWInvHistoryJson json file containing HW inventory history in canonical form
      * @return 0 if any location is ingested, otherwise 1
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws DataStoreException
+     * @throws InterruptedException Interrupted Exception
+     * @throws IOException IO Exception
+     * @throws DataStoreException Datastore Exception
      */
     @Override
     public int ingestHistory(String canonicalHWInvHistoryJson) throws InterruptedException, IOException, DataStoreException {
@@ -180,7 +180,14 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     @Override
     public long numberOfLocationsInHWInv() throws IOException, DataStoreException {
         try {
-            return client.callProcedure("NumberOfLocationsInHWInv").getResults()[0].asScalarLong();
+            ClientResponse response = client.callProcedure("NumberOfLocationsInHWInv");
+            VoltTable result = response.getResults()[0];
+            if (result.getRowCount() < 1) {
+                return 0;
+            }
+
+            result.advanceRow();
+            return result.asScalarLong();
         } catch (ProcCallException e) {
             logger.error("ProcCallException during AllLocationsAtIdFromHWInv");
             throw new DataStoreException(e.getMessage());
@@ -202,8 +209,14 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     @Override
     public String lastHwInvHistoryUpdate() throws IOException, DataStoreException {
         try {
-            return client.callProcedure("HwInventoryHistoryLastUpdateTimestamp").getResults()[0].
-                    fetchRow(0).getString(0);
+            ClientResponse response = client.callProcedure("HwInventoryHistoryLastUpdateTimestamp");
+            VoltTable result = response.getResults()[0];
+            if (result.getRowCount() < 1) {
+                return "";
+            }
+
+            result.advanceRow();
+            return result.getString(0);
         } catch (ProcCallException e) {
             logger.error("ProcCallException during HwInventoryHistoryLastUpdateTimestamp");
             throw new DataStoreException(e.getMessage());
@@ -263,7 +276,6 @@ public class VoltHWInvDbApi implements HWInvDbApi {
      * Each record is a csv of (DbUpdatedTimestamp, action, location, fru).  This method is
      * primarily used for debugging. </p>
      * @return a list of HW change records
-     * @throws InterruptedException interrupt exception
      * @throws IOException i/o exception
      * @throws DataStoreException data exception
      */
@@ -293,7 +305,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    private Logger logger;
-    private String[] servers;
+    private final Logger logger;
+    private final String[] servers;
     private Client client = null;
 }
