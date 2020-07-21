@@ -1,0 +1,38 @@
+{
+  "eventsimConfig" : {
+    "SensorMetadata": "/resources/ForeignSensorMetaData.json",
+    "RASMetadata": "/resources/ForeignEventMetaData.json",
+    "JobsMetadata" : "/resources/ForeignJobsMetaData.json",
+    "BootParameters" : "/opt/ucs/etc/BootParameters.json",
+    "HWInventory" : "/opt/ucs/etc/HWInventory.json",
+    "HWInventoryPath" : "/opt/ucs/etc",
+    "HWInventoryQueryPath" : "/opt/ucs/etc/HwInvQuery_",
+    "HWInventoryDiscStatUrl" : "/Inventory/DiscoveryStatus",
+    "eventCount": 10,
+    "timeDelayMus": 1,
+    "eventRatioSensorToRas": 1,
+    "randomizerSeed": "1234"
+  },
+  "networkConfig" : {
+    "network" : "sse",
+    "sseConfig": {
+      "serverAddress": "api-gw-service-nmn.local" ,
+      "serverPort": "8080" ,
+      "urls": {
+        "/v1/stream/telemetry": [
+          "telemetry"
+        ] ,
+        "/apis/smd/hsm/v1/Subscriptions/SCN": [
+          "stateChanges"
+        ] ,
+        "/v1/stream/events": [
+          "events"
+        ]
+      }
+    },
+    "rabbitmq": {
+      "exchangeName": "simulator",
+      "uri": "amqp://api-gw-service-nmn.local"
+    }
+  }
+}
