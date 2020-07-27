@@ -2,10 +2,7 @@ package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.logging.Logger;
-import com.intel.dai.foreign_bus.ConversionException;
-import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyMap;
-import com.intel.properties.PropertyNotExpectedType;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -204,6 +201,32 @@ public class EventSimAppTest {
         eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
         doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine).publishRasEvents("test", ".*" , "false", null, null, "1", null);
         assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generatRasEvents(parameters));
+    }
+
+    @Test
+    public void generateFabricEvents() throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "test");
+        parameters.put("count", "1");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doNothing().when(eventSimApiTest.eventSimEngine).publishFabricEvents("test", ".*" , "false", null, null, "1", "1",null);
+        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateFabricEvents(parameters));
+    }
+
+    @Test
+    public void generateFabricEventsWithException() throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "test");
+        parameters.put("count", "1");
+        Logger log = mock(Logger.class);
+        EventSimApp eventSimApiTest = new EventSimApp(log);
+        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
+        eventSimApiTest.eventSimEngine =  mock(SimulatorEngine.class);
+        doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine).publishFabricEvents("test", ".*" , "false", null, null, "1", null,null);
+        assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generateFabricEvents(parameters));
     }
 
     @Test

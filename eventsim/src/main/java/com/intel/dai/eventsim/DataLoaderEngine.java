@@ -8,6 +8,7 @@ import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,7 +21,7 @@ import java.util.*;
  */
 public class DataLoaderEngine {
 
-    public DataLoaderEngine(PropertyMap engineconfiguration, NodeInformation nodeInfo, Logger log) throws SimulatorException {
+    DataLoaderEngine(PropertyMap engineconfiguration, NodeInformation nodeInfo, Logger log) throws SimulatorException {
         engineconfiguration_ = engineconfiguration;
         nodeInfo_ = nodeInfo;
         log_ = log;
@@ -31,36 +32,35 @@ public class DataLoaderEngine {
      * This method is validate loaded EventSim configuration file data.
      */
     private void validateDataLoaderDetails() throws SimulatorException {
-        sensorMetadataLocation_ = engineconfiguration_.getStringOrDefault("SensorMetadata", null);
-        if (sensorMetadataLocation_ == null)
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'SensorMetadata' entry");
+        try {
 
-        rasMetadataLocation_ = engineconfiguration_.getStringOrDefault("RASMetadata", null);
-        if (rasMetadataLocation_ == null)
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'RASMetadata' entry");
+            for(String key : EVENTSIM_CONFIG_KEYS) {
+                if(engineconfiguration_.get(key) == null)
+                    throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
+            }
 
-        jobsMetadataLocation_ = engineconfiguration_.getStringOrDefault("JobsMetadata", null);
-        if (jobsMetadataLocation_ == null)
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'JobsMetadata' entry");
-
-        eventCount_ = engineconfiguration_.getLongOrDefault("eventCount", -1);
-        timeDelayMus_ = engineconfiguration_.getLongOrDefault("timeDelayMus", 1);
-        randomizerSeed_ = engineconfiguration_.getLongOrDefault("randomizerSeed", 1);
-
-        bootParamsLocation_ = engineconfiguration_.getStringOrDefault("BootParameters", null);
-        hwInventoryLocation_ = engineconfiguration_.getStringOrDefault("HWInventory", null);
-        hwInventoryLocationPath_ = engineconfiguration_.getStringOrDefault("HWInventoryPath", null);
-        hwInventoryQueryLocationPath_ = engineconfiguration_.getStringOrDefault("HWInventoryQueryPath", null);
-
-        hwInventoryDiscStatusUrl_ = engineconfiguration_.getStringOrDefault("HWInventoryDiscStatUrl", null);
-        if (hwInventoryDiscStatusUrl_ == null)
-            throw new SimulatorException("EventSim Configuration file doesn't contain 'HWInventoryDiscStatUrl' entry");
+            sensorMetadataLocation_ = engineconfiguration_.getString("SensorMetadata");
+            rasMetadataLocation_ = engineconfiguration_.getString("RASMetadata");
+            jobsMetadataLocation_ = engineconfiguration_.getString("JobsMetadata");
+            bootParamsLocation_ = engineconfiguration_.getString("BootParameters");
+            hwInventoryLocation_ = engineconfiguration_.getString("HWInventory");
+            hwInventoryLocationPath_ = engineconfiguration_.getString("HWInventoryPath");
+            hwInventoryQueryLocationPath_ = engineconfiguration_.getString("HWInventoryQueryPath");
+            hwInventoryDiscStatusUrl_ = engineconfiguration_.getString("HWInventoryDiscStatUrl");
+            eventCount_ = engineconfiguration_.getLong("eventCount");
+            timeDelayMus_ = engineconfiguration_.getLong("timeDelayMus");
+            randomizerSeed_ = engineconfiguration_.getLongOrDefault("randomizerSeed", -1);
+            sensorPerEvent_ = engineconfiguration_.getLong("sensor-rate");
+            eventsTemplate_ = engineconfiguration_.getMap("eventsTemplateConfig");
+        } catch (PropertyNotExpectedType e) {
+            throw new SimulatorException(e.getMessage());
+        }
     }
 
     /**
      * This method is used to load meta data of ras and sensor.
      */
-    public void loadData() throws SimulatorException {
+    void loadData() throws SimulatorException {
         try {
             processSensorMetadata();
             processRASMetadata();
@@ -68,7 +68,9 @@ public class DataLoaderEngine {
             loadSystemManifestFromDB();
             loadForeignLocationData();
             validateForeignLocationsWithDB();
-        } catch (final IOException | ConfigIOParseException e) {
+            validateEventTemplate();
+            loadEventTemplate();
+        } catch (final IOException | ConfigIOParseException | PropertyNotExpectedType e) {
            throw new SimulatorException("Error while loading data into data loader engine: " + e.getMessage());
         }
     }
@@ -161,7 +163,7 @@ public class DataLoaderEngine {
             return EventDefinitionType.DENSE_CHASSIS;
         }
 
-        System.out.println("Event '" + eventDescription + "' didn't match with a known definition");
+        log_.info("Event '" + eventDescription + "' didn't match with a known definition");
         return EventDefinitionType.UNKNOWN;
     }
 
@@ -209,6 +211,30 @@ public class DataLoaderEngine {
         nodeHostnamedata_ = new ArrayList<>(nodeInfo_.getComputeHostnameFromLocationMap().values());
     }
 
+    /**
+     * This method is used to load events template files data
+     * @throws PropertyNotExpectedType If attribute contains incorrect data format
+     */
+    private void loadEventTemplate() throws PropertyNotExpectedType {
+        fabricTemplate_ = eventsTemplate_.getMap("fabric").getString("eventTemplate");
+        fabricStreamId_ = eventsTemplate_.getMap("fabric").getString("streamId");
+    }
+
+    /**
+     * This method is used to validate configuration data
+     * @throws PropertyNotExpectedType If attribute contains incorrect data format
+     */
+    private void validateEventTemplate() throws PropertyNotExpectedType {
+        for (String event : EVENTS) {
+            if (eventsTemplate_.get(event) == null)
+                log_.info("EventSim Configuration file doesn't contain '" + event + "' entry");
+            for (String key : EVENTS_TEMPLATE_KEYS) {
+                if (eventsTemplate_.getMap(event).getString(key) == null)
+                    log_.info("EventSim Configuration file doesn't contain '" + event + "' entry");
+            }
+        }
+    }
+
     private enum EventDefinitionType {
         DENSE_RACK,
         DENSE_CHASSIS,
@@ -217,20 +243,23 @@ public class DataLoaderEngine {
         UNKNOWN
     }
 
-    public List<String> getNodeHostnameData() { return nodeHostnamedata_; }
-    public PropertyDocument getSensorMetaData() { return definitionSensorMetadata_;}
-    public List<String> getRasMetaData() {return rasMetadata_;}
-    public PropertyDocument getJobsMetaData() {return definitionJobsMetadata_;}
-    public List<String> getNodeLocationData() {return nodeLocationdata_;}
-    public List<String> getNonNodeLocationData() {return nonNodeLocationdata_;}
-    public long getDefaultNumberOfEventsToBeGenerated() {return eventCount_;}
-    public long getDefaultTimeDelayMus() {return timeDelayMus_;}
-    public long getDefaultRandomiserSeed() {return randomizerSeed_;}
+    List<String> getNodeHostnameData() { return nodeHostnamedata_; }
+    PropertyDocument getSensorMetaData() { return definitionSensorMetadata_;}
+    List<String> getRasMetaData() {return rasMetadata_;}
+    PropertyDocument getJobsMetaData() {return definitionJobsMetadata_;}
+    List<String> getNodeLocationData() {return nodeLocationdata_;}
+    List<String> getNonNodeLocationData() {return nonNodeLocationdata_;}
+    long getDefaultNumberOfEventsToBeGenerated() {return eventCount_;}
+    long getDefaultTimeDelayMus() {return timeDelayMus_;}
+    long getDefaultRandomiserSeed() {return randomizerSeed_;}
+    long getDefaultSensorsPerEvent() {return sensorPerEvent_;}
     public String getBootParamsFileLocation() { return bootParamsLocation_;}
     public String getHwInventoryFileLocation() {return hwInventoryLocation_;}
     public String getHwInventoryDiscStatusUrl() {return hwInventoryDiscStatusUrl_;}
     public String getHwInventoryFileLocationPath() {return hwInventoryLocationPath_;}
     public String getHwInventoryQueryLocationPath() {return hwInventoryQueryLocationPath_;}
+    public String getFabricEventFileTemplate() {return  fabricTemplate_;}
+    public String getFabricEventStreamId() {return fabricStreamId_;}
     private Collection<Object> allLocations = null;
     private static final String denseRackPattern = "^CC_.*";
     private static final String denseChassisPattern ="^BC_(T|V|P|F|I|L)_NODE[0-3]_(?!(CPU[0-3]|KNC)).*";
@@ -245,16 +274,25 @@ public class DataLoaderEngine {
     private long eventCount_;
     private long timeDelayMus_;
     private long randomizerSeed_;
+    private long sensorPerEvent_;
+    private String[] EVENTSIM_CONFIG_KEYS = {"SensorMetadata", "RASMetadata", "JobsMetadata", "BootParameters",
+            "HWInventory", "HWInventoryPath", "HWInventoryQueryPath",
+            "HWInventoryDiscStatUrl", "eventsTemplateConfig"};
+    private String[] EVENTS_TEMPLATE_KEYS = {"eventTemplate", "streamId"};
+    private String[] EVENTS = {"fabric"};
 
-    PropertyMap definitionSensorMetadata_;
-    PropertyMap definitionJobsMetadata_;
-    ArrayList<String> rasMetadata_;
-    List<String> nodeLocationdata_;
-    List<String> nonNodeLocationdata_ = new ArrayList<>();
-    List<String> nodeHostnamedata_;
+    private PropertyMap definitionSensorMetadata_;
+    private PropertyMap definitionJobsMetadata_;
+    private ArrayList<String> rasMetadata_;
+    private List<String> nodeLocationdata_;
+    private List<String> nonNodeLocationdata_ = new ArrayList<>();
+    private List<String> nodeHostnamedata_;
     private String bootParamsLocation_;
     private String hwInventoryLocation_;
     private String hwInventoryDiscStatusUrl_;
     private String hwInventoryLocationPath_;
     private String hwInventoryQueryLocationPath_;
+    private PropertyMap eventsTemplate_;
+    private String fabricTemplate_;
+    private String fabricStreamId_;
 }

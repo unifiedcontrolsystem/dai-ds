@@ -299,6 +299,92 @@ public class SimulatorEngineTest {
     }
 
     @Test
+    public void testFabricEvents() throws Exception {
+        final File templateFile = tempFolder.newFile("template.json");
+        loadDataIntoFile(templateFile, fabricTemplate);
+        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
+        assert parser_ != null;
+        PropertyMap config = parser_.fromString(eventSimConfig).getAsMap();
+        config.getMap("eventsimConfig").getMap("eventsTemplateConfig").getMap("fabric").put("eventTemplate", templateFile.getAbsolutePath());
+        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
+        loadDataIntoFile(eventSimConfigFile, parser_.toString(config));
+        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
+        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
+        NodeInformation nodeInfoMock = mock(NodeInformation.class);
+        List<String> locations = new ArrayList<>();
+        locations.add("R0");
+        locations.add("R0-SMS");
+        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
+        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
+        eventSimTestMock.initialise(args);
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        simulatorEngineTest.initialize();
+        simulatorEngineTest.publishFabricEvents("R0.*", ".*", "false", "0", null, "5", "1", null);
+        assertEquals(5, simulatorEngineTest.getPublishedForeignEventsCount());
+    }
+
+    @Test
+    public void testFabricEvents_DefaultValues() throws Exception {
+        final File templateFile = tempFolder.newFile("template.json");
+        loadDataIntoFile(templateFile, fabricTemplate);
+        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
+        assert parser_ != null;
+        PropertyMap config = parser_.fromString(eventSimConfig).getAsMap();
+        config.getMap("eventsimConfig").getMap("eventsTemplateConfig").getMap("fabric").put("eventTemplate", templateFile.getAbsolutePath());
+        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
+        loadDataIntoFile(eventSimConfigFile, parser_.toString(config));
+        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
+        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
+        NodeInformation nodeInfoMock = mock(NodeInformation.class);
+        List<String> locations = new ArrayList<>();
+        locations.add("R0");
+        locations.add("R0-SMS");
+        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
+        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
+        eventSimTestMock.initialise(args);
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        simulatorEngineTest.initialize();
+        simulatorEngineTest.publishFabricEvents(".*", ".*", "true", "0", "123", null, null, null);
+        assertEquals(3, simulatorEngineTest.getPublishedForeignEventsCount());
+    }
+
+    @Test(expected = SimulatorException.class)
+    public void testFabricEvents_MismatchLocationRegex() throws Exception {
+        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
+        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
+        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
+        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
+        NodeInformation nodeInfoMock = mock(NodeInformation.class);
+        List<String> locations = new ArrayList<>();
+        locations.add("R0");
+        locations.add("R0-SMS");
+        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
+        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
+        eventSimTestMock.initialise(args);
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        simulatorEngineTest.initialize();
+        simulatorEngineTest.publishFabricEvents("GT.*", ".*", "true", null, null, null, "1",null);
+    }
+
+    @Test(expected = SimulatorException.class)
+    public void testFabricEvents_MismatchLabelRegex() throws Exception {
+        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
+        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
+        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
+        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
+        NodeInformation nodeInfoMock = mock(NodeInformation.class);
+        List<String> locations = new ArrayList<>();
+        locations.add("R0");
+        locations.add("R0-SMS");
+        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
+        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
+        eventSimTestMock.initialise(args);
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        simulatorEngineTest.initialize();
+        simulatorEngineTest.publishFabricEvents(".*", "GT.*", "true", null, null, null, "1",null);
+    }
+
+    @Test
     public void testSensorEvents() throws Exception {
         final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
         loadDataIntoFile(eventSimConfigFile, eventSimConfig);
@@ -782,44 +868,57 @@ public class SimulatorEngineTest {
     }
 
     private String eventSimConfig = "{\n" +
-            "    \"eventsimConfig\" : {\n" +
-            "        \"SensorMetadata\": \"/resources/ForeignSensorMetaData.json\",\n" +
-            "        \"RASMetadata\": \"/resources/ForeignEventMetaData.json\",\n" +
-            "        \"JobsMetadata\": \"/resources/ForeignJobsMetaData.json\",\n" +
-            "        \"BootParameters\" : \"/opt/ucs/etc/BootParameters.json\",\n" +
-            "        \"HWInventory\" : \"/opt/ucs/etc/HWInventory.json\",\n" +
-            "        \"HWInventoryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryQueryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryDiscStatUrl\" : \"/Inventory/DiscoveryStatus\",\n" +
-            "        \"eventCount\": 3,\n" +
-            "        \"timeDelayMus\": 1,\n" +
-            "        \"eventRatioSensorToRas\": 1,\n" +
-            "        \"randomizerSeed\": \"234\"\n" +
-            "    },\n" +
-            "    \"networkConfig\" : {\n" +
-            "        \"network\" : \"sse\",\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"*\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
-            "            \"urls\": {\n" +
-            "                \"/v1/stream/cray-telemetry-fan\": [\n" +
-            "                    \"telemetry\"\n" +
-            "                ] ,\n" +
-            "                \"/streams/nodeBootEvents\": [\n" +
-            "                    \"stateChanges\"\n" +
-            "                ] ,\n" +
-            "                \"/v1/stream/cray-dmtf-resource-event\": [\n" +
-            "                    \"events\"\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        } ,\n" +
-            "        \"rabbitmq\": {\n" +
-            "            \"exchangeName\": \"simulator\" ,\n" +
-            "            \"uri\": \"amqp://127.0.0.1\"\n" +
+            "  \"eventsimConfig\" : {\n" +
+            "      \"SensorMetadata\": \"/resources/ForeignSensorMetaData.json\",\n" +
+            "      \"RASMetadata\": \"/resources/ForeignEventMetaData.json\",\n" +
+            "      \"JobsMetadata\" : \"/resources/ForeignJobsMetaData.json\",\n" +
+            "      \"BootParameters\" : \"/opt/ucs/etc/BootParameters.json\",\n" +
+            "      \"HWInventory\" : \"/opt/ucs/etc/HWInventory.json\",\n" +
+            "      \"HWInventoryPath\" : \"/opt/ucs/etc\",\n" +
+            "      \"HWInventoryQueryPath\" : \"/opt/ucs/etc\",\n" +
+            "      \"HWInventoryDiscStatUrl\" : \"/Inventory/DiscoveryStatus\",\n" +
+            "      \"eventCount\": 3,\n" +
+            "      \"timeDelayMus\": 1,\n" +
+            "      \"randomizerSeed\": \"234\",\n" +
+            "      \"sensor-rate\":1,\n" +
+            "      \"eventsTemplateConfig\" : {\n" +
+            "        \"fabric\" : {\n" +
+            "          \"eventTemplate\" : \"/opt/ucs/etc/tel_energy.json\",\n" +
+            "          \"streamId\" : \"events\"\n" +
+            "        },\n" +
+            "        \"environment\" : {\n" +
+            "          \"eventTemplate\" : \"/opt/ucs/etc/fabric.json\",\n" +
+            "          \"streamId\" : \"telemetry\"\n" +
+            "        },\n" +
+            "        \"boot\" : {\n" +
+            "          \"eventTemplate\" : \"/opt/ucs/etc/fabric.json\",\n" +
+            "          \"streamId\" : \"stateChanges\"\n" +
             "        }\n" +
-            "    }\n" +
-            "}\n" +
-            "\n";
+            "      }\n" +
+            "  },\n" +
+            "  \"networkConfig\" : {\n" +
+            "      \"network\" : \"sse\",\n" +
+            "      \"sseConfig\": {\n" +
+            "          \"serverAddress\": \"sms01-nmn.local\" ,\n" +
+            "          \"serverPort\": \"8080\" ,\n" +
+            "          \"urls\": {\n" +
+            "            \"/v1/stream/cray-telemetry-fan\": [\n" +
+            "              \"telemetry\"\n" +
+            "            ] ,\n" +
+            "            \"/streams/nodeBootEvents\": [\n" +
+            "              \"stateChanges\"\n" +
+            "            ] ,\n" +
+            "            \"/v1/stream/cray-dmtf-resource-event\": [\n" +
+            "              \"events\"\n" +
+            "            ]\n" +
+            "          }\n" +
+            "      } ,\n" +
+            "      \"rabbitmq\": {\n" +
+            "          \"exchangeName\": \"simulator\" ,\n" +
+            "          \"uri\": \"amqp://127.0.0.1\"\n" +
+            "      }\n" +
+            "  }\n" +
+            "}\n";
 
     private String invalidEventSimConfig = "{\n" +
             "    \"eventsimConfig\" : {\n" +
@@ -893,5 +992,35 @@ public class SimulatorEngineTest {
             "    \"start-time\" : \"2020-05-27 16:34:50.607Z\"\n" +
             "  },\n" +
             "  \"delay\" : \"0\"\n" +
+            "}";
+
+    private String fabricTemplate = "{\n" +
+            "  \"metrics\": {\n" +
+            "    \"messages\": [\n" +
+            "      {\n" +
+            "        \"Events\": [\n" +
+            "          {\n" +
+            "            \"EventTimestamp\": \"2020-06-03T22:40:14.059Z\" ,\n" +
+            "            \"MessageId\": \"test\" ,\n" +
+            "            \"Oem\": {\n" +
+            "              \"Sensors\": [\n" +
+            "                {\n" +
+            "                  \"Timestamp\": \"2020-06-03T22:40:14.059Z\" ,\n" +
+            "                  \"Location\": \"test\" ,\n" +
+            "                  \"ParentalIndex\": 0 ,\n" +
+            "                  \"PhysicalContext\": \"test\" ,\n" +
+            "                  \"Index\": 0 ,\n" +
+            "                  \"DeviceSpecificContext\": \"test\" ,\n" +
+            "                  \"SubIndex\": 12 ,\n" +
+            "                  \"Value\": \"14576\"\n" +
+            "                }\n" +
+            "              ] ,\n" +
+            "              \"TelemetrySource\": \"test\"\n" +
+            "            }\n" +
+            "          }\n" +
+            "        ]\n" +
+            "      } \n" +
+            "    ]\n" +
+            "  }\n" +
             "}";
 }

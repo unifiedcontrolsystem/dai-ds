@@ -1,5 +1,6 @@
 package com.intel.dai.eventsim;
 
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
@@ -7,6 +8,7 @@ import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -81,6 +83,14 @@ class SystemGenerator {
      */
     List<ForeignEvent> publishBootReadyEventsForLocation(long numOfEvents) throws ConversionException {
         return new ArrayList<>(component_.publishAvailableEventsForLocation(regexMatchedLocations, numOfEvents));
+    }
+
+    Event publishFabricEventsForLocation(long numOfEvents, long seed, long sensorRate)
+            throws SimulatorException, ConversionException, PropertyNotExpectedType {
+        PropertyDocument fabricEvents =  component_.publishFabricEvents(numOfEvents, seed, sensorRate, regexMatchedLocations,
+                fabricRegexMatchedLabelDescriptions_);
+        Event event = new Event(dataLoaderEngine.getFabricEventStreamId(), fabricEvents);
+        return event;
     }
 
     /**
@@ -182,7 +192,7 @@ class SystemGenerator {
      * @return number of matching regex label descriptions
      * @throws PropertyNotExpectedType when unable to fetch respective label description data.
      */
-    int getMatchedRegexLabels(final String regexLabelDesc, final SimulatorEngine.EVENT_TYPE eventType) throws PropertyNotExpectedType {
+    int getMatchedRegexLabels(final String regexLabelDesc, final SimulatorEngine.EVENT_TYPE eventType) throws PropertyNotExpectedType, IOException, ConfigIOParseException {
         int value = 0;
 
         switch (eventType) {
@@ -222,6 +232,30 @@ class SystemGenerator {
                                 }
                             }
                             value = jobsRegexMatchedLabelDescriptions_.size();
+                            break;
+
+            case FABRIC :   value = 0;
+                            String fabricTemplateFile = dataLoaderEngine.getFabricEventFileTemplate();
+                            PropertyDocument template = LoadFileLocation.fromFileLocation(fabricTemplateFile);
+                            PropertyMap metricData = template.getAsMap().getMap("metrics");
+                            PropertyArray messageData = metricData.getArray("messages");
+                            for(int i = 0; i < messageData.size(); i++) {
+                                PropertyArray eventsData = messageData.getMap(0).getArray("Events");
+                                for(int j = 0; j < eventsData.size(); j++) {
+                                    PropertyMap oemData = eventsData.getMap(j).getMap("Oem");
+                                    PropertyArray sensorData = oemData.getArray("Sensors");
+                                    PropertyArray updatedSensorData = new PropertyArray();
+                                    for(int k = 0; k < sensorData.size(); k++) {
+                                        PropertyMap sensor = sensorData.getMap(k);
+                                        if(sensor.getString("PhysicalContext").matches(regexLabelDesc)) {
+                                            updatedSensorData.add(sensor);
+                                            value++;
+                                        }
+                                    }
+                                    oemData.put("Sensors", updatedSensorData);
+                                }
+                            }
+                            fabricRegexMatchedLabelDescriptions_ = template;
                             break;
 
             default      :  break;
@@ -395,4 +429,5 @@ class SystemGenerator {
     private List<PropertyDocument> rasRegexMatchedLabelDescriptions_ = new ArrayList<>();
     private List<PropertyDocument> sensorRegexMatchedLabelDescriptions_ = new ArrayList<>();
     private List<PropertyDocument> jobsRegexMatchedLabelDescriptions_ = new ArrayList<>();
+    private PropertyDocument fabricRegexMatchedLabelDescriptions_;
 }

@@ -6,18 +6,13 @@ import com.intel.networking.HttpMethod;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.sql.Timestamp;
-import java.util.Random;
-
 import org.json_voltpatches.JSONArray;
 import org.json_voltpatches.JSONObject;
+
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 /**
  * Description of class EventSimApp.
@@ -56,6 +51,7 @@ public class EventSimApp extends EventSim {
 
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
         source_.register("/apis/events/boot/*", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
+        source_.register("/apis/events/fabric", HttpMethod.POST.toString(), eventsimApi::generateFabricEvents);
         source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generatRasEvents);
         source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
@@ -106,6 +102,29 @@ public class EventSimApp extends EventSim {
                 default      :   eventSimEngine.publishBootEvents(locations, bfProbability, burst, delay, seed, output);
                                  break;
             }
+            return create_result_json("F", "Success");
+        } catch (SimulatorException e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send fabric events to network.
+     * @param parameters input details of the request.
+     * @return Status = F if ras events are generated, Status = E on failure
+     */
+    String generateFabricEvents(Map<String, String> parameters) {
+        try {
+            log_.info("Received fabric api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            String burst = parameters.getOrDefault("burst", "false");
+            String eventsCount = parameters.getOrDefault("count", null);
+            String delay = parameters.getOrDefault("delay", null);
+            String label = parameters.getOrDefault("label", ".*");
+            String locations = parameters.getOrDefault("locations", ".*");
+            String output = parameters.getOrDefault("output", null);
+            String seed = parameters.getOrDefault("seed", null);
+            String sensorsRate = parameters.getOrDefault("sensor-rate", null);
+            eventSimEngine.publishFabricEvents(locations, label, burst, delay, seed, eventsCount, sensorsRate, output);
             return create_result_json("F", "Success");
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());

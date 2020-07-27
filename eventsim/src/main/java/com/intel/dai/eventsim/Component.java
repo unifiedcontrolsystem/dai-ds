@@ -6,6 +6,7 @@ import com.intel.logging.Logger;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import com.sun.istack.NotNull;
 
 import java.util.ArrayList;
@@ -26,6 +27,55 @@ public class Component {
         } catch(IOException | ConfigIOParseException e) {
             bootImageInfo_ = new PropertyArray();
         }*/
+    }
+
+    /**
+     * This method is to create fabric events.
+     * @param eventsPerLocation number of events to create at a particular location.
+     * @param seed to repeat same type of data.
+     * @param sensorRate number of sensors per events message block
+     * @param regexMatchedLocations locations matching the location-regex input.
+     * @param regexMatchedTemplate descriptions matching the description-regex.
+     * @return fabric events.
+     * @throws ConversionException unable to create fabric event.
+     */
+    PropertyDocument publishFabricEvents(final long eventsPerLocation, final long seed, final long sensorRate,
+                                                  @NotNull final List<String> regexMatchedLocations,
+                                                  @NotNull final PropertyDocument regexMatchedTemplate)
+            throws ConversionException, PropertyNotExpectedType {
+        long remainingEvents = eventsPerLocation;
+        randomNumber.setSeed(seed);
+        PropertyMap metricData = regexMatchedTemplate.getAsMap().getMap("metrics");
+        PropertyArray messageData = metricData.getArray("messages");
+        PropertyArray eventsData = messageData.getMap(generateRandomNumberBetween(0, messageData.size())).getArray("Events");
+        PropertyMap oemData = eventsData.getMap(generateRandomNumberBetween(0, eventsData.size())).getMap("Oem");
+        PropertyArray sensorData = oemData.getArray("Sensors");
+
+        PropertyArray updatedMessageData = new PropertyArray();
+
+        while (remainingEvents != 0) {
+            PropertyArray copyMessageData = new PropertyArray(metricData.getArray("messages"));
+            PropertyMap copyMessageMap = copyMessageData.getMap(generateRandomNumberBetween(0, messageData.size()));
+            PropertyArray copyEvents = copyMessageMap.getArray("Events");
+            PropertyMap copyEventItemMap = copyEvents.getMap(generateRandomNumberBetween(0, copyEvents.size()));
+            PropertyMap updatedOemData = copyEventItemMap.getMap("Oem");
+            PropertyArray updatedSensorData = new PropertyArray();
+            for (int k = 0; k < sensorRate; k++) {
+                if (remainingEvents == 0)
+                    break;
+                String location = regexMatchedLocations.get(generateRandomNumberBetween(0, regexMatchedLocations.size()));
+                PropertyMap sensor = sensorData.getMap(generateRandomNumberBetween(0, sensorData.size()));
+                sensor.put("Location", CommonFunctions.convertLocationToForeign(location));
+                updatedSensorData.add(sensor);
+                remainingEvents--;
+            }
+            updatedOemData.put("Sensors", updatedSensorData);
+            copyMessageMap.put("Events", copyEvents);
+            updatedMessageData.add(copyMessageMap);
+        }
+
+        metricData.put("messages",updatedMessageData);
+        return regexMatchedTemplate;
     }
 
     /**

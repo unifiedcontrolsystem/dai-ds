@@ -1,8 +1,13 @@
 package com.intel.dai.eventsim;
 
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
+import com.intel.properties.PropertyArray;
+import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.sun.istack.NotNull;
@@ -23,6 +28,7 @@ public class SimulatorEngine {
         dataLoaderEngine_ = dataLoaderEngine;
         source_ = source;
         log_ = log;
+        jsonParser_ = ConfigIOFactory.getInstance("json");
         system_ = new SystemGenerator(log);
         scenario_ = new Scenario();
     }
@@ -187,6 +193,45 @@ public class SimulatorEngine {
     }
 
     /**
+     * This method is used to create and send fabric events to network
+     * @param regexLocation regex of locations
+     * @param regexLabel regex for event type/description
+     * @param burst true for burst mode, false for constant mode
+     * @param timeDelayMus time delay to induce while sending events to network
+     * @param randomiserSeed randomization seed to replicate data.
+     * @param numOfEvents number of ras events to generate
+     * @param sensorsRate number of sensors per event message block
+     * @param output store generated events in a file
+     */
+    void publishFabricEvents(@NotNull final String regexLocation, @NotNull String regexLabel, @NotNull String burst, @NotNull String timeDelayMus, @NotNull String randomiserSeed,
+                             @NotNull String numOfEvents, @NotNull String sensorsRate, @NotNull String output) throws SimulatorException {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("location-regex", regexLocation);
+        parameters.put("label-regex", regexLabel);
+        parameters.put("burst", burst);
+
+        try {
+            validateParameters(parameters);
+            loadDefaults();
+            boolean burstMode = Boolean.parseBoolean(burst);
+            if (timeDelayMus != null)
+                timeDelayMus_ = Long.parseLong(timeDelayMus);
+            if (randomiserSeed != null)
+                randomiserSeed_ = Long.parseLong(randomiserSeed);
+            if (numOfEvents != null)
+                numOfEvents_ = Long.parseLong(numOfEvents);
+            if (sensorsRate != null)
+                sensorsPerEvent_= Long.parseLong(sensorsRate);
+            if (ExistsLocationsMatchedRegex(regexLocation, EVENT_TYPE.RAS) && ExistsMatchedRegexLabel(regexLabel, EVENT_TYPE.FABRIC)) {
+                Event rasEvents = system_.publishFabricEventsForLocation(numOfEvents_, randomiserSeed_, sensorsPerEvent_);
+                publishGeneratedForeignEvents(rasEvents, burstMode, output);
+            }
+        } catch (final ConversionException | PropertyNotExpectedType | IOException | ConfigIOParseException e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
+    /**
      * This method is used to create and send ras events to network
      * @param regexLocation regex of locations
      * @param regexLabel regex for event type/description
@@ -219,7 +264,7 @@ public class SimulatorEngine {
                 events.put(1L, rasEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final ConversionException | PropertyNotExpectedType e) {
+        } catch (final ConversionException | PropertyNotExpectedType | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -257,7 +302,7 @@ public class SimulatorEngine {
                 events.put(1L, sensorEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final PropertyNotExpectedType | ConversionException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -295,7 +340,7 @@ public class SimulatorEngine {
                 events.put(1L, jobEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final PropertyNotExpectedType | ConversionException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -393,7 +438,7 @@ public class SimulatorEngine {
                     break;
             }
 
-        } catch (PropertyNotExpectedType | ConversionException e) {
+        } catch (PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -411,6 +456,12 @@ public class SimulatorEngine {
      * @return generated events
      */
     long getPublishedEventsCount() { return publishedEvents_.size(); }
+
+    /**
+     * This method is used to return number of events generated and sent to network.
+     * @return generated events
+     */
+    long getPublishedForeignEventsCount() { return totalPublishedEvents; }
 
     /**
      * This method is used to send repeat scenario generated events.
@@ -468,6 +519,39 @@ public class SimulatorEngine {
             publishGeneratedEvents(events, burst, ouput);
             counter--;
             System.out.println("Counter : " + counter);
+        }
+    }
+
+    private void publishGeneratedForeignEvents(Event event, boolean burstMode, String output) throws SimulatorException {
+        publishedEvents_ .clear();
+        long droppedEvents = 0;
+        ZonedDateTime startTime1 = ZonedDateTime.now(ZoneId.systemDefault());
+        log_.info("Start Time : " + startTime1.toString());
+        PropertyDocument events = event.message;
+        try {
+            long eventsToPublish = updateTimeStamp(events);
+            source_.send(event.streamId, jsonParser_.toString(events));
+            totalPublishedEvents = totalPublishedEvents + eventsToPublish;
+            publishedEvents_.add(events.toString() + "\n\n");
+            if(!burstMode)
+                delayMicroSecond(timeDelayMus_);
+        } catch (RESTClientException | PropertyNotExpectedType e) {
+            droppedEvents++;
+            throw new SimulatorException(e.getMessage());
+        }
+
+        ZonedDateTime endTime1 = ZonedDateTime.now(ZoneId.systemDefault());
+        log_.debug("End Time : " + endTime1.toString());
+        log_.debug("Total Published events : " + totalPublishedEvents);
+        log_.debug("Dropped events : " + droppedEvents);
+        log_.debug("Total Time Main Start to Main End :" + (Duration.between(startTime1,endTime1).toSeconds()) + " seconds");
+
+        if(output != null) {
+            try {
+                scenario_.writeEventToFile(publishedEvents_, output);
+            } catch (IOException e) {
+                throw new SimulatorException(e.getMessage());
+            }
         }
     }
 
@@ -570,7 +654,7 @@ public class SimulatorEngine {
      * @return true when matched regex label descriptions exists
      * @throws SimulatorException when no matched regex label descriptions.
      */
-    private boolean ExistsMatchedRegexLabel(final String regexLabel, final EVENT_TYPE eventType) throws PropertyNotExpectedType, SimulatorException {
+    private boolean ExistsMatchedRegexLabel(final String regexLabel, final EVENT_TYPE eventType) throws PropertyNotExpectedType, SimulatorException, IOException, ConfigIOParseException {
         if (system_.getMatchedRegexLabels(regexLabel, eventType) == 0) {
             if (eventType.equals(EVENT_TYPE.RAS))
                 throw new SimulatorException("No Matched Regex Locations to generate RAS Events.");
@@ -578,6 +662,8 @@ public class SimulatorEngine {
                 throw new SimulatorException("No Matched Regex Locations to generate Sensor Events.");
             else if (eventType.equals(EVENT_TYPE.JOB))
                 throw new SimulatorException("No Matched Regex Locations to generate Job Events.");
+            else if (eventType.equals(EVENT_TYPE.FABRIC))
+                throw new SimulatorException("No Matched Regex Locations to generate Fabric Events.");
         }
         return true;
     }
@@ -597,6 +683,7 @@ public class SimulatorEngine {
         numOfEvents_ = dataLoaderEngine_.getDefaultNumberOfEventsToBeGenerated();
         timeDelayMus_ = dataLoaderEngine_.getDefaultTimeDelayMus();
         randomiserSeed_ = dataLoaderEngine_.getDefaultRandomiserSeed();
+        sensorsPerEvent_ = dataLoaderEngine_.getDefaultSensorsPerEvent();
     }
 
     /**
@@ -623,12 +710,38 @@ public class SimulatorEngine {
             defaultMap.put(eventType.toString(), 0L);
     }
 
+    private long updateTimeStamp(PropertyDocument events) throws PropertyNotExpectedType {
+        long value = 0;
+        PropertyMap metricData = events.getAsMap().getMap("metrics");
+        PropertyArray messageData = metricData.getArray("messages");
+        for(int i = 0; i < messageData.size(); i++) {
+            PropertyArray eventsData = messageData.getMap(i).getArray("Events");
+            for(int j = 0; j < eventsData.size(); j++) {
+                PropertyMap eventData = eventsData.getMap(j);
+                eventData.put("EventTimestamp", getCurrentTimestamp());
+                PropertyMap oemData = eventData.getMap("Oem");
+                PropertyArray sensorData = oemData.getArray("Sensors");
+                for(int k = 0; k < sensorData.size(); k++) {
+                    PropertyMap sensor = sensorData.getMap(k);
+                    sensor.put("Timestamp", getCurrentTimestamp());
+                    value++;
+                }
+            }
+        }
+        return value;
+    }
+
+    private String getCurrentTimestamp() {
+        return ZonedDateTime.now(ZoneId.of("UTC")).toInstant().toString();
+    }
+
     enum EVENT_TYPE {
         BOOT,
         RAS,
         SENSOR,
         JOB,
-        OTHER;
+        FABRIC,
+        OTHER
     }
 
     private final DataLoaderEngine dataLoaderEngine_;
@@ -638,8 +751,11 @@ public class SimulatorEngine {
     private long numOfEvents_;
     private long timeDelayMus_;
     private long randomiserSeed_;
+    private long sensorsPerEvent_;
+    private long totalPublishedEvents;
     private List<String> publishedEvents_ = new ArrayList<>();
     private final Logger log_;
     private Map<String, Long> events_ = new HashMap<>();
+    private final ConfigIO jsonParser_;
 /*    private List<String> publishedEvents1_ = new ArrayList<>();*/
 }
