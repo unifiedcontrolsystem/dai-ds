@@ -328,6 +328,7 @@ public abstract class FabricAdapter {
         config.put("aggregateUseMovingAverage", "false");
 
         // Re-publishing configuration
+        config.put("disablePublishing", "false");
         config.put("publishServerUrl", "amqp://127.0.0.1"); // if null, no republish is done.
         config.put("exchangeName", "rePublishFabric"); // RabbitMQ's exchange name
         config.put("rawTopic", "ucs_fabric_raw_telemetry");
@@ -335,7 +336,7 @@ public abstract class FabricAdapter {
         config.put("eventsTopic", "ucs_fabric_events");
 
         // Connection information...
-        config.put("use-ssl", "true");
+        config.put("use-ssl", "false");
         config.put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");
         config.put("tokenServer", null); // Default is no authentication...
 
@@ -411,7 +412,8 @@ public abstract class FabricAdapter {
     }
 
     private void setupPublisher() throws AdapterException {
-        if(publisher_ == null) {
+        boolean doPublishing = !Boolean.parseBoolean(config_.getOrDefault("disablePublishing", "false"));
+        if(publisher_ == null && doPublishing) {
             try {
                 publisher_ = NetworkDataSourceFactory.createInstanceWithLogger(log_, "rabbitmq", config_);
                 if (publisher_ == null)
