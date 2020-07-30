@@ -73,7 +73,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
         if(args_.containsKey("connectTimeout"))
             connectionTimeoutSeconds_ = Integer.parseInt(args_.get("connectTimeout"));
         String tokenProviderName = args_.getOrDefault("tokenAuthProvider", null);
-        if(tokenProviderName != null) {
+        if(tokenProviderName != null && args_.getOrDefault("tokenServer", null) != null) {
             createTokenProvider(tokenProviderName, args_);
             if(tokenProvider_ == null) throw new NetworkException("Failed to create the OAuth token provider class");
         }
