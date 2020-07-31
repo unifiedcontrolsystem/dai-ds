@@ -8,6 +8,7 @@ import com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark;
 import com.intel.networking.sink.http_callback.NetworkDataSinkHttpCallback;
 import com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ;
 import com.intel.networking.sink.restsse.NetworkDataSinkSSE;
+import com.intel.networking.sink.sse.NetworkDataSinkEventSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -97,5 +98,6 @@ public final class NetworkDataSinkFactory {
         put("sse", NetworkDataSinkSSE.class);
         put("http_callback", NetworkDataSinkHttpCallback.class);
         put("benchmark", NetworkDataSinkBenchmark.class);
+        put("eventSource", NetworkDataSinkEventSource.class);
     }};
 }

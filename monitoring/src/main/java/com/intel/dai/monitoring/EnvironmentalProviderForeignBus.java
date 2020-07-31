@@ -82,26 +82,26 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
         if(!configured_) getConfig(config);
         // Store raw but normalized data...
         log_.debug("Storing raw telemetry for node %s.", data.getLocation());
-        systemActions.storeNormalizedData(data.getTelemetryDataType(), data.getLocation(),
+        systemActions.storeNormalizedData(data.getDescription(), data.getLocation(),
                 data.getNanoSecondTimestamp(), data.getValue());
         // Publish raw but normalized data...
         if(publish_) {
             log_.debug("Publishing raw telemetry for node %s.", data.getLocation());
-            systemActions.publishNormalizedData(rawTopic_, data.getTelemetryDataType(), data.getLocation(),
+            systemActions.publishNormalizedData(rawTopic_, data.getDescription(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getValue());
         }
         if(Math.abs(data.getAverage() - Double.MIN_VALUE) >= 0.000001) {
             // Store and publish aggregate data it available...
             log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
-                    data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
+                    data.getDescription(), data.getLocation(), data.getNanoSecondTimestamp(),
                     data.getMinimum(), data.getMaximum(), data.getAverage());
-            systemActions.storeAggregatedData(data.getTelemetryDataType(), data.getLocation(),
+            systemActions.storeAggregatedData(data.getDescription(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
             if(publish_) {
                 log_.debug("Publishing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
-                        data.getTelemetryDataType(), data.getLocation(), data.getNanoSecondTimestamp(),
+                        data.getDescription(), data.getLocation(), data.getNanoSecondTimestamp(),
                         data.getMinimum(), data.getMaximum(), data.getAverage());
-                systemActions.publishAggregatedData(aggregatedTopic_, data.getTelemetryDataType(), data.getLocation(),
+                systemActions.publishAggregatedData(aggregatedTopic_, data.getDescription(), data.getLocation(),
                         data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
             }
         }
@@ -129,7 +129,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
         }
     }
 
-    private CommonDataFormat aggregateData(CommonDataFormat raw) {
+    private synchronized CommonDataFormat aggregateData(CommonDataFormat raw) {
         if(doAggregation_) {
             log_.debug("Aggregating data...");
             String key = raw.getLocation() + ":" + raw.getTelemetryDataType();

@@ -17,5 +17,5 @@ public interface SSERequestBuilder {
      * @param eventTypes The event types to "subscribe" to for the requested connection.
      * @return The String for the request body or query line.
      */
-    String buildRequest(Collection<String> eventTypes, Map<String,String> builderSpecific);
+    String buildRequest(Collection<String> eventTypes, Map<String, String> builderSpecific);
 }

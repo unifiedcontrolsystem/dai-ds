@@ -64,7 +64,7 @@ public class NetworkDataSinkSSE implements NetworkDataSink {
                 args_.getOrDefault("urlPath", "/restsse/")));
         implementation_ = args_.getOrDefault("implementation", "apache");
         String sseBuilder = args_.getOrDefault("requestBuilder",
-                "com.intel.networking.sink.restsse.SSEStreamRequestBuilder");
+                "com.intel.networking.sink.SSEStreamRequestBuilder");
         createBuilder(sseBuilder);
         if(builder_ == null)
             throw new NetworkException("Failed to create a network REST request builder: " + sseBuilder);

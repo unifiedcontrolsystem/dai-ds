@@ -13,6 +13,7 @@ import com.intel.logging.Logger;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -53,7 +54,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     public void storeAggregatedData(String dataType, String location, long nanoSecondsTimeStamp, double min,
                                     double max, double average) {
         try {
-            telemetryActions_.logEnvDataAggregated(dataType, location, nanoSecondsTimeStamp / 1000L, max, min, average,
+            telemetryActions_.logEnvDataAggregated(dataType, location, nanoSecondsTimeStamp / 1_000L, max, min, average,
                     adapter_.getType(), adapter_.getBaseWorkItemId());
         } catch(DataStoreException e) {
             log_.exception(e, "Failed to store aggregated data");
@@ -177,15 +178,22 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
     @Override
     public void logFailedToUpdateNodeBootImageId(String location, String instanceData) {
-        long ts = Instant.now().toEpochMilli() * 1000L;
+        long ts = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
         eventActions_.logRasEventNoEffectedJob("1000000084", instanceData, location, ts, adapter_.getType(),
                 adapter_.getBaseWorkItemId());
     }
 
     @Override
     public void logFailedToUpdateBootImageInfo(String instanceData) {
-        long ts = Instant.now().toEpochMilli() * 1000L;
+        long ts = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
         eventActions_.logRasEventNoEffectedJob("1000000085", instanceData, null, ts, adapter_.getType(),
+                adapter_.getBaseWorkItemId());
+    }
+
+    @Override
+    public void logFailedToUpdateWorkItemResults(String instanceData) {
+        long ts = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
+        eventActions_.logRasEventNoEffectedJob("0001000017", instanceData, null, ts, adapter_.getType(),
                 adapter_.getBaseWorkItemId());
     }
 

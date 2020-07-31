@@ -21,6 +21,7 @@ public class NetworkDataSinkRabbitMQ implements NetworkDataSink {
     /**
      * Used by the {@link NetworkDataSinkFactory} to create an instance of the RabbitMQ provider.
      *
+     * @param logger The passed logger.
      * @param args A Map<String,String> where the following values are recognized:
      *
      * exchangeName - (required) The required exchangeName for RabbitMQ.
@@ -54,8 +55,7 @@ public class NetworkDataSinkRabbitMQ implements NetworkDataSink {
     }
 
     @Override
-    public void initialize() {
-    }
+    public void initialize() { }
 
     /**
      * Clear all previously set subjects. Has no effect if startListening was already called.

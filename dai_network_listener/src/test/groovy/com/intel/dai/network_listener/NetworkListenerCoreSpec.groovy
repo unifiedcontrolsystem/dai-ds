@@ -1,9 +1,11 @@
 package com.intel.dai.network_listener
 
 import com.intel.dai.dsapi.DataStoreFactory
+import com.intel.dai.dsapi.WorkQueue
 import com.intel.logging.Logger
 import com.intel.networking.sink.NetworkDataSink
 import com.intel.perflogging.BenchmarkHelper
+import com.intel.properties.PropertyMap
 import spock.lang.Specification
 
 class NetworkListenerCoreSpec extends Specification {
@@ -26,6 +28,13 @@ class NetworkListenerCoreSpec extends Specification {
         list.add(mock1)
         list.add(mock2)
         underTest_.backgroundContinueConnections(list)
+        expect: true
+    }
+
+    def "Test streamLocationCallback"() {
+        underTest_.streamLocations = new PropertyMap()
+        underTest_.workQueue_ = Mock(WorkQueue)
+        underTest_.streamLocationCallback("location", "/api", null)
         expect: true
     }
 }

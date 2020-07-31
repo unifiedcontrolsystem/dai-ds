@@ -46,13 +46,19 @@ public class KeycloakTokenAuthentication implements TokenAuthentication {
             log_.debug("    ===>>> '%s' = '%s'", entry.getKey(), entry.getValue());
         KeycloakBuilder builder = getBuilder()
                 .clientId(getRequiredArgumentValue(arguments, "clientId"))
-                .clientSecret(getRequiredArgumentValue(arguments, "clientSecret"))
                 .serverUrl(getRequiredArgumentValue(arguments, "tokenServer"))
-                .grantType(OAuth2Constants.CLIENT_CREDENTIALS);
-        supportRealm(arguments, builder);
-        supportUsernamePassword(arguments, builder);
-        log_.info("Creating an OAuth Token Bearer class for interface %s",
-                TokenAuthentication.class.getCanonicalName());
+                .realm(getRequiredArgumentValue(arguments, "realm"));
+        if(arguments.containsKey("username") && arguments.containsKey("password")) {
+            builder.grantType(OAuth2Constants.PASSWORD)
+                    .username(getRequiredArgumentValue(arguments, "username"))
+                    .password(getRequiredArgumentValue(arguments, "password"));
+        } else {
+            builder.grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+                    .clientSecret(getRequiredArgumentValue(arguments, "clientSecret"));
+
+        }
+        log_.info(String.format("Creating an OAuth Token Bearer class for interface %s",
+                TokenAuthentication.class.getCanonicalName()));
         cloak_ = builder.build();
         manager_ = cloak_.tokenManager();
     }
@@ -103,22 +109,6 @@ public class KeycloakTokenAuthentication implements TokenAuthentication {
             throw new TokenAuthenticationException(String.format("Argument '%s' is missing or null but is required",
                     key));
         return arguments.get(key);
-    }
-
-    private void supportUsernamePassword(Map<String, String> arguments, KeycloakBuilder builder) {
-        String username = arguments.getOrDefault("username", null);
-        String password = arguments.getOrDefault("password", null);
-        if(username != null && password != null) {
-            builder.grantType(OAuth2Constants.PASSWORD)
-                    .username(username)
-                    .password(password);
-        }
-    }
-
-    private void supportRealm(Map<String,String> arguments, KeycloakBuilder builder) {
-        String realm = arguments.getOrDefault("realm", null);
-        if(realm != null)
-            builder.realm(realm);
     }
 
     private Logger log_;

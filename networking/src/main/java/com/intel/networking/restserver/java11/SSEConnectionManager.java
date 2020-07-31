@@ -12,9 +12,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -132,6 +130,9 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
                     eventType.trim()).getBytes(StandardCharsets.UTF_8));
             if(id != null && !id.isBlank())
                 connection.exchange.getResponseBody().write(String.format("id:%s%n", id).
+                            getBytes(StandardCharsets.UTF_8));
+            else
+                connection.exchange.getResponseBody().write(String.format("id:%d%n", idCounter_.getAndIncrement()).
                         getBytes(StandardCharsets.UTF_8));
             for (String part : parts)
                 connection.exchange.getResponseBody().write(String.format("data:%s%n", part).
@@ -169,6 +170,7 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
     private AtomicLong globalLastPublish_ = new AtomicLong(Instant.now().getEpochSecond());
     private AtomicBoolean stopKeepAliveThread_ = new AtomicBoolean(false);
     private Thread keepAliveThread_ = null;
+    private AtomicLong idCounter_ = new AtomicLong(0L);
 
     static class SSEConnection {
         SSEConnection(HttpExchange exchange, Collection<String> eventTypes) {

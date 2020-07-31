@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Paul Amonson
+// Copyright (C) 2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -15,8 +15,8 @@ public class EventSource {
     public void processLine(String line, SSEEvent eventsCallback) {
         if (line.startsWith(":"))
             return;
-        if(line.isBlank()) { // do dispatch...
-            if(data.isBlank()) { // empty event; reset and abort
+        if(line.trim().isEmpty()) { // do dispatch...
+            if(data.trim().isEmpty()) { // empty event; reset and abort
                 reset();
                 return;
             }

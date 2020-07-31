@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public final class FabricPerfTelemetryProvider extends FabricAdapter {
     /**
@@ -131,7 +130,7 @@ public final class FabricPerfTelemetryProvider extends FabricAdapter {
             logError("The 'Value' key was not a valid number: %s", name);
             return;
         }
-        FabricTelemetryItem item = new FabricTelemetryItem(timestampUs, name, daiLocation, value, inBlacklist(name));
+        FabricTelemetryItem item = new FabricTelemetryItem(timestampUs, name, daiLocation, value, inDenylist(name));
         results.add(item);
     }
 

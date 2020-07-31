@@ -31,7 +31,7 @@ public class SSENetwork extends NetworkConnectionObject {
      */
     public void publish(final String eventType, final String message) {
         try {
-                server_.ssePublish(eventType, message, null);
+            server_.ssePublish(eventType, message, null);
         } catch (final RESTServerException e) {
             log_.warn("Error while publishing message to network. " + e.getMessage());
         }
