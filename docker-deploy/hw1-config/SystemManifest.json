@@ -1,0 +1,180 @@
+{
+  "sysname": "preview4",
+  "views": {
+    "Full": {
+      "view": "Full",
+      "view-description": "Full Floor Layout",
+      "initzoom": 0,
+      "zoomscales": [4, 6, 8],
+      "rackscale": 12,
+      "floor": {
+        "description": "The Single Full Preview 4 System",
+        "width": 100, "height": 200,
+        "content": [
+          {
+            "name": "X0",
+            "definition": "rack",
+            "x": 10, "y": 1
+          }
+        ]
+      },
+      "definitions": {
+        "rack": {
+          "description": "Preview 4 Rack",
+          "type": "Rack",
+          "width": 38, "height": 102, "obscured": true,
+          "content": [
+            {
+              "name": "CH0",
+              "definition": "service-chassis-1",
+              "x": 0, "y": 4
+            },
+            {
+              "name": "CH1",
+              "definition": "service-chassis-2",
+              "x": 0, "y": 14
+            },
+            {
+              "name": "CH2",
+              "definition": "service-chassis-3",
+              "x": 0, "y": 24
+            },
+            {
+              "name": "CH3",
+              "definition": "service-chassis-4",
+              "x": 0, "y": 34
+            },
+            {
+              "name": "CH4",
+              "definition": "compute-chassis-1",
+              "x": 0, "y": 44
+            },
+            {
+              "name": "CH5",
+              "definition": "compute-chassis-2",
+              "x": 0, "y": 54
+            },
+            {
+              "name": "CH6",
+              "definition": "compute-chassis-3",
+              "x": 0, "y": 64
+            },
+            {
+              "name": "CH7",
+              "definition": "compute-chassis-4",
+              "x": 0, "y": 74
+            }
+          ]
+        },
+        "service-chassis-1": {
+          "description": "Service Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "SN0",
+              "definition": "service-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "service-chassis-2": {
+          "description": "Service Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "SN1",
+              "definition": "service-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "service-chassis-3": {
+          "description": "Service Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "SN2",
+              "definition": "service-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "service-chassis-4": {
+          "description": "Service Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "SN3",
+              "definition": "service-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "compute-chassis-1": {
+          "description": "Compute Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "CN0",
+              "definition": "compute-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "compute-chassis-2": {
+          "description": "Compute Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "CN1",
+              "definition": "compute-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "compute-chassis-3": {
+          "description": "Compute Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "CN2",
+              "definition": "compute-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "compute-chassis-4": {
+          "description": "Compute Node Enclosure",
+          "type": "Chassis",
+          "width":34, "height": 6,
+          "content": [
+            {
+              "name": "CN3",
+              "definition": "compute-node",
+              "x": 2, "y": 2
+            }
+          ]
+        },
+        "compute-node": {
+          "description": "Compute Node",
+          "type": "ComputeNode",
+          "width":34, "height": 6,
+          "content": []
+        },
+        "service-node": {
+          "description": "Service Node",
+          "type": "ServiceNode",
+          "width":34, "height": 6,
+          "content": []
+        }
+      }
+    }
+  }
+}

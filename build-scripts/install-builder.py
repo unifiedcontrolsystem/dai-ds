@@ -181,10 +181,12 @@ function remove_soft_link() {
 }
 
 function post_install() {
+  echo -n
 {{POST_INSTALL}}
 }
 
 function pre_uninstall() {
+  echo -n
 {{PRE_UNINSTALL}}
 }
 
