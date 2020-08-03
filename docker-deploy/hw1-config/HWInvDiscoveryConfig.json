@@ -1,0 +1,40 @@
+{
+  "providerClassMap": {
+    "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
+  },
+  "providerConfigurations": {
+    "tokenAuthProvider": {
+      "tokenServer": "https://authentication_server:8080/auth",
+      "realm": "myKingdom",
+      "clientId": "myApplicationId",
+      "clientSecret": "shhhhhhhhhhhh"
+    },
+    "requester": {
+      "initiateDiscovery": {
+        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "verb": "POST",
+        "resource": "/Inventory/Discover"
+      },
+      "getDiscoveryStatus": {
+        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "verb": "GET",
+        "resource": "/Inventory/DiscoveryStatus"
+      },
+      "getHwInventorySnapshot": {
+        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware"
+      },
+      "getHWInventoryUpdate": {
+        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware/"
+      },
+      "getHWInventoryHistory": {
+        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware/History"
+      }
+    }
+  }
+}

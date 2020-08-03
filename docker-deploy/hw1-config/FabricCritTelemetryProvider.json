@@ -1,0 +1,9 @@
+{
+  "connectAddress": "api-gw-service-nmn.local",
+  "connectPort": 8080,
+  "urlPath": "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry",
+  "exchangeName": "ucs",
+  "publishServerUrl": "amqp://api-gw-service-nmn.local",
+  "use-ssl": false,
+  "tokenAuthProvider": null
+}
