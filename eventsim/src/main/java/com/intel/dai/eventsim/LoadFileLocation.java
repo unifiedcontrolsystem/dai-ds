@@ -7,10 +7,8 @@ import com.intel.properties.PropertyDocument;
 
 import javax.validation.constraints.NotNull;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
+import java.io.InputStream;
 
 /**
  * Description of class LoadFileLocation.
@@ -52,11 +50,29 @@ public class LoadFileLocation {
      * @param file file path
      * @throws IOException null/empty data or file provided
      */
-    static void writeFile(@NotNull final PropertyArray data, @NotNull final String file) throws IOException {
+    static void writeFile(@NotNull final PropertyArray data, @NotNull final String file, boolean prettyPrint) throws IOException {
         if(data == null || data.isEmpty() || file == null || file.isEmpty())
             throw new IOException("data or file path is null or empty.");
+
+        if(prettyPrint) {
+            writeFile(data, file, 2);
+            return;
+        }
+
+        writeFile(data, file, 0);
+    }
+
+    /**
+     * This method is used to write data to file
+     * @param data data
+     * @param file file path
+     * @throws IOException null/empty data or file provided
+     */
+    private static void writeFile(@NotNull final PropertyArray data, @NotNull final String file, int indent) throws IOException {
         loadParser();
+        parser_.setIndent(indent);
         parser_.writeConfig(data, file);
+        parser_.setIndent(0);
     }
 
     /**

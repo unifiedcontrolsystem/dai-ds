@@ -6,43 +6,40 @@ import com.intel.properties.PropertyMap
 import spock.lang.Specification
 
 class BootParametersSpec extends Specification {
-    def "Read boot params config file, Process null data"() {
-        BootParameters bootParametersTest = new BootParameters()
-        when:
-            bootParametersTest.processData(null)
-        then:
-            def e = thrown(SimulatorException)
-            e.message == "No boot-images data."
-    }
 
-    def "Read boot params config file, Process non PropertyMap data format"() {
-        BootParameters bootParametersTest = new BootParameters()
-        when:
-            bootParametersTest.processData(new PropertyArray())
-        then:
-            def e = thrown(SimulatorException)
-            e.message == "No boot-images data."
-    }
-
-    def "Read boot params config file, Process empty PropertyMap data format"() {
-        BootParameters bootParametersTest = new BootParameters()
-        when:
-            bootParametersTest.processData(new PropertyMap())
-        then:
-            def e = thrown(SimulatorException)
-            e.message == "No boot-images data."
-    }
-
-    def "Read boot params config file, Process PropertyMap with missing 'boot-images' key"() {
-        BootParameters bootParametersTest = new BootParameters()
-
-        //Generate non empty data of type PropertyMap with missing boot-image key
-        PropertyMap data = new PropertyMap();
+    def setup() {
         data.put("key", "value")
-        when:
-            bootParametersTest.processData(data)
-        then:
-            def e = thrown(SimulatorException)
-            e.message == "No boot-images data."
     }
+
+    def "Read or process boot parameters configuration file"() {
+        BootParameters bootParametersTest = new BootParameters()
+        when:
+        bootParametersTest.processData(input)
+        then:
+        def e = thrown(SimulatorException)
+        e.message.equals(output)
+        where:
+        input       |   output
+        null        |   "No boot-images data."
+        data        |   "No boot-images data."
+        EMPTY_MAP   |   "No boot-images data."
+        EMPTY_ARRAY |   "No boot-images data."
+    }
+
+    def "Set boot parameters configuration file as empty or null"() {
+        BootParameters bootParametersTest = new BootParameters()
+        when:
+        bootParametersTest.setBootParamsConfigFile(file)
+        then:
+        def e = thrown(SimulatorException)
+        e.message.equals(output)
+        where:
+        file      |   output
+        null      |   "Invalid or null boot parameters config file."
+        ""        |   "Invalid or null boot parameters config file."
+    }
+
+    private static PropertyMap data = new PropertyMap()
+    private static PropertyMap EMPTY_MAP = new PropertyMap()
+    private static PropertyArray EMPTY_ARRAY = new PropertyArray()
 }

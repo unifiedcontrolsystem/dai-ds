@@ -21,7 +21,7 @@ public abstract class NetworkConnectionObject {
     static NetworkConnectionObject createConnection(String network, Logger log, PropertyMap config) {
         log_ = log;
         if (NETWORK_TYPES.valueOf(network.toUpperCase()) == NETWORK_TYPES.SSE) {
-            PropertyMap sseConfig = config.getMapOrDefault("sseConfig", null);
+            PropertyMap sseConfig = config.getMapOrDefault("sse", null);
             sseServer = new SSENetwork(sseConfig, log_);
             return sseServer;
         }
@@ -111,7 +111,8 @@ public abstract class NetworkConnectionObject {
     void send(final String subject, final String eventMessages) throws RESTClientException {
         if (subject.equals(ForeignEvent.EVENT_SUB_TYPE.other.toString()))
             callBack.publish(subject, eventMessages);
-        if (subject.equals(ForeignEvent.EVENT_SUB_TYPE.events.toString()) || subject.equals(ForeignEvent.EVENT_SUB_TYPE.telemetry.toString()) || subject.equals(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString()))
+        if (subject.equals(ForeignEvent.EVENT_SUB_TYPE.events.toString()) || subject.equals(ForeignEvent.EVENT_SUB_TYPE.telemetry.toString()) ||
+                subject.equals(ForeignEvent.EVENT_SUB_TYPE.stateChanges.toString()) || subject.equals(ForeignEvent.EVENT_SUB_TYPE.fabric.toString()))
             sseServer.publish(subject, eventMessages);
     }
 

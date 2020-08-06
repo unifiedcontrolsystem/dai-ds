@@ -4,34 +4,37 @@
 
 package com.intel.dai;
 
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
+import com.intel.dai.dsapi.DataStoreFactory;
+import com.intel.dai.dsapi.WorkQueue;
+import com.intel.dai.dsimpl.DataStoreFactoryImpl;
+import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.dai.exceptions.DataStoreException;
-import com.intel.logging.*;
-import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
-import com.intel.dai.dsapi.DataStoreFactory;
-import com.intel.dai.dsimpl.DataStoreFactoryImpl;
-import com.intel.dai.dsapi.WorkQueue;
-import com.intel.config_io.*;
-import com.intel.properties.*;
-import org.voltdb.client.*;
-import org.voltdb.client.Client;
+import com.intel.logging.Logger;
+import com.intel.properties.PropertyArray;
+import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
+import com.intel.xdg.XdgConfigFile;
 import org.voltdb.VoltTable;
+import org.voltdb.client.*;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.*;
-import java.lang.*;
-import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.net.UnknownHostException;
-import com.intel.xdg.XdgConfigFile;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 /**
  * Adapter base class (used as super class for component adapters)

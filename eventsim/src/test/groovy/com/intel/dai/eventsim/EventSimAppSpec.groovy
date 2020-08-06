@@ -1,6 +1,5 @@
 package com.intel.dai.eventsim
 
-import com.intel.config_io.ConfigIOFactory
 import com.intel.logging.Logger
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
@@ -12,415 +11,352 @@ class EventSimAppSpec extends Specification {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
-    def "Read EventSim config file, fetch boot parameters" () {
-        Logger log = Mock(Logger)
-        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
-        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
-        eventSimApiTest.bootParamsApi_ = new BootParameters();
-        Map<String, String> parameters = new HashMap<>()
-        expect :
-        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
+    def setup() {
+        logMock_ = Mock(Logger.class)
+
+        eventSimApp_ = new EventSimApp("voltdb-server", "server-config-file", logMock_)
+        eventSimApp_.log_ = logMock_
+        eventSimApp_.dataLoader_ = Mock(DataLoader.class)
+        eventSimApp_.dataLoader_.initialize() >> null
+        eventSimApp_.dataLoader_.getNetworkConfigurationData() >> loadNetworkDetails()
+
+        eventSimApp_.initialiseInstances()
+
+        eventSimApp_.source_ = Mock(NetworkObject.class)
+        eventSimApp_.source_.startServer() >> {}
+        eventSimApp_.source_.stopServer() >> {}
+        eventSimApp_.source_.serverStatus() >> {}
+        eventSimApp_.eventSimEngine_ = Mock(SimulatorEngine.class)
+        eventSimApp_.eventSimEngine_.initialize() >> {}
+        eventSimApp_.foreignSimulatorEngine_ = Mock(ForeignSimulatorEngine.class)
+        eventSimApp_.bootParamsApi_ = Mock(BootParameters.class)
+        eventSimApp_.hwInvApi_ = Mock(HardwareInventory.class)
+        eventSimApp_.wlmApi_ = Mock(WlmApi.class)
+        eventSimApp_.apiReq_ = Mock(ApiReqData.class)
+
+        eventSimApp_.run(eventSimApp_)
     }
 
-    def "Read EventSim config file, fetch boot parameters for a known location" () {
-        Logger log = Mock(Logger)
-        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
-        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
-        eventSimApiTest.bootParamsApi_ = new BootParameters();
+    def "server status"() {
+        eventSimApp_.startServer()
+        expect:
+        eventSimApp_.isServerUp_
+        eventSimApp_.stopServer()
+        !eventSimApp_.isServerUp_
+        !eventSimApp_.serverStatus()
+    }
+
+    def "generate ras events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.eventSimEngine_.publishRasEvents("test", ".*" , "false", null, null, "1", null) >> {}
+        eventSimApp_.eventSimEngine_.publishRasEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
+                {throw new SimulatorException("test exception")}
+
+        expect:
+        eventSimApp_.generatRasEvents(parameters).contains("Success")
+        parameters.put("locations", "UNKNOWN")
+        eventSimApp_.generatRasEvents(parameters).contains("test exception")
+    }
+
+    def "generate fabric events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.foreignSimulatorEngine_.generateFabricEvents(parameters) >> {}
+
+        expect:
+        eventSimApp_.generateFabricEvents(parameters).contains("Success")
+    }
+
+    def "generate sensor events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.eventSimEngine_.publishSensorEvents("test", ".*" , "false", null, null, "1", null) >> {}
+        eventSimApp_.eventSimEngine_.publishSensorEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
+                {throw new SimulatorException("test exception")}
+
+        expect:
+        eventSimApp_.generateSensorEvents(parameters).contains("Success")
+        parameters.put("locations", "UNKNOWN")
+        eventSimApp_.generateSensorEvents(parameters).contains("test exception")
+    }
+
+    def "generate job events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.eventSimEngine_.publishJobEvents("test", ".*" , "false", null, null, "1", null) >> {}
+        eventSimApp_.eventSimEngine_.publishJobEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
+                {throw new SimulatorException("test exception")}
+
+        expect:
+        eventSimApp_.generateJobEvents(parameters).contains("Success")
+        parameters.put("locations", "UNKNOWN")
+        eventSimApp_.generateJobEvents(parameters).contains("test exception")
+    }
+
+    def "generate boot events"() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+        parameters.put("sub_component", "all")
+
+        eventSimApp_.eventSimEngine_.publishBootEvents("test", "0" , "false", null, null, null) >> {}
+        eventSimApp_.eventSimEngine_.publishBootEvents("UNKNOWN", "0" , "false", null, null, null) >>
+                { throw new SimulatorException("test exception")}
+        eventSimApp_.eventSimEngine_.publishBootOffEvents("test", "false", null, null, null) >> {}
+        eventSimApp_.eventSimEngine_.publishBootOnEvents("test", "0" , "false", null, null, null) >> {}
+        eventSimApp_.eventSimEngine_.publishBootReadyEvents("test","false", null, null, null) >> {}
+
+        expect:
+        eventSimApp_.generateBootEvents(parameters).contains("Success")
+        parameters.put("sub_component", "off")
+        eventSimApp_.generateBootEvents(parameters).contains("Success")
+        parameters.put("sub_component", "on")
+        eventSimApp_.generateBootEvents(parameters).contains("Success")
+        parameters.put("sub_component", "ready")
+        eventSimApp_.generateBootEvents(parameters).contains("Success")
+        parameters.put("sub_component", "all")
+        parameters.put("locations", "UNKNOWN")
+        eventSimApp_.generateBootEvents(parameters).contains("test exception")
+    }
+
+    def "fetch boot parameters details"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("hosts", "x0")
-        expect :
-        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
-        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).getArrayOrDefault("hosts", null).get(0).equals("x0")
+
+        File input = createAndLoadDataToFile("test.json", BOOT_PARAM_CONFIG)
+        eventSimApp_.dataLoader_.getBootParamsFileLocation() >> input.getAbsolutePath()
+        eventSimApp_.bootParamsApi_ = new BootParameters()
+
+        expect:
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .containsKey("hosts")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .getArray("hosts").get(0).equals("x0")
+        parameters.put("hosts", "x1")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .containsKey("hosts")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .getArray("hosts").get(0).equals("Default")
+        parameters.put("hosts", null)
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .containsKey("hosts")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
+                .getArray("hosts").get(0).equals("Default")
     }
 
-    def "Read EventSim config file, fetch boot parameters for a default location" () {
-        Logger log = Mock(Logger)
-        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
-        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> bootPrametersConfigFileLoation.getAbsolutePath()
-        eventSimApiTest.bootParamsApi_ = new BootParameters();
+    def "Initiate inventory discovery and observe discovery status"() {
         Map<String, String> parameters = new HashMap<>()
-        parameters.put("hosts", "s0")
-        expect :
-        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).containsKey("hosts")
-        eventSimApiTest.jsonParser_.fromString(eventSimApiTest.getBootParameters(parameters)).getAsArray().getMap(0).getArrayOrDefault("hosts", null).get(0).equals("Default")
-    }
+        parameters.put("xnames", "test")
 
-    def "Fetch boot parameters, occured exception" () {
-        Logger log = Mock(Logger)
-        final File bootPrametersConfigFileLoation = tempFolder.newFile("BootParameters.json")
-        loadDataIntoFile(bootPrametersConfigFileLoation, bootParametersConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getBootParamsFileLocation() >> ""
-        eventSimApiTest.bootParamsApi_ = new BootParameters();
-        Map<String, String> parameters = new HashMap<>()
+        eventSimApp_.dataLoader_.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
+        eventSimApp_.source_.getAddress() >> "localhost"
+        eventSimApp_.source_.getPort() >> 1234
+        expect:
+        eventSimApp_.initiateInventoryDiscovery(parameters).contains("[{\"URI\":\"http://localhost:1234/Inventory/DiscoveryStatus/0\"}]")
+        eventSimApp_.getAllInventoryDiscoveryStatus(parameters).contains("{\"Status\":\"Complete\",\"Details\":null,\"LastUpdateTime\":")
         when:
-            eventSimApiTest.getBootParameters(parameters).contains("boot-image-id")
+        parameters.put("xnames", null)
+        eventSimApp_.initiateInventoryDiscovery(parameters)
+        eventSimApp_.getAllInventoryDiscoveryStatus(parameters).contains("")
         then:
-            def e = thrown(SimulatorException)
-            e.getMessage() == "Invalid or null boot parameters config file."
+        def e = thrown(ResultOutputException)
+        e.getMessage() == "404::One or more requested RedfishEndpoint foreign IDs was not found."
     }
 
-    def "Initiate inventory discovery" () {
-        Logger log = Mock(Logger)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
-        eventSimApiTest.source_ = Mock(NetworkObject.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.source_.getAddress() >> "localhost"
-        eventSimApiTest.source_.getPort() >> 1234
-        Map<String, String> params = new HashMap<>()
-        params.put("xnames", "test1")
-        expect :
-            eventSimApiTest.initiateInventoryDiscovery(params).contains("[{\"URI\":\"http://localhost:1234/Inventory/DiscoveryStatus/0\"}]")
-    }
-
-    def "Initiate inventory discovery, for null locations" () {
-        Logger log = Mock(Logger)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
-        eventSimApiTest.source_ = Mock(NetworkObject.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.source_.getAddress() >> "localhost"
-        eventSimApiTest.source_.getPort() >> 1234
-        Map<String, String> params = new HashMap<>()
-        params.put("xnames", null)
-        when:
-            eventSimApiTest.initiateInventoryDiscovery(params)
-        then:
-            def e = thrown(ResultOutputException)
-            e.getMessage() == "404::One or more requested RedfishEndpoint foreign IDs was not found."
-    }
-
-    def "Inventory discovery status" () {
-        Logger log = Mock(Logger)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json");
-        Map<String, String> params = new HashMap<>()
-        params.put("xnames", "test1")
-        expect :
-            eventSimApiTest.getAllInventoryDiscoveryStatus(params).contains("{\"Status\":\"Complete\",\"Details\":null,\"LastUpdateTime\":")
-    }
-
-    def "Read EventSim config file, fetch inventory hardware" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryConfigFileLocation = tempFolder.newFile("HWInventory.json")
-        loadDataIntoFile(hwInventoryConfigFileLocation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocation() >> hwInventoryConfigFileLocation.getAbsolutePath()
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
+    def "Fetch hardware inventory and query details"() {
         Map<String, String> parameters = new HashMap<>()
-        expect :
-            eventSimApiTest.getInventoryHardware(parameters).contains("processor-node-id-1")
-    }
+        parameters.put("sub_component", "test_location")
 
-    def "Fetch inventory hardware, occured exception" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryConfigFileLocation = tempFolder.newFile("HWInventory.json")
-        loadDataIntoFile(hwInventoryConfigFileLocation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocation() >> ""
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
-        Map<String, String> parameters = new HashMap<>()
-        when :
-            eventSimApiTest.getInventoryHardware(parameters)
-        then:
-            def e = thrown(SimulatorException)
-            e.getMessage() == "Invalid or null hardware inventory config file"
-    }
+        File input = createAndLoadDataToFile("test_location.json", HARDWARE_INVENTORY_CONFIG)
 
-    def "Read EventSim config file, fetch inventory hardware for location" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryLocationConfigFileLocation = tempFolder.newFile("x0c0s0b0n0.json")
-        loadDataIntoFile(hwInventoryLocationConfigFileLocation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocationPath() >> hwInventoryLocationConfigFileLocation.getParent()
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("sub_component", "x0c0s0b0n0")
-        expect :
-            eventSimApiTest.getInventoryHardwareForLocation(parameters).contains("processor-node-id-1")
-    }
+        eventSimApp_.dataLoader_.getHwInventoryFileLocation() >> input.getAbsolutePath()
+        eventSimApp_.dataLoader_.getHwInventoryFileLocationPath() >> input.getParent()
+        eventSimApp_.dataLoader_.getHwInventoryQueryLocationPath() >> input.getParent()
+        eventSimApp_.hwInvApi_ = new HardwareInventory()
 
-    def "Fetch inventory hardware, occured exception for location" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryLocationConfigFileLocation = tempFolder.newFile("x0c0s0b0n0.json")
-        loadDataIntoFile(hwInventoryLocationConfigFileLocation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryFileLocationPath() >> ""
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("sub_component", "x0c0s0b0n0")
-        when :
-            eventSimApiTest.getInventoryHardwareForLocation(parameters)
-        then:
-            def e = thrown(SimulatorException)
-            e.getMessage() == "Invalid or null hardware inventory config path"
-    }
-
-    def "Read EventSim config file, fetch inventory hardware query for location" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryQueryConfigFileLoation = tempFolder.newFile("x0c0s0b0n0.json")
-        loadDataIntoFile(hwInventoryQueryConfigFileLoation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryQueryLocationPath() >> hwInventoryQueryConfigFileLoation.getParent()
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("sub_component", "x0c0s0b0n0")
-        expect :
-            eventSimApiTest.getInventoryHardwareQueryForLocation(parameters).contains("processor-node-id-1")
-    }
-
-    def "Fetch inventory hardware, occured exception query for location" () {
-        Logger log = Mock(Logger)
-        final File hwInventoryQueryConfigFileLoation = tempFolder.newFile("x0c0s0b0n0.json")
-        loadDataIntoFile(hwInventoryQueryConfigFileLoation, hwInventoryConfig)
-        EventSimApp eventSimApiTest = new EventSimApp(log)
-        eventSimApiTest.jsonParser_ = ConfigIOFactory.getInstance("json")
-        eventSimApiTest.simEngineDataLoader = Mock(DataLoaderEngine.class)
-        EventSimApp.log_ = Mock(Logger.class)
-        eventSimApiTest.simEngineDataLoader.getHwInventoryQueryLocationPath() >> ""
-        eventSimApiTest.hwInvApi_ = new HardwareInventory();
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("sub_component", "x0c0s0b0n0")
-        when :
-            eventSimApiTest.getInventoryHardwareQueryForLocation(parameters)
-        then:
-            def e = thrown(SimulatorException)
-            e.getMessage() == "Invalid or null hardware inventory query path"
+        expect:
+        eventSimApp_.getInventoryHardware(parameters).contains("processor-node-id-1")
+        eventSimApp_.getInventoryHardwareForLocation(parameters).contains("processor-node-id-1")
+        eventSimApp_.getInventoryHardwareQueryForLocation(parameters).contains("processor-node-id-1")
     }
 
     def "createReservation" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = new HashMap<>()
-        params.put("name", "testres")
-        params.put("users", "root")
-        params.put("nodes", "node01 node02")
-        params.put("starttime", "2019-02-14 02:15:58")
-        params.put("duration", "3600000")
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("name", "testres")
+        parameters.put("users", "root")
+        parameters.put("nodes", "node01 node02")
+        parameters.put("starttime", "2019-02-14 02:15:58")
+        parameters.put("duration", "3600000")
 
         expect :
-        test.createReservation(params).contains("{\"Status\":\"F\"")
+        eventSimApp_.createReservation(parameters).contains("{\"Status\":\"F\"")
     }
 
     def "createReservation Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.createReservation(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.createReservation(parameters).contains("{\"Status\":\"E\"")
     }
 
     def "modifyReservation" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = new HashMap<>()
-        params.put("name", "testres")
-        params.put("users", "root")
-        params.put("nodes", "node01 node02")
-        params.put("starttime", "2019-02-14 02:15:58")
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("name", "testres")
+        parameters.put("users", "root")
+        parameters.put("nodes", "node01 node02")
+        parameters.put("starttime", "2019-02-14 02:15:58")
 
         expect :
-        test.modifyReservation(params).contains("{\"Status\":\"F\"")
+        eventSimApp_.modifyReservation(parameters).contains("{\"Status\":\"F\"")
     }
 
     def "modifyReservation Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.modifyReservation(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.modifyReservation(parameters).contains("{\"Status\":\"E\"")
     }
 
     def "deleteReservation" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = new HashMap<>()
-        params.put("name", "testres")
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("name", "testres")
 
         expect :
-        test.deleteReservation(params).contains("{\"Status\":\"F\"")
+        eventSimApp_.deleteReservation(parameters).contains("{\"Status\":\"F\"")
     }
 
     def "deleteReservation Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.bgschedPath = "./build/tmp/bgsched.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.bgschedPath = "./build/tmp/bgsched.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.deleteReservation(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.deleteReservation(parameters).contains("{\"Status\":\"E\"")
     }
 
     def "startJob" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
-        Map<String, String> params = new HashMap<>()
-        params.put("jobid", "10")
-        params.put("name", "testjob")
-        params.put("users", "root")
-        params.put("nodes", "node01 node02")
-        params.put("starttime", "2019-02-14 02:15:58")
-        params.put("workdir", "/home")
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.cqmPath = "./build/tmp/cqm.log"
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("jobid", "10")
+        parameters.put("name", "testjob")
+        parameters.put("users", "root")
+        parameters.put("nodes", "node01 node02")
+        parameters.put("starttime", "2019-02-14 02:15:58")
+        parameters.put("workdir", "/home")
 
         expect :
-        test.startJob(params).contains("{\"Status\":\"F\"")
+        eventSimApp_.startJob(parameters).contains("{\"Status\":\"F\"")
     }
 
     def "startJob Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.cqmPath = "./build/tmp/cqm.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.startJob(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.startJob(parameters).contains("{\"Status\":\"E\"")
     }
 
     def "terminateJob" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
-        Map<String, String> params = new HashMap<>()
-        params.put("jobid", "10")
-        params.put("name", "testjob")
-        params.put("users", "root")
-        params.put("nodes", "node01 node02")
-        params.put("starttime", "2019-02-14 02:15:58")
-        params.put("workdir", "/home")
-        params.put("exitstatus", "0")
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.cqmPath = "./build/tmp/cqm.log"
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("jobid", "10")
+        parameters.put("name", "testjob")
+        parameters.put("users", "root")
+        parameters.put("nodes", "node01 node02")
+        parameters.put("starttime", "2019-02-14 02:15:58")
+        parameters.put("workdir", "/home")
+        parameters.put("exitstatus", "0")
 
         expect :
-        test.terminateJob(params).contains("{\"Status\":\"F\"")
+        eventSimApp_.terminateJob(parameters).contains("{\"Status\":\"F\"")
     }
 
     def "terminateJob Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.cqmPath = "./build/tmp/cqm.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.terminateJob(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.terminateJob(parameters).contains("{\"Status\":\"E\"")
     }
 
     def "simulateWlm Exception" () {
-        Logger log = Mock(Logger)
-        EventSimApp test = new EventSimApp(log)
-        EventSimApp.log_ = Mock(Logger.class)
-        test.jsonParser_ = ConfigIOFactory.getInstance("json")
-        test.wlmApi.cqmPath = "./build/tmp/cqm.log"
-        Map<String, String> params = null
+        eventSimApp_.wlmApi_ = new WlmApi(logMock_)
+        eventSimApp_.wlmApi_.cqmPath = "./build/tmp/cqm.log"
+        Map<String, String> parameters = null
 
         expect :
-        test.simulateWlm(params).contains("{\"Status\":\"E\"")
+        eventSimApp_.simulateWlm(parameters).contains("{\"Status\":\"E\"")
     }
 
-    private void loadDataIntoFile(File file, String data) throws Exception {
-        FileUtils.writeStringToFile(file, data);
+    def loadNetworkDetails() {
+        return eventSimApp_.parser_.fromString(NETWORK_CONFIG).getAsMap()
     }
 
-    private final String bootParametersConfig = "[\n" +
+    private File createAndLoadDataToFile(String filename, String data) throws Exception {
+        final File newFile = tempFolder.newFile(filename)
+        FileUtils.writeStringToFile(newFile, data)
+        return newFile
+    }
+
+    private Logger logMock_
+    private EventSimApp eventSimApp_
+
+    private final String NETWORK_CONFIG = "{\n" +
+            "  \"network\" : \"sse\",\n" +
+            "  \"sse\": {\n" +
+            "    \"server-address\": \"local\" ,\n" +
+            "    \"server-port\": \"1234\" ,\n" +
+            "    \"urls\": {\n" +
+            "      \"/url-1\": [\n" +
+            "        \"stream-1\"\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  } ,\n" +
+            "  \"rabbitmq\": {\n" +
+            "    \"exchangeName\": \"simulator\",\n" +
+            "    \"uri\": \"amqp://127.0.0.1\"\n" +
+            "  }\n" +
+            "}"
+
+    private final String BOOT_PARAM_CONFIG = "[\n" +
             "  {\n" +
             "    \"hosts\": [\n" +
             "      \"Default\"\n" +
             "    ],\n" +
-            "    \"initrd\": \"initird\",\n" +
-            "    \"kernel\": \"kernel\",\n" +
-            "    \"params\": \"params-data\",\n" +
-            "    \"id\": \"boot-image-id\",\n" +
-            "    \"description\": \"boot-image-description\",\n" +
-            "    \"BootImageFile\": \"boot-image-file\",\n" +
-            "    \"BootImageChecksum\": \"boot-image-checksum\",\n" +
-            "    \"BootOptions\": null,\n" +
-            "    \"KernelArgs\": null,\n" +
-            "    \"BootStrapImageFile\": \"bootstrap-file\",\n" +
-            "    \"BootStrapImageChecksum\": \"bootstrap-checksum\"\n" +
+            "    \"id\": \"default-boot-image-id\"\n" +
             "  },\n" +
             "  {\n" +
             "    \"hosts\": [\n" +
             "      \"x0\"\n" +
             "    ],\n" +
-            "    \"initrd\": \"initird.img\",\n" +
-            "    \"kernel\": \"kernel\",\n" +
-            "    \"params\": \"parms-data\",\n" +
-            "    \"id\": \"boot-image-id-1\",\n" +
-            "    \"description\": \"bootimage-description\",\n" +
-            "    \"BootImageFile\": \"boot-image-file-1\",\n" +
-            "    \"BootImageChecksum\": \"boot-image-checksum\",\n" +
-            "    \"BootOptions\": null,\n" +
-            "    \"KernelArgs\": null,\n" +
-            "    \"BootStrapImageFile\": \"bootstrap-file\",\n" +
-            "    \"BootStrapImageChecksum\": \"bootstrap-checksum\"\n" +
+            "    \"id\": \"boot-image-id-x0\"\n" +
             "  }\n" +
             "]"
 
-    private final String hwInventoryConfig = "[{\n" +
+    private final String HARDWARE_INVENTORY_CONFIG = "[{\n" +
             "  \"Nodes\": [\n" +
             "    {\n" +
             "      \"ID\": \"node-id\"\n" +
@@ -429,9 +365,6 @@ class EventSimAppSpec extends Specification {
             "  \"Processors\": [\n" +
             "    {\n" +
             "      \"ID\": \"processor-node-id-1\"\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"ID\": \"processor-node-id-2\",\n" +
             "    }\n" +
             "  ],\n" +
             "  \"Memory\": [\n" +

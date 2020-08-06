@@ -55,6 +55,10 @@ class HttpClient(object):
         except requests.exceptions.Timeout:
             msg = "Request timed out. Please try again"
             raise RuntimeError(msg)
+
+        if response.status_code != 200:
+            raise RuntimeError("status-code = " + str(response.status_code) + ".Reason = " + str(response.reason))
+
         status, rs_response = self._parse_http_response(response.text)
         if status == 'E':
             raise RuntimeError(rs_response)
@@ -69,6 +73,10 @@ class HttpClient(object):
         except requests.exceptions.Timeout:
             msg = "Request timed out. Please try again"
             raise RuntimeError(msg)
+
+        if response.status_code != 200:
+            raise RuntimeError("status-code = " + str(response.status_code) + ".Reason = " + str(response.reason))
+
         status, rs_response = self._parse_http_response(response.text)
         if status == 'E':
             raise RuntimeError(rs_response)
