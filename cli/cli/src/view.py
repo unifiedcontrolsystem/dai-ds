@@ -8,6 +8,7 @@ CLI commands for controlling viewing data in database.
 import json
 import pwd
 import os
+import re
 from .command_result import CommandResult
 from .http_client import HttpClient
 from .device_regex_resolver import DeviceRegexResolver
