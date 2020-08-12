@@ -139,8 +139,9 @@ public final class FabricTelemetryProvider extends FabricAdapter {
             aggregateData(item);
             try {
                 if (hasAggregatedData(item))
-                    storeTelemetry_.logEnvDataAggregated(item.getName(), item.getLocation(), item.getTimestamp(),
-                            item.getMaximum(), item.getMinimum(), item.getAverage(), ADAPTER_TYPE,
+                    storeTelemetry_.logEnvDataAggregated(item.getName(), item.getLocation(),
+                            item.getTimestamp() / 1_000L, item.getMaximum(), item.getMinimum(),
+                            item.getAverage(), ADAPTER_TYPE,
                             workQueue_.baseWorkItemId());
             } catch (DataStoreException e) {
                 log_.exception(e, "Failed to store the environmental data item: ", item.toString());

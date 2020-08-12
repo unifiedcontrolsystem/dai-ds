@@ -1726,16 +1726,8 @@ exit 0
         exclude("**/populate_schema.jar")
         into("opt/dai-docker/lib")
     }
-    from("${projectDir}/docker-deploy/etc") {
-        exclude("**/SystemManifest.json")
-        exclude("**/MachineConfig.json")
-        into("opt/dai-docker/etc")
-    }
     from("${buildDir}/tmp/dai-manager.service") {
         into("etc/systemd/system")
-    }
-    from("${projectDir}/config-files/log4j2.xml") {
-        into("opt/dai-docker/etc")
     }
     from("${projectDir}/docker-deploy/dai/entryPoint.sh") {
         into("opt/dai-docker/dai")
@@ -1754,25 +1746,7 @@ exit 0
         into("opt/dai-docker/dai")
         fileMode = 0700
     }
-    from("${projectDir}/docker-deploy/etc/EventSim.json") {
-       into("opt/dai-docker/etc")
-    }
-    from("${projectDir}/config-files/BootParameters.json") {
-        into("opt/dai-docker/etc")
-    }
-    from("${projectDir}/config-files/HWInventory.json") {
-        into("opt/dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
-        into("opt/dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/etc/LocationTranslationMap.json") {
-        into("opt/dai-docker/etc")
-    }
     // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
-        into("opt/ucs/etc")
-    }
     from("${buildDir}/tmp/hw-discovery.sh") {
         into("opt/ucs/bin")
         fileMode = 0700
@@ -1919,18 +1893,6 @@ exit \$?
         exclude("**/procedures.jar")
         into("opt/dai-docker/lib")
     }
-    from("${projectDir}/docker-deploy/etc/MachineConfig.json") {
-        into("opt/dai-docker/etc/")
-    }
-    from("${projectDir}/docker-deploy/etc/SystemManifest.json") {
-        into("opt/dai-docker/etc/")
-    }
-    from("${projectDir}/docker-deploy/etc/NearlineConfig.json") {
-        into("opt/dai-docker/etc/")
-    }
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("opt/dai-docker/etc")
-    }
     // Services
     from("${buildDir}/tmp/dai-postgres.service") {
         into("etc/systemd/system")
@@ -1951,10 +1913,76 @@ exit \$?
     }
 }
 
+task makeDockerInstallEventSimConfig(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dockerEventSimConfig.yml").text =
+"""# DAI EventSim Config Docker Deployment Config
+name: docker_eventsim_config_${packageVersion}
+tarball: ${buildDir}/tmp/dai-docker-eventsim-config.tar.gz
+destination_folder: ${buildDir}/distributions
+"""
+    }
+    archiveFileName = "dai-docker-eventsim-config.tar.gz"
+    compression = Compression.GZIP
+    destinationDirectory = file("${buildDir}/tmp")
+    fileMode = 0600
+    dirMode = 0700
+
+    from("${projectDir}/config-files/RasEventMetaData.json") {
+        into("dai-docker/etc")
+    }
+    from("${projectDir}/docker-deploy/eventsim-config") {
+        into("dai-docker/etc")
+    }
+    into("/opt/")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
+                    "${buildDir}/tmp/dockerEventSimConfig.yml"
+        }
+    }
+}
+
+task makeDockerInstallHW1Config(type: Tar) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dockerHW1Config.yml").text =
+"""# DAI HW1 Config Docker Deployment Config
+name: docker_hw1_config_${packageVersion}
+tarball: ${buildDir}/tmp/dai-docker-hw1-config.tar.gz
+destination_folder: ${buildDir}/distributions
+"""
+    }
+    archiveFileName = "dai-docker-hw1-config.tar.gz"
+    compression = Compression.GZIP
+    destinationDirectory = file("${buildDir}/tmp")
+    fileMode = 0600
+    dirMode = 0700
+
+    from("${projectDir}/config-files/RasEventMetaData.json") {
+        into("dai-docker/etc")
+    }
+    from("${projectDir}/docker-deploy/hw1-config") {
+        into("dai-docker/etc")
+    }
+    into("/opt/")
+    doLast {
+        exec {
+            workingDir = "${projectDir}"
+            errorOutput = standardOutput
+            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
+                    "${buildDir}/tmp/dockerHW1Config.yml"
+        }
+    }
+}
+
 task makeEventSimCliInstaller(type: Tar) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/eventsim_cli.yml").text ="""# EventSim CLI Install Config
+        new File((String)"${buildDir}/tmp/eventsim_cli.yml").text = """# EventSim CLI Install Config
 name: cli_eventsim_${packageVersion}
 tarball: ${buildDir}/tmp/eventsim.tar.gz
 destination_folder: ${buildDir}/distributions
@@ -2070,7 +2098,8 @@ task makeAllArtifacts {
     }
     dependsOn subprojects.jar
     finalizedBy "makeDaiRpm", "makeDaiVoltRpm", "makeEventSimCliInstaller", "makeUcsCliInstaller",
-            "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai", "makeDeveloperDockerTarball"
+            "makeDockerInstallHW1Config", "makeDockerInstallEventSimConfig", "makeDockerInstallTarball3rdParty",
+            "makeDockerInstallTarballDai", "makeDeveloperDockerTarball"
 }
 rootProject.build.finalizedBy(makeAllArtifacts)
 

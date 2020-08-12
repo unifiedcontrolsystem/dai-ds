@@ -1,0 +1,56 @@
+{
+  "providerClassMap": {
+    "inventoryEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "stateChangeSource": {
+      "arguments": {
+        "connectPort": 8080,
+        "connectAddress": "api-gw-service-nmn.local",
+        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
+        "connectTimeout": "30",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
+        "requestType": "GET",
+        "use-ssl": false,
+        "requestBuilderSelectors": {
+          "stream_id": "dai-inventory"
+        }
+      },
+      "name": "sse"
+    }
+  },
+
+  "adapterProfiles": {
+    "default": {
+      "networkStreamsRef": [
+        "stateChangeSource"
+      ],
+      "subjects": [
+        "stateChanges"
+      ],
+      "adapterProvider": "inventoryEventData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://sms01-nmn.local"
+    },
+    "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
+      "publishTopic": "ucs_inventory_event",
+      "informWorkLoadManager": false,
+      "publish": true
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "providerClassMap": {
+    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
+    "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "telemetry": {
+      "arguments": {
+        "connectPort": 8080,
+        "connectAddress": "api-gw-service-nmn.local",
+        "urlPath": "/v1/stream/telemetry",
+        "connectTimeout": "30",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
+        "requestType": "GET",
+        "use-ssl": false,
+        "requestBuilderSelectors": {
+          "stream_id": "dai-telemetry"
+        }
+      },
+      "name": "sse"
+    },
+    "events": {
+      "arguments": {
+        "connectPort": 8080,
+        "connectAddress": "api-gw-service-nmn.local",
+        "urlPath": "/v1/stream/events",
+        "connectTimeout": "30",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
+        "requestType": "GET",
+        "use-ssl": false,
+        "requestBuilderSelectors": {
+          "stream_id": "dai-events"
+        }
+      },
+      "name": "sse"
+    }
+  },
+
+  "adapterProfiles": {
+    "environmental": {
+      "networkStreamsRef": [
+        "telemetry"
+      ],
+      "subjects": [
+        "telemetry"
+      ],
+      "adapterProvider": "environmentalData"
+    },
+    "ras_events": {
+      "networkStreamsRef": [
+        "events"
+      ],
+      "subjects": [
+        "events"
+      ],
+      "adapterProvider": "rasData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://sms01-nmn.local"
+    },
+    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+      "publishRawTopic": "ucs_raw_data",
+      "publishAggregatedTopic": "ucs_aggregated_data",
+      "publish": true
+    },
+    "com.intel.dai.monitoring.RasEventProviderForeignBus": {
+      "publishTopic": "ucs_ras_event",
+      "publish": true
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}

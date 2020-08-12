@@ -175,7 +175,7 @@ SET default_with_oids = false;
 CREATE TABLE public.tier2_aggregatedenvdata (
     lctn character varying(100) NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
-    type character varying(35) NOT NULL,
+    type text NOT NULL,
     maximumvalue double precision NOT NULL,
     minimumvalue double precision NOT NULL,
     averagevalue double precision NOT NULL,
