@@ -1,0 +1,216 @@
+{
+  "metrics": {
+    "messages": [
+      {
+        "Context": "x3000c0r42b0" ,
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-05T23:40:10Z" ,
+            "MessageId": "CrayTelemetry.Energy" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-05T23:40:10.001267039Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:10.001688158Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:10.002024966Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:10.002352895Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                }
+              ] ,
+              "TelemetrySource": "sC"
+            }
+          }
+        ]
+      } ,
+      {
+        "Context": "x3000c0r42b0" ,
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-05T23:40:11Z" ,
+            "MessageId": "CrayTelemetry.Energy" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-05T23:40:11.000656926Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:11.001001573Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:11.001396975Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:11.001696066Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                }
+              ] ,
+              "TelemetrySource": "sC"
+            }
+          }
+        ]
+      } ,
+      {
+        "Context": "x3000c0r42b0" ,
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-05T23:40:12Z" ,
+            "MessageId": "CrayTelemetry.Energy" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-05T23:40:12.000849896Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:12.001232579Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:12.001562188Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:12.001889077Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                }
+              ] ,
+              "TelemetrySource": "sC"
+            }
+          }
+        ]
+      } ,
+      {
+        "Context": "x3000c0r42b0" ,
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-05T23:40:13Z" ,
+            "MessageId": "CrayTelemetry.Energy" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-05T23:40:13.000936756Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:13.001259565Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:13.001537899Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:13.001812753Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                }
+              ] ,
+              "TelemetrySource": "sC"
+            }
+          }
+        ]
+      } ,
+      {
+        "Context": "x3000c0r42b0" ,
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-05T23:40:14Z" ,
+            "MessageId": "CrayTelemetry.Energy" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-05T23:40:14.000810597Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:14.001224437Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 1 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:14.001575364Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                } ,
+                {
+                  "Timestamp": "2020-06-05T23:40:14.001883575Z" ,
+                  "Location": "ros-0040a683cda1" ,
+                  "PhysicalContext": "PowerSupply" ,
+                  "Index": 0 ,
+                  "Value": ""
+                }
+              ] ,
+              "TelemetrySource": "sC"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

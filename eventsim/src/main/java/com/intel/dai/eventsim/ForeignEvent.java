@@ -76,6 +76,7 @@ public abstract class ForeignEvent {
         stateChanges,
         telemetry,
         jobs,
+        fabric,
         other
     }
 
