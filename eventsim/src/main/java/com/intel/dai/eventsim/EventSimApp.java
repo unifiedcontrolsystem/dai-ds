@@ -6,56 +6,27 @@ import com.intel.networking.HttpMethod;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.sql.Timestamp;
-import java.util.Random;
-
 import org.json_voltpatches.JSONArray;
 import org.json_voltpatches.JSONObject;
+
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 /**
  * Description of class EventSimApp.
  * This class handles simulation of various types of data through API's.
  */
-public class EventSimApp extends EventSim {
+public class EventSimApp  extends  EventSim {
 
-    private EventSimApp(String[] args) throws SimulatorException {
-        super(args, log_);
-    }
-
-    EventSimApp(Logger log) {
-        super(log);
-    }
-
-    public static void main(String[] args) {
-        log_ = LoggerFactory.getInstance("EventSimApp", "EventSimApp", "console");
-        if(args.length != 2) {
-            log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");
-            System.exit(1);
-        }
-        run(args);
-    }
-
-    private static void run(String[] args) {
-        try {
-            final EventSimApp eventsimServer = new EventSimApp(args);
-            eventsimServer.initialise(args);
-            eventsimServer.executeRoutes(eventsimServer);
-            eventsimServer.startServer();
-        } catch (SimulatorException e) {
-            log_.exception(e);
-            System.exit(1);
-        }
+    EventSimApp(String voltdbServer, String serverConfig, Logger log) {
+        super(voltdbServer, serverConfig, log);
     }
 
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
         source_.register("/apis/events/boot/*", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
+        source_.register("/apis/events/fabric", HttpMethod.POST.toString(), eventsimApi::generateFabricEvents);
         source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generatRasEvents);
         source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
@@ -97,15 +68,31 @@ public class EventSimApp extends EventSim {
 
             String sub_cmd = parameters.get("sub_component");
             switch (sub_cmd) {
-                case "off"   :   eventSimEngine.publishBootOffEvents(locations, burst, delay, seed, output);
-                                 break;
-                case "on"    :   eventSimEngine.publishBootOnEvents(locations, bfProbability, burst, delay, seed, output);
-                                 break;
-                case "ready" :   eventSimEngine.publishBootReadyEvents(locations, burst, delay, seed, output);
-                                 break;
-                default      :   eventSimEngine.publishBootEvents(locations, bfProbability, burst, delay, seed, output);
-                                 break;
+                case "off"   :   eventSimEngine_.publishBootOffEvents(locations, burst, delay, seed, output);
+                    break;
+                case "on"    :   eventSimEngine_.publishBootOnEvents(locations, bfProbability, burst, delay, seed, output);
+                    break;
+                case "ready" :   eventSimEngine_.publishBootReadyEvents(locations, burst, delay, seed, output);
+                    break;
+                default      :   eventSimEngine_.publishBootEvents(locations, bfProbability, burst, delay, seed, output);
+                    break;
             }
+            return create_result_json("F", "Success");
+        } catch (SimulatorException e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create and send fabric events to network.
+     * @param parameters input details of the request.
+     * @return Status = F if ras events are generated, Status = E on failure
+     */
+    String generateFabricEvents(Map<String, String> parameters) {
+        try {
+            log_.info("Received fabric api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            removeEmptyValueParameters(parameters);
+            foreignSimulatorEngine_.generateFabricEvents(parameters);
             return create_result_json("F", "Success");
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());
@@ -127,7 +114,7 @@ public class EventSimApp extends EventSim {
             String locations = parameters.getOrDefault("locations", ".*");
             String output = parameters.getOrDefault("output", null);
             String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine.publishRasEvents(locations, label, burst, delay, seed, eventsCount, output);
+            eventSimEngine_.publishRasEvents(locations, label, burst, delay, seed, eventsCount, output);
             return create_result_json("F", "Success");
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());
@@ -155,7 +142,7 @@ public class EventSimApp extends EventSim {
             String seed = parameters.getOrDefault("seed", null);
             String startTime = parameters.getOrDefault("start-time", null);
             String type = parameters.getOrDefault("type", null);
-            eventSimEngine.publishEventsForScenario(scenarioFile, type, locations, rasLabel, sensorLabel, bfProbability, burst, delay, seed, counter, duration, startTime, output);
+            eventSimEngine_.publishEventsForScenario(scenarioFile, type, locations, rasLabel, sensorLabel, bfProbability, burst, delay, seed, counter, duration, startTime, output);
             return create_result_json("F", "Success");
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
@@ -177,7 +164,7 @@ public class EventSimApp extends EventSim {
             String location = parameters.getOrDefault("locations", ".*");
             String output = parameters.getOrDefault("output", null);
             String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine.publishSensorEvents(location, label, burst, delay, seed, eventsCount, output);
+            eventSimEngine_.publishSensorEvents(location, label, burst, delay, seed, eventsCount, output);
             return create_result_json("F", "Success");
 
         } catch (SimulatorException e) {
@@ -200,7 +187,7 @@ public class EventSimApp extends EventSim {
             String location = parameters.getOrDefault("locations", ".*");
             String output = parameters.getOrDefault("output", null);
             String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine.publishJobEvents(location, label, burst, delay, seed, eventsCount, output);
+            eventSimEngine_.publishJobEvents(location, label, burst, delay, seed, eventsCount, output);
             return create_result_json("F", "Success");
 
         } catch (SimulatorException e) {
@@ -215,7 +202,7 @@ public class EventSimApp extends EventSim {
      */
     String getRandomizationSeed(Map<String, String> parameters) {
         log_.info("Received get-seed api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        String seed = eventSimEngine.getRandomizationSeed();
+        String seed = eventSimEngine_.getRandomizationSeed();
         return create_result_json("F", seed);
     }
 
@@ -242,7 +229,7 @@ public class EventSimApp extends EventSim {
         String subUrl = parameters.getOrDefault("Url", null);
         source_.register(subUrl, subscriber, parameters);
         PropertyMap subscription = source_.getSubscription(subUrl, subscriber);
-        return jsonParser_.toString(subscription);
+        return parser_.toString(subscription);
     }
 
     /**
@@ -256,7 +243,7 @@ public class EventSimApp extends EventSim {
         PropertyDocument result = source_.getSubscriptionForId(Long.parseLong(subId));
         if(result == null)
             throw new SimulatorException("No subscription for given details exists.");
-        return jsonParser_.toString(result);
+        return parser_.toString(result);
     }
 
     /**
@@ -270,7 +257,7 @@ public class EventSimApp extends EventSim {
         PropertyDocument result = source_.getAllSubscriptions();
         if(result == null)
             throw new SimulatorException("No subscriptions exists.");
-        return jsonParser_.toString(result);
+        return parser_.toString(result);
     }
 
     /**
@@ -293,12 +280,12 @@ public class EventSimApp extends EventSim {
      */
     public String getBootParameters(final Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getBootParameters api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        bootParamsApi_.setBootParamsConfigFile(simEngineDataLoader.getBootParamsFileLocation());
+        bootParamsApi_.setBootParamsConfigFile(dataLoader_.getBootParamsFileLocation());
         assert parameters != null;
         String location = parameters.getOrDefault("hosts",null);
         if(location == null || location.equals("null"))
-            return jsonParser_.toString(bootParamsApi_.getBootParameters());
-        return jsonParser_.toString(bootParamsApi_.getBootParametersForLocation(location));
+            return parser_.toString(bootParamsApi_.getBootParameters());
+        return parser_.toString(bootParamsApi_.getBootParametersForLocation(location));
     }
 
     /**
@@ -318,7 +305,7 @@ public class EventSimApp extends EventSim {
         List<PropertyMap> foreignNameDiscovery = new ArrayList<>();
         for(int i = 0; i < numOfForeignNamesDiscovery; i++) {
             PropertyMap foreignNameUri = new PropertyMap();
-            foreignNameUri.put("URI", getForeignServerUrl() + simEngineDataLoader.getHwInventoryDiscStatusUrl() + "/" + i);
+            foreignNameUri.put("URI", getForeignServerUrl() + dataLoader_.getHwInventoryDiscStatusUrl() + "/" + i);
             foreignNameDiscovery.add(foreignNameUri);
         }
 
@@ -351,7 +338,7 @@ public class EventSimApp extends EventSim {
             foreignNameDiscoveryStatus.put("Details", null);
             discoveryStatus.add(foreignNameDiscoveryStatus);
         }
-        return jsonParser_.toString(discoveryStatus);
+        return parser_.toString(discoveryStatus);
     }
 
     /**
@@ -361,9 +348,9 @@ public class EventSimApp extends EventSim {
      */
     public String getInventoryHardware(final Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getInventoryHardware api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        hwInvApi_.setInventoryHardwareConfigLocation(simEngineDataLoader.getHwInventoryFileLocation());
+        hwInvApi_.setInventoryHardwareConfigLocation(dataLoader_.getHwInventoryFileLocation());
         PropertyArray hwInventory = (PropertyArray) hwInvApi_.getHwInventory();
-        return jsonParser_.toString(hwInventory);
+        return parser_.toString(hwInventory);
     }
 
     /**
@@ -375,9 +362,9 @@ public class EventSimApp extends EventSim {
     public String getInventoryHardwareForLocation(final Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getInventoryHardwareForLocation api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String location = parameters.getOrDefault("sub_component", null);
-        hwInvApi_.setInventoryHardwareConfigPath(simEngineDataLoader.getHwInventoryFileLocationPath());
+        hwInvApi_.setInventoryHardwareConfigPath(dataLoader_.getHwInventoryFileLocationPath());
         PropertyDocument hwInventory =  hwInvApi_.getInventoryHardwareForLocation(location);
-        return jsonParser_.toString(hwInventory);
+        return parser_.toString(hwInventory);
     }
 
     /**
@@ -388,9 +375,9 @@ public class EventSimApp extends EventSim {
     public String getInventoryHardwareQueryForLocation(final Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getInventoryHardwareQueryForLocation api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String location = parameters.getOrDefault("sub_component", null);
-        hwInvApi_.setInventoryHardwareQueryPath(simEngineDataLoader.getHwInventoryQueryLocationPath());
+        hwInvApi_.setInventoryHardwareQueryPath(dataLoader_.getHwInventoryQueryLocationPath());
         PropertyDocument hwInventory = hwInvApi_.getInventoryHardwareQueryForLocation(location);
-        return jsonParser_.toString(hwInventory);
+        return parser_.toString(hwInventory);
     }
 
     public String createReservation(final Map<String, String> parameters) {
@@ -405,7 +392,7 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            String result = wlmApi.createReservation(name, users, nodes, starttime, duration);
+            String result = wlmApi_.createReservation(name, users, nodes, starttime, duration);
 
             return create_result_json("F", result);
         } catch (Exception e) {
@@ -420,7 +407,7 @@ public class EventSimApp extends EventSim {
             String users = parameters.get("users");
             String nodes = parameters.get("nodes");
             String starttime = parameters.get("starttime");
-            String result = wlmApi.modifyReservation(name, users, nodes, starttime);
+            String result = wlmApi_.modifyReservation(name, users, nodes, starttime);
 
             return create_result_json("F", result);
         } catch (Exception e) {
@@ -432,7 +419,7 @@ public class EventSimApp extends EventSim {
         log_.info("Received deleteReservation api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         try {
             String name = parameters.get("name");
-            String result = wlmApi.deleteReservation(name);
+            String result = wlmApi_.deleteReservation(name);
 
             return create_result_json("F", result);
         } catch (Exception e) {
@@ -453,7 +440,7 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            String result = wlmApi.startJob(jobid, name, users, nodes, starttime, workdir);
+            String result = wlmApi_.startJob(jobid, name, users, nodes, starttime, workdir);
 
             return create_result_json("F", result);
         } catch (Exception e) {
@@ -475,7 +462,7 @@ public class EventSimApp extends EventSim {
             if(nodes.equals("random"))
                 nodes = pickRandomNodes();
 
-            String result = wlmApi.terminateJob(jobid, name, users, nodes, starttime, workdir, exitStatus);
+            String result = wlmApi_.terminateJob(jobid, name, users, nodes, starttime, workdir, exitStatus);
 
             return create_result_json("F", result);
         } catch (Exception e) {
@@ -489,7 +476,7 @@ public class EventSimApp extends EventSim {
             String reservations = parameters.get("reservations");
             String[] nodes = pickRandomNodes().split(" ");
 
-            wlmApi.simulateWlm(reservations, nodes);
+            wlmApi_.simulateWlm(reservations, nodes);
 
             return create_result_json("F", "Success");
         } catch (Exception e) {
@@ -497,9 +484,43 @@ public class EventSimApp extends EventSim {
         }
     }
 
-    private String pickRandomNodes() throws Exception {
-        simEngineDataLoader.loadData();
-        List<String> locations = simEngineDataLoader.getNodeHostnameData();
+    /**
+     * This method is used to create logger instance before calling main method
+     */
+    private static void setup() {
+        log_ = LoggerFactory.getInstance("EventSimApp", "EventSimApp", "console");
+    }
+
+    /**
+     * This method to start server.
+     */
+    void startServer() throws SimulatorException {
+        source_.startServer();
+        isServerUp_ = true;
+    }
+
+    /**
+     * This class is to imitate like a server.
+     */
+    void stopServer() throws SimulatorException {
+        source_.stopServer();
+        isServerUp_ = false;
+    }
+
+    /**
+     * This method to fetch server status.
+     */
+    boolean serverStatus() {
+        source_.serverStatus();
+        return isServerUp_;
+    }
+
+    /**
+     * This method is used to pick random node hostnames
+     * @return random nodes hostnames
+     */
+    private String pickRandomNodes() {
+        List<String> locations = dataLoader_.getNodeLocationsHostnames();
         Random rand = new Random();
         int size = rand.nextInt(locations.size());
         StringBuilder nodes = new StringBuilder();
@@ -513,21 +534,6 @@ public class EventSimApp extends EventSim {
     }
 
     /**
-     * This method to start server.
-     */
-    void startServer() throws SimulatorException { source_.startServer(); }
-
-    /**
-     * This class is to imitate like a server.
-     */
-    void stopServer() throws SimulatorException { source_.stopServer(); }
-
-    /**
-     * This method to fetch server status.
-     */
-    void serverStatus() { source_.serverStatus(); }
-
-    /**
      * This method to generate url of the server
      */
     private String getForeignServerUrl() {
@@ -536,13 +542,67 @@ public class EventSimApp extends EventSim {
         return "http://" + foreignServerAddr + ":" + foreignServerPort;
     }
 
+    /**
+     * This method is used to return api requested data
+     * @param status status of request
+     * @param result result data
+     * @return status and data in a format
+     */
     private String create_result_json(Object status, Object result){
         PropertyMap output = new PropertyMap();
         output.put("Status", status);
         output.put("Result", result);
-        return jsonParser_.toString(output);
+        return parser_.toString(output);
+    }
+
+    /**
+     * This method is used to filter input parameters by removing null value inputs
+     * @param parameters input data
+     */
+    private void removeEmptyValueParameters(Map<String, String> parameters) {
+        for(Map.Entry<String, String> parameter : parameters.entrySet()) {
+            String key = parameter.getKey();
+            String value = parameter.getValue();
+            if(value.isEmpty()) {
+                log_.info("Removing key, value for key is empty, key = " + key);
+                parameters.remove(key);
+            }
+        }
+    }
+
+    static {
+        setup();
+    }
+
+    public static void main(String[] args) {
+        if(args.length != 2) {
+            log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");
+            System.exit(1);
+        }
+
+        load(args[0], args[1]);
+    }
+
+    private static void load(String voltdbServer, String serverConfigFile) {
+        try {
+            final EventSimApp eventSimApp = new EventSimApp(voltdbServer, serverConfigFile, log_);
+            eventSimApp.initialiseInstances();
+            eventSimApp.initialiseData();
+            eventSimApp.run(eventSimApp);
+
+        } catch (SimulatorException e) {
+            log_.exception(e);
+            System.exit(1);
+        }
+    }
+
+    void run(EventSimApp eventSimApp) throws SimulatorException {
+        executeRoutes(eventSimApp);
+        startServer();
     }
 
     static Logger log_;
-    private int numOfForeignNamesDiscovery = 1;
+
+    private int numOfForeignNamesDiscovery;
+    private boolean isServerUp_ = false;
 }

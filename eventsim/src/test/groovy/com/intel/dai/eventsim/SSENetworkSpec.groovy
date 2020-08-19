@@ -1,16 +1,11 @@
 package com.intel.dai.eventsim
 
 import com.intel.logging.Logger
-import com.intel.networking.HttpMethod
 import com.intel.networking.restserver.RESTServer
 import com.intel.networking.restserver.RESTServerException
 import com.intel.networking.restserver.RESTServerHandler
-import com.intel.networking.restserver.Request
-import com.intel.properties.PropertyArray
 import com.intel.properties.PropertyMap
-import com.intel.properties.PropertyNotExpectedType
 import org.apache.commons.io.FileUtils
-import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -24,7 +19,7 @@ class SSENetworkSpec extends Specification {
 
     def "initialise sse instance" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.initialize()
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.setAddress("localhost") >> ""
@@ -41,7 +36,7 @@ class SSENetworkSpec extends Specification {
 
     def "Start server" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
@@ -52,7 +47,7 @@ class SSENetworkSpec extends Specification {
 
     def "Stop server" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(false)
@@ -63,7 +58,7 @@ class SSENetworkSpec extends Specification {
 
     def "Get server address" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(false)
@@ -74,7 +69,7 @@ class SSENetworkSpec extends Specification {
 
     def "Get server port" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(false)
@@ -85,7 +80,7 @@ class SSENetworkSpec extends Specification {
 
     def "Publish data to sse network in constant mode" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
@@ -95,7 +90,7 @@ class SSENetworkSpec extends Specification {
 
     def "Publish data to sse network in burst mode" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
@@ -105,7 +100,7 @@ class SSENetworkSpec extends Specification {
 
     def "Test logging occured error message while publishing data" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.set(true)
@@ -116,7 +111,7 @@ class SSENetworkSpec extends Specification {
 
     def "Test register to sse network with url as null value" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         when:
         sseNetworkTest.register(null, "GET", Mock(RESTServerHandler))
@@ -127,7 +122,7 @@ class SSENetworkSpec extends Specification {
 
     def "Test register to sse network with http method as null value" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         when:
         sseNetworkTest.register("http://test.com", null, Mock(RESTServerHandler))
@@ -138,7 +133,7 @@ class SSENetworkSpec extends Specification {
 
     def "Test register to sse network with valid details" () {
         loadData()
-        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sseConfig"), Mock(Logger))
+        SSENetwork sseNetworkTest = new SSENetwork(config.getMap("sse"), Mock(Logger))
         sseNetworkTest.server_ = Mock(RESTServer)
         sseNetworkTest.server_.running_ = Mock(AtomicBoolean)
         sseNetworkTest.server_.running_.get() >> false
@@ -160,9 +155,9 @@ class SSENetworkSpec extends Specification {
     }
 
     String sseConfig = "{\n" +
-            "  \"sseConfig\": {\n" +
-            "    \"serverAddress\": \"localhost\" ,\n" +
-            "    \"serverPort\": \"1234\" ,\n" +
+            "  \"sse\": {\n" +
+            "    \"server-address\": \"localhost\" ,\n" +
+            "    \"server-port\": \"1234\" ,\n" +
             "    \"urls\": {\n" +
             "      \"/v1/stream/cray-telemetry-fan\": [\n" +
             "        \"telemetry\"\n" +

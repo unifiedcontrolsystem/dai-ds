@@ -2,115 +2,79 @@ package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
-import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.dsapi.DataStoreFactory;
-import com.intel.dai.dsapi.NodeInformation;
-import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.logging.Logger;
-import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 /**
- * Description of class EventSim.
- * initialisation of all dependent components that eventsim server needs to serve.
+ * Description of class EventSim
+ * create instances of several api classes to be served
  */
-public class EventSim {
+class EventSim {
 
-    EventSim(String[] args, Logger log) throws SimulatorException {
+    EventSim(final String voltdbServer, final String serverConfigFile, final Logger log) {
+        voltdbServer_ = voltdbServer;
+        serverConfigFile_ = serverConfigFile;
         log_ = log;
-        loadConfigFile(args);
-        validateConfig();
-        initialiseInstances(args);
+        parser_ = ConfigIOFactory.getInstance("json");
+        dataLoader_ = new DataLoader(serverConfigFile_, voltdbServer_, log_);
     }
 
     /**
-     * This method is used for unit test cases.
-     * @param log
+     * This method is used to load foreign simulation configuration data
+     * create and initialise several api classes instances
+     * @throws SimulatorException unable to create/initialise instances
      */
-    EventSim(Logger log) {
-        log_ = log;
-        wlmApi = new WlmApi(log_);
+    void initialiseInstances() throws SimulatorException {
+        loadData();
+        initialise();
     }
 
     /**
-     * This method is used to initialise instances
-     * @throws SimulatorException when unable to create instances.
+     * This method is used to initialise api classes instances
+     * @throws SimulatorException unable to create/initialise instances
      */
-    void initialise(String[] args) throws SimulatorException {
-        DataStoreFactory factory = createDataStoreFactory(args);
-        nodeinfo = factory.createNodeInformation();
-        PropertyMap eventsimConfig = serverConfiguration_.getMapOrDefault("eventsimConfig", null);
-        simEngineDataLoader = new DataLoaderEngine(eventsimConfig, nodeinfo, log_);
-        eventSimEngine = new SimulatorEngine(simEngineDataLoader, source_, log_);
-        eventSimEngine.initialize();
+    void initialiseData() throws SimulatorException {
+        source_.initialise();
+        eventSimEngine_.initialize();
+        foreignSimulatorEngine_.initialize();
     }
 
     /**
-     * This method is used to create factory method for database using input data
-     * @param args input data with db details.
-     * @return
+     * This method is used to initialise api classes instances
+     * @throws SimulatorException unable to create/initialise instances
      */
-    DataStoreFactory createDataStoreFactory(String[] args) {
-        return new DataStoreFactoryImpl(args, log_);
-    }
-
-    /**
-     * This method is used load configuration file data
-     * @param args_ voltdb details, configuration file location
-     * @throws SimulatorException when unable to load configuration file data.
-     * expects non null values.
-     */
-    private void loadConfigFile(String[] args_) throws SimulatorException {
-        try {
-            eventSimConfigFile_ = args_[1];
-            PropertyDocument data = LoadFileLocation.fromFileLocation(eventSimConfigFile_);
-            if(!data.isMap() || ((PropertyMap) data).size() == 0)
-                throw new SimulatorException("Invalid or null EventSim server configuration details.");
-            serverConfiguration_ = data.getAsMap();
-        } catch (FileNotFoundException e) {
-            throw new SimulatorException("Error while reading Eventsim server config file: " + eventSimConfigFile_);
-        } catch (IOException | ConfigIOParseException e) {
-            throw new SimulatorException("Error while reading Eventsim server config file", e);
-        }
-    }
-
-    /**
-     * This method is used validate configuration file data
-     */
-    private void validateConfig() throws SimulatorException {
-        if(!serverConfiguration_.containsKey("networkConfig"))
-            throw new SimulatorException("Eventsim config file is missing 'networkConfig' entry.");
-        if(!serverConfiguration_.containsKey("eventsimConfig"))
-            throw new SimulatorException("Eventsim config file is missing 'eventsimConfig' entry.");
-    }
-
-    /**
-     * This method is used to initialise instances
-     * @throws SimulatorException when unable to create instances.
-     */
-    private void initialiseInstances(String[] args) throws SimulatorException {
-        jsonParser_ = ConfigIOFactory.getInstance("json");
+    void initialise() throws SimulatorException {
         bootParamsApi_ = new BootParameters();
         hwInvApi_ = new HardwareInventory();
-        wlmApi = new WlmApi(log_);
-        ApiReqData apiReq = new ApiReqData(log_);
-        PropertyMap ntwkConfig = serverConfiguration_.getMapOrDefault("networkConfig", null);
-        source_ = new NetworkObject(ntwkConfig, log_, apiReq);
-        source_.initialise();
+        wlmApi_ = new WlmApi(log_);
+        apiReq_ = new ApiReqData(log_);
+
+        PropertyMap networkConfiguration = dataLoader_.getNetworkConfigurationData();
+        source_ = new NetworkObject(networkConfiguration, log_, apiReq_);
+        eventSimEngine_ = new SimulatorEngine(dataLoader_, source_, log_);
+        foreignSimulatorEngine_ = new ForeignSimulatorEngine(dataLoader_, source_, log_);
     }
 
-    private String eventSimConfigFile_;
-    private final Logger log_;
-    private PropertyMap serverConfiguration_;
-    protected ConfigIO jsonParser_;
+    /**
+     * This method is used to load foreignserver configuration data
+     * @throws SimulatorException unable to read/load foreign server configuration data
+     */
+    private void loadData() throws SimulatorException {
+        dataLoader_.initialize();
+    }
+
     protected BootParameters bootParamsApi_;
     protected HardwareInventory hwInvApi_;
+    protected WlmApi wlmApi_;
     protected NetworkObject source_;
-    SimulatorEngine eventSimEngine;
-    private NodeInformation nodeinfo;
-    protected DataLoaderEngine simEngineDataLoader;
-    protected WlmApi wlmApi;
+    protected DataLoader dataLoader_;
+    protected SimulatorEngine eventSimEngine_;
+    protected ForeignSimulatorEngine foreignSimulatorEngine_;
+    protected ApiReqData apiReq_;
+
+    protected final ConfigIO parser_;
+
+    private final String voltdbServer_;
+    private final String serverConfigFile_;
+    private final Logger log_;
 }

@@ -1,0 +1,655 @@
+{
+  "metrics": {
+    "messages": [
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s17b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "258"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s17b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s17b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s17b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.267000198364258"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s17b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.07450008392334"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s5b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "192"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s5b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s5b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s5b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.211999893188477"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s5b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.061500072479248"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s19b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "250"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s19b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s19b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s19b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.267000198364258"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s19b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.061500072479248"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s30b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "160"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s30b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s30b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s30b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.376999855041504"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s30b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.07450008392334"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s15b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "263"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s15b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s15b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s15b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.211999893188477"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s15b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.0355000495910645"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s24b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "248"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s24b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s24b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s24b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.211999893188477"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s24b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.07450008392334"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s9b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "207"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s9b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s9b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s9b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.376999855041504"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s9b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.0875000953674316"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s7b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "225"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s7b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s7b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s7b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.432000160217285"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s7b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.07450008392334"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s11b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "210"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s11b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s11b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s11b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.156999588012695"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s11b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.061500072479248"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:46Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:46Z",
+                  "Location": "x3000c0s1b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "190"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:46Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:46Z",
+                  "Location": "x3000c0s1b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:46Z",
+                  "Location": "x3000c0s1b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:46Z",
+                  "Location": "x3000c0s1b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.211999893188477"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:46Z",
+                  "Location": "x3000c0s1b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.0485000610351562"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      },
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Power",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s3b0",
+                  "PhysicalContext": "Chassis",
+                  "Index": 0,
+                  "Value": "195"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          },
+          {
+            "EventTimestamp": "2020-06-03T22:35:45Z",
+            "MessageId": "CrayTelemetry.Voltage",
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s3b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 0,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s3b0",
+                  "PhysicalContext": "PowerSupplyBay",
+                  "Index": 1,
+                  "Value": "0"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s3b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+12.0V",
+                  "Value": "12.376999855041504"
+                },
+                {
+                  "Timestamp": "2020-06-03T22:35:45Z",
+                  "Location": "x3000c0s3b0",
+                  "PhysicalContext": "SystemBoard",
+                  "Index": 0,
+                  "DeviceSpecificContext": "+3.3V Vbat",
+                  "Value": "3.0875000953674316"
+                }
+              ],
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -110,29 +110,29 @@ class NetworkObjectSpec extends Specification {
     def "Test exceptions for invalid config file missing serverAddress details" () {
         loadData(networkConfig)
         PropertyMap config = config.getMap("networkConfig")
-        config.getMap("sseConfig").remove("serverAddress")
+        config.getMap("sse").remove("server-address")
         when:
         new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
-        e.getMessage() == "EventSim Configuration file doesn't contain 'serverAddress' entry"
+        e.getMessage() == "EventSim Configuration file doesn't contain 'server-address' entry"
     }
 
     def "Test exceptions for invalid config file missing serverPort details" () {
         loadData(networkConfig)
         PropertyMap config = config.getMap("networkConfig")
-        config.getMap("sseConfig").remove("serverPort")
+        config.getMap("sse").remove("server-port")
         when:
         new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
         def e = thrown(SimulatorException)
-        e.getMessage() == "EventSim Configuration file doesn't contain 'serverPort' entry"
+        e.getMessage() == "EventSim Configuration file doesn't contain 'server-port' entry"
     }
 
     def "Test exceptions for invalid config file missing urls details" () {
         loadData(networkConfig)
         PropertyMap config = config.getMap("networkConfig")
-        config.getMap("sseConfig").remove("urls")
+        config.getMap("sse").remove("urls")
         when:
         new NetworkObject(config, Mock(Logger), Mock(ApiReqData))
         then:
@@ -345,9 +345,9 @@ class NetworkObjectSpec extends Specification {
     String networkConfig = "{\n" +
             "    \"networkConfig\": {\n" +
             "        \"network\": \"sse\" ,\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"localhost\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
+            "        \"sse\": {\n" +
+            "            \"server-address\": \"localhost\" ,\n" +
+            "            \"server-port\": \"5678\" ,\n" +
             "            \"urls\": {\n" +
             "                \"/v1/stream/cray-telemetry-fan\": [\n" +
             "                    \"telemetry\"\n" +
@@ -370,9 +370,9 @@ class NetworkObjectSpec extends Specification {
     String callbackConfig = "{\n" +
             "    \"networkConfig\": {\n" +
             "        \"network\": \"callback\" ,\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"localhost\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
+            "        \"sse\": {\n" +
+            "            \"server-address\": \"localhost\" ,\n" +
+            "            \"server-port\": \"5678\" ,\n" +
             "            \"urls\": {\n" +
             "                \"/v1/stream/cray-telemetry-fan\": [\n" +
             "                    \"telemetry\"\n" +
@@ -395,9 +395,9 @@ class NetworkObjectSpec extends Specification {
     String rabbitmqConfig = "{\n" +
             "    \"networkConfig\": {\n" +
             "        \"network\": \"rabbitmq\" ,\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"localhost\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
+            "        \"sse\": {\n" +
+            "            \"server-address\": \"localhost\" ,\n" +
+            "            \"server-port\": \"5678\" ,\n" +
             "            \"urls\": {\n" +
             "                \"/v1/stream/cray-telemetry-fan\": [\n" +
             "                    \"telemetry\"\n" +
@@ -420,9 +420,9 @@ class NetworkObjectSpec extends Specification {
     String otherConfig = "{\n" +
             "    \"networkConfig\": {\n" +
             "        \"network\": \"other\" ,\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"localhost\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
+            "        \"sse\": {\n" +
+            "            \"server-address\": \"localhost\" ,\n" +
+            "            \"server-port\": \"5678\" ,\n" +
             "            \"urls\": {\n" +
             "                \"/v1/stream/cray-telemetry-fan\": [\n" +
             "                    \"telemetry\"\n" +
