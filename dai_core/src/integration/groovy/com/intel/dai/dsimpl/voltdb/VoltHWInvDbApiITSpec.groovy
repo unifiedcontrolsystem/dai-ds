@@ -25,6 +25,7 @@ class VoltHWInvDbApiITSpec extends Specification {
         ts = new VoltHWInvDbApi(logger, new HWInvUtilImpl(logger), servers)
         ts.initialize()
         ts.delete''
+        ts.deleteAllRawHistoricalRecords()
         ts.deleteAllCookedNodes()
     }
 

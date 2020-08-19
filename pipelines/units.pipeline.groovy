@@ -72,7 +72,7 @@ pipeline {
                     steps {
                         script {
                             utilities.InvokeGradle("clean")
-                            utilities.InvokeGradle("test")
+                            utilities.InvokeGradle("build")
                         }
                     }
                 }
@@ -99,7 +99,7 @@ pipeline {
                 }
                 stage('Archive') {
                     steps {
-                        archiveArtifacts 'build/reports/**'
+                        archiveArtifacts 'build/distributions/**, build/reports/**'
                     }
                 }
             }

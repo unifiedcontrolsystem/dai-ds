@@ -321,6 +321,18 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
+    public void deleteAllRawHistoricalRecords() throws IOException, DataStoreException {
+        try {
+            client.callProcedure("RawInventoryHistoryDelete");
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException during RawInventoryHistoryDelete");
+            throw new DataStoreException(e.getMessage());
+        } catch (NullPointerException e) {
+            logger.error("Null client");
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
     public long numberRawInventoryHistoryRows()
             throws IOException, DataStoreException {
         try {
@@ -376,7 +388,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
 
     private boolean isNode(String location) {
         return StringUtils.countMatches(location, "-") == 2
-                && StringUtils.countMatches(location, "CN") == 1;  // can handle null location string
+                && StringUtils.countMatches(location, "-CN") == 1;  // can handle null location string
     }
 
     public List<String> dumpCookedNodes() throws DataStoreException, IOException {

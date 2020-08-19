@@ -7,6 +7,9 @@ CREATE PROCEDURE RawInventoryHistoryInsert
    AS UPSERT INTO RawHWInventory_History(Action, ID, FRUID, ForeignTimestamp, DbUpdatedTimestamp)
         VALUES(?, ?, ?, ?, CURRENT_TIMESTAMP);
 
+CREATE PROCEDURE RawInventoryHistoryDelete   -- needed for testing
+    AS DELETE FROM RawHWInventory_History;
+
 CREATE PROCEDURE RawInventoryHistoryDump
     AS SELECT * FROM RawHWInventory_History;
 
