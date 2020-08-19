@@ -1,0 +1,2624 @@
+{
+  "metrics": {
+    "messages": [
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "40"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "37"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-53"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-51"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s17b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-39"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-58"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-54"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s3b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-38"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "42"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "35"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "37"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-57"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-54"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s9b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-39"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-58"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-54"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s5b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-38"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "37"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "24"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-48"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-52"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "37"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s24b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-39"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "35"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "24"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-49"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-50"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "35"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s19b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-36"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "40"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "41"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-57"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-54"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s1b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-36"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "24"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "36"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-51"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-51"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "35"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s15b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-38"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "35"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "40"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "34"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "39"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-54"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s7b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-38"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "38"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "39"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-60"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-60"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-58"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-57"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-68"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-58"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s30b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-39"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      } ,
+      {
+        "Events": [
+          {
+            "EventTimestamp": "2020-06-03T22:25:36Z" ,
+            "MessageId": "CrayTelemetry.Temperature" ,
+            "Oem": {
+              "Sensors": [
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Lft Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 3 Temp" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P1 VR Temp" ,
+                  "Value": "33"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Front Panel Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "SSB Temp" ,
+                  "Value": "40"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB P2 VR Temp" ,
+                  "Value": "31"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB BMC Temp" ,
+                  "Value": "30"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "BB Rt Rear Temp" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 1 Temp" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "HSBP 1 Temp" ,
+                  "Value": "28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Riser 2 Temp" ,
+                  "Value": "25"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Exit Air Temp" ,
+                  "Value": "32"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "LAN NIC Temp" ,
+                  "Value": "37"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS1 Temperature" ,
+                  "Value": "26"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "PS2 Temperature" ,
+                  "Value": "27"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 DTS Therm Mgn" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P1 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "P2 Temperature" ,
+                  "Value": "29"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 1" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 2" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 3" ,
+                  "Value": "-55"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "DIMM Thrm Mrgn 4" ,
+                  "Value": "-56"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 1" ,
+                  "Value": "-28"
+                } ,
+                {
+                  "Timestamp": "2020-06-03T22:25:36Z" ,
+                  "Location": "x3000c0s11b0" ,
+                  "ParentalIndex": 0 ,
+                  "PhysicalContext": "Baseboard" ,
+                  "Index": 0 ,
+                  "DeviceSpecificContext": "Agg Therm Mgn 2" ,
+                  "Value": "-38"
+                }
+              ] ,
+              "TelemetrySource": "River"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

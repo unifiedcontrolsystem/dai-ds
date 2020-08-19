@@ -17,14 +17,14 @@ public class WlmApi {
 
     Logger logger_;
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String bgschedPath = "/var/log/bgsched.log";
-    String cqmPath = "/var/log/cqm.log";
+    protected String bgschedPath = "/var/log/bgsched.log";
+    protected String cqmPath = "/var/log/cqm.log";
 
-    public WlmApi(Logger logger) {
+    WlmApi(Logger logger) {
         logger_ = logger;
     }
 
-    public String createReservation(String name, String users, String nodes, Timestamp starttime, String duration) throws IOException {
+    String createReservation(String name, String users, String nodes, Timestamp starttime, String duration) throws IOException {
 
         logger_.info("Generate create reservation log line");
         String logstring = "";
@@ -49,7 +49,7 @@ public class WlmApi {
         return logstring;
     }
 
-    public String modifyReservation(String name, String users, String nodes, String starttime) throws IOException {
+    String modifyReservation(String name, String users, String nodes, String starttime) throws IOException {
 
         logger_.info("Generate modify reservation log line");
         String logstring = "";
@@ -80,7 +80,7 @@ public class WlmApi {
         return logstring;
     }
 
-    public String deleteReservation(String name) throws IOException {
+    String deleteReservation(String name) throws IOException {
 
         logger_.info("Generate delete reservation log line");
         FileWriter bgschedLog = null;
@@ -103,7 +103,7 @@ public class WlmApi {
     }
 
 
-    public String startJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir) throws IOException {
+    String startJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir) throws IOException {
 
         logger_.info("Generate start job log line");
         FileWriter cqmLog = null;
@@ -127,7 +127,7 @@ public class WlmApi {
         return logstring;
     }
 
-    public String terminateJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir, String exitStatus) throws IOException {
+    String terminateJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir, String exitStatus) throws IOException {
 
         logger_.info("Generate terminate job log line");
         FileWriter cqmLog = null;
@@ -153,7 +153,7 @@ public class WlmApi {
         return logstring;
     }
 
-    public void simulateWlm(String reservations, String[] nodes) throws Exception {
+    void simulateWlm(String reservations, String[] nodes) throws Exception {
 
         HashMap<String, Reservation> logItems = new HashMap<String, Reservation>();
         String[] users = "user1 user2 user3 user4".split(" ");
@@ -249,7 +249,7 @@ public class WlmApi {
         }
     }
 
-    public String[] getRandomSubArray(String[] array) {
+    String[] getRandomSubArray(String[] array) {
 
         Random rand = new Random();
         int size = rand.nextInt(array.length);

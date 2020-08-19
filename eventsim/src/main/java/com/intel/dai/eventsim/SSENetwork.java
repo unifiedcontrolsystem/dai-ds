@@ -104,8 +104,8 @@ public class SSENetwork extends NetworkConnectionObject {
      * @throws RESTServerException when unable to fetch rest server address or port data.
      */
     private void configureNetwork() throws RESTServerException {
-        setAddress(config_.getStringOrDefault("serverAddress", null));
-        setPort(config_.getStringOrDefault("serverPort", null));
+        setAddress(config_.getStringOrDefault("server-address", null));
+        setPort(config_.getStringOrDefault("server-port", null));
     }
 
     /**

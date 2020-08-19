@@ -77,9 +77,9 @@ Below json explains about the client subscriptions details.
 ...
 "networkConfig" : {
       "network" : "sse",
-      "sseConfig": {
-          "serverAddress": "rest_server_ip_address_or_hostname" ,
-          "serverPort": "rest_server_port" ,
+      "sse": {
+          "server-address": "rest_server_ip_address_or_hostname" ,
+          "server-port": "rest_server_port" ,
           "urls": {
             "network_stream_telemety_url": [
               "monitor_adapter_profile_subject_name"
@@ -114,9 +114,9 @@ Note:
 ...
 "networkConfig" : {
       "network" : "sse",
-      "sseConfig": {
-          "serverAddress": "rest_server_ip_address_or_hostname" , //data-point 3
-          "serverPort": "rest_server_port" , //data-point 4
+      "sse": {
+          "server-address": "rest_server_ip_address_or_hostname" , //data-point 3
+          "server-port": "rest_server_port" , //data-point 4
           "urls": {
             "network_stream_telemety_url": [ //data-point 1
               "monitor_adapter_profile_subject_name" //data-point 2
@@ -176,9 +176,9 @@ In above example compare data-points between EventSim.json (simulation-server) a
 ...
 "networkConfig" : {
       "network" : "sse",
-      "sseConfig": {
-          "serverAddress": "rest_server_ip_address_or_hostname" , //data-point 3
-          "serverPort": "rest_server_port" , //data-point 4
+      "sse": {
+          "server-address": "rest_server_ip_address_or_hostname" , //data-point 3
+          "server-port": "rest_server_port" , //data-point 4
           "urls": {
             "network_stream_telemety_url": [ //data-point 1
               "provisioner_adapter_profile_subject_name" //data-point 2
