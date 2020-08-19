@@ -1012,7 +1012,7 @@ CREATE TABLE public.Tier2_HWInventoryLocation (
     entrynumber bigint NOT NULL
 );
 
-CREATE TABLE public.tier2_HWInventory_History (
+CREATE TABLE public.tier2_RawHWInventory_History (
     Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
@@ -1244,7 +1244,7 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
       return query
           select 'Replacement_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
-          from tier2_hwinventory_history; 
+          from tier2_RawHWInventory_History;
 
       return query
           select 'Service_Node_LastChg_Timestamp'::varchar,
@@ -1676,16 +1676,16 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_hwinventory_history
+CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_RawHWInventory_History
     LANGUAGE plpgsql
     AS $$
     DECLARE
         p_fruid character varying;
     BEGIN
-        p_fruid := (select distinct on (fruid) fruid from tier2_hwinventory_history where fruid = p_lctn);
+        p_fruid := (select distinct on (fruid) fruid from tier2_RawHWInventory_History where fruid = p_lctn);
         if (p_fruid is not null) then
         return query
-            select * from  tier2_hwinventory_history
+            select * from  tier2_RawHWInventory_History
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
                 fruid like (p_fruid || '%')
@@ -1693,7 +1693,7 @@ CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp with
 
         else
         return query
-            select * from  tier2_hwinventory_history
+            select * from  tier2_RawHWInventory_History
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
                 (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
@@ -1712,7 +1712,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.getinventoryhistoryforlctn(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), fruid character varying(80))
     LANGUAGE sql
     AS $$
-        select id, fruid from  tier2_hwinventory_history
+        select id, fruid from  tier2_RawHWInventory_History
         where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
             dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
             (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
@@ -2526,19 +2526,19 @@ $$;
 -- Name: replacementhistorylist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_hwinventory_history
+CREATE OR REPLACE FUNCTION public.replacementhistorylist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.tier2_RawHWInventory_History
     LANGUAGE plpgsql
     AS $$
 BEGIN
     if (p_start_time is not null) then
         return query
-            select * from tier2_hwinventory_history
+            select * from tier2_RawHWInventory_History
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
                 dbupdatedtimestamp >= p_start_time
             order by dbupdatedtimestamp, id, action, fruid desc;
     else
         return query
-            select * from tier2_hwinventory_history
+            select * from tier2_RawHWInventory_History
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
             order by dbupdatedtimestamp, id, action, fruid desc;
     end if;
@@ -3289,11 +3289,11 @@ CREATE OR REPLACE FUNCTION public.insertorupdatehwinventorylocation(p_id charact
         DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.get_hwinventoryhistory_records() RETURNS SETOF public.tier2_HWInventory_History
+CREATE OR REPLACE FUNCTION public.get_rawinventoryhistory_records() RETURNS SETOF public.tier2_RawHWInventory_History
  LANGUAGE sql
     AS $$
     select *
-    from Tier2_HwInventory_History;
+    from tier2_RawHWInventory_History;
 $$;
 
 CREATE OR REPLACE FUNCTION public.get_hwinventoryfru_records() RETURNS SETOF public.Tier2_HWInventoryFRU
@@ -3765,7 +3765,7 @@ CREATE SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq
 ALTER SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq OWNED BY public.tier2_nonnodehw_history.entrynumber;
 
 
-CREATE SEQUENCE public.tier2_HWInventory_History_entrynumber_seq
+CREATE SEQUENCE public.tier2_RawHWInventory_History_entrynumber_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -3773,9 +3773,9 @@ CREATE SEQUENCE public.tier2_HWInventory_History_entrynumber_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tier2_HWInventory_History_entrynumber_seq OWNED BY public.tier2_HWInventory_History.entrynumber;
-ALTER TABLE ONLY public.tier2_HWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventory_History_entrynumber_seq'::regclass);
-SELECT pg_catalog.setval('public.tier2_HWInventory_History_entrynumber_seq', 1, false);
+ALTER SEQUENCE public.tier2_RawHWInventory_History_entrynumber_seq OWNED BY public.tier2_RawHWInventory_History.entrynumber;
+ALTER TABLE ONLY public.tier2_RawHWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_RawHWInventory_History_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_RawHWInventory_History_entrynumber_seq', 1, false);
 
 CREATE SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq
     START WITH 1

@@ -46,7 +46,7 @@ import java.text.SimpleDateFormat;
  *      mDataMoverResultTblIndxToTableNameMap.put(27, "NonNodeHwInventory_History");
  *      mDataMoverResultTblIndxToTableNameMap.put(28, "HW_Inventory_Fru");
  *      mDataMoverResultTblIndxToTableNameMap.put(29, "HW_Inventory_Location");
- *      mDataMoverResultTblIndxToTableNameMap.put(30, "HW_Inventory_History");
+ *      mDataMoverResultTblIndxToTableNameMap.put(30, "RawHWInventory_History");
  */
 
 public class DataMoverGetListOfRecsToMove extends VoltProcedure {
@@ -84,7 +84,7 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectNonNodeHwInventory_HistoryToBeMovedSql   = new SQLStmt("SELECT * FROM NonNodeHwInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
     public final SQLStmt selectHW_Inventory_FRU_ToBeMovedSql            = new SQLStmt("SELECT * FROM HW_Inventory_Fru WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectHW_INVENTORY_Location_ToBeMovedSql       = new SQLStmt("SELECT * FROM HW_Inventory_Location WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
-    public final SQLStmt selectHW_Inventory_HistoryToBeMovedSql         = new SQLStmt("SELECT * FROM HW_Inventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectRawHWInventory_HistoryToBeMovedSql       = new SQLStmt("SELECT * FROM RawHWInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
 
     public VoltTable[] run(long lEndTsInMicroSecs, long lStartTsInMicroSecs) throws VoltAbortException {
         // Get the appropriate data out of the history tables that need to be moved to Tier2.
@@ -119,7 +119,7 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
         voltQueueSQL(selectNonNodeHwInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectHW_Inventory_FRU_ToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectHW_INVENTORY_Location_ToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
-        voltQueueSQL(selectHW_Inventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectRawHWInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
 
         // Actually get the results for each of the tables.
         VoltTable[] aVt = voltExecuteSQL(true);

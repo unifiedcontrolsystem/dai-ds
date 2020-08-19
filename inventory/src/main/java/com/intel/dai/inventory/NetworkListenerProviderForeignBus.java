@@ -174,12 +174,16 @@ class HWInventoryUpdate implements Runnable {
                 foreignInventoryClient_.getCanonicalHWInvHistoryJson(
                         actions_.lastHWInventoryHistoryUpdate()));
 
+        String foreignTimestamp = actions_.lastHWInventoryHistoryUpdate();
+
         if(bootState_ == BootState.NODE_OFFLINE) {
             actions_.deleteHWInventory(location_);
+            // Assign nulls to cooked history
             return;
         }
         if(bootState_ == BootState.NODE_ONLINE) {
             actions_.upsertHWInventory(location_, foreignInventoryClient_.getCanonicalHWInvJson(foreignName_));
+            // Walk the raw history to upsert the cooked history
         }
     }
 }

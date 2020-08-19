@@ -197,7 +197,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
      */
     @Override
     public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
-        return hwInvDbApi_.numberOfLocationsInHWInv() == 0;
+        return hwInvDbApi_.numberOfRawInventoryRows() == 0;
     }
 
     /**
@@ -238,8 +238,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
         try {
             hwInvDbApi_.ingestHistory(canonicalHwInvHistJson);
-        } catch (InterruptedException e) {
-            log_.error("InterruptedException: %s", e.getMessage());
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
@@ -260,21 +258,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     public void close() throws IOException {
         if(publisher_ != null)
             publisher_.close();
-    }
-
-    /**
-     * Fetch HW Inventory snapshot data for specific location.
-     * @param location DAI location to fetch hw inventory data from db.
-     */
-    private HWInvTree getHWInvSnapshot(String location) {
-        try {
-            return hwInvDbApi_.allLocationsAt(location, null);
-        } catch (IOException e) {
-            log_.error("IOException: %s", e.getMessage());
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
-        return null;
     }
 
     /**

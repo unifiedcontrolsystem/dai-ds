@@ -31,16 +31,30 @@ pipeline {
                         script { utilities.FixFilesPermission() }
                     }
                 }
-                stage('Quick Test') {
+                stage('Quick Unit Test') {
                     options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'true' } }
                     steps {
                         script {
+                            utilities.InvokeGradle(":dai_core:clean")
                             utilities.InvokeGradle(":inventory_api:test")
                             utilities.InvokeGradle(":inventory:test")
                             utilities.InvokeGradle(":dai_core:test")
                             utilities.InvokeGradle(":dai_network_listener:test")
                             utilities.InvokeGradle(":procedures:test")
+                        }
+                    }
+                }
+                stage('Quick Component Test') {
+                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    steps {
+                        script {
+                            def scriptDir = 'inventory_api/src/integration/resources/scripts/'
+                            StopHWInvDb()
+                            utilities.InvokeGradle(":procedures:jar")
+                            StartHWInvDb(scriptDir)
+                            utilities.InvokeGradle(":dai_core:integrationTest")
                         }
                     }
                 }
@@ -52,26 +66,26 @@ pipeline {
                         junit '**/test-results/**/*.xml'
                     }
                 }
-                stage('Quick Check') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
-                    steps {
-                        script {
-                            utilities.InvokeGradle(":inventory_api:check")
-                            utilities.InvokeGradle(":inventory:check")
-                            utilities.InvokeGradle(":dai_core:check")
-                            utilities.InvokeGradle(":dai_network_listener:check")
-                            utilities.InvokeGradle(":procedures:check")
-                        }
-                    }
-                }
-                stage('Full Test') {
+                stage('Full Unit Test') {
                     options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'false' } }
                     steps {
                         script {
                             utilities.InvokeGradle("clean")
                             utilities.InvokeGradle("test")
+                        }
+                    }
+                }
+                stage('Full Component Test') {
+                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    steps {
+                        script {
+                            def scriptDir = 'inventory_api/src/integration/resources/scripts/'
+                            StopHWInvDb()
+                            utilities.InvokeGradle(":procedures:jar")
+                            StartHWInvDb(scriptDir)
+                            utilities.InvokeGradle("integrationTest")
                         }
                     }
                 }
@@ -83,13 +97,6 @@ pipeline {
                         junit '**/test-results/**/*.xml'
                     }
                 }
-                stage('Full Check') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
-                    steps {
-                        script { utilities.InvokeGradle("check") }
-                    }
-                }
                 stage('Archive') {
                     steps {
                         archiveArtifacts 'build/reports/**'
@@ -98,4 +105,17 @@ pipeline {
             }
         }
     }
+}
+
+def StartHWInvDb(def scriptDir) {
+    sh "${scriptDir}init-voltdb.sh"
+    sh "${scriptDir}start-voltdb.sh"
+    sh "${scriptDir}wait-for-voltdb.sh 21211"
+    sh "sqlcmd < ${scriptDir}voltdb_node_history.sql"
+    sh "sqlcmd < ${scriptDir}voltdb_raw_inventory_tables.sql"
+    sh "sqlcmd < ${scriptDir}voltdb_procedures.sql"
+}
+
+def StopHWInvDb() {
+    sh 'voltadmin shutdown --force || true'
 }

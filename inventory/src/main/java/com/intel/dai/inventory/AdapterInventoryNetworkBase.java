@@ -56,9 +56,20 @@ abstract class AdapterInventoryNetworkBase {
      * Patch missing HW inventory history.
      */
     void postInitialize() {
+        // 1. Check with postgres to see if the last time stamp is null, if so we need to populate the empty tables
+        // 2. Get inventory history; ingest to raw
+        // 3. Get inventory snapshot(s) by considering the inventory history; ingest to raw
+        // 4. Walk the inventory history and assemble cooked nodes; ingest to cooked
         ingestCanonicalHWInvHistoryJson(foreignInventoryClient_.getCanonicalHWInvHistoryJson(
-                foreignInventoryClient_.lastHWInventoryHistoryUpdate(hwInvDbApi_)));
+                foreignInventoryClient_.lastHWInventoryHistoryUpdate(hwInvDbApi_)));    //CMC_TODO
+
         ingestCanonicalHWInvJson(foreignInventoryClient_.getCanonicalHWInvJson(""));
+
+        // Otherwise
+        // Walk the raw history table for a list of nodes to update in the cooked history.
+        // For each node to be updated, query the raw snapshot table to construct the cooked node.
+        // Upsert the cooked node into the cooked node table
+        // Need to convert foreign server timestamp into ms since epoch
     }
 
     /**
@@ -93,8 +104,6 @@ abstract class AdapterInventoryNetworkBase {
 
         try {
             hwInvDbApi_.ingestHistory(canonicalHwInvHistJson);
-        } catch (InterruptedException e) {
-            log_.error("InterruptedException: %s", e.getMessage());
         } catch (IOException e) {
             log_.error("IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
