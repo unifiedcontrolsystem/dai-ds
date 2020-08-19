@@ -1,9 +1,9 @@
 {
   "event": {
-    "fabric" : {
-      "default" : "fabric-perf",
+    "ras" : {
+      "default" : "old-ras",
       "types" :[
-        "fabric-perf"
+        "fabric-crit", "fabric-perf", "old-ras"
       ]
     }
   } ,
@@ -45,7 +45,37 @@
         "metrics/messages[*]/Events[*]" : "metrics/messages[*]",
         "metrics/messages[*]" : "new"
       },
-      "timestamp" : "metrics/messages[?]/Events[*]/Oem/Sensors[?]/Timestamp"
+      "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
+    },
+    "old-ras": {
+      "template": "/resources/templates/old-ras.json" ,
+      "stream-type": "events" ,
+      "single-template": {
+        "message[*]/seqnum": ".*" ,
+        "message[*]/pri": ".*"
+      },
+      "single-template-count": {
+        "message[*]":1
+      },
+      "path-count" : {
+        "message[*]" : 1
+      },
+      "update-fields": {
+        "message[*]": {
+          "event-type": {
+            "metadata": "/resources/metadata/ForeignEventMetaDataArray.json" ,
+            "metadata-filter": ".*"
+          } ,
+          "location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "message[*]" : "new"
+      },
+      "timestamp" : "message[?]/timestamp"
     }
   }
 }

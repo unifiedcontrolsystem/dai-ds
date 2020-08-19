@@ -26,8 +26,7 @@ public class EventSimApp  extends  EventSim {
 
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
         source_.register("/apis/events/boot/*", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
-        source_.register("/apis/events/fabric", HttpMethod.POST.toString(), eventsimApi::generateFabricEvents);
-        source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generatRasEvents);
+        source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generateRasEvents);
         source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
         source_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
@@ -88,33 +87,11 @@ public class EventSimApp  extends  EventSim {
      * @param parameters input details of the request.
      * @return Status = F if ras events are generated, Status = E on failure
      */
-    String generateFabricEvents(Map<String, String> parameters) {
+    String generateRasEvents(Map<String, String> parameters) {
         try {
             log_.info("Received fabric api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
             removeEmptyValueParameters(parameters);
-            foreignSimulatorEngine_.generateFabricEvents(parameters);
-            return create_result_json("F", "Success");
-        } catch (SimulatorException e) {
-            return create_result_json("E", "Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * This method is used to create and send ras events to network.
-     * @param parameters input details of the request.
-     * @return Status = F if ras events are generated, Status = E on failure
-     */
-    String generatRasEvents(Map<String, String> parameters) {
-        try {
-            log_.info("Received ras api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            String burst = parameters.getOrDefault("burst", "false");
-            String eventsCount = parameters.getOrDefault("count", null);
-            String delay = parameters.getOrDefault("delay", null);
-            String label = parameters.getOrDefault("label", ".*");
-            String locations = parameters.getOrDefault("locations", ".*");
-            String output = parameters.getOrDefault("output", null);
-            String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine_.publishRasEvents(locations, label, burst, delay, seed, eventsCount, output);
+            foreignSimulatorEngine_.generateRasEvents(parameters);
             return create_result_json("F", "Success");
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());

@@ -40,7 +40,7 @@ class ForeignSimulatorEngine {
         systemHierarchy();
     }
 
-    void generateFabricEvents(Map<String, String> parameters) throws SimulatorException {
+    void generateRasEvents(Map<String, String> parameters) throws SimulatorException {
         try {
             DataValidation.validateData(parameters, MISSING_KEY);
 

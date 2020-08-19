@@ -95,7 +95,7 @@
         "connectAddress": "10.30.126.57",
         "urlPath": "/v1/stream/cray-dmtf-resource-event",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "dmtfEvents"

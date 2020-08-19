@@ -50,9 +50,9 @@ class ForeignSimulatorEngineSpec extends Specification {
         dataLoader_.initialize()
     }
 
-    def "generate fabric events" () {
+    def "generate ras events" () {
         sourceMock_ = Mock(NetworkObject.class)
-        sourceMock_.send(any(), any()) >> {}
+        sourceMock_.send(any() as String, any() as String) >> {}
         ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_, sourceMock_, logMock_);
         foreignSimEngineTest.initialize()
 
@@ -62,7 +62,7 @@ class ForeignSimulatorEngineSpec extends Specification {
 
         when:
         parameters.put("count", count.toString())
-        foreignSimEngineTest.generateFabricEvents(parameters)
+        foreignSimEngineTest.generateRasEvents(parameters)
 
         then:
         foreignSimEngineTest.publishedEvents_ == publishedEvents
@@ -72,6 +72,7 @@ class ForeignSimulatorEngineSpec extends Specification {
          2     |      2
          3     |      3
          5     |      5
+        12     |     12
     }
 
     def loadParameters() {
@@ -202,7 +203,7 @@ class ForeignSimulatorEngineSpec extends Specification {
             "        \"metrics/messages[*]/Events[*]/Oem/Sensors[*]\" : \"metrics/messages[*]\",\n" +
             "        \"metrics/messages[*]\" : \"new\"\n" +
             "      },\n" +
-            "      \"timestamp\" : \"metrics/messages[?]/Events[*]/Oem/Sensors[?]/Timestamp\"\n" +
+            "      \"timestamp\" : \"metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp\"\n" +
             "    }\n" +
             "  }\n" +
             "}"

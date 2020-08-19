@@ -177,32 +177,6 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateRasEvents() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("locations", "test");
-        parameters.put("count", "1");
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        doNothing().when(eventSimApiTest.eventSimEngine_).publishRasEvents("test", ".*" , "false", null, null, "1", null);
-        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generatRasEvents(parameters));
-    }
-
-    @Test
-    public void generateRasEventsWithException() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("locations", "test");
-        parameters.put("count", "1");
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine_).publishRasEvents("test", ".*" , "false", null, null, "1", null);
-        assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generatRasEvents(parameters));
-    }
-
-    @Test
     public void generateSensorEvents() throws SimulatorException {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("locations", "test");

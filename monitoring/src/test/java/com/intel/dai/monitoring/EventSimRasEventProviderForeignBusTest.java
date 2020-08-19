@@ -125,20 +125,21 @@ public class EventSimRasEventProviderForeignBusTest {
     private PropertyMap classConfig_ = new PropertyMap();
     private NetworkListenerConfig ActionConfig_;
     private PropertyMap providerConfig_;
-    private static final String sample1 = "{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String sample2 = "{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String sample3 = "{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String sample4 = "{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String badSample1 = "{\"event-tipe\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String badSample2 = "{\"event-type\":\"ec_node_halt_xxx\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
-    private static final String badSample3 = "\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\",\"timestamp\":" +
-            "\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}";
+    private static final String sample1 = "{\"message\":[{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\"," +
+            "\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String sample2 = "{\"message\":[{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\"," +
+            "\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String sample3 = "{\"message\":[{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\"," +
+            "\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String sample4 = "{\"message\":[{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\"," +
+            "\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String badSample1 = "{\"message\":[{\"event-tipe\":\"ec_node_halt_rsp\"," +
+            "\"location\":\"all\",\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String badSample2 = "{\"message\":[{\"event-type\":\"ec_node_halt_xxx\"," +
+            "\"location\":\"all\",\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+    private static final String badSample3 = "\"message\":[{\"event-type\":\"ec_node_halt_rsp\",\"location\":\"all\"," +
+            "\"timestamp\":\"2019-05-28 15:55:00.0000Z\",\"payload\":\"sample1\"}]}";
+
     private static final String jsonMetaData_ = "{\n" +
             "    \"ec_boot\": \"RasMntrForeignNodeBoot\",\n" +
             "    \"ec_node_standby\": \"RasMntrForeignNodeStandby\",\n" +

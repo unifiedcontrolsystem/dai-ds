@@ -46,32 +46,6 @@ class EventSimAppSpec extends Specification {
         !eventSimApp_.serverStatus()
     }
 
-    def "generate ras events"() {
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("locations", "test")
-        parameters.put("count", "1")
-
-        eventSimApp_.eventSimEngine_.publishRasEvents("test", ".*" , "false", null, null, "1", null) >> {}
-        eventSimApp_.eventSimEngine_.publishRasEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
-                {throw new SimulatorException("test exception")}
-
-        expect:
-        eventSimApp_.generatRasEvents(parameters).contains("Success")
-        parameters.put("locations", "UNKNOWN")
-        eventSimApp_.generatRasEvents(parameters).contains("test exception")
-    }
-
-    def "generate fabric events"() {
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("locations", "test")
-        parameters.put("count", "1")
-
-        eventSimApp_.foreignSimulatorEngine_.generateFabricEvents(parameters) >> {}
-
-        expect:
-        eventSimApp_.generateFabricEvents(parameters).contains("Success")
-    }
-
     def "generate sensor events"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("locations", "test")
