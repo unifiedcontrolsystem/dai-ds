@@ -16,7 +16,7 @@ class LoadFileLocationSpec extends Specification {
 
     def "null/empty data to write into file" () {
         when:
-        LoadFileLocation.writeFile(null, "/tmp/output.txt")
+        LoadFileLocation.writeFile(null, "/tmp/output.txt", false)
         then:
         def e = thrown(IOException)
         e.getMessage() == "data or file path is null or empty."

@@ -1,5 +1,6 @@
 package com.intel.dai.eventsim;
 
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SimulatorEngine {
 
-    SimulatorEngine(DataLoaderEngine dataLoaderEngine, NetworkObject source, Logger log) {
+    SimulatorEngine(DataLoader dataLoaderEngine, NetworkObject source, Logger log) {
         dataLoaderEngine_ = dataLoaderEngine;
         source_ = source;
         log_ = log;
@@ -219,7 +220,7 @@ public class SimulatorEngine {
                 events.put(1L, rasEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final ConversionException | PropertyNotExpectedType e) {
+        } catch (final ConversionException | PropertyNotExpectedType | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -257,7 +258,7 @@ public class SimulatorEngine {
                 events.put(1L, sensorEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final PropertyNotExpectedType | ConversionException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -295,7 +296,7 @@ public class SimulatorEngine {
                 events.put(1L, jobEvents);
                 publishGeneratedEvents(events, burstMode, output);
             }
-        } catch (final PropertyNotExpectedType | ConversionException e) {
+        } catch (final PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -393,7 +394,7 @@ public class SimulatorEngine {
                     break;
             }
 
-        } catch (PropertyNotExpectedType | ConversionException e) {
+        } catch (PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
             throw new SimulatorException(e.getMessage());
         }
     }
@@ -570,14 +571,14 @@ public class SimulatorEngine {
      * @return true when matched regex label descriptions exists
      * @throws SimulatorException when no matched regex label descriptions.
      */
-    private boolean ExistsMatchedRegexLabel(final String regexLabel, final EVENT_TYPE eventType) throws PropertyNotExpectedType, SimulatorException {
+    private boolean ExistsMatchedRegexLabel(final String regexLabel, final EVENT_TYPE eventType) throws PropertyNotExpectedType, SimulatorException, IOException, ConfigIOParseException {
         if (system_.getMatchedRegexLabels(regexLabel, eventType) == 0) {
             if (eventType.equals(EVENT_TYPE.RAS))
-                throw new SimulatorException("No Matched Regex Locations to generate RAS Events.");
+                throw new SimulatorException("No Matched Regex labels to generate RAS Events.");
             else if (eventType.equals(EVENT_TYPE.SENSOR))
-                throw new SimulatorException("No Matched Regex Locations to generate Sensor Events.");
+                throw new SimulatorException("No Matched Regex labels to generate Sensor Events.");
             else if (eventType.equals(EVENT_TYPE.JOB))
-                throw new SimulatorException("No Matched Regex Locations to generate Job Events.");
+                throw new SimulatorException("No Matched Regex labels to generate Job Events.");
         }
         return true;
     }
@@ -586,7 +587,7 @@ public class SimulatorEngine {
      * This method is used to load location data from db.
      */
     private void loadData() throws SimulatorException {
-        dataLoaderEngine_.loadData();
+       dataLoaderEngine_.initialize();
     }
 
     /**
@@ -594,16 +595,16 @@ public class SimulatorEngine {
      * are not passed through request.
      */
     private void loadDefaults() {
-        numOfEvents_ = dataLoaderEngine_.getDefaultNumberOfEventsToBeGenerated();
-        timeDelayMus_ = dataLoaderEngine_.getDefaultTimeDelayMus();
-        randomiserSeed_ = dataLoaderEngine_.getDefaultRandomiserSeed();
+        numOfEvents_ = Long.parseLong(dataLoaderEngine_.getEventsConfigutaion("count", "0"));
+        timeDelayMus_ = Long.parseLong(dataLoaderEngine_.getEventsConfigutaion("time-delay-mus", "0"));
+        randomiserSeed_ = Long.parseLong(dataLoaderEngine_.getEventsConfigutaion("seed", "0"));
     }
 
     /**
      * This method is used to display system location details.
      */
     private void systemHierarchy() {
-        for (String location : dataLoaderEngine_.getNodeLocationData())
+        for (String location : dataLoaderEngine_.getNodeLocations())
             System.out.println(location.toUpperCase());
     }
 
@@ -631,7 +632,7 @@ public class SimulatorEngine {
         OTHER;
     }
 
-    private final DataLoaderEngine dataLoaderEngine_;
+    private final DataLoader dataLoaderEngine_;
     private final NetworkObject source_;
     private final SystemGenerator system_;
     private final Scenario scenario_;

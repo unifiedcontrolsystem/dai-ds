@@ -106,7 +106,7 @@ public class Scenario {
     void writeEventToFile(List<String> values, String file) throws IOException {
         PropertyArray data = new PropertyArray();
         data.addAll(values);
-        LoadFileLocation.writeFile(data, file);
+        LoadFileLocation.writeFile(data, file, true);
     }
 
     /**

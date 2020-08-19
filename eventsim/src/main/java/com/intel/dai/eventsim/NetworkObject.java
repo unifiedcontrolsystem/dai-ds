@@ -218,7 +218,7 @@ public class NetworkObject {
      * @return sse details
      */
     private PropertyMap getSSEConfiguration() {
-        return config_.getMapOrDefault("sseConfig", null);
+        return config_.getMapOrDefault("sse", null);
     }
 
     /**
@@ -269,7 +269,7 @@ public class NetworkObject {
     private final Logger log_;
     private final ApiReqData apiReqData_;
     private NetworkConnectionObject networkConnectionObject;
-    private final String[] SSE_CONFIG_KEYS = new String[]{"serverAddress", "serverPort", "urls"};
+    private final String[] SSE_CONFIG_KEYS = new String[]{"server-address", "server-port", "urls"};
     private final String[] RABBIT_MQ_CONFIG_KEYS = new String[]{"exchangeName", "uri"};
-    private final String[] NETWORK_CONFIG_KEYS = new String[]{"network", "sseConfig", "rabbitmq"};
+    private final String[] NETWORK_CONFIG_KEYS = new String[]{"network", "sse", "rabbitmq"};
 }

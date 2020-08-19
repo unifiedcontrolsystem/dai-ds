@@ -26,13 +26,13 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
-                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
-                      'events\n    job                 generate job events\n    boot                generate boot '
-                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
-                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
-                      'this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,fabric,boot,scenario,get-seed} ...\n\npositional '
+                      'arguments:\n  {ras,sensor,job,fabric,boot,scenario,get-seed}\n                        '
+                      'subparser for events\n    ras                 generate ras events\n    sensor              '
+                      'generate sensor events\n    job                 generate job events\n    fabric              '
+                      'generate fabric events\n    boot                generate boot events\n    scenario            '
+                      'generate events for a given scenario\n    get-seed            fetch prior seed to replicate '
+                      'same data.\n\noptional arguments:\n  -h, --help            show this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -44,13 +44,13 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
-                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
-                      'events\n    job                 generate job events\n    boot                generate boot '
-                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
-                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
-                      'this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,fabric,boot,scenario,get-seed} ...\n\npositional '
+                      'arguments:\n  {ras,sensor,job,fabric,boot,scenario,get-seed}\n                        '
+                      'subparser for events\n    ras                 generate ras events\n    sensor              '
+                      'generate sensor events\n    job                 generate job events\n    fabric              '
+                      'generate fabric events\n    boot                generate boot events\n    scenario            '
+                      'generate events for a given scenario\n    get-seed            fetch prior seed to replicate '
+                      'same data.\n\noptional arguments:\n  -h, --help            show this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -188,6 +188,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "Success"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - Success', captured_output.getvalue())
@@ -205,6 +206,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to create ras events"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to create ras events\n', captured_output.getvalue())
@@ -222,6 +224,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "Success"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - Success', captured_output.getvalue())
@@ -239,6 +242,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to create sensor events"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to create sensor events\n', captured_output.getvalue())
@@ -256,6 +260,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "Success"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - Success', captured_output.getvalue())
@@ -273,6 +278,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to create job events"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to create job events\n', captured_output.getvalue())
@@ -290,6 +296,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "Success"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - Success', captured_output.getvalue())
@@ -307,6 +314,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to create boot events"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to create boot events\n', captured_output.getvalue())
@@ -324,6 +332,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "Success"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - Success', captured_output.getvalue())
@@ -341,6 +350,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to create scenario events"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to create scenario events\n', captured_output.getvalue())
@@ -358,6 +368,7 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "F",
                                 "Result": "123"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('0 - 123', captured_output.getvalue())
@@ -375,7 +386,69 @@ class EventsCliTest(TestCase):
                     json.dumps({"Status": "E",
                                 "Result": "Error:unable to get seed data"
                                 })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Error:unable to get seed data\n', captured_output.getvalue())
+        captured_output.close()
+
+    def test_fabric_events_help(self):
+        parser = Parser()
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        sys.argv = ['eventsim', 'events', 'fabric', '-h']
+        with self.assertRaises(SystemExit):
+            parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('usage: eventsim events fabric [-h] [--burst] [--count COUNT] [--delay DELAY]\n                 '
+                      '             [--locations LOCATIONS] [--output OUTPUT]\n                              [--seed '
+                      'SEED] [--template TEMPLATE]\n                              [--timeout TIMEOUT] [--type {'
+                      'fabric-perf}]\n\noptional arguments:\n  -h, --help            show this help message and '
+                      'exit\n  --burst               generate fabric events without delay. Default is\n               '
+                      '         constant mode with delay\n  --count COUNT         given number of fabric events are '
+                      'generated. The\n                        default values exists in eventsim config file\n  '
+                      '--delay DELAY         pause for given value in microseconds to generate\n                      '
+                      '  fabric events. The default values exists in eventsim\n                        config file\n  '
+                      '--locations LOCATIONS\n                        generate fabric events at a given location. '
+                      'Provide\n                        regex for multiple locations\n  --output OUTPUT       save '
+                      'data to a file\n  --seed SEED           seed to duplicate data\n  --template TEMPLATE   sample '
+                      'template to generate fabric events\n  --timeout TIMEOUT     fabric sub-command execution '
+                      'timeout\n  --type {fabric-perf}  provide type of the fabric event to generate events\n',
+            captured_output.getvalue())
+        captured_output.close()
+
+    def test_fabric_positive(self):
+        parser = Parser()
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        sys.argv = ['eventsim', 'events', 'fabric']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.post') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F",
+                                "Result": "Success"
+                                })
+                type(patched_get.return_value).status_code = 200
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('0 - Success', captured_output.getvalue())
+        captured_output.close()
+
+    def test_fabric_negative(self):
+        parser = Parser()
+        captured_output = io.StringIO()
+        sys.stderr = captured_output
+        sys.argv = ['eventsim', 'events', 'fabric']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.post') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "E",
+                                "Result": "Error:unable to create fabric events"
+                                })
+                type(patched_get.return_value).status_code = 200
+                parser.execute_cli_cmd()
+        sys.stderr = sys.__stderr__
+        self.assertIn('Error:unable to create fabric events\n', captured_output.getvalue())
         captured_output.close()

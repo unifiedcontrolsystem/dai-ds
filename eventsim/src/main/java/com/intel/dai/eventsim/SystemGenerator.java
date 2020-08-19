@@ -1,5 +1,6 @@
 package com.intel.dai.eventsim;
 
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
@@ -7,6 +8,7 @@ import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -25,7 +27,7 @@ class SystemGenerator {
      * @param dataLoaderEngine_ database object to fetch data from db and load locations data into map.
      * @throws SimulatorException when unable to fetch boot parameters configuration file.
      */
-    void generateSystem(final DataLoaderEngine dataLoaderEngine_) throws SimulatorException {
+    void generateSystem(final DataLoader dataLoaderEngine_) throws SimulatorException {
         dataLoaderEngine = dataLoaderEngine_;
         component_ = new Component(log_, dataLoaderEngine_.getBootParamsFileLocation());
         loadComponents();
@@ -182,7 +184,7 @@ class SystemGenerator {
      * @return number of matching regex label descriptions
      * @throws PropertyNotExpectedType when unable to fetch respective label description data.
      */
-    int getMatchedRegexLabels(final String regexLabelDesc, final SimulatorEngine.EVENT_TYPE eventType) throws PropertyNotExpectedType {
+    int getMatchedRegexLabels(final String regexLabelDesc, final SimulatorEngine.EVENT_TYPE eventType) throws PropertyNotExpectedType, IOException, ConfigIOParseException {
         int value = 0;
 
         switch (eventType) {
@@ -200,13 +202,10 @@ class SystemGenerator {
             case SENSOR  :  sensorRegexMatchedLabelDescriptions_.clear();
                             PropertyMap data = dataLoaderEngine.getSensorMetaData().getAsMap();
                             for(String itemKey : data.keySet()) {
-                                PropertyArray compKey = data.getArrayOrDefault(itemKey, new PropertyArray());
-                                for(int i = 0; i < compKey.size(); i++) {
-                                    PropertyMap itemData = compKey.getMap(i);
-                                    String itemDescription = itemData.getStringOrDefault("description", "");
-                                    if(itemDescription.matches(regexLabelDesc))
-                                        sensorRegexMatchedLabelDescriptions_.add(itemData);
-                                }
+                                PropertyMap compKey = data.getMapOrDefault(itemKey, new PropertyMap());
+                                String itemDescription = compKey.getStringOrDefault("description", "");
+                                if(itemDescription.matches(regexLabelDesc))
+                                    sensorRegexMatchedLabelDescriptions_.add(compKey);
                             }
                             value = sensorRegexMatchedLabelDescriptions_.size();
                             break;
@@ -370,7 +369,7 @@ class SystemGenerator {
      * This method loads node locations data into map.
      */
     private void loadNodeLocations() throws SimulatorException {
-        nodeLocations_ = dataLoaderEngine.getNodeLocationData();
+        nodeLocations_ = dataLoaderEngine.getNodeLocations();
         if(nodeLocations_ == null)
             throw new SimulatorException("No node locations data");
         locations.addAll(nodeLocations_);
@@ -380,13 +379,13 @@ class SystemGenerator {
      * This method loads non-node locations data into map.
      */
     private void loadNonNodeLocations() {
-        nonNodeLocations_ = dataLoaderEngine.getNonNodeLocationData();
+        nonNodeLocations_ = dataLoaderEngine.getNonNodeLocations();
         if(nonNodeLocations_ != null)
             locations.addAll(nonNodeLocations_);
     }
 
     private final Logger log_;
-    private DataLoaderEngine dataLoaderEngine;
+    private DataLoader dataLoaderEngine;
     private List<String> locations = new ArrayList<>();
     private List<String> regexMatchedLocations = new ArrayList<>();
     private Component component_;

@@ -1,38 +1,43 @@
 {
-  "eventsimConfig" : {
-    "SensorMetadata": "/resources/ForeignSensorMetaData.json",
-    "RASMetadata": "/resources/ForeignEventMetaData.json",
-    "JobsMetadata" : "/resources/ForeignJobsMetaData.json",
-    "BootParameters" : "/opt/ucs/etc/BootParameters.json",
-    "HWInventory" : "/opt/ucs/etc/HWInventory.json",
-    "HWInventoryPath" : "/opt/ucs/etc",
-    "HWInventoryQueryPath" : "/opt/ucs/etc/HwInvQuery_",
-    "HWInventoryDiscStatUrl" : "/Inventory/DiscoveryStatus",
-    "eventCount": 10,
-    "timeDelayMus": 1,
-    "eventRatioSensorToRas": 1,
-    "randomizerSeed": "1234"
+  "api-simulator-config" : {
+      "boot-parameters" : "/opt/ucs/etc/BootParameters.json",
+      "hw-inventory" : "/opt/ucs/etc/HWInventory.json",
+      "hw-inventory-path" : "/opt/ucs/etc",
+      "hw-inventory-query-path" : "/opt/ucs/etc/HwInvQuery_",
+      "hw-inv-discover-status-url" : "/Inventory/DiscoveryStatus",
+      "sensor-metadata": "/resources/ForeignSensorMetaData.json",
+      "ras-metadata": "/resources/ForeignEventMetaData.json",
+      "jobs-metadata" : "/resources/ForeignJobsMetaData.json"
   },
-  "networkConfig" : {
-    "network" : "sse",
-    "sseConfig": {
-      "serverAddress": "api-gw-service-nmn.local" ,
-      "serverPort": "8080" ,
-      "urls": {
-        "/v1/stream/telemetry": [
-          "telemetry"
-        ] ,
-        "/apis/smd/hsm/v1/Subscriptions/SCN": [
-          "stateChanges"
-        ] ,
-        "/v1/stream/events": [
-          "events"
-        ]
+  "events-simulator-config" : {
+    "count": 10,
+    "seed": "1234",
+    "events-template-config" : "/opt/ucs/etc/EventsTemplate.json",
+    "time-delay-mus": 1
+  },
+  "network-config" : {
+      "network" : "sse",
+      "sse": {
+          "server-address": "sms01-nmn.local" ,
+          "server-port": "8080" ,
+          "urls": {
+            "/v1/stream/cray-telemetry-fan": [
+              "telemetry"
+            ] ,
+            "/streams/nodeBootEvents": [
+              "stateChanges"
+            ] ,
+            "/v1/stream/cray-dmtf-resource-event": [
+              "events"
+            ] ,
+            "/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
+              "fabric"
+            ]
+          }
+      } ,
+      "rabbitmq": {
+          "exchangeName": "simulator",
+          "uri": "amqp://127.0.0.1"
       }
-    },
-    "rabbitmq": {
-      "exchangeName": "simulator",
-      "uri": "amqp://api-gw-service-nmn.local"
-    }
   }
 }

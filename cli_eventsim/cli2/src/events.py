@@ -11,7 +11,9 @@ EventSim CLI commands to generate events.
 
 
 class EventsCli(object):
-    default_timeout = 31536000
+
+    #cli timeout session in seconds
+    default_timeout = 5400
 
     """
     This method lists sub-commands for events command.
@@ -23,6 +25,7 @@ class EventsCli(object):
         self._add_ras_event_parser(event_subparsers)
         self._add_sensor_event_parser(event_subparsers)
         self._add_job_event_parser(event_subparsers)
+        self._add_fabric_event_parser(event_subparsers)
         self._add_boot_event_parser(event_subparsers)
         self._add_scenario_event_parser(event_subparsers)
         self._add_get_seed_parser(event_subparsers)
@@ -52,6 +55,28 @@ class EventsCli(object):
         ras_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         ras_events_parser.add_argument('--timeout', type=int, help='ras sub-command execution timeout')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
+
+    """
+    This method describes 'fabric' sub-command arguments.
+    """
+    def _add_fabric_event_parser(self, event_parser):
+        fabric_events_parser = event_parser.add_parser('fabric', help='generate fabric events')
+        fabric_events_parser.add_argument('--burst',
+            help='generate fabric events without delay. Default is constant mode with delay', action='store_true')
+        fabric_events_parser.add_argument('--count', type=int,
+            help='given number of fabric events are generated. The default values exists in eventsim config file')
+        fabric_events_parser.add_argument('--delay', type=int,
+            help='pause for given value in microseconds to generate fabric events. The default values exists in '
+                 'eventsim config file')
+        fabric_events_parser.add_argument('--locations',
+            help='generate fabric events at a given location. Provide regex for multiple locations')
+        fabric_events_parser.add_argument('--output', help='save data to a file')
+        fabric_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        fabric_events_parser.add_argument('--template', help='sample template to generate fabric events')
+        fabric_events_parser.add_argument('--timeout', type=int, help='fabric sub-command execution timeout')
+        fabric_events_parser.add_argument('--type', choices=['fabric-perf'], default='fabric-perf',
+            help='provide type of the fabric event to generate events')
+        fabric_events_parser.set_defaults(func=self._generate_fabric_events_execute)
 
     """
     This method describes 'sensor' sub-command arguments.
@@ -163,6 +188,25 @@ class EventsCli(object):
         url = client.get_base_url() + 'apis/events/ras'
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'label': args.label,
                       'locations': args.locations, 'output': args.output, 'seed': args.seed}
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        timeout = args.timeout
+        if timeout is None:
+            timeout = self.default_timeout
+        response_code, response = client.send_post_request(url, parameters, timeout)
+        return CommandResult(response_code, response)
+
+    """
+    This method generates url and send api request to generate fabric events.
+    """
+    def _generate_fabric_events_execute(self, args):
+        client = HttpClient()
+
+        # URL will be POST http://127.0.0.1:9998/apis/events/fabric
+        url = client.get_base_url() + 'apis/events/fabric'
+
+        parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
+                      'output': args.output, 'seed': args.seed, 'template' : args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout

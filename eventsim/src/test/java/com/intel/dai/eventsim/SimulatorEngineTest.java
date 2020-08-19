@@ -4,10 +4,9 @@ import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.NodeInformation;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
-import com.intel.properties.PropertyMap;
 import org.apache.commons.io.FileUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -15,248 +14,60 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 
 public class SimulatorEngineTest {
 
-    private DataStoreFactory dsfactory_;
-
-    public class EventSimTestMock extends EventSim {
-
-        EventSimTestMock(String[] args_, Logger log_) throws SimulatorException {
-            super(args_, log_);
-            dsfactory_ = mock(DataStoreFactory.class);
-        }
-
-        @Override
-        DataStoreFactory createDataStoreFactory(String[] args) {
-            return dsfactory_;
-        }
-    }
-
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+    private DataLoader dataLoader_;
+    private NetworkObject sourceMock_;
+    private Logger logMock_;
+    private ConfigIO parser_;
+    private NodeInformation nodeInfoMock_;
+    private DataStoreFactory factoryMock_;
 
-    @Test
-    public void testHwInventoryFileLocation() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
-        simulatorEngineTest.initialize();
-        assertEquals("/opt/ucs/etc/HWInventory.json", eventSimTestMock.simEngineDataLoader.getHwInventoryFileLocation());
-    }
+    @Before
+    public void setup() throws Exception {
+        parser_ = ConfigIOFactory.getInstance("json");
+        logMock_ = mock(Logger.class);
+        sourceMock_ = mock(NetworkObject.class);
 
-    @Test
-    public void testHwInventoryDiscStatusUrl() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
-        simulatorEngineTest.initialize();
-        assertEquals("/Inventory/DiscoveryStatus", eventSimTestMock.simEngineDataLoader.getHwInventoryDiscStatusUrl());
-    }
+        File foreignServerConfigFile = createAndLoadDataToFile("Test.json",FOREIGN_SERVER_CONFIG);
 
-    @Test
-    public void testHwInventoryFileLocationPath() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
-        simulatorEngineTest.initialize();
-        assertEquals("/opt/ucs/etc", eventSimTestMock.simEngineDataLoader.getHwInventoryFileLocationPath());
-    }
+        dataLoader_ = new DataLoader(foreignServerConfigFile.getAbsolutePath() , "voltdb-server", logMock_);
+        nodeInfoMock_ = mock(NodeInformation.class);
+        factoryMock_ = mock(DataStoreFactory.class);
+        when(factoryMock_.createNodeInformation()).thenReturn(nodeInfoMock_);
+        dataLoader_.factory_ = factoryMock_;
 
-    @Test
-    public void testHwInventoryQueryLocationPath() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
-        simulatorEngineTest.initialize();
-        assertEquals("/opt/ucs/etc", eventSimTestMock.simEngineDataLoader.getHwInventoryQueryLocationPath());
-    }
+        locations_ = loadLocations();
+        parameters_ = loadParameters();
+        hostnames_ = loadHostnames();
 
-    @Test(expected = SimulatorException.class)
-    public void testErrorLoadDataFromDb() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        doThrow(new DataStoreException("test exception")).when(nodeInfoMock).getNodeLocations();
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
-        simulatorEngineTest.initialize();
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingEventSimServerConfiguration() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, "");
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingEventSimServerConfigurationWithEmptyData() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, "{}");
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingEventSimServerConfigurationFile() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", ""};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void invalidEventSimConfiguration() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, invalidEventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-
-    @Test(expected = SimulatorException.class)
-    public void missingNetworkConfigEntry() throws Exception {
-        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        PropertyMap data = LoadFileLocation.fromFileLocation(eventSimConfigFile.getAbsolutePath()).getAsMap();
-        data.remove("networkConfig");
-        assertNotNull(parser_);
-        loadDataIntoFile(eventSimConfigFile, parser_.toString(data));
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingEventSimConfigEntry() throws Exception {
-        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        PropertyMap data = LoadFileLocation.fromFileLocation(eventSimConfigFile.getAbsolutePath()).getAsMap();
-        data.remove("eventsimConfig");
-        assertNotNull(parser_);
-        loadDataIntoFile(eventSimConfigFile, parser_.toString(data));
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        new EventSimTestMock(args, mock(Logger.class));
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingSensorMetadataConfigEntry() throws Exception {
-        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        PropertyMap data = LoadFileLocation.fromFileLocation(eventSimConfigFile.getAbsolutePath()).getAsMap();
-        data.getMapOrDefault("eventsimConfig", null).remove("SensorMetadata");
-        assertNotNull(parser_);
-        loadDataIntoFile(eventSimConfigFile, parser_.toString(data));
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        eventSimTestMock.initialise(args);
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingRASMetadataConfigEntry() throws Exception {
-        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        PropertyMap data = LoadFileLocation.fromFileLocation(eventSimConfigFile.getAbsolutePath()).getAsMap();
-        data.getMapOrDefault("eventsimConfig", null).remove("RASMetadata");
-        assertNotNull(parser_);
-        loadDataIntoFile(eventSimConfigFile, parser_.toString(data));
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        eventSimTestMock.initialise(args);
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void missingHWInventoryDiscStatUrlEntry() throws Exception {
-        ConfigIO parser_ = ConfigIOFactory.getInstance("json");
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        PropertyMap data = LoadFileLocation.fromFileLocation(eventSimConfigFile.getAbsolutePath()).getAsMap();
-        data.getMapOrDefault("eventsimConfig", null).remove("HWInventoryDiscStatUrl");
-        assertNotNull(parser_);
-        loadDataIntoFile(eventSimConfigFile, parser_.toString(data));
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        eventSimTestMock.initialise(args);
+        when(nodeInfoMock_.getNodeLocations()).thenReturn(locations_);
+        when(nodeInfoMock_.getComputeHostnameFromLocationMap()).thenReturn(hostnames_);
+        dataLoader_.initialize();
     }
 
     @Test
     public void testRasEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishRasEvents("R0.*", ".*", "false", "0", null, "5", null);
+        simulatorEngineTest.publishRasEvents("TEST.*", ".*", "false", "0", null, "5", null);
         assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testRasEvents_DefaultValues() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishRasEvents(".*", ".*", "true", "0", "123", null, null);
         assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
@@ -264,147 +75,59 @@ public class SimulatorEngineTest {
 
     @Test(expected = SimulatorException.class)
     public void testRasEvents_MismatchLocationRegex() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishRasEvents("GT.*", ".*", "true", null, null, null, null);
     }
 
     @Test(expected = SimulatorException.class)
     public void testRasEvents_MismatchLabelRegex() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishRasEvents(".*", "GT.*", "true", null, null, null, null);
     }
 
     @Test
     public void testSensorEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents("R0.*", ".*", "true", "0", "123", "5", "/dev/null");
+        simulatorEngineTest.publishSensorEvents("TEST.*", ".*", "true", "0", "123", "5", "/dev/null");
         assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testSensorEvents_DefaultValues() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        ArrayList<String> locations = new ArrayList<String>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents(".*", ".*", "true", null, null, "3", null);
+        simulatorEngineTest.publishSensorEvents("TEST.*", ".*", "true", null, null, "3", null);
         assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test(expected = SimulatorException.class)
     public void testSensorEvents_MismatchRegexLocation() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishSensorEvents("GT.*", ".*", "true", null, null, null, null);
     }
 
     @Test(expected = SimulatorException.class)
     public void testSensorEvents_MismatchRegexLabel() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishSensorEvents(".*", "GT.*", "true", null, null, null, null);
     }
 
     @Test
     public void testJobEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishJobEvents("R0.*", ".*", "true", "0", "123", "5", "/dev/null");
+        simulatorEngineTest.publishJobEvents("TEST.*", ".*", "true", "0", "123", "5", "/dev/null");
         assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testJobEvents_DefaultValues() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        ArrayList<String> locations = new ArrayList<String>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishJobEvents(".*", ".*", "true", null, null, "3", null);
         assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
@@ -412,194 +135,89 @@ public class SimulatorEngineTest {
 
     @Test(expected = SimulatorException.class)
     public void testJobEvents_MismatchRegexLocation() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishJobEvents("GT.*", ".*", "true", null, null, null, null);
     }
 
     @Test(expected = SimulatorException.class)
     public void testJobEvents_MismatchRegexLabel() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SMS");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishJobEvents(".*", "GT.*", "true", null, null, null, null);
     }
 
     @Test
     public void testBootEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishBootEvents("R0.*", "0", "false", "0", "123", null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootEvents("TEST.*", "0", "false", "0", "123", null);
+        assertEquals(6, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testBootOffEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishBootOffEvents("R0.*", "false", "0", null, null);
-        assertEquals(1, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootOffEvents("TEST.*", "false", "0", null, null);
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testBootOnEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SNS1");
-        locations.add("R0-SNS2");
-        locations.add("R0-SNS3");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishBootOnEvents("R0.*", "0", "false", "0", "123", null);
-        assertEquals(4, simulatorEngineTest.getPublishedEventsCount());
-        simulatorEngineTest.publishBootOnEvents("R0.*", "1", "false", "0", "123", null);
-        assertEquals(4, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootOnEvents("TEST.*", "0", "false", "0", "123", null);
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootOnEvents("TEST.*", "1", "false", "0", "123", null);
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
         simulatorEngineTest.publishBootOnEvents(".*", "0.6", "false", "0", "123", null);
-        assertEquals(4, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testBootReadyEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishBootReadyEvents("R0.*", "false", "0", "123", null);
-        assertEquals(1, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootReadyEvents("TEST.*", "false", "0", "123", null);
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testBootOffOnReadyDefaultEvents_NullValues() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishBootEvents(".*", "0", "true", "0", null, null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(6, simulatorEngineTest.getPublishedEventsCount());
         simulatorEngineTest.publishBootOffEvents(".*", "true", null, "0", null);
-        assertEquals(1, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
         simulatorEngineTest.publishBootOnEvents(".*", "0", "true", "0", null, null);
-        assertEquals(1, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
         simulatorEngineTest.publishBootReadyEvents(".*", "true", null, null, null);
-        assertEquals(1, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(2, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test(expected = SimulatorException.class)
     public void testBootEvents_MismatchRegex() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishBootEvents("GT.*", "0", "true", null, null, null);
     }
 
     @Test
     public void testBootFailureEvents() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
-        simulatorEngineTest.publishBootEvents("R0.*", "1", "false", null, null, null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
+        simulatorEngineTest.publishBootEvents("TEST.*", "1", "false", null, null, null);
+        assertEquals(6, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
     public void testBootFailureEvents_60_bf() throws Exception {
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishBootEvents(".*", "0.5", "false", null, null, null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
+        assertEquals(6, simulatorEngineTest.getPublishedEventsCount());
     }
 
     @Test
@@ -607,17 +225,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "burst", ".*", ".*", ".*", "0", "true", "0", "123", "1", null, null, null);
         assertEquals(67, simulatorEngineTest.getPublishedEventsCount());
@@ -628,17 +236,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "group-burst", ".*", ".*", ".*", "0", "true", "0", "123", null, "1", null, null);
         assertEquals(10, simulatorEngineTest.getPublishedEventsCount());
@@ -651,17 +249,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "repeat", ".*", ".*", ".*", "0", "true", "0", "123", null, "0", null, null);
         assertEquals(0, simulatorEngineTest.getPublishedEventsCount());
@@ -672,20 +260,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        locations.add("R0-SNS1");
-        locations.add("R0-SNS2");
-        locations.add("R0-SNS3");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "repeat", ".*", ".*", ".*", "0.6", "true", "0", "123", null, null, null, null);
         assertEquals(67, simulatorEngineTest.getPublishedEventsCount());
@@ -701,17 +276,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "repeat", ".*", ".*", ".*", "0", "true", "0", "123", "1", null, null, null);
         assertEquals(67, simulatorEngineTest.getPublishedEventsCount());
@@ -722,17 +287,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "group-burst", null, ".*", ".*", "0", "true", "0", "123", "1", null, null, null);
     }
@@ -742,17 +297,7 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "group-burst", "GT.*", ".*", ".*", "0", "true", "0", "123", "1", null, null, null);
     }
@@ -762,64 +307,89 @@ public class SimulatorEngineTest {
         final File scenarioConfigFile = tempFolder.newFile("scenario.json");
         loadDataIntoFile(scenarioConfigFile, scenarioConfig);
 
-        final File eventSimConfigFile = tempFolder.newFile("EventSim.json");
-        loadDataIntoFile(eventSimConfigFile, eventSimConfig);
-        String[] args = new String[]{"localhost", eventSimConfigFile.getAbsolutePath()};
-        EventSimTestMock eventSimTestMock = new EventSimTestMock(args, mock(Logger.class));
-        NodeInformation nodeInfoMock = mock(NodeInformation.class);
-        List<String> locations = new ArrayList<>();
-        locations.add("R0");
-        when(dsfactory_.createNodeInformation()).thenReturn(nodeInfoMock);
-        when(nodeInfoMock.getNodeLocations()).thenReturn(locations);
-        eventSimTestMock.initialise(args);
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(eventSimTestMock.simEngineDataLoader, mock(NetworkObject.class), mock(Logger.class));
+        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
         simulatorEngineTest.publishEventsForScenario(scenarioConfigFile.getAbsolutePath(), "group-burst", ".*", "GT.*", "GT.*", "0", "true", "0", "123", "1", null, null, null);
+    }
+
+    Map<String, String> loadParameters() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("locations", "TEST-01");
+        parameters.put("count", "1");
+        return parameters;
+    }
+
+    List<String> loadLocations() {
+        List<String> locations = new ArrayList<>();
+        locations.add("TEST-01");
+        locations.add("TEST-02");
+        return locations;
+    }
+
+    Map<String, String> loadHostnames() {
+        Map<String, String> hostnames = new HashMap<>();
+        hostnames.put("test-location", "test-hostname");
+        return hostnames;
+    }
+
+    private File createAndLoadDataToFile(String filename, String data) throws Exception {
+        final File newFile = tempFolder.newFile(filename);
+        FileUtils.writeStringToFile(newFile, data);
+        return newFile;
     }
 
     private void loadDataIntoFile(File file, String data) throws Exception {
         FileUtils.writeStringToFile(file, data, StandardCharsets.UTF_8);
     }
 
-    private String eventSimConfig = "{\n" +
-            "    \"eventsimConfig\" : {\n" +
-            "        \"SensorMetadata\": \"/resources/ForeignSensorMetaData.json\",\n" +
-            "        \"RASMetadata\": \"/resources/ForeignEventMetaData.json\",\n" +
-            "        \"JobsMetadata\": \"/resources/ForeignJobsMetaData.json\",\n" +
-            "        \"BootParameters\" : \"/opt/ucs/etc/BootParameters.json\",\n" +
-            "        \"HWInventory\" : \"/opt/ucs/etc/HWInventory.json\",\n" +
-            "        \"HWInventoryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryQueryPath\" : \"/opt/ucs/etc\",\n" +
-            "        \"HWInventoryDiscStatUrl\" : \"/Inventory/DiscoveryStatus\",\n" +
-            "        \"eventCount\": 3,\n" +
-            "        \"timeDelayMus\": 1,\n" +
-            "        \"eventRatioSensorToRas\": 1,\n" +
-            "        \"randomizerSeed\": \"234\"\n" +
-            "    },\n" +
-            "    \"networkConfig\" : {\n" +
-            "        \"network\" : \"sse\",\n" +
-            "        \"sseConfig\": {\n" +
-            "            \"serverAddress\": \"*\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
-            "            \"urls\": {\n" +
-            "                \"/v1/stream/cray-telemetry-fan\": [\n" +
-            "                    \"telemetry\"\n" +
-            "                ] ,\n" +
-            "                \"/streams/nodeBootEvents\": [\n" +
-            "                    \"stateChanges\"\n" +
-            "                ] ,\n" +
-            "                \"/v1/stream/cray-dmtf-resource-event\": [\n" +
-            "                    \"events\"\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        } ,\n" +
-            "        \"rabbitmq\": {\n" +
-            "            \"exchangeName\": \"simulator\" ,\n" +
-            "            \"uri\": \"amqp://127.0.0.1\"\n" +
-            "        }\n" +
-            "    }\n" +
-            "}\n" +
-            "\n";
+    private List<String> locations_ = new ArrayList<>();
+
+    private Map<String, String> parameters_ = new HashMap<>();
+    private Map<String, String> hostnames_ = new HashMap<>();
+
+    private String FOREIGN_SERVER_CONFIG = "{\n" +
+            "  \"api-simulator-config\" : {\n" +
+            "      \"boot-parameters\" : \"/opt/ucs/etc/BootParameters.json\",\n" +
+            "      \"hw-inventory\" : \"/opt/ucs/etc/HWInventory.json\",\n" +
+            "      \"hw-inventory-path\" : \"/opt/ucs/etc\",\n" +
+            "      \"hw-inventory-query-path\" : \"/opt/ucs/etc/HwInvQuery_\",\n" +
+            "      \"hw-inv-discover-status-url\" : \"/Inventory/DiscoveryStatus\",\n" +
+            "      \"sensor-metadata\": \"/resources/ForeignSensorMetaData.json\",\n" +
+            "      \"ras-metadata\": \"/resources/ForeignEventMetaData.json\",\n" +
+            "      \"jobs-metadata\" : \"/resources/ForeignJobsMetaData.json\"\n" +
+            "  },\n" +
+            "  \"events-simulator-config\" : {\n" +
+            "    \"count\": 3,\n" +
+            "    \"seed\": \"1234\",\n" +
+            "    \"events-template-config\" : \"/opt/ucs/etc/EventsTemplate.json\",\n" +
+            "    \"time-delay-mus\": 1\n" +
+            "  },\n" +
+            "  \"network-config\" : {\n" +
+            "      \"network\" : \"sse\",\n" +
+            "      \"sse\": {\n" +
+            "          \"server-address\": \"sms01-nmn.local\" ,\n" +
+            "          \"server-port\": \"8080\" ,\n" +
+            "          \"urls\": {\n" +
+            "            \"/v1/stream/cray-telemetry-fan\": [\n" +
+            "              \"telemetry\"\n" +
+            "            ] ,\n" +
+            "            \"/streams/nodeBootEvents\": [\n" +
+            "              \"stateChanges\"\n" +
+            "            ] ,\n" +
+            "            \"/v1/stream/cray-dmtf-resource-event\": [\n" +
+            "              \"events\"\n" +
+            "            ] ,\n" +
+            "            \"/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry\": [\n" +
+            "              \"fabric\"\n" +
+            "            ]\n" +
+            "          }\n" +
+            "      } ,\n" +
+            "      \"rabbitmq\": {\n" +
+            "          \"exchangeName\": \"simulator\",\n" +
+            "          \"uri\": \"amqp://127.0.0.1\"\n" +
+            "      }\n" +
+            "  }\n" +
+            "}";
 
     private String invalidEventSimConfig = "{\n" +
             "    \"eventsimConfig\" : {\n" +
@@ -838,9 +408,9 @@ public class SimulatorEngineTest {
             "    },\n" +
             "    \"networkConfig\" : \n" + //add { before \n to make valid json
             "        \"network\" : \"sse\",\n" +
-            "        \"sseConfig\": {\n" +
+            "        \"sse\": {\n" +
             "            \"serverAddress\": \"*\" ,\n" +
-            "            \"serverPort\": \"5678\" ,\n" +
+            "            \"server-port\": \"5678\" ,\n" +
             "            \"urls\": {\n" +
             "                \"/v1/stream/cray-telemetry-fan\": [\n" +
             "                    \"telemetry\"\n" +
@@ -893,5 +463,54 @@ public class SimulatorEngineTest {
             "    \"start-time\" : \"2020-05-27 16:34:50.607Z\"\n" +
             "  },\n" +
             "  \"delay\" : \"0\"\n" +
+            "}";
+
+    private final String EVENTS_CONFIG = "{\n" +
+            "  \"event\": {\n" +
+            "    \"fabric\" : {\n" +
+            "      \"default\" : \"fabric-perf\",\n" +
+            "      \"types\" :[\n" +
+            "        \"fabric-perf\"\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  } ,\n" +
+            "  \"event-types\": {\n" +
+            "    \"fabric-perf\": {\n" +
+            "      \"template\": \"/resources/templates/fabric-perf-telemetry.json\" ,\n" +
+            "      \"stream-type\": \"fabric\" ,\n" +
+            "      \"single-template\": {\n" +
+            "        \"metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext\": \".*\" ,\n" +
+            "        \"metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location\": \".*\"\n" +
+            "      },\n" +
+            "      \"single-template-count\": {\n" +
+            "        \"metrics/messages[*]\": 1\n" +
+            "      },\n" +
+            "      \"path-count\" : {\n" +
+            "        \"metrics/messages[*]/Events[*]/Oem/Sensors[*]\" : 3,\n" +
+            "        \"metrics/messages[*]\" : 3\n" +
+            "      },\n" +
+            "      \"update-fields\": {\n" +
+            "        \"metrics/messages[*]/Events[*]/Oem/Sensors[*]\": {\n" +
+            "          \"DeviceSpecificContext\": {\n" +
+            "            \"metadata\": \"/resources/metadata/ForeignEventMetaDataArray.json\" ,\n" +
+            "            \"metadata-filter\": \".*\"\n" +
+            "          } ,\n" +
+            "          \"Location\": {\n" +
+            "            \"metadata\": \"DB-Locations\" ,\n" +
+            "            \"metadata-filter\": \".*\"\n" +
+            "          } ,\n" +
+            "          \"Value\": {\n" +
+            "            \"metadata\": \"Integer\" ,\n" +
+            "            \"metadata-filter\": [10, 12]\n" +
+            "          }\n" +
+            "        }\n" +
+            "      },\n" +
+            "      \"generate-data-and-overflow-path\" : {\n" +
+            "        \"metrics/messages[*]/Events[*]/Oem/Sensors[*]\" : \"metrics/messages[*]\",\n" +
+            "        \"metrics/messages[*]\" : \"new\"\n" +
+            "      },\n" +
+            "      \"timestamp\" : \"metrics/messages[?]/Events[*]/Oem/Sensors[?]/Timestamp\"\n" +
+            "    }\n" +
+            "  }\n" +
             "}";
 }
