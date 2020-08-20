@@ -26,10 +26,6 @@ class JsonPath {
         return getPathData(jsonPath, data, value, false);
     }
 
-    PropertyDocument set(String jsonPath, PropertyMap data, String newValue) throws PropertyNotExpectedType {
-        return setPathValue(jsonPath, data, newValue);
-    }
-
     void update(String path, PropertyMap templateData, PropertyMap newFieldValues, long count, long seed) throws PropertyNotExpectedType {
         setPathValue(path, templateData, newFieldValues, count, seed);
     }
@@ -40,10 +36,6 @@ class JsonPath {
 
     void setCounter(String jsonPath, PropertyMap data, long counter, long seed) throws PropertyNotExpectedType {
         setPathCounter(jsonPath,data, counter, seed);
-    }
-
-    PropertyDocument set(String jsonPath, PropertyMap data, PropertyArray newvalues, long seed) throws PropertyNotExpectedType {
-        return setPathValue(jsonPath, data, newvalues, seed);
     }
 
     PropertyDocument set(String jsonPath, PropertyMap data, Set<String> fields, PropertyMap newValues, long seed) throws PropertyNotExpectedType {
@@ -60,45 +52,15 @@ class JsonPath {
             return new String[] {jsonPath};
         boolean isArraySpecificRead = jsonPath.contains(ARRAY_SPECIFIC);
         String[] searchPathAndField = isArraySpecificRead ? jsonPath.split(ARRAY_SPECIFIC_SEARCH) : jsonPath.split(SPECIFIC_SEARCH);
-        if(searchPathAndField.length != 2)
-            return searchPathAndField;
-        jsonPath = searchPathAndField[0] + ARRAY_ALL;
-        String field = searchPathAndField[1].replaceAll(PATH_SEPARATOR, "");
-        return new String[] {jsonPath, field};
-
-    }
-
-    private PropertyDocument setPathValue(String jsonPath, PropertyMap data, String newValue) throws PropertyNotExpectedType {
-        String[] pathAndField = getPathAndField(jsonPath);
-        if(pathAndField.length != 2)
-            return data;
-        String jpath = pathAndField[0];
-        String field = pathAndField[1];
-
-        PropertyDocument fieldData = getPathData(jpath, data);
-        if(fieldData.isMap()) {
-            PropertyMap item = fieldData.getAsMap();
-            for(int i = 0; i < item.size(); i++) {
-                if(item.containsKey(field))
-                    item.put(field, newValue);
-            }
-        } else {
-            PropertyArray items = fieldData.getAsArray();
-            for(int i = 0; i < items.size(); i++) {
-                PropertyMap item = items.getMap(i);
-                if(item.containsKey(field))
-                    item.put(field, newValue);
-            }
-        }
-        return data;
+        for(int index=0; index < searchPathAndField.length - 1; index++)
+            searchPathAndField[index] = searchPathAndField[index] + ARRAY_ALL;
+        return searchPathAndField;
     }
 
     private void setPathValue(String jsonPath, PropertyMap data, PropertyMap newFieldValues, long count, long seed) throws PropertyNotExpectedType {
-        String[] pathAndField = getPathAndField(jsonPath);
+        randomNumber.setSeed(seed);
 
-        String jpath = pathAndField[0] + ARRAY_SPECIFIC;
-
-        PropertyDocument arrayData = getPathData(jpath, data);
+        PropertyDocument arrayData = getPathData(jsonPath, data);
         if(arrayData.isArray()) {
             PropertyArray items = arrayData.getAsArray();
             PropertyArray copyItems = new PropertyArray(items);
@@ -119,62 +81,52 @@ class JsonPath {
     }
 
     private long setPathTime(String jsonPath, PropertyMap data, String zone) throws PropertyNotExpectedType {
-        long count = 0;
         String[] pathAndField = getPathAndField(jsonPath);
 
-        String jpath = pathAndField[0] + ARRAY_SPECIFIC;
-
-        PropertyDocument arrayData = getPathData(jpath, data);
+        String level_0_jPath = pathAndField[0];
+        PropertyDocument arrayData = getPathData(level_0_jPath, data);
         PropertyArray pathData = arrayData.getAsArray();
-        for(int i = 0; i < pathData.size(); i++) {
-            PropertyMap d1 = pathData.getMap(i);
-            String[] levels = (pathAndField[1]+ ARRAY_SPECIFIC).split(PATH_SEPARATOR);
 
-            int numOfLevels = levels.length;
-            for(int j = 1; j < numOfLevels - 1; j++) {
-                String level = levels[j];
-                boolean isMap = !level.endsWith(IS_ARRAY);
-                level = level.replaceAll(ARRAY_ALL_SEARCH, "");
-                if(isMap)
-                    d1 = d1.getMap(level);
-                else
-                    d1 = d1.getArray(level).getMap(0);
+        timeModifiedItems_ = 0;
+        getFieldAndUpdateTime(1, pathData, pathAndField, zone);
+        return timeModifiedItems_;
+    }
+
+    private void getFieldAndUpdateTime(int level, PropertyArray data, String[] paths, String zone) throws PropertyNotExpectedType {
+        if(level == paths.length - 1) {
+            String field = paths[level];
+            for(int index = 0; index < data.size(); index++) {
+                PropertyMap item = data.getMap(index);
+                if(item.containsKey(field)) {
+                    item.put(field, ZonedDateTime.now(ZoneId.of(zone)).toInstant().toString());
+                    timeModifiedItems_++;
+                }
             }
+            return;
+        }
 
-            String level = levels[numOfLevels - 1];
-            level = level.replaceAll("[(?,*)]", "*").replaceAll(ARRAY_ALL_SEARCH, "");
-            boolean isMap = level.endsWith(IS_ARRAY);
-            PropertyDocument fdata = isMap ? d1.getMap(level) : d1.getArray(level);
-
-            String field = pathAndField[pathAndField.length - 1];
-            field = field.replaceAll(PATH_SEPARATOR, "");
-            if(fdata.isMap()) {
-                PropertyMap items = fdata.getAsMap();
-                if(items.containsKey(field)) {
-                    items.put(field, ZonedDateTime.now(ZoneId.of(zone)).toInstant().toString());
-                    count++;
+        for(int index = 0; index < data.size(); index++) {
+            String key = paths[level].replaceAll(ARRAY_ALL_SEARCH, "");
+            if(key.contains("/")) {
+                String[] mapPath = key.split("/");
+                PropertyMap mapData = data.getMap(index);
+                for(int mapPathIndex = 0; mapPathIndex < mapPath.length - 1; mapPathIndex++) {
+                    mapData = mapData.getMap(mapPath[mapPathIndex]);
                 }
-            } else {
-                PropertyArray items = fdata.getAsArray();
-                for(int k = 0; k < items.size(); k++) {
-                    PropertyMap item = items.getMap(k);
-                    if(item.containsKey(field)) {
-                        item.put(field, ZonedDateTime.now(ZoneId.of(zone)).toInstant().toString());
-                        count++;
-                    }
-                }
+                PropertyArray arrayData = mapData.getArray(mapPath[mapPath.length - 1]);
+                getFieldAndUpdateTime(level+1, arrayData, paths, zone);
+            }
+            else {
+                PropertyArray indexData = data.getMap(index).getArray(key);
+                getFieldAndUpdateTime(level + 1, indexData, paths, zone);
             }
         }
-        return count;
     }
 
     private void setPathCounter(String jsonPath, PropertyMap data, long counter, long seed) throws PropertyNotExpectedType {
         randomNumber.setSeed(seed);
 
-        String[] pathAndField = getPathAndField(jsonPath);
-        String jpath = pathAndField[0];
-
-        PropertyDocument fieldData = getPathData(jpath, data);
+        PropertyDocument fieldData = getPathData(jsonPath, data);
         if(fieldData.isArray()) {
             PropertyArray items = fieldData.getAsArray();
             PropertyArray newItems = new PropertyArray(items);
@@ -187,32 +139,6 @@ class JsonPath {
                 items.add(item);
             }
         }
-    }
-
-    private PropertyDocument setPathValue(String jsonPath, PropertyMap data, PropertyArray newvalues, long seed) throws PropertyNotExpectedType {
-        randomNumber.setSeed(seed);
-        String[] pathAndField = getPathAndField(jsonPath);
-        if(pathAndField.length != 2)
-            return data;
-        String jpath = pathAndField[0];
-        String field = pathAndField[1];
-
-        PropertyDocument fieldData = getPathData(jpath, data);
-        if(fieldData.isMap()) {
-            PropertyMap item = fieldData.getAsMap();
-            for(int i = 0; i < item.size(); i++) {
-                if(item.containsKey(field))
-                    item.put(field, newvalues.get(generateRandomNumberBetween(0, newvalues.size())));
-            }
-        } else {
-            PropertyArray items = fieldData.getAsArray();
-            for(int i = 0; i < items.size(); i++) {
-                PropertyMap item = items.getMap(i);
-                if(item.containsKey(field))
-                    item.put(field, newvalues.get(generateRandomNumberBetween(0, newvalues.size())));
-            }
-        }
-        return data;
     }
 
     private PropertyDocument setPathValue(String jsonPath, PropertyMap data, Set<String> fields, PropertyMap newValues, long seed) throws PropertyNotExpectedType {
@@ -362,12 +288,14 @@ class JsonPath {
                 data = data.getArray(level).getMap(0);
         }
         String level = levels[numOfLevels - 1];
+        boolean isMap = !level.endsWith(IS_ARRAY);
         level = level.replaceAll("[(?,*)]", "*").replaceAll(ARRAY_ALL_SEARCH, "");
-        boolean isMap = level.endsWith(IS_ARRAY);
+
         PropertyDocument fdata;
         if(isMap)
             fdata = data.getMap(level);
-        fdata = data.getArray(level);
+        else
+            fdata = data.getArray(level);
         return fdata;
     }
 
@@ -530,13 +458,14 @@ class JsonPath {
         return data;
     }*/
 
+    private long timeModifiedItems_ = 0;
     private final String PATH_SEPARATOR = "/";
     private final String ARRAY_ALL = "[*]";
     private final String ARRAY_ALL_SEARCH = "\\[\\*\\]";
     private final String ARRAY_SPECIFIC = "[?]";
-    private final String ARRAY_SPECIFIC_SEARCH = "\\[\\?\\]";
+    private final String ARRAY_SPECIFIC_SEARCH = "\\[\\?\\]/";
     private final String SPECIFIC = "?";
-    private final String SPECIFIC_SEARCH = "\\?";
+    private final String SPECIFIC_SEARCH = "\\?/";
     private final String IS_ARRAY = "]";
-    private Random randomNumber = new Random();
+    private final Random randomNumber = new Random();
 }

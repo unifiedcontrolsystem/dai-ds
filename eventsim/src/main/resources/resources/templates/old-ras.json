@@ -1,0 +1,17 @@
+{
+  "message" : [
+    {
+      "src":"x0c0s36b0n0",
+      "payload":"Cause:ec_dump_cabinet_data",
+      "pri":"0x0",
+      "seqnum":"0x7220",
+      "event-type":"ec_dump_cabinet_data",
+      "location":"x0c0s36b0n0",
+      "timestamp":"2020-06-05T23:40:10Z",
+      "message":"src::::x0c0s36b0n0|pri:0x0|seqnum:0x7220::x0c0s36b0n0|Cause:ec_dump_cabinet_data"
+    }
+  ]
+}
+
+
+

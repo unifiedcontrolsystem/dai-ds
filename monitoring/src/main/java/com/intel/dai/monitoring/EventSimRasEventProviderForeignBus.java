@@ -18,7 +18,6 @@ import com.intel.properties.PropertyNotExpectedType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,28 +53,32 @@ public class EventSimRasEventProviderForeignBus implements NetworkListenerProvid
         if(!configDone_)
             setUpConfig(config);
         try {
-            PropertyMap message = parser_.fromString(data).getAsMap();
+            PropertyMap messageReceived = parser_.fromString(data).getAsMap();
             List<CommonDataFormat> commonList = new ArrayList<>();
-            if(!checkMessage(message))
-                return commonList;
-            String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
-            String eventType = message.getStringOrDefault("event-type", null);
-            String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
-            for(String foreignLocation: foreignLocations) {
-                try {
-                    String location = CommonFunctions.convertForeignToLocation(foreignLocation);
-                    CommonDataFormat common = new CommonDataFormat(
-                            CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
-                            location, DataType.RasEvent);
-                    String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
-                    common.setRasEvent(ucsEvent, payload);
-                    common = suppressEvents(common);
-                    if (common != null)
-                        commonList.add(common);
-                } catch(ConversionException e) {
-                    log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
-                            "location %s", foreignLocation);
-                    log_.debug("Skipped location for data: %s", data);
+            PropertyArray messages = messageReceived.getArray("message");
+            for(int index = 0; index < messages.size(); index++) {
+                PropertyMap message = messages.getMap(index);
+                if (!checkMessage(message))
+                    return commonList;
+                String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
+                String eventType = message.getStringOrDefault("event-type", null);
+                String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
+                for (String foreignLocation : foreignLocations) {
+                    try {
+                        String location = CommonFunctions.convertForeignToLocation(foreignLocation);
+                        CommonDataFormat common = new CommonDataFormat(
+                                CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
+                                location, DataType.RasEvent);
+                        String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
+                        common.setRasEvent(ucsEvent, payload);
+                        common = suppressEvents(common);
+                        if (common != null)
+                            commonList.add(common);
+                    } catch (ConversionException e) {
+                        log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
+                                "location %s", foreignLocation);
+                        log_.debug("Skipped location for data: %s", data);
+                    }
                 }
             }
             return commonList;

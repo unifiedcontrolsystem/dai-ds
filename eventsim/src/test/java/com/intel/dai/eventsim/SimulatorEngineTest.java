@@ -58,36 +58,6 @@ public class SimulatorEngineTest {
     }
 
     @Test
-    public void testRasEvents() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishRasEvents("TEST.*", ".*", "false", "0", null, "5", null);
-        assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
-    }
-
-    @Test
-    public void testRasEvents_DefaultValues() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishRasEvents(".*", ".*", "true", "0", "123", null, null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void testRasEvents_MismatchLocationRegex() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishRasEvents("GT.*", ".*", "true", null, null, null, null);
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void testRasEvents_MismatchLabelRegex() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishRasEvents(".*", "GT.*", "true", null, null, null, null);
-    }
-
-    @Test
     public void testSensorEvents() throws Exception {
         SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();
