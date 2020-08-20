@@ -7,11 +7,13 @@ package com.intel.dai.procedures;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 
-public class UpsertLocationIntoHWInv extends VoltProcedure {
+public class RawInventoryInsert extends VoltProcedure {
     private static final String upsertFruSqlCmd =
-            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType, DbUpdatedTimestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
+            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType, FRUInfo, DbUpdatedTimestamp)" +
+                    " VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);";
     private static final String upsertLocSqlCmd =
-            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID, DbUpdatedTimestamp) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);";
+            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID, Info, DbUpdatedTimestamp)" +
+                    " VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
 
     public static final long SUCCESSFUL = 0;
     public static final long FAILED = 1;
@@ -21,8 +23,8 @@ public class UpsertLocationIntoHWInv extends VoltProcedure {
     public static final SQLStmt upsertIntoHWInvFruStmt = new SQLStmt(upsertFruSqlCmd);
     public static final SQLStmt upsertIntoHWInvLocStmt = new SQLStmt(upsertLocSqlCmd);
 
-    public long run(String id, String type, int ordinal,
-                    String fruId, String fruType, String fruSubType)
+    public long run(String id, String type, int ordinal, String info,
+                    String fruId, String fruType, String fruSubType, String fruInfo)
             throws VoltAbortException {
 
         if (fruId == null) {
@@ -39,8 +41,8 @@ public class UpsertLocationIntoHWInv extends VoltProcedure {
             }
         }
 
-        voltQueueSQL(upsertIntoHWInvFruStmt, fruId, fruType, fruSubType);
-        voltQueueSQL(upsertIntoHWInvLocStmt, id, type, ordinal, fruId);
+        voltQueueSQL(upsertIntoHWInvFruStmt, fruId, fruType, fruSubType, fruInfo);
+        voltQueueSQL(upsertIntoHWInvLocStmt, id, type, ordinal, fruId, info);
 
         voltExecuteSQL();
         return SUCCESSFUL;

@@ -91,11 +91,11 @@ public class ForeignInventoryClient {
         } else {
             foreignHwInv = hwInvDiscovery_.queryHWInvTree(root);
         }
-        if (foreignHwInv.getLeft() != 0) {
+        if (foreignHwInv.left != 0) {
             log_.error("failed to acquire foreign HW inventory json");
             return null;
         }
-        return foreignHwInv.getRight();
+        return foreignHwInv.right;
     }
 
     private String getForeignHWInvHistoryJson(String startTime) {
@@ -110,11 +110,11 @@ public class ForeignInventoryClient {
 
         ImmutablePair<Integer, String> foreignHwInvHistory = hwInvDiscovery_.queryHWInvHistory(startTime);
 
-        if (foreignHwInvHistory.getLeft() != 0) {
+        if (foreignHwInvHistory.left != 0) {
             log_.error("failed to acquire foreign HW inventory history json");
             return null;
         }
-        return foreignHwInvHistory.getRight();
+        return foreignHwInvHistory.right;
     }
 
     private final Logger log_;

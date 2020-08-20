@@ -759,7 +759,7 @@ CREATE TABLE NodeInventory_History (
    InventoryTimestamp   TIMESTAMP         NOT NULL,   -- Time the event occurred that resulted in this inventory being changed.
                                                       -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
                                                       --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
-   InventoryInfo        VarChar(16384),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
+   InventoryInfo        VarChar(65536),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
    Sernum               VarChar(50),                  -- Identifies the specific hw currently in this location (i.e., Product Serial)
    PRIMARY KEY (Lctn, InventoryTimestamp)
 );
@@ -775,7 +775,7 @@ CREATE TABLE Tier2_NodeInventory_History (
    InventoryTimestamp      TIMESTAMP         NOT NULL,   -- Time the event occurred that resulted in this inventory being changed.
                                                          -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
                                                          --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
-   InventoryInfo           VarChar(16384),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
+   InventoryInfo           VarChar(65536),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
    Sernum                  VarChar(50),                  -- Identifies the specific hw currently in this location (i.e., Product Serial)
    Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt            NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
@@ -1991,63 +1991,6 @@ CREATE TABLE Tier2_Config (
 
 
 --------------------------------------------------------------
--- Foreign HW Inventory
---------------------------------------------------------------
--- Records all FRUs that are and were in the HPC.
-CREATE TABLE HW_Inventory_FRU (
-    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
-    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
-    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
-);
-
-CREATE TABLE Tier2_HW_Inventory_FRU (
-    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
-    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
-    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
-);
-
--- Corresponds to the current HPC HW architecture wrt to HW locations.
--- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
-CREATE TABLE HW_Inventory_Location (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
-    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
-    Ordinal INTEGER NOT NULL,            -- singleton:0
-    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
-);
-
-CREATE TABLE tier2_HW_Inventory_Location (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
-    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
-    Ordinal INTEGER NOT NULL,            -- singleton:0
-    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
-);
-
--- History of FRU installation and removal from the HPC.  Note that the timestamp marks
--- the DB update event.  The foreign data does not have the time of actual HW modification.
-CREATE TABLE HW_Inventory_History (
-    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
-    ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
-    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
-);
-
-CREATE TABLE tier2_HW_Inventory_History (
-    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
-    ID VARCHAR(64) NOT NULL,                -- Location ID translated from JSON
-    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
-);
-
---------------------------------------------------------------
 -- Foreign F/W Inventory
 --------------------------------------------------------------
 -- Records all F/W versions in the HPC.
@@ -2082,6 +2025,71 @@ CREATE TABLE tier2_FW_Version_History (
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
     EntryNumber BigInt NOT NULL
 );
+
+--------------------------------------------------------------
+-- >>> Foreign HW Inventory
+--------------------------------------------------------------
+-- Records all FRUs that are and were in the HPC.
+CREATE TABLE HW_Inventory_FRU (
+    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
+    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    FRUInfo VARCHAR(8192),
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE Tier2_HW_Inventory_FRU (
+    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
+    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
+    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
+    FRUInfo VARCHAR(8192),
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
+
+-- Corresponds to the current HPC HW architecture wrt to HW locations.
+-- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
+CREATE TABLE HW_Inventory_Location (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
+    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
+    Ordinal INTEGER NOT NULL,            -- singleton:0
+    Info VARCHAR(8192),
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE tier2_HW_Inventory_Location (
+    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
+    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
+    Ordinal INTEGER NOT NULL,            -- singleton:0
+    Info VARCHAR(8192),
+    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL
+);
+
+-- History of FRU installation and removal from the HPC.  Note that the timestamp marks
+-- the DB update event.  The foreign data does not have the time of actual HW modification.
+CREATE TABLE RawHWInventory_History (
+    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
+    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
+);
+
+CREATE TABLE tier2_RawHWInventory_History (
+    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    ID VARCHAR(64) NOT NULL,                -- Location ID translated from JSON
+    FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    EntryNumber BigInt NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
+);
+
+-- <<< Foreign HW Inventory
 
 END_OF_BATCH
 

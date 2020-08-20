@@ -279,9 +279,9 @@ public class NearlineTableUpdater {
                 new DataUpdateStmt(
                         "{call InsertOrUpdateHWInventoryLocation(?,?,?,?,?)}",
                         true));
-        SQL_STMTS.put("HW_Inventory_History",
+        SQL_STMTS.put("RawHWInventory_History",
                 new DataUpdateStmt(
-                        "insert into Tier2_HWInventory_History(Action, id, fruid, DbUpdatedTimestamp)"
+                        "insert into tier2_RawHWInventory_History(Action, id, fruid, DbUpdatedTimestamp)"
                                 + "values(?,?,?,?)",
                         false));
 

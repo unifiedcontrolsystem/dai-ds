@@ -9,43 +9,30 @@ import org.voltdb.VoltTable
 class InvStoredProceduresSpec extends spock.lang.Specification {
     def "UpsertLocationIntoHWInv"() {
         given:
-        def upserter = Spy(UpsertLocationIntoHWInv)
+        def upserter = Spy(RawInventoryInsert)
         upserter.voltQueueSQL(*_) >> {}
         upserter.voltExecuteSQL() >> []
 
         when:
-        def res = upserter.run("id", "type", 42,
-                fruId, fruType, fruSubType)
+        def res = upserter.run("id", "type", 42, null,
+                fruId, fruType, fruSubType, null)
 
         then:
         res == expectedResult
 
         where:
         fruId      | fruType    | fruSubType   || expectedResult
-        'fruId'    | 'fruType'  | 'fruSubType' || UpsertLocationIntoHWInv.SUCCESSFUL
-        'fruId'    | null       | null         || UpsertLocationIntoHWInv.SUCCESSFUL
-        'fruId'    | null       | "not-null"   || UpsertLocationIntoHWInv.FAILED
-        'empty-ID' | null       | null         || UpsertLocationIntoHWInv.SUCCESSFUL
-        'empty-ID' | "not-null" | null         || UpsertLocationIntoHWInv.FAILED
-        null       | null       | null         || UpsertLocationIntoHWInv.FAILED
+        'fruId'    | 'fruType'  | 'fruSubType' || RawInventoryInsert.SUCCESSFUL
+        'fruId'    | null       | null         || RawInventoryInsert.SUCCESSFUL
+        'fruId'    | null       | "not-null"   || RawInventoryInsert.FAILED
+        'empty-ID' | null       | null         || RawInventoryInsert.SUCCESSFUL
+        'empty-ID' | "not-null" | null         || RawInventoryInsert.FAILED
+        null       | null       | null         || RawInventoryInsert.FAILED
     }
 
-    def "DeleteAllLocationsAtIdFromHWInv"() {
+    def "RawInventoryDump"() {
         given:
-        def testSubject = Spy(DeleteAllLocationsAtIdFromHWInv)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> {}
-
-        when:
-        def res = testSubject.run("x0c0s21b0n0")
-
-        then:
-        res == 0
-    }
-
-    def "AllLocationsAtIdFromHWInv"() {
-        given:
-        def testSubject = Spy(AllLocationsAtIdFromHWInv)
+        def testSubject = Spy(RawInventoryDump)
         testSubject.voltQueueSQL(*_) >> {}
         testSubject.voltExecuteSQL(*_) >> new VoltTable[1];
 
@@ -54,50 +41,6 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
 
         then:
         res == null
-    }
-
-    def "HwInventoryHistoryEventCount"() {
-        def res = new VoltTable()
-        res.m_rowCount = 0
-        def vt = new VoltTable[1]
-        vt[0] = res
-
-        given:
-        def testSubject = Spy(HwInventoryHistoryEventCount)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> vt;
-
-        expect: testSubject.run(null, null, null, null) == -1
-    }
-
-    def "HwInventoryHistoryInsert"() {
-        given:
-        def testSubject = Spy(HwInventoryHistoryInsert)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> {}
-
-        expect: testSubject.run(Action, ID, FRUID, TimeStamp) == Res
-
-        where:
-        Action      | ID    | FRUID     | TimeStamp || Res
-        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'REMOVED'   | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'ADDED'     | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.SUCCESSFUL
-        'INVALIDED' | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        null        | 'x0'  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'ADDED'     | null  | 'model-T' | "ts"      || HwInventoryHistoryInsert.FAILED
-        'ADDED'     | 'x0'  | null      | "ts"      || HwInventoryHistoryInsert.FAILED
-        'ADDED'     | 'x0'  | 'model-T' | null      || HwInventoryHistoryInsert.FAILED
-    }
-
-    def "HwInventoryHistoryDump"() {
-        given:
-        def testSubject = Spy(HwInventoryHistoryDump)
-        testSubject.voltQueueSQL(*_) >> {}
-        testSubject.voltExecuteSQL(*_) >> new VoltTable[1]
-
-        when: testSubject.run('x0')
-        then: notThrown Exception
     }
 
     def "FwInventoryUpsert"() {

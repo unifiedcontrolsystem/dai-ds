@@ -34,12 +34,12 @@ class HWInvDiscoverySpec extends Specification {
     def "queryHWInvTree - entire tree" () {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
-        expect: hwInvDiscovery.queryHWInvTree().getLeft() == 1
+        expect: hwInvDiscovery.queryHWInvTree().left == 1
     }
     def "queryHWInvTree - partial tree" () {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
-        expect: hwInvDiscovery.queryHWInvTree(null).getLeft() == 1
+        expect: hwInvDiscovery.queryHWInvTree(null).left == 1
     }
 
     def "createRestClient()" () {

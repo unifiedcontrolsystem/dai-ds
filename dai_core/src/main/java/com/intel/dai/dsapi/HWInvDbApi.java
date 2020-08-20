@@ -40,8 +40,9 @@ public interface HWInvDbApi {
     int ingest(String canonicalHWInvJson) throws InterruptedException, IOException, DataStoreException;
 
     void delete(String locationName) throws IOException, DataStoreException;
-    HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws IOException, DataStoreException;
-    long numberOfLocationsInHWInv() throws IOException, DataStoreException;
+    // HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws IOException,
+    //         DataStoreException;
+    long numberOfRawInventoryRows() throws IOException, DataStoreException;
 
     /**
      * Return the latest HW inventory history update timestamp string in RFC-3339 format.
@@ -52,10 +53,8 @@ public interface HWInvDbApi {
      */
     String lastHwInvHistoryUpdate() throws IOException, DataStoreException;
 
-    void insertHistoricalRecord(String action, String id, String fru, String foreignServerTimestamp) throws
-            InterruptedException, IOException, DataStoreException;
+    void insertRawHistoricalRecord(String action, String id, String fru, String foreignServerTimestamp)
+            throws IOException, DataStoreException;
 
-    List<String> dumpHistoricalRecords() throws IOException, DataStoreException;
-
-    int ingestHistory(String canonicalHWInvHistoryJson) throws InterruptedException, IOException, DataStoreException;
+    int ingestHistory(String canonicalHWInvHistoryJson) throws IOException, DataStoreException;
 }

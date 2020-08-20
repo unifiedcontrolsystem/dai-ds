@@ -10,7 +10,7 @@ import java.nio.file.Paths
 
 class VoltHWInvDbApiSpec extends Specification {
     VoltHWInvDbApi api
-    Logger logger = LoggerFactory.getInstance("Test", "VoltHWInvDbApiSpec", "console");
+    Logger logger = LoggerFactory.getInstance("Test", "VoltHWInvDbApiSpec", "console")
 
     def setup() {
         VoltDbClient.voltClient = Mock(Client)
@@ -64,23 +64,19 @@ class VoltHWInvDbApiSpec extends Specification {
     }
 
     def "numberOfLocationsInHWInv"() {
-        when: api.numberOfLocationsInHWInv()
-        then: thrown DataStoreException
-    }
-    def "insertHistoricalRecord"() {
-        api.client = Mock(Client)
-        when: api.insertHistoricalRecord(null, null, null, null)
-        then: thrown DataStoreException
-    }
-    def "lastHwInvHistoryUpdate"() {
-        api.client = Mock(Client)
-        when: api.lastHwInvHistoryUpdate()
+        when: api.numberOfRawInventoryRows()
         then: thrown DataStoreException
     }
 
-    def "dumpHistoricalRecords"() {
+    def "insertHistoricalRecord"() {
         api.client = Mock(Client)
-        when: api.dumpHistoricalRecords()
+        when: api.insertRawHistoricalRecord(null, null, null, null)
+        then: notThrown DataStoreException
+    }
+
+    def "lastHwInvHistoryUpdate"() {
+        api.client = Mock(Client)
+        when: api.lastHwInvHistoryUpdate()
         then: thrown DataStoreException
     }
 }
