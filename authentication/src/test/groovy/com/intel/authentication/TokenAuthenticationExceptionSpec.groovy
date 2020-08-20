@@ -1,3 +1,8 @@
+// Copyright (C) 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 package com.intel.authentication
 
 import spock.lang.Specification

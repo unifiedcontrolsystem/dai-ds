@@ -7,33 +7,17 @@
   "networkStreams": {
     "telemetry": {
       "arguments": {
-        "connectPort": 8080,
-        "connectAddress": "api-gw-service-nmn.local",
-        "urlPath": "/v1/stream/telemetry",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "use-ssl": false,
-        "requestBuilderSelectors": {
-          "stream_id": "dai-telemetry"
-        }
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/telemetry?stream_id=dai-telemtry",
+        "connectTimeout": "30"
       },
-      "name": "sse"
+      "name": "eventSource"
     },
     "events": {
       "arguments": {
-        "connectPort": 8080,
-        "connectAddress": "api-gw-service-nmn.local",
-        "urlPath": "/v1/stream/events",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "use-ssl": false,
-        "requestBuilderSelectors": {
-          "stream_id": "dai-events"
-        }
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/events?stream_id=dai-events",
+        "connectTimeout": "30"
       },
-      "name": "sse"
+      "name": "eventSource"
     }
   },
 

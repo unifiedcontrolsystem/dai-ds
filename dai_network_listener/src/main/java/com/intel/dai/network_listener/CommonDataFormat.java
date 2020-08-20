@@ -5,6 +5,7 @@
 package com.intel.dai.network_listener;
 
 import com.intel.dai.dsapi.BootState;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,20 @@ public final class CommonDataFormat {
 
     public void storeExtraData(String key, String value) { extraData_.put(key, value); }
     public String retrieveExtraData(String key) { return extraData_.getOrDefault(key, ""); }
+
+    @Override public String toString() {
+        final String spaces = "                              ";
+        StringBuilder build = new StringBuilder();
+        build.append("\n");
+        build.append(spaces).append("Description   = ").append(description_).append("\n");
+        build.append(spaces).append("TelemetryType = ").append(telemetryDataType_).append("\n");
+        build.append(spaces).append("Location      = ").append(location_).append("\n");
+        build.append(spaces).append("Timestamp     = ").append(TimeUtils.iso8601toNs(nsTimestamp_)).append("\n");
+        build.append(spaces).append("Minimum       = ").append(min_).append("\n");
+        build.append(spaces).append("Average       = ").append(average_).append("\n");
+        build.append(spaces).append("Maximum       = ").append(max_).append("\n");
+        return build.toString();
+    }
 
     private long nsTimestamp_;
     private String location_;

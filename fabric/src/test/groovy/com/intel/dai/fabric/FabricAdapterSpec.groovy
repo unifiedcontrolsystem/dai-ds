@@ -15,7 +15,7 @@ import com.intel.logging.Logger
 import com.intel.networking.sink.NetworkDataSink
 import com.intel.networking.sink.NetworkDataSinkDelegate
 import com.intel.networking.sink.NetworkDataSinkFactory
-import com.intel.networking.sink.restsse.NetworkDataSinkSSE
+import com.intel.networking.sink.sse.NetworkDataSinkEventSource
 import com.intel.networking.source.NetworkDataSource
 import com.intel.networking.source.NetworkDataSourceFactory
 import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ
@@ -32,7 +32,6 @@ class FabricAdapterSpec extends Specification {
         @Override protected String adapterType() { return "FABRIC" }
         @Override protected void processConfigItems(Map<String, String> config) { super.processConfigItems(config) }
     }
-
 
     static class TestRabbitMQ implements NetworkDataSource {
         TestRabbitMQ(Logger logger, Map<String,String> config) {}
@@ -56,7 +55,7 @@ class FabricAdapterSpec extends Specification {
         @Override void stopListening() { }
         @Override boolean isListening() { return true }
         @Override void setLogger(Logger logger) { }
-        @Override String getProviderName() { return "sse" }
+        @Override String getProviderName() { return "eventSource" }
     }
 
     def configFile_ = new File("./build/tmp/FabricAdapterSpec.json")
@@ -73,17 +72,16 @@ class FabricAdapterSpec extends Specification {
         rasEvents_ = Mock(RasEventLog)
         adapter_ = Mock(IAdapter)
 
-        NetworkDataSinkFactory.unregisterImplementation("sse")
-        NetworkDataSinkFactory.registerNewImplementation("sse", TestSSE.class)
+        NetworkDataSinkFactory.unregisterImplementation("eventSource")
+        NetworkDataSinkFactory.registerNewImplementation("eventSource", TestSSE.class)
         NetworkDataSourceFactory.unregisterImplementation("rabbitmq")
         NetworkDataSourceFactory.registerNewImplementation("rabbitmq", TestRabbitMQ.class)
 
-        params_ = ["connectAddress":"127.0.0.1",
-                   "connectPort":"12345",
-                   "urlPath":"/api/stream"]
-        config_ = ["raw_topic":"ucs_fabric_raw_telemetry",
-                   "aggregated_topic":"ucs_fabric_aggregated_telemetry",
-                   "events_topic":"ucs_fabric_events"]
+        params_ = [ "fullUrl": "http://127.0.0.1:12345/api/stream?stream_id=someId" ]
+        config_ = [ "fullUrl": "http://127.0.0.1:12345/api/stream?stream_id=someId",
+                    "raw_topic":"ucs_fabric_raw_telemetry",
+                    "aggregated_topic":"ucs_fabric_aggregated_telemetry",
+                    "events_topic":"ucs_fabric_events"]
 
         workItem_ = "HandleInputFromExternalComponent"
 
@@ -102,7 +100,7 @@ class FabricAdapterSpec extends Specification {
         factory.createStoreTelemetry() >> Mock(StoreTelemetry)
 
         configFile_.createNewFile()
-        configFile_.text = """{"jobid":"3453425","storeBlacklist":"somename"}"""
+        configFile_.text = """{"jobid":"3453425","storeDenyList":"somename"}"""
 
         underTest_ = new TestProvider("127.0.0.1", logger, factory, adapter_)
         underTest_.config_ = underTest_.buildConfig(configFile_)
@@ -110,8 +108,8 @@ class FabricAdapterSpec extends Specification {
 
     def cleanup() {
         configFile_.delete()
-        NetworkDataSinkFactory.unregisterImplementation("sse")
-        NetworkDataSinkFactory.registerNewImplementation("sse", NetworkDataSinkSSE.class)
+        NetworkDataSinkFactory.unregisterImplementation("eventSource")
+        NetworkDataSinkFactory.registerNewImplementation("eventSource", NetworkDataSinkEventSource.class)
         NetworkDataSourceFactory.unregisterImplementation("rabbitmq")
         NetworkDataSourceFactory.registerNewImplementation("rabbitmq", NetworkDataSourceRabbitMQ.class)
     }
@@ -142,10 +140,8 @@ class FabricAdapterSpec extends Specification {
     def "Test consumeWorkItemParameters"() {
         given:
         params_.clear()
-        params_.put("connectAddress", ADDR)
-        params_.put("connectPort", PORT)
-        params_.put("urlPath", URLPATH)
-        config_.put("urlPath", URLPATH)
+        params_.put("fullUrl", null)
+        config_.put("fullUrl", null)
         underTest_.mainProcessingFlow(config_, "location")
 
         when:
@@ -153,17 +149,6 @@ class FabricAdapterSpec extends Specification {
 
         then:
         thrown(AdapterException)
-
-        where:
-        ADDR        | PORT     | URLPATH
-        null        | "1254"   | "/api"
-        "127.0.0.1" | null     | "/api"
-        "127.0.0.1" | "  "     | "/api"
-        "127.0.0.1" | "12b54"  | "/api"
-        "127.0.0.1" | "1254"   | null
-        "127.0.0.1" | "1254"   | "   "
-        "127.0.0.1" | "0"      | "/api"
-        "127.0.0.1" | "65536"  | "/api"
     }
 
     def "Test Publishing"() {
@@ -192,8 +177,8 @@ class FabricAdapterSpec extends Specification {
         then:  thrown(ConfigIOParseException)
     }
 
-    def "Test inBlacklist"() {
-        expect: underTest_.inBlacklist(NAME) == RESULT
+    def "Test inDenylist"() {
+        expect: underTest_.inDenylist(NAME) == RESULT
         where:
         NAME        || RESULT
         "somename"  || true

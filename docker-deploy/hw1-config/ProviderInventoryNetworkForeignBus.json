@@ -10,7 +10,7 @@
         "connectAddress": "api-gw-service-nmn.local",
         "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.SSEStreamRequestBuilder",
         "requestType": "GET",
         "use-ssl": false,
         "requestBuilderSelectors": {

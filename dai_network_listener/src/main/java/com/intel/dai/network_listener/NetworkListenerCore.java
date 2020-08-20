@@ -4,18 +4,24 @@
 //
 package com.intel.dai.network_listener;
 
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.AdapterInformation;
 import com.intel.dai.dsapi.AdapterOperations;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
+import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.exceptions.ProviderException;
 import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;
+import com.intel.networking.sink.NetworkDataSinkEx;
 import com.intel.networking.sink.NetworkDataSinkFactory;
 import com.intel.perflogging.BenchmarkHelper;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import org.voltdb.client.ProcCallException;
 
 import java.io.IOException;
@@ -53,6 +59,7 @@ public class NetworkListenerCore {
         assert logger != null:"Passed a null Logger to NetworkListenerCore.ctor()!";
         assert configuration != null:"Passed a null NetworkListenerConfig to NetworkListenerCore.ctor()!";
         assert factory != null:"Passed a null DataStoreFactory to NetworkListenerCore.ctor()!";
+        assert parser_ != null:"JSON parser was null";
         log_ = logger;
         config_ = configuration;
         adapter_ = config_.getAdapterInformation();
@@ -171,6 +178,7 @@ public class NetworkListenerCore {
     // Start all connections; SSE, HTTP Callback, RabbitMQ, etc...
     private boolean startAllConnections() throws NetworkDataSinkFactory.FactoryException {
         ArrayList<NetworkDataSink> unconnectedList = new ArrayList<>();
+        streamLocations = new PropertyMap();
         for(String networkStreamName: config_.getProfileStreams()) {
             PropertyMap arguments = config_.getNetworkArguments(networkStreamName);
             if (arguments == null) throw new NullPointerException("A null arguments object");
@@ -183,6 +191,25 @@ public class NetworkListenerCore {
             if(sink == null) {
                 log_.warn("The NetworkDataSinkFactory returned 'null' for implementation '%s'", name);
                 continue;
+            }
+            if(sink instanceof NetworkDataSinkEx) {
+                NetworkDataSinkEx ex = (NetworkDataSinkEx)sink;
+                ex.setStreamLocationCallback(this::streamLocationCallback);
+                String json = workQueue_.workingResults();
+                String path = null;
+                if(json != null && !json.trim().isEmpty()) {
+                    try {
+                        path = args.get("urlPath");
+                        PropertyMap map = parser_.fromString(json).getAsMap();
+                        if(path != null) {
+                            String id = map.getString(path);
+                            ex.setLocationId(id);
+                            streamLocations.put(path, id);
+                        }
+                    } catch(ConfigIOParseException | NullPointerException | PropertyNotExpectedType e) {
+                        log_.exception(e, "Failed to parse Working Results for stream '%s', reading from tip of the stream", path);
+                    }
+                }
             }
             sinks_.add(sink);
             sink.setLogger(log_);
@@ -202,6 +229,19 @@ public class NetworkListenerCore {
             new Thread(() -> backgroundContinueConnections(unconnectedList)).start();
         }
         return true;
+    }
+
+    private void streamLocationCallback(String streamLocation, String urlPath, String streamId) {
+        log_.debug("*** Updating work item with latest ID from stream: urlPath=%s; newStreamLocation=%s",
+                urlPath, streamLocation);
+        streamLocations.put(urlPath, streamLocation);
+        String json = parser_.toString(streamLocations);
+        try {
+            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), json);
+        } catch(IOException e) {
+            log_.exception(e);
+            actions_.logFailedToUpdateWorkItemResults(json);
+        }
     }
 
     // Used if some connection failed, this will continue trying until list is empty (all connection made).
@@ -443,6 +483,8 @@ public class NetworkListenerCore {
             ConcurrentLinkedQueue<FullMessage> queue_ = new ConcurrentLinkedQueue<>();
     private long baseThreadId_;
     private static long STABILIZATION_VALUE = 1500L;
+    private final ConfigIO parser_ = ConfigIOFactory.getInstance("json");
+    private PropertyMap streamLocations = null;
 
     private static final class FullMessage {
         FullMessage(String subject, String message) {

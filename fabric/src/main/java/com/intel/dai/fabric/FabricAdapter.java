@@ -15,17 +15,17 @@ import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;
+import com.intel.networking.sink.NetworkDataSinkEx;
 import com.intel.networking.sink.NetworkDataSinkFactory;
 import com.intel.networking.source.NetworkDataSource;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Base class for fabric telemetry processing. Configuration comes from the provider but defaults are provided in
@@ -45,7 +45,7 @@ public abstract class FabricAdapter {
         log_     = logger;
         factory_ = factory;
         adapter_ = adapter;
-        parser_ = ConfigIOFactory.getInstance("json");
+        parser_  = ConfigIOFactory.getInstance("json");
         if(parser_ == null)
             throw new NullPointerException("The JSON parser failed to be created!"); // This cannot happen...
     }
@@ -86,9 +86,8 @@ public abstract class FabricAdapter {
         Map<String, String> workItemParameters = workQueue_.getClientParameters();
 
         // Get server stream information.
-        config_.put(PARAM_CONNECT_ADDRESS, getConnectionAddress(workItemParameters));
-        config_.put(PARAM_URL, getConnectionUrl(workItemParameters));
-        config_.put(PARAM_CONNECT_PORT, getConnectionPort(workItemParameters));
+        config_.put(PARAM_FULL_URL, getConnectionFullUrl(workItemParameters));
+        config_.put(PARAM_LAST_LOCATION, workQueue_.workingResults());
     }
 
     /**
@@ -97,8 +96,7 @@ public abstract class FabricAdapter {
      * @return The timestamp.
      */
     final protected long usTimestamp() {
-        Instant now = Instant.now();
-        return (now.getEpochSecond() * 1_000_000L) + (now.getNano() / 1_000L);
+        return TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
     }
 
     /**
@@ -131,7 +129,7 @@ public abstract class FabricAdapter {
                 }
                 // Sleep for a little bit if no work items are queued for this adapter type.
                 if (workQueue_.amtTimeToWait() > 0)
-                    Thread.sleep( Math.min(workQueue_.amtTimeToWait(), 5) * 100);
+                    safeSleep( Math.min(workQueue_.amtTimeToWait(), 5) * 100);
             }
             storeTelemetry_.close();
             publisher_.close();
@@ -244,11 +242,11 @@ public abstract class FabricAdapter {
      */
     protected void processConfigItems(Map<String, String> config) {
         networkSinkType_ = config.getOrDefault("networkSinkType", "sse");
-        String sList = config.getOrDefault("storeBlacklist", null);
+        String sList = config.getOrDefault("storeDenyList", null);
         if(sList == null || sList.trim().isEmpty())
-            blacklist_ = new ArrayList<>();
+            denyList_ = new ArrayList<>();
         else
-            blacklist_ = Arrays.asList(sList.split(","));
+            denyList_ = Arrays.asList(sList.split(","));
     }
 
     /**
@@ -289,12 +287,12 @@ public abstract class FabricAdapter {
     /**
      * Called by providers to determine if there is a need to skip the given name when storing aggregate data.
      *
-     * @param name The nameto check against the blacklist or regular expressions.
+     * @param name The name to check against the deny list or regular expressions.
      * @return true if the name should not be stored, false if the name should be stored.
      */
-    final protected boolean inBlacklist(String name) {
+    final protected boolean inDenylist(String name) {
         boolean result = false;
-        for(String regex: blacklist_) {
+        for(String regex: denyList_) {
             result = name.matches(regex);
             if(result)
                 break;
@@ -302,23 +300,13 @@ public abstract class FabricAdapter {
         return result;
     }
 
-    void badParameterValue(String parameter, String reason) throws AdapterException {
-        String msg = String.format("The base work item's parameters contains a bad parameter '%s' because it is %s!",
-                parameter, reason);
-        logSoftwareRasEvent(msg, "none");
-    }
-
     Map<String, String> getConfigMapDefaults() {
         Map<String,String> config = new HashMap<>();
 
         // Adapter/provider settings
-        config.put("networkSinkType", "sse");
-        config.put(PARAM_CONNECT_ADDRESS, "127.0.0.1");
-        config.put(PARAM_CONNECT_PORT, "65535");
-        config.put(PARAM_URL, "/");
-        config.put("subjects", "*");
-        config.put("requestBuilder", "com.intel.networking.sink.restsse.SSEStreamRequestBuilder");
-        config.put("connectTimeout", "600");
+        config.put("networkSinkType", "eventSource");
+        config.put(PARAM_LAST_LOCATION, null);
+        config.put(PARAM_FULL_URL, "fullUrl");
 
         // Environmental data aggregation...
         config.put("aggregateEnabled", "true");
@@ -336,12 +324,11 @@ public abstract class FabricAdapter {
         config.put("eventsTopic", "ucs_fabric_events");
 
         // Connection information...
-        config.put("use-ssl", "false");
         config.put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");
         config.put("tokenServer", null); // Default is no authentication...
 
         // Store name blacklist: comma separated list (no spaces) of names that will not be stored in Tier 2.
-        config.put("storeBlacklist", null);
+        config.put("storeDenyList", null);
 
         return config;
     }
@@ -354,14 +341,16 @@ public abstract class FabricAdapter {
                 throw new NullPointerException("Failed to get a '" + networkSinkType_ +
                         "' based NetworkDataSink instance");
             listener.setCallbackDelegate(this::processRawMessage);
+            if(listener instanceof NetworkDataSinkEx) {
+                NetworkDataSinkEx ex = (NetworkDataSinkEx)listener;
+                ex.setStreamLocationCallback(this::incomingLocationId);
+                ex.setLocationId(config_.getOrDefault(PARAM_LAST_LOCATION, null));
+            }
             listener.startListening();
 
             log_.info("Starting the listening loop...");
-            while (!adapter_.adapterShuttingDown()) {
-                try {
-                    Thread.sleep(100L); // One tenth second pause.
-                } catch (InterruptedException e) { /* Ignore interrupt and continue loop */ }
-            }
+            while (!adapter_.adapterShuttingDown())
+                safeSleep(100L); // One tenth second pause.
 
             log_.info("Stopping the listening loop.");
             listener.stopListening();
@@ -381,33 +370,11 @@ public abstract class FabricAdapter {
             publisher_.sendMessage(topic, message);
     }
 
-    private String getConnectionPort(Map<String, String> workItemParameters) throws AdapterException {
-        String sPort = workItemParameters.getOrDefault(PARAM_CONNECT_PORT,
-                config_.getOrDefault(PARAM_CONNECT_PORT, "65534"));
-        if(sPort == null)
-            badParameterValue(PARAM_CONNECT_PORT, "port value must not be null");
-        if(!Pattern.matches("^\\d+$", sPort))
-            badParameterValue(PARAM_CONNECT_PORT, "port value must be an integer, and match pattern '^\\d+$'");
-        try {
-            int port = Integer.parseInt(sPort);
-            if(port < 1 || port > 65535)
-                badParameterValue(PARAM_CONNECT_PORT, "port value must be in the range 1-65535 inclusive");
-        } catch(NumberFormatException e) { /* Cannot get here do to pattern match check */ }
-        return sPort;
-    }
-
-    private String getConnectionAddress(Map<String, String> workItemParameters) throws AdapterException {
-        String address = workItemParameters.getOrDefault(PARAM_CONNECT_ADDRESS,
-                config_.getOrDefault(PARAM_CONNECT_ADDRESS, "127.0.0.1"));
-        if (address == null || address.trim().isEmpty())
-            badParameterValue(PARAM_CONNECT_ADDRESS, "null or empty value");
-        return address;
-    }
-
-    private String getConnectionUrl(Map<String, String> workItemParameters) throws AdapterException {
-        String url = workItemParameters.getOrDefault(PARAM_URL, config_.getOrDefault(PARAM_URL, "/"));
+    private String getConnectionFullUrl(Map<String, String> workItemParameters) throws AdapterException {
+        String url = workItemParameters.getOrDefault(PARAM_FULL_URL, config_.getOrDefault(PARAM_FULL_URL, "/"));
         if (url == null || url.trim().isEmpty())
-            badParameterValue(PARAM_URL, "null or empty value");
+            logSoftwareRasEvent(String.format("The base work item's parameters contains a bad parameter '%s' because " +
+                    "it is null or an empty value!", PARAM_FULL_URL), "none");
         return url;
     }
 
@@ -426,6 +393,25 @@ public abstract class FabricAdapter {
         }
     }
 
+    private void incomingLocationId(String urlPath, String streamName, String id) {
+        try {
+            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), id);
+        } catch(IOException e) {
+            log_.error("Failed to store working results to improve resiliency: %s", id);
+            try {
+                logSoftwareRasEvent("Failed to store working results to improve resiliency", id);
+            } catch(AdapterException e1) {
+                log_.exception(e1, "Could not store RAS event for failed storing of work item current results!");
+            }
+        }
+    }
+
+    private void safeSleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch(InterruptedException e) { /* Ignore interruption here */ }
+    }
+
     protected final String servers_;
     protected final Logger log_;
     protected final DataStoreFactory factory_;
@@ -438,11 +424,10 @@ public abstract class FabricAdapter {
     protected       List<String> subjects_ = new ArrayList<>();
     protected       ConfigIO parser_;
     private         String networkSinkType_;
-    private         List<String> blacklist_;
+    private         List<String> denyList_;
 
-    private static final String PARAM_CONNECT_ADDRESS   = "connectAddress";
-    private static final String PARAM_CONNECT_PORT      = "connectPort";
-    private static final String PARAM_URL               = "urlPath";
+    private static final String PARAM_FULL_URL      = "fullUrl";
+    private static final String PARAM_LAST_LOCATION = "lastId";
 
     static final int INSTANCE_DATA_MAX = 9000;
 }
