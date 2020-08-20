@@ -21,13 +21,13 @@
           "server-address": "api-gw-service-nmn.local" ,
           "server-port": "8080" ,
           "urls": {
-            "/v1/stream/cray-telemetry-fan": [
+            "/v1/stream/telemetry": [
               "telemetry"
             ] ,
-            "/streams/nodeBootEvents": [
+            "/apis/smd/hsm/v1/Subscriptions/SCN": [
               "stateChanges"
             ] ,
-            "/v1/stream/cray-dmtf-resource-event": [
+            "/v1/stream/events": [
               "events"
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
