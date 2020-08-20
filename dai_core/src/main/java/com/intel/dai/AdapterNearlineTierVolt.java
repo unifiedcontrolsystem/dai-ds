@@ -4,21 +4,29 @@
 
 package com.intel.dai;
 
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
+import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import org.json_voltpatches.JSONException;
-import org.voltdb.client.*;
 import org.voltdb.VoltTable;
-import java.lang.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import org.voltdb.client.ProcCallException;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import com.intel.properties.*;
-import com.intel.config_io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
-import com.rabbitmq.client.*;
 
 /**
  * AdapterNearlineTierVolt for the VoltDB database.
@@ -66,7 +74,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_WORKITEM_HISTORY               = -99999L;
         mEntryNumber_HWINVENTORY_FRU                = -99999L;
         mEntryNumber_HWINVENTORY_LOCATION           = -99999L;
-        mEntryNumber_HWINVENTORY_HISTORY            = -99999L;
+        mEntryNumber_RAWHWINVENTORY_HISTORY         = -99999L;
     }   // ctor
 
 
@@ -102,7 +110,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_WORKITEM_HISTORY;               // the last used entry number for the Tier2_WORKITEM_HISTORY table.
     private long        mEntryNumber_HWINVENTORY_FRU;               // the last used entry number for the Tier2_HWINVENTORY_FRU table.
     private long        mEntryNumber_HWINVENTORY_LOCATION;               // the last used entry number for the Tier2_HWINVENTORY_LOCATION table.
-    private long        mEntryNumber_HWINVENTORY_HISTORY;               // the last used entry number for the Tier2_HWINVENTORY_HISTORY table.
+    private long        mEntryNumber_RAWHWINVENTORY_HISTORY;         // the last used entry number for the tier2_RawHWInventory_History table.
 
 
     long getTablesMaxEntryNum(String sTableName) throws IOException, ProcCallException {
@@ -175,7 +183,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_WORKITEM_HISTORY               = getTablesMaxEntryNum("Tier2_WORKITEM_HISTORY;");
         mEntryNumber_HWINVENTORY_FRU                = getTablesMaxEntryNum("Tier2_HW_Inventory_Fru;");
         mEntryNumber_HWINVENTORY_LOCATION           = getTablesMaxEntryNum("Tier2_HW_Inventory_Location;");
-        mEntryNumber_HWINVENTORY_HISTORY            = getTablesMaxEntryNum("Tier2_HW_Inventory_History;");
+        mEntryNumber_RAWHWINVENTORY_HISTORY         = getTablesMaxEntryNum("Tier2_RawHWInventory_History;");
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2 (via the DataMover queue) AND for publishing that data for any components that subscribe for it (via the DataMoverExchange).
         DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
@@ -490,8 +498,8 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                     case "HW_Inventory_Fru":
                         mEntryNumber_HWINVENTORY_FRU = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_HW_Inventory_Fru.upsert", lAmqpMessageId, mEntryNumber_HWINVENTORY_FRU);
                         break;
-                    case "HW_Inventory_History":
-                        mEntryNumber_HWINVENTORY_HISTORY = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_HW_Inventory_History.insert", lAmqpMessageId, mEntryNumber_HWINVENTORY_HISTORY);
+                    case "RawHWInventory_History":
+                        mEntryNumber_RAWHWINVENTORY_HISTORY = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_RawHWInventory_History.insert", lAmqpMessageId, mEntryNumber_RAWHWINVENTORY_HISTORY);
                         break;
                     case "WorkItem":
                         // Loop through each of the entries in the VoltTable.

@@ -1,0 +1,54 @@
+{
+  "locs": [
+    {
+      "ID": "R0-CB0-CN0",
+      "Type": "Node",
+      "Ordinal": 0,
+      "Info": "{\"info\":\"info\"}",
+      "FRUID": "Node.0",
+      "FRUType": "Node",
+      "FRUSubType": "",
+      "FRUInfo": "{\"fruInfo\":\"fruInfo\"}"
+    },
+    {
+      "ID": "R0-CB0-CN0-CPU0",
+      "Type": "Processor",
+      "Ordinal": 0,
+      "Info": "{}",
+      "FRUID": "Processor.0",
+      "FRUType": "Processor",
+      "FRUSubType": "",
+      "FRUInfo": "{}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM0",
+      "Type": "Memory",
+      "Ordinal": 0,
+      "Info": "{}",
+      "FRUID": "Memory.0",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DIMM1",
+      "Type": "Memory",
+      "Ordinal": 1,
+      "Info": "{}",
+      "FRUID": "Memory.1",
+      "FRUType": "Memory",
+      "FRUSubType": "",
+      "FRUInfo": "{}"
+    },
+    {
+      "ID": "R0-CB0-CN0-DRIVE0",
+      "Type": "Drive",
+      "Ordinal": 0,
+      "Info": "{}",
+      "FRUID": "Drive.0",
+      "FRUType": "Drive",
+      "FRUSubType": "",
+      "FRUInfo": "{}"
+    }
+  ]
+}

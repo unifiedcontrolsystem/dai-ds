@@ -11,7 +11,7 @@ import org.voltdb.VoltTable;
 /**
  * Select the nodes at the given location.
  */
-public class AllLocationsAtIdFromHWInv extends VoltProcedure {
+public class RawInventoryDump extends VoltProcedure {
     private static final String SQL_TEXT =
             "SELECT * FROM " +
                     "(SELECT * FROM HW_Inventory_Location I, HW_Inventory_FRU F WHERE I.FRUID = F.FRUID) AS " +

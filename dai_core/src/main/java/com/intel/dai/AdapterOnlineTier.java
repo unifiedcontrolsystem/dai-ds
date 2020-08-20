@@ -77,7 +77,7 @@ public abstract class AdapterOnlineTier {
         mTablesToBePurgedSet.add("NonNodeHwInventory_History"); // Index 27
         mTablesToBePurgedSet.add("HW_Inventory_Fru");// Index 28
         mTablesToBePurgedSet.add("HW_Inventory_Location"); // Index 29
-        mTablesToBePurgedSet.add("HW_Inventory_History"); // Index 30
+        mTablesToBePurgedSet.add("RawHWInventory_History"); // Index 30
     }   // ctor
 
     void initializeAdapter() throws IOException, TimeoutException {

@@ -14,10 +14,9 @@ import spock.lang.Specification
 import java.nio.file.Paths
 
 class HWInvTranslatorSpec extends Specification {
-    HWInvTranslator ts
-
     static def dataDir = "src/test/resources/data/"
-    static def tmpDir = "build/tmp/"
+
+    HWInvTranslator ts
 
     def setupSpec() {
         "rm noSuchFile".execute().text

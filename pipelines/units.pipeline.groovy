@@ -27,75 +27,117 @@ pipeline {
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        sh 'rm -rf build'
                         script { utilities.FixFilesPermission() }
                     }
                 }
-                stage('Quick Test') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                stage('Quick Unit Test') {
+                    options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'true' } }
                     steps {
                         script {
-                            utilities.InvokeGradle(":inventory_api:test")
-                            utilities.InvokeGradle(":inventory:test")
+//                            utilities.InvokeGradle("build")
+//                            utilities.InvokeGradle(":dai_core:clean")
+//                            utilities.InvokeGradle(":inventory_api:test")
+//                            utilities.InvokeGradle(":inventory:test")
                             utilities.InvokeGradle(":dai_core:test")
-                            utilities.InvokeGradle(":dai_network_listener:test")
-                            utilities.InvokeGradle(":procedures:test")
+//                            utilities.InvokeGradle(":dai_network_listener:test")
+//                            utilities.InvokeGradle(":procedures:test")
+                        }
+                    }
+                }
+                stage('Quick Component Test') {
+                    options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    steps {
+                        script {
+                            RestartHWInvDb()
+                            utilities.InvokeGradle(":dai_core:integrationTest")
+                            utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }
                 }
                 stage('Quick Report') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'true' } }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
                     }
                 }
-                stage('Quick Check') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
-                    steps {
-                        script {
-                            utilities.InvokeGradle(":inventory_api:check")
-                            utilities.InvokeGradle(":inventory:check")
-                            utilities.InvokeGradle(":dai_core:check")
-                            utilities.InvokeGradle(":dai_network_listener:check")
-                            utilities.InvokeGradle(":procedures:check")
-                        }
-                    }
-                }
-                stage('Full Test') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                stage('Full Unit Test') {
+                    options{ catchError(message: "Full Unit Test failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'false' } }
                     steps {
                         script {
+                            sh 'rm -rf build'
                             utilities.InvokeGradle("clean")
-                            utilities.InvokeGradle("test")
+                            utilities.InvokeGradle("build")
+                        }
+                    }
+                }
+                stage('Full Component Test') {
+                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    steps {
+                        script {
+                            def scriptDir = 'inventory_api/src/integration/resources/scripts/'
+                            StopHWInvDb()
+                            utilities.InvokeGradle(":procedures:jar")
+                            StartHWInvDb(scriptDir)
+                            utilities.InvokeGradle("integrationTest")
                         }
                     }
                 }
                 stage('Full Report') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Full Report failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_CHECK}" == 'false' } }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
                     }
                 }
-                stage('Full Check') {
-                    options{ catchError(message: "Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
-                    steps {
-                        script { utilities.InvokeGradle("check") }
-                    }
-                }
                 stage('Archive') {
                     steps {
-                        archiveArtifacts 'build/reports/**'
+                        sh 'rm -f *.zip'
+                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
+                        zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
+                        zip archive: true, dir: 'inventory_api/src/test/resources/data', glob: '', zipFile: 'hwInvData.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+                        archiveArtifacts 'build/distributions/**, build/reports/**'
                     }
                 }
             }
         }
     }
+}
+
+def RestartHWInvDb() {
+    StopHWInvDb()
+    StartHWInvDb()
+}
+
+// This is one way to setup for component level tests.  You can also use docker-compose or partially
+// starts DAI
+def StartHWInvDb() {
+    utilities.InvokeGradle(":procedures:jar")
+
+    def scriptDir = 'inventory_api/src/integration/resources/scripts/'
+    sh "${scriptDir}init-voltdb.sh"
+    sh "${scriptDir}start-voltdb.sh"
+    sh "${scriptDir}wait-for-voltdb.sh 21211"
+    sh "sqlcmd < ${scriptDir}load_procedures.sql"
+    sh "sqlcmd < data/db/DAI-Volt-Tables.sql"
+    sh "sqlcmd < data/db/DAI-Volt-Procedures.sql"
+}
+
+// Shutdown method depends on how voltdb was procured.  For example,
+// if docker-compose was used to procure the voltdb, the relevant
+// containers need to be shutdown.
+def StopHWInvDb() {
+    sh 'voltadmin shutdown --force || true'
 }
