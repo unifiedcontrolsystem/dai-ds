@@ -1,3 +1,8 @@
+// Copyright (C) 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 package com.intel.authentication
 
 import com.intel.logging.Logger
@@ -27,9 +32,9 @@ class KeycloakTokenAuthenticationSpec extends Specification {
                 "tokenServer":"https://localhost:8080/auth",
                 "clientId":"testClientId",
                 "clientSecret":"some_secret",
-                "realm":null,
-                "username":null,
-                "password":null
+                "realm":"null",
+                "username":"null",
+                "password":"null"
         ]
         builder_.grantType(_) >> builder_
         builder_.serverUrl(_) >> builder_
@@ -67,13 +72,13 @@ class KeycloakTokenAuthenticationSpec extends Specification {
         arguments_."realm" = realm
         arguments_."username" = user
         arguments_."password" = pass
-        underTest_.initialize(logger_, arguments_)
-        expect: underTest_.token_ == null
+        when: underTest_.initialize(logger_, arguments_)
+        then: thrown(TokenAuthenticationException)
         where:
         realm   | user   | pass
         null    | null   | "passwd"
         null    | "name" | null
-        "realm" | "name" | "passwd"
+//        "realm" | "name" | "passwd"
     }
 
     def "Test getToken without initializing"() {

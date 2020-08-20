@@ -130,7 +130,7 @@ public final class FabricTelemetryProvider extends FabricAdapter {
             logError("The 'Value' key was not a valid number: %s", name);
             return;
         }
-        FabricTelemetryItem item = new FabricTelemetryItem(timestampUs, name, daiLocation, value, inBlacklist(name));
+        FabricTelemetryItem item = new FabricTelemetryItem(timestampUs, name, daiLocation, value, inDenylist(name));
         results.add(item);
     }
 

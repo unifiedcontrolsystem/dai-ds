@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-package com.intel.networking.sink.restsse
+package com.intel.networking.sink
 
 import spock.lang.Specification
 

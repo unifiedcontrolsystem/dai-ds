@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class RequestInfoTest {
     @Test
     public void ctor() {
-        Map<String,String> headers = new HashMap<>() {{
+        Map<String,String> headers = new HashMap<String,String>() {{
            put("X-Unknown", "value");
         }};
         RequestInfo info = new RequestInfo(HttpMethod.GET, URI.create("http://localhost"), null, headers);
@@ -25,7 +25,7 @@ public class RequestInfoTest {
 
     @Test
     public void toStringTest() {
-        Map<String,String> headers = new HashMap<>() {{
+        Map<String,String> headers = new HashMap<String,String>() {{
             put("X-Unknown", "value");
         }};
         RequestInfo info = new RequestInfo(HttpMethod.GET, URI.create("http://localhost"), "Body Text.", headers);

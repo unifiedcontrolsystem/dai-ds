@@ -26,15 +26,18 @@ public class JdbcStoreTelemetry implements StoreTelemetry {
     }
 
     @Override
-    public long logEnvDataAggregated(String sTypeOfData, String sLctn, long lTsInMicroSecs, double dMaxValue,
-                                     double dMinValue, double dAvgValue, String sReqAdapterType, long lReqWorkItemId)
+    public synchronized long logEnvDataAggregated(String sTypeOfData, String sLctn, long lTsInMicroSecs,
+                                                  double dMaxValue, double dMinValue, double dAvgValue,
+                                                  String sReqAdapterType, long lReqWorkItemId)
             throws DataStoreException {
         createConnection();
         createlogEnvDataAggregatedPreparedCall();
-
+        log_.debug("\n\n*** UNIQUE TUPLE: TYPE='%s'; LOCATION='%s'; TS='%d'\n", sTypeOfData, sLctn, lTsInMicroSecs);
         try {
             telemetryAggregatedData_.setString(1, sLctn);
-            telemetryAggregatedData_.setTimestamp(2, new Timestamp(lTsInMicroSecs / 1000), gmt_);
+            Timestamp jts = new Timestamp(lTsInMicroSecs / 1_000_000L * 1_000L); // Set in truncated Milliseconds
+            jts.setNanos(((int)(lTsInMicroSecs % 1_000_000L)) * 1_000); // Set remaining microseconds as nano seconds.
+            telemetryAggregatedData_.setTimestamp(2, jts, gmt_);
             telemetryAggregatedData_.setString(3, sTypeOfData);
             telemetryAggregatedData_.setDouble(4, dMaxValue);
             telemetryAggregatedData_.setDouble(5, dMinValue);

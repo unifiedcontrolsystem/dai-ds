@@ -8,6 +8,6 @@ package com.intel.authentication;
  * Exception thrown by the implementation of the TokenAuthentication interface.
  */
 public class TokenAuthenticationException extends Exception {
-    TokenAuthenticationException(String msg) { super(msg); }
+    public TokenAuthenticationException(String msg) { super(msg); }
     private final static long serialVersionUID = 1345338L; // Compiler Required...
 }

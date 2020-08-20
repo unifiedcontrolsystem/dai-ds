@@ -10,6 +10,7 @@ import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.runtime_utils.TimeUtils;
 import com.intel.xdg.XdgConfigFile;
 
 import java.io.FileInputStream;
@@ -34,30 +35,7 @@ final public class CommonFunctions {
      * @throws ParseException If the date is not of the form yyyy-MM-dd HH:mm:ss.SSSX
      */
     public static long convertISOToLongTimestamp(String timestamp) throws ParseException {
-        SimpleDateFormat[] df = new SimpleDateFormat[] {
-                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX"),
-                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"),
-                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-        };
-        String[] parts = timestamp.split("\\.");
-        // Fraction without TZ
-        String fraction = parts.length == 1 ? "0" : parts[1].replaceFirst("([A-Z]+)|([-+][0-9:]+)","");
-        // timestamp without fraction but with TZ (" " or "T" separator agnostic)
-        String tsToSecond = timestamp.replaceFirst("\\.[0-9]+", "").replace(" ", "T");
-        Instant ts = null;
-        // Do appropriate parsing...
-        for(SimpleDateFormat fmt: df) {
-            try {
-                ts = fmt.parse(tsToSecond).toInstant();
-                break;
-            } catch(ParseException | NullPointerException e) { /* Not used */ }
-        }
-        if(ts == null)
-            throw new ParseException(tsToSecond, 0); // Parsing timestamp failed.
-        if(fraction.length() > 9)
-            throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", timestamp.indexOf('.'));
-        return (ts.getEpochSecond() * 1_000_000_000L) +
-                (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
+        return TimeUtils.nSFromIso8601(timestamp);
     }
 
     /**

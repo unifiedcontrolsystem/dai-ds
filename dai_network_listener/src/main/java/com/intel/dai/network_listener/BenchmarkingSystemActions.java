@@ -75,6 +75,9 @@ public class BenchmarkingSystemActions implements SystemActions, Initializer {
     public void logFailedToUpdateBootImageInfo(String instanceData) { }
 
     @Override
+    public void logFailedToUpdateWorkItemResults(String instanceData) { }
+
+    @Override
     public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
         return true;
     }

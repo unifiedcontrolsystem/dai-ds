@@ -137,6 +137,13 @@ public interface SystemActions extends AutoCloseable, Closeable {
     void logFailedToUpdateBootImageInfo(String instanceData);
 
     /**
+     * Log a RAS event denoting the failure to update the restart data for a work item.
+     *
+     * @param instanceData The instance data for the RAS event.
+     */
+    void logFailedToUpdateWorkItemResults(String instanceData);
+
+    /**
      * Checks to see if the inventory data has been populated yet.
      *
      * @return true if the inventory is missing, false if there is inventory stored.

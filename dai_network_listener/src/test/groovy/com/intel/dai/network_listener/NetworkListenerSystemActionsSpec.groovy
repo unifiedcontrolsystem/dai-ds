@@ -31,6 +31,7 @@ class NetworkListenerSystemActionsSpec extends Specification {
         config_.getProviderConfigurationFromClassName(_ as String) >> listenerConfig_
         factory_ = Mock(DataStoreFactory)
         factory_.createRasEventLog(_ as AdapterInformation) >> Mock(RasEventLog)
+        factory_.createWorkQueue(_ as AdapterInformation) >> Mock(WorkQueue)
         invApi_ = Mock(HWInvDbApi)
         factory_.createHWInvApi() >> invApi_
         NodeInformation info = Mock(NodeInformation)
@@ -86,6 +87,11 @@ class NetworkListenerSystemActionsSpec extends Specification {
 
     def "logFailedToUpdateBootImageInfo"() {
         underTest_.logFailedToUpdateBootImageInfo("instanceData")
+        expect: true
+    }
+
+    def "logFailedToUpdateWorkItemResults"() {
+        underTest_.logFailedToUpdateWorkItemResults("instanceData")
         expect: true
     }
 
