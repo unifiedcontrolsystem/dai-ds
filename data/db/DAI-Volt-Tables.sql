@@ -2075,7 +2075,8 @@ CREATE TABLE RawHWInventory_History (
     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
     ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
+    DbUpdatedTimestamp TIMESTAMP NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
 );
 
 CREATE TABLE tier2_RawHWInventory_History (
@@ -2084,7 +2085,8 @@ CREATE TABLE tier2_RawHWInventory_History (
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
     ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
+    EntryNumber BigInt NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
 );
 
 -- <<< Foreign HW Inventory
