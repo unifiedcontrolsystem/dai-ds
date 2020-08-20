@@ -62,7 +62,7 @@ class ForeignHwInventoryApiSpec extends Specification {
         invRequester.initialize(log, config, restClient)
 
         when:
-        def res = invRequester.getHwInventory().getLeft()
+        def res = invRequester.getHwInventory().left
 
         then:
         res == 1
@@ -73,7 +73,7 @@ class ForeignHwInventoryApiSpec extends Specification {
         invRequester.initialize(log, config, restClient)
 
         when:
-        def res = invRequester.getHwInventory("x0").getLeft()
+        def res = invRequester.getHwInventory("x0").left
 
         then:
         res == 1
@@ -84,7 +84,7 @@ class ForeignHwInventoryApiSpec extends Specification {
         invRequester.initialize(log, config, restClient)
 
         when:
-        def res = invRequester.getHWInventoryHistory("t0").getLeft()
+        def res = invRequester.getHWInventoryHistory("t0").left
 
         then:
         res == 1
@@ -161,7 +161,7 @@ class ForeignHwInventoryApiSpec extends Specification {
         def uri = new URI("")
         def blockingResult = new BlockingResult(code, responseDocument, requestInfo)
         expect:
-        invRequester.interpreteQueryHWInvQueryResult(uri, blockingResult).getLeft() == status
+        invRequester.interpreteQueryHWInvQueryResult(uri, blockingResult).left == status
 
         where:
         code    | responseDocument      | requestInfo                       || status

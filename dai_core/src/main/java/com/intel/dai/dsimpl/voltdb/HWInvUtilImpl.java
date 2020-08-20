@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * This class contains methods that convert canonical inventory information amongst different formats.  The
  * possible formats are POJO, json string and json file.
