@@ -1016,6 +1016,7 @@ CREATE TABLE public.tier2_RawHWInventory_History (
     Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
+    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
     EntryNumber bigint NOT NULL
 );
