@@ -5,9 +5,12 @@
 package com.intel.dai.dsimpl.voltdb;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
+import com.intel.properties.PropertyMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.voltdb.VoltTable;
@@ -216,9 +219,11 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             throws IOException, DataStoreException {
         String node_serial_number = "";
 
-        HWInvTree t = allLocationsAt(nodeLocation, null);
+        ConfigIO parser = ConfigIOFactory.getInstance("json");
 
-        JsonObject hwInfoJsonEntries = new JsonObject();
+        PropertyMap hwInfoJsonEntries = new PropertyMap();
+
+        HWInvTree t = allLocationsAt(nodeLocation, null);
         for (HWInvLoc loc : t.locs) {
             if (loc.Type.equals("Node")) {
                 node_serial_number = loc.FRUID;
@@ -227,11 +232,14 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             hwInfoJsonEntries.putAll(entries); // all entries are distinct
         }
 
-        JsonObject hwInfo = new JsonObject();
+        PropertyMap hwInfo = new PropertyMap();
         hwInfo.put("HWInfo", hwInfoJsonEntries);
 
-        String hwInfoJson = hwInfo.toJson();
-        hwInfoJson = hwInfoJson.replace("\\/", "/");    // escaping / makes queries very difficult
+        String hwInfoJson = null;
+        if (parser != null) {
+            hwInfoJson = parser.toString(hwInfo);
+            hwInfoJson = hwInfoJson.replace("\\/", "/");    // escaping / makes queries very difficult
+        }
 
         return new ImmutablePair<>(node_serial_number, hwInfoJson);
     }
@@ -425,5 +433,5 @@ public class VoltHWInvDbApi implements HWInvDbApi {
 
     private final Logger logger;
     private final String[] servers;
-    Client client = null;
+    private Client client = null;
 }

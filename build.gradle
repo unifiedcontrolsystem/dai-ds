@@ -538,7 +538,6 @@ project(':dai_core') {
         compile group: 'commons-io', name: 'commons-io', version: commonsio_version
         compile "com.google.code.gson:gson:${gson_version}"
         compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-        compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
