@@ -10,6 +10,7 @@ import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -75,8 +76,8 @@ class ForeignSimulatorEngine {
     private void publishEvents(PropertyDocument events, String streamId, boolean burstMode, long timeDelayMus, String timestampJPath, String output) throws PropertyNotExpectedType, SimulatorException {
         try {
             publishedEvents_ = 0;
-            ZonedDateTime startTime1 = ZonedDateTime.now(ZoneId.systemDefault());
-            log_.info("Start Time : " + startTime1.toString());
+            ZonedDateTime startTime = ZonedDateTime.now(ZoneId.systemDefault());
+            log_.info("Start Time : " + startTime.toString());
             PropertyArray eventsInfo = events.getAsArray();
             for (int i = 0; i < eventsInfo.size(); i++) {
                 PropertyMap event = eventsInfo.getMap(i);
@@ -85,9 +86,11 @@ class ForeignSimulatorEngine {
                 if(!burstMode)
                     delayMicroSecond(timeDelayMus);
             }
-            log_.info("End Time : " + startTime1.toString());
+            ZonedDateTime endTime = ZonedDateTime.now(ZoneId.systemDefault());
+            log_.info("End Time : " + endTime.toString());
             log_.info("Published events =  " + publishedEvents_);
             log_.info("Published messages =  " + eventsInfo.size());
+            log_.debug("Total Time to publish " + publishedEvents_ + " events :" + (Duration.between(startTime, endTime).toMillis()) + " milli-seconds");
             if(output != null) {
                 LoadFileLocation.writeFile(eventsInfo, output, true);
             }
