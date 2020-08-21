@@ -7,10 +7,7 @@ import com.intel.properties.PropertyNotExpectedType;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 class JsonPath {
 
@@ -175,70 +172,99 @@ class JsonPath {
         return data;
     }
 
-    private PropertyDocument splitDataByPathAndCount(PropertyMap templateData, String generateDataPath, String overFlowJPath, long countJPathTemplateItems, long seed) throws PropertyNotExpectedType {
-        if(overFlowJPath.equals("new")) {
-            return splitDataByPathAndCount(templateData, generateDataPath, countJPathTemplateItems, seed);
-        }
+    private PropertyDocument splitDataByPathAndCount(PropertyMap templateData, String generateDataPath, String overFlowDataJPath, long countGenerateDataPathHoldItems, long seed) throws PropertyNotExpectedType {
         randomNumber.setSeed(seed);
-        PropertyMap copyData = new PropertyMap(templateData);
-
-        PropertyDocument fieldData = getPathData(generateDataPath, templateData);
-        PropertyDocument overFlowPathDataFinal = getPathData(overFlowJPath, copyData);
-
-        PropertyArray items = fieldData.getAsArray();
-        PropertyArray newItems = new PropertyArray();
-        while(items.size() > 0) {
-            PropertyDocument jpathData = getPathDataByCount(generateDataPath, templateData, countJPathTemplateItems, seed);
-            PropertyDocument overFlowPathData = getPathData(overFlowJPath, jpathData.getAsMap());
-            newItems.add(overFlowPathData.getAsArray().getMap(0));
+        if(overFlowDataJPath.equals("new")) {
+            return splitDataByPathAndCount(templateData, generateDataPath, countGenerateDataPathHoldItems, seed);
         }
 
-        overFlowPathDataFinal.getAsArray().clear();
-        overFlowPathDataFinal.getAsArray().addAll(newItems);
-        templateData = copyData;
-        return copyData;
-    }
+        PropertyArray finalData = new PropertyArray();
 
-    private PropertyDocument splitDataByPathAndCount(PropertyMap templateData, String generateDataPath, long countJPathTemplateItems, long seed) throws PropertyNotExpectedType {
-        randomNumber.setSeed(seed);
-        PropertyMap copyData = new PropertyMap();
-
-        PropertyDocument fieldData = getPathData(generateDataPath, templateData);
-
-        PropertyArray items = fieldData.getAsArray();
-        PropertyArray newItems = new PropertyArray();
-        while(items.size() > 0) {
-            PropertyDocument jpathData = getPathDataByCount(generateDataPath, templateData, countJPathTemplateItems, seed);
-            newItems.add(jpathData.getAsMap());
-        }
-
-        return newItems;
-    }
-
-    private PropertyDocument getPathDataByCount(String generateDataPath, PropertyMap templateData, long countJPathTemplateItems, long seed) throws PropertyNotExpectedType {
-        randomNumber.setSeed(seed);
-
-        PropertyMap copyTemplate = new PropertyMap(templateData);
-
-        PropertyDocument fieldData = getPathData(generateDataPath, templateData);
-        PropertyDocument finalData = getPathData(generateDataPath, copyTemplate);
-
-        if(fieldData.isArray()) {
-            PropertyArray items = fieldData.getAsArray();
-            PropertyArray data = new PropertyArray(items);
-            PropertyArray newItems = new PropertyArray();
-
-            for(long i = 0; i < countJPathTemplateItems && data.size() > 0; i++) {
-                PropertyMap item = new PropertyMap(data.getMap(generateRandomNumberBetween(0, data.size())));
-                newItems.add(item);
-                data.remove(item);
-                items.remove(item);
+        //Split generate data and overflow path and find diffences path
+        List<String> generatePathLevels = Arrays.asList(generateDataPath.split(PATH_SEPARATOR));
+        List<String> overFlowPathLevels = Arrays.asList(overFlowDataJPath.split(PATH_SEPARATOR));
+        List<String> traversePathFromOvFlwToGenPath = new ArrayList<>();
+        for(String key : generatePathLevels) {
+            if(!overFlowPathLevels.contains(key)) {
+                traversePathFromOvFlwToGenPath.add(key);
             }
-            finalData.getAsArray().clear();
-            finalData.getAsArray().addAll(newItems);
+        }
+        String[] traversePath = new String[traversePathFromOvFlwToGenPath.size()];
+        traversePath = traversePathFromOvFlwToGenPath.toArray(traversePath);
+
+        //Get child of overflowpath data
+        PropertyArray overFlowPathData = getPathData(overFlowDataJPath, templateData).getAsArray();
+        PropertyMap overFlowPathDataChild = overFlowPathData.getMap(0);
+
+        //traverse through generate-data-path endpoint and get items to split and clear data at endpoint overflowpath
+        PropertyArray overFlowPathDataEndPoint = traversePathAndFetchData(traversePath, overFlowPathDataChild);
+        PropertyArray items = new PropertyArray(overFlowPathDataEndPoint);
+        Collections.shuffle(items, randomNumber);
+        overFlowPathDataEndPoint.clear();
+
+        int itemsToSplit = items.size();
+
+        //Collect data and add data to endpoint-overflowpath
+        while(itemsToSplit != 0) {
+            PropertyMap newOverFlowPathDataEndPoint = new PropertyMap(overFlowPathDataChild);
+            PropertyArray childOverFlowPathEndPoint = traversePathAndFetchData(traversePath, newOverFlowPathDataEndPoint).getAsArray();
+            PropertyArray itemsByCount = pickRandomItemsByCount(items, itemsToSplit, countGenerateDataPathHoldItems, seed);
+            childOverFlowPathEndPoint.addAll(itemsByCount);
+            finalData.add(newOverFlowPathDataEndPoint);
+            itemsToSplit = itemsToSplit - itemsByCount.size();
+        }
+        overFlowPathData.clear();
+        overFlowPathData.addAll(finalData);
+        return templateData;
+    }
+
+    private PropertyArray traversePathAndFetchData(String[] paths, PropertyMap data) throws PropertyNotExpectedType {
+        for(int i = 0; i < paths.length - 1; i++) {
+            String path = paths[i];
+            boolean isArray = path.contains("*");
+            path = path.replaceAll(ARRAY_ALL_SEARCH, "");
+            if(isArray)
+                data = data.getArray(path).getMap(0);
+            else
+                data = data.getMap(path);
         }
 
-        return copyTemplate;
+        String level = paths[paths.length - 1];
+        level = level.replaceAll("[(?,*)]", "*").replaceAll(ARRAY_ALL_SEARCH, "");
+        return data.getArray(level);
+    }
+
+    private PropertyDocument splitDataByPathAndCount(PropertyMap templateData, String generateDataPath, long countGenerateDataPathHoldItems, long seed) throws PropertyNotExpectedType {
+        randomNumber.setSeed(seed);
+        PropertyArray finalData = new PropertyArray();
+
+        PropertyArray fieldData = getPathData(generateDataPath, templateData).getAsArray();
+        PropertyArray items = new PropertyArray(fieldData);
+        Collections.shuffle(items, randomNumber);
+        fieldData.clear();
+
+        int itemsToSplit = items.size();
+
+        while(itemsToSplit != 0) {
+            PropertyMap data = new PropertyMap(templateData);
+            PropertyArray generateDataPathEndPoint = getPathData(generateDataPath, data).getAsArray();
+            PropertyArray jpathData = pickRandomItemsByCount(items, itemsToSplit, countGenerateDataPathHoldItems, seed);
+            generateDataPathEndPoint.addAll(jpathData);
+            finalData.add(data);
+            itemsToSplit = itemsToSplit - jpathData.size();
+        }
+        return finalData;
+    }
+
+    private PropertyArray pickRandomItemsByCount(PropertyArray items, int index, long countJPathTemplateItems, long seed) throws PropertyNotExpectedType {
+        randomNumber.setSeed(seed);
+
+        PropertyArray randomItems = new PropertyArray();
+        for(int counter = 0; counter < countJPathTemplateItems && (1 <= index && index <= items.size()); counter++) {
+            PropertyMap item = items.getMap(--index);
+            randomItems.add(item);
+        }
+        return randomItems;
     }
 
     private PropertyDocument getPathData(String jsonPath, PropertyMap data, String value, boolean parse) throws PropertyNotExpectedType {
