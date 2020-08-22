@@ -53,7 +53,9 @@ class EventsCli(object):
         ras_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         ras_events_parser.add_argument('--template', help='sample template to generate ras events')
         ras_events_parser.add_argument('--timeout', type=int, help='ras sub-command execution timeout')
-        ras_events_parser.add_argument('--type', choices=['fabric-perf', 'old-ras', 'fabric-crit'], default='old-ras',
+        ras_events_parser.add_argument('--timezone', type=int,
+            help='generate ras events for a given timezone. The default values exists in config file')
+        ras_events_parser.add_argument('--type', choices=['fabric-crit', 'old-ras'], default='old-ras',
             help='provide type of the ras event to generate events')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
 
@@ -63,18 +65,23 @@ class EventsCli(object):
     def _add_sensor_event_parser(self, event_parser):
         sensor_events_parser = event_parser.add_parser('sensor', help='generate sensor events')
         sensor_events_parser.add_argument('--burst',
-            help='generate sensor events without delay. Default is constant mode with delay.', action='store_true')
+            help='generate sensor events without delay. Default is constant mode with delay', action='store_true')
         sensor_events_parser.add_argument('--count', type=int,
-            help='given number of sensor events are generated. The default values exists in eventsim config file.')
+            help='given number of sensor events are generated. The default values exists in eventsim config file')
         sensor_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate sensor events. The default values exists in '
-                 'eventsim config file.')
-        sensor_events_parser.add_argument('--label', help='generate sensor events for a given type/description')
+                 'eventsim config file')
         sensor_events_parser.add_argument('--locations',
-            help='generate sensor events at a given location. Provide regex for multiple locations.')
-        sensor_events_parser.add_argument('--output', help='store data in a file')
+            help='generate sensor events at a given location. Provide regex for multiple locations')
+        sensor_events_parser.add_argument('--output', help='save data to a file')
         sensor_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        sensor_events_parser.add_argument('--template', help='sample template to generate sensor events')
         sensor_events_parser.add_argument('--timeout', type=int, help='sensor sub-command execution timeout')
+        sensor_events_parser.add_argument('--timezone', type=int,
+            help='generate sensor events for given timezone. The default values exists in config file')
+        sensor_events_parser.add_argument('--type', choices=['energy', 'fabric-perf', 'power', 'temperature',
+                                                             'voltage'],
+            default='energy', help='provide type of the sensor event to generate events')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
 
     """
@@ -182,10 +189,12 @@ class EventsCli(object):
     """
     def _generate_sensor_events_execute(self, args):
         client = HttpClient()
+
         # URL will be POST http://127.0.0.1:9998/apis/events/sensor
         url = client.get_base_url() + 'apis/events/sensor'
-        parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'label': args.label,
-                      'locations': args.locations, 'output': args.output, 'seed': args.seed}
+
+        parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
+                      'output': args.output, 'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout

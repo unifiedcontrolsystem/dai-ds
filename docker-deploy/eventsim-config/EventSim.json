@@ -13,7 +13,8 @@
     "count": 10,
     "seed": "1234",
     "events-template-config" : "/opt/ucs/etc/EventsTemplate.json",
-    "time-delay-mus": 1
+    "time-delay-mus": 1,
+    "timezone": "GMT"
   },
   "network-config" : {
       "network" : "sse",
@@ -21,17 +22,26 @@
           "server-address": "api-gw-service-nmn.local" ,
           "server-port": "8080" ,
           "urls": {
-            "/v1/stream/telemetry": [
-              "telemetry"
-            ] ,
-            "/apis/smd/hsm/v1/Subscriptions/SCN": [
-              "stateChanges"
-            ] ,
-            "/v1/stream/events": [
+            "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event": [
               "events"
             ] ,
-            "/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage": [
+              "voltage"
+            ] ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-power": [
+              "power"
+            ] ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-energy": [
+              "energy"
+            ] ,
+            "/apis/sma-telemetry/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
               "fabric"
+            ] ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": [
+              "telemetry"
+            ] ,
+            "/streams/nodeBootEvents": [
+              "stateChanges"
             ]
           }
       } ,

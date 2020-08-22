@@ -5,16 +5,37 @@
   },
 
   "networkStreams": {
-    "telemetry": {
+    "energyTelemetry": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/telemetry?stream_id=dai-telemtry",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
+        "connectTimeout": "30"
+      },
+      "name": "eventSource"
+    },
+    "powerTelemetry": {
+      "arguments": {
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/cray-telemetry-power?stream_id=dai-telemtry",
+        "connectTimeout": "30"
+      },
+      "name": "eventSource"
+    },
+    "temperatureTelemetry": {
+      "arguments": {
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/cray-telemetry-temperature?stream_id=dai-telemtry",
+        "connectTimeout": "30"
+      },
+      "name": "eventSource"
+    },
+    "voltageTelemetry": {
+      "arguments": {
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/cray-telemetry-voltage?stream_id=dai-telemtry",
         "connectTimeout": "30"
       },
       "name": "eventSource"
     },
     "events": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/events?stream_id=dai-events",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/v1/stream/cray-dmtf-resource-event?stream_id=dai-events",
         "connectTimeout": "30"
       },
       "name": "eventSource"
@@ -24,7 +45,10 @@
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
-        "telemetry"
+        "energyTelemetry",
+        "powerTelemetry",
+        "temperatureTelemetry",
+        "voltageTelemetry"
       ],
       "subjects": [
         "telemetry"

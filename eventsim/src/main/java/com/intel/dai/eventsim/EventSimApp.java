@@ -6,6 +6,7 @@ import com.intel.networking.HttpMethod;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
+import com.intel.runtime_utils.TimeUtils;
 import org.json_voltpatches.JSONArray;
 import org.json_voltpatches.JSONObject;
 
@@ -83,13 +84,13 @@ public class EventSimApp  extends  EventSim {
     }
 
     /**
-     * This method is used to create and send fabric events to network.
+     * This method is used to create and send ras events to network.
      * @param parameters input details of the request.
      * @return Status = F if ras events are generated, Status = E on failure
      */
     String generateRasEvents(Map<String, String> parameters) {
         try {
-            log_.info("Received fabric api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            log_.info("Received ras api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
             removeEmptyValueParameters(parameters);
             foreignSimulatorEngine_.generateRasEvents(parameters);
             return create_result_json("F", "Success");
@@ -134,16 +135,10 @@ public class EventSimApp  extends  EventSim {
     String generateSensorEvents(Map<String, String> parameters) {
         try {
             log_.info("Received sensor api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            String burst = parameters.getOrDefault("burst", "false");
-            String eventsCount = parameters.getOrDefault("count", null);
-            String delay = parameters.getOrDefault("delay", null);
-            String label = parameters.getOrDefault("label", ".*");
-            String location = parameters.getOrDefault("locations", ".*");
-            String output = parameters.getOrDefault("output", null);
-            String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine_.publishSensorEvents(location, label, burst, delay, seed, eventsCount, output);
+            log_.info("Received sensor api request : " + TimeUtils.getNsTimestamp());
+            removeEmptyValueParameters(parameters);
+            foreignSimulatorEngine_.generateSensorEvents(parameters);
             return create_result_json("F", "Success");
-
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());
         }

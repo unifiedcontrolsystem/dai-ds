@@ -188,44 +188,6 @@ public class SimulatorEngine {
     }
 
     /**
-     * This method is used to create and send sensor events to network
-     * @param regexLocation regex of locations
-     * @param regexLabel regex for event type/description
-     * @param burst true for burst mode, false for constant mode
-     * @param timeDelayMus time delay to induce while sending events to network
-     * @param randomiserSeed randomization seed to replicate data.
-     * @param numOfEvents number of sensor events to generate
-     * @param output store generated events in a file
-     * @throws SimulatorException unable to create sensor event
-     */
-    void publishSensorEvents(@NotNull final String regexLocation, @NotNull final String regexLabel, @NotNull final String burst, final String timeDelayMus, final String randomiserSeed, final String numOfEvents, final String output) throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("location-regex", regexLocation);
-        parameters.put("label-regex", regexLabel);
-        parameters.put("burst", burst);
-
-        try {
-            validateParameters(parameters);
-            loadDefaults();
-            boolean burstMode = Boolean.parseBoolean(burst);
-            if (timeDelayMus != null)
-                timeDelayMus_ = Long.parseLong(timeDelayMus);
-            if (randomiserSeed != null)
-                randomiserSeed_ = Long.parseLong(randomiserSeed);
-            if (numOfEvents != null)
-                numOfEvents_ = Long.parseLong(numOfEvents);
-            if (ExistsLocationsMatchedRegex(regexLocation, EVENT_TYPE.SENSOR) && ExistsMatchedRegexLabel(regexLabel, EVENT_TYPE.SENSOR)) {
-                List<ForeignEvent> sensorEvents = system_.publishSensorEventsForLocation(numOfEvents_, randomiserSeed_);
-                Map<Long, List<ForeignEvent>> events = new HashMap<>();
-                events.put(1L, sensorEvents);
-                publishGeneratedEvents(events, burstMode, output);
-            }
-        } catch (final PropertyNotExpectedType | ConversionException | IOException | ConfigIOParseException e) {
-            throw new SimulatorException(e.getMessage());
-        }
-    }
-
-    /**
      * This method is used to create and send job events to network
      * @param regexLocation regex of locations
      * @param regexLabel regex for event type/description
