@@ -14,7 +14,7 @@ class VoltHWInvDbApiITSpec extends Specification {
     static def inventoryFileName = 'oneNode.json'
     static def inventoryResultFileName = tmpDir+inventoryFileName
     static def inventoryExpectedResultFileName = expectedDir+inventoryFileName
-    static def inventoryDataFilePath = Paths.get dataDir+inventoryFileName
+    static def rawInventoryDataFilePath = Paths.get dataDir+inventoryFileName
 
     VoltHWInvDbApi ts
     Logger logger = Mock Logger
@@ -30,30 +30,30 @@ class VoltHWInvDbApiITSpec extends Specification {
     }
 
     def "delete"() {
-        given: ts.ingest inventoryDataFilePath
+        setup: ts.ingest rawInventoryDataFilePath
         when: ts.delete ''
         then: ts.numberOfRawInventoryRows() == 0
     }
 
     def "ingest -- file"() {
-        when: ts.ingest inventoryDataFilePath
+        when: ts.ingest rawInventoryDataFilePath
         then: ts.numberOfRawInventoryRows() == 5
     }
 
     def "allLocationsAt"() {
-        given: ts.ingest inventoryDataFilePath
+        setup: ts.ingest rawInventoryDataFilePath
         when: ts.allLocationsAt 'R0-CB0-CN0', inventoryResultFileName
         then: FileUtils.contentEquals new File(inventoryExpectedResultFileName), new File(inventoryResultFileName)
     }
 
     def "numberOfRawInventoryRows"() {
         given: ts.numberOfRawInventoryRows() == 0
-        when: ts.ingest inventoryDataFilePath
+        when: ts.ingest rawInventoryDataFilePath
         then: ts.numberOfRawInventoryRows() == 5
     }
 
     def "generateHWInfoJsonBlob"() {
-        given: ts.ingest inventoryDataFilePath
+        setup: ts.ingest rawInventoryDataFilePath
         when:
         def res = ts.generateHWInfoJsonBlob 'R0-CB0-CN0'
         then:
@@ -62,23 +62,26 @@ class VoltHWInvDbApiITSpec extends Specification {
     }
 
     def "numberOfCookedNodes"() {
-        given: ts.ingest inventoryDataFilePath
+        setup: ts.ingest rawInventoryDataFilePath
         when: ts.ingestCookedNode '2002-10-02T15:00:00.05Z', 'Added', 'R0-CB0-CN0'
         then: ts.numberOfCookedNodes() == 1
     }
 
     def "deleteAllCookedNodes"() {
-        given:
-        ts.ingest inventoryDataFilePath
+        setup:
+        ts.ingest rawInventoryDataFilePath
         ts.ingestCookedNode '2002-10-02T15:00:00.05Z', 'Added', 'R0-CB0-CN0'
+        expect: ts.numberOfCookedNodes() == 1
 
         when: ts.deleteAllCookedNodes()
         then: ts.numberOfCookedNodes() == 0
     }
 
     def "ingestCookedNode"() {
-        given: ts.ingest inventoryDataFilePath
-        when: ts.ingestCookedNode Timestamp, Action, NodeLocation
+        given: ts.numberOfCookedNodes() == 0
+        when:
+        ts.ingest rawInventoryDataFilePath
+        ts.ingestCookedNode Timestamp, Action, NodeLocation
         then: ts.numberOfCookedNodes() == 1
 
         where:
@@ -88,29 +91,31 @@ class VoltHWInvDbApiITSpec extends Specification {
     }
 
     def "insertHistoricalRecord"() {
-        when:
-        ts.insertRawHistoricalRecord 'Added', 'R0-CB0-CN0', 'node.0', '2002-10-02T15:00:00.05Z'
-        ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0', 'node.0', '2003-10-02T15:00:00.05Z'
-
-        then: ts.numberRawInventoryHistoryRows() == 2
+        given: ts.numberOfRawInventoryRows() == 0
+        when: def count = populateRawInvHistoryTable()
+        then: ts.numberRawInventoryHistoryRows() == count
     }
 
     def "lastHwInvHistoryUpdate"() {
-        given:
-        ts.insertRawHistoricalRecord 'Added', 'R0-CB0-CN0', 'node.0', '2002-10-02T15:00:00.05Z'
-        ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0', 'node.0', '2003-10-02T15:00:00.05Z'
-
+        setup: populateRawInvHistoryTable()
         expect: '2003-10-02T15:00:00.05Z' == ts.lastHwInvHistoryUpdate()
     }
 
     def "ingestCookedNodesChanged"() {
-        given:
-        ts.ingest inventoryDataFilePath
+        given: ts.numberCookedNodeInventoryHistoryRows() == 0
+        when:
+        ts.ingest rawInventoryDataFilePath
+        populateRawInvHistoryTable()
+
+        then: ts.ingestCookedNodesChanged() == 2
+        println ts.dumpCookedNodes()
+    }
+
+    def populateRawInvHistoryTable() {
         ts.insertRawHistoricalRecord 'Added', 'R0-CB0-CN0', 'node.0', '2002-10-02T15:00:00.05Z'
         ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0', 'node.0', '2003-10-02T15:00:00.05Z'
         ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0-DIMM0', 'memory.0', '2003-10-02T15:00:00.05Z'
 
-        expect: ts.ingestCookedNodesChanged() == 2
-        println ts.dumpCookedNodes()
+        return 3
     }
 }
