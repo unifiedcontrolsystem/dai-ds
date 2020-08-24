@@ -58,36 +58,6 @@ public class SimulatorEngineTest {
     }
 
     @Test
-    public void testSensorEvents() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents("TEST.*", ".*", "true", "0", "123", "5", "/dev/null");
-        assertEquals(5, simulatorEngineTest.getPublishedEventsCount());
-    }
-
-    @Test
-    public void testSensorEvents_DefaultValues() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents("TEST.*", ".*", "true", null, null, "3", null);
-        assertEquals(3, simulatorEngineTest.getPublishedEventsCount());
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void testSensorEvents_MismatchRegexLocation() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents("GT.*", ".*", "true", null, null, null, null);
-    }
-
-    @Test(expected = SimulatorException.class)
-    public void testSensorEvents_MismatchRegexLabel() throws Exception {
-        SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
-        simulatorEngineTest.initialize();
-        simulatorEngineTest.publishSensorEvents(".*", "GT.*", "true", null, null, null, null);
-    }
-
-    @Test
     public void testJobEvents() throws Exception {
         SimulatorEngine simulatorEngineTest = new SimulatorEngine(dataLoader_, sourceMock_, logMock_);
         simulatorEngineTest.initialize();

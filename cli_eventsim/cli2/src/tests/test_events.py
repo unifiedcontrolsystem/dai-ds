@@ -26,13 +26,13 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,fabric,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,fabric,boot,scenario,get-seed}\n                        '
-                      'subparser for events\n    ras                 generate ras events\n    sensor              '
-                      'generate sensor events\n    job                 generate job events\n    fabric              '
-                      'generate fabric events\n    boot                generate boot events\n    scenario            '
-                      'generate events for a given scenario\n    get-seed            fetch prior seed to replicate '
-                      'same data.\n\noptional arguments:\n  -h, --help            show this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
+                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
+                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
+                      'events\n    job                 generate job events\n    boot                generate boot '
+                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
+                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
+                      'this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -44,13 +44,13 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,fabric,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,fabric,boot,scenario,get-seed}\n                        '
-                      'subparser for events\n    ras                 generate ras events\n    sensor              '
-                      'generate sensor events\n    job                 generate job events\n    fabric              '
-                      'generate fabric events\n    boot                generate boot events\n    scenario            '
-                      'generate events for a given scenario\n    get-seed            fetch prior seed to replicate '
-                      'same data.\n\noptional arguments:\n  -h, --help            show this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
+                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
+                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
+                      'events\n    job                 generate job events\n    boot                generate boot '
+                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
+                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
+                      'this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -63,18 +63,22 @@ class EventsCliTest(TestCase):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('usage: eventsim events ras [-h] [--burst] [--count COUNT] [--delay DELAY]\n                    '
-                      '       [--label LABEL] [--locations LOCATIONS]\n                           [--output OUTPUT] ['
-                      '--seed SEED] [--timeout TIMEOUT]\n\noptional arguments:\n  -h, --help            show this '
-                      'help message and exit\n  --burst               generate ras events without delay. Default is '
-                      'constant\n                        mode with delay.\n  --count COUNT         given number of '
-                      'ras events are generated. The default\n                        values exists in eventsim '
-                      'config file.\n  --delay DELAY         pause for given value in microseconds to generate ras\n  '
-                      '                      events. The default values exists in eventsim config\n                   '
-                      '     file.\n  --label LABEL         generate ras events for a given type/description\n  '
-                      '--locations LOCATIONS\n                        generate ras events at a given location. '
-                      'Provide regex\n                        for multiple locations.\n  --output OUTPUT       store '
-                      'data in a file\n  --seed SEED           seed to duplicate data\n  --timeout TIMEOUT     ras '
-                      'sub-command execution timeout\n', captured_output.getvalue())
+                      '       [--locations LOCATIONS] [--output OUTPUT]\n                           [--seed SEED] ['
+                      '--template TEMPLATE]\n                           [--timeout TIMEOUT] [--timezone TIMEZONE]\n   '
+                      '                        [--type {fabric-crit,old-ras}]\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n  --burst               generate ras events '
+                      'without delay. Default is constant\n                        mode with delay\n  --count COUNT   '
+                      '      given number of ras events are generated. The default\n                        values '
+                      'exists in eventsim config file\n  --delay DELAY         pause for given value in microseconds '
+                      'to generate ras\n                        events. The default values exists in eventsim '
+                      'config\n                        file\n  --locations LOCATIONS\n                        '
+                      'generate ras events at a given location. Provide regex\n                        for multiple '
+                      'locations\n  --output OUTPUT       save data to a file\n  --seed SEED           seed to '
+                      'duplicate data\n  --template TEMPLATE   sample template to generate ras events\n  --timeout '
+                      'TIMEOUT     ras sub-command execution timeout\n  --timezone TIMEZONE   generate ras events for '
+                      'a given timezone. The default\n                        values exists in config file\n  --type '
+                      '{fabric-crit,old-ras}\n                        provide type of the ras event to generate '
+                      'events\n', captured_output.getvalue())
         captured_output.close()
 
     def test_sensor_events_help(self):
@@ -86,18 +90,23 @@ class EventsCliTest(TestCase):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('usage: eventsim events sensor [-h] [--burst] [--count COUNT] [--delay DELAY]\n                 '
-                      '             [--label LABEL] [--locations LOCATIONS]\n                              [--output '
-                      'OUTPUT] [--seed SEED]\n                              [--timeout TIMEOUT]\n\noptional '
-                      'arguments:\n  -h, --help            show this help message and exit\n  --burst               '
-                      'generate sensor events without delay. Default is\n                        constant mode with '
-                      'delay.\n  --count COUNT         given number of sensor events are generated. The\n             '
-                      '           default values exists in eventsim config file.\n  --delay DELAY         pause for '
-                      'given value in microseconds to generate\n                        sensor events. The default '
-                      'values exists in eventsim\n                        config file.\n  --label LABEL         '
-                      'generate sensor events for a given type/description\n  --locations LOCATIONS\n                 '
-                      '       generate sensor events at a given location. Provide\n                        regex for '
-                      'multiple locations.\n  --output OUTPUT       store data in a file\n  --seed SEED           '
-                      'seed to duplicate data\n  --timeout TIMEOUT     sensor sub-command execution timeout\n',
+                      '             [--locations LOCATIONS] [--output OUTPUT]\n                              [--seed '
+                      'SEED] [--template TEMPLATE]\n                              [--timeout TIMEOUT] [--timezone '
+                      'TIMEZONE]\n                              [--type {energy,fabric-perf,power,temperature,'
+                      'voltage}]\n\noptional arguments:\n  -h, --help            show this help message and exit\n  '
+                      '--burst               generate sensor events without delay. Default is\n                       '
+                      ' constant mode with delay\n  --count COUNT         given number of sensor events are '
+                      'generated. The\n                        default values exists in eventsim config file\n  '
+                      '--delay DELAY         pause for given value in microseconds to generate\n                      '
+                      '  sensor events. The default values exists in eventsim\n                        config file\n  '
+                      '--locations LOCATIONS\n                        generate sensor events at a given location. '
+                      'Provide\n                        regex for multiple locations\n  --output OUTPUT       save '
+                      'data to a file\n  --seed SEED           seed to duplicate data\n  --template TEMPLATE   sample '
+                      'template to generate sensor events\n  --timeout TIMEOUT     sensor sub-command execution '
+                      'timeout\n  --timezone TIMEZONE   generate sensor events for given timezone. The default\n      '
+                      '                  values exists in config file\n  --type {energy,fabric-perf,power,'
+                      'temperature,voltage}\n                        provide type of the sensor event to generate '
+                      'events\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -181,7 +190,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'ras']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -199,7 +208,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'ras']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -217,7 +226,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'sensor']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -235,7 +244,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'sensor']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -253,7 +262,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'job']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -271,7 +280,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'job']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -289,7 +298,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'boot']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -307,7 +316,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'boot']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -325,7 +334,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'scenario', '/tmp/scenario.json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -343,7 +352,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'scenario', '/tmp/scenario.json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.post') as patched_get:
                 type(patched_get.return_value).text = \
@@ -361,7 +370,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         sys.argv = ['eventsim', 'events', 'get-seed']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
@@ -379,7 +388,7 @@ class EventsCliTest(TestCase):
         captured_output = io.StringIO()
         sys.stderr = captured_output
         sys.argv = ['eventsim', 'events', 'get-seed']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
@@ -392,63 +401,3 @@ class EventsCliTest(TestCase):
         self.assertIn('Error:unable to get seed data\n', captured_output.getvalue())
         captured_output.close()
 
-    def test_fabric_events_help(self):
-        parser = Parser()
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        sys.argv = ['eventsim', 'events', 'fabric', '-h']
-        with self.assertRaises(SystemExit):
-            parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events fabric [-h] [--burst] [--count COUNT] [--delay DELAY]\n                 '
-                      '             [--locations LOCATIONS] [--output OUTPUT]\n                              [--seed '
-                      'SEED] [--template TEMPLATE]\n                              [--timeout TIMEOUT] [--type {'
-                      'fabric-perf}]\n\noptional arguments:\n  -h, --help            show this help message and '
-                      'exit\n  --burst               generate fabric events without delay. Default is\n               '
-                      '         constant mode with delay\n  --count COUNT         given number of fabric events are '
-                      'generated. The\n                        default values exists in eventsim config file\n  '
-                      '--delay DELAY         pause for given value in microseconds to generate\n                      '
-                      '  fabric events. The default values exists in eventsim\n                        config file\n  '
-                      '--locations LOCATIONS\n                        generate fabric events at a given location. '
-                      'Provide\n                        regex for multiple locations\n  --output OUTPUT       save '
-                      'data to a file\n  --seed SEED           seed to duplicate data\n  --template TEMPLATE   sample '
-                      'template to generate fabric events\n  --timeout TIMEOUT     fabric sub-command execution '
-                      'timeout\n  --type {fabric-perf}  provide type of the fabric event to generate events\n',
-            captured_output.getvalue())
-        captured_output.close()
-
-    def test_fabric_positive(self):
-        parser = Parser()
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        sys.argv = ['eventsim', 'events', 'fabric']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.post') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "Success"
-                                })
-                type(patched_get.return_value).status_code = 200
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('0 - Success', captured_output.getvalue())
-        captured_output.close()
-
-    def test_fabric_negative(self):
-        parser = Parser()
-        captured_output = io.StringIO()
-        sys.stderr = captured_output
-        sys.argv = ['eventsim', 'events', 'fabric']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.post') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "E",
-                                "Result": "Error:unable to create fabric events"
-                                })
-                type(patched_get.return_value).status_code = 200
-                parser.execute_cli_cmd()
-        sys.stderr = sys.__stderr__
-        self.assertIn('Error:unable to create fabric events\n', captured_output.getvalue())
-        captured_output.close()

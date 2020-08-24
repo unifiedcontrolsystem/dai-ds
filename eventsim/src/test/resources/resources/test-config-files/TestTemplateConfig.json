@@ -1,0 +1,225 @@
+{
+  "event": {
+    "ras" : {
+      "default" : "old-ras",
+      "types" :[
+        "fabric-crit", "fabric-perf", "old-ras"
+      ]
+    },
+
+    "sensor" : {
+      "default" : "energy",
+      "types" :[
+        "energy", "fabric-perf", "power", "temperature", "voltage"
+      ]
+    }
+  } ,
+  "event-types": {
+    "energy": {
+      "template": "/resources/templates/telemetry-energy.json" ,
+      "stream-type": "energy" ,
+      "single-template": {
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-02": ".*" ,
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-03": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 1
+      },
+      "path-count" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : 2,
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 2
+      },
+      "update-fields": {
+        "level0/level1[*]/level2[*]/level3/level4[*]": {
+          "level4-03": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "level4-05": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : "level0/level1[*]",
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-01"
+    },
+
+    "fabric-perf": {
+      "template": "/resources/templates/fabric-perf-telemetry.json" ,
+      "stream-type": "fabric" ,
+      "single-template": {
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-04": ".*" ,
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-06": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 1
+      },
+      "path-count" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : 2,
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 2
+      },
+      "update-fields": {
+        "level0/level1[*]/level2[*]/level3/level4[*]": {
+          "level4-02": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "level4-07": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : "level0/level1[*]",
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-01"
+    },
+
+    "old-ras": {
+      "template": "/resources/templates/old-ras.json" ,
+      "stream-type": "events" ,
+      "single-template": {
+        "level0[*]/level0-1": ".*" ,
+        "level0[*]/level0-2": ".*"
+      },
+      "single-template-count": {
+        "level0[*]":1
+      },
+      "path-count" : {
+        "level0[*]" : 1
+      },
+      "update-fields": {
+        "level0[*]": {
+          "level0-1": {
+            "metadata": "/resources/metadata/ForeignEventMetaDataArray.json" ,
+            "metadata-filter": ".*"
+          } ,
+          "level0-2": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0[*]" : "new"
+      },
+      "timestamp" : "level0[?]/level0-7"
+    },
+
+    "power": {
+      "template": "/resources/templates/telemetry-power.json" ,
+      "stream-type": "power" ,
+      "single-template": {
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 1
+      },
+      "path-count" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : 1,
+        "level0/level1[*]/level2[*]" : 2,
+        "level0/level1[*]" : 2
+      },
+      "update-fields": {
+        "level0/level1[*]/level2[*]/level3/level4[*]": {
+          "level4-2": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "level4-3": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : "level0/level1[*]/level2[*]",
+        "level0/level1[*]/level2[*]" : "level0/level1[*]",
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-1"
+    },
+
+    "temperature": {
+      "template": "/resources/templates/telemetry-temperature.json" ,
+      "stream-type": "temperature" ,
+      "single-template": {
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 1
+      },
+      "path-count" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : 25,
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 11
+      },
+      "update-fields": {
+        "level0/level1[*]/level2[*]/level3/level4[*]": {
+          "level4-2": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "level4-3": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : "level0/level1[*]",
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-1"
+    },
+
+    "voltage": {
+      "template": "/resources/templates/telemetry-voltage.json" ,
+      "stream-type": "temperature" ,
+      "single-template": {
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
+        "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 1
+      },
+      "path-count" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : 28,
+        "level0/level1[*]/level2[*]" : 1,
+        "level0/level1[*]" : 4
+      },
+      "update-fields": {
+        "level0/level1[*]/level2[*]/level3/level4[*]": {
+          "level4-2": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "level4-3": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]/level2[*]/level3/level4[*]" : "level0/level1[*]",
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-1"
+    }
+  }
+}

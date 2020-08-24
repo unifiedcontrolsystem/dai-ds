@@ -13,7 +13,8 @@
     "count": 10,
     "seed": "1234",
     "events-template-config" : "/opt/ucs/etc/EventsTemplate.json",
-    "time-delay-mus": 1
+    "time-delay-mus": 1,
+    "timezone": "GMT"
   },
   "network-config" : {
       "network" : "sse",
@@ -21,46 +22,46 @@
           "server-address": "sms01-nmn.local" ,
           "server-port": "8080" ,
           "urls": {
-            "/v1/stream/cray-dmtf-resource-event": [
+            "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event": [
               "events"
             ] ,
-            "/v1/stream/cray-node": [
+            "/apis/sma-telemetry/v1/stream/cray-node": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-logs-clusterstor": [
+            "/apis/sma-telemetry/v1/stream/cray-logs-clusterstor": [
               "logs"
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-fabric-telemetry": [
               "fabric"
             ],
-            "/v1/stream/cray-telemetry-fan": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-fan": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-job-events": [
+            "/apis/sma-telemetry/v1/stream/cray-job-events": [
               "job"
             ] ,
-            "/v1/stream/cray-hmsstatechange-notifications": [
+            "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": [
               "hmsstatechange"
             ] ,
-            "/v1/stream/cray-logs-containers": [
+            "/apis/sma-telemetry/v1/stream/cray-logs-containers": [
               "logs"
             ] ,
-            "/v1/stream/cray-hmsheartbeat-notifications": [
+            "/apis/sma-telemetry/v1/stream/cray-hmsheartbeat-notifications": [
               "hmsheartbeat"
             ] ,
-            "/v1/stream/cray-job": [
+            "/apis/sma-telemetry/v1/stream/cray-job": [
               "job"
             ] ,
-            "/v1/stream/cray-telemetry-voltage": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-telemetry-pressure": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-pressure": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-telemetry-power": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-power": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-telemetry-energy": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-energy": [
               "telemetry"
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry": [
@@ -69,16 +70,16 @@
             "/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
               "fabric"
             ] ,
-            "/v1/stream/cray-telemetry-temperature": [
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": [
               "telemetry"
             ] ,
-            "/v1/stream/cray-lustre": [
+            "/apis/sma-telemetry/v1/stream/cray-lustre": [
               "lustre"
             ] ,
-            "/v1/stream/cray-logs-syslog": [
+            "/apis/sma-telemetry/v1/stream/cray-logs-syslog": [
               "logs"
             ] ,
-            "/streams/nodeBootEvents": [
+            "/apis/sma-telemetry/streams/nodeBootEvents": [
               "stateChanges"
             ]
           }

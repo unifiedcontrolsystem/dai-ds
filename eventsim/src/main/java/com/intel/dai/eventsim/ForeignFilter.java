@@ -5,8 +5,8 @@ import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
-import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyDocument;
+import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.FileNotFoundException;
@@ -140,9 +140,10 @@ class ForeignFilter {
             for(Map.Entry<String, Object> field : fieldsMetadataInfo.entrySet()) {
                 String fieldName = field.getKey();
                 PropertyMap metadataInfo = (PropertyMap) field.getValue();
+                DataValidation.validateKeys(metadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
 
-                String metadataFile = metadataInfo.getString("metadata");
-                Object metadataFilter = metadataInfo.get("metadata-filter");
+                String metadataFile = metadataInfo.getString(METADATA_KEYS[0]);
+                Object metadataFilter = metadataInfo.get(METADATA_KEYS[1]);
                 PropertyArray metadata = filterDataWithValue(metadataFile, metadataFilter);
 
                 pathAndValue.put(fieldName, metadata);
@@ -203,8 +204,11 @@ class ForeignFilter {
         }
     }
 
+    private PropertyArray filteredLocations_ = new PropertyArray();
+
     private final JsonPath jsonPath_;
     private final Logger log_;
     private final ForeignDataGenerator generator_;
-    private PropertyArray filteredLocations_ = new PropertyArray();
+    private final String[] METADATA_KEYS = {"metadata", "metadata-filter"};
+    private final String MISSING_METADATA_KEYS = "All event types configuration file is missing required key, key = ";
 }

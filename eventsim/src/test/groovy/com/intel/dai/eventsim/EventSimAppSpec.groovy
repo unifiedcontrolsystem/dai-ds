@@ -46,19 +46,26 @@ class EventSimAppSpec extends Specification {
         !eventSimApp_.serverStatus()
     }
 
+    def "generate ras events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.foreignSimulatorEngine_.generateRasEvents(parameters) >> {}
+
+        expect:
+        eventSimApp_.generateRasEvents(parameters).contains("Success")
+    }
+
     def "generate sensor events"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("locations", "test")
         parameters.put("count", "1")
 
-        eventSimApp_.eventSimEngine_.publishSensorEvents("test", ".*" , "false", null, null, "1", null) >> {}
-        eventSimApp_.eventSimEngine_.publishSensorEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
-                {throw new SimulatorException("test exception")}
+        eventSimApp_.foreignSimulatorEngine_.generateSensorEvents(parameters) >> {}
 
         expect:
         eventSimApp_.generateSensorEvents(parameters).contains("Success")
-        parameters.put("locations", "UNKNOWN")
-        eventSimApp_.generateSensorEvents(parameters).contains("test exception")
     }
 
     def "generate job events"() {

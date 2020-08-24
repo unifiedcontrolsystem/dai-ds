@@ -5,6 +5,7 @@ import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -61,7 +62,7 @@ class EventTemplateConfig {
      */
     void loadTemplateData() throws SimulatorException {
         try {
-            templateConfig_ = LoadFileLocation.fromFileLocation(templateConfigFile_).getAsMap();
+            templateConfig_ = loadDataFromFile(templateConfigFile_);
             DataValidation.validateKeys(templateConfig_, TEMPLATE_CONFIG, MISSING_TEMP_CONFIG);
             events_ = templateConfig_.getMap(TEMPLATE_CONFIG[0]);
             eventTypesConfig_ = templateConfig_.getMap(TEMPLATE_CONFIG[1]);
@@ -69,6 +70,21 @@ class EventTemplateConfig {
             throw new SimulatorException(e.getMessage());
         }
         log_.info("events-template configurations data is loaded successfully");
+    }
+
+    /**
+     * This method is used to load data from file location or resources
+     * @param metadataFile file path
+     * @return data in file
+     * @throws IOException unable to read/load data
+     * @throws ConfigIOParseException unable to reda/load data
+     */
+    private PropertyMap loadDataFromFile(final String metadataFile) throws IOException, ConfigIOParseException {
+        try {
+            return LoadFileLocation.fromFileLocation(metadataFile).getAsMap();
+        } catch (FileNotFoundException e) {
+            return LoadFileLocation.fromResources(metadataFile).getAsMap();
+        }
     }
 
 /*    void setEventName(String eventName) { eventName_ = eventName; }

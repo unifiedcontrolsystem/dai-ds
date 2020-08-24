@@ -3,16 +3,23 @@
     "ras" : {
       "default" : "old-ras",
       "types" :[
-        "fabric-crit", "fabric-perf", "old-ras"
+        "fabric-crit", "old-ras"
+      ]
+    },
+
+    "sensor" : {
+      "default" : "energy",
+      "types" :[
+        "energy", "fabric-perf", "power", "temperature", "voltage"
       ]
     }
   } ,
   "event-types": {
-    "fabric-perf": {
-      "template": "/resources/templates/telemetry-voltage.json" ,
-      "stream-type": "fabric" ,
+    "energy": {
+      "template": "/resources/templates/telemetry-energy.json" ,
+      "stream-type": "energy" ,
       "single-template": {
-        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
       },
       "single-template-count": {
@@ -20,16 +27,12 @@
         "metrics/messages[*]" : 1
       },
       "path-count" : {
-        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 3,
-        "metrics/messages[*]/Events[*]" : 2,
-        "metrics/messages[*]" : 3
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 4,
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 5
       },
       "update-fields": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[*]": {
-          "DeviceSpecificContext": {
-            "metadata": "/resources/metadata/ForeignEventMetaDataArray.json" ,
-            "metadata-filter": ".*"
-          } ,
           "Location": {
             "metadata": "DB-Locations" ,
             "metadata-filter": ".*"
@@ -41,12 +44,47 @@
         }
       },
       "generate-data-and-overflow-path" : {
-        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]/Events[*]",
-        "metrics/messages[*]/Events[*]" : "metrics/messages[*]",
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]",
         "metrics/messages[*]" : "new"
       },
       "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
     },
+
+    "fabric-perf": {
+      "template": "/resources/templates/fabric-perf-telemetry.json" ,
+      "stream-type": "fabric" ,
+      "single-template": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 1
+      },
+      "path-count" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 96,
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 16
+      },
+      "update-fields": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]": {
+          "Location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "Value": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]",
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
+    },
+
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
       "stream-type": "events" ,
@@ -76,6 +114,112 @@
         "message[*]" : "new"
       },
       "timestamp" : "message[?]/timestamp"
+    },
+
+    "power": {
+      "template": "/resources/templates/telemetry-power.json" ,
+      "stream-type": "power" ,
+      "single-template": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 1
+      },
+      "path-count" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 1,
+        "metrics/messages[*]/Events[*]" : 2,
+        "metrics/messages[*]" : 11
+      },
+      "update-fields": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]": {
+          "Location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "Value": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]/Events[*]",
+        "metrics/messages[*]/Events[*]" : "metrics/messages[*]",
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
+    },
+
+    "temperature": {
+      "template": "/resources/templates/telemetry-temperature.json" ,
+      "stream-type": "temperature" ,
+      "single-template": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 1
+      },
+      "path-count" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 25,
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 11
+      },
+      "update-fields": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]": {
+          "Location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "Value": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]",
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
+    },
+
+    "voltage": {
+      "template": "/resources/templates/telemetry-voltage.json" ,
+      "stream-type": "temperature" ,
+      "single-template": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
+        "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 1
+      },
+      "path-count" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : 28,
+        "metrics/messages[*]/Events[*]" : 1,
+        "metrics/messages[*]" : 4
+      },
+      "update-fields": {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]": {
+          "Location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          } ,
+          "Value": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]/Events[*]/Oem/Sensors[*]" : "metrics/messages[*]",
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
     }
   }
 }

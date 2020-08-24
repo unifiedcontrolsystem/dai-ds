@@ -9,9 +9,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-fan",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-fan",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "fanMetrics"
@@ -23,9 +23,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-voltage",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "voltageMetrics"
@@ -37,9 +37,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-pressure",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-pressure",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "pressureMetrics"
@@ -51,9 +51,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-power",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-power",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "powerMetrics"
@@ -65,9 +65,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-energy",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-energy",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "energyMetrics"
@@ -79,9 +79,9 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-telemetry-temperature",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
+        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",
         "requestBuilderSelectors": {
           "stream_id": "temperatureMetrics"
@@ -93,7 +93,7 @@
       "arguments": {
         "connectPort": 5678,
         "connectAddress": "10.30.126.57",
-        "urlPath": "/v1/stream/cray-dmtf-resource-event",
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event",
         "connectTimeout": "30",
         "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
         "requestType": "GET",

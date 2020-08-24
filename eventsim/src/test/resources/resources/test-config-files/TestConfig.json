@@ -1,0 +1,92 @@
+{
+  "api-simulator-config" : {
+    "boot-parameters" : "/opt/ucs/etc/BootParameters.json",
+    "hw-inventory" : "/opt/ucs/etc/HWInventory.json",
+    "hw-inventory-path" : "/opt/ucs/etc",
+    "hw-inventory-query-path" : "/opt/ucs/etc/HwInvQuery_",
+    "hw-inv-discover-status-url" : "/Inventory/DiscoveryStatus",
+    "sensor-metadata": "/resources/ForeignSensorMetaData.json",
+    "ras-metadata": "/resources/ForeignEventMetaData.json",
+    "jobs-metadata" : "/resources/ForeignJobsMetaData.json"
+  },
+  "events-simulator-config" : {
+    "count": 10,
+    "seed": "1234",
+    "events-template-config" : "/resources/test-config-files/TestTemplateConfig.json",
+    "time-delay-mus": 1,
+    "timezone": "GMT"
+  },
+  "network-config" : {
+    "network" : "sse",
+    "sse": {
+      "server-address": "localhost" ,
+      "server-port": "78965" ,
+      "urls": {
+        "/test1/test1/test1": [
+          "events"
+        ] ,
+        "/test1/test1/test1-node": [
+          "telemetry"
+        ] ,
+        "/v1/test1/test1-logs-clusterstor": [
+          "logs"
+        ] ,
+        "/test1/sma-telemetry/test1/test1/test1-fabric-telemetry": [
+          "fabric"
+        ],
+        "/v1/test1/test1-telemetry-fan": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-job-events": [
+          "job"
+        ] ,
+        "/test1/test2/test1-notifications": [
+          "hmsstatechange"
+        ] ,
+        "/test1/test1/test1-logs-containers": [
+          "logs"
+        ] ,
+        "/test1/test1/test1-hmsheartbeat-notifications": [
+          "hmsheartbeat"
+        ] ,
+        "/test1/test1/test1-job": [
+          "job"
+        ] ,
+        "/test1/test1/test1-telemetry-voltage": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-telemetry-pressure": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-telemetry-power": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-telemetry-energy": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-crit-telemetry": [
+          "fabric"
+        ] ,
+        "/test1/test1/test1-perf-telemetry": [
+          "fabric"
+        ] ,
+        "/test1/test1/test1-telemetry-temperature": [
+          "telemetry"
+        ] ,
+        "/test1/test1/test1-lustre": [
+          "lustre"
+        ] ,
+        "/test1/test1/test1-logs-syslog": [
+          "logs"
+        ] ,
+        "/test1/test1": [
+          "stateChanges"
+        ]
+      }
+    } ,
+    "rabbitmq": {
+      "exchangeName": "simulator",
+      "uri": "amqp://127.0.0.1"
+    }
+  }
+}

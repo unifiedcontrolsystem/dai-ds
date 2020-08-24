@@ -1,14 +1,24 @@
 {
-  "message" : [
+  "level0" : [
     {
-      "src":"x0c0s36b0n0",
-      "payload":"Cause:ec_dump_cabinet_data",
-      "pri":"0x0",
-      "seqnum":"0x7220",
-      "event-type":"ec_dump_cabinet_data",
-      "location":"x0c0s36b0n0",
-      "timestamp":"2020-06-05T23:40:10Z",
-      "message":"src::::x0c0s36b0n0|pri:0x0|seqnum:0x7220::x0c0s36b0n0|Cause:ec_dump_cabinet_data",
+      "level0-1":"test",
+      "level0-2":"Cause:test",
+      "level0-3":"0x0",
+      "level0-4":"0x7220",
+      "level0-5":"test",
+      "level0-6":"test",
+      "level0-7":"2020-06-05T23:40:10Z",
+      "level0-8":"test"
+    },
+    {
+      "level0-1":"test",
+      "level0-2":"Cause:test",
+      "level0-3":"0x0",
+      "level0-4":"0x7220",
+      "level0-5":"test",
+      "level0-6":"test",
+      "level0-7":"2020-06-05T23:40:10Z",
+      "level0-8":"test"
     }
   ]
 }
