@@ -6,7 +6,7 @@ pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_CHECK', defaultValue: false,
-        description: 'Performing quick checks only')
+                description: 'Performing quick checks only')
         choice(name: 'AGENT', choices: [
                 'NRE-TEST',
                 'cmcheung-centos-7-test',
@@ -28,6 +28,7 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script { utilities.FixFilesPermission() }
+                        CleanUpMachine()
                     }
                 }
                 stage('Quick Unit Test') {
@@ -52,7 +53,7 @@ pipeline {
                         script {
                             RestartHWInvDb()
                             utilities.InvokeGradle(":dai_core:integrationTest")
-                            utilities.InvokeGradle("makeAllArtifacts")
+//                            utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }
                 }
@@ -63,6 +64,16 @@ pipeline {
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
+                    }
+                }
+                stage('Quick Archive') {
+                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    steps {
+                        sh 'rm -f *.zip'
+                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+//                        archiveArtifacts 'build/distributions/**, build/reports/**'
+                        archiveArtifacts 'build/reports/**'
                     }
                 }
                 stage('Full Unit Test') {
@@ -77,20 +88,17 @@ pipeline {
                         }
                     }
                 }
-                stage('Full Component Test') {
-                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
-                            buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
-                    steps {
-                        script {
-                            def scriptDir = 'inventory_api/src/integration/resources/scripts/'
-                            StopHWInvDb()
-                            utilities.InvokeGradle(":procedures:jar")
-                            StartHWInvDb(scriptDir)
-                            utilities.InvokeGradle("integrationTest")
-                        }
-                    }
-                }
+//                stage('Full Component Test') {
+//                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
+//                            buildResult: 'UNSTABLE') }
+//                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+//                    steps {
+//                        script {
+//                            RestartHWInvDb()
+//                            utilities.InvokeGradle("integrationTest")
+//                        }
+//                    }
+//                }
                 stage('Full Report') {
                     options{ catchError(message: "Full Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
@@ -100,15 +108,17 @@ pipeline {
                         junit '**/test-results/**/*.xml'
                     }
                 }
-                stage('Archive') {
+                stage('Full Archive') {
+                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
                     steps {
+                        CopyCleanUpMachineScript()
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: 'inventory_api/src/test/resources/data', glob: '', zipFile: 'hwInvData.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-                        archiveArtifacts 'build/distributions/**, build/reports/**'
+                        archiveArtifacts 'build/reports/**, build/distributions/**, build/distribution/clean_up_machine.sh'
                     }
                 }
             }
@@ -123,9 +133,9 @@ def RestartHWInvDb() {
 
 // This is one way to setup for component level tests.  You can also use docker-compose or partially
 // starts DAI
+// Currently, our docker image has some dependencies that are fulfilled after DAI is installed.  So,
+// we cannot use this easily for component tests.
 def StartHWInvDb() {
-    utilities.InvokeGradle(":procedures:jar")
-
     def scriptDir = 'inventory_api/src/integration/resources/scripts/'
     sh "${scriptDir}init-voltdb.sh"
     sh "${scriptDir}start-voltdb.sh"
@@ -140,4 +150,14 @@ def StartHWInvDb() {
 // containers need to be shutdown.
 def StopHWInvDb() {
     sh 'voltadmin shutdown --force || true'
+}
+
+def CleanUpMachine() {
+    CopyCleanUpMachineScript()
+    sh './build/distributions/clean_up_machine.sh'
+}
+
+def CopyCleanUpMachineScript() {
+    sh 'mkdir -p build/distributions'
+    sh 'cp ./inventory_api/src/integration/resources/scripts/clean_up_machine.sh ./build/distributions'
 }

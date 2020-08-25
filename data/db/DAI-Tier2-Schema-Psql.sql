@@ -968,7 +968,7 @@ CREATE TABLE public.tier2_nodeinventory_history (
    Lctn                    VarChar(25)       NOT NULL,
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,
    InventoryTimestamp      TIMESTAMP         NOT NULL,
-   InventoryInfo           VarChar(16384),
+   InventoryInfo           jsonb,
    Sernum                  VarChar(50),
    Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,
    EntryNumber             BigInt            NOT NULL,
@@ -1725,22 +1725,24 @@ $$;
 -- Name: getinventoryinfoforlctn(tcharacter varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
-    LANGUAGE sql
-    AS $$
-        select HI.id,
-        HI.dbupdatedtimestamp,
-        HI.ordinal,
-        HI.fruid,
-        HI.type,
-        HF.frutype,
-        HF.frusubtype
-        from tier2_hwinventorylocation HI
-        inner join tier2_hwinventoryfru HF on
-        HI.fruid = HF.fruid
-        where
-            HI.id like concat(p_lctn, '%')
-        order by HI.DbUpdatedTimestamp, HI.id desc LIMIT p_limit;
+CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer)
+ RETURNS TABLE(lctn character varying
+              , dbupdatedtimestamp timestamp without time zone
+              , inventorytimestamp timestamp without time zone
+              , inventoryinfo character varying
+              , sernum character varying
+     )
+LANGUAGE sql
+AS $$
+select HI.Lctn
+    , HI.dbupdatedtimestamp
+    , HI.InventoryTimestamp
+    , InventoryInfo::varchar
+--     , cast(InventoryInfo as varchar)
+    , HI.Sernum
+from tier2_nodeinventory_history HI
+where HI.Lctn = p_lctn
+order by HI.InventoryTimestamp, HI.Lctn desc LIMIT p_limit;
 $$;
 
 

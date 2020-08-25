@@ -378,7 +378,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
                 String location = vt.getString("ID");
                 String actionOnNode = vt.getString("Action");  // Added or Removed
 
-                if (!isNode(location)) {
+                if (!isNodeLocation(location)) {
                     continue;
                 }
                 ingestCookedNode(foreignTimestamp, actionOnNode, location);
@@ -394,7 +394,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    private boolean isNode(String location) {
+    private boolean isNodeLocation(String location) {
         return StringUtils.countMatches(location, "-") == 2
                 && StringUtils.countMatches(location, "-CN") == 1;  // can handle null location string
     }
@@ -427,6 +427,20 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             throw new DataStoreException(e.getMessage());
         } catch (NullPointerException e) {
             logger.error("Null Pointer Exception");
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
+    public long numberCookedNodeInventoryHistoryRows()
+            throws IOException, DataStoreException {
+        try {
+            return client.callProcedure("NodeHistoryRowCount").
+                    getResults()[0].asScalarLong();
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException during NodeHistoryRowCount");
+            throw new DataStoreException(e.getMessage());
+        } catch (NullPointerException e) {
+            logger.error("Null client");
             throw new DataStoreException(e.getMessage());
         }
     }
