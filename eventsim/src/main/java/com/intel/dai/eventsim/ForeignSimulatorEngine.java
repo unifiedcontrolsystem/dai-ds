@@ -2,6 +2,8 @@ package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyArray;
@@ -24,10 +26,7 @@ import java.util.Map;
  */
 class ForeignSimulatorEngine {
 
-    private static final String DEFAULT_COUNT = "0";
-    private final EventTypeTemplate eventTypeTemplate_;
-
-    ForeignSimulatorEngine(DataLoader dataLoaderEngine, NetworkObject source, Logger log) throws SimulatorException {
+    ForeignSimulatorEngine(DataLoader dataLoaderEngine, NetworkObject source, Logger log) {
         dataLoaderEngine_ = dataLoaderEngine;
         source_ = source;
         log_ = log;
@@ -42,12 +41,43 @@ class ForeignSimulatorEngine {
         systemHierarchy();
     }
 
+    void generateBootEvents(Map<String, String> parameters) throws SimulatorException {
+        PropertyArray output = new PropertyArray();
+        try {
+            parameters.put("count", "1");
+            String state = parameters.getOrDefault("type", BOOT_STATES.all.toString());
+            if(BOOT_STATES.valueOf(state).equals(BOOT_STATES.all)) {
+                parameters.put("type", BOOT_STATES.off.toString());
+                output.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+                parameters.put("type", BOOT_STATES.on.toString());
+                output.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+                parameters.put("type", BOOT_STATES.ready.toString());
+                output.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+            }
+            else
+                output.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+            publishEvents(output, streamName_, burst_, timeDelay_, jpathToTimestamp_, output_, zone_);
+        } catch (Exception e) {
+            throw new SimulatorException(e.getMessage());
+        }
+    }
+
     void generateRasEvents(Map<String, String> parameters) throws SimulatorException {
-       generateEvents(parameters, EVENT_TYPE.RAS.toString().toLowerCase());
+        try {
+            PropertyDocument events = generateEvents(parameters, EVENT_TYPE.RAS.toString().toLowerCase());
+            publishEvents(events, streamName_, burst_, timeDelay_, jpathToTimestamp_, output_, zone_);
+        } catch (Exception e) {
+            throw new SimulatorException(e.getMessage());
+        }
     }
 
     void generateSensorEvents(Map<String, String> parameters) throws SimulatorException {
-        generateEvents(parameters, EVENT_TYPE.SENSOR.toString().toLowerCase());
+        try {
+            PropertyDocument events = generateEvents(parameters, EVENT_TYPE.SENSOR.toString().toLowerCase());
+            publishEvents(events, streamName_, burst_, timeDelay_, jpathToTimestamp_, output_, zone_);
+        } catch (Exception e) {
+            throw new SimulatorException(e.getMessage());
+        }
     }
 
     private void publishEvents(PropertyDocument events, String streamId, boolean burstMode, long timeDelayMus,
@@ -78,37 +108,32 @@ class ForeignSimulatorEngine {
         }
     }
 
-    private void generateEvents(Map<String, String> parameters, String type) throws SimulatorException {
-        try {
-            DataValidation.validateData(parameters, MISSING_KEY);
+    private PropertyDocument generateEvents(Map<String, String> parameters, String type) throws SimulatorException, PropertyNotExpectedType, IOException, ConfigIOParseException, ConversionException {
+        DataValidation.validateData(parameters, MISSING_KEY);
 
-            String locationsRegex = parameters.getOrDefault("locations", ".*");
-            filter_.validateLocations(dataLoaderEngine_.getNodeLocations(), locationsRegex);
+        String locationsRegex = parameters.getOrDefault("locations", ".*");
+        filter_.validateLocations(dataLoaderEngine_.getNodeLocations(), locationsRegex);
 
-            loadDefaults(parameters);
+        loadDefaults(parameters);
 
-            String eventName = defaults.getOrDefault("sub_component", type);
-            String eventType = defaults.getOrDefault("type", eventTypeTemplate_.getDefaultEventType(eventName));
-            long numOfEventsToGenerate = Long.parseLong(defaults.getOrDefault("count", DEFAULT_COUNT));
-            long timeDelay = Long.parseLong(defaults.get("time-delay-mus"));
-            long seed = Long.parseLong(defaults.get("seed"));
-            boolean burst = Boolean.parseBoolean(defaults.get("burst"));
-            String output = defaults.get("output");
-            String eventTypeTemplateFile = defaults.get("template");
+        String eventName = defaults.getOrDefault("sub_component", type);
+        String eventType = defaults.getOrDefault("type", eventTypeTemplate_.getDefaultEventType(eventName));
+        long numOfEventsToGenerate = Long.parseLong(defaults.getOrDefault("count", DEFAULT_COUNT));
+        long seed = Long.parseLong(defaults.get("seed"));
+        String eventTypeTemplateFile = defaults.get("template");
 
-            eventTypeTemplate_.validateEventNameAndType(eventName, eventType);
-            eventTypeTemplate_.loadData(eventType);
-            eventTypeTemplate_.setEventTypeTemplateFile(eventTypeTemplateFile);
+        eventTypeTemplate_.validateEventNameAndType(eventName, eventType);
+        eventTypeTemplate_.loadData(eventType);
+        eventTypeTemplate_.setEventTypeTemplateFile(eventTypeTemplateFile);
 
-            String streamName = eventTypeTemplate_.getEventTypeStreamName();
-            String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
-            String zone = defaults.get("timezone");
+        timeDelay_ = Long.parseLong(defaults.get("time-delay-mus"));
+        burst_ = Boolean.parseBoolean(defaults.get("burst"));
+        output_ = defaults.get("output");
+        streamName_ = eventTypeTemplate_.getEventTypeStreamName();
+        jpathToTimestamp_ = eventTypeTemplate_.getPathToUpdateTimestamp();
+        zone_ = defaults.get("timezone");
 
-            PropertyDocument event = filter_.generateEvents(eventTypeTemplate_, numOfEventsToGenerate, seed);
-            publishEvents(event, streamName, burst, timeDelay, jpathToTimestamp, output, zone);
-        } catch (Exception e) {
-            throw new SimulatorException(e.getMessage());
-        }
+        return filter_.generateEvents(eventTypeTemplate_, numOfEventsToGenerate, seed);
     }
 
     private void loadDefaults(Map<String, String> parameters) {
@@ -153,13 +178,30 @@ class ForeignSimulatorEngine {
     private final NetworkObject source_;
     private final Logger log_;
     private final ConfigIO jsonParser_;
+    private final EventTypeTemplate eventTypeTemplate_;
 
-    protected long publishedEvents_;
+    private boolean burst_;
 
+    private long publishedEvents_;
+    private long timeDelay_;
+
+    private String output_;
+    private String streamName_;
+    private String jpathToTimestamp_;
+    private String zone_;
+
+    private static final String DEFAULT_COUNT = "0";
     private static final String MISSING_KEY = "Given key/data is null, key = ";
 
-    enum EVENT_TYPE {
+    private enum EVENT_TYPE {
         RAS,
-        SENSOR
+        SENSOR,
+        BOOT
+    }
+    private enum BOOT_STATES {
+        off,
+        on,
+        ready,
+        all
     }
 }

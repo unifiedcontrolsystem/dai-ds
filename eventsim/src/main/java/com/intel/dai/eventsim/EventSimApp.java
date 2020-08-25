@@ -26,7 +26,7 @@ public class EventSimApp  extends  EventSim {
     }
 
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
-        source_.register("/apis/events/boot/*", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
+        source_.register("/apis/events/boot", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
         source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generateRasEvents);
         source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
@@ -58,25 +58,9 @@ public class EventSimApp  extends  EventSim {
      */
     String generateBootEvents(Map<String, String> parameters) {
         try {
-            log_.info("Received boot api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            String burst = parameters.getOrDefault("burst", "false");
-            String delay = parameters.getOrDefault("delay", null);
-            String locations = parameters.getOrDefault("locations", ".*");
-            String output = parameters.getOrDefault("output", null);
-            String bfProbability = parameters.getOrDefault("probability", "0");
-            String seed = parameters.getOrDefault("seed", null);
-
-            String sub_cmd = parameters.get("sub_component");
-            switch (sub_cmd) {
-                case "off"   :   eventSimEngine_.publishBootOffEvents(locations, burst, delay, seed, output);
-                    break;
-                case "on"    :   eventSimEngine_.publishBootOnEvents(locations, bfProbability, burst, delay, seed, output);
-                    break;
-                case "ready" :   eventSimEngine_.publishBootReadyEvents(locations, burst, delay, seed, output);
-                    break;
-                default      :   eventSimEngine_.publishBootEvents(locations, bfProbability, burst, delay, seed, output);
-                    break;
-            }
+            log_.info("Received ras api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            removeEmptyValueParameters(parameters);
+            foreignSimulatorEngine_.generateBootEvents(parameters);
             return create_result_json("F", "Success");
         } catch (SimulatorException e) {
             return create_result_json("E", "Error: " + e.getMessage());

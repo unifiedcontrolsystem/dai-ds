@@ -12,6 +12,13 @@
       "types" :[
         "energy", "fabric-perf", "power", "temperature", "voltage"
       ]
+    },
+
+    "boot" : {
+      "default" : "boot-all",
+      "types" :[
+        "off", "on", "ready"
+      ]
     }
   } ,
   "event-types": {
@@ -83,6 +90,99 @@
         "level0/level1[*]" : "new"
       },
       "timestamp" : "level0/level1[?]/level2[?]/level3/level4[?]/level4-01"
+    },
+
+    "off": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "events" ,
+      "single-template": {
+        "level0/level1[?]/level1-2": ".*" ,
+        "level0/level1[?]/level1-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]":1
+      },
+      "path-count" : {
+        "level0/level1[*]" : 1
+      },
+      "update-fields": {
+        "level0/level1[*]": {
+          "level1-1[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "level1-3": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Off"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level1-4"
+    },
+
+    "on": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "events" ,
+      "single-template": {
+        "level0/level1[?]/level1-2": ".*" ,
+        "level0/level1[?]/level1-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]":1
+      },
+      "path-count" : {
+        "level0/level1[*]" : 1
+      },
+      "update-fields": {
+        "level0/level1[*]": {
+          "level1-1[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "level1-3": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "On"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level1-4"
+    },
+
+    "ready": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "events" ,
+      "single-template": {
+        "level0/level1[?]/level1-2": ".*" ,
+        "level0/level1[?]/level1-3": ".*"
+      },
+      "single-template-count": {
+        "level0/level1[*]":1
+      },
+      "path-count" : {
+        "level0/level1[*]" : 1
+      },
+      "update-fields": {
+        "level0/level1[*]": {
+          "level1-1[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "level1-3": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Ready"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "level0/level1[*]" : "new"
+      },
+      "timestamp" : "level0/level1[?]/level1-4"
     },
 
     "old-ras": {

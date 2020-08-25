@@ -46,6 +46,17 @@ class EventSimAppSpec extends Specification {
         !eventSimApp_.serverStatus()
     }
 
+    def "generate boot events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.foreignSimulatorEngine_.generateBootEvents(parameters) >> {}
+
+        expect:
+        eventSimApp_.generateBootEvents(parameters).contains("Success")
+    }
+
     def "generate ras events"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("locations", "test")
@@ -68,6 +79,24 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.generateSensorEvents(parameters).contains("Success")
     }
 
+    def "generate boot/ras/sensor events with exception"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("count", "1")
+
+        eventSimApp_.foreignSimulatorEngine_.generateBootEvents(parameters) >>
+                {throw new SimulatorException("test exception")}
+        eventSimApp_.foreignSimulatorEngine_.generateRasEvents(parameters) >>
+                {throw new SimulatorException("test exception")}
+        eventSimApp_.foreignSimulatorEngine_.generateSensorEvents(parameters) >>
+                {throw new SimulatorException("test exception")}
+
+        expect:
+        eventSimApp_.generateBootEvents(parameters).contains("test exception")
+        eventSimApp_.generateRasEvents(parameters).contains("test exception")
+        eventSimApp_.generateSensorEvents(parameters).contains("test exception")
+    }
+
     def "generate job events"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("locations", "test")
@@ -81,32 +110,6 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.generateJobEvents(parameters).contains("Success")
         parameters.put("locations", "UNKNOWN")
         eventSimApp_.generateJobEvents(parameters).contains("test exception")
-    }
-
-    def "generate boot events"() {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("locations", "test")
-        parameters.put("count", "1")
-        parameters.put("sub_component", "all")
-
-        eventSimApp_.eventSimEngine_.publishBootEvents("test", "0" , "false", null, null, null) >> {}
-        eventSimApp_.eventSimEngine_.publishBootEvents("UNKNOWN", "0" , "false", null, null, null) >>
-                { throw new SimulatorException("test exception")}
-        eventSimApp_.eventSimEngine_.publishBootOffEvents("test", "false", null, null, null) >> {}
-        eventSimApp_.eventSimEngine_.publishBootOnEvents("test", "0" , "false", null, null, null) >> {}
-        eventSimApp_.eventSimEngine_.publishBootReadyEvents("test","false", null, null, null) >> {}
-
-        expect:
-        eventSimApp_.generateBootEvents(parameters).contains("Success")
-        parameters.put("sub_component", "off")
-        eventSimApp_.generateBootEvents(parameters).contains("Success")
-        parameters.put("sub_component", "on")
-        eventSimApp_.generateBootEvents(parameters).contains("Success")
-        parameters.put("sub_component", "ready")
-        eventSimApp_.generateBootEvents(parameters).contains("Success")
-        parameters.put("sub_component", "all")
-        parameters.put("locations", "UNKNOWN")
-        eventSimApp_.generateBootEvents(parameters).contains("test exception")
     }
 
     def "fetch boot parameters details"() {

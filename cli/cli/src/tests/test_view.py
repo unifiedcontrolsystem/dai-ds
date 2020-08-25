@@ -944,12 +944,12 @@ class ViewTest(TestCase):
                                                          "\"heading\":\"id\"},{\"unit\":\"string\","
                                                          "\"data\":\"dbupdatedtimestamp\","
                                                          "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"ordinal\",\"heading\":\"ordinal\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
-                                                         "\"data\":\"type\", "
-                                                         "\"heading\":\"type\"},{\"unit\":\"string\","
-                                                         "\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                                         "\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"inventorytimestamp\","
+                                                         "\"heading\":\"inventorytimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"sernum\", "
+                                                         "\"heading\":\"sernum\"},{\"unit\":\"string\","
+                                                         "\"data\":\"inventoryinfo\",\"heading\":\"inventoryinfo\"},"
                                                          "{\"unit\":\"string\",\"data\":\"frusubtype\","
                                                          "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
                                                          "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
@@ -958,7 +958,7 @@ class ViewTest(TestCase):
                                 })
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('FRUSUBTYPE', captured_output.getvalue())
+        self.assertIn('INVENTORYINFO', captured_output.getvalue())
         captured_output.close()
 
     def test__view_inventory_info_execute_positive_json(self):
@@ -974,12 +974,12 @@ class ViewTest(TestCase):
                                                          "\"heading\":\"id\"},{\"unit\":\"string\","
                                                          "\"data\":\"dbupdatedtimestamp\","
                                                          "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"ordinal\",\"heading\":\"ordinal\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
-                                                         "\"data\":\"type\", "
-                                                         "\"heading\":\"type\"},{\"unit\":\"string\","
-                                                         "\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                                         "\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                                         "{\"unit\":\"string\",\"data\":\"inventorytimestamp\","
+                                                         "\"heading\":\"inventorytimestamp\"},{\"unit\":\"string\","
+                                                         "\"data\":\"sernum\", "
+                                                         "\"heading\":\"sernum\"},{\"unit\":\"string\","
+                                                         "\"data\":\"inventoryinfo\",\"heading\":\"inventoryinfo\"},"
                                                          "{\"unit\":\"string\",\"data\":\"frusubtype\","
                                                          "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
                                                          "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
@@ -988,7 +988,7 @@ class ViewTest(TestCase):
                                 })
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('frusubtype', captured_output.getvalue())
+        self.assertIn('inventoryinfo', captured_output.getvalue())
         captured_output.close()
 
     def test_is_bad_input(self):

@@ -44,9 +44,6 @@ class JsonPath {
     }
 
     private String[] getPathAndField(String jsonPath) {
-        boolean isSpecificRead = jsonPath.contains(SPECIFIC);
-        if(!isSpecificRead)
-            return new String[] {jsonPath};
         boolean isArraySpecificRead = jsonPath.contains(ARRAY_SPECIFIC);
         String[] searchPathAndField = isArraySpecificRead ? jsonPath.split(ARRAY_SPECIFIC_SEARCH) : jsonPath.split(SPECIFIC_SEARCH);
         for(int index=0; index < searchPathAndField.length - 1; index++)
@@ -62,12 +59,17 @@ class JsonPath {
             PropertyArray items = arrayData.getAsArray();
             PropertyArray copyItems = new PropertyArray(items);
             PropertyArray newItems = new PropertyArray();
-            for(long i = 0; i < count; i++) {
+            for(long i = 0; i < count && copyItems.size() > 0; i++) {
                 PropertyMap item = new PropertyMap(copyItems.getMap(generateRandomNumberBetween(0, copyItems.size())));
                 for(String field : newFieldValues.keySet()) {
-                    if(item.containsKey(field)) {
-                        PropertyArray values = newFieldValues.getArray(field);
+                    boolean isFieldArray = field.contains("[]");
+                    PropertyArray values = newFieldValues.getArray(field);
+                    if(item.containsKey(field) && !isFieldArray) {
                         item.put(field, values.get(generateRandomNumberBetween(0, values.size())));
+                    }
+                    else {
+                        field = field.replaceAll("\\[\\]", "");
+                        item.put(field, values);
                     }
                 }
                 newItems.add(item);
