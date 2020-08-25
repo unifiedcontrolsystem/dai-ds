@@ -1,9 +1,13 @@
 {
   "connectAddress": "api-gw-service-nmn.local",
-  "connectPort": 8080,
+  "connectPort": 443,
   "urlPath": "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry",
   "exchangeName": "ucs",
-  "publishServerUrl": "amqp://api-gw-service-nmn.local",
-  "use-ssl": false,
-  "tokenAuthProvider": null
+  "publishServerUrl": "amqp://am01-nmn.local",
+  "use-ssl": true,
+  "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+  "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+  "clientId": "admin-client",
+  "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+  "realm": "shasta"
 }
