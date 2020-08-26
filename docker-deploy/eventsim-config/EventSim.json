@@ -40,7 +40,7 @@
             "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": [
               "telemetry"
             ] ,
-            "/streams/nodeBootEvents": [
+            "/apis/smd/hsm/v1/Subscriptions/SCN": [
               "stateChanges"
             ]
           }
