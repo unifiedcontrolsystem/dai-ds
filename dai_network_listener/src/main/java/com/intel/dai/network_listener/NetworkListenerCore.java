@@ -237,7 +237,7 @@ public class NetworkListenerCore {
         streamLocations.put(urlPath, streamLocation);
         String json = parser_.toString(streamLocations);
         try {
-            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), json);
+            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), json, false);
         } catch(IOException e) {
             log_.exception(e);
             actions_.logFailedToUpdateWorkItemResults(json);

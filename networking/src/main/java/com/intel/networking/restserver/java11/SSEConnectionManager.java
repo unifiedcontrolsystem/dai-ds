@@ -131,7 +131,7 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
             if(id != null && !id.isBlank())
                 connection.exchange.getResponseBody().write(String.format("id:%s%n", id).
                             getBytes(StandardCharsets.UTF_8));
-            else
+            else if(FORCE_EVENT_ID)
                 connection.exchange.getResponseBody().write(String.format("id:%d%n", idCounter_.getAndIncrement()).
                         getBytes(StandardCharsets.UTF_8));
             for (String part : parts)
@@ -171,6 +171,9 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
     private AtomicBoolean stopKeepAliveThread_ = new AtomicBoolean(false);
     private Thread keepAliveThread_ = null;
     private AtomicLong idCounter_ = new AtomicLong(0L);
+
+    // Set to "true" to enable automatic event ID simulation, "false" to disable automatic event ID simulation.
+    private static final boolean FORCE_EVENT_ID = true;
 
     static class SSEConnection {
         SSEConnection(HttpExchange exchange, Collection<String> eventTypes) {
