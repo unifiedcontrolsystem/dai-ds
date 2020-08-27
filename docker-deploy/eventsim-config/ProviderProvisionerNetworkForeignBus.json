@@ -6,7 +6,7 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/smd/hsm/v1/Subscriptions/SCN?stream_id=dai-provisioner",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-provisioner",
         "connectTimeout": "30"
       },
       "name": "eventSource"

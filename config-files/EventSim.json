@@ -41,7 +41,7 @@
               "job"
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": [
-              "hmsstatechange"
+              "stateChanges"
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-logs-containers": [
               "logs"
@@ -78,9 +78,6 @@
             ] ,
             "/apis/sma-telemetry/v1/stream/cray-logs-syslog": [
               "logs"
-            ] ,
-            "/apis/sma-telemetry/streams/nodeBootEvents": [
-              "stateChanges"
             ]
           }
       } ,

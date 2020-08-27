@@ -6,18 +6,17 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "localhost",
-        "connectPort": 5678,
-        "bindAddress": "sms01-nmn",
-        "bindPort": 54321,
-        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
-        "subjects": "stateChange",
-        "requestBuilder": "com.intel.dai.provisioners.ForeignSubscriptionRequest",
-        "responseParser": "com.intel.dai.provisioners.ForeignSubscriptionResponseParser",
-        "subscriberName": "daiSubscriptionID",
-        "use-ssl": false
+        "connectAddress": "api-gw-service-nmn.local",
+        "connectPort": 8080,
+        "urlPath": "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications",
+        "connectTimeout": "30",
+        "requestBuilder": "com.intel.networking.sink.SSEStreamRequestBuilder",
+        "requestType": "GET",
+        "requestBuilderSelectors": {
+          "stream_id": "dai-provisioner"
+        }
       },
-      "name": "http_callback"
+      "name": "sse"
     }
   },
 

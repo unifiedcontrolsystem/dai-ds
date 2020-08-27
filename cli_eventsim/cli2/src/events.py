@@ -120,7 +120,10 @@ class EventsCli(object):
         boot_events_parser.add_argument('--probability', default=0,
             help='generate boot events with probability failure. Default no failure.')
         boot_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
+        boot_events_parser.add_argument('--template', help='sample template to generate boot events')
         boot_events_parser.add_argument('--timeout', type=int, help='boot sub-command execution timeout')
+        boot_events_parser.add_argument('--timezone', type=int,
+            help='generate boot events for given timezone. The default values exists in config file')
         boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
             help='generate given type of boot events. Default generates all [on/off/ready] types of boot events.')
         boot_events_parser.set_defaults(func=self._generate_boot_events_execute)
@@ -227,9 +230,9 @@ class EventsCli(object):
     def _generate_boot_events_execute(self, args):
         client = HttpClient()
         # URL will be POST http://127.0.0.1:9998/apis/events/boot
-        url = client.get_base_url() + 'apis/events/boot/' + args.type
+        url = client.get_base_url() + 'apis/events/boot'
         parameters = {'burst': args.burst, 'delay': args.delay, 'locations': args.locations, 'output': args.output,
-                      'probability': args.probability, 'seed': args.seed}
+                      'probability': args.probability, 'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout

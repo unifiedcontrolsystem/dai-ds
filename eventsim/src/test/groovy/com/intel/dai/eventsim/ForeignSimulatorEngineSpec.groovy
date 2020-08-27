@@ -32,6 +32,32 @@ class ForeignSimulatorEngineSpec extends Specification {
         dataLoader_.initialize()
     }
 
+    def "generate boot events" () {
+        sourceMock_ = Mock(NetworkObject.class)
+        sourceMock_.send(any() as String, any() as String) >> {}
+        ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_, sourceMock_, logMock_);
+        foreignSimEngineTest.initialize()
+
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "TEST-01")
+        parameters.put("count", "1")
+        parameters.put("type", type)
+
+        when:
+        parameters.put("count", count.toString())
+        foreignSimEngineTest.generateBootEvents(parameters)
+
+        then:
+        foreignSimEngineTest.publishedEvents_ == publishedEvents
+
+        where:
+        type       |    count    |  publishedEvents
+        "off"      |      1      |      1
+        "on"       |      1      |      1
+        "ready"    |      1      |      1
+        "all"      |      3      |      3
+    }
+
     def "generate ras events" () {
         sourceMock_ = Mock(NetworkObject.class)
         sourceMock_.send(any() as String, any() as String) >> {}

@@ -12,6 +12,13 @@
       "types" :[
         "energy", "fabric-perf", "power", "temperature", "voltage"
       ]
+    },
+
+    "boot" : {
+      "default" : "all",
+      "types" :[
+        "off", "on", "ready"
+      ]
     }
   } ,
   "event-types": {
@@ -85,12 +92,105 @@
       "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
     },
 
+    "off": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChanges" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Off"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
+    "on": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChanges" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "On"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
+    "ready": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChanges" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Ready"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
       "stream-type": "events" ,
       "single-template": {
-        "message[*]/seqnum": ".*" ,
-        "message[*]/pri": ".*"
+        "message[?]/seqnum": ".*" ,
+        "message[?]/pri": ".*"
       },
       "single-template-count": {
         "message[*]":1

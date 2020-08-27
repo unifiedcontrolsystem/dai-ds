@@ -120,7 +120,8 @@ class EventsCliTest(TestCase):
         sys.stdout = sys.__stdout__
         self.assertIn('usage: eventsim events boot [-h] [--burst] [--delay DELAY]\n                            ['
                       '--locations LOCATIONS] [--output OUTPUT]\n                            [--probability '
-                      'PROBABILITY] [--seed SEED]\n                            [--timeout TIMEOUT] [--type {off,on,'
+                      'PROBABILITY] [--seed SEED]\n                            [--template TEMPLATE] [--timeout '
+                      'TIMEOUT]\n                            [--timezone TIMEZONE] [--type {off,on,'
                       'ready}]\n\noptional arguments:\n  -h, --help            show this help message and exit\n  '
                       '--burst               generate boot events without delay. Default is\n                        '
                       'constant mode with delay.\n  --delay DELAY         pause for given value in microseconds to '
@@ -129,10 +130,12 @@ class EventsCliTest(TestCase):
                       'events at a given location. Provide\n                        regex for multiple locations.\n  '
                       '--output OUTPUT       store data in a file\n  --probability PROBABILITY\n                      '
                       '  generate boot events with probability failure. Default\n                        no '
-                      'failure.\n  --seed SEED           seed to duplicate data\n  --timeout TIMEOUT     boot '
-                      'sub-command execution timeout\n  --type {off,on,ready}\n                        generate given '
-                      'type of boot events. Default generates\n                        all [on/off/ready] types of '
-                      'boot events.\n', captured_output.getvalue())
+                      'failure.\n  --seed SEED           seed to duplicate data\n  --template TEMPLATE   sample '
+                      'template to generate boot events\n  --timeout TIMEOUT     boot sub-command execution timeout\n '
+                      ' --timezone TIMEZONE   generate boot events for given timezone. The default\n                  '
+                      '      values exists in config file\n  --type {off,on,ready}\n                        generate '
+                      'given type of boot events. Default generates\n                        all [on/off/ready] types '
+                      'of boot events.\n', captured_output.getvalue())
         captured_output.close()
 
     def test_scenario_events_help(self):
