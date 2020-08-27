@@ -6,17 +6,10 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "api-gw-service-nmn.local",
-        "connectPort": 8080,
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "dai-provisioner"
-        }
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-provisioner",
+        "connectTimeout": "30"
       },
-      "name": "sse"
+      "name": "eventSource"
     }
   },
 
@@ -36,7 +29,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_boot_event",

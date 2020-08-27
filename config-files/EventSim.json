@@ -19,7 +19,7 @@
   "network-config" : {
       "network" : "sse",
       "sse": {
-          "server-address": "sms01-nmn.local" ,
+          "server-address": "api-gw-service-nmn.local" ,
           "server-port": "8080" ,
           "urls": {
             "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event": [
@@ -83,7 +83,7 @@
       } ,
       "rabbitmq": {
           "exchangeName": "simulator",
-          "uri": "amqp://127.0.0.1"
+          "uri": "amqp://am01-nmn.local"
       }
   }
 }
