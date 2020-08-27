@@ -395,7 +395,7 @@ public abstract class FabricAdapter {
 
     private void incomingLocationId(String urlPath, String streamName, String id) {
         try {
-            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), id);
+            workQueue_.saveWorkItemsRestartData(workQueue_.workItemId(), id, false);
         } catch(IOException e) {
             log_.error("Failed to store working results to improve resiliency: %s", id);
             try {
