@@ -43,7 +43,7 @@ class HttpClient(object):
     def send_get_request(self, request_string, tval):
         try:
             response = requests.get(request_string, timeout=tval)
-            if(self.check_response(response)):
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -64,7 +64,7 @@ class HttpClient(object):
     def send_put_request(self, request_string, data, tval):
         try:
             response = requests.put(request_string, data, timeout=tval)
-            if(self.check_response(response)):
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -85,7 +85,7 @@ class HttpClient(object):
     def send_post_request(self, request_string, data, tval):
         try:
             response = requests.post(request_string, data, timeout=tval)
-            if(self.check_response(response)):
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -106,7 +106,7 @@ class HttpClient(object):
     def send_delete_request(self, request_string, tval):
         try:
             response = requests.delete(request_string, timeout=tval)
-            if not response.ok:
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -141,6 +141,7 @@ class HttpClient(object):
                 p_str += '&' + key + '=' + val
         return p_str
 
+    @staticmethod
     def _parse_http_response(self, response):
         try:
             json_response = json.loads(response)
