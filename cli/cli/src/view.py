@@ -476,11 +476,10 @@ class ViewCli(object):
                 columns_order = ["lctn", "dbupdatedtimestamp", "inventorytimestamp", "sernum", "inventoryinfo"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         else:
-            starttime, endtime = self._retrieve_time_from_args(args)
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
             url = client.get_base_url() + 'cli/getinvhislctn?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn, user] if x != ""])
+            [x for x in [limit, lctn, user] if x != ""])
             self.lgr.debug("_view_inventory_change_execute: URL for request is {0}".format(url))
             response_code, response = client.send_get_request(url, time_out)
 
