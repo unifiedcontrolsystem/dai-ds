@@ -141,8 +141,7 @@ class HttpClient(object):
                 p_str += '&' + key + '=' + val
         return p_str
 
-    @staticmethod
-    def _parse_http_response(response):
+    def _parse_http_response(self, response):
         try:
             json_response = json.loads(response)
             return json_response['Status'], json_response['Result']
