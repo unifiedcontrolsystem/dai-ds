@@ -134,7 +134,7 @@ public class AdapterUIRest extends AdapterUI {
         }
         return map;
     }
-    
+
     private static Map<String, String> convertHttpRequestToMap(Request req) {
         /* Convert request header parameters to a Map
          * */
@@ -150,7 +150,7 @@ public class AdapterUIRest extends AdapterUI {
     }
 
     private static Set<String> convertToSet(String devices)
-        {
+    {
         Set<String> deviceSet = new HashSet<>(Arrays.asList(devices.split(",")));
         if(deviceSet.isEmpty()) {
             return null;

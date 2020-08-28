@@ -102,7 +102,8 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
             if (jobMaxDBUpdatedTimestamp < val || jobMaxDBUpdatedTimestamp == null) {
                 //var timetill = get_start_date(val, 30)
                 updateAJobsFromDB(dbAJobsresponse, val);
-                updateNJobsFromDB(dbNJobsresponse, val);
+                updateNJobsFromDB(dbNJobsresponse, ((jobMaxDBUpdatedTimestamp != null) ?
+                                  jobMaxDBUpdatedTimestamp : get_start_date(val, 5)), val);
                 jobMaxDBUpdatedTimestamp = val;
             }
         } else if (name == "Ras_Max_DbUpdatedTimestamp") {
@@ -132,7 +133,7 @@ function fetchDBChangeTimestampsResponseNonTrivial(data)
         }
         else if (name == "Replacement_Max_Timestamp") {
             if (replacementMaxTimestamp != val) {
-                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, val);
+                updateReplacementHistoryFromDB(dbReplacementHistoryResponse, replacementMaxTimestamp, null);
                 replacementMaxTimestamp = val;
             }
         }
@@ -323,11 +324,11 @@ function updateAJobsFromDB(callback, EndTime)
 
 }
 
-function updateNJobsFromDB(callback, EndTime)
+function updateNJobsFromDB(callback, StartTime, EndTime)
 {
-    console.log('/query/jobsnonact?EndTime='+EndTime);
+    console.log('/query/jobsnonact?StartTime='+StartTime+'&EndTime='+EndTime);
     $.ajax({
-        url: '/query/jobsnonact?EndTime='+EndTime,
+        url: '/query/jobsnonact?StartTime='+StartTime+'&EndTime='+EndTime,
         success : callback
     });
 
@@ -619,11 +620,10 @@ function dbReplacementHistoryResponse(data)
         console.log("db change response.status=", status, " result= ", (JSON.parse(data)).Result);
         return;
     }
-
+    var resp = JSON.parse((JSON.parse(data)).Result);
     if (!replacementhistorytable.data().any()) {
         replacementhistorytable.rows().remove();}	// removes all rows
 
-    var resp = JSON.parse((JSON.parse(data)).Result);
     for (var i = 0;  i < resp.length; i++) {
         var time = resp[i].dbupdatedtimestamp;
         var location = resp[i].id;

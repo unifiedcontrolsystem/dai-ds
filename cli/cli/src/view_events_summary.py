@@ -96,6 +96,8 @@ class ViewEventsSummary(object):
         result = "EVENTS SUMMARY BASED ON THE COMBINATION OF LOCATION & EVENTS\n"
         result += "{:<14} {:<10} {:<70} {:<15} {:<20}\n".format('LOCATION', 'COUNT', 'TYPE', 'SEVERITY',
                                                            'CONTROL OPERATION', 'LATEST EVENT TIME')
+        sort_by_location = lambda lctn, ras: (lctn is None, lctn or '', ras)
+        location_summary = OrderedDict(sorted(location_summary.items(), key=lambda t: sort_by_location(*t[0])))
         for key, values in location_summary.items():
             count, type, severity, control_operation, timestamp = values
             result += "{:<14} {:<10} {:<70} {:<15} {:<20}\n".format(str(key[0]),

@@ -26,7 +26,7 @@ class ViewTest(TestCase):
         sys.argv = ['ucs', 'view']
         parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -38,7 +38,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -50,7 +50,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,inventory-history,inventory-info,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -364,13 +364,12 @@ class ViewTest(TestCase):
         parser = Parser()
         sys.argv = ['ucs', 'view', 'event', '--start-time', '2019-07-09', '--end-time', '2019-07-09', '--jobid', '123?']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.post') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "E",
-                                "Result": "Bad input, please try with a valid jobid"
-                                })
-                type(patched_get.return_value).status_code = 200
+            patched_construct.return_value = "http://localhost/4567:"	
+            with patch('requests.post') as patched_get:	
+                type(patched_get.return_value).text = json.dumps({"Status": "E",	
+                                "Result": "Bad input, please try with a valid jobid"	
+                                })	
+                type(patched_get.return_value).status_code = 200	
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Bad input, please try with a valid jobid', captured_output.getvalue())
@@ -893,7 +892,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory-history', 'R8-21-CH11-CN0']
+        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
@@ -914,7 +913,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory-history', 'R8-21-CH11-CN0', '--format', 'json']
+        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history', '--format', 'json']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
@@ -935,7 +934,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory-info', 'x0c0s24b0n0']
+        sys.argv = ['ucs', 'view', 'inventory', 'x0c0s24b0n0']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
@@ -965,7 +964,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory-info', 'x0c0s24b0n0', '--format', 'json']
+        sys.argv = ['ucs', 'view', 'inventory', 'x0c0s24b0n0', '--format', 'json']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:

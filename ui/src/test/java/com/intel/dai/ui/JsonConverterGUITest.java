@@ -40,7 +40,7 @@ public class JsonConverterGUITest {
 
         when(metaData.getColumnName(1)).thenReturn("EntryNumber");
         when(metaData.getColumnType(1)).thenReturn(Types.BIGINT);
-        when(resultSet.getInt(1)).thenReturn(123456);
+        when(resultSet.getLong(1)).thenReturn(123456L);
 
         when(metaData.getColumnName(2)).thenReturn("id");
         when(metaData.getColumnType(2)).thenReturn(Types.TINYINT);
@@ -84,7 +84,7 @@ public class JsonConverterGUITest {
         assertEquals(1, jsonarray.size());
         PropertyMap mapObject = jsonarray.getMap(0);
         assertEquals(10, mapObject.size());
-        assertEquals(123456, mapObject.get("EntryNumber"));
+        assertEquals(123456L, mapObject.get("EntryNumber"));
         assertEquals(12, mapObject.get("id"));
         assertEquals("Monitor", mapObject.get("AdapterName"));
         assertEquals(34, mapObject.get("SensorNumber"));

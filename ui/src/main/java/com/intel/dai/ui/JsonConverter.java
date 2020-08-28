@@ -30,7 +30,7 @@ public class JsonConverter {
                     rowData.add( resultsetinp.getArray(i));
                 }
                 else if(rasmetadata.getColumnType(i)== Types.BIGINT){
-                    rowData.add( resultsetinp.getInt(i));
+                    rowData.add( resultsetinp.getLong(i));
                 }
                 else if(rasmetadata.getColumnType(i)== Types.TINYINT){
                     rowData.add( resultsetinp.getInt(i));
