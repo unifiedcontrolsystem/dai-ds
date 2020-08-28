@@ -30,8 +30,7 @@ class ViewCli(object):
         self._root_parser.set_defaults(func=self._view_execute)
         self._add_environment_parser(view_subparsers)
         self._add_events_parser(view_subparsers)
-        self._add_inventory_history_parser(view_subparsers)
-        self._add_inventory_info_parser(view_subparsers)
+        self._add_inventory_parser(view_subparsers)
         self._add_job_info_parser(view_subparsers)
         self._add_network_config_parser(view_subparsers)
         self._add_replacement_history_parser(view_subparsers)
@@ -73,7 +72,7 @@ class ViewCli(object):
                                    help='excludes all event data for the descriptive name of the event type in the'
                                         'RASMetadata.json. \n Example: RasGen or Ras. Regex are allowed too')
         events_parser.add_argument('--severity', help='Filter all event data for a given severity {INFO, FATAL, ERROR,'
-                                                      ' CRITICAL}. This option does not take wildcards or RegEx \n')
+                                                              ' WARN, DEBUG}. This option does not take wildcards or RegEx \n')
         events_parser.add_argument('--format', choices=['json', 'table'],
                                    help='Display data either in JSON or table '
                                         'format. Default will be to display '
@@ -109,6 +108,25 @@ class ViewCli(object):
                                         action='store_true')
         environment_parser.set_defaults(func=self._view_environment_execute)
 
+    def _add_inventory_parser(self, view_parser):
+        inventory_parser = view_parser.add_parser('inventory', help='view the inventory info data for a '
+                                                                         'specific location')
+        inventory_parser.add_argument('locations',
+                                      help='Filter all inventory info data for a given locations. '
+                                           'Provide comma separated location list or location group. '
+                                           'Example: R2-CH0[1-4]-N[1-4]')
+        inventory_parser.add_argument('--limit', default=100, type=int,
+                                      help='Provide a limit to the number of records of data being retrieved. '
+                                           'The default value is 100')
+        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
+                                      help='Display data either in JSON or table format. '
+                                           'Default will be to display data in tabular format')
+        inventory_parser.add_argument('--sernum', help='Filter all inventory data for a given serial number')
+        inventory_parser.add_argument('--history', help='Show all inventory history data', action='store_true')
+        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+                                                                               'Uses a default of 900s')
+        inventory_parser.set_defaults(func=self._view_inventory_execute)
+
     def _add_state_parser(self, view_parser):
         state_parser = view_parser.add_parser('state', help='view the latest state info data for a specific location')
         state_parser.add_argument('locations',
@@ -141,6 +159,31 @@ class ViewCli(object):
                                                                                      'Uses default of 900s')
         network_config__parser.set_defaults(func=self._view_network_config_execute)
 
+    def _add_replacement_history_parser(self, view_parser):
+        replacement_parser = view_parser.add_parser('replacement-history', help='view the replacement history data')
+        replacement_parser.add_argument('--start-time', dest="start_time",
+                                      help='provide the start time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        replacement_parser.add_argument('--end-time', dest="end_time",
+                                      help='provide the end time. The preferred format for the date is'
+                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
+        replacement_parser1 = replacement_parser.add_mutually_exclusive_group(required=True)
+        replacement_parser1.add_argument('locations', nargs='?',
+                                       help='Filter all inventory info and history for a given locations. '
+                                            'Provide comma separated location list or location group. '
+                                            'Example: R2-CH0[1-4]-N[1-4]')
+        replacement_parser1.add_argument('sernum', nargs='?', help='Filter all inventory history data for a given '
+                                                                 'serial number')
+        replacement_parser.add_argument('--limit', type=int, help='Provide a limit to the number of records of data '
+                                                                'being retrieved. The default value is 100')
+        replacement_parser.add_argument('--format', choices=['json', 'table'], default='table',
+                                      help='Display data either in JSON or table format. '
+                                           'Default will be to display data in tabular format')
+        replacement_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+                                                                               'Uses a default of 900s')
+        replacement_parser.add_argument('--all', help='Specify all output fields for more information than default view',
+                                      action='store_true')
+        replacement_parser.set_defaults(func=self._view_replacement_history_execute)
     def _add_job_info_parser(self, view_parser):
         job_parser = view_parser.add_parser('job', help='view the job information for the cluster')
         job_parser.add_argument('--start-time', dest="start_time",
@@ -188,72 +231,6 @@ class ViewCli(object):
         reservation_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
                                                                                'Uses a default of 900s')
         reservation_parser.set_defaults(func=self._view_reservation_info_execute)
-
-    def _add_inventory_history_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('inventory-history', help='view the history of inventory changes '
-                                                                            'for a location')
-        inventory_parser.add_argument('--start-time', dest="start_time",
-                                      help='provide the start time. The preferred format for the date is'
-                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--end-time', dest="end_time",
-                                      help='provide the end time. The preferred format for the date is'
-                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('locations',
-                                      help='Filter all inventory history data for a given locations. '
-                                           'Provide comma separated location list or location group. '
-                                           'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--limit', type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. '
-                                           'The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. Default will be to display '
-                                           'data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                               'Uses a default of 900s')
-        inventory_parser.set_defaults(func=self._view_inventory_change_execute)
-
-    def _add_inventory_info_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('inventory-info', help='view the latest inventory info data for a '
-                                                                         'specific location')
-        inventory_parser.add_argument('locations',
-                                      help='Filter all inventory info data for a given locations. '
-                                           'Provide comma separated location list or location group. '
-                                           'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser.add_argument('--limit', default=100, type=int,
-                                      help='Provide a limit to the number of records of data being retrieved. '
-                                           'The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                               'Uses a default of 900s')
-        inventory_parser.set_defaults(func=self._view_inventory_info_execute)
-
-    def _add_replacement_history_parser(self, view_parser):
-        inventory_parser = view_parser.add_parser('replacement-history', help='view the replacement history data')
-        inventory_parser.add_argument('--start-time', dest="start_time",
-                                      help='provide the start time. The preferred format for the date is'
-                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser.add_argument('--end-time', dest="end_time",
-                                      help='provide the end time. The preferred format for the date is'
-                                           ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
-        inventory_parser1 = inventory_parser.add_mutually_exclusive_group(required=True)
-        inventory_parser1.add_argument('locations', nargs='?',
-                                       help='Filter all inventory info and history for a given locations. '
-                                            'Provide comma separated location list or location group. '
-                                            'Example: R2-CH0[1-4]-N[1-4]')
-        inventory_parser1.add_argument('sernum', nargs='?', help='Filter all inventory history data for a given '
-                                                                 'serial number')
-        inventory_parser.add_argument('--limit', type=int, help='Provide a limit to the number of records of data '
-                                                                'being retrieved. The default value is 100')
-        inventory_parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                      help='Display data either in JSON or table format. '
-                                           'Default will be to display data in tabular format')
-        inventory_parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                                                               'Uses a default of 900s')
-        inventory_parser.add_argument('--all', help='Specify all output fields for more information than default view',
-                                      action='store_true')
-        inventory_parser.set_defaults(func=self._view_replacement_history_execute)
 
     def _view_execute(self, args):
         self._root_parser.print_help()
@@ -450,12 +427,77 @@ class ViewCli(object):
 
         return CommandResult(response_code, data_to_display)
 
+    def _view_replacement_history_execute(self, args):
+        client = HttpClient()
+        if args.sernum is not None and args.locations is not None:
+            response_msg = 'The inventory change takes either a lctn or a serial number as an input filter. ' \
+                           'Try again with only one of them'
+            return self._parse_response_as_per_user_request(args.format, 1,
+                                                            JsonError(response_msg).construct_error_result())
+        if args.sernum is None and args.locations is None:
+            response_msg = 'The inventory change requires one of the input filters lctn or a serial number. ' \
+                           'Try again with one of them'
+            return self._parse_response_as_per_user_request(args.format, 1,
+                                                            JsonError(response_msg).construct_error_result())
+        starttime, endtime = self._retrieve_time_from_args(args)
+        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+        user = 'user=' + self.user
+        url = client.get_base_url() + 'cli/getinvchanges?' + "&".join(
+            [x for x in [starttime, endtime, limit, lctn, user] if x != ""])
+        self.lgr.debug("_view_replacement_history_execute: URL for request is {0}".format(url))
+        response_code, response = client.send_get_request(url, time_out)
+
+        json_display = JsonDisplay(response)
+
+        if display_format == 'json':
+            data_to_display = json_display.display_raw_json()
+        else:
+            columns_order = ["dbupdatedtimestamp", "id", "action", "fruid"]
+            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+        return CommandResult(response_code, data_to_display)
+
+    def _view_inventory_execute(self, args):
+        client = HttpClient()
+        if not args.history:
+            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+            user = 'user=' + self.user
+            sernum = ''
+            if args.sernum is not None:
+                sernum = 'Sernum=' + str(args.sernum)
+            url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user, sernum] if x != ""])
+            self.lgr.debug("_view_inventory_execute: URL for request is {0}".format(url))
+            response_code, response = client.send_get_request(url, time_out)
+
+            json_display = JsonDisplay(response)
+
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                columns_order = ["lctn", "dbupdatedtimestamp", "inventorytimestamp", "sernum", "inventoryinfo"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+        else:
+            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+            user = 'user=' + self.user
+            url = client.get_base_url() + 'cli/getinvhislctn?' + "&".join(
+            [x for x in [limit, lctn, user] if x != ""])
+            self.lgr.debug("_view_inventory_change_execute: URL for request is {0}".format(url))
+            response_code, response = client.send_get_request(url, time_out)
+
+            json_display = JsonDisplay(response)
+
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                columns_order = ["id", "fruid"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+        return CommandResult(response_code, data_to_display)
+
     def _view_state_execute(self, args):
         client = HttpClient()
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
         user = 'user=' + self.user
         url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
-        self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
+        self.lgr.debug("_view_state_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
         json_display = JsonDisplay(response)
@@ -472,7 +514,7 @@ class ViewCli(object):
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
         user = 'user=' + self.user
         url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
-        self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
+        self.lgr.debug("_view_network_config_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
         json_display = JsonDisplay(response)
@@ -552,71 +594,6 @@ class ViewCli(object):
                 columns_order = ["reservationname", "users", "nodes", "starttimestamp", "endtimestamp", "deletedtimestamp"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
             return CommandResult(response_code, data_to_display)
-
-    def _view_replacement_history_execute(self, args):
-        client = HttpClient()
-        if args.sernum is not None and args.locations is not None:
-            response_msg = 'The inventory change takes either a lctn or a serial number as an input filter. ' \
-                           'Try again with only one of them'
-            return self._parse_response_as_per_user_request(args.format, 1,
-                                                            JsonError(response_msg).construct_error_result())
-        if args.sernum is None and args.locations is None:
-            response_msg = 'The inventory change requires one of the input filters lctn or a serial number. ' \
-                           'Try again with one of them'
-            return self._parse_response_as_per_user_request(args.format, 1,
-                                                            JsonError(response_msg).construct_error_result())
-        starttime, endtime = self._retrieve_time_from_args(args)
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        user = 'user=' + self.user
-        url = client.get_base_url() + 'cli/getinvchanges?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn, user] if x != ""])
-        self.lgr.debug("_view_replacement_history_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["dbupdatedtimestamp", "id", "action", "fruid"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_inventory_info_execute(self, args):
-        client = HttpClient()
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        user = 'user=' + self.user
-        url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user] if x != ""])
-        self.lgr.debug("_view_inventory_info_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["lctn", "dbupdatedtimestamp", "inventorytimestamp", "sernum", "inventoryinfo"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_inventory_change_execute(self, args):
-        client = HttpClient()
-        starttime, endtime = self._retrieve_time_from_args(args)
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        user = 'user=' + self.user
-        url = client.get_base_url() + 'cli/getinvhislctn?' + "&".join(
-            [x for x in [starttime, endtime, limit, lctn, user] if x != ""])
-        self.lgr.debug("_view_inventory_change_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["id", "fruid"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
 
     def _validate_input_timestamp(self, input_time):
         try:

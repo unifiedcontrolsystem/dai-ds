@@ -43,7 +43,7 @@ class HttpClient(object):
     def send_get_request(self, request_string, tval):
         try:
             response = requests.get(request_string, timeout=tval)
-            if not response.ok:
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -64,7 +64,7 @@ class HttpClient(object):
     def send_put_request(self, request_string, data, tval):
         try:
             response = requests.put(request_string, data, timeout=tval)
-            if not response.ok:
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -85,7 +85,7 @@ class HttpClient(object):
     def send_post_request(self, request_string, data, tval):
         try:
             response = requests.post(request_string, data, timeout=tval)
-            if not response.ok:
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -106,7 +106,7 @@ class HttpClient(object):
     def send_delete_request(self, request_string, tval):
         try:
             response = requests.delete(request_string, timeout=tval)
-            if not response.ok:
+            if self.check_response(response):
                 sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
                 response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
@@ -124,36 +124,9 @@ class HttpClient(object):
             return 1, rs_response
         return 0, rs_response
 
-    # def send_get_request_nb(self, request_string, tval):
-    #     """
-    #     Deprecated code. Will be revisited to check if we need this feature
-    #     Non blocking GET request.
-    #     :param request_string:
-    #     :param tval:
-    #     :return:
-    #     """
-    #     response_code, response = self.send_get_request(request_string, tval)
-    #     if response_code > 0:
-    #         return response_code, response
-    #     try:
-    #         track_req = json.loads(response.replace("\\\\", ""))['Location']
-    #     except (KeyError, ValueError) as e:
-    #         return 1, e
-    #     request_done = False
-    #     response = None
-    #     spinner = Spinner('Command in progress   ')
-    #     while request_done is False:
-    #         for _ in range(self._check_non_blocking_status_interval * 4):
-    #             spinner.next()
-    #             time.sleep(1)
-    #         response = requests.get(track_req, timeout=tval)
-    #         json_response = json.loads(response.text.replace("\\\\", ""))
-    #         if json_response['Status'] in 'FE':
-    #             request_done = True
-    #     status, rs_response = self._parse_http_response(response.text)
-    #     if status == 'E':
-    #         raise RuntimeError(rs_response)
-    #     return 0, rs_response
+    @staticmethod
+    def check_response(response):
+        return (not response.ok) and response.status_code != 400 and response.status_code < 500
 
     @staticmethod
     def append_params(params):
@@ -168,8 +141,7 @@ class HttpClient(object):
                 p_str += '&' + key + '=' + val
         return p_str
 
-    @staticmethod
-    def _parse_http_response(response):
+    def _parse_http_response(self, response):
         try:
             json_response = json.loads(response)
             return json_response['Status'], json_response['Result']

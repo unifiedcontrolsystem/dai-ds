@@ -40,7 +40,7 @@ public class JsonConverterTest {
 
         when(metaData.getColumnName(1)).thenReturn("EntryNumber");
         when(metaData.getColumnType(1)).thenReturn(Types.BIGINT);
-        when(resultSet.getInt(1)).thenReturn(123456);
+        when(resultSet.getLong(1)).thenReturn(123456L);
 
         when(metaData.getColumnName(2)).thenReturn("id");
         when(metaData.getColumnType(2)).thenReturn(Types.TINYINT);
