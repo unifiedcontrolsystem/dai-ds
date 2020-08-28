@@ -1,6 +1,6 @@
 {
   "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry?stream_id=dai-fabric-events",
   "exchangeName": "ucs",
-  "publishServerUrl": "amqp://api-gw-service-nmn.local",
+  "publishServerUrl": "amqp://am01-nmn.local",
   "tokenAuthProvider": null
 }

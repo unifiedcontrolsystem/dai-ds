@@ -1,7 +1,6 @@
 {
-  "connectAddress": "sms01-nmn.local",
-  "connectPort": 8080,
-  "urlPath": "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry",
+  "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry?stream_id=dai-fabric-events",
   "exchangeName": "ucs",
-  "publishServerUrl": "amqp://sms01-nmn.local"
+  "publishServerUrl": "amqp://am01-nmn.local",
+  "tokenAuthProvider": null
 }
