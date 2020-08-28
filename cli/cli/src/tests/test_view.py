@@ -366,8 +366,7 @@ class ViewTest(TestCase):
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"	
             with patch('requests.post') as patched_get:	
-                type(patched_get.return_value).text = \	
-                    json.dumps({"Status": "E",	
+                type(patched_get.return_value).text = json.dumps({"Status": "E",	
                                 "Result": "Bad input, please try with a valid jobid"	
                                 })	
                 type(patched_get.return_value).status_code = 200	
