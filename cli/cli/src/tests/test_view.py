@@ -364,12 +364,12 @@ class ViewTest(TestCase):
         parser = Parser()
         sys.argv = ['ucs', 'view', 'event', '--start-time', '2019-07-09', '--end-time', '2019-07-09', '--jobid', '123?']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"	
-            with patch('requests.post') as patched_get:	
-                type(patched_get.return_value).text = json.dumps({"Status": "E",	
-                                "Result": "Bad input, please try with a valid jobid"	
-                                })	
-                type(patched_get.return_value).status_code = 200	
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.post') as patched_get:
+                type(patched_get.return_value).text = json.dumps({"Status": "E",
+                                "Result": "Bad input, please try with a valid jobid"
+                                })
+                type(patched_get.return_value).status_code = 200
                 parser.execute_cli_cmd()
         sys.stderr = sys.__stderr__
         self.assertIn('Bad input, please try with a valid jobid', captured_output.getvalue())
