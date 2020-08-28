@@ -892,7 +892,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0 --history']
+        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
@@ -913,7 +913,7 @@ class ViewTest(TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0 --history', '--format', 'json']
+        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history', '--format', 'json']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
