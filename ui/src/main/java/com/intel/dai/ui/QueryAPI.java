@@ -59,7 +59,7 @@ public class QueryAPI {
                     jsonResult = executeProcedureEndTime("{call JobHistoryListOfActiveJobsatTime(?)}", endtime);
                     break;
                 case "jobsnonact":
-                    jsonResult = executeProcedureEndTime("{call JobHistoryListOfNonActiveJobsAtTime(?)}", endtime);
+                    jsonResult = executeProcedureStartEndTime("{call JobHistoryListOfNonActiveJobsAtTime(?, ?)}", starttime, endtime);
                     break;
                 case "changets":
                     jsonResult = executeProcedureNoParams("{call DbChgTimestamps()}");

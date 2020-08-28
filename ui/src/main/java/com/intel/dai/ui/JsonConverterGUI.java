@@ -27,7 +27,7 @@ public class JsonConverterGUI {
                     obj_json.put(column_name, resultsetinp.getArray(i));
                 }
                 else if(rasmetadata.getColumnType(i)== Types.BIGINT){
-                    obj_json.put(column_name, resultsetinp.getInt(i));
+                    obj_json.put(column_name, resultsetinp.getLong(i));
                 }
                 else if(rasmetadata.getColumnType(i)== Types.TINYINT){
                     obj_json.put(column_name, resultsetinp.getInt(i));

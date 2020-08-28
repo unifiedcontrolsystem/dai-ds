@@ -224,8 +224,8 @@ function main()
         var table_info = table.page.info();
         if (table_info.end == table_info.recordsTotal) {
             var end_time_requested = (table.row(":last", {order: 'applied'}).data())[6];
-            var start_time_requested = get_start_date(end_time_requested, 10);
-            updateNJobsFromDB(dbNJobsresponse, end_time_requested);
+            var start_time_requested = get_start_date(end_time_requested, 5);
+            updateNJobsFromDB(dbNJobsresponse, start_time_requested, end_time_requested);
         }
     }).DataTable();
 

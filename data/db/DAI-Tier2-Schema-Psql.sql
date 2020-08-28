@@ -1035,14 +1035,14 @@ BEGIN
     if (p_start_time is not null) then
         return query
             select * from Tier2_AggregatedEnvData
-            where Timestamp <= coalesce(p_end_time, current_timestamp) and
+            where Timestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
                 Timestamp >= p_start_time
-            order by Lctn, Timestamp desc LIMIT 200;
+            order by Timestamp desc, Lctn LIMIT 200;
     else
         return query
             select * from Tier2_AggregatedEnvData
-            where Timestamp <= coalesce(p_end_time, current_timestamp)
-            order by Timestamp desc LIMIT 200;
+            where Timestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            order by Timestamp desc, Lctn LIMIT 200;
     end if;
     return;
 END
@@ -1270,9 +1270,9 @@ CREATE OR REPLACE FUNCTION public.diaglistofactivediagsattime(p_end_time timesta
     LANGUAGE sql
     AS $$
     select D1.* from Tier2_Diag_History D1
-    where D1.StartTimestamp <= coalesce(p_end_time, current_timestamp) and
+    where D1.StartTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
         (D1.EndTimestamp is null or
-        D1.EndTimestamp > coalesce(p_end_time, current_timestamp)) and
+        D1.EndTimestamp > coalesce(p_end_time, current_timestamp at time zone 'UTC')) and
         D1.LastChgTimestamp = (select max(D2.LastChgTimestamp) from Tier2_Diag_History D2 where D2.DiagId = D1.DiagId)
     order by DiagId desc;
 $$;
@@ -2002,7 +2002,7 @@ BEGIN
                 when v_lctn is null then (RE.lctn ~ '.*' or RE.lctn is null)
                 when v_lctn is not null then (RE.lctn not like '') and ((select string_to_array(RE.lctn, '')) <@ (select string_to_array(v_lctn, ',')))
             end
-        order by RE.DbUpdatedTimestamp desc, RE.EventType, RE.Id LIMIT v_limit;
+        order by RE.lastchgtimestamp desc, RE.EventType, RE.Id LIMIT v_limit;
     return;
 END
 $$;
@@ -2277,13 +2277,13 @@ BEGIN
     if (p_start_time is not null) then
         return query
             select * from tier2_inventorysnapshot
-            where snapshottimestamp <= coalesce(p_end_time, current_timestamp) and
+            where snapshottimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
                 snapshottimestamp >= p_start_time
             order by snapshottimestamp desc;
     else
         return query
             select * from tier2_inventorysnapshot
-            where snapshottimestamp <= coalesce(p_end_time, current_timestamp)
+            where snapshottimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
             order by snapshottimestamp desc;
     end if;
     return;
@@ -2308,7 +2308,7 @@ BEGIN
     for v_job  in
         select *
         from Tier2_Job_History
-        where LastChgTimestamp <= coalesce(p_end_time, current_timestamp)
+        where LastChgTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
         order by JobId desc,
             LastChgTimestamp desc,
             DbUpdatedTimestamp desc
@@ -2338,7 +2338,7 @@ $$;
 -- Name: jobhistorylistofnonactivejobsattime(timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.jobhistorylistofnonactivejobsattime(p_end_time timestamp without time zone) RETURNS SETOF public.jobnonactivetype
+CREATE OR REPLACE FUNCTION public.jobhistorylistofnonactivejobsattime(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS SETOF public.jobnonactivetype
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -2350,7 +2350,8 @@ BEGIN
     for v_job  in
         select *
         from Tier2_Job_History
-        where LastChgTimestamp <= coalesce(p_end_time, current_timestamp)
+        where LastChgTimestamp >  coalesce(p_start_time, current_timestamp at time zone 'UTC' - INTERVAL '5 DAYS')
+        and LastChgTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
         order by JobId desc,
             DbUpdatedTimestamp desc,
             LastChgTimestamp desc
@@ -2398,8 +2399,11 @@ BEGIN
         from Tier2_Job_History
         where coalesce(endtimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
         and starttimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0')
-        and coalesce(endtimestamp, current_timestamp at time zone 'UTC') >= coalesce(p_at_time, coalesce(endtimestamp, current_timestamp at time zone 'UTC'))
-        and starttimestamp <= coalesce(p_at_time, starttimestamp)
+        and
+        case
+                when p_at_time is not null then endtimestamp >= p_at_time and starttimestamp <= p_at_time and state = 'T'
+                when p_at_time is null then state ~ '.*'
+        end
         and
         case
                 when p_jobid = '%' then (jobid ~ '.*')
@@ -2410,32 +2414,29 @@ BEGIN
                 when p_username = '%' then (username ~ '.*')
                 when p_username != '%' then (username = p_username)
         end
-                and
-        case
-                when p_state = '%' then (state ~ '.*')
-                when p_state != '%' then (state = p_state)
-        end
-        order by JobId desc, starttimestamp desc
+        order by dbupdatedtimestamp desc, JobId desc
     loop
         if v_counter < p_limit then
             if v_job.JobId <> v_prev_job_id then
-                v_nodes := GetListNodeLctns(v_job.Nodes);
-                if p_locations = '%' or areNodesInJob(string_to_array(p_locations, ','), string_to_array(v_nodes,' ')) then
-                    v_counter := v_counter + 1;
-                    v_prev_job_id := v_job.JobId;
-                    v_rec.JobId := v_job.JobId;
-                    v_rec.JobName := v_job.JobName;
-                    v_rec.State := v_job.State;
-                    v_rec.Bsn := v_job.Bsn;
-                    v_rec.UserName := v_job.UserName;
-                    v_rec.StartTimestamp := v_job.StartTimestamp;
-                    v_rec.EndTimestamp := v_job.EndTimestamp;
-                    v_rec.ExitStatus := v_job.ExitStatus;
-                    v_rec.NumNodes := v_job.NumNodes;
-                    v_rec.Nodes := v_nodes;
-                    v_rec.JobAcctInfo := v_job.JobAcctInfo;
-                    v_rec.Wlmjobstate := v_job.Wlmjobstate;
-                    return next v_rec;
+                v_prev_job_id := v_job.JobId;
+                if p_state = '%' or (p_state = v_job.state) then
+                    v_nodes := GetListNodeLctns(v_job.Nodes);
+                    if p_locations = '%' or areNodesInJob(string_to_array(p_locations, ','), string_to_array(v_nodes,' ')) then
+                        v_counter := v_counter + 1;
+                        v_rec.JobId := v_job.JobId;
+                        v_rec.JobName := v_job.JobName;
+                        v_rec.State := v_job.State;
+                        v_rec.Bsn := v_job.Bsn;
+                        v_rec.UserName := v_job.UserName;
+                        v_rec.StartTimestamp := v_job.StartTimestamp;
+                        v_rec.EndTimestamp := v_job.EndTimestamp;
+                        v_rec.ExitStatus := v_job.ExitStatus;
+                        v_rec.NumNodes := v_job.NumNodes;
+                        v_rec.Nodes := v_nodes;
+                        v_rec.JobAcctInfo := v_job.JobAcctInfo;
+                        v_rec.Wlmjobstate := v_job.Wlmjobstate;
+                        return next v_rec;
+                    end if;
                 end if;
             end if;
         end if;
@@ -2493,11 +2494,11 @@ BEGIN
                     MD.DbUpdatedTimestamp =
                     (select max(T.DbUpdatedTimestamp) from Tier2_RasMetaData T
                     where T.EventType = MD.EventType)
-            where RE.DbUpdatedTimestamp <=
-                coalesce(p_end_time, current_timestamp) and
-                RE.DbUpdatedTimestamp >= p_start_time  and
-                MD.Severity = 'ERROR' or MD.Severity = 'FATAL'
-            order by RE.DbUpdatedTimestamp desc, RE.EventType, RE.Id LIMIT 200;
+            where RE.LastChgTimestamp <=
+                coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                RE.LastChgTimestamp >= p_start_time  and
+                MD.Severity in ('ERROR','FATAL')
+            order by RE.DbUpdatedTimestamp desc, RE.EventType, RE.Id;
     else
         return query
             select RE.EventType,
@@ -2515,10 +2516,10 @@ BEGIN
                     MD.DbUpdatedTimestamp =
                     (select max(T.DbUpdatedTimestamp) from Tier2_RasMetaData T
                     where T.EventType = MD.EventType)
-            where RE.DbUpdatedTimestamp <=
-                coalesce(p_end_time, current_timestamp) and
-                MD.Severity = 'ERROR' or MD.Severity = 'FATAL'
-            order by RE.DbUpdatedTimestamp desc, RE.EventType, RE.Id LIMIT 200;
+            where RE.LastChgTimestamp <=
+                coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                MD.Severity in ('ERROR','FATAL')
+            order by RE.DbUpdatedTimestamp desc, RE.EventType, RE.Id;
     end if;
     return;
 END
@@ -2536,13 +2537,13 @@ BEGIN
     if (p_start_time is not null) then
         return query
             select * from tier2_RawHWInventory_History
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
                 dbupdatedtimestamp >= p_start_time
             order by dbupdatedtimestamp, id, action, fruid desc;
     else
         return query
             select * from tier2_RawHWInventory_History
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp)
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
             order by dbupdatedtimestamp, id, action, fruid desc;
     end if;
     return;
@@ -2568,7 +2569,7 @@ BEGIN
                 RE.DeletedTimestamp,
                 RE.LastChgTimestamp
             from Tier2_WlmReservation_History RE
-            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp)
+            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
             order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT 200;
     else
         return query
@@ -2580,7 +2581,7 @@ BEGIN
                 RE.DeletedTimestamp,
                 RE.LastChgTimestamp
             from Tier2_WlmReservation_History RE
-            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp) and
+            where RE.DbUpdatedTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
             RE.DbUpdatedTimestamp >= p_start_time
             order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT 200;
     end if;
