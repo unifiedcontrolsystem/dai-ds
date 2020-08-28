@@ -70,7 +70,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://sms01-nmn.local"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",

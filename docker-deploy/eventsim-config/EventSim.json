@@ -47,7 +47,7 @@
       } ,
       "rabbitmq": {
           "exchangeName": "simulator",
-          "uri": "amqp://127.0.0.1"
+          "uri": "amqp://am01-nmn.local"
       }
   }
 }

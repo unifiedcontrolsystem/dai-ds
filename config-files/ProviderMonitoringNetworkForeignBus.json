@@ -5,115 +5,50 @@
   },
 
   "networkStreams": {
-    "fanTelemetry": {
+    "energyTelemetry": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-fan",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "fanMetrics"
-        }
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
+        "connectTimeout": "30"
       },
-      "name": "sse"
-    },
-    "voltageTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "voltageMetrics"
-        }
-      },
-      "name": "sse"
-    },
-    "pressureTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-pressure",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "pressureMetrics"
-        }
-      },
-      "name": "sse"
+      "name": "eventSource"
     },
     "powerTelemetry": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-power",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "powerMetrics"
-        }
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-telemetry-power?stream_id=dai-telemtry",
+        "connectTimeout": "30"
       },
-      "name": "sse"
-    },
-    "energyTelemetry": {
-      "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-energy",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "energyMetrics"
-        }
-      },
-      "name": "sse"
+      "name": "eventSource"
     },
     "temperatureTelemetry": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "temperatureMetrics"
-        }
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-telemetry-temperature?stream_id=dai-telemtry",
+        "connectTimeout": "30"
       },
-      "name": "sse"
+      "name": "eventSource"
     },
-    "dtmfResourceEvents": {
+    "voltageTelemetry": {
       "arguments": {
-        "connectPort": 5678,
-        "connectAddress": "10.30.126.57",
-        "urlPath": "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event",
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.restsse.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "dmtfEvents"
-        }
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-telemetry-voltage?stream_id=dai-telemtry",
+        "connectTimeout": "30"
       },
-      "name": "sse"
+      "name": "eventSource"
+    },
+    "events": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event?stream_id=dai-events",
+        "connectTimeout": "30"
+      },
+      "name": "eventSource"
     }
   },
 
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
-        "temperatureTelemetry",
         "energyTelemetry",
         "powerTelemetry",
-        "pressureTelemetry",
-        "voltageTelemetry",
-        "fanTelemetry"
+        "temperatureTelemetry",
+        "voltageTelemetry"
       ],
       "subjects": [
         "telemetry"
@@ -122,7 +57,7 @@
     },
     "ras_events": {
       "networkStreamsRef": [
-        "dtmfResourceEvents"
+        "events"
       ],
       "subjects": [
         "events"
@@ -135,7 +70,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",
