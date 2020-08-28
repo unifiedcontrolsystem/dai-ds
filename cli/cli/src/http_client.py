@@ -142,7 +142,7 @@ class HttpClient(object):
         return p_str
 
     @staticmethod
-    def _parse_http_response(self, response):
+    def _parse_http_response(response):
         try:
             json_response = json.loads(response)
             return json_response['Status'], json_response['Result']
