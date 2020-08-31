@@ -1,7 +1,0 @@
-{
-  "/Inventory/Hardware" : "/all",
-  "/Inventory/Hardware/History" : "/history_all",
-  "/Inventory/Hardware/History?start_time=*" : "/chronology/$1",
-  "/Inventory/Hardware/all" : "/all",
-  "/Inventory/Hardware/*": "/nodes/$1"
-}
