@@ -5,11 +5,9 @@
 package com.intel.networking.sink;
 
 import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark;
-import com.intel.networking.sink.http_callback.NetworkDataSinkHttpCallback;
 import com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ;
-import com.intel.networking.sink.restsse.NetworkDataSinkSSE;
+import com.intel.networking.sink.sse.NetworkDataSinkEventSource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,8 +53,7 @@ public class NetworkDataSinkFactoryTest {
     public void setUp() {
         NetworkDataSinkFactory.registeredImplementations_ = new HashMap<>() {{
             put("rabbitmq", NetworkDataSinkRabbitMQ.class);
-            put("sse", NetworkDataSinkSSE.class);
-            put("http_callback", NetworkDataSinkHttpCallback.class);
+            put("eventSource", NetworkDataSinkEventSource.class);
             put("benchmark", NetworkDataSinkBenchmark.class);
         }};
     }

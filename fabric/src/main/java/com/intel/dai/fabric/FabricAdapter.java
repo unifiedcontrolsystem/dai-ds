@@ -241,7 +241,7 @@ public abstract class FabricAdapter {
      * @param config The loaded configuration.
      */
     protected void processConfigItems(Map<String, String> config) {
-        networkSinkType_ = config.getOrDefault("networkSinkType", "sse");
+        networkSinkType_ = config.getOrDefault("networkSinkType", "eventSource");
         String sList = config.getOrDefault("storeDenyList", null);
         if(sList == null || sList.trim().isEmpty())
             denyList_ = new ArrayList<>();
