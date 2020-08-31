@@ -9,7 +9,6 @@ pipeline {
                 description: 'Performing quick checks only')
         choice(name: 'AGENT', choices: [
                 'NRE-TEST',
-                'cmcheung-centos-7-test',
                 'css-centos-8-00-test',
                 'css-centos-8-01-test'
         ], description: 'Agent label')
@@ -53,7 +52,7 @@ pipeline {
                         script {
                             RestartHWInvDb()
                             utilities.InvokeGradle(":dai_core:integrationTest")
-//                            utilities.InvokeGradle("makeAllArtifacts")
+                            utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }
                 }
@@ -69,11 +68,8 @@ pipeline {
                 stage('Quick Archive') {
                     when { expression { "${params.QUICK_CHECK}" == 'true' } }
                     steps {
-                        sh 'rm -f *.zip'
-                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
-                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-//                        archiveArtifacts 'build/distributions/**, build/reports/**'
-                        archiveArtifacts 'build/reports/**'
+                        CopyCleanUpMachineScript()
+                        archiveArtifacts 'build/reports/**, build/distributions/**, build/distribution/clean_up_machine.sh'
                     }
                 }
                 stage('Full Unit Test') {
@@ -88,17 +84,17 @@ pipeline {
                         }
                     }
                 }
-//                stage('Full Component Test') {
-//                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
-//                            buildResult: 'UNSTABLE') }
-//                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
-//                    steps {
-//                        script {
-//                            RestartHWInvDb()
-//                            utilities.InvokeGradle("integrationTest")
-//                        }
-//                    }
-//                }
+                stage('Full Component Test') {
+                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    steps {
+                        script {
+                            RestartHWInvDb()
+                            utilities.InvokeGradle("integrationTest")
+                        }
+                    }
+                }
                 stage('Full Report') {
                     options{ catchError(message: "Full Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
@@ -111,8 +107,8 @@ pipeline {
                 stage('Full Archive') {
                     when { expression { "${params.QUICK_CHECK}" == 'false' } }
                     steps {
-                        CopyCleanUpMachineScript()
                         sh 'rm -f *.zip'
+                        CopyCleanUpMachineScript()
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
@@ -131,8 +127,8 @@ def RestartHWInvDb() {
     StartHWInvDb()
 }
 
-// This is one way to setup for component level tests.  You can also use docker-compose or partially
-// starts DAI
+// This is one way to setup for component level testing.  You can also use docker-compose or partially
+// starts DAI.
 // Currently, our docker image has some dependencies that are fulfilled after DAI is installed.  So,
 // we cannot use this easily for component tests.
 def StartHWInvDb() {

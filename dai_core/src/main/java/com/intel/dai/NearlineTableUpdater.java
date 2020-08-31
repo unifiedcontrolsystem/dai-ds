@@ -4,22 +4,17 @@
 
 package com.intel.dai;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Types;
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
+
+import java.sql.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class NearlineTableUpdater {
     // Defaults to use coherency, set system property 'useCoherency' to 'false' to turn it off.
@@ -281,10 +276,13 @@ public class NearlineTableUpdater {
                         true));
         SQL_STMTS.put("RawHWInventory_History",
                 new DataUpdateStmt(
-                        "insert into tier2_RawHWInventory_History(Action, id, fruid, DbUpdatedTimestamp)"
-                                + "values(?,?,?,?)",
+                        "insert into tier2_RawHWInventory_History(Action, id, fruid, ForeignTimestamp, DbUpdatedTimestamp)"
+                                + "values(?,?,?,?,?)",
                         false));
-
+        SQL_STMTS.put("NodeInventory_History",
+                new DataUpdateStmt(
+                        "{call insertorupdatenodeinventorydata(?,?,?,?,?)}",
+                        true));
     }
 
     private Logger log_;

@@ -3300,6 +3300,13 @@ CREATE OR REPLACE FUNCTION public.get_rawinventoryhistory_records() RETURNS SETO
     from tier2_RawHWInventory_History;
 $$;
 
+CREATE OR REPLACE FUNCTION public.get_nodeinventoryhistory_records() RETURNS SETOF public.tier2_NodeInventory_History
+    LANGUAGE sql
+AS $$
+select *
+from tier2_NodeInventory_History;
+$$;
+
 CREATE OR REPLACE FUNCTION public.get_hwinventoryfru_records() RETURNS SETOF public.Tier2_HWInventoryFRU
  LANGUAGE sql
     AS $$
@@ -3312,6 +3319,25 @@ CREATE OR REPLACE FUNCTION public.get_hwinventorylocation_records() RETURNS SETO
     AS $$
     select *
     from Tier2_HWInventoryLocation;
+$$;
+
+CREATE OR REPLACE FUNCTION public.insertorupdatenodeinventorydata(
+    p_Lctn VarChar
+    , p_DbUpdatedTimestamp TIMESTAMP
+    , p_InventoryTimestamp TIMESTAMP
+    , p_InventoryInfo varchar
+    , p_Sernum varchar
+    ) RETURNS void
+    LANGUAGE sql
+AS $$
+insert into tier2_nodeinventory_history(Lctn, DbUpdatedTimestamp, InventoryTimestamp, InventoryInfo, Sernum, Tier2DbUpdatedTimestamp)
+    values(p_Lctn, p_DbUpdatedTimestamp, p_InventoryTimestamp, p_InventoryInfo::jsonb, p_Sernum, current_timestamp at time zone 'UTC')
+on conflict(Lctn, InventoryTimestamp) do
+    update set DbUpdatedTimestamp = p_DbUpdatedTimestamp
+             , InventoryInfo = p_InventoryInfo::jsonb
+             , Sernum = p_Sernum
+             , Tier2DbUpdatedTimestamp = current_timestamp at time zone 'UTC'
+             ;
 $$;
 
 ----- ALTER TABLE SQLS START HERE ------
@@ -3756,6 +3782,7 @@ CREATE SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq
     CACHE 1;
 
 ALTER SEQUENCE public.tier2_nodeinventory_history_entrynumber_seq OWNED BY public.tier2_nodeinventory_history.entrynumber;
+ALTER TABLE ONLY public.tier2_nodeinventory_history ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_nodeinventory_history_entrynumber_seq'::regclass);
 
 
 CREATE SEQUENCE public.tier2_nonnodehw_history_entrynumber_seq

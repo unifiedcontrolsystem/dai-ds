@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "************** You will see a lot of failures if the machine is already clean **************"
-
 echo "*** Stop any local voltdb instance ***"
 voltadmin shutdown
 
@@ -12,7 +10,11 @@ do
 done
 
 echo "*** Stop and remove any remaining dai containers"
-docker rm $(docker stop $(docker ps -aq -f name=dai-))
+for container in $(docker ps -aq -f name="dai-")
+do
+  docker stop $container
+  docker rm $container
+done
 
 echo "*** Delete logstash configuration files ***"
 sudo rm -f /etc/logstash/conf.d/*.conf
