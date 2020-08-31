@@ -1,0 +1,8 @@
+dai-json-server:
+  image: vimagick/json-server
+  container_name: dai-json-server
+  command: --id ID --host 0.0.0.0 --watch jsonServerInventory.db.json --routes jsonServerRoutes.json
+  ports:
+    - "3000:3000"
+  volumes:
+    - /opt/dai-docker/etc:/data
