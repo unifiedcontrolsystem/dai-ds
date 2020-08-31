@@ -130,7 +130,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             informWlm_ = map.getBooleanOrDefault("informWorkLoadManager", informWlm_);
             topic_ = map.getStringOrDefault("publishTopic", topic_);
             try {
-                baseUrl_ = config.getFirstNetworkBaseUrl(false);
+                baseUrl_ = config.getFirstNetworkBaseUrl();
             } catch(ConfigIOParseException e) {
                 log_.exception(e, "Failed to get the baseUrl");
                 baseUrl_ = "http://127.0.0.1:65535"; // A bogus URL will be used causing other errors to be logged.
