@@ -235,7 +235,8 @@ public class NetworkListenerConfig {
         boolean result = subjects != null && subjects.size() > 0;
         if(result)
             for(Object oSubject: subjects) {
-                result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
+                result = oSubject instanceof String &&
+                         (subjectMap_.containsKey(oSubject.toString()) || oSubject.equals("*"));
                 if(!result) break;
             }
         return result;
