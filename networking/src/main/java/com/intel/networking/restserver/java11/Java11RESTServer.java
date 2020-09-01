@@ -4,10 +4,11 @@
 //
 package com.intel.networking.restserver.java11;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.intel.logging.Logger;
 import com.intel.networking.HttpMethod;
-import com.intel.networking.restserver.*;
+import com.intel.networking.restserver.RESTServer;
+import com.intel.networking.restserver.RESTServerException;
+import com.intel.networking.restserver.RouteObject;
 import com.intel.properties.PropertyMap;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -35,9 +36,9 @@ public class Java11RESTServer extends RESTServer {
     }
 
     @Override
-    public void ssePublish(String eventType, String data, String id) throws RESTServerException {
+    public void ssePublish(String publishPath, String data, String id) throws RESTServerException {
         if(running_.get())
-            connectionManager_.publishToConnections(eventType, data, id);
+            connectionManager_.publishToConnections(publishPath, data, id);
         else
             throw new RESTServerException("Cannot publish an SSE packet until the server is running");
     }
