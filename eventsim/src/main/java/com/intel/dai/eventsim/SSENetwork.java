@@ -6,12 +6,13 @@ import com.intel.networking.restserver.RESTServer;
 import com.intel.networking.restserver.RESTServerException;
 import com.intel.networking.restserver.RESTServerFactory;
 import com.intel.networking.restserver.RESTServerHandler;
-import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import com.sun.istack.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Description of class SSENetwork.
@@ -31,8 +32,9 @@ public class SSENetwork extends NetworkConnectionObject {
      */
     public void publish(final String eventType, final String message) {
         try {
-            server_.ssePublish(eventType, message, null);
-        } catch (final RESTServerException e) {
+            String publishPath = subUrls_.getString(eventType);
+            server_.ssePublish(publishPath, message, null);
+        } catch (final RESTServerException | PropertyNotExpectedType e) {
             log_.warn("Error while publishing message to network. " + e.getMessage());
         }
     }
@@ -138,17 +140,19 @@ public class SSENetwork extends NetworkConnectionObject {
     private void subscribeUrls() throws RESTServerException {
         PropertyMap subscribeUrls = config_.getMapOrDefault("urls", null);
         log_.debug("*** Registering new SSE URLs...");
-        for (String url : subscribeUrls.keySet()) {
-            PropertyArray urls = subscribeUrls.getArrayOrDefault(url, new PropertyArray());
+        for (Map.Entry<String, Object> subscribeUrl : subscribeUrls.entrySet()) {
+            String url = subscribeUrl.getKey();
+            String subject = subscribeUrl.getValue().toString();
             List<String> subjects = new ArrayList<>();
-            for (Object subject : urls)
-                subjects.add(subject.toString());
+            subjects.add(subject);
             log_.debug("*** Added route method GET/SSE to new URL %s", url);
             server_.addSSEHandler(url, subjects);
+            subUrls_.put(subject, url);
         }
     }
 
     private final PropertyMap config_;
     private final Logger log_;
     private RESTServer server_ = null;
+    private PropertyMap subUrls_ = new PropertyMap();
 }
