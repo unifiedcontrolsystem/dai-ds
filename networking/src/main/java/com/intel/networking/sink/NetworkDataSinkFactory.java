@@ -5,9 +5,7 @@ package com.intel.networking.sink;
 
 import com.intel.logging.Logger;
 import com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark;
-import com.intel.networking.sink.http_callback.NetworkDataSinkHttpCallback;
 import com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ;
-import com.intel.networking.sink.restsse.NetworkDataSinkSSE;
 import com.intel.networking.sink.sse.NetworkDataSinkEventSource;
 
 import java.lang.reflect.Constructor;
@@ -95,8 +93,6 @@ public final class NetworkDataSinkFactory {
     static Map<String, Class<? extends NetworkDataSink>> registeredImplementations_ =
             new HashMap<String, Class<? extends NetworkDataSink>>() {{
         put("rabbitmq", NetworkDataSinkRabbitMQ.class);
-        put("sse", NetworkDataSinkSSE.class);
-        put("http_callback", NetworkDataSinkHttpCallback.class);
         put("benchmark", NetworkDataSinkBenchmark.class);
         put("eventSource", NetworkDataSinkEventSource.class);
     }};
