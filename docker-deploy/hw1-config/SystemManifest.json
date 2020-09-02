@@ -1,5 +1,5 @@
 {
-  "sysname": "preview4",
+  "sysname": "hw1",
   "views": {
     "Full": {
       "view": "Full",
@@ -8,170 +8,272 @@
       "zoomscales": [4, 6, 8],
       "rackscale": 12,
       "floor": {
-        "description": "The Single Full Preview 4 System",
-        "width": 100, "height": 200,
+        "description": "The HW1 System",
+        "width": 0, "height": 0,
         "content": [
           {
-            "name": "X0",
-            "definition": "rack",
-            "x": 10, "y": 1
+            "name": "X3002",
+            "definition": "rack2",
+            "x": 0, "y": 0
+          },
+          {
+            "name": "X3001",
+            "definition": "rack1",
+            "x": 0, "y": 0
           }
         ]
       },
       "definitions": {
-        "rack": {
-          "description": "Preview 4 Rack",
+        "rack2": {
+          "description": "HW1 Rack 2",
           "type": "Rack",
-          "width": 38, "height": 102, "obscured": true,
+          "width": 0, "height": 0, "obscured": true,
           "content": [
             {
-              "name": "CH0",
-              "definition": "service-chassis-1",
-              "x": 0, "y": 4
+              "name": "HSSW1",
+              "definition": "high-speed switch",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "SSW1",
+              "definition": "fabric switch",
+              "x": 0, "y": 0
             },
             {
               "name": "CH1",
-              "definition": "service-chassis-2",
-              "x": 0, "y": 14
+              "definition": "compute node chassis",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH2",
-              "definition": "service-chassis-3",
-              "x": 0, "y": 24
+              "name": "SW3",
+              "definition": "switch",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH3",
-              "definition": "service-chassis-4",
-              "x": 0, "y": 34
+              "name": "SW2",
+              "definition": "switch",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH4",
-              "definition": "compute-chassis-1",
-              "x": 0, "y": 44
+              "name": "SW1",
+              "definition": "switch",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH5",
-              "definition": "compute-chassis-2",
-              "x": 0, "y": 54
+              "name": "CH1",
+              "definition": "compute node chassis",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH6",
-              "definition": "compute-chassis-3",
-              "x": 0, "y": 64
+              "name": "UAN2",
+              "definition": "user access node",
+              "x": 0, "y": 0
             },
             {
-              "name": "CH7",
-              "definition": "compute-chassis-4",
-              "x": 0, "y": 74
-            }
-          ]
-        },
-        "service-chassis-1": {
-          "description": "Service Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "UAN1",
+              "definition": "user access node",
+              "x": 0, "y": 0
+            },
             {
-              "name": "SN0",
-              "definition": "service-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "service-chassis-2": {
-          "description": "Service Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "AM3",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
             {
-              "name": "SN1",
-              "definition": "service-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "service-chassis-3": {
-          "description": "Service Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "AM2",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
             {
-              "name": "SN2",
-              "definition": "service-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "service-chassis-4": {
-          "description": "Service Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "AM1",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "GWN2",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "GWN1",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "WN3",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "WN2",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "WN1",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
             {
               "name": "SN3",
-              "definition": "service-node",
-              "x": 2, "y": 2
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "SN2",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "SN1",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "MN3",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "MN2",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "MN1",
+              "definition": "service node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU3",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU1",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU2",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU0",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
             }
           ]
         },
-        "compute-chassis-1": {
-          "description": "Compute Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
+        "rack1": {
+          "description": "HW1 Rack 1",
+          "type": "Rack",
+          "width": 0, "height": 0, "obscured": true,
           "content": [
             {
-              "name": "CN0",
-              "definition": "compute-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "compute-chassis-2": {
-          "description": "Compute Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "HSSW3",
+              "definition": "high-speed switch",
+              "x": 0, "y": 0
+            },
             {
-              "name": "CN1",
-              "definition": "compute-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "compute-chassis-3": {
-          "description": "Compute Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "HSSW2",
+              "definition": "high-speed switch",
+              "x": 0, "y": 0
+            },
             {
-              "name": "CN2",
-              "definition": "compute-node",
-              "x": 2, "y": 2
-            }
-          ]
-        },
-        "compute-chassis-4": {
-          "description": "Compute Node Enclosure",
-          "type": "Chassis",
-          "width":34, "height": 6,
-          "content": [
+              "name": "HSSW1",
+              "definition": "high-speed switch",
+              "x": 0, "y": 0
+            },
             {
-              "name": "CN3",
-              "definition": "compute-node",
-              "x": 2, "y": 2
+              "name": "CH1",
+              "definition": "compute node chassis",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU3",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU1",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU2",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "PDU0",
+              "definition": "rack PDU",
+              "x": 0, "y": 0
             }
           ]
         },
-        "compute-node": {
-          "description": "Compute Node",
-          "type": "ComputeNode",
-          "width":34, "height": 6,
+        "high-speed switch": {
+          "description": "High Speed Network Switch",
+          "type": "Switch",
+          "x": 0, "y": 0,
           "content": []
         },
-        "service-node": {
+        "fabric switch": {
+          "description": "Fabric Network Switch",
+          "type": "Switch",
+          "x": 0, "y": 0,
+          "content": []
+        },
+        "switch": {
+          "description": "Network Switch",
+          "type": "Switch",
+          "x": 0, "y": 0,
+          "content": []
+        },
+        "compute node chassis": {
+          "description": "Compute Node Chassis",
+          "type": "Chassis",
+          "width": 0, "height": 0,
+          "content": [
+            {
+              "name": "CN4",
+              "definition": "compute node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "CN3",
+              "definition": "compute node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "CN2",
+              "definition": "compute node",
+              "x": 0, "y": 0
+            },
+            {
+              "name": "CN1",
+              "definition": "compute node",
+              "x": 0, "y": 0
+            }
+          ]
+        },
+        "compute node": {
+          "description": "Compute Node",
+          "type": "ComputeNode",
+          "width": 0, "height": 0,
+          "content": []
+        },
+        "service node": {
           "description": "Service Node",
           "type": "ServiceNode",
-          "width":34, "height": 6,
+          "width": 0, "height": 0,
+          "content": []
+        },
+        "rack PDU": {
+          "description": "Rack PDU",
+          "type": "PDU",
+          "width": 0, "height": 0,
           "content": []
         }
       }
