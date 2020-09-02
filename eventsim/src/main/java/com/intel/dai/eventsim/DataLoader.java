@@ -65,7 +65,7 @@ class DataLoader {
      * @return location of events template file absolute path
      */
     String getEventsTemplateConfigurationFile() {
-        return getEventsConfigutaion(FOREIGN_EVENTS_CONFIG_KEYS[2], null);
+        return getEventsConfigutaion(FOREIGN_EVENTS_CONFIG_KEYS[1], null);
     }
 
     /**
@@ -286,7 +286,7 @@ class DataLoader {
 
     private final String[] FOREIGN_API_CONFIG_KEYS = {"boot-parameters", "hw-inventory", "hw-inventory-path", "hw-inventory-query-path",
             "hw-inv-discover-status-url", "sensor-metadata", "ras-metadata", "jobs-metadata"};
-    private final String[] FOREIGN_EVENTS_CONFIG_KEYS = {"count", "time-delay-mus", "events-template-config"};
+    private final String[] FOREIGN_EVENTS_CONFIG_KEYS = {"count", "events-template-config", "time-delay-mus"};
     private final String[] NETWORK_CONFIG_KEYS = {"network"};
     private final String[] FOREIGN_SERVER_CONFIG = {"api-simulator-config", "events-simulator-config", "network-config"};
     private final String MISSING_FOREIGN_SERVER_CONFIG = "Eventsim config file is missing required entry, entry = ";

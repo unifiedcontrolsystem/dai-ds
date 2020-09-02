@@ -133,30 +133,31 @@ class EventsCli(object):
     """
     def _add_scenario_event_parser(self, event_parser):
         scenario_events_parser = event_parser.add_parser('scenario', help='generate events for a given scenario')
-        scenario_events_parser.add_argument('file', help='scenario configuration file')
+        scenario_events_parser.add_argument('file', help='scenario configuration file. The file should exist in '
+            'installed configuration files folder. Ex: /opt/ucs/etc/')
         scenario_events_parser.add_argument('--burst',
             help='generate events for a given scenario without delay. Default is constant mode with delay.',
             action='store_true')
-        scenario_events_parser.add_argument('--counter', type=int, help='repeat scenario for a given counter')
+        scenario_events_parser.add_argument('--counter', type=int, help='repeat scenario for a given counter times')
         scenario_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate events for a given scenario. The default values '
                  'exists in eventsim config file.')
         scenario_events_parser.add_argument('--duration', type=int,
-            help='scenario occurs for a given duration. The default units is minutes only.')
+            help='scenario occurs for a given duration time. The default units is minutes only.')
         scenario_events_parser.add_argument('--locations',
             help='generate events for a given scenario at a given location. Provide regex for multiple locations.')
         scenario_events_parser.add_argument('--output', help='Store data in a file.')
         scenario_events_parser.add_argument('--probability', type=int,
             help='generate boot events with probability failure')
-        scenario_events_parser.add_argument('--ras-label', help='generate ras events of a particular type/description')
-        scenario_events_parser.add_argument('--sensor-label',
-            help='generate sensor events of a particular type/description')
         scenario_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
-        scenario_events_parser.add_argument('--start-time', help='start time to generate events for a given scenario')
+        scenario_events_parser.add_argument('--start-time',
+            help='start time/scheduled time to generate events for a given scenario')
         scenario_events_parser.add_argument('--timeout', type=int, help='scenario sub-command execution timeout')
-        scenario_events_parser.add_argument('--mode', choices=['burst', 'group-burst', 'repeat'],
-            help='generate events given type of scenario. Default generates burst type scenario. Scenario data exists '
-                 'in scenario config file.')
+        scenario_events_parser.add_argument('--timezone', type=int,
+            help='generate events for given timezone. The default values exists in config file')
+        scenario_events_parser.add_argument('--type', choices=['burst', 'group-burst', 'repeat'], default='burst',
+            help='generate events for a given type of scenario. Default generates burst type scenario. Scenario data '
+                 'exists in scenario config file.')
         scenario_events_parser.set_defaults(func=self._generate_scenario_events_execute)
 
     """
@@ -249,10 +250,10 @@ class EventsCli(object):
         # URL will be POST http://127.0.0.1:9998/apis/events/scenario
         url = client.get_base_url() + 'apis/events/scenario'
 
-        parameters = {'file': args.file, 'burst': args.burst, 'delay': args.delay, 'duration': args.duration,
-                      'locations': args.locations, 'output': args.output, 'probability': args.probability,
-                      'ras-lable': args.ras_label, 'counter': args.counter, 'sensor-label': args.sensor_label,
-                      'seed': args.seed, 'start-time': args.start_time, 'type': args.mode}
+        parameters = {'file': args.file, 'burst': args.burst, 'counter': args.counter, 'delay': args.delay,
+                      'duration': args.duration, 'locations': args.locations, 'output':args.output,
+                      'probability': args.probability, 'seed': args.seed, 'start-time': args.start_time,
+                      'timeout': args.timeout, 'timezone': args.timezone, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout

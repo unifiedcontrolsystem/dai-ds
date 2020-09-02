@@ -28,7 +28,7 @@ class BootCli(object):
 
     def _get_boot_parameters_execute(self, args):
         client = HttpClient()
-        # URL will be GET http://10.54.134.150:9998/bootparameters
+        # URL will be GET http://localhost:9998/bootparameters
         url = client.get_base_url() + '/bootparameters'
         response_code, response = client.send_get_request(url, '900')
         return CommandResult(response_code, response)

@@ -1,12 +1,13 @@
 package com.intel.dai.eventsim
 
-
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.NodeInformation
 import com.intel.logging.Logger
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+
+import java.time.*
 
 class ForeignSimulatorEngineSpec extends Specification {
 
@@ -124,7 +125,46 @@ class ForeignSimulatorEngineSpec extends Specification {
         "voltage"      |      3      |      3
         "voltage"      |     10      |     10
         "voltage"      |     20      |     20
+    }
 
+    def "generate scenario events" () {
+        sourceMock_ = Mock(NetworkObject.class)
+        sourceMock_.send(any() as String, any() as String) >> {}
+        ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_, sourceMock_, logMock_);
+        foreignSimEngineTest.initialize()
+
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "TEST-01")
+        parameters.put("type", type)
+
+        if(counter != null)
+            parameters.put("counter", counter)
+
+        if(duration != null)
+            parameters.put("duration", duration)
+
+        if(start_time != null) {
+            Instant now = Instant.now()
+            Duration fiveMinutes = Duration.ofSeconds( 1)
+            Instant fiveMinutesFromNow = now.plus( fiveMinutes )
+            ZonedDateTime zdt = fiveMinutesFromNow.atZone(ZoneId.systemDefault())
+            parameters.put("start-time", zdt.toString())
+        }
+
+        parameters.put("file", foreignScenarioConfigFile_)
+
+        when:
+        foreignSimEngineTest.generateEventsForScenario(parameters)
+
+        then:
+        foreignSimEngineTest.publishedEvents_ == publishedEvents
+
+        where:
+        type            |  counter  |  duration | start_time  |   publishedEvents
+        "burst"         |   null    |   null    |    null     |         11
+        "group-burst"   |   null    |   null    |    null     |         11
+        "repeat"        |    "2"    |   null    |    null     |         11
+        "repeat"        |    "2"    |   null    |    ""       |         11
     }
 
     def loadParameters() {
@@ -157,7 +197,9 @@ class ForeignSimulatorEngineSpec extends Specification {
     private Map<String, String> parameters_ = new HashMap<>()
     private Map<String, String> hostnames_ = new HashMap<>()
 
-    private String foreignServerConfigFile_ = "/resources/test-config-files/TestConfig.json";
+    private String foreignServerConfigFile_ = "/resources/test-config-files/TestConfig.json"
+    private String foreignScenarioConfigFile_ = "/resources/test-config-files/TestScenario.json"
+
     private DataStoreFactory factoryMock_
 
 }

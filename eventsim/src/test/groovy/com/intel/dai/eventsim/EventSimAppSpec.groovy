@@ -79,7 +79,18 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.generateSensorEvents(parameters).contains("Success")
     }
 
-    def "generate boot/ras/sensor events with exception"() {
+    def "generate scenario events"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("locations", "test")
+        parameters.put("file", "/tmp/scenario.json")
+
+        eventSimApp_.foreignSimulatorEngine_.generateSensorEvents(parameters) >> {}
+
+        expect:
+        eventSimApp_.generateSensorEvents(parameters).contains("Success")
+    }
+
+    def "generate boot/ras/sensor/scenario events with exception"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("locations", "test")
         parameters.put("count", "1")
@@ -90,11 +101,14 @@ class EventSimAppSpec extends Specification {
                 {throw new SimulatorException("test exception")}
         eventSimApp_.foreignSimulatorEngine_.generateSensorEvents(parameters) >>
                 {throw new SimulatorException("test exception")}
+        eventSimApp_.foreignSimulatorEngine_.generateEventsForScenario(parameters) >>
+                {throw new SimulatorException("test exception")}
 
         expect:
         eventSimApp_.generateBootEvents(parameters).contains("test exception")
         eventSimApp_.generateRasEvents(parameters).contains("test exception")
         eventSimApp_.generateSensorEvents(parameters).contains("test exception")
+        eventSimApp_.generateEventsForScenario(parameters).contains("test exception")
     }
 
     def "generate job events"() {
