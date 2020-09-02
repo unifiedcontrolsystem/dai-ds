@@ -8,7 +8,6 @@ import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * Interface that allows HW inventory to be stored in an underlying DB.  The HW

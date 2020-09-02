@@ -22,32 +22,18 @@
           "server-address": "api-gw-service-nmn.local" ,
           "server-port": "8080" ,
           "urls": {
-            "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event": [
-              "events"
-            ] ,
-            "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage": [
-              "voltage"
-            ] ,
-            "/apis/sma-telemetry/v1/stream/cray-telemetry-power": [
-              "power"
-            ] ,
-            "/apis/sma-telemetry/v1/stream/cray-telemetry-energy": [
-              "energy"
-            ] ,
-            "/apis/sma-telemetry/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": [
-              "fabric"
-            ] ,
-            "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": [
-              "telemetry"
-            ] ,
-            "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": [
-              "stateChanges"
-            ]
+            "/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event": "dmtfEvent" ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage": "voltageTelemetry" ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-power": "powerTelemetry" ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-energy": "energyTelemetry" ,
+            "/apis/sma-telemetry/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": "fabricPerf" ,
+            "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": "temperatureTelemetry" ,
+            "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": "stateChange"
           }
       } ,
       "rabbitmq": {
           "exchangeName": "simulator",
-          "uri": "amqp://127.0.0.1"
+          "uri": "amqp://am01-nmn.local"
       }
   }
 }

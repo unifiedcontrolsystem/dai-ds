@@ -1,23 +1,15 @@
 {
   "providerClassMap": {
-    "bootEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
+    "inventoryEventData": "com.intel.dai.inventory.NetworkListenerProviderForeignBus"
   },
 
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectAddress": "sms01-nmn.local",
-        "connectPort": 8080,
-        "bindAddress": "sms01-nmn.local",
-        "bindPort": 54322,
-        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
-        "subjects": "stateChanges",
-        "requestBuilder": "com.intel.dai.inventory.ForeignSubscriptionRequest",
-        "responseParser": "com.intel.dai.inventory.ForeignSubscriptionResponseParser",
-        "subscriberName": "daiSubscriptionID",
-        "use-ssl": false
+        "fullUrl": "https://api-gw-service-nmn.local/apis/smd/hsm/v1/Subscriptions/SCN?stream_id=dai-inventory",
+        "connectTimeout": "30"
       },
-      "name": "http_callback"
+      "name": "eventSource"
     }
   },
 
@@ -27,9 +19,9 @@
         "stateChangeSource"
       ],
       "subjects": [
-        "stateChanges"
+        "*"
       ],
-      "adapterProvider": "bootEventData"
+      "adapterProvider": "inventoryEventData"
     }
   },
 
@@ -37,13 +29,12 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://127.0.0.1"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
-      "bootImageInfoUrlPath": "/bootparameters",
-      "publish": false
+      "publish": true
     }
   },
 

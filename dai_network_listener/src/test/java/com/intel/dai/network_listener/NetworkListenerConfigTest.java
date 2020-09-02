@@ -216,32 +216,6 @@ public class NetworkListenerConfigTest {
     }
 
     @Test
-    public void validatingNetworkStream3() throws Exception {
-        PropertyMap map = parser_.fromString(json_).getAsMap();
-        map.getMap("networkStreams").getMap("nodeTelemetry1").getMap("arguments").remove("requestType");
-        map.getMap("networkStreams").getMap("nodeTelemetry1").getMap("arguments").put("requestType", null);
-        String json = parser_.toString(map);
-        NetworkListenerConfig config = new NetworkListenerConfig(info_, mock(Logger.class));
-        try (InputStream stream = new ByteArrayInputStream(json.getBytes())) {
-            config.loadFromStream(stream);
-        }
-        config.setCurrentProfile(arguments_[3]);
-    }
-
-    @Test
-    public void validatingNetworkStream4() throws Exception {
-        PropertyMap map = parser_.fromString(json_).getAsMap();
-        map.getMap("networkStreams").getMap("nodeTelemetry1").getMap("arguments").remove("requestType");
-        map.getMap("networkStreams").getMap("nodeTelemetry1").getMap("arguments").put("requestType", "METHOD");
-        String json = parser_.toString(map);
-        NetworkListenerConfig config = new NetworkListenerConfig(info_, mock(Logger.class));
-        try (InputStream stream = new ByteArrayInputStream(json.getBytes())) {
-            config.loadFromStream(stream);
-        }
-        config.setCurrentProfile(arguments_[3]);
-    }
-
-    @Test
     public void validatingNetworkStream5() throws Exception {
         PropertyMap map = parser_.fromString(json_).getAsMap();
         map.getMap("networkStreams").getMap("nodeTelemetry1").getMap("arguments").remove("requestType");
@@ -327,20 +301,21 @@ public class NetworkListenerConfigTest {
 
     @Test
     public void getNetworkName() {
-        assertEquals("sse", config_.getNetworkName("nodeTelemetry1"));
+        assertEquals("eventSource", config_.getNetworkName("nodeTelemetry1"));
     }
 
     @Test
     public void getNetworkArguments() {
         PropertyMap args = config_.getNetworkArguments("nodeTelemetry1");
-        assertEquals("foreignPostBuilder", args.getStringOrDefault("requestBuilder", null));
+        assertEquals("http://127.0.0.1:5678/streams/nodeTelemetry/1", args.getStringOrDefault("fullUrl", null));
     }
 
     @Test
     public void getProviderClassNameFromName() {
-        assertEquals("com.intel.dai.foreign.builders.ApiPostBuilder",
-                config_.getProviderClassNameFromName("foreignPostBuilder"));
+        assertEquals("com.intel.dai.network_listener.Transformer",
+                config_.getProviderClassNameFromName("foreignTelemetryData"));
     }
+
 
     @Test
     public void getProviderConfigurationFromClassName() {
@@ -352,8 +327,7 @@ public class NetworkListenerConfigTest {
     @Test
     public void getFirstNetworkBaseUrl() throws Exception {
         config_.setCurrentProfile("default");
-        assertEquals("http://127.0.0.1:5678", config_.getFirstNetworkBaseUrl(false));
-        assertEquals("https://127.0.0.1:5678", config_.getFirstNetworkBaseUrl(true));
+        assertEquals("http://127.0.0.1:5678", config_.getFirstNetworkBaseUrl());
     }
 
     private NetworkListenerConfig config_;
@@ -362,9 +336,7 @@ public class NetworkListenerConfigTest {
     private static String[] arguments_ = new String[] {"127.0.0.2", "location", "hostname", "default"};
     private static String json_ = "{\n" +
             "  \"providerClassMap\": {\n" +
-            "    \"foreignPostBuilder\": \"com.intel.dai.foreign.builders.ApiPostBuilder\",\n" +
-            "    \"foreignTelemetryData\": \"com.intel.dai.network_listener.Transformer\",\n" +
-            "    \"foreignGetBuilder\": \"com.intel.dai.foreign.builders.ApiGetBuilder\"\n" +
+            "    \"foreignTelemetryData\": \"com.intel.dai.network_listener.Transformer\"\n" +
             "  },\n" +
             "  \"providerConfigurations\": {\n" +
             "    \"com.intel.dai.network_listener.Transformer\": {}\n" +
@@ -372,49 +344,33 @@ public class NetworkListenerConfigTest {
             "  \"networkStreams\": {\n" +
             "    \"rackTelemetry\": {\n" +
             "      \"arguments\": {\n" +
-            "        \"connectPort\": 5678,\n" +
-            "        \"connectAddress\": \"127.0.0.1\",\n" +
-            "        \"requestBuilder\": \"foreignGetBuilder\",\n" +
-            "        \"requestType\": \"GET\",\n" +
-            "        \"urlPath\": \"/streams/rackTelemetry\"\n" +
+            "        \"fullUrl\": \"http://127.0.0.1:5678/streams/rackTelemetry\"\n" +
             "      },\n" +
-            "      \"name\": \"sse\"\n" +
+            "      \"name\": \"eventSource\"\n" +
             "    },\n" +
             "    \"nodeTelemetry3\": {\n" +
             "      \"arguments\": {\n" +
-            "        \"connectPort\": 5678,\n" +
-            "        \"connectAddress\": \"127.0.0.1\",\n" +
-            "        \"requestBuilder\": \"foreignPostBuilder\",\n" +
-            "        \"urlPath\": \"/streams/nodeTelemetry/3\"\n" +
+            "        \"fullUrl\": \"http://127.0.0.1:5678/streams/nodeTelemetry/3\"\n" +
             "      },\n" +
-            "      \"name\": \"sse\"\n" +
+            "      \"name\": \"eventSource\"\n" +
             "    },\n" +
             "    \"nodeTelemetry2\": {\n" +
             "      \"arguments\": {\n" +
-            "        \"connectPort\": 5678,\n" +
-            "        \"connectAddress\": \"127.0.0.1\",\n" +
-            "        \"requestBuilder\": \"foreignPostBuilder\",\n" +
-            "        \"urlPath\": \"/streams/nodeTelemetry/2\"\n" +
+            "        \"fullUrl\": \"http://127.0.0.1:5678/streams/nodeTelemetry/2\"\n" +
             "      },\n" +
-            "      \"name\": \"sse\"\n" +
+            "      \"name\": \"eventSource\"\n" +
             "    },\n" +
             "    \"nodeTelemetry1\": {\n" +
             "      \"arguments\": {\n" +
-            "        \"connectPort\": 5678,\n" +
-            "        \"connectAddress\": \"127.0.0.1\",\n" +
-            "        \"requestBuilder\": \"foreignPostBuilder\",\n" +
-            "        \"urlPath\": \"/streams/nodeTelemetry/1\"\n" +
+            "        \"fullUrl\": \"http://127.0.0.1:5678/streams/nodeTelemetry/1\"\n" +
             "      },\n" +
-            "      \"name\": \"sse\"\n" +
+            "      \"name\": \"eventSource\"\n" +
             "    },\n" +
             "    \"nodeTelemetry0\": {\n" +
             "      \"arguments\": {\n" +
-            "        \"connectPort\": 5678,\n" +
-            "        \"connectAddress\": \"127.0.0.1\",\n" +
-            "        \"requestBuilder\": \"foreignPostBuilder\",\n" +
-            "        \"urlPath\": \"/streams/nodeTelemetry/0\"\n" +
+            "        \"fullUrl\": \"http://127.0.0.1:5678/streams/nodeTelemetry/0\"\n" +
             "      },\n" +
-            "      \"name\": \"sse\"\n" +
+            "      \"name\": \"eventSource\"\n" +
             "    }\n" +
             "  },\n" +
             "  \"adapterProfiles\": {\n" +

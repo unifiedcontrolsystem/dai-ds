@@ -4,34 +4,35 @@
   },
   "providerConfigurations": {
     "tokenAuthProvider": {
-      "tokenServer": "https://authentication_server:8080/auth",
-      "realm": "myKingdom",
-      "clientId": "myApplicationId",
-      "clientSecret": "shhhhhhhhhhhh"
+      "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+      "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+      "clientId": "admin-client",
+      "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+      "realm": "shasta"
     },
     "requester": {
       "initiateDiscovery": {
-        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "endpoint": "https://api-gw-service-nmn.local",
         "verb": "POST",
         "resource": "/Inventory/Discover"
       },
       "getDiscoveryStatus": {
-        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "endpoint": "https://api-gw-service-nmn.local",
         "verb": "GET",
         "resource": "/Inventory/DiscoveryStatus"
       },
       "getHwInventorySnapshot": {
-        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "endpoint": "https://api-gw-service-nmn.local",
         "verb": "GET",
         "resource": "/Inventory/Hardware"
       },
       "getHWInventoryUpdate": {
-        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "endpoint": "https://api-gw-service-nmn.local",
         "verb": "GET",
         "resource": "/Inventory/Hardware/"
       },
       "getHWInventoryHistory": {
-        "endpoint": "http://api-gw-service-nmn.local:8080",
+        "endpoint": "https://api-gw-service-nmn.local",
         "verb": "GET",
         "resource": "/Inventory/Hardware/History"
       }

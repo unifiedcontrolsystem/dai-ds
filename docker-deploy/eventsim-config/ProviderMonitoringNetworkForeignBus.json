@@ -7,35 +7,35 @@
   "networkStreams": {
     "energyTelemetry": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-energy?stream_id=dai-energy",
         "connectTimeout": "30"
       },
       "name": "eventSource"
     },
     "powerTelemetry": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-power?stream_id=dai-telemtry",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-power?stream_id=dai-power",
         "connectTimeout": "30"
       },
       "name": "eventSource"
     },
     "temperatureTelemetry": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-temperature?stream_id=dai-telemtry",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-temperature?stream_id=dai-temperature",
         "connectTimeout": "30"
       },
       "name": "eventSource"
     },
     "voltageTelemetry": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-voltage?stream_id=dai-telemtry",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-telemetry-voltage?stream_id=dai-voltage",
         "connectTimeout": "30"
       },
       "name": "eventSource"
     },
     "events": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event?stream_id=dai-events",
+        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-dmtf-resource-event?stream_id=dai-dmtf",
         "connectTimeout": "30"
       },
       "name": "eventSource"
@@ -51,7 +51,7 @@
         "voltageTelemetry"
       ],
       "subjects": [
-        "telemetry"
+        "*"
       ],
       "adapterProvider": "environmentalData"
     },
@@ -60,7 +60,7 @@
         "events"
       ],
       "subjects": [
-        "events"
+        "*"
       ],
       "adapterProvider": "rasData"
     }
@@ -70,7 +70,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://sms01-nmn.local"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",

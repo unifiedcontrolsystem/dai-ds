@@ -3,7 +3,7 @@
     "ras" : {
       "default" : "old-ras",
       "types" :[
-        "fabric-crit", "fabric-perf", "old-ras"
+        "fabric-crit", "old-ras"
       ]
     },
 
@@ -12,12 +12,19 @@
       "types" :[
         "energy", "fabric-perf", "power", "temperature", "voltage"
       ]
+    },
+
+    "boot" : {
+      "default" : "all",
+      "types" :[
+        "off", "on", "ready"
+      ]
     }
   } ,
   "event-types": {
     "energy": {
       "template": "/resources/templates/telemetry-energy.json" ,
-      "stream-type": "energy" ,
+      "stream-type": "energyTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -52,7 +59,7 @@
 
     "fabric-perf": {
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
-      "stream-type": "fabric" ,
+      "stream-type": "fabricPerf" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -85,12 +92,105 @@
       "timestamp" : "metrics/messages[?]/Events[?]/Oem/Sensors[?]/Timestamp"
     },
 
+    "off": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChange" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Off"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
+    "on": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChange" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "On"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
+    "ready": {
+      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-type": "stateChange" ,
+      "single-template": {
+        "metrics/messages[?]/Flag": ".*" ,
+        "metrics/messages[?]/State": ".*"
+      },
+      "single-template-count": {
+        "metrics/messages[*]":1
+      },
+      "path-count" : {
+        "metrics/messages[*]" : 1
+      },
+      "update-fields": {
+        "metrics/messages[*]": {
+          "Components[]": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          },
+          "State": {
+            "metadata": "/resources/metadata/ForeignStateChangeStates.json" ,
+            "metadata-filter": "Ready"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "metrics/messages[*]" : "new"
+      },
+      "timestamp" : "metrics/messages[?]/timestamp"
+    },
+
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
-      "stream-type": "events" ,
+      "stream-type": "dmtfEvent" ,
       "single-template": {
-        "message[*]/seqnum": ".*" ,
-        "message[*]/pri": ".*"
+        "message[?]/seqnum": ".*" ,
+        "message[?]/pri": ".*"
       },
       "single-template-count": {
         "message[*]":1
@@ -118,7 +218,7 @@
 
     "power": {
       "template": "/resources/templates/telemetry-power.json" ,
-      "stream-type": "power" ,
+      "stream-type": "powerTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -154,7 +254,7 @@
 
     "temperature": {
       "template": "/resources/templates/telemetry-temperature.json" ,
-      "stream-type": "temperature" ,
+      "stream-type": "temperatureTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -189,7 +289,7 @@
 
     "voltage": {
       "template": "/resources/templates/telemetry-voltage.json" ,
-      "stream-type": "temperature" ,
+      "stream-type": "voltageTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"

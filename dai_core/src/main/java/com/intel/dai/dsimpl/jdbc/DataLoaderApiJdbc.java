@@ -4,14 +4,14 @@
 
 package com.intel.dai.dsimpl.jdbc;
 
+import com.intel.dai.dsapi.DataLoaderApi;
+import com.intel.dai.exceptions.DataStoreException;
+import com.intel.logging.Logger;
+
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
-import com.intel.logging.Logger;
-import com.intel.dai.dsapi.DataLoaderApi;
-import com.intel.dai.exceptions.DataStoreException;
 
 public class DataLoaderApiJdbc implements DataLoaderApi {
 
@@ -468,6 +468,7 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_TO_PROCEDURE.put("HW_Inventory_FRU", "get_hwinventoryfru_records()");
         TABLE_TO_PROCEDURE.put("HW_Inventory_Location", "get_hwinventorylocation_records()");
         TABLE_TO_PROCEDURE.put("RawHWInventory_History", "get_rawinventoryhistory_records()");
+        TABLE_TO_PROCEDURE.put("NodeInventory_History", "get_nodeinventoryhistory_records()");
     }
 
     private Connection onlineTierConn;

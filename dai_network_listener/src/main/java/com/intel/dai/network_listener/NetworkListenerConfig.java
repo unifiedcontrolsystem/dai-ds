@@ -15,6 +15,7 @@ import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -122,14 +123,15 @@ public class NetworkListenerConfig {
         return providerConfigs_.getMapOrDefault(className, null);
     }
 
-    public String getFirstNetworkBaseUrl(boolean useSSL) throws ConfigIOParseException {
+    public String getFirstNetworkBaseUrl() throws ConfigIOParseException {
         checkProfile();
         String streamName = getProfileStreams().iterator().next();
-        String scheme = useSSL?"https":"http";
         PropertyMap arguments = getNetworkArguments(streamName);
         try {
-            return String.format("%s://%s:%d", scheme, arguments.getString("connectAddress"),
-                    arguments.getInt("connectPort"));
+            String fullUrl = arguments.getString("fullUrl");
+            URI uri = URI.create(fullUrl);
+            return String.format("%s://%s:%d", uri.getScheme(), uri.getHost(),
+                    uri.getPort());
         } catch(PropertyNotExpectedType e) {
             throw new ConfigIOParseException("Failed to get the base URL from the first network stream in the " +
                     "profile: " + currentProfile_, e);
@@ -233,7 +235,8 @@ public class NetworkListenerConfig {
         boolean result = subjects != null && subjects.size() > 0;
         if(result)
             for(Object oSubject: subjects) {
-                result = oSubject instanceof String && subjectMap_.containsKey(oSubject.toString());
+                result = oSubject instanceof String &&
+                         (subjectMap_.containsKey(oSubject.toString()) || oSubject.equals("*"));
                 if(!result) break;
             }
         return result;

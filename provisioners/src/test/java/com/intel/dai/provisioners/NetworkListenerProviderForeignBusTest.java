@@ -40,7 +40,7 @@ public class NetworkListenerProviderForeignBusTest {
         map_.put("bootImageInfoUrlPath", "/com/intel/dai/hwinventory/api/test/bootId");
         map_.put("doActions", false);
         when(config_.getProviderConfigurationFromClassName(anyString())).thenReturn(map_);
-        when(config_.getFirstNetworkBaseUrl(anyBoolean())).thenReturn("http://127.0.0.2:9999");
+        when(config_.getFirstNetworkBaseUrl()).thenReturn("http://127.0.0.2:9999");
     }
 
     @Test
