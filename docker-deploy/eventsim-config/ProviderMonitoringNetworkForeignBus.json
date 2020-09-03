@@ -72,12 +72,12 @@
       "exchangeName": "ucs",
       "uri": "amqp://am01-nmn.local"
     },
-    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+    "com.intel.dai.monitoring.EventSimEnvironmentalProviderForeignBus": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
       "publish": true
     },
-    "com.intel.dai.monitoring.RasEventProviderForeignBus": {
+    "com.intel.dai.monitoring.EventSimRasEventProviderForeignBus": {
       "publishTopic": "ucs_ras_event",
       "publish": true
     }
