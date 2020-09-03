@@ -13,7 +13,7 @@
       "Key": "UcsConfigDirectory"
     },
     {
-      "Value": "sms01-nmn",
+      "Value": "am01-nmn.local",
       "Key": "SmwHostname"
     }
   ],
@@ -119,14 +119,14 @@
       "Queue": ""
     },
     {
-      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=sms01-nmn.local",
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=am01-nmn.local",
       "TypeOfAdapter": "ONLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataMover",
       "Queue": ""
     },
     {
-      "Parms": "RabbitMQHost=sms01-nmn.local",
+      "Parms": "RabbitMQHost=am01-nmn.local",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataReceiver",
@@ -161,7 +161,7 @@
       "Queue": "X0-CH0-SN0"
     },
     {
-      "Parms": "RabbitMQHost=sms01-nmn.local",
+      "Parms": "RabbitMQHost=am01-nmn.local",
       "TypeOfAdapter": "WLM",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
@@ -196,7 +196,7 @@
       "IpAddr": "10.2.0.1",
       "BmcAddr": "10.4.0.1",
       "BootImageId": null,
-      "HostName": "sms01-nmn",
+      "HostName": "am01-nmn",
       "MacAddr": "aa:bb:cc:dd:ef:80",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:00",
@@ -208,7 +208,7 @@
       "IpAddr": "10.2.0.2",
       "BmcAddr": "10.4.0.2",
       "BootImageId": null,
-      "HostName": "sms02-nmn",
+      "HostName": "am02-nmn",
       "MacAddr": "aa:bb:cc:dd:ef:81",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:01",
@@ -220,7 +220,7 @@
       "IpAddr": "10.2.0.3",
       "BmcAddr": "10.4.0.3",
       "BootImageId": null,
-      "HostName": "sms03-nmn",
+      "HostName": "am03-nmn",
       "MacAddr": "aa:bb:cc:dd:ef:82",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:02",
@@ -232,7 +232,7 @@
       "IpAddr": "10.2.0.4",
       "BmcAddr": "10.4.0.4",
       "BootImageId": null,
-      "HostName": "sms04-nmn",
+      "HostName": "am04-nmn",
       "MacAddr": "aa:bb:cc:dd:ef:83",
       "Type": "ServiceNode",
       "BmcMacAddr": "aa:bb:cc:dd:ef:03",
