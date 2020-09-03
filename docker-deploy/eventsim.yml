@@ -15,4 +15,5 @@ services:
       - "/opt/dai-docker/lib:/opt/ucs/lib"
       - "/opt/dai-docker/log:/opt/ucs/log"
       - "/opt/dai-docker/dai:/opt/ucs/dai"
+      - "/opt/dai-docker/var_log:/var/log"
     restart: always
