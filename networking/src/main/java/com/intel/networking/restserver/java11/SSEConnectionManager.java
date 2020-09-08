@@ -54,13 +54,13 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         }
     }
 
-    void publishToConnections(String eventType, String data, String id) {
+    void publishToConnections(String publishPath, String data, String id) {
         List<SSEConnection> brokenConnections = new ArrayList<>();
         synchronized (this) {
             for(SSEConnection connection: connections_) {
-                if(shouldEventBeFired(eventType, connection.exchange.getRequestURI().getPath(),
+                if(shouldEventBeFired(publishPath, connection.exchange.getRequestURI().getPath(),
                         connection.eventTypes)) {
-                    if(publishSSE(connection, eventType, data, id))
+                    if(publishSSE(connection, publishPath, data, id))
                         brokenConnections.add(connection);
                     else
                         connection.lastPublished = Instant.now().getEpochSecond();
@@ -77,8 +77,8 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         globalLastPublish_.set(Instant.now().getEpochSecond());
     }
 
-    private boolean shouldEventBeFired(String eventType, String path, Collection<String> wantedEventTypes) {
-        return checkForPossibleEventTypes(eventType, path) && checkForWantedEventTypes(eventType, wantedEventTypes);
+    private boolean shouldEventBeFired(String publishPath, String path, Collection<String> wantedEventTypes) {
+        return publishPath.equals(path);
     }
 
     boolean checkForWantedEventTypes(String eventType, Collection<String> wantedEventTypes) {
@@ -123,11 +123,11 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         return false;
     }
 
-    private boolean publishSSE(SSEConnection connection, String eventType, String data, String id) {
+    private boolean publishSSE(SSEConnection connection, String publishPath, String data, String id) {
         String[] parts = data.split("\n");
         try {
             connection.exchange.getResponseBody().write(String.format("event:%s%n",
-                    eventType.trim()).getBytes(StandardCharsets.UTF_8));
+                    publishPath.trim()).getBytes(StandardCharsets.UTF_8));
             if(id != null && !id.isBlank())
                 connection.exchange.getResponseBody().write(String.format("id:%s%n", id).
                             getBytes(StandardCharsets.UTF_8));
@@ -142,8 +142,9 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         } catch(IOException e) {
             String host = connection.exchange.getRemoteAddress().getHostName();
             int port = connection.exchange.getRemoteAddress().getPort();
-            log_.exception(e, String.format("Failed to send message to connection at '%s:%d' using event type '%s', removing connection",
-                    host, port, eventType));
+            log_.exception(e, String.format("Failed to send message to connection at '%s:%d' using publishPath'%s', " +
+                            "removing connection",
+                    host, port, publishPath));
             return true;
         }
         return false;
