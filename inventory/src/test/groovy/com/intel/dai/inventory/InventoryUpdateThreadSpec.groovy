@@ -8,6 +8,8 @@ import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.HWInvDbApi
 import com.intel.dai.dsapi.HWInvHistoryEvent
 import com.intel.dai.dsapi.HWInvUtil
+import com.intel.dai.dsapi.InventorySnapshot
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.logging.Logger
 import spock.lang.Specification
 
@@ -77,5 +79,39 @@ class DatabaseSynchronizerSpec extends Specification {
 
         expect:
         ts.ingestCookedNodes([:]) == 0
+    }
+
+    def "getLastHWInventoryHistoryUpdate"() {
+        ts.nearlineInventoryDatabaseClient_ = Mock(InventorySnapshot)
+        ts.nearlineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
+
+        expect:
+        ts.getLastHWInventoryHistoryUpdate() == ""
+    }
+
+    def "ingestCanonicalHWInvHistoryJson"() {
+        ts.nearlineInventoryDatabaseClient_ = Mock(InventorySnapshot)
+        ts.nearlineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
+
+        expect:
+        ts.ingestCanonicalHWInvHistoryJson(null) == []
+    }
+
+    def "ingestRawInventoryHistoryEvents"() {
+        ts.util_ = new HWInvUtilImpl(Mock(Logger))
+        ts.foreignInventoryDatabaseClient_ = Mock(ForeignInventoryClient)
+        ts.foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(_) >> null
+
+        expect:
+        ts.ingestRawInventoryHistoryEvents(null) == []
+    }
+
+    def "ingestRawInventorySnapshot"() {
+        ts.util_ = new HWInvUtilImpl(Mock(Logger))
+        ts.foreignInventoryDatabaseClient_ = Mock(ForeignInventoryClient)
+        ts.foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(_) >> null
+
+        expect:
+        ts.ingestRawInventorySnapshot("", []) == 0
     }
 }
