@@ -24,7 +24,7 @@
   "event-types": {
     "energy": {
       "template": "/resources/templates/telemetry-energy.json" ,
-      "stream-type": "energy" ,
+      "stream-type": "energyTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -59,7 +59,7 @@
 
     "fabric-perf": {
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
-      "stream-type": "fabric" ,
+      "stream-type": "fabricPerf" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -94,7 +94,7 @@
 
     "off": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-type": "stateChanges" ,
+      "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -125,7 +125,7 @@
 
     "on": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-type": "stateChanges" ,
+      "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -156,7 +156,7 @@
 
     "ready": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-type": "stateChanges" ,
+      "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -187,7 +187,7 @@
 
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
-      "stream-type": "events" ,
+      "stream-type": "dmtfEvent" ,
       "single-template": {
         "message[?]/seqnum": ".*" ,
         "message[?]/pri": ".*"
@@ -218,7 +218,7 @@
 
     "power": {
       "template": "/resources/templates/telemetry-power.json" ,
-      "stream-type": "power" ,
+      "stream-type": "powerTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -254,7 +254,7 @@
 
     "temperature": {
       "template": "/resources/templates/telemetry-temperature.json" ,
-      "stream-type": "temperature" ,
+      "stream-type": "temperatureTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -289,7 +289,7 @@
 
     "voltage": {
       "template": "/resources/templates/telemetry-voltage.json" ,
-      "stream-type": "temperature" ,
+      "stream-type": "voltageTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"

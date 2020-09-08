@@ -39,6 +39,8 @@ public class Java11RESTClient extends RESTClient {
      */
     public Java11RESTClient(Logger log) {
         super(log);
+        log_.warn("*** DEPRECATION WARNING: The REST client 'jdk11' is deprecated, please change to using the " +
+                "'apache' REST client!");
         try { // This SSLContext accepts ALL certificates and should NEVER be used to talk to the internet!!!
             SSLContext context = SSLContext.getInstance("TLS");
             TrustManager[] tm = new TrustManager[] { new PermissiveX509TrustManager() };

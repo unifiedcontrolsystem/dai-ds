@@ -6,18 +6,15 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "connectPort": 8080,
-        "connectAddress": "api-gw-service-nmn.local",
-        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN",
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-inventory",
         "connectTimeout": "30",
-        "requestBuilder": "com.intel.networking.sink.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "use-ssl": false,
-        "requestBuilderSelectors": {
-          "stream_id": "dai-inventory"
-        }
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
       },
-      "name": "sse"
+      "name": "eventSource"
     }
   },
 
@@ -27,7 +24,7 @@
         "stateChangeSource"
       ],
       "subjects": [
-        "stateChanges"
+        "*"
       ],
       "adapterProvider": "inventoryEventData"
     }
@@ -37,7 +34,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://sms01-nmn.local"
+      "uri": "amqp://am01-nmn.local"
     },
     "com.intel.dai.inventory.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_inventory_event",

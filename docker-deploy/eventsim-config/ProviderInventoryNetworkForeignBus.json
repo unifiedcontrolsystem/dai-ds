@@ -19,7 +19,7 @@
         "stateChangeSource"
       ],
       "subjects": [
-        "stateChanges"
+        "*"
       ],
       "adapterProvider": "inventoryEventData"
     }
