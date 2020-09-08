@@ -16,9 +16,6 @@ public class RawInventoryInsert extends VoltProcedure {
                     " VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
 
     public static final long SUCCESSFUL = 0;
-    public static final long FAILED = 1;
-
-    public static final String emptyPrefix = "empty-";
 
     public static final SQLStmt upsertIntoHWInvFruStmt = new SQLStmt(upsertFruSqlCmd);
     public static final SQLStmt upsertIntoHWInvLocStmt = new SQLStmt(upsertLocSqlCmd);
@@ -27,24 +24,14 @@ public class RawInventoryInsert extends VoltProcedure {
                     String fruId, String fruType, String fruSubType, String fruInfo)
             throws VoltAbortException {
 
-        if (fruId == null) {
-            return FAILED;
+        // If fruid is null, only the loc can be captured.  However, this is NOT a
+        // failure.  It most likely means the the loc is EMPTY.
+        if (fruId != null) {
+            voltQueueSQL(upsertIntoHWInvFruStmt, fruId, fruType, fruSubType, fruInfo);
         }
-        if (fruId.indexOf(emptyPrefix) == 0) {
-            if (fruType != null) {
-                return FAILED;
-            }
-        }
-        if (fruType == null) {
-            if (fruSubType != null) {
-                return FAILED;
-            }
-        }
-
-        voltQueueSQL(upsertIntoHWInvFruStmt, fruId, fruType, fruSubType, fruInfo);
         voltQueueSQL(upsertIntoHWInvLocStmt, id, type, ordinal, fruId, info);
 
         voltExecuteSQL();
-        return SUCCESSFUL;
+        return 0;  // voltdb stored procedures cannot return void
     }
 }

@@ -1,3 +1,0 @@
-usage: HWInvTranslatorCLI
- -i,--input <arg>    input file name
- -o,--output <arg>   output file name

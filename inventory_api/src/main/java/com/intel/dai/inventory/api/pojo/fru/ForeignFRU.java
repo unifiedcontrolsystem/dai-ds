@@ -45,10 +45,18 @@ public class ForeignFRU {
         return "";
     }
 
+    /**
+     * We explicitly initialize each field in order to make the meaning of
+     * null clear.  The constructor determines the default value of a json field.
+     */
     public ForeignFRU() {
-        FRUID = "";
-        Type = "";
-        Subtype = "";
+//        FRUID = "";
+//        Type = "";
+//        Subtype = "";
+
+        FRUID = null;
+        Type = null;
+        Subtype = null;
 
         MemoryFRUInfo = null;
         ProcessorFRUInfo = null;

@@ -27,18 +27,18 @@ class VoltHWInvDbApiSpec extends Specification {
         def util = Mock(HWInvUtilImpl)
         api = new VoltHWInvDbApi(logger, util, servers)
         util.toCanonicalPOJO(_) >> null
-        expect: api.ingest(null as String) == 1
+        expect: api.ingest(null as String) == 0
     }
     def "ingest from empty HWInvHistory"() {
         HWInvHistory hist = new HWInvHistory();
-        expect: api.ingest(hist) == 1
+        expect: api.ingest(hist) == []
     }
     def "ingestHistory from String failed"() {
         String[] servers = ["localhost"]
         def util = Mock(HWInvUtilImpl)
         api = new VoltHWInvDbApi(logger, util, servers)
         util.toCanonicalHistoryPOJO(_) >> null
-        expect: api.ingestHistory(null as String) == 1
+        expect: api.ingestHistory(null as String) == []
     }
     // Ingesting nonexistent file now results in a no-op
     def "ingest -- nonexistent file"() {
@@ -70,8 +70,8 @@ class VoltHWInvDbApiSpec extends Specification {
 
     def "insertHistoricalRecord"() {
         api.client = Mock(Client)
-        when: api.insertRawHistoricalRecord(null, null, null, null)
-        then: notThrown DataStoreException
+        when: api.insertRawHistoricalRecord null
+        then: thrown DataStoreException
     }
 
     def "lastHwInvHistoryUpdate"() {

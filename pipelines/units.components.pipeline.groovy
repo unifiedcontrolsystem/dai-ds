@@ -5,7 +5,7 @@
 pipeline {
     agent none
     parameters {
-        booleanParam(name: 'QUICK_CHECK', defaultValue: false,
+        booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Performing quick checks only')
         choice(name: 'AGENT', choices: [
                 'NRE-TEST',
@@ -32,50 +32,46 @@ pipeline {
                 }
                 stage('Quick Unit Test') {
                     options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
                         script {
-//                            utilities.InvokeGradle("build")
-//                            utilities.InvokeGradle(":dai_core:clean")
-//                            utilities.InvokeGradle(":inventory_api:test")
-//                            utilities.InvokeGradle(":inventory:test")
-                            utilities.InvokeGradle(":dai_core:test")
-//                            utilities.InvokeGradle(":dai_network_listener:test")
-//                            utilities.InvokeGradle(":procedures:test")
+                            utilities.InvokeGradle(":procedures:build")
+                            utilities.InvokeGradle(":inventory:build")
+                            utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }
                 }
                 stage('Quick Component Test') {
                     options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
                         script {
                             RestartHWInvDb()
+                            utilities.InvokeGradle(":procedures:jar")
                             utilities.InvokeGradle(":dai_core:integrationTest")
-                            utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }
                 }
                 stage('Quick Report') {
                     options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
                     }
                 }
                 stage('Quick Archive') {
-                    when { expression { "${params.QUICK_CHECK}" == 'true' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
-                        CopyCleanUpMachineScript()
-                        archiveArtifacts 'build/reports/**, build/distributions/**, build/distribution/clean_up_machine.sh'
+                        CopyIntegrationTestScriptsToBuildDistributions()
+                        archiveArtifacts 'build/reports/**, build/distributions/*.sh, build/json-server/**'
                     }
                 }
                 stage('Full Unit Test') {
                     options{ catchError(message: "Full Unit Test failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         script {
                             sh 'rm -rf build'
@@ -87,7 +83,7 @@ pipeline {
                 stage('Full Component Test') {
                     options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         script {
                             RestartHWInvDb()
@@ -98,23 +94,23 @@ pipeline {
                 stage('Full Report') {
                     options{ catchError(message: "Full Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
                     }
                 }
                 stage('Full Archive') {
-                    when { expression { "${params.QUICK_CHECK}" == 'false' } }
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -f *.zip'
-                        CopyCleanUpMachineScript()
+                        CopyIntegrationTestScriptsToBuildDistributions()
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: 'inventory_api/src/test/resources/data', glob: '', zipFile: 'hwInvData.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-                        archiveArtifacts 'build/reports/**, build/distributions/**, build/distribution/clean_up_machine.sh'
+                        archiveArtifacts 'build/reports/**, build/distributions/*.sh, build/json-server/**'
                     }
                 }
             }
@@ -149,11 +145,13 @@ def StopHWInvDb() {
 }
 
 def CleanUpMachine() {
-    CopyCleanUpMachineScript()
+    CopyIntegrationTestScriptsToBuildDistributions()
     sh './build/distributions/clean_up_machine.sh'
 }
 
-def CopyCleanUpMachineScript() {
+def CopyIntegrationTestScriptsToBuildDistributions() {
+    sh 'mkdir -p build/json-server'
     sh 'mkdir -p build/distributions'
+    sh 'cp ./inventory_api/src/integration/resources/scripts/json-server/* ./build/json-server'
     sh 'cp ./inventory_api/src/integration/resources/scripts/clean_up_machine.sh ./build/distributions'
 }

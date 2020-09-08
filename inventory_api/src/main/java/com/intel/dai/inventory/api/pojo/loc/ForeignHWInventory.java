@@ -10,7 +10,7 @@ import java.util.List;
 
 @ToString
 public class ForeignHWInventory {
-    public String ForeignName;
+    public String XName;    // field name MUST match incoming json from foreign server
     public String Format;
 
     public List<ForeignHWInvByLocCabinet> Cabinets;
@@ -23,6 +23,7 @@ public class ForeignHWInventory {
     public List<ForeignHWInvByLocNode> Nodes;
     public List<ForeignHWInvByLocProcessor> Processors;
 
+    public List<ForeignHWInvByLocDrive> Drives;
     public List<ForeignHWInvByLocMemory> Memory;
     public List<ForeignHWInvByLocCabinetPDU> CabinetPDU;
     public List<ForeignHWInvByLocCabinetPDUOutlet> CabinetPDUOutlets;

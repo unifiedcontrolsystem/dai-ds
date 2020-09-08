@@ -1,5 +1,6 @@
 package com.intel.dai.dsimpl.voltdb
 
+import com.intel.dai.dsapi.HWInvHistoryEvent
 import com.intel.logging.Logger
 import org.apache.commons.io.FileUtils
 import spock.lang.Specification
@@ -63,14 +64,14 @@ class VoltHWInvDbApiITSpec extends Specification {
 
     def "numberOfCookedNodes"() {
         setup: ts.ingest rawInventoryDataFilePath
-        when: ts.ingestCookedNode '2002-10-02T15:00:00.05Z', 'Added', 'R0-CB0-CN0'
+        when: ts.ingestCookedNode 'R0-CB0-CN0', '2002-10-02T15:00:00.05Z'
         then: ts.numberOfCookedNodes() == 1
     }
 
     def "deleteAllCookedNodes"() {
         setup:
         ts.ingest rawInventoryDataFilePath
-        ts.ingestCookedNode '2002-10-02T15:00:00.05Z', 'Added', 'R0-CB0-CN0'
+        ts.ingestCookedNode 'R0-CB0-CN0', '2002-10-02T15:00:00.05Z'
         expect: ts.numberOfCookedNodes() == 1
 
         when: ts.deleteAllCookedNodes()
@@ -81,13 +82,13 @@ class VoltHWInvDbApiITSpec extends Specification {
         given: ts.numberOfCookedNodes() == 0
         when:
         ts.ingest rawInventoryDataFilePath
-        ts.ingestCookedNode Timestamp, Action, NodeLocation
+        ts.ingestCookedNode NodeLocation, Timestamp
         then: ts.numberOfCookedNodes() == 1
 
         where:
-        Timestamp                   | Action    | NodeLocation
-        '2002-10-02T15:00:00.05Z'   | 'Added'   | 'R0-CB0-CN0'
-        '2003-10-02T15:00:00.05Z'   | 'Removed' | 'R0-CB0-CN0'
+        Timestamp                   | NodeLocation
+        '2002-10-02T15:00:00.05Z'   | 'R0-CB0-CN0'
+        '2003-10-02T15:00:00.05Z'   | 'R0-CB0-CN0'
     }
 
     def "insertHistoricalRecord"() {
@@ -102,19 +103,33 @@ class VoltHWInvDbApiITSpec extends Specification {
     }
 
     def "ingestCookedNodesChanged"() {
+        Map<String, String> lastNodeChangeTimestamp = [:]
+        lastNodeChangeTimestamp['R0-CB0-CN0'] = '2002-10-02T15:00:00.05Z'
         given: ts.numberCookedNodeInventoryHistoryRows() == 0
         when:
         ts.ingest rawInventoryDataFilePath
-        populateRawInvHistoryTable()
 
-        then: ts.ingestCookedNodesChanged() == 2
+        then: ts.ingestCookedNodesChanged(lastNodeChangeTimestamp) == 1
         println ts.dumpCookedNodes()
     }
 
     def populateRawInvHistoryTable() {
-        ts.insertRawHistoricalRecord 'Added', 'R0-CB0-CN0', 'node.0', '2002-10-02T15:00:00.05Z'
-        ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0', 'node.0', '2003-10-02T15:00:00.05Z'
-        ts.insertRawHistoricalRecord 'Removed', 'R0-CB0-CN0-DIMM0', 'memory.0', '2003-10-02T15:00:00.05Z'
+        def event = new HWInvHistoryEvent();
+        event.Action = 'Added'
+        event.ID = 'R0-CB0-CN0'
+        event.FRUID = 'node.0'
+        event.Timestamp = '2002-10-02T15:00:00.05Z'
+        ts.insertRawHistoricalRecord event
+
+        event.Action = 'Removed'
+        event.ID = 'R0-CB0-CN0'
+        event.FRUID = 'node.0'
+        event.Timestamp = '2003-10-02T15:00:00.05Z'
+        ts.insertRawHistoricalRecord event
+
+        event.ID = 'R0-CB0-CN0-DIMM0'
+        event.FRUID = 'memory.0'
+        ts.insertRawHistoricalRecord event
 
         return 3
     }

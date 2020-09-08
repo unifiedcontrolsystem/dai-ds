@@ -102,6 +102,28 @@ public class HWInvUtilImpl implements HWInvUtil {
         return (List<HWInvLoc>) CollectionUtils.subtract(list0, list1);
     }
 
+    @Override
+    public String head(String str, int limit) {
+        return str == null ? null : str.substring(0, Math.min(limit, str.length()));
+    }
+
+    @Override
+    public void setMaxNumberOfNonDebugMessages(int limit) {
+        maxNumberOfNonDebugMessages = limit;
+    }
+
+    @Override
+    public void logError(String fmt, Object... args) {
+        if (numberOfNonDebugMessagesSoFar < maxNumberOfNonDebugMessages) {
+            numberOfNonDebugMessagesSoFar++;
+            logger.error(fmt, args);
+            return;
+        }
+        logger.debug(fmt, args);
+    }
+
+    private int numberOfNonDebugMessagesSoFar = 0;
+    private int maxNumberOfNonDebugMessages = 0;
     private final transient Gson gson;
     private final Logger logger;
 }

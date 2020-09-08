@@ -11,7 +11,8 @@ import lombok.ToString;
 
 
 /**
- * Pojo containing information extracted from a foreign location.
+ * Pojo containing information extracted from a foreign location.  Note that null
+ * handling can be tricky.
  */
 @ToString
 public class ForeignHWInvByLoc {
@@ -52,12 +53,20 @@ public class ForeignHWInvByLoc {
         return "";
     }
 
+    /**
+     * We explicitly initialize each field in order to make the meaning of
+     * null clear.  The constructor determines the default value of a json field.
+     */
     public ForeignHWInvByLoc() {
         Ordinal = -1;
 
-        ID = "";
-        Type = "";
-        Status = "";
+//        ID = "";
+//        Type = "";
+//        Status = "";
+
+        ID = null;
+        Type = null;
+        Status = null;
         PopulatedFRU = null;
 
         MemoryLocationInfo = null;

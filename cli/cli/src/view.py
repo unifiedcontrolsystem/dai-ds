@@ -473,7 +473,7 @@ class ViewCli(object):
             if display_format == 'json':
                 data_to_display = json_display.display_raw_json()
             else:
-                columns_order = ["lctn", "dbupdatedtimestamp", "inventorytimestamp", "sernum", "inventoryinfo"]
+                columns_order = ["lctn", "inventorytimestamp", "sernum", "inventoryinfo"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         else:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)

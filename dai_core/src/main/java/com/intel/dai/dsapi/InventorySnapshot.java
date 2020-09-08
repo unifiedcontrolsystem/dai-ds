@@ -4,13 +4,15 @@
 
 package com.intel.dai.dsapi;
 
-import java.time.Instant;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.properties.PropertyMap;
+
+import java.time.Instant;
 
 public interface InventorySnapshot {
     void storeInventorySnapshot(String location, Instant timestamp, String info) throws DataStoreException;
     PropertyMap retrieveRefSnapshot(String location) throws DataStoreException;
     PropertyMap retrieveSnapshot(long id) throws DataStoreException;
     void setReferenceSnapshot(int id) throws DataStoreException;
+    String getLastHWInventoryHistoryUpdate() throws DataStoreException;
 }

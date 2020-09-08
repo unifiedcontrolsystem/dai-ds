@@ -5,6 +5,8 @@
 package com.intel.dai.inventory.api;
 
 
+import com.intel.dai.dsapi.HWInvUtil;
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.inventory.api.pojo.rqst.InventoryInfoRequester;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.BlockingResult;
@@ -32,6 +34,7 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
         this.logger = logger;
         this.config = config;
         this.restClient = restClient;
+        this.util = new HWInvUtilImpl(logger);
     }
 
     /**
@@ -82,13 +85,13 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
     public ImmutablePair<Integer, String> getHwInventory() {
         try {
             URI uri = makeUri(config.getHwInventorySnapshot.endpoint, config.getHwInventorySnapshot.resource);
-            logger.info("uri: %s", uri.toString());
+            logger.info("HWI:%n  uri: %s", uri.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvQueryResult(uri, result);
         } catch (URISyntaxException e) {
-            logger.fatal("Cannot create URI to get HW inventory");
+            logger.fatal("HWI:%n  Cannot create URI to get HW inventory");
         } catch (RESTClientException e) {
-            logger.fatal("getRESTRequestBlocking failure");
+            logger.fatal("HWI:%n  getRESTRequestBlocking failure");
         }
         return new ImmutablePair<>(1, "");
     }
@@ -102,7 +105,7 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
     public ImmutablePair<Integer, String> getHwInventory(String foreignLocName) {
         try {
             URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, foreignLocName);
-            logger.info("uri: %s", uri.toString());
+            logger.info("HWI:%n  uri: %s", uri);
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvQueryResult(uri, result);
         } catch (URISyntaxException e) {
@@ -122,13 +125,13 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
     public ImmutablePair<Integer, String> getHWInventoryHistory(String startTime) {
         try {
             URI query = makeHistoryQuery(startTime);
-            logger.info("query: %s", query.toString());
+            logger.info("HWI:%n  makeHistoryQuery(startTime=%S) => %s", startTime, query.toString());
             BlockingResult result = restClient.getRESTRequestBlocking(query);
             return interpreteQueryHWInvQueryResult(query, result);
         } catch (URISyntaxException e) {
-            logger.fatal("Cannot create URI to get HW inventory history");
+            logger.fatal("HWI:%n  Cannot create URI to get HW inventory history");
         } catch (RESTClientException e) {
-            logger.fatal("getRESTRequestBlocking failure");
+            logger.fatal("HWI:%n  getRESTRequestBlocking failure");
         }
         return new ImmutablePair<>(1, "");
     }
@@ -147,18 +150,23 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
      *
      * @param startTime if available; otherwise null
      * @return URI for querying inventory history from the given start time
-     * @throws URISyntaxException
+     * @throws URISyntaxException URI Syntax Exception
      */
     private URI makeHistoryQuery(String startTime) throws URISyntaxException {
         URI uri = makeUri(config.getHWInventoryHistory.endpoint, config.getHWInventoryHistory.resource);
-        if (startTime != null && !startTime.equals("")) {
-            return new URI(String.format("%s?start_time=%s", uri.toString(), startTime));
+        logger.debug("HWI:%n  makeUri(getHWInventoryHistory.endpoint=%s, getHWInventoryHistory.resource=%s) => %s",
+                config.getHWInventoryHistory.endpoint, config.getHWInventoryHistory.resource,
+                uri);
+        if (startTime == null || startTime.equals("")) {
+            return uri; // no start time means entire history
         }
-        return uri;
+        return new URI(String.format("%s?start_time=%s", uri.toString(), startTime));
     }
 
     private ImmutablePair<Integer, String> interpreteQueryHWInvQueryResult(URI uri, BlockingResult result) {
-        if (validateBlockingResult(uri, result) != 0) {
+        int res = validateBlockingResult(uri, result);
+        if (res != 0) {
+            logger.error("HWI:%n  validateBlockingResult(uri, result) => %d", res);
             return new ImmutablePair<>(1, "");
         }
         return new ImmutablePair<>(0, result.responseDocument);
@@ -198,21 +206,23 @@ class ForeignHwInventoryApi implements ForeignServerInventoryRest {
             return 1;
         }
         if (result.code != 200) {
-            logger.error("%s => %d", uri.toString(), result.code);
+            logger.error("HWI:%n  %s => %d", uri.toString(), result.code);
             return result.code;
         }
         if (result.requestInfo == null) {
-            logger.error("requestInfo is null");
+            logger.error("HWI:%n  requestInfo is null");
             return 1;
         }
         if (result.responseDocument == null) {
-            logger.error("responseDocument is null");
+            logger.error("HWI:%n  responseDocument is null");
             return 1;
         }
-        logger.info(result.responseDocument);
+        logger.debug("HWI:%n  result.responseDocument:%s",
+                util.head(result.responseDocument, 240));
         return 0;
     }
 
+    private HWInvUtil util;
     private Logger logger;
     private InventoryInfoRequester config;
     private RESTClient restClient;
