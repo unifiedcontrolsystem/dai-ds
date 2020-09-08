@@ -79,4 +79,52 @@ class VoltHWInvDbApiSpec extends Specification {
         when: api.lastHwInvHistoryUpdate()
         then: thrown DataStoreException
     }
+
+    def "deleteAllCookedNodes"() {
+        api.client = Mock(Client)
+        when: api.deleteAllCookedNodes()
+        then: thrown DataStoreException
+    }
+
+    def "deleteAllRawHistoricalRecords"() {
+        api.client = Mock(Client)
+        when: api.deleteAllRawHistoricalRecords()
+        then: thrown DataStoreException
+    }
+
+    def "dumpCookedNodes"() {
+        api.client = Mock(Client)
+        when: api.dumpCookedNodes()
+        then: thrown DataStoreException
+    }
+
+    def "ingestCookedNode"() {
+        api.client = Mock(Client)
+        when: api.ingestCookedNode("", "")
+        then: thrown DataStoreException
+    }
+
+    def "numberCookedNodeInventoryHistoryRows"() {
+        api.client = Mock(Client)
+        when: api.numberCookedNodeInventoryHistoryRows()
+        then: thrown DataStoreException
+    }
+
+    def "numberOfCookedNodes"() {
+        api.client = Mock(Client)
+        when: api.numberOfCookedNodes()
+        then: thrown DataStoreException
+    }
+
+    def "numberRawInventoryHistoryRows"() {
+        api.client = Mock(Client)
+        when: api.numberRawInventoryHistoryRows()
+        then: thrown DataStoreException
+    }
+
+    def "ingestCookedNodesChanged"() {
+        api.client = Mock(Client)
+        when: api.ingestCookedNodesChanged([:])
+        then: notThrown DataStoreException
+    }
 }

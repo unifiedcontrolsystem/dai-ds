@@ -37,6 +37,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             return  result.getString(1); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
+        } catch (NullPointerException ex) {
+            String msg = String.format("HWI:%n  %s", ex.getMessage());
+            throw new DataStoreException(msg);
         }
         // Ignore (assume result set is already closed or no longer valid)
     }
