@@ -57,6 +57,12 @@ class EventsCli(object):
             help='generate ras events for a given timezone. The default values exists in config file')
         ras_events_parser.add_argument('--type', choices=['fabric-crit', 'old-ras'], default='old-ras',
             help='provide type of the ras event to generate events')
+        ras_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        ras_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        ras_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
 
     """
@@ -82,6 +88,12 @@ class EventsCli(object):
         sensor_events_parser.add_argument('--type', choices=['energy', 'fabric-perf', 'power', 'temperature',
                                                              'voltage'],
             default='energy', help='provide type of the sensor event to generate events')
+        sensor_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        sensor_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        sensor_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
 
     """
@@ -126,6 +138,12 @@ class EventsCli(object):
             help='generate boot events for given timezone. The default values exists in config file')
         boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
             help='generate given type of boot events. Default generates all [on/off/ready] types of boot events.')
+        boot_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        boot_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        boot_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         boot_events_parser.set_defaults(func=self._generate_boot_events_execute)
 
     """
@@ -174,12 +192,15 @@ class EventsCli(object):
     """
     def _generate_ras_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
 
         # URL will be POST http://127.0.0.1:9998/apis/events/ras
         url = client.get_base_url() + 'apis/events/ras'
 
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
-                      'output': args.output, 'seed': args.seed, 'template' : args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'output': args.output,
+                      'seed': args.seed, 'template' : args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -193,12 +214,15 @@ class EventsCli(object):
     """
     def _generate_sensor_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
 
         # URL will be POST http://127.0.0.1:9998/apis/events/sensor
         url = client.get_base_url() + 'apis/events/sensor'
 
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
-                      'output': args.output, 'seed': args.seed, 'template': args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'output': args.output,
+                      'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -230,10 +254,14 @@ class EventsCli(object):
     """
     def _generate_boot_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
+
         # URL will be POST http://127.0.0.1:9998/apis/events/boot
         url = client.get_base_url() + 'apis/events/boot'
         parameters = {'burst': args.burst, 'delay': args.delay, 'locations': args.locations, 'output': args.output,
-                      'probability': args.probability, 'seed': args.seed, 'template': args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'probability':
+                       args.probability, 'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -275,3 +303,13 @@ class EventsCli(object):
             timeout = self.default_timeout
         response_code, response = client.send_get_request(url, timeout)
         return CommandResult(response_code, response)
+
+    """
+    This method is used to validate jpath arguments
+    """
+    @staticmethod
+    def _validate_jpath_arguments(args):
+        if args.jpath_field is None and args.jpath_field_metadata_filter is not None:
+            raise RuntimeError("missing one of the arguments args.path_field or args.path_field_metadata_filter")
+        elif args.jpath_field is not None and args.jpath_field_metadata_filter is None:
+            raise RuntimeError("missing one of the arguments args.path_field or args.path_field_metadata_filter")
