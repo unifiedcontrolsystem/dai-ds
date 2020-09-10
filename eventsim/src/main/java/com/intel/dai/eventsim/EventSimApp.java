@@ -6,7 +6,6 @@ import com.intel.networking.HttpMethod;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-import com.intel.runtime_utils.TimeUtils;
 import org.json_voltpatches.JSONArray;
 import org.json_voltpatches.JSONObject;
 
@@ -91,20 +90,8 @@ public class EventSimApp  extends  EventSim {
     String generateEventsForScenario(Map<String, String> parameters) {
         try {
             log_.info("Received scenario api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            String scenarioFile = parameters.getOrDefault("file", null);
-            String burst = parameters.getOrDefault("burst", "false");
-            String counter = parameters.getOrDefault("counter", null);
-            String delay = parameters.getOrDefault("delay", null);
-            String duration = parameters.getOrDefault("duration", null);
-            String locations = parameters.getOrDefault("locations", ".*");
-            String output = parameters.getOrDefault("output", null);
-            String bfProbability = parameters.getOrDefault("probability", "0");
-            String rasLabel = parameters.getOrDefault("ras-label", ".*");
-            String sensorLabel = parameters.getOrDefault("sensor-label", ".*");
-            String seed = parameters.getOrDefault("seed", null);
-            String startTime = parameters.getOrDefault("start-time", null);
-            String type = parameters.getOrDefault("type", null);
-            eventSimEngine_.publishEventsForScenario(scenarioFile, type, locations, rasLabel, sensorLabel, bfProbability, burst, delay, seed, counter, duration, startTime, output);
+            removeEmptyValueParameters(parameters);
+            foreignSimulatorEngine_.generateEventsForScenario(parameters);
             return create_result_json("F", "Success");
         } catch (Exception e) {
             return create_result_json("E", "Error: " + e.getMessage());
@@ -119,7 +106,6 @@ public class EventSimApp  extends  EventSim {
     String generateSensorEvents(Map<String, String> parameters) {
         try {
             log_.info("Received sensor api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            log_.info("Received sensor api request : " + TimeUtils.getNsTimestamp());
             removeEmptyValueParameters(parameters);
             foreignSimulatorEngine_.generateSensorEvents(parameters);
             return create_result_json("F", "Success");

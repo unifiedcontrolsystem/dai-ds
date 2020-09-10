@@ -42,6 +42,26 @@ class ForeignFilter {
     }
 
     /**
+     * This method is used to assign stream data to all generated events using template.
+     * @param streamData contains id and path to update timestamp
+     * @param streamMessage assign each event to stream-message
+     * @param events total generated events to publish
+     * @throws PropertyNotExpectedType unable to assign stream data to each event
+     */
+    void assignStreamDataToAllEvents(PropertyMap streamData, String streamMessage, PropertyArray events) throws PropertyNotExpectedType {
+        PropertyArray updateEvents = new PropertyArray();
+        for(int index = 0; index < events.size(); index++) {
+            PropertyMap event = events.getMap(index);
+            PropertyMap updateEvent = new PropertyMap();
+            updateEvent.putAll(streamData);
+            updateEvent.put(streamMessage, event);
+            updateEvents.add(updateEvent);
+        }
+        events.clear();
+        events.addAll(updateEvents);
+    }
+
+    /**
      * This method is used to generate events for event type template, count
      * @param eventTypeTemplate event type template info
      * @param count number of events to be generated
