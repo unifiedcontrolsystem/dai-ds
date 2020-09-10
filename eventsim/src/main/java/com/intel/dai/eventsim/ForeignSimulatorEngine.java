@@ -205,7 +205,8 @@ class ForeignSimulatorEngine {
         output_ = defaults.get("output");
         zone_ = defaults.get("timezone");
 
-        PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, numOfEventsToGenerate, seed).getAsArray();
+        PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilter_,
+                numOfEventsToGenerate, seed).getAsArray();
 
         String streamName = eventTypeTemplate_.getEventTypeStreamName();
         String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
@@ -327,6 +328,10 @@ class ForeignSimulatorEngine {
         STREAM_DATA.put(STREAM_ID, "");
         STREAM_DATA.put(STREAM_MESSAGE, "");
         STREAM_DATA.put(TIMESTAMP_PATH, "");
+
+        updateJpathFieldFilter_.put("jpath-field", parameters.getOrDefault("jpath-field", null));
+        updateJpathFieldFilter_.put("metadata", parameters.getOrDefault("jpath-field-metadata", null));
+        updateJpathFieldFilter_.put("metadata-filter", parameters.getOrDefault("jpath-field-metadata-filter",null));
     }
 
     private void systemHierarchy() {
@@ -382,6 +387,7 @@ class ForeignSimulatorEngine {
     }
 
     private Map<String, String> defaults = new HashMap<>();
+    private PropertyMap updateJpathFieldFilter_ = new PropertyMap();
 
     private final DataLoader dataLoaderEngine_;
     private final ForeignFilter filter_;

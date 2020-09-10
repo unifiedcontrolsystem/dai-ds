@@ -72,9 +72,11 @@ class ForeignFilter {
      * @throws ConfigIOParseException unable to create events
      * @throws SimulatorException unable to create events
      */
-    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
+    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyMap updateJpathFieldFilter_,
+                                    long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
         PropertyMap updateJPathField = eventTypeTemplate.getUpdateFieldsInfoWithMetada();
         PropertyMap updateJPathWithMetadata = new PropertyMap();
+        updateJPathFieldInfo(updateJPathField, updateJpathFieldFilter_);
         loadMetadataToUpdateJPathFields(updateJPathField, updateJPathWithMetadata);
 
         PropertyMap templateData = eventTypeTemplate.getEventTypeSingleTemplateData();
@@ -221,6 +223,26 @@ class ForeignFilter {
             return LoadFileLocation.fromFileLocation(metadataFile).getAsArray();
         } catch (FileNotFoundException e) {
             return LoadFileLocation.fromResources(metadataFile).getAsArray();
+        }
+    }
+
+    private void updateJPathFieldInfo(PropertyMap updateJPathField, PropertyMap updateJpathFieldFilter_) throws PropertyNotExpectedType {
+        for(Map.Entry<String, Object> item :  updateJPathField.entrySet()) {
+            String jpath = item.getKey();
+            PropertyMap fieldsInfo = (PropertyMap) item.getValue();
+            for(Map.Entry<String, Object> fieldInfo : fieldsInfo.entrySet()) {
+                String path = jpath + "/" + fieldInfo.getKey();
+                PropertyMap metadataInfo = (PropertyMap) fieldInfo.getValue();
+                if(updateJpathFieldFilter_.containsValue(path)) {
+                    String metadataSource = updateJpathFieldFilter_.getString(METADATA_KEYS[0]);
+                    if(metadataSource != null)
+                        metadataInfo.put(METADATA_KEYS[0], metadataSource);
+
+                    String metadataFilter= updateJpathFieldFilter_.getString(METADATA_KEYS[1]);
+                    if(metadataFilter != null)
+                        metadataInfo.put(METADATA_KEYS[1], metadataFilter);
+                }
+            }
         }
     }
 
