@@ -45,7 +45,7 @@ class HWInvTranslatorSpec extends Specification {
         arg.Status = Status
         arg.PopulatedFRU = PopulatedFRU
 
-        expect: ts.toCanonical(arg) == null
+        expect: ts.toCanonicalLoc(arg) == null
 
         where:
         ID      | Type      | Ordinal   | Status            | PopulatedFRU
@@ -84,23 +84,7 @@ class HWInvTranslatorSpec extends Specification {
         dataDir+"foreignHwByLocList/preview4HWInventory.json"   || ""
         dataDir+"foreignHwByLocList/inv_loc.json"               || ""
         dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     || "x0c0s21b0n0"
-        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   || null
-    }
-
-    def "isValidLocationName"() {
-        expect: ts.isValidLocationName(candidate) == result
-
-        where:
-        candidate       | result
-        "x0"            | true
-        "x0c0s0b0n0"    | true
-        "x0c0s21b0n0"   | true
-        "x0c0s0b0n"     | false
-        "^#^@!"         | false
-        null            | false
-        "X0"            | false
-        "x0*"           | false
-        "+"             | false
+        dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   || "s0"
     }
 
     def "toCanonical from ForeignHWInvHistoryEvent - negative" () {

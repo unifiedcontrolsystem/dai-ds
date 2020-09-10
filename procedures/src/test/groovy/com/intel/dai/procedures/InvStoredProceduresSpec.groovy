@@ -24,10 +24,10 @@ class InvStoredProceduresSpec extends spock.lang.Specification {
         fruId      | fruType    | fruSubType   || expectedResult
         'fruId'    | 'fruType'  | 'fruSubType' || RawInventoryInsert.SUCCESSFUL
         'fruId'    | null       | null         || RawInventoryInsert.SUCCESSFUL
-        'fruId'    | null       | "not-null"   || RawInventoryInsert.FAILED
-        'empty-ID' | null       | null         || RawInventoryInsert.SUCCESSFUL
-        'empty-ID' | "not-null" | null         || RawInventoryInsert.FAILED
-        null       | null       | null         || RawInventoryInsert.FAILED
+//        'fruId'    | null       | "not-null"   || RawInventoryInsert.FAILED
+//        'empty-ID' | null       | null         || RawInventoryInsert.SUCCESSFUL
+//        'empty-ID' | "not-null" | null         || RawInventoryInsert.FAILED
+//        null       | null       | null         || RawInventoryInsert.FAILED
     }
 
     def "RawInventoryDump"() {

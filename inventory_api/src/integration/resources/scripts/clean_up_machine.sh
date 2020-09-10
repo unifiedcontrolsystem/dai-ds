@@ -27,5 +27,6 @@ done
 
 sudo systemctl daemon-reload
 
+echo "*** Delete UCS directories"
 sudo rm -rf /opt/dai-docker
 sudo rm -rf /opt/ucs

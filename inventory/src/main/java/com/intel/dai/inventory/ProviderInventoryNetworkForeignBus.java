@@ -30,12 +30,14 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
                     "use 3 arguments: voltdb_servers, location, and hostname in that order", adapterName));
 
         Logger logger = LoggerFactory.getInstance(AdapterInventoryNetworkBase.ADAPTER_TYPE, adapterName, "console");
+        logger.info("HWI:%n  main(args=[%s, %s, %s])", args[0], args[1], args[2]);
+
         AdapterInformation adapterInfo = new AdapterInformation(AdapterInventoryNetworkBase.ADAPTER_TYPE, adapterName,
                 args[1],args[2], -1L);
         adapterInfo.setServers(args[0].split(","));
-        DataStoreFactory factory = new DataStoreFactoryImpl(adapterInfo.getServers(), logger);
+        factory_= new DataStoreFactoryImpl(adapterInfo.getServers(), logger);
 
-        ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory, adapterInfo,
+        ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory_, adapterInfo,
                 "/opt/ucs/log/ProviderInventoryNetworkForeignBus-Benchmarking.json", 5);
         String configName = ProviderInventoryNetworkForeignBus.class.getSimpleName() + ".json";
         try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
@@ -46,4 +48,10 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
             logger.exception(e, "Missing or unreadable configuration is fatal, halting the provider process.");
         }
     }
+
+    public static DataStoreFactory getDataStoreFactory() {
+        return factory_;
+    }
+
+    private static DataStoreFactory factory_;
 }

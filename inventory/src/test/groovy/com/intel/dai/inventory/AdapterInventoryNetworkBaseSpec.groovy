@@ -2,11 +2,8 @@ package com.intel.dai.inventory
 
 import com.intel.dai.AdapterInformation
 import com.intel.dai.dsapi.DataStoreFactory
-import com.intel.dai.dsapi.HWInvDbApi
 import com.intel.dai.network_listener.NetworkListenerCore
 import com.intel.logging.Logger
-
-import org.apache.commons.lang3.tuple.ImmutablePair
 import spock.lang.Specification
 
 class AdapterInventoryNetworkBaseSpec extends Specification {
@@ -102,19 +99,14 @@ class AdapterInventoryNetworkBaseSpec extends Specification {
         expect: underTest_.entryPoint(stream)
     }
 
-    def "Test preInitialize for location"() {
+    def "Test preInitialize"() {
         underTest_.preInitialize()
-        HWInvDbApi hWInvApiMock = Mock(HWInvDbApi)
-        underTest_.hwInvDbApi_ = hWInvApiMock
-        underTest_.hwInvDbApi_.ingest(any()) >> 0
-        underTest_.hwInvDbApi_.ingestHistory(any()) >> 0
+        expect: true    // this method has an empty body
+    }
 
-        def value = new ImmutablePair<>(0, hwInvForLocation)
-        ForeignInventoryClient foreignInvApi = Mock(ForeignInventoryClient)
-        underTest_.foreignInventoryClient_ = foreignInvApi
-        underTest_.foreignInventoryClient_.getCanonicalHWInvJson() >> value
+    def "Test postInitialize"() {
         underTest_.postInitialize()
-        expect: true
+        expect: true    // this method has an empty body
     }
 
     String hwInvForLocation = "{\n" +

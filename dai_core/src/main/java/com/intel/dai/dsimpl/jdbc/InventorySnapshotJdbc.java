@@ -7,19 +7,42 @@ package com.intel.dai.dsimpl.jdbc;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.dsapi.InventorySnapshot;
+import com.intel.dai.exceptions.DataStoreException;
 import com.intel.properties.PropertyMap;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.Timestamp;
 
 public class InventorySnapshotJdbc implements InventorySnapshot {
+    @Override
+    public String getLastHWInventoryHistoryUpdate() throws DataStoreException {
+        PreparedStatement retrieveRefLastRawInventoryHistoryUpdate = null;
+        try {
+            establishConnectionToNearlineDb();
+            retrieveRefLastRawInventoryHistoryUpdate = prepareStatement(GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL);
+            return executeRetrieveRefLastRawInventoryUpdateStmt(retrieveRefLastRawInventoryHistoryUpdate);
+        } finally {
+            tearDown(retrieveRefLastRawInventoryHistoryUpdate);
+        }
+    }
+
+    private String executeRetrieveRefLastRawInventoryUpdateStmt(PreparedStatement retrieveRefLastRawInventoryUpdate)
+            throws DataStoreException {
+        try (ResultSet result = retrieveRefLastRawInventoryUpdate.executeQuery()) {
+
+            if (!result.next()) {
+                throw new DataStoreException("HWI:%n  Reference last raw inventory update:!result.next()");
+            }
+            return  result.getString(1); // first column is indexed at 1
+        } catch (SQLException ex) {
+            throw new DataStoreException(ex.getMessage());
+        } catch (NullPointerException ex) {
+            String msg = String.format("HWI:%n  %s", ex.getMessage());
+            throw new DataStoreException(msg);
+        }
+        // Ignore (assume result set is already closed or no longer valid)
+    }
 
     @Override
     public void storeInventorySnapshot(String location, Instant timestamp, String info)
@@ -225,4 +248,6 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String SELECT_SNAPSHOT_BY_ID_SQL =
             "select InventoryInfo from Tier2_InventorySnapshot where Id = ?";
     private static final String SET_REF_SNAPSHOT_SQL = "{call SetRefSnapshotDataForLctn(?)}";
+    private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
+            "select LastRawReplacementHistoryUpdate()";
 }

@@ -8,7 +8,6 @@ import com.intel.dai.inventory.api.pojo.fru.ForeignFRU
 import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistory
 import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryAtLoc
 import com.intel.dai.inventory.api.pojo.hist.ForeignHWInvHistoryEvent
-import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLoc
 import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinet
 import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinetPDU
 import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLocCabinetPDUOutlet
@@ -96,8 +95,8 @@ class ForeignHWInventorySpec extends Specification {
         def tree0 = new ForeignHWInventory()
         def tree1 = new ForeignHWInventory()
 
-        tree0.ForeignName = "c0n0"
-        tree1.ForeignName = "c0n0"
+        tree0.XName = "c0n0"
+        tree1.XName = "c0n0"
         tree0.Format = "NodeOnly"
         tree1.Format = "NodeOnly"
 
