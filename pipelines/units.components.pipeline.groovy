@@ -35,8 +35,12 @@ pipeline {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
                         script {
+                            utilities.InvokeGradle(":procedures:test")
+                            utilities.InvokeGradle(":inventory:test")
+
                             utilities.InvokeGradle(":procedures:build")
                             utilities.InvokeGradle(":inventory:build")
+
                             utilities.InvokeGradle("makeAllArtifacts")
                         }
                     }

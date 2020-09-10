@@ -138,7 +138,6 @@ public class HWInvDiscovery {
             throw new RESTClientException("HWI:%n  restClient == null");
         }
 
-        String requesterClass = sess.providerClassMap.requester;
         String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
 
         if (tokenAuthProvider != null && !tokenAuthProvider.equals("")) {
@@ -155,7 +154,7 @@ public class HWInvDiscovery {
             restClient.setTokenOAuthRetriever(tokenProvider_);
         }
 
-        createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
+        createRequester(sess, restClient);
     }
 
     private HWDiscoverySession toHWDiscoverySession(String inputFileName) throws RESTClientException {
@@ -193,25 +192,46 @@ public class HWInvDiscovery {
         }
     }
 
-    private void createRequester(String requester, InventoryInfoRequester config, RESTClient restClient) {
-        if (requester == null || config == null || restClient == null) {
+    private void createRequester(HWDiscoverySession sess, RESTClient restClient) {
+        if (restClient == null) {
+            log.error("HWI:%n  %s","restClient cannot be null");
+            return;
+        }
+        if (sess == null) {
+            log.error("HWI:%n  %s","sess cannot be null");
+            return;
+        }
+        if (sess.providerClassMap == null) {
+            log.error("HWI:%n  sess.providerClassMap cannot be null: sess=%s",
+                    sess.toString());
+            return;
+        }
+        if (sess.providerConfigurations == null) {
+            log.error("HWI:%n  sess.providerConfigurations cannot be null: sess=%s",
+                    sess.toString());
+            return;
+        }
+        String requesterClass = sess.providerClassMap.requester;
+        InventoryInfoRequester restMethods = sess.providerConfigurations.requester;
+        if (requesterClass == null || restMethods == null) {
+            log.error("HWI:%n  error in sess=%s", sess.toString());
             return;
         }
         try {
-            Class<?> classObj = Class.forName(requester);
+            Class<?> classObj = Class.forName(requesterClass);
             Constructor<?> ctor = classObj.getDeclaredConstructor();
             requester_ = (ForeignServerInventoryRest) ctor.newInstance();
-            requester_.initialize(log, config, restClient);
+            requester_.initialize(log, restMethods, restClient);
         } catch (ClassNotFoundException e) {
-            log.exception(e, String.format("HWI:%n  Missing RestRequester implementation '%s'", requester));
+            log.exception(e, String.format("HWI:%n  Missing RestRequester implementation '%s'", requesterClass));
         } catch (NoSuchMethodException e) {
             log.exception(e, String.format("HWI:%n  Missing public constructor for RestRequester implementation '%s'",
-                    requester));
+                    requesterClass));
         } catch (IllegalAccessException e) {
             log.exception(e, String.format("HWI:%n  Default constructor for RestRequester implementation " +
-                    "'%s' must be public", requester));
+                    "'%s' must be public", requesterClass));
         } catch (InstantiationException | InvocationTargetException e) {
-            log.exception(e, String.format("HWI:%n  Cannot construct RestRequester implementation '%s'", requester));
+            log.exception(e, String.format("HWI:%n  Cannot construct RestRequester implementation '%s'", requesterClass));
         }
     }
 

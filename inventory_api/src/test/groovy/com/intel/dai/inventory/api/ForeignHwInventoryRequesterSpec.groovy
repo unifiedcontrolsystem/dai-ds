@@ -16,15 +16,15 @@ import com.intel.networking.restclient.RESTClient
 import com.intel.networking.restclient.RequestInfo
 import spock.lang.Specification
 
-class ForeignHwInventoryApiSpec extends Specification {
-    ForeignHwInventoryApi invRequester;
+class ForeignHwInventoryRequesterSpec extends Specification {
+    ForeignHwInventoryRequester invRequester;
 
     def log = Mock(Logger)
     def config = new InventoryInfoRequester()
     def restClient = Mock(RESTClient)
 
     def setup() {
-        invRequester = new ForeignHwInventoryApi();
+        invRequester = new ForeignHwInventoryRequester();
         invRequester.util = Mock(HWInvUtil)
     }
 

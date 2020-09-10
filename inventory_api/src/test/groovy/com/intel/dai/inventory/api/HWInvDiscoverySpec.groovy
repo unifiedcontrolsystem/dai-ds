@@ -4,55 +4,81 @@
 //
 package com.intel.dai.inventory.api
 
-
+import com.intel.dai.inventory.api.pojo.cfg.HWDiscoverySession
 import com.intel.logging.Logger
+import com.intel.networking.restclient.BlockingResult
+import com.intel.networking.restclient.RESTClient
+import com.intel.networking.restclient.RequestInfo
+import com.intel.networking.restclient.ResponseCallback
+import com.intel.networking.restclient.SSEEvent
 import spock.lang.Specification
 
+class FakeRestClient extends RESTClient {
+    FakeRestClient(Logger logger) {super(logger)}
+    void doSSERequest(RequestInfo request, ResponseCallback callback, SSEEvent eventsCallback) {}
+    BlockingResult doRESTRequest(RequestInfo request) { return null; }
+}
+
 class HWInvDiscoverySpec extends Specification {
-    def "createTokenProvider" () {
+    def "createTokenProvider"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.tokenProvider_ = null
         when: hwInvDiscovery.createTokenProvider(null, null)
         then: HWInvDiscovery.tokenProvider_ == null
     }
-    def "createRequester" () {
+    
+    def "createRequester"() {
+        HWDiscoverySession sess = new HWDiscoverySession()
+        sess.providerClassMap.requester = null
+
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
-        given: HWInvDiscovery.requester_ = null
-        when: hwInvDiscovery.createRequester(null, null, null)
-        then: HWInvDiscovery.requester_ == null
+
+        when: hwInvDiscovery.createRequester(sess, restClient)
+        then: HWInvDiscovery.requester_ == result
+
+        where:
+        requesterClassName                                          | restClient                        || result
+        null                                                        | new FakeRestClient(Mock(Logger))  || null
+        "com.intel.dai.inventory.api.ForeignHwInventoryRequester"   | null                              || null
     }
-    def "initiateDiscovery" () {
+
+    def "initiateDiscovery"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
         expect: hwInvDiscovery.initiateDiscovery() == 1
     }
-    def "pollForDiscoveryProgress" () {
+    
+    def "pollForDiscoveryProgress"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
         expect: hwInvDiscovery.pollForDiscoveryProgress() == 1
     }
-    def "queryHWInvTree - entire tree" () {
+    
+    def "queryHWInvTree - entire tree"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
         expect: hwInvDiscovery.queryHWInvTree().left == 1
     }
-    def "queryHWInvTree - partial tree" () {
+    
+    def "queryHWInvTree - partial tree"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         given: HWInvDiscovery.requester_ = null
         expect: hwInvDiscovery.queryHWInvTree(null).left == 1
     }
 
-    def "createRestClient()" () {
+    def "createRestClient()"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         when: hwInvDiscovery.createRestClient()
         then: thrown Exception
     }
-    def "initialize()" () {
+    
+    def "initialize()"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         when: hwInvDiscovery.initialize()
         then: thrown Exception
     }
-    def "toHWDiscoverySession()" () {
+    
+    def "toHWDiscoverySession()"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         when: hwInvDiscovery.toHWDiscoverySession(null)
         then: thrown Exception
