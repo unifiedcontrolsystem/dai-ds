@@ -76,6 +76,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             workItem.storeExtraData(FOREIGN_KEY, foreign);
             workItems.add(workItem);
         }
+        log_.info("HWI:%n  Extracted %d work items", workItems.size());
         return workItems;   // to be consumed by com.intel.dai.network_listener.processMessage()
     }
 

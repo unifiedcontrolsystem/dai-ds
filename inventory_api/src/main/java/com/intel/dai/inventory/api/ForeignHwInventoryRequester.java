@@ -20,8 +20,8 @@ import java.net.URISyntaxException;
 /**
  * This class implements the rest client API that interacts with the foreign inventory server.
  */
-class ForeignHwInventoryApi implements ForeignServerInventoryRest {
-    public ForeignHwInventoryApi() {}
+class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
+    public ForeignHwInventoryRequester() {}
 
     /**
      * Initializes logger, requester and client.

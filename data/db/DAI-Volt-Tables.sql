@@ -2054,7 +2054,7 @@ CREATE TABLE HW_Inventory_Location (
     Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
     Ordinal INTEGER NOT NULL,            -- singleton:0
     Info VARCHAR(8192),
-    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    FRUID VARCHAR(80),                      -- perhaps <manufacturer>-<serial#>
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
@@ -2063,7 +2063,7 @@ CREATE TABLE tier2_HW_Inventory_Location (
     Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
     Ordinal INTEGER NOT NULL,            -- singleton:0
     Info VARCHAR(8192),
-    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
+    FRUID VARCHAR(80),                      -- perhaps <manufacturer>-<serial#>
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
     EntryNumber BigInt NOT NULL
 );
@@ -2071,19 +2071,19 @@ CREATE TABLE tier2_HW_Inventory_Location (
 -- History of FRU installation and removal from the HPC.  Note that the timestamp marks
 -- the DB update event.  The foreign data does not have the time of actual HW modification.
 CREATE TABLE RawHWInventory_History (
-    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    Action VARCHAR(16) NOT NULL,            -- Added/Removed
     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
+    ForeignTimestamp VARCHAR(32) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
     PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
 );
 
 CREATE TABLE tier2_RawHWInventory_History (
-    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    Action VARCHAR(16) NOT NULL,            -- Added/Removed
     ID VARCHAR(64) NOT NULL,                -- Location ID translated from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
+    ForeignTimestamp VARCHAR(32) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
     EntryNumber BigInt NOT NULL,
     PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates

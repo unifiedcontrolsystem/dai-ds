@@ -1562,7 +1562,16 @@ public class AdapterDaiMgr {
             while (!bClocksAreSynced) {
                 // Get volt's time.
                 log_.info("Get volts current time");  // temporary message to help debug time sync issue.
-                long lTier1ClkInMillis = adapter.client().callProcedure("@AdHoc", "SELECT SINCE_EPOCH(Millisecond, NOW) FROM Machine WHERE Sernum='1';").getResults()[0].asScalarLong();
+                long lTier1ClkInMillis;
+                try {
+                    lTier1ClkInMillis = adapter.client().callProcedure(
+                            "@AdHoc", "SELECT SINCE_EPOCH(Millisecond, NOW) FROM Machine WHERE Sernum='1';").
+                            getResults()[0].asScalarLong();
+                } catch (Exception e) {
+                    log_.error("Machine table is probably empty: %s", e.getMessage());
+                    adapter.handleMainlineAdapterCleanup(true);
+                    return;
+                }
                 // Get this machine's current time.
                 long lCurMillisecs = System.currentTimeMillis();
                 log_.info("Got volts current time");  // temporary message to help debug time sync issue.

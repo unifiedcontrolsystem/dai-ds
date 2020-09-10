@@ -452,7 +452,7 @@ class ViewCli(object):
         if display_format == 'json':
             data_to_display = json_display.display_raw_json()
         else:
-            columns_order = ["dbupdatedtimestamp", "id", "action", "fruid"]
+            columns_order = ["foreigntimestamp", "id", "action", "fruid"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 
