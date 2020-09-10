@@ -42,6 +42,26 @@ class ForeignFilter {
     }
 
     /**
+     * This method is used to assign stream data to all generated events using template.
+     * @param streamData contains id and path to update timestamp
+     * @param streamMessage assign each event to stream-message
+     * @param events total generated events to publish
+     * @throws PropertyNotExpectedType unable to assign stream data to each event
+     */
+    void assignStreamDataToAllEvents(PropertyMap streamData, String streamMessage, PropertyArray events) throws PropertyNotExpectedType {
+        PropertyArray updateEvents = new PropertyArray();
+        for(int index = 0; index < events.size(); index++) {
+            PropertyMap event = events.getMap(index);
+            PropertyMap updateEvent = new PropertyMap();
+            updateEvent.putAll(streamData);
+            updateEvent.put(streamMessage, event);
+            updateEvents.add(updateEvent);
+        }
+        events.clear();
+        events.addAll(updateEvents);
+    }
+
+    /**
      * This method is used to generate events for event type template, count
      * @param eventTypeTemplate event type template info
      * @param count number of events to be generated
@@ -52,9 +72,11 @@ class ForeignFilter {
      * @throws ConfigIOParseException unable to create events
      * @throws SimulatorException unable to create events
      */
-    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
+    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyMap updateJpathFieldFilter_,
+                                    long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
         PropertyMap updateJPathField = eventTypeTemplate.getUpdateFieldsInfoWithMetada();
         PropertyMap updateJPathWithMetadata = new PropertyMap();
+        updateJPathFieldInfo(updateJPathField, updateJpathFieldFilter_);
         loadMetadataToUpdateJPathFields(updateJPathField, updateJPathWithMetadata);
 
         PropertyMap templateData = eventTypeTemplate.getEventTypeSingleTemplateData();
@@ -201,6 +223,26 @@ class ForeignFilter {
             return LoadFileLocation.fromFileLocation(metadataFile).getAsArray();
         } catch (FileNotFoundException e) {
             return LoadFileLocation.fromResources(metadataFile).getAsArray();
+        }
+    }
+
+    private void updateJPathFieldInfo(PropertyMap updateJPathField, PropertyMap updateJpathFieldFilter_) throws PropertyNotExpectedType {
+        for(Map.Entry<String, Object> item :  updateJPathField.entrySet()) {
+            String jpath = item.getKey();
+            PropertyMap fieldsInfo = (PropertyMap) item.getValue();
+            for(Map.Entry<String, Object> fieldInfo : fieldsInfo.entrySet()) {
+                String path = jpath + "/" + fieldInfo.getKey();
+                PropertyMap metadataInfo = (PropertyMap) fieldInfo.getValue();
+                if(updateJpathFieldFilter_.containsValue(path)) {
+                    String metadataSource = updateJpathFieldFilter_.getString(METADATA_KEYS[0]);
+                    if(metadataSource != null)
+                        metadataInfo.put(METADATA_KEYS[0], metadataSource);
+
+                    String metadataFilter= updateJpathFieldFilter_.getString(METADATA_KEYS[1]);
+                    if(metadataFilter != null)
+                        metadataInfo.put(METADATA_KEYS[1], metadataFilter);
+                }
+            }
         }
     }
 

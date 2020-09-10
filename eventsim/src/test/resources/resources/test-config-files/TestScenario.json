@@ -1,0 +1,35 @@
+{
+  "mode" : "repeat",
+  "events" : ["ras", "sensor", "boot"],
+  "ras" : ["old-ras"],
+  "sensor" : ["energy", "fabric-perf", "power", "temperature", "voltage"],
+  "boot" : ["off", "on", "ready"],
+
+  "burst" : {
+    "ras" : "6",
+    "sensor" : "4",
+    "boot" : "1",
+    "rate" : "5",
+    "seed" : "123"
+  },
+
+  "group-burst" : {
+    "ras" : "7",
+    "sensor" : "3",
+    "boot" : "1",
+    "group-batch-ras" : "5",
+    "group-batch-sensor" : "1",
+    "group-batch-boot" : "0",
+    "seed" : "123"
+  },
+
+  "repeat" : {
+    "mode" : "burst",
+    "clock-mode" : "duration",
+    "duration" : "1",
+    "counter" : "1",
+    "start-time" : "2020-05-27 16:34:50.607Z"
+  },
+
+  "time-delay-mus" : "2000000"
+}

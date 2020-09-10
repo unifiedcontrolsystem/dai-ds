@@ -57,6 +57,12 @@ class EventsCli(object):
             help='generate ras events for a given timezone. The default values exists in config file')
         ras_events_parser.add_argument('--type', choices=['fabric-crit', 'old-ras'], default='old-ras',
             help='provide type of the ras event to generate events')
+        ras_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        ras_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        ras_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
 
     """
@@ -82,6 +88,12 @@ class EventsCli(object):
         sensor_events_parser.add_argument('--type', choices=['energy', 'fabric-perf', 'power', 'temperature',
                                                              'voltage'],
             default='energy', help='provide type of the sensor event to generate events')
+        sensor_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        sensor_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        sensor_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
 
     """
@@ -126,6 +138,12 @@ class EventsCli(object):
             help='generate boot events for given timezone. The default values exists in config file')
         boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
             help='generate given type of boot events. Default generates all [on/off/ready] types of boot events.')
+        boot_events_parser.add_argument('--jpath-field',
+            help='Provide json-path to field only. Ex: level0/level1[*]/item1')
+        boot_events_parser.add_argument('--jpath-field-metadata',
+            help='Provide file path with all possible values. Ex: /tmp/source.json')
+        boot_events_parser.add_argument('--jpath-field-metadata-filter',
+            help='Provide regex value to fill data in json-path-field. Ex: level0/level1[*]/item1')
         boot_events_parser.set_defaults(func=self._generate_boot_events_execute)
 
     """
@@ -133,30 +151,31 @@ class EventsCli(object):
     """
     def _add_scenario_event_parser(self, event_parser):
         scenario_events_parser = event_parser.add_parser('scenario', help='generate events for a given scenario')
-        scenario_events_parser.add_argument('file', help='scenario configuration file')
+        scenario_events_parser.add_argument('file', help='scenario configuration file. The file should exist in '
+            'installed configuration files folder. Ex: /opt/ucs/etc/')
         scenario_events_parser.add_argument('--burst',
             help='generate events for a given scenario without delay. Default is constant mode with delay.',
             action='store_true')
-        scenario_events_parser.add_argument('--counter', type=int, help='repeat scenario for a given counter')
+        scenario_events_parser.add_argument('--counter', type=int, help='repeat scenario for a given counter times')
         scenario_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate events for a given scenario. The default values '
                  'exists in eventsim config file.')
         scenario_events_parser.add_argument('--duration', type=int,
-            help='scenario occurs for a given duration. The default units is minutes only.')
+            help='scenario occurs for a given duration time. The default units is minutes only.')
         scenario_events_parser.add_argument('--locations',
             help='generate events for a given scenario at a given location. Provide regex for multiple locations.')
         scenario_events_parser.add_argument('--output', help='Store data in a file.')
         scenario_events_parser.add_argument('--probability', type=int,
             help='generate boot events with probability failure')
-        scenario_events_parser.add_argument('--ras-label', help='generate ras events of a particular type/description')
-        scenario_events_parser.add_argument('--sensor-label',
-            help='generate sensor events of a particular type/description')
         scenario_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
-        scenario_events_parser.add_argument('--start-time', help='start time to generate events for a given scenario')
+        scenario_events_parser.add_argument('--start-time',
+            help='start time/scheduled time to generate events for a given scenario')
         scenario_events_parser.add_argument('--timeout', type=int, help='scenario sub-command execution timeout')
-        scenario_events_parser.add_argument('--mode', choices=['burst', 'group-burst', 'repeat'],
-            help='generate events given type of scenario. Default generates burst type scenario. Scenario data exists '
-                 'in scenario config file.')
+        scenario_events_parser.add_argument('--timezone', type=int,
+            help='generate events for given timezone. The default values exists in config file')
+        scenario_events_parser.add_argument('--type', choices=['burst', 'group-burst', 'repeat'], default='burst',
+            help='generate events for a given type of scenario. Default generates burst type scenario. Scenario data '
+                 'exists in scenario config file.')
         scenario_events_parser.set_defaults(func=self._generate_scenario_events_execute)
 
     """
@@ -173,12 +192,15 @@ class EventsCli(object):
     """
     def _generate_ras_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
 
         # URL will be POST http://127.0.0.1:9998/apis/events/ras
         url = client.get_base_url() + 'apis/events/ras'
 
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
-                      'output': args.output, 'seed': args.seed, 'template' : args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'output': args.output,
+                      'seed': args.seed, 'template' : args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -192,12 +214,15 @@ class EventsCli(object):
     """
     def _generate_sensor_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
 
         # URL will be POST http://127.0.0.1:9998/apis/events/sensor
         url = client.get_base_url() + 'apis/events/sensor'
 
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
-                      'output': args.output, 'seed': args.seed, 'template': args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'output': args.output,
+                      'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -229,10 +254,14 @@ class EventsCli(object):
     """
     def _generate_boot_events_execute(self, args):
         client = HttpClient()
+        self._validate_jpath_arguments(args)
+
         # URL will be POST http://127.0.0.1:9998/apis/events/boot
         url = client.get_base_url() + 'apis/events/boot'
         parameters = {'burst': args.burst, 'delay': args.delay, 'locations': args.locations, 'output': args.output,
-                      'probability': args.probability, 'seed': args.seed, 'template': args.template, 'type': args.type}
+                      'jpath-field': args.jpath_field, 'jpath-field-metadata': args.jpath_field_metadata,
+                      'jpath-field-metadata-filter': args.jpath_field_metadata_filter, 'probability':
+                       args.probability, 'seed': args.seed, 'template': args.template, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -249,10 +278,10 @@ class EventsCli(object):
         # URL will be POST http://127.0.0.1:9998/apis/events/scenario
         url = client.get_base_url() + 'apis/events/scenario'
 
-        parameters = {'file': args.file, 'burst': args.burst, 'delay': args.delay, 'duration': args.duration,
-                      'locations': args.locations, 'output': args.output, 'probability': args.probability,
-                      'ras-lable': args.ras_label, 'counter': args.counter, 'sensor-label': args.sensor_label,
-                      'seed': args.seed, 'start-time': args.start_time, 'type': args.mode}
+        parameters = {'file': args.file, 'burst': args.burst, 'counter': args.counter, 'delay': args.delay,
+                      'duration': args.duration, 'locations': args.locations, 'output':args.output,
+                      'probability': args.probability, 'seed': args.seed, 'start-time': args.start_time,
+                      'timeout': args.timeout, 'timezone': args.timezone, 'type': args.type}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -274,3 +303,13 @@ class EventsCli(object):
             timeout = self.default_timeout
         response_code, response = client.send_get_request(url, timeout)
         return CommandResult(response_code, response)
+
+    """
+    This method is used to validate jpath arguments
+    """
+    @staticmethod
+    def _validate_jpath_arguments(args):
+        if args.jpath_field is None and args.jpath_field_metadata_filter is not None:
+            raise RuntimeError("missing one of the arguments args.path_field or args.path_field_metadata_filter")
+        elif args.jpath_field is not None and args.jpath_field_metadata_filter is None:
+            raise RuntimeError("missing one of the arguments args.path_field or args.path_field_metadata_filter")

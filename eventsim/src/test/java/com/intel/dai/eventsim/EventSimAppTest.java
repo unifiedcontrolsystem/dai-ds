@@ -203,59 +203,6 @@ public class EventSimAppTest {
     }
 
     @Test
-    public void generateEventsForScenario() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("file", "/tmp/test.json");
-        parameters.put("burst", "false");
-        parameters.put("counter", null);
-        parameters.put("delay", null);
-        parameters.put("duration", null);
-        parameters.put("location", ".*");
-        parameters.put("output", null);
-        parameters.put("probability", "0");
-        parameters.put("ras-label", ".*");
-        parameters.put("sensor-label", ".*");
-        parameters.put("seed", null);
-        parameters.put("start-time", null);
-        parameters.put("type", "burst");
-
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        EventSimApp.log_ = mock(Logger.class);
-        doNothing().when(eventSimApiTest.eventSimEngine_).publishEventsForScenario("/tmp/test.json", "burst", ".*", ".*",".*", "0",
-                "false", null, null, null, null, null, null);
-        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateEventsForScenario(parameters));
-    }
-
-    @Test
-    public void generateEventsForScenario_Exception() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("file", "/tmp/test.json");
-        parameters.put("burst", "false");
-        parameters.put("counter", null);
-        parameters.put("delay", null);
-        parameters.put("duration", null);
-        parameters.put("location", ".*");
-        parameters.put("output", null);
-        parameters.put("probability", "0");
-        parameters.put("ras-label", ".*");
-        parameters.put("sensor-label", ".*");
-        parameters.put("seed", null);
-        parameters.put("start-time", null);
-        parameters.put("type", "burst");
-
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        EventSimApp.log_ = mock(Logger.class);
-        doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine_).publishEventsForScenario("/tmp/test.json", "burst", ".*", ".*",".*", "0", "false", null, null, null, null, null, null);
-        assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generateEventsForScenario(parameters));
-    }
-
-    @Test
     public void fetchRandomSeed() {
         Map<String, String> parameters = new HashMap<>();
         Logger log = mock(Logger.class);
