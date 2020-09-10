@@ -1,3 +1,7 @@
+// Copyright (C) 2019-2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory;
 
 import com.intel.dai.dsapi.HWInvDbApi;
@@ -34,7 +38,7 @@ public class ForeignInventoryClient {
         try {
             return hwInvDbApi.lastHwInvHistoryUpdate();
         } catch (IOException | DataStoreException e) {
-            return null;
+            return "";
         }
     }
 
@@ -55,13 +59,13 @@ public class ForeignInventoryClient {
         return canonicalHwInv.getValue();
     }
 
-    private String toCanonicalHWInvHistoryJson(String foreignHWInvJson) {
-        if (foreignHWInvJson == null) return null;
+    private String toCanonicalHWInvHistoryJson(String foreignHWInvHistJson) {
+        if (foreignHWInvHistJson == null) return null;
 
         HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl(log_));
-        ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
+        ImmutablePair<String, String> canonicalHwInv = tr.foreignHistoryToCanonical(foreignHWInvHistJson);
         if (canonicalHwInv.getKey() == null) {
-            log_.error("failed to translate foreign HW inventory json");
+            log_.error("HWI:%n  failed to translate foreign HW inventory json");
             return null;
         }
         return canonicalHwInv.getValue();
@@ -78,10 +82,10 @@ public class ForeignInventoryClient {
 
         try {
             hwInvDiscovery_.initialize();
-            log_.info("rest client created");
+            log_.debug("Rest client created");
 
         } catch (RESTClientException e) {
-            log_.fatal("Fail to create REST client: %s", e.getMessage());
+            log_.fatal("HWI:%n  Failed to create REST client: %s", e.getMessage());
             return null;
         }
 
@@ -92,7 +96,7 @@ public class ForeignInventoryClient {
             foreignHwInv = hwInvDiscovery_.queryHWInvTree(root);
         }
         if (foreignHwInv.left != 0) {
-            log_.error("failed to acquire foreign HW inventory json");
+            log_.error("HWI:%n  Failed to acquire foreign HW inventory json");
             return null;
         }
         return foreignHwInv.right;
@@ -101,22 +105,22 @@ public class ForeignInventoryClient {
     private String getForeignHWInvHistoryJson(String startTime) {
         try {
             hwInvDiscovery_.initialize();
-            log_.info("rest client created");
+            log_.debug("HWI:%n  %s", "Rest client created");
 
         } catch (RESTClientException e) {
-            log_.fatal("Fail to create REST client: %s", e.getMessage());
+            log_.fatal("HWI:%n  Failed to create REST client: %s", e.getMessage());
             return null;
         }
 
         ImmutablePair<Integer, String> foreignHwInvHistory = hwInvDiscovery_.queryHWInvHistory(startTime);
 
         if (foreignHwInvHistory.left != 0) {
-            log_.error("failed to acquire foreign HW inventory history json");
+            log_.error("HWI:%n  %s", "Failed to acquire foreign HW inventory history json");
             return null;
         }
         return foreignHwInvHistory.right;
     }
 
     private final Logger log_;
-    private HWInvDiscovery hwInvDiscovery_;
+    private HWInvDiscovery hwInvDiscovery_; // cannot make final because some unit tests will fail
 }

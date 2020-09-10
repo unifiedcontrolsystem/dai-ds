@@ -1,6 +1,0 @@
-usage: HWInvDbClientCLI
- -c,--canonical <arg>   canonical HW Inventory file name
- -d,--debug <arg>       debug mode: DEBUG/INFO/WARN/ERROR/FATAL
- -o,--output <arg>      canonical json DB dump file name
- -u,--update <arg>      vendor update file name
- -v,--vendor <arg>      vendor HW Inventory file name

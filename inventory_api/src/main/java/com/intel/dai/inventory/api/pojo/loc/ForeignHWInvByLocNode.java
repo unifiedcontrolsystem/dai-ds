@@ -15,4 +15,5 @@ import java.util.List;
 public class ForeignHWInvByLocNode extends ForeignHWInvByLoc {
     public List<ForeignHWInvByLocProcessor> Processors;
     public List<ForeignHWInvByLocMemory> Memory;
+    public List<ForeignHWInvByLocDrive> Drives;
 }

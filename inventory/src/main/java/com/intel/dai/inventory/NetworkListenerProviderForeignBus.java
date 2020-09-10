@@ -28,7 +28,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     public void initialize() { /* Not used but is required */ }
 
     /**
-     * <p> Translates the json in the data String into CommonDataFormat.  The json contains a list of components
+     * <p> Callback from com.intel.dai.network_listener.processMessage().
+     * Translates the json in the data String into CommonDataFormat.  The json contains a list of components
      * that shares a common state update.  This translate into an array of CommonDataFormat entries, each
      * describing a single component. </p>
      *
@@ -41,36 +42,41 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     public List<CommonDataFormat> processRawStringData(String scnJson, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
 
-        long currentTimestamp = currentUTCInNanoseconds();  // all entries in the returned list must share a common timestamp
-                                        // this is needed to avoid an update storm during the initial loading
-                                        // of the HW inventory
+        long currentTimestamp = currentUTCInNanoseconds();
 
-        ForeignHWInvChangeNotification notif = new HWInvNotificationTranslator(log_).toPOJO(scnJson);
-        if (notif == null) {
-            throw new NetworkListenerProviderException("scnJson translation failed");
+        ForeignHWInvChangeNotification foreignInventoryChangeNotification =
+                new HWInvNotificationTranslator(log_).toPOJO(scnJson);
+        if (foreignInventoryChangeNotification == null) {
+            throw new NetworkListenerProviderException("Cannot extract foreignInventoryChangeNotification");
         }
 
-        BootState newComponentState = toBootState(notif.State);
+        BootState newComponentState = toBootState(foreignInventoryChangeNotification.State);
         if (newComponentState == null) {
-            log_.info("ignoring unsupported scn notification state: %s", notif.State);
+            log_.info("HWI:%n  ignoring unsupported scn notification state: %s",
+                    foreignInventoryChangeNotification.State);
             return new ArrayList<>();
         }
 
         List<CommonDataFormat> workItems = new ArrayList<>();
-        for (String foreign: notif.Components) {
+        for (String foreign: foreignInventoryChangeNotification.Components) {
+            String location;
             try {
-                CommonDataFormat workItem = new CommonDataFormat(
-                        currentTimestamp, CommonFunctions.convertForeignToLocation(foreign), DataType.InventoryChangeEvent);
-                workItem.setStateChangeEvent(newComponentState);
-                workItem.storeExtraData(FOREIGN_KEY, foreign);
-                workItems.add(workItem);
+                location = CommonFunctions.convertForeignToLocation(foreign);  // this fails if translation map is outdated
             } catch(ConversionException e) {
-                throw new NetworkListenerProviderException("Failed to convert the foreign location to a DAI location",
-                        e);
+                location = foreign; // for debugging purpose
+//                throw new NetworkListenerProviderException(
+//                        "Failed to convert the foreign location to a DAI location", e);
             }
-        }
 
-        return workItems;
+            CommonDataFormat workItem = new CommonDataFormat(
+                    currentTimestamp,
+                    location,
+                    DataType.InventoryChangeEvent);
+            workItem.setStateChangeEvent(newComponentState);
+            workItem.storeExtraData(FOREIGN_KEY, foreign);
+            workItems.add(workItem);
+        }
+        return workItems;   // to be consumed by com.intel.dai.network_listener.processMessage()
     }
 
     /**
@@ -83,7 +89,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     }
 
     /**
-     * <p> Convert a foreign component state into BootState.  Unsupported states are represented as null,
+     * <p> Converts a foreign component state into BootState.  Unsupported states are represented as null,
      * and unexpected states cause an exception to be thrown.
      * HWInvNotificationTranslator guarantees that the input string cannot be null.  Note that none of
      * the listed component state corresponds obvicously to BootState.NODE_BOOTING. </p>
@@ -91,7 +97,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
      * @return a BootState or null
      * @throws NetworkListenerProviderException network listener provider exception
      */
-    BootState toBootState(String foreignComponentState) throws NetworkListenerProviderException {
+    BootState toBootState(String foreignComponentState)
+            throws NetworkListenerProviderException {
+
         switch(foreignComponentState) {
             case "Off":
                 return BootState.NODE_OFFLINE;
@@ -105,17 +113,20 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             case "Halt":
             case "Ready":
             case "Paused":
-                log_.info("Unsupported foreign component state: %s", foreignComponentState);
+                log_.info("HWI:%n  Unsupported foreign component state: %s",
+                        foreignComponentState);
                 return null;
             default:
-                String msg = String.format("Unexpected foreign component state: %s", foreignComponentState);
-                log_.error(msg);
+                String msg = String.format("Unexpected foreign component state: %s",
+                        foreignComponentState);
+                log_.error("HWI:%n  %s", msg);
                 throw new NetworkListenerProviderException(msg);
         }
     }
 
     /**
-     * <p> Act on work items described in common data format. </p>
+     * <p> Callback from com.intel.dai.network_listener.processMessage().
+     * Acts on a work item described in common data format. </p>
      * @param workItem HW inventory update work item in common data format
      * @param config network listener config
      * @param systemActions system actions for processing work item
@@ -123,67 +134,29 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     @Override
     public void actOnData(CommonDataFormat workItem, NetworkListenerConfig config, SystemActions systemActions) {
         if(config_ == null)
-            getConfig(config, systemActions);
+            getConfig(config);
 
-        String foreignLocation = workItem.retrieveExtraData(FOREIGN_KEY);
-        String location = workItem.getLocation();
         BootState bootState = workItem.getStateEvent();
-        if (location != null) {
-            Thread t = new Thread(new HWInventoryUpdate(location, foreignLocation, bootState, actions_, log_));
-            t.start();  // background updates of HW inventory
+        if (!isSupportedInventoryEvents(bootState)) {
+            log_.debug("HWI:%n  Unsupported boot state=%d", bootState);
+            return;
         }
-        // Possible TODOs: store RAZ event and publish to Rabbit MQ
+
+        Thread t = new Thread(new InventoryUpdateThread(log_));
+        t.start();  // background update of inventory
     }
 
-    private void getConfig(NetworkListenerConfig config, SystemActions systemActions) {
-        config_ = config;
-        actions_ = systemActions;
+    private boolean isSupportedInventoryEvents(BootState bootState) {
+        return bootState == BootState.NODE_ONLINE || bootState == BootState.NODE_OFFLINE;
+    }
 
-        // Possible TODOs: RAZ and Publisher config (Rabbit MQ)
+    private void getConfig(NetworkListenerConfig config) {
+        config_ = config;
+        // System actions no longer used because the DB update code needs to run before
+        // system actions are available.
     }
 
     private final Logger log_;
-
     private NetworkListenerConfig config_ = null;
-    private SystemActions actions_ = null;
-
     private final static String FOREIGN_KEY = "foreignLocationKey";
-}
-
-/**
- * Performs background update of the HW inventory DB.
- */
-class HWInventoryUpdate implements Runnable {
-    private final String location_;
-    private final String foreignName_;
-    private final SystemActions actions_;
-    private final BootState bootState_;
-    private final ForeignInventoryClient foreignInventoryClient_;
-
-    public HWInventoryUpdate(String location, String foreignName, BootState bootState, SystemActions actions,
-                             Logger log) {
-        location_ = location;
-        foreignName_ = foreignName;
-        actions_ = actions;
-        bootState_ = bootState;
-        foreignInventoryClient_ = new ForeignInventoryClient(log);
-    }
-
-    public void run() {
-        actions_.upsertHWInventoryHistory(
-                foreignInventoryClient_.getCanonicalHWInvHistoryJson(
-                        actions_.lastHWInventoryHistoryUpdate()));
-
-        String foreignTimestamp = actions_.lastHWInventoryHistoryUpdate();
-
-        if(bootState_ == BootState.NODE_OFFLINE) {
-            actions_.deleteHWInventory(location_);
-            // Assign nulls to cooked history
-            return;
-        }
-        if(bootState_ == BootState.NODE_ONLINE) {
-            actions_.upsertHWInventory(location_, foreignInventoryClient_.getCanonicalHWInvJson(foreignName_));
-            // Walk the raw history to upsert the cooked history
-        }
-    }
 }

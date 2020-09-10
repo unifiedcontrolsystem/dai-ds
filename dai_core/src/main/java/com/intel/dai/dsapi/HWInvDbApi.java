@@ -8,6 +8,8 @@ import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface that allows HW inventory to be stored in an underlying DB.  The HW
@@ -34,7 +36,7 @@ public interface HWInvDbApi {
     /**
      * <p> Ingest part of the HW inventory tree canonical form encoded as the given json string. </p>
      * @param canonicalHWInvJson json string containing a canonical HW inventory
-     * @return 0 if any location is ingested, otherwise 1
+     * @return number of HW inventory locations ingested
      */
     int ingest(String canonicalHWInvJson) throws InterruptedException, IOException, DataStoreException;
 
@@ -52,8 +54,9 @@ public interface HWInvDbApi {
      */
     String lastHwInvHistoryUpdate() throws IOException, DataStoreException;
 
-    void insertRawHistoricalRecord(String action, String id, String fru, String foreignServerTimestamp)
-            throws IOException, DataStoreException;
+    void deleteAllRawHistoricalRecords() throws IOException, DataStoreException;
 
-    int ingestHistory(String canonicalHWInvHistoryJson) throws IOException, DataStoreException;
+    List<HWInvHistoryEvent> ingestHistory(String canonicalHWInvHistoryJson) throws IOException, DataStoreException;
+
+    int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp);
 }

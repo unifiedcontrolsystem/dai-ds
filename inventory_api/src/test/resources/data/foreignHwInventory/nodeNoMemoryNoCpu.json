@@ -1,5 +1,5 @@
 {
-  "ForeignName": "x0c0s21b0n0",
+  "XName": "x0c0s21b0n0",
   "Format": "NestNodesOnly",
   "Nodes": [
     {
@@ -37,9 +37,7 @@
           "SystemType": "Physical",
           "UUID": "26276e2a-29dd-43eb-8ca6-8186bbc3d971"
         }
-      },
-      "Processors": null,
-      "Memory": null
+      }
     }
   ]
 }

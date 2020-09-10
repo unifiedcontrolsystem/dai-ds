@@ -1,7 +1,7 @@
 {
     "db": {
         "type": "jdbc",
-        "url": "jdbc:postgresql://sms01-nmn.local:5432/dai",
+        "url": "jdbc:postgresql://am01-nmn.local.local:5432/dai",
         "username": "dai",
         "password": "123@dai"
     }

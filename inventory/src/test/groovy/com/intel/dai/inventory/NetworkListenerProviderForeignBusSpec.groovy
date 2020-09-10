@@ -55,16 +55,17 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         '{Components: [], State: "Cow"}'    || NetworkListenerProviderException
     }
 
-    def "processRawStringData - edge cases - unknown nodes"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
-        then: thrown exception
-
-        where:
-        scnJson                                 || exception
-        '{Components: [""], State: "On"}'       || NetworkListenerProviderException
-        '{Components: ["cow"], State: "On"}'    || NetworkListenerProviderException
-        '{Components: ["", ""], State: "On"}'   || NetworkListenerProviderException
-    }
+    // Foreign to DAI namespace mapping disabled for now
+//    def "processRawStringData - edge cases - unknown nodes"() {
+//        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+//        then: thrown exception
+//
+//        where:
+//        scnJson                                 || exception
+//        '{Components: [""], State: "On"}'       || NetworkListenerProviderException
+//        '{Components: ["cow"], State: "On"}'    || NetworkListenerProviderException
+//        '{Components: ["", ""], State: "On"}'   || NetworkListenerProviderException
+//    }
 
     def "processRawStringData - unsupported boot state"() {
         when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))

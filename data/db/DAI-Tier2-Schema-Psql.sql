@@ -1013,16 +1013,31 @@ CREATE TABLE public.Tier2_HWInventoryLocation (
 );
 
 CREATE TABLE public.tier2_RawHWInventory_History (
-    Action VARCHAR(16) NOT NULL,            -- INSERTED/DELETED
+    Action VARCHAR(16) NOT NULL,                -- Added/Removed
     ID VARCHAR(64) NOT NULL,                -- perhaps xname (path); as is from JSON
     FRUID VARCHAR(80) NOT NULL,             -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(24) NOT NULL,  -- Foreign server timestamp string in RFC-3339 format
+    ForeignTimestamp VARCHAR(32) NOT NULL,      -- Foreign server timestamp string in RFC-3339 format
     DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber bigint NOT NULL
+    EntryNumber bigint NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
 );
 
 
 --- FUNCTION DEFINITIONS START HERE ----
+
+-- ForeignTimeStamp is keep as a RFC-3339 string by design.
+CREATE OR REPLACE FUNCTION public.LastRawReplacementHistoryUpdate()
+    RETURNS varchar
+AS $$
+DECLARE
+    max_time_str varchar;
+BEGIN
+    EXECUTE 'SELECT MAX(ForeignTimestamp) FROM tier2_RawHWInventory_History'
+        into max_time_str;
+    RETURN max_time_str;
+END
+$$ LANGUAGE plpgsql;
+
 
 --
 -- Name: aggregatedenvdatalistattime(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
@@ -1738,11 +1753,10 @@ select HI.Lctn
     , HI.dbupdatedtimestamp
     , HI.InventoryTimestamp
     , InventoryInfo::varchar
---     , cast(InventoryInfo as varchar)
     , HI.Sernum
 from tier2_nodeinventory_history HI
 where HI.Lctn = p_lctn
-order by HI.InventoryTimestamp, HI.Lctn desc LIMIT p_limit;
+order by HI.InventoryTimestamp desc, HI.Lctn asc LIMIT p_limit;
 $$;
 
 

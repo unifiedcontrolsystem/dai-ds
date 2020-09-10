@@ -88,7 +88,7 @@ public class HWInvDiscovery {
      */
     public ImmutablePair<Integer, String> queryHWInvTree(String foreignLocName) {
         if (requester_ == null) {
-            log.error("requester_ is null");
+            log.error("HWI:%n  requester_ is null");
             return new ImmutablePair<>(1, "");
         }
         return requester_.getHwInventory(foreignLocName);
@@ -100,7 +100,7 @@ public class HWInvDiscovery {
      */
     public ImmutablePair<Integer, String> queryHWInvTree() {
         if (requester_ == null) {
-            log.error("requester_ is null");
+            log.error("HWI:%n  requester_ is null");
             return new ImmutablePair<>(1, "");
         }
         return requester_.getHwInventory();
@@ -113,7 +113,7 @@ public class HWInvDiscovery {
      */
     public ImmutablePair<Integer, String> queryHWInvHistory(String startTime) {
         if (requester_ == null) {
-            log.error("requester_ is null");
+            log.error("HWI:%n  requester_ is null");
             return new ImmutablePair<>(1, "");
         }
         return requester_.getHWInventoryHistory(startTime);
@@ -128,12 +128,15 @@ public class HWInvDiscovery {
         XdgConfigFile xdg = new XdgConfigFile("ucs");
         String configPath = xdg.FindFile("HWInvDiscoveryConfig.json");
         if(configPath == null)
-            throw new NullPointerException("Was unable to find the configuration file: HWInvDiscoveryConfig.json");
+            throw new NullPointerException("HWI:%n  Was unable to find the configuration file: HWInvDiscoveryConfig.json");
 
         sess = toHWDiscoverySession(configPath);
-        log.info("config:%n%s", sess.toString());
+        log.debug("HWI:%n  toHWDiscoverySession(configPath=%s) => %s", configPath, sess.toString());
 
         RESTClient restClient = RESTClientFactory.getInstance("jdk11", log);
+        if (restClient == null) {
+            throw new RESTClientException("HWI:%n  restClient == null");
+        }
 
         String requesterClass = sess.providerClassMap.requester;
         String tokenAuthProvider = sess.providerClassMap.tokenAuthProvider;
@@ -147,14 +150,12 @@ public class HWInvDiscovery {
             );
             createTokenProvider(tokenAuthProvider, config);
             if (tokenProvider_ == null) {
-                throw new RESTClientException("Cannot create token provider");
+                throw new RESTClientException("HWI:%n  tokenProvider_ == null");
             }
-            if (restClient != null) {
-                restClient.setTokenOAuthRetriever(tokenProvider_);
-            }
+            restClient.setTokenOAuthRetriever(tokenProvider_);
         }
 
-        createRequester(requesterClass, sess.providerConfigurations.inventoryInfoRequester, restClient);
+        createRequester(requesterClass, sess.providerConfigurations.requester, restClient);
     }
 
     private HWDiscoverySession toHWDiscoverySession(String inputFileName) throws RESTClientException {
@@ -164,7 +165,7 @@ public class HWInvDiscovery {
             return gson.fromJson(br, HWDiscoverySession.class);
         } catch (Exception e) {
             // EOFException can occur if the json is incomplete
-            String msg = String.format("Fail to determine discovery session providers: %s", e.getMessage());
+            String msg = String.format("HWI:%n  Fail to determine discovery session providers: %s", e.getMessage());
             log.fatal(msg);
             throw new RESTClientException(msg);
         }
@@ -202,15 +203,15 @@ public class HWInvDiscovery {
             requester_ = (ForeignServerInventoryRest) ctor.newInstance();
             requester_.initialize(log, config, restClient);
         } catch (ClassNotFoundException e) {
-            log.exception(e, String.format("Missing RestRequester implementation '%s'", requester));
+            log.exception(e, String.format("HWI:%n  Missing RestRequester implementation '%s'", requester));
         } catch (NoSuchMethodException e) {
-            log.exception(e, String.format("Missing public constructor for RestRequester implementation '%s'",
+            log.exception(e, String.format("HWI:%n  Missing public constructor for RestRequester implementation '%s'",
                     requester));
         } catch (IllegalAccessException e) {
-            log.exception(e, String.format("Default constructor for RestRequester implementation " +
+            log.exception(e, String.format("HWI:%n  Default constructor for RestRequester implementation " +
                     "'%s' must be public", requester));
         } catch (InstantiationException | InvocationTargetException e) {
-            log.exception(e, String.format("Cannot construct RestRequester implementation '%s'", requester));
+            log.exception(e, String.format("HWI:%n  Cannot construct RestRequester implementation '%s'", requester));
         }
     }
 

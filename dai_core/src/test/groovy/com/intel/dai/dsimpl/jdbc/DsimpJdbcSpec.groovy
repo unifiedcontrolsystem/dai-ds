@@ -39,3 +39,13 @@ class JdbcStoreTelemetrySpec extends Specification {
         then: notThrown Exception
     }
 }
+
+class InventorySnapshotJdbcSpec extends Specification {
+    def "getLastHWInventoryHistoryUpdate"() {
+        def ts = new InventorySnapshotJdbc()
+        ts.dbConn = Mock(Connection)
+        ts.dbConn.prepareStatement(_) >> null
+        when: ts.getLastHWInventoryHistoryUpdate()
+        then: thrown DataStoreException
+    }
+}

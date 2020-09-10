@@ -4,6 +4,7 @@
 //
 package com.intel.dai.inventory.api
 
+import com.intel.dai.dsapi.HWInvUtil
 import com.intel.dai.inventory.api.pojo.fru.ForeignFRU
 import com.intel.dai.inventory.api.pojo.fru.info.*
 import com.intel.dai.inventory.api.pojo.loc.ForeignHWInvByLoc
@@ -24,6 +25,7 @@ class ForeignHwInventoryApiSpec extends Specification {
 
     def setup() {
         invRequester = new ForeignHwInventoryApi();
+        invRequester.util = Mock(HWInvUtil)
     }
 
     def "initialize"() {
@@ -102,6 +104,7 @@ class ForeignHwInventoryApiSpec extends Specification {
     }
 
     def "makeHistoryQuery" () {
+        invRequester.logger = log
         invRequester.config = new InventoryInfoRequester();
         invRequester.config.getHWInventoryHistory.endpoint = "http://localhost:5678/"
         invRequester.config.getHWInventoryHistory.resource = "Inventory/Hardware/History"
@@ -114,8 +117,7 @@ class ForeignHwInventoryApiSpec extends Specification {
         invRequester.logger = log
         def uri = new URI("")
         def blockingResult = new BlockingResult(code, responseDocument, requestInfo)
-        expect:
-        invRequester.interpretePollForDiscoveryProgressResult(uri, blockingResult) == status
+        expect: invRequester.interpretePollForDiscoveryProgressResult(uri, blockingResult) == status
 
         where:
         code    | responseDocument      | requestInfo                       || status

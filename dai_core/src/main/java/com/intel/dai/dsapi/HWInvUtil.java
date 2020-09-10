@@ -21,4 +21,7 @@ public interface HWInvUtil {
     void toFile(String str, String outputFileName) throws IOException;
     String fromFile(Path inputFilePath) throws IOException;
     List<HWInvLoc> subtract(List<HWInvLoc> list0, List<HWInvLoc> list1);
+    String head(String str, int limit);
+    void setMaxNumberOfNonDebugMessages(int limit);
+    void logError(String fmt, Object ...args);
 }

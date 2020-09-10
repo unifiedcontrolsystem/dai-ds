@@ -10,10 +10,10 @@ import lombok.ToString;
 @ToString
 public class ProviderConfigurations {
     public TokenAuthProvider tokenAuthProvider;
-    public InventoryInfoRequester inventoryInfoRequester;
+    public InventoryInfoRequester requester;
 
     public ProviderConfigurations() {
         tokenAuthProvider = new TokenAuthProvider();
-        inventoryInfoRequester = new InventoryInfoRequester();
+        requester = new InventoryInfoRequester();
     }
 }

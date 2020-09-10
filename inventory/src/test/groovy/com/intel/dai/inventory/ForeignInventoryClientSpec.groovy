@@ -1,3 +1,7 @@
+// Copyright (C) 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 package com.intel.dai.inventory
 
 import com.intel.dai.dsapi.HWInvDbApi
@@ -47,11 +51,11 @@ class ForeignInventoryClientSpec extends Specification {
         def hwDisc = Mock(HWInvDiscovery)
         hwDisc.queryHWInvHistory(_) >> QueryResult
         ts.hwInvDiscovery_ = hwDisc
-        expect: ts.getCanonicalHWInvHistoryJson(null) == null
+        expect: ts.getCanonicalHWInvHistoryJson(null) == Result
 
         where:
         QueryResult                                 || Result
-        new ImmutablePair<>(0, "{}")                || "{}"
+        new ImmutablePair<>(0, "{}")                || '{\n  "events": []\n}'
         new ImmutablePair<>(1, "Doesn't matter")    || null
     }
 }
