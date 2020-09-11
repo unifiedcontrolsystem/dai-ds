@@ -109,7 +109,7 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
             String foreignLocationName = toForeignLocationName(locationName);
             URI uri = makeUri(config.getHWInventoryUpdate.endpoint,
                     config.getHWInventoryUpdate.resource,
-                    locationName);
+                    foreignLocationName);
             logger.info("HWI:%n  uri: %s", uri);
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvQueryResult(uri, result);
