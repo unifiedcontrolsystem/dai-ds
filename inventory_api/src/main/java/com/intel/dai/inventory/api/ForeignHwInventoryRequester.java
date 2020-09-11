@@ -135,7 +135,7 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
     }
 
     boolean isForeignLocationName(String locationName) {
-        return locationName.equals("all") || locationName.startsWith("x");
+        return locationName.equals("all") || locationName.startsWith("x");  // case sensitive is important here
     }
 
     /**
