@@ -42,10 +42,10 @@ public interface ForeignServerInventoryRest {
 
     /**
      * Gets the entire HW inventory at the specified location.
-     * @param foreignLocName foreign name of the root of a subtree in the HPC inventory hierarchy
+     * @param locationName DAI name of the root of a subtree in the HPC inventory hierarchy
      * @return status 0 and json containing the inventory if successful; otherwise status is 1
      */
-    ImmutablePair<Integer, String> getHwInventory(String foreignLocName);
+    ImmutablePair<Integer, String> getHwInventory(String locationName);
 
     /**
      * Gets the hardware inventory history at the specified start start to the present.

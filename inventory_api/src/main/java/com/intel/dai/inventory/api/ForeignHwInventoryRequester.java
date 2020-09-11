@@ -7,6 +7,8 @@ package com.intel.dai.inventory.api;
 
 import com.intel.dai.dsapi.HWInvUtil;
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
+import com.intel.dai.foreign_bus.CommonFunctions;
+import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.inventory.api.pojo.rqst.InventoryInfoRequester;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.BlockingResult;
@@ -98,13 +100,16 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
 
     /**
      * Gets the entire HW inventory at the specified location.
-     * @param foreignLocName foreign name of the root of a subtree in the HPC inventory hierarchy
+     * @param locationName foreign name of the root of a subtree in the HPC inventory hierarchy
      * @return status 0 and json containing the inventory if successful; otherwise status is 1
      */
     @Override
-    public ImmutablePair<Integer, String> getHwInventory(String foreignLocName) {
+    public ImmutablePair<Integer, String> getHwInventory(String locationName) {
         try {
-            URI uri = makeUri(config.getHWInventoryUpdate.endpoint, config.getHWInventoryUpdate.resource, foreignLocName);
+            String foreignLocationName = toForeignLocationName(locationName);
+            URI uri = makeUri(config.getHWInventoryUpdate.endpoint,
+                    config.getHWInventoryUpdate.resource,
+                    locationName);
             logger.info("HWI:%n  uri: %s", uri);
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvQueryResult(uri, result);
@@ -114,6 +119,23 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
             logger.fatal("getRESTRequestBlocking failure");
         }
         return new ImmutablePair<>(1, "");
+    }
+
+    String toForeignLocationName(String locationName) {
+        if (isForeignLocationName(locationName)) {
+            logger.debug("HWI:%n  %s is already in foreign namespace", locationName);
+            return locationName;
+        }
+        try {
+            return CommonFunctions.convertLocationToForeign(locationName);
+        } catch (ConversionException e) {
+            logger.error("HWI:%n  %s cannot be mapped backed to foreign namespace", locationName);
+            return locationName;
+        }
+    }
+
+    boolean isForeignLocationName(String locationName) {
+        return locationName.equals("all") || locationName.startsWith("x");
     }
 
     /**
