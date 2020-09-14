@@ -180,10 +180,8 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         String hwInfoJson = hwInfo.right;
 
         long foreignTimestampInMillisecondsSinceEpoch = Instant.parse(foreignTimestamp).toEpochMilli();
-        insertNodeHistory(nodeLocation, foreignTimestampInMillisecondsSinceEpoch, hwInfoJson,
+        return insertNodeHistory(nodeLocation, foreignTimestampInMillisecondsSinceEpoch, hwInfoJson,
                 nodeSerialNumber);
-
-        return 1;
     }
 
     public long numberOfCookedNodes() throws DataStoreException, IOException {
@@ -213,7 +211,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    private void insertNodeHistory(String nodeLocation, long foreignTimestampInMillisecondsSinceEpoch,
+    private int insertNodeHistory(String nodeLocation, long foreignTimestampInMillisecondsSinceEpoch,
                                    String hwInfoJson, String nodeSerialNumber) throws IOException, DataStoreException {
         try {
             ClientResponse cr = client.callProcedure(
@@ -226,6 +224,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             if (cr.getStatus() != ClientResponse.SUCCESS) {
                 logger.error("HWI:%n  NodeHistoryInsert(nodeLocation=%s) => %d",
                         nodeLocation, cr.getStatus());
+                return 0;
             }
         } catch (ProcCallException e) {
             logger.error("HWI:%n  ProcCallException during NodeHistoryInsert");
@@ -234,6 +233,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             logger.error("HWI:%n  Null client");
             throw new DataStoreException(e.getMessage());
         }
+        return 1;
     }
 
     private ImmutablePair<String, String> generateHWInfoJsonBlob(String nodeLocation)
@@ -297,7 +297,6 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             logger.error("ProcCallException during RawInventoryDump");
             throw new DataStoreException(e.getMessage());
         } catch (NullPointerException e) {
-            logger.error("Null client");
             throw new DataStoreException(e.getMessage());
         }
     }
