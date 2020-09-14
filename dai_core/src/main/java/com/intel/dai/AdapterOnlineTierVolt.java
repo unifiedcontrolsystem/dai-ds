@@ -4,21 +4,27 @@
 
 package com.intel.dai;
 
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.config_io.ConfigIOParseException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.perflogging.BenchmarkHelper;
-import org.voltdb.client.*;
+import com.intel.properties.PropertyArray;
+import com.intel.properties.PropertyMap;
+import com.rabbitmq.client.MessageProperties;
 import org.voltdb.VoltTable;
-import java.lang.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import org.voltdb.client.ClientResponse;
+import org.voltdb.client.ProcCallException;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import com.intel.config_io.*;
-import com.intel.properties.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
-import com.rabbitmq.client.*;
 
 /**
  * AdapterOnlineTierVolt for the VoltDB database.
@@ -505,6 +511,8 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
     public static void main(String[] args) throws IOException, TimeoutException {
         Logger logger = LoggerFactory.getInstance("ONLINE_TIER", AdapterOnlineTierVolt.class.getName(), "console");
+        for (String arg : args) logger.info("arg: %s", arg);
+
         AdapterSingletonFactory.initializeFactory("ONLINE_TIER", AdapterOnlineTierVolt.class.getName(), logger);
         final AdapterOnlineTierVolt obj = new AdapterOnlineTierVolt(logger);
         obj.initializeAdapter();

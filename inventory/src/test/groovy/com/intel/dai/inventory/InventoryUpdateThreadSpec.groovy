@@ -42,8 +42,10 @@ class DatabaseSynchronizerSpec extends Specification {
         'cow'               | 'ts0'     || [:]
         'R0-CB0-CN0'        | 'ts0'     || ['R0-CB0-CN0': 'ts0']
         'R0-CB0-CN0-DIMM0'  | 'ts0'     || ['R0-CB0-CN0': 'ts0']
-        'x0b0n0'            | 'ts1'     || ['x0b0n0': 'ts1']
-        'x0b0n0d0'          | 'ts1'     || ['x0b0n0': 'ts1']
+        'X00-AM42'          | 'ts0'     || ['X00-AM42': 'ts0']
+        'X00-AM42-DIMM65'   | 'ts0'     || ['X00-AM42': 'ts0']
+        'x0b0n0'            | 'ts1'     || [:]
+        'x0b0n0d0'          | 'ts1'     || [:]
     }
 
     def "ingestChangedNodeLocationSnapshots -- empty"() {

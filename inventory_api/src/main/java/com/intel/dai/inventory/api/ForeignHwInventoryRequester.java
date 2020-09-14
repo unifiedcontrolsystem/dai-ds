@@ -106,10 +106,9 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
     @Override
     public ImmutablePair<Integer, String> getHwInventory(String locationName) {
         try {
-            String foreignLocationName = toForeignLocationName(locationName);
             URI uri = makeUri(config.getHWInventoryUpdate.endpoint,
                     config.getHWInventoryUpdate.resource,
-                    foreignLocationName);
+                    toForeignLocationName(locationName));
             logger.info("HWI:%n  uri: %s", uri);
             BlockingResult result = restClient.getRESTRequestBlocking(uri);
             return interpreteQueryHWInvQueryResult(uri, result);
@@ -123,13 +122,14 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
 
     String toForeignLocationName(String locationName) {
         if (isForeignLocationName(locationName)) {
-            logger.debug("HWI:%n  %s is already in foreign namespace", locationName);
+            logger.warn("HWI:%n  %s is already in foreign namespace", locationName);
             return locationName;
         }
         try {
             return CommonFunctions.convertLocationToForeign(locationName);
         } catch (ConversionException e) {
-            logger.error("HWI:%n  %s cannot be mapped backed to foreign namespace", locationName);
+            logger.error("HWI:%n  %s cannot be mapped into foreign namespace because %s",
+                    locationName, e.getMessage());
             return locationName;
         }
     }

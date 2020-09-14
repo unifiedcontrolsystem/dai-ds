@@ -45,17 +45,17 @@ pipeline {
                         }
                     }
                 }
-                stage('Quick Component Test') {
-                    options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    steps {
-                        script {
-                            RestartHWInvDb()
-                            utilities.InvokeGradle(":procedures:jar")
-                            utilities.InvokeGradle(":dai_core:integrationTest")
-                        }
-                    }
-                }
+//                stage('Quick Component Test') {
+//                    options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+//                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+//                    steps {
+//                        script {
+//                            RestartHWInvDb()
+//                            utilities.InvokeGradle(":procedures:jar")
+//                            utilities.InvokeGradle(":dai_core:integrationTest")
+//                        }
+//                    }
+//                }
                 stage('Quick Report') {
                     options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }

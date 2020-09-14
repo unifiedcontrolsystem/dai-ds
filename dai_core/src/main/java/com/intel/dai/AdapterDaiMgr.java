@@ -1,24 +1,31 @@
 package com.intel.dai;
 
-import com.intel.dai.dsapi.*;
+import com.intel.dai.dsapi.DataStoreFactory;
+import com.intel.dai.dsapi.DbStatusApi;
+import com.intel.dai.dsapi.Location;
+import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.dai.exceptions.DataStoreException;
-import com.intel.logging.*;
+import com.intel.logging.Logger;
+import com.intel.logging.LoggerFactory;
+import com.intel.runtime_utils.RuntimeCommand;
 import org.apache.commons.io.IOUtils;
-import org.voltdb.client.*;
 import org.voltdb.VoltTable;
-import java.lang.*;
+import org.voltdb.client.Client;
+import org.voltdb.client.ClientResponse;
+import org.voltdb.client.ProcCallException;
+
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.time.Instant;
-import java.util.*;
-import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
-import com.intel.runtime_utils.RuntimeCommand;
 
 /**
  * AdapterDaiMgr for the VoltDB database.
@@ -1283,7 +1290,7 @@ public class AdapterDaiMgr {
     //---------------------------------------------------------
     public long handleMotherSuperiorDaiMgr(String sSnLctn, String sSnHostname) throws InterruptedException, IOException, ProcCallException, AdapterException
     {
-        log_.info("handleMotherSuperiorDaiMgr - starting");
+        log_.info("CP: handleMotherSuperiorDaiMgr - starting");
 
         // Clean up any "stale" adapter instances that were inadvertently left as active
         // (Specifically this involves checking for any adapter instances running on this service node.  For any that are found we need to check if they really are still active.).
@@ -1322,9 +1329,6 @@ public class AdapterDaiMgr {
                 // Ensure that critical child work items are "not stuck".
                 ensureChildWrkItemsMakingProgress(sSnLctn);
 
-                // Sleep for a little bit.
-                Thread.sleep( 5 * 1000L );  // 5 secs
-
                 // Periodically do a "proof of life" operation so that the Mother Superior (MoS) DAI Manager's backup instance knows this MoS DAI Mgr instance is still alive.
                 proofOfLife();
 
@@ -1342,8 +1346,12 @@ public class AdapterDaiMgr {
                                                         );
                 }
                 catch (Exception e2) { log_.exception(e2); }
+            } finally {
+                // Sleep for a little bit.  Sleep here instead or you may get an exception storm.
+                if (!adapter.adapterShuttingDown()) Thread.sleep( 5 * 1000L );  // 5 secs
             }
         }   // End while loop
+        log_.info("CP: handleMotherSuperiorDaiMgr - exiting normally");
         return -99999;
     }   // End handleMotherSuperiorDaiMgr(String sSnLctn, String sSnHostname)
 
@@ -1519,7 +1527,7 @@ public class AdapterDaiMgr {
     //--------------------------------------------------------------------------
     public void mainProcessingFlow(String[] args) throws IOException, TimeoutException {
         try {
-            log_.info("starting");
+            log_.info("CP: mainProcessingFlow - starting");
 
             // Set up signal handlers for this process.
             AdapterShutdownHandler tempShutdownHandler = new AdapterShutdownHandler() {
@@ -1631,6 +1639,7 @@ public class AdapterDaiMgr {
             //-----------------------------------------------------------------
             // Main processing loop
             //-----------------------------------------------------------------
+            log_.info("CP: entering main processing loop ...");
             while(adapter.adapterShuttingDown() == false) {
                 try {
                     // Handle any work items that have been queued for this type of adapter.
@@ -1704,6 +1713,7 @@ public class AdapterDaiMgr {
                     catch (Exception e2) { log_.exception(e2); }
                 }
             }   // End while loop - handle any work items that have been queued for this type of adapter.
+            log_.info("CP: Exited main processing log");
 
             //-----------------------------------------------------------------
             // Clean up adapter table, base work item, and close connections to db.
@@ -1715,6 +1725,8 @@ public class AdapterDaiMgr {
                 ProcCallException e) {
             adapter.handleMainlineAdapterException(e);
         }
+
+        log_.info("CP: mainProcessingFlow - exiting normally");
     }   // End mainProcessingFlow(String[] args)
 
 
@@ -1722,6 +1734,7 @@ public class AdapterDaiMgr {
     public static void main(String[] args) throws IOException, TimeoutException {
         final String type = "DAI_MGR";
         final Logger logger = LoggerFactory.getInstance(type, AdapterDaiMgr.class.getName(), "console");
+        for (String arg : args) logger.info("CP: arg: %s", arg);
         AdapterSingletonFactory.initializeFactory(type, AdapterDaiMgr.class.getName(), logger);
         final IAdapter adapter = AdapterSingletonFactory.getAdapter();
         final AdapterDaiMgr obj = new AdapterDaiMgr(adapter, logger,
