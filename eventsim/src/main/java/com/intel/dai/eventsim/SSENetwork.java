@@ -8,11 +8,12 @@ import com.intel.networking.restserver.RESTServerFactory;
 import com.intel.networking.restserver.RESTServerHandler;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
-import com.sun.istack.NotNull;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Description of class SSENetwork.
@@ -30,7 +31,7 @@ public class SSENetwork extends NetworkConnectionObject {
      * This method is to publish data to network.
      * @param eventType subscription subject.
      */
-    public void publish(final String eventType, final String message) {
+    public void publishImmediate(final String eventType, final String message) {
         try {
             String publishPath = subUrls_.getString(eventType);
             server_.ssePublish(publishPath, message, null);
@@ -40,13 +41,59 @@ public class SSENetwork extends NetworkConnectionObject {
     }
 
     /**
+     * This method is to publish data to network in a more efficient way.
+     * @param eventType subscription subject.
+     */
+    public void publish(final String eventType, final String message) {
+        if(sendThread_ == null) {
+            sendThread_ = new Thread(this::sendDelayedLoop);
+            sendThread_.start();
+        }
+        Accumulator current = accumulator_.getOrDefault(eventType, new Accumulator(eventType));
+        accumulator_.putIfAbsent(eventType, current);
+        synchronized (current) {
+            if(current.startTime == 0L)
+                current.startTime = TimeUtils.getNsTimestamp();
+            current.data += message;
+            current.count++;
+        }
+    }
+    private static final int DELAYED_COUNT = 20;       // fire delayed network message after 20 count or...
+    private static final long DELAYED_NS = 1_000_000L; // ... 1ms elapsed time.
+    private void sendDelayedLoop() {
+        while(server_.isRunning()) {
+            accumulator_.forEach((consumer, current) -> {
+                synchronized (current) {
+                    long diff = TimeUtils.getNsTimestamp() - current.startTime;
+                    if (current.count >= DELAYED_COUNT || diff > DELAYED_NS) {
+                        publishImmediate(current.eventType, current.data);
+                        current.reset();
+                    }
+                }
+            });
+            try { Thread.sleep(0, 1_000); } catch(InterruptedException e) { /* No consequence */ }
+        }
+    }
+    private static class Accumulator {
+        Accumulator(String type) { eventType = type; reset(); }
+        void reset() {startTime = 0L; data = ""; count = 0; }
+        final String eventType;
+        long startTime;
+        String data;
+        int count;
+    }
+    private Thread sendThread_ = null;
+    private final Map<String, Accumulator> accumulator_ = new ConcurrentHashMap<>();
+
+    /**
      * This method is used to subscribe to rest handler.
      * @param url subscription url.
      * @param httpMethod GET/POST/DELETE/PUT.
      * @param callback callback method.
      * @throws RESTServerException when unable to add handler.
      */
-    public void register(@NotNull final String url, @NotNull final String httpMethod, final RESTServerHandler callback) throws RESTServerException {
+    public void register(final String url, final String httpMethod, final RESTServerHandler callback)
+            throws RESTServerException {
         if (url == null || httpMethod == null)
             throw new RESTServerException("Could not register URL or HttpMethod or call back method : NULL value(s)");
         server_.addHandler(url, HttpMethod.valueOf(httpMethod), callback);

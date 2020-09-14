@@ -52,39 +52,44 @@ public class EventSimRasEventProviderForeignBus implements NetworkListenerProvid
             throws NetworkListenerProviderException {
         if(!configDone_)
             setUpConfig(config);
-        try {
-            PropertyMap messageReceived = parser_.fromString(data).getAsMap();
-            List<CommonDataFormat> commonList = new ArrayList<>();
-            PropertyArray messages = messageReceived.getArray("message");
-            for(int index = 0; index < messages.size(); index++) {
-                PropertyMap message = messages.getMap(index);
-                if (!checkMessage(message))
-                    return commonList;
-                String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
-                String eventType = message.getStringOrDefault("event-type", null);
-                String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
-                for (String foreignLocation : foreignLocations) {
-                    try {
-                        String location = CommonFunctions.convertForeignToLocation(foreignLocation);
-                        CommonDataFormat common = new CommonDataFormat(
-                                CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
-                                location, DataType.RasEvent);
-                        String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
-                        common.setRasEvent(ucsEvent, payload);
-                        common = suppressEvents(common);
-                        if (common != null)
-                            commonList.add(common);
-                    } catch (ConversionException e) {
-                        log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
-                                "location %s", foreignLocation);
-                        log_.debug("Skipped location for data: %s", data);
+        List<CommonDataFormat> commonList = new ArrayList<>();
+        List<String> jsonList = CommonFunctions.breakupStreamedJSONMessages(data);
+        for(String json: jsonList) {
+            try {
+                PropertyMap messageReceived = parser_.fromString(json).getAsMap();
+                PropertyArray messages = messageReceived.getArray("message");
+                for (int index = 0; index < messages.size(); index++) {
+                    PropertyMap message = messages.getMap(index);
+                    if (!checkMessage(message))
+                        return commonList;
+                    String[] foreignLocations = message.getStringOrDefault("location", "").split(",");
+                    String eventType = message.getStringOrDefault("event-type", null);
+                    String ucsEvent = eventMetaData_.getStringOrDefault(eventType, "RasMntrForeignUnknownEvent");
+                    for (String foreignLocation : foreignLocations) {
+                        try {
+                            String location = CommonFunctions.convertForeignToLocation(foreignLocation);
+                            CommonDataFormat common = new CommonDataFormat(
+                                    CommonFunctions.convertISOToLongTimestamp(message.getString("timestamp")),
+                                    location, DataType.RasEvent);
+                            String payload = message.getStringOrDefault("payload", message.getStringOrDefault("message", ""));
+                            common.setRasEvent(ucsEvent, payload);
+                            common = suppressEvents(common);
+                            if (common != null)
+                                commonList.add(common);
+                        } catch (ConversionException e) {
+                            log_.warn("Failed to convert a foreign location to a DAI location, skipping data element for " +
+                                    "location %s", foreignLocation);
+                            log_.debug("Skipped location for data: %s", data);
+                        }
                     }
                 }
+            } catch (ConfigIOParseException | PropertyNotExpectedType | ParseException | ClassCastException |
+                    NullPointerException e) {
+                log_.warn("Dropping data that cannot be parsed");
+                log_.debug("JSON='%s'", json);
             }
-            return commonList;
-        } catch(ConfigIOParseException | PropertyNotExpectedType | ParseException e) {
-            throw new NetworkListenerProviderException("Failed to load the event metadata");
         }
+        return commonList;
     }
 
     @Override

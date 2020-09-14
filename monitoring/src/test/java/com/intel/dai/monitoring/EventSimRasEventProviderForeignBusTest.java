@@ -95,7 +95,7 @@ public class EventSimRasEventProviderForeignBusTest {
         transformer_.processRawStringData(badSample2, config_);
     }
 
-    @Test(expected = NetworkListenerProviderException.class)
+    @Test
     public void processRawStringDataBadJson() throws Exception {
         transformer_.processRawStringData(badSample3, config_);
     }
