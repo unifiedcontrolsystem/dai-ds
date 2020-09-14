@@ -17,6 +17,9 @@ pipeline {
     stages {
         stage ('unit-test') {
             agent { label "${AGENT}" }
+            environment {
+                PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
+            }
             stages {
                 stage('Preparation') {
                     steps {
@@ -45,17 +48,17 @@ pipeline {
                         }
                     }
                 }
-//                stage('Quick Component Test') {
-//                    options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-//                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-//                    steps {
-//                        script {
-//                            RestartHWInvDb()
-//                            utilities.InvokeGradle(":procedures:jar")
-//                            utilities.InvokeGradle(":dai_core:integrationTest")
-//                        }
-//                    }
-//                }
+                stage('Quick Component Test') {
+                    options{ catchError(message: "Quick Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    steps {
+                        script {
+                            RestartHWInvDb()
+                            utilities.InvokeGradle(":procedures:jar")
+                            utilities.InvokeGradle(":dai_core:integrationTest")
+                        }
+                    }
+                }
                 stage('Quick Report') {
                     options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
@@ -84,17 +87,17 @@ pipeline {
                         }
                     }
                 }
-//                stage('Full Component Test') {
-//                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
-//                            buildResult: 'UNSTABLE') }
-//                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-//                    steps {
-//                        script {
-//                            RestartHWInvDb()
-//                            utilities.InvokeGradle("integrationTest")
-//                        }
-//                    }
-//                }
+                stage('Full Component Test') {
+                    options{ catchError(message: "Full Component Test failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    steps {
+                        script {
+                            RestartHWInvDb()
+                            utilities.InvokeGradle("integrationTest")
+                        }
+                    }
+                }
                 stage('Full Report') {
                     options{ catchError(message: "Full Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }

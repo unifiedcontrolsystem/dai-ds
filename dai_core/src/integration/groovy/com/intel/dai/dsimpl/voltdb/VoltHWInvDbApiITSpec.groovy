@@ -21,7 +21,7 @@ class VoltHWInvDbApiITSpec extends Specification {
     Logger logger = Mock Logger
 
     def setup() {
-        String server = "192.168.2.22"
+        String server = "localhost"
         String[] servers = [server]
         ts = new VoltHWInvDbApi(logger, new HWInvUtilImpl(logger), servers)
         ts.initialize()
