@@ -26,9 +26,11 @@
             "/apis/sma-telemetry/v1/stream/cray-telemetry-voltage": "voltageTelemetry" ,
             "/apis/sma-telemetry/v1/stream/cray-telemetry-power": "powerTelemetry" ,
             "/apis/sma-telemetry/v1/stream/cray-telemetry-energy": "energyTelemetry" ,
-            "/apis/sma-telemetry/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": "fabricPerf" ,
             "/apis/sma-telemetry/v1/stream/cray-telemetry-temperature": "temperatureTelemetry" ,
-            "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": "stateChange"
+            "/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications": "stateChange" ,
+            "/apis/sma-telemetry/v1/stream/cray-fabric-perf-telemetry": "fabricPerf" ,
+            "/apis/sma-telemetry/v1/stream/cray-fabric-crit-telemetry": "fabricCrit" ,
+            "/apis/sma-telemetry/v1/stream/cray-fabric-telemetry": "fabricTelemetry"
           }
       } ,
       "rabbitmq": {
