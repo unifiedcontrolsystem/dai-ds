@@ -9,7 +9,6 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
-import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.intel.runtime_utils.TimeUtils;
@@ -378,20 +377,15 @@ final public class CommonFunctions {
     }
 
     private static int dumpConversionMap(Logger log_, PropertyMap conversionMap, String conversionMapName) {
-        try {
-            ConfigIO parser = ConfigIOFactory.getInstance("json");
-            if (parser == null) {
-                log_.error("Cannot get a json parser instance");
-                return -1;
-            }
-            PropertyDocument conversionMapDoc = parser.fromString(conversionMap.toString());
-            log_.info("%s.size()=%d", conversionMapName, conversionMap.size());
-            log_.debug(" dump of %s:%n%s", conversionMapName, parser.toString(conversionMapDoc));
-            return conversionMap.size();
-        } catch (ConfigIOParseException e) {
-            log_.exception(e);
-            return -2;
+        ConfigIO parser = ConfigIOFactory.getInstance("json");
+        if (parser == null) {
+            log_.error("Cannot get a json parser instance");
+            return -1;
         }
+        String dump = conversionMap.toString();
+        log_.info("%s.size()=%d", conversionMapName, conversionMap.size());
+        log_.debug(" dump of %s:%n%s", conversionMapName, dump);
+        return conversionMap.size();
     }
 
     private CommonFunctions() {} // Disable creation...
