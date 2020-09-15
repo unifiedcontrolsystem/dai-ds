@@ -64,12 +64,11 @@ public class HWInvTranslator {
         }
     }
 
-    // Commenting out code for next milestone for now.
-//   /**
-//    * <p> Parse the given json containing the foreign HW inventory history. </p>
-//    * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
-//    * @return POJO containing the Parsed as json, or null if parsing failed
-//    */
+   /**
+    * <p> Parse the given json containing the foreign HW inventory history. </p>
+    * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
+    * @return POJO containing the Parsed as json, or null if parsing failed
+    */
     private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
         try {
             return gson.fromJson(foreignHWInvHistoryJson, ForeignHWInvHistory.class);
@@ -157,10 +156,13 @@ public class HWInvTranslator {
             return ImmutablePair.nullPair();
         }
 
-        util.setMaxNumberOfNonDebugMessages(1);
+        checkNamespaceConversionMaps();
+
+        util.setRemainingNumberOfErrorMessages(32);
+        util.setRemainingNumberOfInfoMessages(1);
         for (HWInvLoc loc: canonicalTree.locs) {
             try {
-                loc.ID = CommonFunctions.convertForeignToLocation(loc.ID);
+                loc.ID = mapToDaiNamespace(loc.ID);
             } catch (ConversionException e) {
                 util.logError("HWI:%n  DAI namespace conversion failure: %s", e.getMessage());
             } catch (NullPointerException e) {
@@ -174,6 +176,17 @@ public class HWInvTranslator {
         return new ImmutablePair<>(subject, util.toCanonicalJson(canonicalTree));
     }
 
+    private void checkNamespaceConversionMaps() {
+        if (CommonFunctions.haveErrorsInConversionMaps(logger)) {
+            logger.warn("HWI:%n  %s", "error in namespace conversion maps");
+        }
+    }
+
+    private String mapToDaiNamespace(String foreignName) throws ConversionException {
+        String daiName = CommonFunctions.convertForeignToLocation(foreignName);
+        util.logInfo("HWI:%n  convertForeignToLocation(foreignName=%s) => %s", foreignName, daiName);
+        return daiName;
+    }
 
     public ImmutablePair<String, String> foreignHistoryToCanonical(String foreignJson) {
         ImmutablePair<String, HWInvHistory> translatedResult = toCanonicalHistory(foreignJson);
@@ -184,14 +197,20 @@ public class HWInvTranslator {
             return ImmutablePair.nullPair();
         }
 
-        util.setMaxNumberOfNonDebugMessages(1);
+        checkNamespaceConversionMaps();
+
+        util.setRemainingNumberOfErrorMessages(32);
+        util.setRemainingNumberOfInfoMessages(1);
         for (HWInvHistoryEvent evt: canonicalHistory.events) {
             try {
-                evt.ID = CommonFunctions.convertForeignToLocation(evt.ID);
+                evt.ID = mapToDaiNamespace(evt.ID);
             } catch(ConversionException e) {
                 util.logError("HWI:%n  convertForeignToLocation(evt.ID=%s) threw %s",
                         evt.ID, e.getMessage());
                 // skip translation so we can debug this issue
+            } catch (NullPointerException e) {
+                util.logError("HWI:%n  evt=%s: %s", evt, e.getMessage());
+                continue;
             }
             translatedEvents.add(evt);
         }

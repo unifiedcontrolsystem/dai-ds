@@ -2,6 +2,7 @@ package com.intel.dai.foreign_bus
 
 import spock.lang.Specification
 
+import com.intel.logging.Logger
 import java.text.ParseException
 
 class CommonFunctionsSpec extends Specification {
@@ -89,5 +90,10 @@ class CommonFunctionsSpec extends Specification {
 }"""
         def results = CommonFunctions.parseForeignTelemetry(sample)
         expect: results.size() == 2
+    }
+
+    def "Test haveErrorsInConversionMaps"() {
+        when: CommonFunctions.haveErrorsInConversionMaps(Mock(Logger))
+        then: notThrown Exception
     }
 }

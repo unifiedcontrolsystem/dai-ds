@@ -1832,9 +1832,11 @@ WantedBy=multi-user.target
 LOG="/opt/ucs/log/populate_schema.log"
 ARGS="\${VOLTDB_SERVER} /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
 JAR="/opt/ucs/lib/populate_schema.jar"
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
+
 umask 077
 
-java -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
+java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
 exit \$?
 """

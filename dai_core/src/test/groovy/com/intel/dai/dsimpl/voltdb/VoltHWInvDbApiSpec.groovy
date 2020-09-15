@@ -4,13 +4,16 @@ import com.intel.dai.dsapi.HWInvHistory
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
 import com.intel.logging.LoggerFactory
+import org.voltdb.ClientResponseImpl
+import org.voltdb.VoltTable
 import org.voltdb.client.Client
+import org.voltdb.client.ClientResponse
 import spock.lang.Specification
 import java.nio.file.Paths
 
 class VoltHWInvDbApiSpec extends Specification {
     VoltHWInvDbApi api
-    Logger logger = LoggerFactory.getInstance("Test", "VoltHWInvDbApiSpec", "console")
+    Logger logger = Mock(Logger)
 
     def setup() {
         VoltDbClient.voltClient = Mock(Client)
@@ -99,9 +102,20 @@ class VoltHWInvDbApiSpec extends Specification {
     }
 
     def "ingestCookedNode"() {
+        setup:
+        def cr = Mock(ClientResponseImpl)
+        cr.getStatus() >> voltdbStatus
+        cr.getResults() >> new VoltTable[1]
+        cr.getResults()[0] = new VoltTable()
         api.client = Mock(Client)
-        when: api.ingestCookedNode("", "")
-        then: thrown DataStoreException
+        api.client.callProcedure(*_) >> cr
+
+        expect: api.ingestCookedNode("nodeLocation", "2020-06-03T22:35:45Z") == res
+
+        where:
+        voltdbStatus                        || res
+        ClientResponse.SUCCESS              || 1
+        ClientResponse.UNEXPECTED_FAILURE   || 0
     }
 
     def "numberCookedNodeInventoryHistoryRows"() {
@@ -126,5 +140,23 @@ class VoltHWInvDbApiSpec extends Specification {
         api.client = Mock(Client)
         when: api.ingestCookedNodesChanged([:])
         then: notThrown DataStoreException
+    }
+
+    def "insertNodeHistory"() {
+        given:
+        def cr = Mock(ClientResponseImpl)
+        cr.getStatus() >> voltdbStatus
+        api.client = Mock(Client)
+        api.client.callProcedure(*_) >> cr
+
+        when: api.insertNodeHistory(
+                "nodeLocation", 42,
+                "hwInfoJson", "nodeSerialNumber")
+        then: notThrown DataStoreException
+
+        where:
+        voltdbStatus                        || res
+        ClientResponse.SUCCESS              || true
+        ClientResponse.UNEXPECTED_FAILURE   || true
     }
 }

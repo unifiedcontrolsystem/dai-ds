@@ -53,7 +53,7 @@ public class ForeignInventoryClient {
         HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl(log_));
         ImmutablePair<String, String> canonicalHwInv = tr.foreignToCanonical(foreignHWInvJson);
         if (canonicalHwInv.getKey() == null) {
-            log_.error("failed to translate foreign HW inventory json");
+            log_.error("HWI:%n  %s", "failed to translate foreign HW inventory json");
             return null;
         }
         return canonicalHwInv.getValue();
@@ -65,7 +65,7 @@ public class ForeignInventoryClient {
         HWInvTranslator tr = new HWInvTranslator(new HWInvUtilImpl(log_));
         ImmutablePair<String, String> canonicalHwInv = tr.foreignHistoryToCanonical(foreignHWInvHistJson);
         if (canonicalHwInv.getKey() == null) {
-            log_.error("HWI:%n  failed to translate foreign HW inventory json");
+            log_.error("HWI:%n  %s", "failed to translate foreign HW inventory history json");
             return null;
         }
         return canonicalHwInv.getValue();

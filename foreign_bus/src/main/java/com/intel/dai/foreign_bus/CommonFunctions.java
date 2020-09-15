@@ -7,6 +7,7 @@ package com.intel.dai.foreign_bus;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
+import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
@@ -17,8 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,11 +61,11 @@ final public class CommonFunctions {
         StringBuilder builder = new StringBuilder();
         try {
             if(nodeMap_.containsKey(foreignLocation)) {
-                    builder.append(nodeMap_.getString(foreignLocation));
-                    processName(builder, sensorName, extraLocation);
+                builder.append(nodeMap_.getString(foreignLocation));
+                processName(builder, sensorName, extraLocation);
             } else
-                throw new ConversionException(String.format("The foreign '%s' was not in the conversion map!",
-                        foreignLocation));
+                throw new ConversionException(String.format("The foreign '%s' was not in the conversion map (nodeMap.size()=%d)!",
+                        foreignLocation, nodeMap_.size()));
         } catch(PropertyNotExpectedType e) {
             throw new ConversionException("Its possible the resource file for foreign translation has been corrupted",
                     e);
@@ -92,7 +91,8 @@ final public class CommonFunctions {
                 return reverseNodeMap_.getString(daiLocation);
             else {
                 throw new ConversionException(String.format("The DAI location string '%s' was not found " +
-                        "in the conversion map!", daiLocation));
+                        "in the conversion map (reverseNodeMap_.size()=%d)!",
+                        daiLocation, reverseNodeMap_.size()));
             }
         } catch(PropertyNotExpectedType e) {
             throw new ConversionException("Its possible the resource file for foreign translation has been corrupted",
@@ -259,25 +259,36 @@ final public class CommonFunctions {
     }
 
     private static boolean loadConversionsMapsfromStream(InputStream stream) {
-        try {
+        try (stream) {
             ConfigIO parser = ConfigIOFactory.getInstance("json");
-            assert parser != null: "Failed to get the JSON parser!";
+            assert parser != null : "Failed to get the JSON parser!";
             PropertyMap root = parser.readConfig(stream).getAsMap();
-            nodeMap_ = root.getMap("conversion_node_map");
+
             sensorCpuPattern_ = root.getString("sensor_embedded_cpu_pattern");
             sensorDimmPattern_ = root.getString("sensor_embedded_dimm_pattern");
             sensorChannelPattern_ = root.getString("sensor_embedded_channel_pattern");
+
+            PropertyMap temp = new PropertyMap();
+            temp.putAll(root.getMap("conversion_node_map"));
+
+            nodeMap_ = new PropertyMap();
             reverseNodeMap_ = new PropertyMap();
-            for(String key: nodeMap_.keySet()) {
-                nodeMap_.put(key, nodeMap_.getString(key).toUpperCase());
-                reverseNodeMap_.put(nodeMap_.getString(key), key);
+
+            for (String key : temp.keySet()) {          // use a temp or the behavior is undefined
+                if (temp.getString(key) != null) {      // null pointer check or you may get null.toUpperCase()
+                    nodeMap_.put(key, temp.getString(key).toUpperCase());
+
+                    // If nodeMap_ is not an one-to-one mapping, reverseNodeMap_ reverse the last put()
+                    reverseNodeMap_.put(nodeMap_.getString(key), key);
+                }
             }
+            // If nodeMap_ is not one-to-one, then reverseNodeMap_.size() < nodeMap_.size()
+
             return true;
-        } catch(IOException | ConfigIOParseException | PropertyNotExpectedType e) {
+        } catch (IOException | ConfigIOParseException | PropertyNotExpectedType e) {
             return false;
-        } finally {
-            try { stream.close(); } catch(IOException ec) { /* Nothing to do if close fails. */ }
         }
+        /* Nothing to do if close fails. */
     }
 
     private static void processName(StringBuilder builder, String sensorName, String extra) {
@@ -318,6 +329,63 @@ final public class CommonFunctions {
     // For testing only....
     static void clearMaps() {
         nodeMap_ = null;
+    }
+
+    public static boolean haveErrorsInConversionMaps(Logger log_) {
+        if (haveErrorsInInitializingConversionMaps(log_)) {
+            log_.error("Conversion maps are not correctly initialized");
+            return true;
+        }
+
+        int nodeMapSize = dumpConversionMap(log_, nodeMap_, "nodeMap_");
+        int reverseNodeMapSize = dumpConversionMap(log_, reverseNodeMap_, "reverseNodeMap_");
+
+        if (nodeMapSize < 0) {
+            log_.error("failed to dump nodeMap_");
+            return true;
+        }
+        if (reverseNodeMapSize < 0) {
+            log_.error("failed to dump reverseNodeMap_");
+            return true;
+        }
+        return nodeMapSize != reverseNodeMapSize;
+    }
+
+    private static boolean haveErrorsInInitializingConversionMaps(Logger log_) {
+        try {
+            if (nodeMap_ == null) {
+                // Need to invoke convertForeignToLocation() once to initialize conversion maps
+                if (!convertForeignToLocation("all").equals("all")) {
+                    // idempotent; loads conversion maps if necessary
+                    log_.error("HWI:%n  convertForeignToLocation('all') != 'all'");
+                    return true;
+                }
+            }
+        } catch (ConversionException e) {
+            log_.exception(e, "HWI:%n  convertForeignToLocation('all') threw %s", e.getMessage());
+            return true;
+        }
+        if (nodeMap_ == null) {
+            log_.error("nodeMap_ is null");
+            return true;
+        }
+        if (reverseNodeMap_ == null) {
+            log_.error("reverseNodeMap_ is null");
+            return true;
+        }
+        return false;
+    }
+
+    private static int dumpConversionMap(Logger log_, PropertyMap conversionMap, String conversionMapName) {
+        ConfigIO parser = ConfigIOFactory.getInstance("json");
+        if (parser == null) {
+            log_.error("Cannot get a json parser instance");
+            return -1;
+        }
+        String dump = conversionMap.toString();
+        log_.info("%s.size()=%d", conversionMapName, conversionMap.size());
+        log_.debug(" dump of %s:%n%s", conversionMapName, dump);
+        return conversionMap.size();
     }
 
     private CommonFunctions() {} // Disable creation...

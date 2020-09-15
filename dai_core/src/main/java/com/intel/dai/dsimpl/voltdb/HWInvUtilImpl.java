@@ -108,22 +108,45 @@ public class HWInvUtilImpl implements HWInvUtil {
     }
 
     @Override
-    public void setMaxNumberOfNonDebugMessages(int limit) {
-        maxNumberOfNonDebugMessages = limit;
+    public void setRemainingNumberOfErrorMessages(int limit) {
+        remainingNumberOfErrorMessages = limit;
+    }
+
+    @Override
+    public void setRemainingNumberOfInfoMessages(int limit) {
+        remainingNumberOfInfoMessages = limit;
     }
 
     @Override
     public void logError(String fmt, Object... args) {
-        if (numberOfNonDebugMessagesSoFar < maxNumberOfNonDebugMessages) {
-            numberOfNonDebugMessagesSoFar++;
+        StackTraceElement ste = Thread.currentThread().getStackTrace()[2];  // stack frame logging the error
+        String incidentLocation = String.format("%s:%d", ste.getFileName(), ste.getLineNumber());
+        if (remainingNumberOfErrorMessages > 0) {
+            remainingNumberOfErrorMessages--;
+            logger.error("HWI:%n ERROR %s", incidentLocation);
             logger.error(fmt, args);
             return;
         }
+        logger.debug("HWI:%n ERROR %s", incidentLocation);
         logger.debug(fmt, args);
     }
 
-    private int numberOfNonDebugMessagesSoFar = 0;
-    private int maxNumberOfNonDebugMessages = 0;
+    @Override
+    public void logInfo(String fmt, Object... args) {
+        StackTraceElement ste = Thread.currentThread().getStackTrace()[2];  // stack frame logging the info
+        String incidentLocation = String.format("%s:%d", ste.getFileName(), ste.getLineNumber());
+        if (remainingNumberOfInfoMessages > 0) {
+            remainingNumberOfInfoMessages--;
+            logger.info("HWI:%n INFO %s", incidentLocation);
+            logger.info(fmt, args);
+            return;
+        }
+        logger.debug("HWI:%n INFO %s", incidentLocation);
+        logger.debug(fmt, args);
+    }
+
+    private int remainingNumberOfErrorMessages = 0;
+    private int remainingNumberOfInfoMessages = 0;
     private final transient Gson gson;
     private final Logger logger;
 }
