@@ -360,7 +360,7 @@ public abstract class FabricAdapter {
     }
 
     private void parseSubjects() {
-        String subjects = config_.getOrDefault("subjects", null);
+        String subjects = config_.getOrDefault("subjects", "*");
         if (subjects != null)
             subjects_ = Arrays.asList(subjects.split(","));
     }
