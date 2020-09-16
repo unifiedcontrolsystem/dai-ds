@@ -98,7 +98,7 @@ class DatabaseSynchronizer {
             log_.error("HWI:%n  getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
             return null;
         } catch (NullPointerException e) {
-            log_.error("HWI:%n  initializeDependencies(): %s", e.getMessage());
+            log_.exception(e,"HWI:%n  null pointer exception: %s", e.getMessage());
             return null;
         }
     }
