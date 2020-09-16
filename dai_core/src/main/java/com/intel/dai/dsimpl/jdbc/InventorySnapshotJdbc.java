@@ -9,12 +9,17 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.dsapi.InventorySnapshot;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
 
 import java.sql.*;
 import java.time.Instant;
 
 public class InventorySnapshotJdbc implements InventorySnapshot {
+    public InventorySnapshotJdbc(Logger logger) {
+        log_ = logger;
+    }
+
     @Override
     public String getLastHWInventoryHistoryUpdate() throws DataStoreException {
         PreparedStatement retrieveRefLastRawInventoryHistoryUpdate = null;
@@ -22,7 +27,11 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             establishConnectionToNearlineDb();
             retrieveRefLastRawInventoryHistoryUpdate = prepareStatement(GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL);
             return executeRetrieveRefLastRawInventoryUpdateStmt(retrieveRefLastRawInventoryHistoryUpdate);
-        } finally {
+        } catch (DataStoreException e) {
+            log_.error("HWI:%n  %s", e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
             tearDown(retrieveRefLastRawInventoryHistoryUpdate);
         }
     }
@@ -128,6 +137,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private void establishConnectionToNearlineDb() throws DataStoreException {
         if (dbConn == null) {
             dbConn = DbConnectionFactory.createDefaultConnection();
+            if (dbConn == null) {
+                throw new DataStoreException("DbConnectionFactory.createDefaultConnection() => null");
+            }
         }
     }
 
@@ -233,8 +245,10 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         }
 
         try {
-            dbConn.close();
-            dbConn = null;
+            if (dbConn != null) {
+                dbConn.close();
+                dbConn = null;
+            }
         } catch (SQLException ex) {
             // Ignore (assume resource is already closed or no longer valid)
         }
@@ -250,4 +264,6 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String SET_REF_SNAPSHOT_SQL = "{call SetRefSnapshotDataForLctn(?)}";
     private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
             "select LastRawReplacementHistoryUpdate()";
+
+    private Logger log_;
 }

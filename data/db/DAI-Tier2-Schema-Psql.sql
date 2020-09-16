@@ -995,22 +995,6 @@ CREATE TABLE PUBLIC.tier2_authorized_user (
     roleid character varying NOT NULL
 );
 
-CREATE TABLE public.Tier2_HWInventoryFRU (
-    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
-    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
-    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    entrynumber bigint NOT NULL
-);
-
-CREATE TABLE public.Tier2_HWInventoryLocation (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- perhaps xname (path); as is from JSON
-    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
-    Ordinal INTEGER NOT NULL,            -- singleton:0
-    FRUID VARCHAR(80) NOT NULL,          -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    entrynumber bigint NOT NULL
-);
 
 CREATE TABLE public.tier2_RawHWInventory_History (
     Action VARCHAR(16) NOT NULL,                -- Added/Removed
@@ -2254,33 +2238,6 @@ $$;
 
 
 --
--- Name: inventoryinfolist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.inventoryinfolist(p_start_time timestamp without time zone, p_end_time timestamp without time zone) RETURNS TABLE(id character varying(64), dbupdatedtimestamp timestamp without time zone, ordinal integer, fruid character varying(80), type character varying(16), frutype character varying(16), frusubtype character varying(32))
-    LANGUAGE sql
-    AS $$
-    select  HI.id,
-            HI.dbupdatedtimestamp,
-            HI.ordinal,
-            HI.fruid,
-            HI.type,
-            HF.frutype,
-            HF.frusubtype
-    from tier2_hwinventorylocation HI
-    inner join tier2_hwinventoryfru HF on
-    HI.fruid = HF.fruid
-    where
-        case
-            when p_start_time is null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-            when p_start_time is not null then HI.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                                               HI.dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp at time zone 'UTC')
-        end
-    order by HI.DbUpdatedTimestamp, HI.id desc
-$$;
-
-
---
 -- Name: inventorysnapshotlist(timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -3265,48 +3222,6 @@ BEGIN
 END;
 $$;
 
-
-CREATE OR REPLACE FUNCTION public.insertorupdatehwinventoryfru(p_fruid character varying, p_frutype character varying, p_frusubtype character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
-    LANGUAGE plpgsql
-    AS $$ BEGIN
-    insert into Tier2_HWInventoryFRU(
-        FRUId,
-        FRUType,
-        FRUSubType,
-        DbUpdatedTimestamp)
-    values(
-        p_fruid,
-        p_frutype,
-        p_frusubtype,
-        p_dbupdatedtimestamp)
-    on conflict(FRUId) do update set
-        FRUType = p_frutype,
-        FRUSubType = p_frusubtype,
-        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.insertorupdatehwinventorylocation(p_id character varying, p_type character varying, p_ordinal integer, p_fruid character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
-    LANGUAGE plpgsql
-    AS $$ BEGIN
-    insert into Tier2_HWInventoryLocation(
-        Id,
-        Type,
-        Ordinal,
-        FruId,
-        DbUpdatedTimestamp)
-    values(
-        p_id,
-        p_type,
-        p_ordinal,
-        p_fruid,
-        p_dbupdatedtimestamp)
-    on conflict(Id) do update set
-        FRUId = p_fruid,
-        Type = p_type,
-        Ordinal = p_ordinal,
-        DbUpdatedTimestamp = p_dbupdatedtimestamp; END;
-$$;
-
 CREATE OR REPLACE FUNCTION public.get_rawinventoryhistory_records() RETURNS SETOF public.tier2_RawHWInventory_History
  LANGUAGE sql
     AS $$
@@ -3319,20 +3234,6 @@ CREATE OR REPLACE FUNCTION public.get_nodeinventoryhistory_records() RETURNS SET
 AS $$
 select *
 from tier2_NodeInventory_History;
-$$;
-
-CREATE OR REPLACE FUNCTION public.get_hwinventoryfru_records() RETURNS SETOF public.Tier2_HWInventoryFRU
- LANGUAGE sql
-    AS $$
-    select *
-    from Tier2_HWInventoryFRU;
-$$;
-
-CREATE OR REPLACE FUNCTION public.get_hwinventorylocation_records() RETURNS SETOF public.Tier2_HWInventoryLocation
- LANGUAGE sql
-    AS $$
-    select *
-    from Tier2_HWInventoryLocation;
 $$;
 
 CREATE OR REPLACE FUNCTION public.insertorupdatenodeinventorydata(
@@ -3822,29 +3723,6 @@ ALTER SEQUENCE public.tier2_RawHWInventory_History_entrynumber_seq OWNED BY publ
 ALTER TABLE ONLY public.tier2_RawHWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_RawHWInventory_History_entrynumber_seq'::regclass);
 SELECT pg_catalog.setval('public.tier2_RawHWInventory_History_entrynumber_seq', 1, false);
 
-CREATE SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.tier2_HWInventoryFRU_entrynumber_seq OWNED BY public.tier2_HWInventoryFRU.entrynumber;
-ALTER TABLE ONLY public.tier2_HWInventoryFRU ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryFRU_entrynumber_seq'::regclass);
-SELECT pg_catalog.setval('public.tier2_HWInventoryFRU_entrynumber_seq', 1, false);
-
-CREATE SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.tier2_HWInventoryLocation_entrynumber_seq OWNED BY public.tier2_HWInventoryLocation.entrynumber;
-ALTER TABLE ONLY public.tier2_HWInventoryLocation ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_HWInventoryLocation_entrynumber_seq'::regclass);
-SELECT pg_catalog.setval('public.tier2_HWInventoryLocation_entrynumber_seq', 1, false);
 
 --
 -- Name: tier2_adapter_history entrynumber; Type: DEFAULT; Schema: public; Owner: -

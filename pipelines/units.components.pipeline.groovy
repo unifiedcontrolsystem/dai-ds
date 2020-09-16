@@ -8,9 +8,8 @@ pipeline {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Skips the clean step')
         choice(name: 'AGENT', choices: [
-                'NRE-TEST',
-                'css-centos-8-00-test',
-                'css-centos-8-01-test'
+                'NRE-BUILD',
+                'css-centos-8-00-build'
         ], description: 'Agent label')
     }    
 

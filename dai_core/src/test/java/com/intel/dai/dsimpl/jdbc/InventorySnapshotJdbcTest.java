@@ -5,6 +5,7 @@
 package com.intel.dai.dsimpl.jdbc;
 
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,9 +27,11 @@ public class InventorySnapshotJdbcTest {
         mockDbConn = Mockito.mock(Connection.class);
         mockStmt = Mockito.mock(PreparedStatement.class);
 
+        mockLogger = Mockito.mock(Logger.class);
+
         Mockito.when(mockDbConn.prepareStatement(Mockito.anyString())).thenReturn(mockStmt);
 
-        invApi = new InventorySnapshotJdbc();
+        invApi = new InventorySnapshotJdbc(mockLogger);
         invApi.setDbConn(mockDbConn);
     }
 
@@ -49,7 +52,7 @@ public class InventorySnapshotJdbcTest {
         Mockito.verify(mockStmt, Mockito.times(1)).setString(Mockito.anyInt(), Mockito.eq(LOCATION));
         Mockito.verify(mockStmt, Mockito.times(1))
                 .setTimestamp(Mockito.anyInt(), Mockito.eq(Timestamp.from(timestamp)));
-        Mockito.verify(mockStmt, Mockito.times(1)).setString(Mockito.anyInt(), Mockito.eq(info.toString()));
+        Mockito.verify(mockStmt, Mockito.times(1)).setString(Mockito.anyInt(), Mockito.eq(info));
         // Verify statement is executed
         Mockito.verify(mockStmt, Mockito.times(1)).execute();
     }
@@ -146,5 +149,6 @@ public class InventorySnapshotJdbcTest {
     Connection mockDbConn;
     PreparedStatement mockStmt;
     InventorySnapshotJdbc invApi;
+    Logger mockLogger;
 }
 
