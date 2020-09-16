@@ -226,6 +226,8 @@ public class VoltHWInvDbApi implements HWInvDbApi {
                         nodeLocation, cr.getStatus());
                 return 0;
             }
+            logger.info("HWI:%n  NodeHistoryInsert(nodeLocation=%s, foreignTimestampInMillisecondsSinceEpoch=%d) was successful",
+                    nodeLocation, foreignTimestampInMillisecondsSinceEpoch);
         } catch (ProcCallException e) {
             logger.error("HWI:%n  ProcCallException during NodeHistoryInsert");
             throw new DataStoreException(e.getMessage());

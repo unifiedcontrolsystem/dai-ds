@@ -1,7 +1,7 @@
 {
-  "/Inventory/Hardware" : "/all",
+  "/Inventory/Hardware" : "/",
   "/Inventory/Hardware/History" : "/history_all",
-  "/Inventory/Hardware/History?start_time=*" : "/chronology/$1",
+  "/Inventory/Hardware/History?start_time=*" : "/updateHistory/$1",
   "/Inventory/Hardware/all" : "/all",
-  "/Inventory/Hardware/*": "/locations/$1"
+  "/Inventory/Hardware/*": "/updatedLocations/$1"
 }

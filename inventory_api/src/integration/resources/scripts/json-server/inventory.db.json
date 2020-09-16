@@ -1,5 +1,5 @@
 {
-  "locations": [
+  "updatedLocations": [
     {
       "ID": "x3001c0s5b0n0d11",
       "HWInventoryByLocationType": "HWInvByLocMemory",
@@ -28048,16 +28048,16 @@
       }
     ]
   },
-  "chronology": [
+  "updateHistory": [
     {
       "ID": "2020-08-01T15:44:39.346235Z",
-      "History": []
+      "Components": []
     },
     {
       "ID": "2020-07-27T21:10:49.745223Z",
       "Components": [
         {
-          "ID": "x3001c0s5b0n0g1k2",
+          "ID": "x3001c0s5b0n0d11",
           "History": [
             {
               "EventType": "Removed",

@@ -10,9 +10,8 @@ pipeline {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Speeds up build by only performing a partial gradle clean')
         choice(name: 'AGENT', choices: [
-                'NRE-TEST',
+                'NRE-COMPONENT',
                 'cmcheung-centos-7-test',
-                'css-centos-8-00-test',
                 'css-centos-8-01-test'
         ], description: 'Agent label')
     }

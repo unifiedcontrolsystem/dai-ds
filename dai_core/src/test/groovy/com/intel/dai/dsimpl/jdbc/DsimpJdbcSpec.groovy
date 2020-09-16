@@ -6,6 +6,7 @@ import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import com.intel.dai.exceptions.DataStoreException
+import com.intel.logging.Logger
 
 class DbConnectionFactorySpec extends Specification {
     def "DbConnectionFactory constructor"() {
@@ -42,8 +43,9 @@ class JdbcStoreTelemetrySpec extends Specification {
 
 class InventorySnapshotJdbcSpec extends Specification {
     def "getLastHWInventoryHistoryUpdate"() {
-        def ts = new InventorySnapshotJdbc()
+        def ts = new InventorySnapshotJdbc(Mock(Logger))
         ts.dbConn = Mock(Connection)
+        ts.dbConn.close() >> {}
         ts.dbConn.prepareStatement(_) >> null
         when: ts.getLastHWInventoryHistoryUpdate()
         then: thrown DataStoreException
