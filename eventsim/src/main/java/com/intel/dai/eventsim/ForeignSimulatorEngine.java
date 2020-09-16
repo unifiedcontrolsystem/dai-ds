@@ -205,8 +205,8 @@ class ForeignSimulatorEngine {
         output_ = defaults.get("output");
         zone_ = defaults.get("timezone");
 
-        PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilter_,
-                numOfEventsToGenerate, seed).getAsArray();
+        PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilters_,
+                                templateFieldFilters_, numOfEventsToGenerate, seed).getAsArray();
 
         String streamName = eventTypeTemplate_.getEventTypeStreamName();
         String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
@@ -329,9 +329,37 @@ class ForeignSimulatorEngine {
         STREAM_DATA.put(STREAM_MESSAGE, "");
         STREAM_DATA.put(TIMESTAMP_PATH, "");
 
-        updateJpathFieldFilter_.put("jpath-field", parameters.getOrDefault("jpath-field", null));
-        updateJpathFieldFilter_.put("metadata", parameters.getOrDefault("jpath-field-metadata", null));
-        updateJpathFieldFilter_.put("metadata-filter", parameters.getOrDefault("jpath-field-metadata-filter",null));
+        updateJpathFieldFilters_.clear();
+        String updateFieldJpaths[] = parameters.getOrDefault("update-field-jpath", "").split(",");
+        String updateFieldMetadata[] = parameters.getOrDefault("update-field-metadata", "").split(",");
+        String updateFieldMetadataFilters[] = parameters.getOrDefault("update-field-metadata-filter", "").split(",");
+
+        for(int index = 0; index < updateFieldJpaths.length && index < updateFieldMetadataFilters.length; index++) {
+            PropertyMap updateJpathFieldFilter = new PropertyMap();
+            if(!updateFieldJpaths[index].equals("") && !updateFieldMetadataFilters[index].equals("")) {
+                updateJpathFieldFilter.put("jpath-field", updateFieldJpaths[index]);
+                updateJpathFieldFilter.put("metadata-filter", updateFieldMetadataFilters[index]);
+                updateJpathFieldFilters_.add(updateJpathFieldFilter);
+            }
+
+            if(updateFieldMetadata.length > index && !updateFieldMetadata[0].equals(""))
+                updateJpathFieldFilter.put("metadata", updateFieldMetadata[index]);
+        }
+
+
+        templateFieldFilters_.clear();
+        String templateFieldJpaths[] = parameters.getOrDefault("template-field-jpath", "").split(",");
+        String templateFieldFilters[] = parameters.getOrDefault("template-field-filter", "").split(",");
+
+        for(int index = 0; index < templateFieldJpaths.length && index < templateFieldFilters.length; index++) {
+            PropertyMap templateField = new PropertyMap();
+            if(!templateFieldJpaths[index].equals("") && !templateFieldFilters[index].equals("")) {
+                templateField.put("jpath-field", templateFieldJpaths[index]);
+                templateField.put("metadata-filter", templateFieldFilters[index]);
+                templateFieldFilters_.add(templateField);
+            }
+        }
+
     }
 
     private void systemHierarchy() {
@@ -387,7 +415,8 @@ class ForeignSimulatorEngine {
     }
 
     private Map<String, String> defaults = new HashMap<>();
-    private PropertyMap updateJpathFieldFilter_ = new PropertyMap();
+    private PropertyArray updateJpathFieldFilters_ = new PropertyArray();
+    private PropertyArray templateFieldFilters_ = new PropertyArray();
 
     private final DataLoader dataLoaderEngine_;
     private final ForeignFilter filter_;

@@ -134,7 +134,11 @@ class JsonPath {
                 items.clear();
 
             for(int i = 0; i < counter && newItems.size() > 0; i++) {
-                PropertyMap item = newItems.getMap(generateRandomNumberBetween(0, newItems.size()));
+                PropertyMap item;
+                if(i == 0)
+                    item = newItems.getMap(0);
+                else
+                    item = newItems.getMap(generateRandomNumberBetween(0, newItems.size()));
                 items.add(item);
             }
         }
