@@ -98,7 +98,7 @@ class DatabaseSynchronizer {
             log_.error("HWI:%n  getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
             return null;
         } catch (NullPointerException e) {
-            log_.error("HWI:%n  initializeDependencies(): %s", e.getMessage());
+            log_.exception(e,"HWI:%n  null pointer exception: %s", e.getMessage());
             return null;
         }
     }
@@ -197,13 +197,22 @@ class DatabaseSynchronizer {
      * @return parent node location of the event location
      */
     private String extractNodeLocationFromChangeEvent(HWInvHistoryEvent event) {
-        for (String patternString : Arrays.asList("^(.+n\\d+)", "^(.+CN\\d+)")) {
-            Pattern pattern = Pattern.compile(patternString);
+        for (String patternStr : Arrays.asList("^(.+-.+N\\d+)", "^(.+-AM\\d+)")) {
+            Pattern pattern = Pattern.compile(patternStr);
             Matcher matcher = pattern.matcher(event.ID);
             if (matcher.find()) {
                 return matcher.group(1);
             }
         }
+
+        Pattern pattern = Pattern.compile("^(.+n\\d+)");
+        Matcher matcher = pattern.matcher(event.ID);
+        if (matcher.find()) {
+            log_.warn("HWI:%n, Incomplete conversion: event.ID=%s is still in foreign namespace",
+                    event.ID);  // this may be caused by an incomplete namespace conversion map
+            return null;
+        }
+
         return null;    // cannot extract a node changed event
     }
 

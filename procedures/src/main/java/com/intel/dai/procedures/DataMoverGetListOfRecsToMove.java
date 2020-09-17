@@ -44,9 +44,7 @@ import java.text.SimpleDateFormat;
  *      mDataMoverResultTblIndxToTableNameMap.put(25, "DiagResults");
  *      mDataMoverResultTblIndxToTableNameMap.put(26, "NodeInventory_History");
  *      mDataMoverResultTblIndxToTableNameMap.put(27, "NonNodeHwInventory_History");
- *      mDataMoverResultTblIndxToTableNameMap.put(28, "HW_Inventory_Fru");
- *      mDataMoverResultTblIndxToTableNameMap.put(29, "HW_Inventory_Location");
- *      mDataMoverResultTblIndxToTableNameMap.put(30, "RawHWInventory_History");
+ *      mDataMoverResultTblIndxToTableNameMap.put(28, "RawHWInventory_History");
  */
 
 public class DataMoverGetListOfRecsToMove extends VoltProcedure {
@@ -82,8 +80,6 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectDiagResultsToBeMovedSql                  = new SQLStmt("SELECT * FROM DiagResults WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectNodeInventory_HistoryToBeMovedSql        = new SQLStmt("SELECT * FROM NodeInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
     public final SQLStmt selectNonNodeHwInventory_HistoryToBeMovedSql   = new SQLStmt("SELECT * FROM NonNodeHwInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
-    public final SQLStmt selectHW_Inventory_FRU_ToBeMovedSql            = new SQLStmt("SELECT * FROM HW_Inventory_Fru WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
-    public final SQLStmt selectHW_INVENTORY_Location_ToBeMovedSql       = new SQLStmt("SELECT * FROM HW_Inventory_Location WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectRawHWInventory_HistoryToBeMovedSql       = new SQLStmt("SELECT * FROM RawHWInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
 
     public VoltTable[] run(long lEndTsInMicroSecs, long lStartTsInMicroSecs) throws VoltAbortException {
@@ -117,8 +113,6 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
         voltQueueSQL(selectDiagResultsToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectNodeInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectNonNodeHwInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
-        voltQueueSQL(selectHW_Inventory_FRU_ToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
-        voltQueueSQL(selectHW_INVENTORY_Location_ToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectRawHWInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
 
         // Actually get the results for each of the tables.

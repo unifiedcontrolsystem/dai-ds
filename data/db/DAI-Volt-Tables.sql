@@ -2038,15 +2038,6 @@ CREATE TABLE HW_Inventory_FRU (
     DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
-CREATE TABLE Tier2_HW_Inventory_FRU (
-    FRUID VARCHAR(80) NOT NULL PRIMARY KEY,     -- perhaps <manufacturer>-<serial#>
-    FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
-    FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
-    FRUInfo VARCHAR(8192),
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
-);
-
 -- Corresponds to the current HPC HW architecture wrt to HW locations.
 -- Note that FRUID is not unique in foreign data.  This is because node enclosures have no ID.
 CREATE TABLE HW_Inventory_Location (
@@ -2056,16 +2047,6 @@ CREATE TABLE HW_Inventory_Location (
     Info VARCHAR(8192),
     FRUID VARCHAR(80),                      -- perhaps <manufacturer>-<serial#>
     DbUpdatedTimestamp TIMESTAMP NOT NULL
-);
-
-CREATE TABLE tier2_HW_Inventory_Location (
-    ID VARCHAR(64) NOT NULL PRIMARY KEY, -- Location ID translated from JSON
-    Type VARCHAR(16) NOT NULL,           -- Location category(HMS type)
-    Ordinal INTEGER NOT NULL,            -- singleton:0
-    Info VARCHAR(8192),
-    FRUID VARCHAR(80),                      -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber BigInt NOT NULL
 );
 
 -- History of FRU installation and removal from the HPC.  Note that the timestamp marks

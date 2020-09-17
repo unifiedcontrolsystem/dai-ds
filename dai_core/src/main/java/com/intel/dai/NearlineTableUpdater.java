@@ -55,6 +55,7 @@ public class NearlineTableUpdater {
                 benchmarking_.addNamedValue("WroteRasData", tableData.getRowCount());
         } catch (SQLException ex) {
             try {
+                log_.error("Rolling back ...: %s", ex.getMessage());
                 mConn.rollback();
             } catch(SQLException e) { /* Do Nothing on failure */ }
             throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
@@ -93,6 +94,7 @@ public class NearlineTableUpdater {
         // Is this table supported?
         DataUpdateStmt dus = SQL_STMTS.get(tableName);
         if (dus == null) {
+            log_.error("Failed to get DataUpdateStmt for %s", tableName);
             return null;
         }
 
@@ -266,14 +268,6 @@ public class NearlineTableUpdater {
                                 + "Results, DbUpdatedTimestamp)"
                                 + "values(?,?,?,?,?)",
                         false));
-        SQL_STMTS.put("HW_Inventory_Fru",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateHWInventoryFru(?,?,?,?)}",
-                        true));
-        SQL_STMTS.put("HW_Inventory_Location",
-                new DataUpdateStmt(
-                        "{call InsertOrUpdateHWInventoryLocation(?,?,?,?,?)}",
-                        true));
         SQL_STMTS.put("RawHWInventory_History",
                 new DataUpdateStmt(
                         "insert into tier2_RawHWInventory_History(Action, id, fruid, ForeignTimestamp, DbUpdatedTimestamp)"

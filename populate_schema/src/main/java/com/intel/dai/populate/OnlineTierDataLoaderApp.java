@@ -17,6 +17,7 @@ public class OnlineTierDataLoaderApp {
             log.error("starting - Invalid set of arguments specified. The first argument must be the VoltDB " +
                     "server, the second must be the System Manifest file name, the third must be the Machine " +
                     "Configuration file name and the fourth must be the RAS Event Meta Data file name.");
+            for (String arg : args) log.error("arg: %s", arg);
             System.exit(1);
         }
 

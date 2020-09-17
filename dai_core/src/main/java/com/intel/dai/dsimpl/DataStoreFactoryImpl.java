@@ -99,7 +99,7 @@ public class DataStoreFactoryImpl implements DataStoreFactory {
 
     @Override
     public InventorySnapshot createInventorySnapshotApi() {
-        return new InventorySnapshotJdbc();
+        return new InventorySnapshotJdbc(logger_);
     }
 
     @Override

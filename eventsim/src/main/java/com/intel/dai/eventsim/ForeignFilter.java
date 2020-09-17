@@ -72,7 +72,7 @@ class ForeignFilter {
      * @throws ConfigIOParseException unable to create events
      * @throws SimulatorException unable to create events
      */
-    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyMap updateJpathFieldFilter_,
+    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyArray updateJpathFieldFilter_, PropertyArray templateFieldFilters_,
                                     long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
         PropertyMap updateJPathField = eventTypeTemplate.getUpdateFieldsInfoWithMetada();
         PropertyMap updateJPathWithMetadata = new PropertyMap();
@@ -83,6 +83,7 @@ class ForeignFilter {
         PropertyMap sampleTemplateData = new PropertyMap(templateData);
 
         PropertyMap filtersForSingleTemplate = eventTypeTemplate.getFiltersForSingleTemplate();
+        updateFiltersSingleTemplate(filtersForSingleTemplate, templateFieldFilters_);
         filterEventTypeTemplateData(templateData, filtersForSingleTemplate);
 
         PropertyMap jPathFilterCounterInfo = eventTypeTemplate.getFiltersForSingleTemplateCount();
@@ -226,23 +227,36 @@ class ForeignFilter {
         }
     }
 
-    private void updateJPathFieldInfo(PropertyMap updateJPathField, PropertyMap updateJpathFieldFilter_) throws PropertyNotExpectedType {
+    private void updateJPathFieldInfo(PropertyMap updateJPathField, PropertyArray updateJpathFieldFilters_) throws PropertyNotExpectedType {
         for(Map.Entry<String, Object> item :  updateJPathField.entrySet()) {
             String jpath = item.getKey();
             PropertyMap fieldsInfo = (PropertyMap) item.getValue();
             for(Map.Entry<String, Object> fieldInfo : fieldsInfo.entrySet()) {
                 String path = jpath + "/" + fieldInfo.getKey();
                 PropertyMap metadataInfo = (PropertyMap) fieldInfo.getValue();
-                if(updateJpathFieldFilter_.containsValue(path)) {
-                    String metadataSource = updateJpathFieldFilter_.getString(METADATA_KEYS[0]);
-                    if(metadataSource != null)
-                        metadataInfo.put(METADATA_KEYS[0], metadataSource);
+                for(int index = 0; index < updateJpathFieldFilters_.size(); index++) {
+                    PropertyMap updateJpathFieldFilter_ = updateJpathFieldFilters_.getMap(index);
+                    if(updateJpathFieldFilter_.containsValue(path)) {
+                        String metadataSource = updateJpathFieldFilter_.getString(METADATA_KEYS[0]);
+                        if(metadataSource != null)
+                            metadataInfo.put(METADATA_KEYS[0], metadataSource);
 
-                    String metadataFilter= updateJpathFieldFilter_.getString(METADATA_KEYS[1]);
-                    if(metadataFilter != null)
-                        metadataInfo.put(METADATA_KEYS[1], metadataFilter);
+                        String metadataFilter= updateJpathFieldFilter_.getString(METADATA_KEYS[1]);
+                        if(metadataFilter != null)
+                            metadataInfo.put(METADATA_KEYS[1], metadataFilter);
+                    }
                 }
             }
+        }
+    }
+
+    private void updateFiltersSingleTemplate(PropertyMap filtersForSingleTemplate, PropertyArray templateFieldFilters_) throws PropertyNotExpectedType {
+        for(int index = 0; index < templateFieldFilters_.size(); index++) {
+            PropertyMap templateFieldFilters = templateFieldFilters_.getMap(index);
+            String jpath = templateFieldFilters.getString("jpath-field");
+            String filter = templateFieldFilters.getString(METADATA_KEYS[1]);
+
+            filtersForSingleTemplate.put(jpath, filter);
         }
     }
 
