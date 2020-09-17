@@ -9,11 +9,11 @@ import org.voltdb.VoltProcedure;
 
 public class RawInventoryInsert extends VoltProcedure {
     private static final String upsertFruSqlCmd =
-            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType, FRUInfo, DbUpdatedTimestamp)" +
-                    " VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);";
+            "UPSERT INTO HW_Inventory_FRU (FRUID, FRUType, FRUSubType, FRUInfo)" +
+                    " VALUES (?, ?, ?, ?);";
     private static final String upsertLocSqlCmd =
-            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID, Info, DbUpdatedTimestamp)" +
-                    " VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);";
+            "UPSERT INTO HW_Inventory_Location (ID, Type, Ordinal, FRUID, Info)" +
+                    " VALUES (?, ?, ?, ?, ?);";
 
     public static final long SUCCESSFUL = 0;
 

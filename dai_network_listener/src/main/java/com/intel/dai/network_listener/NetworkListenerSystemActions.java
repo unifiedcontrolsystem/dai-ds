@@ -36,7 +36,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         eventActions_ = factory_.createRasEventLog(adapter_);
         bootImage_ = factory_.createBootImageApi(adapter_);
         operations_ = factory_.createAdapterOperations(adapter_);
-        hwInvDbApi_ = factory_.createHWInvApi();
         nodeInformation_ = factory_.createNodeInformation();
     }
 
@@ -197,107 +196,10 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
                 adapter_.getBaseWorkItemId());
     }
 
-    /**
-     * <p> Determines if the HW inventory DB is currently empty. </p>
-     * @return true if the DB is empty, otherwise false
-     * @throws IOException I/O exception
-     * @throws DataStoreException datastore exception
-     */
-    @Override
-    public boolean isHWInventoryEmpty() throws IOException, DataStoreException {
-        return hwInvDbApi_.numberOfRawInventoryRows() == 0;
-    }
-
-    /**
-     * <p> Updates the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
-     * @param location root location in foreign format
-     * @param canonicalJson contains HW inventory in canonical format
-     */
-    @Override
-    public void upsertHWInventory(String location, String canonicalJson) {
-       ingestCanonicalHWInvJson(canonicalJson);
-    }
-
-    /**
-     * Returns the last update time of the inventory database.
-     * @return timestamp string of the last update.
-     */
-    @Override
-    public String lastHWInventoryHistoryUpdate() {
-        try {
-            return hwInvDbApi_.lastHwInvHistoryUpdate();
-        } catch (IOException | DataStoreException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Update or insert new inventory history.
-     *
-     * @param canonicalJson contains HW inventory history in canonical format.
-     */
-    @Override
-    public void upsertHWInventoryHistory(String canonicalJson) {
-        ingestCanonicalHWInvHistoryJson(canonicalJson);
-    }
-
-    private void ingestCanonicalHWInvHistoryJson(String canonicalHwInvHistJson) {
-        if (canonicalHwInvHistJson == null) return;
-
-        try {
-            hwInvDbApi_.ingestHistory(canonicalHwInvHistJson);
-        } catch (IOException e) {
-            log_.error("IOException: %s", e.getMessage());
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
-    }
-
-    /**
-     * <p> delete the location entries of the HW inventory tree at the given root in the HW inventory DB. </p>
-     * @param location root location in DAI format
-     */
-    @Override
-    public void deleteHWInventory(String location) {
-        deleteHWInvSnapshot(location);
-    }
-
     @Override
     public void close() throws IOException {
         if(publisher_ != null)
             publisher_.close();
-    }
-
-    /**
-     * Deletes HW Inventory snapshot for specific location.
-     * @param location DAI location to remove hw inventory data from db.
-     */
-    private void deleteHWInvSnapshot(String location) {
-        try {
-            hwInvDbApi_.delete(location);
-        } catch (IOException e) {
-            log_.error("IOException: %s", e.getMessage());
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
-    }
-
-    /**
-     * <p> Ingests the HW inventory locations in canonical form. </p>
-     * @param canonicalHwInvJson json containing the HW inventory locations in canonical format
-     */
-    private void ingestCanonicalHWInvJson(String canonicalHwInvJson) {
-        if (canonicalHwInvJson == null) return;
-
-        try {
-            hwInvDbApi_.ingest(canonicalHwInvJson);
-        } catch (InterruptedException e) {
-            log_.error("InterruptedException: %s", e.getMessage());
-        } catch (IOException e) {
-            log_.error("IOException: %s", e.getMessage());
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
     }
 
     private Map<String,String> translateForeignBootImageInfo(Map<String,String> entry) {
@@ -374,7 +276,6 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     private RasEventLog eventActions_;
     private BootImage bootImage_;
     private AdapterOperations operations_;
-    private HWInvDbApi hwInvDbApi_;
     private AdapterInformation adapter_;
     private final NodeInformation nodeInformation_;
     private PropertyMap config_;

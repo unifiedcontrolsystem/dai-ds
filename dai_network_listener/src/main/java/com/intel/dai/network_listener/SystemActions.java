@@ -5,10 +5,8 @@
 package com.intel.dai.network_listener;
 
 import com.intel.dai.dsapi.BootState;
-import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -142,41 +140,4 @@ public interface SystemActions extends AutoCloseable, Closeable {
      * @param instanceData The instance data for the RAS event.
      */
     void logFailedToUpdateWorkItemResults(String instanceData);
-
-    /**
-     * Checks to see if the inventory data has been populated yet.
-     *
-     * @return true if the inventory is missing, false if there is inventory stored.
-     * @throws IOException If the check cannot be made.
-     * @throws DataStoreException If the check cannot be made.
-     */
-    boolean isHWInventoryEmpty() throws IOException, DataStoreException;
-
-    /**
-     * Updates or inserts new inventory information.
-     *
-     * @param location The node for the new or changed inventory info.
-     * @param canonicalJson contains HW inventory in canonical format.
-     */
-    void upsertHWInventory(String location, String canonicalJson);
-
-    /**
-     * Returns the last update time of the inventory database.
-     * @return timestamp string of the last update.
-     */
-    String lastHWInventoryHistoryUpdate();
-
-    /**
-     * Updates or inserts new inventory history.
-     *
-     * @param canonicalJson contains HW inventory history in canonical format.
-     */
-    void upsertHWInventoryHistory(String canonicalJson);
-
-    /**
-     * deletes inventory information for a node.
-     *
-     * @param location The node for the deleted inventory info.
-     */
-    void deleteHWInventory(String location);
 }
