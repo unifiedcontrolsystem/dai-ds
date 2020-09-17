@@ -45,6 +45,10 @@ public abstract class NetworkConnectionObject {
         configureClientNetwork();
     }
 
+    public boolean isStreamIDValid(String streamID) {
+        return sseServer.isStreamIDValid(streamID);
+    }
+
     /**
      * This method to initialise callback instance.
      */

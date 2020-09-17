@@ -134,6 +134,7 @@ public class NetworkObject {
      * @throws RESTClientException when null values passed to this method.
      */
     void send(final String subject, final String events) throws RESTClientException {
+        log_.debug("Sending to "+ subject);
         networkConnectionObject.send(subject, events);
     }
 
@@ -192,6 +193,10 @@ public class NetworkObject {
      */
     public boolean unRegisterId(long subId) {
         return networkConnectionObject.unSubscribeId(subId);
+    }
+
+    public boolean isStreamIDValid( String streamID ) {
+        return networkConnectionObject.isStreamIDValid(streamID);
     }
 
     /**

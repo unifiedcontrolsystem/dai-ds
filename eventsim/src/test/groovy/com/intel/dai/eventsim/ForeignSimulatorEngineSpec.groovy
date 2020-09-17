@@ -3,6 +3,7 @@ package com.intel.dai.eventsim
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.NodeInformation
 import com.intel.logging.Logger
+import groovy.json.JsonSlurper
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -167,6 +168,93 @@ class ForeignSimulatorEngineSpec extends Specification {
         "repeat"        |    "2"    |   null    |    ""       |         11
     }
 
+    def "generate echo event" () {
+
+        def jsonSlurper = new JsonSlurper()
+
+        def message_obj
+        def filecontent_obj
+
+        sourceMock_ = Mock(NetworkObject.class)
+        1 * sourceMock_.isStreamIDValid( *_ ) >> true
+
+
+        ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_,sourceMock_, logMock_)
+        foreignSimEngineTest.initialize()
+
+        File file = new File(getClass().getResource(foreignEchoTemplateFile_).toURI())
+
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("file", foreignEchoTemplateFile_)
+        parameters.put("connection", connection)
+
+        when:
+        foreignSimEngineTest.generateEchoEvents(parameters)
+
+        then:
+        1 * sourceMock_.send( *_ ) >> { subject, String message ->
+            assert subject == connection
+
+            message_obj = jsonSlurper.parse(message.toCharArray())
+            filecontent_obj = jsonSlurper.parse(file)
+
+            assert message_obj == filecontent_obj
+
+        }
+
+        where:
+        test            | connection
+        "ras"           | "events"
+        "boot"          | "stateChanges"
+        "telemetry"     | "telemetry"
+
+    }
+
+    def "bad echo file" () {
+
+        sourceMock_ = Mock(NetworkObject.class)
+        sourceMock_.send(any() as String, any() as String) >> {}
+        sourceMock_.isStreamIDValid( *_) >> { return true }
+
+        ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_,sourceMock_, logMock_)
+        foreignSimEngineTest.initialize()
+
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("file", "foo.json")
+        parameters.put("connection", "events")
+
+        when:
+        foreignSimEngineTest.generateEchoEvents(parameters)
+
+        then:
+        def e = thrown(SimulatorException)
+        e.getMessage() == new String("Resource not found: foo.json")
+        0 * sourceMock_.send()
+
+    }
+
+    def "bad echo connection" () {
+
+        sourceMock_ = Mock(NetworkObject.class)
+        sourceMock_.send(any() as String, any() as String) >> {}
+
+        ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_,sourceMock_, logMock_)
+        foreignSimEngineTest.initialize()
+
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("file", foreignEchoTemplateFile_)
+        parameters.put("connection", "foo")
+
+        when:
+        foreignSimEngineTest.generateEchoEvents(parameters)
+
+        then:
+        def e = thrown(SimulatorException)
+        e.getMessage() == new String("foo is not a valid streamID.")
+        0 * sourceMock_.send()
+
+    }
+
     def loadParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("locations", "TEST-01")
@@ -199,6 +287,7 @@ class ForeignSimulatorEngineSpec extends Specification {
 
     private String foreignServerConfigFile_ = "/resources/test-config-files/TestConfig.json"
     private String foreignScenarioConfigFile_ = "/resources/test-config-files/TestScenario.json"
+    private String foreignEchoTemplateFile_ = "/resources/templates/echo.json"
 
     private DataStoreFactory factoryMock_
 
