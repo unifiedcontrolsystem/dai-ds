@@ -182,6 +182,14 @@ class ForeignSimulatorEngine {
         }
     }
 
+    /**
+     * This method is used to return prior randomization seed to replicate data.
+     * @return seed value
+     */
+    String getRandomizationSeed() {
+        return String.valueOf(randomiserSeed_);
+    }
+
     private PropertyDocument generateEvents(Map<String, String> parameters, String type) throws SimulatorException, PropertyNotExpectedType, IOException, ConfigIOParseException, ConversionException {
         DataValidation.validateData(parameters, MISSING_KEY);
 
@@ -193,7 +201,7 @@ class ForeignSimulatorEngine {
         String eventName = defaults.getOrDefault("sub_component", type);
         String eventType = defaults.getOrDefault("type", eventTypeTemplate_.getDefaultEventType(eventName));
         long numOfEventsToGenerate = Long.parseLong(defaults.getOrDefault("count", DEFAULT_COUNT));
-        long seed = Long.parseLong(defaults.get("seed"));
+        randomiserSeed_ = Long.parseLong(defaults.get("seed"));
         String eventTypeTemplateFile = defaults.get("template");
 
         eventTypeTemplate_.validateEventNameAndType(eventName, eventType);
@@ -206,7 +214,7 @@ class ForeignSimulatorEngine {
         zone_ = defaults.get("timezone");
 
         PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilters_,
-                                templateFieldFilters_, numOfEventsToGenerate, seed).getAsArray();
+                                templateFieldFilters_, numOfEventsToGenerate, randomiserSeed_).getAsArray();
 
         String streamName = eventTypeTemplate_.getEventTypeStreamName();
         String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
@@ -431,6 +439,7 @@ class ForeignSimulatorEngine {
 
     private long publishedEvents_;
     private long timeDelay_;
+    private long randomiserSeed_;
 
     private String output_;
     private String zone_;

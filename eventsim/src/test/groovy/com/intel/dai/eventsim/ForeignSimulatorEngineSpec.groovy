@@ -60,6 +60,7 @@ class ForeignSimulatorEngineSpec extends Specification {
     }
 
     def "generate ras events" () {
+        final File outputFile = tempFolder.newFile("output.json")
         sourceMock_ = Mock(NetworkObject.class)
         sourceMock_.send(any() as String, any() as String) >> {}
         ForeignSimulatorEngine foreignSimEngineTest = new ForeignSimulatorEngine(dataLoader_, sourceMock_, logMock_);
@@ -69,10 +70,12 @@ class ForeignSimulatorEngineSpec extends Specification {
         parameters.put("locations", "TEST-01")
         parameters.put("count", "1")
         parameters.put("type", "old-ras")
+        parameters.put("output", outputFile.getAbsolutePath())
 
         when:
         parameters.put("count", count.toString())
         foreignSimEngineTest.generateRasEvents(parameters)
+        tempFolder.delete()
 
         then:
         foreignSimEngineTest.publishedEvents_ == publishedEvents

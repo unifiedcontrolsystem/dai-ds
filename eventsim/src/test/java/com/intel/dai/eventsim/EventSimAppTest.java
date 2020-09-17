@@ -176,33 +176,7 @@ public class EventSimAppTest {
         eventSimApiTest.getAllSubscriptionDetails(input_parameters);
     }
 
-    @Test
-    public void generateJobEvents() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("locations", "test");
-        parameters.put("count", "1");
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        doNothing().when(eventSimApiTest.eventSimEngine_).publishJobEvents("test", ".*" , "false", null, null, "1", null);
-        assertEquals("{\"Status\":\"F\",\"Result\":\"Success\"}", eventSimApiTest.generateJobEvents(parameters));
-    }
-
-    @Test
-    public void generateJobEventsWithException() throws SimulatorException {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("locations", "test");
-        parameters.put("count", "1");
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        //eventSimApiTest.parser_ = ConfigIOFactory.getInstance("json");
-        eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
-        doThrow(new SimulatorException("test exception")).when(eventSimApiTest.eventSimEngine_).publishJobEvents("test", ".*" , "false", null, null, "1", null);
-        assertEquals("{\"Status\":\"E\",\"Result\":\"Error: test exception\"}", eventSimApiTest.generateJobEvents(parameters));
-    }
-
-    @Test
+/*    @Test
     public void fetchRandomSeed() {
         Map<String, String> parameters = new HashMap<>();
         Logger log = mock(Logger.class);
@@ -212,5 +186,5 @@ public class EventSimAppTest {
         eventSimApiTest.eventSimEngine_ =  mock(SimulatorEngine.class);
         when(eventSimApiTest.eventSimEngine_.getRandomizationSeed()).thenReturn("123");
         assertEquals("{\"Status\":\"F\",\"Result\":\"123\"}", eventSimApiTest.getRandomizationSeed(parameters));
-    }
+    }*/
 }

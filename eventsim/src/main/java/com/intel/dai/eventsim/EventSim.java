@@ -35,7 +35,6 @@ class EventSim {
      */
     void initialiseData() throws SimulatorException {
         source_.initialise();
-        eventSimEngine_.initialize();
         foreignSimulatorEngine_.initialize();
     }
 
@@ -51,7 +50,6 @@ class EventSim {
 
         PropertyMap networkConfiguration = dataLoader_.getNetworkConfigurationData();
         source_ = new NetworkObject(networkConfiguration, log_, apiReq_);
-        eventSimEngine_ = new SimulatorEngine(dataLoader_, source_, log_);
         foreignSimulatorEngine_ = new ForeignSimulatorEngine(dataLoader_, source_, log_);
     }
 
@@ -68,7 +66,6 @@ class EventSim {
     protected WlmApi wlmApi_;
     protected NetworkObject source_;
     protected DataLoader dataLoader_;
-    protected SimulatorEngine eventSimEngine_;
     protected ForeignSimulatorEngine foreignSimulatorEngine_;
     protected ApiReqData apiReq_;
 

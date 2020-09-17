@@ -5,9 +5,6 @@
       "hw-inventory-path" : "/opt/ucs/etc",
       "hw-inventory-query-path" : "/opt/ucs/etc/HwInvQuery_",
       "hw-inv-discover-status-url" : "/Inventory/DiscoveryStatus",
-      "sensor-metadata": "/resources/ForeignSensorMetaData.json",
-      "ras-metadata": "/resources/ForeignEventMetaData.json",
-      "jobs-metadata" : "/resources/ForeignJobsMetaData.json"
   },
   "events-simulator-config" : {
     "count": 10,

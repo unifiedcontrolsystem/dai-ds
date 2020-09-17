@@ -26,8 +26,6 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.source_.startServer() >> {}
         eventSimApp_.source_.stopServer() >> {}
         eventSimApp_.source_.serverStatus() >> {}
-        eventSimApp_.eventSimEngine_ = Mock(SimulatorEngine.class)
-        eventSimApp_.eventSimEngine_.initialize() >> {}
         eventSimApp_.foreignSimulatorEngine_ = Mock(ForeignSimulatorEngine.class)
         eventSimApp_.bootParamsApi_ = Mock(BootParameters.class)
         eventSimApp_.hwInvApi_ = Mock(HardwareInventory.class)
@@ -109,21 +107,6 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.generateRasEvents(parameters).contains("test exception")
         eventSimApp_.generateSensorEvents(parameters).contains("test exception")
         eventSimApp_.generateEventsForScenario(parameters).contains("test exception")
-    }
-
-    def "generate job events"() {
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("locations", "test")
-        parameters.put("count", "1")
-
-        eventSimApp_.eventSimEngine_.publishJobEvents("test", ".*" , "false", null, null, "1", null) >> {}
-        eventSimApp_.eventSimEngine_.publishJobEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
-                {throw new SimulatorException("test exception")}
-
-        expect:
-        eventSimApp_.generateJobEvents(parameters).contains("Success")
-        parameters.put("locations", "UNKNOWN")
-        eventSimApp_.generateJobEvents(parameters).contains("test exception")
     }
 
     def "fetch boot parameters details"() {
