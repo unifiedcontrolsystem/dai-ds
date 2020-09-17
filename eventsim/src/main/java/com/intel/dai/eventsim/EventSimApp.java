@@ -31,6 +31,7 @@ public class EventSimApp  extends  EventSim {
         source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
         source_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
         source_.register("/apis/events/job", HttpMethod.POST.toString(), eventsimApi::generateJobEvents);
+        source_.register("/apis/events/echo", HttpMethod.POST.toString(),eventsimApi::generateEchoEvents);
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeAllStateChangeNotifications);
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.POST.toString(), eventsimApi::subscribeStateChangeNotifications );
         source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
@@ -130,6 +131,22 @@ public class EventSimApp  extends  EventSim {
             String output = parameters.getOrDefault("output", null);
             String seed = parameters.getOrDefault("seed", null);
             eventSimEngine_.publishJobEvents(location, label, burst, delay, seed, eventsCount, output);
+            return create_result_json("F", "Success");
+
+        } catch (SimulatorException e) {
+            return create_result_json("E", "Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to echo a given event to network.
+     * @param parameters input details of the request.
+     * @return Status = F if events are generated, Status = E on failure
+     */
+    String generateEchoEvents(Map<String, String> parameters) {
+        try {
+            log_.info("Received echo request: " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+            foreignSimulatorEngine_.generateEchoEvents(parameters);
             return create_result_json("F", "Success");
 
         } catch (SimulatorException e) {

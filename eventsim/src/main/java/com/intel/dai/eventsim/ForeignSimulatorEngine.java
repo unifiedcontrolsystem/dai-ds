@@ -119,6 +119,27 @@ class ForeignSimulatorEngine {
         }
     }
 
+    void generateEchoEvents(Map<String, String> parameters) throws SimulatorException {
+        String echoFile = parameters.get("file");
+        String streamID = parameters.get("connection");
+
+        try {
+            ForeignEventEcho echoEvent = new ForeignEventEcho(streamID);
+
+            // Read Event
+            echoEvent.processMessage(echoFile);
+
+            // Publish Event
+            publishEchoEvent(echoEvent.props_, streamID);
+
+        } catch(IllegalArgumentException e) {
+            throw new SimulatorException( streamID + " is not a valid stream");
+        } catch (Exception e) {
+            throw new SimulatorException(e.getMessage());
+        }
+
+    }
+
     private void publishEventsForScenario(Map<String, String> parameters, String scenario,
                                           PropertyMap events, PropertyMap scenarioParameters)
             throws PropertyNotExpectedType, SimulatorException {
@@ -180,6 +201,31 @@ class ForeignSimulatorEngine {
         } catch (RESTClientException | IOException e) {
             throw new SimulatorException(e.getMessage());
         }
+    }
+
+    private void publishEchoEvent ( PropertyMap event, String streamID ) throws SimulatorException {
+        try {
+            ZonedDateTime startTime = ZonedDateTime.now(ZoneId.systemDefault());
+            log_.info("Publishing echo");
+            log_.info("Start Time : " + startTime.toString());
+
+
+            if ( !source_.isStreamIDValid(streamID ) ) {
+                throw new SimulatorException(streamID + " is not a valid streamID.");
+            }
+
+            source_.send(streamID, jsonParser_.toString(event));
+
+            ZonedDateTime endTime = ZonedDateTime.now(ZoneId.systemDefault());
+            log_.info("End Time : " + endTime.toString());
+            log_.debug("Total Time to publish " + 1 + " events :" + (Duration.between(startTime, endTime).toMillis()) + " milli-seconds");
+        } catch (Exception  e) {
+            log_.debug(e.getMessage());
+            throw new SimulatorException(e.getMessage());
+        }
+
+
+
     }
 
     private PropertyDocument generateEvents(Map<String, String> parameters, String type) throws SimulatorException, PropertyNotExpectedType, IOException, ConfigIOParseException, ConversionException {

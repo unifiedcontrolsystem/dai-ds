@@ -28,6 +28,7 @@ class EventsCli(object):
         self._add_boot_event_parser(event_subparsers)
         self._add_scenario_event_parser(event_subparsers)
         self._add_get_seed_parser(event_subparsers)
+        self._add_echo_event_parser(event_subparsers)
 
     """
     This method displays help text for each sub-command.
@@ -188,6 +189,16 @@ class EventsCli(object):
         get_seed_parser.set_defaults(func=self._fetch_event_seed_execute)
 
     """
+    This method describes 'json' sub-command arguments.
+    """
+    def _add_echo_event_parser(self, event_parser):
+        json_echo_parser = event_parser.add_parser('echo', help='echo json directly to connection')
+        json_echo_parser.add_argument('file', help='Absolute location of the file on the Eventsim server')
+        json_echo_parser.add_argument('connection', help='name of the connection to send resulting json to.')
+        json_echo_parser.add_argument('--timeout', type=int, help='json sub-command execution timeout')
+        json_echo_parser.set_defaults(func=self._echo_json)
+
+    """
     This method generates url and send api request to generate ras events.
     """
     def _generate_ras_events_execute(self, args):
@@ -302,6 +313,23 @@ class EventsCli(object):
         if timeout is None:
             timeout = self.default_timeout
         response_code, response = client.send_get_request(url, timeout)
+        return CommandResult(response_code, response)
+
+    """
+    This method generates url and sends api request to echo specified json.
+    """
+    def _echo_json(self, args):
+        client = HttpClient()
+        # URL will be POST http://127.0.0.1:9998/apis/events/echo
+        url = client.get_base_url() + 'apis/events/echo'
+
+        parameters = {'file': args.file, 'connection': args.connection}
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        timeout = args.timeout
+        if timeout is None:
+            timeout = self.default_timeout
+        response_code, response = client.send_post_request(url, parameters, timeout)
         return CommandResult(response_code, response)
 
     """

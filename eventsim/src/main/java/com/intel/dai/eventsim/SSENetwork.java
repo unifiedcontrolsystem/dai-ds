@@ -102,6 +102,16 @@ public class SSENetwork extends NetworkConnectionObject {
     }
 
     /**
+     * This method checks if subjectID is associated with a URL
+     * @param subjectID subject in question
+     * @return true if subjectID is associated with a valid URL
+     */
+    @Override
+    public boolean isStreamIDValid( String subjectID ) {
+        return subUrls_.containsKey(subjectID);
+    }
+
+    /**
      * This method is used to fetch rest server configuration details.
      * @throws RESTServerException when unable to fetch rest server address or port data.
      */

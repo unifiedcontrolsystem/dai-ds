@@ -213,4 +213,5 @@ public class EventSimAppTest {
         when(eventSimApiTest.eventSimEngine_.getRandomizationSeed()).thenReturn("123");
         assertEquals("{\"Status\":\"F\",\"Result\":\"123\"}", eventSimApiTest.getRandomizationSeed(parameters));
     }
+
 }
