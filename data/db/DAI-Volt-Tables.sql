@@ -2035,7 +2035,6 @@ CREATE TABLE HW_Inventory_FRU (
     FRUType VARCHAR(16),                        -- Field_Replaceble_Unit category(HMS type)
     FRUSubType VARCHAR(32),                     -- perhaps specific model; NULL:unspecifed
     FRUInfo VARCHAR(8192),
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
 -- Corresponds to the current HPC HW architecture wrt to HW locations.
@@ -2046,7 +2045,6 @@ CREATE TABLE HW_Inventory_Location (
     Ordinal INTEGER NOT NULL,            -- singleton:0
     Info VARCHAR(8192),
     FRUID VARCHAR(80),                      -- perhaps <manufacturer>-<serial#>
-    DbUpdatedTimestamp TIMESTAMP NOT NULL
 );
 
 -- History of FRU installation and removal from the HPC.  Note that the timestamp marks
