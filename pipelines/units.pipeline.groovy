@@ -9,6 +9,7 @@ pipeline {
                 description: 'Skips the clean step')
         choice(name: 'AGENT', choices: [
                 'NRE-UNIT',
+                'cmcheung-centos-7-unit',
                 'css-centos-8-00-unit',
                 'css-centos-8-01-unit'
         ], description: 'Agent label')
@@ -35,7 +36,6 @@ pipeline {
                     }
                 }
                 stage('Clean') {
-                    options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -rf build'
@@ -43,7 +43,7 @@ pipeline {
                     }
                 }
                 stage('Unit Test') {
-                    options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {
                             utilities.InvokeGradle("build")
@@ -52,7 +52,7 @@ pipeline {
                     }
                 }
                 stage('Report') {
-                    options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
+                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'

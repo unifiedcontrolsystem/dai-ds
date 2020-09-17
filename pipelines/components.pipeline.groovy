@@ -9,6 +9,7 @@ pipeline {
                 description: 'Speeds up build by skipping gradle clean')
         choice(name: 'AGENT', choices: [
                 'NRE-COMPONENT',
+                'cmcheung-centos-7-component-functional',
                 'css-centos-8-00-component',
                 'css-centos-8-01-component-functional'
         ], description: 'Agent label')
@@ -31,7 +32,6 @@ pipeline {
                     }
                 }
                 stage('Clean') {
-                    options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -rf build'
@@ -39,13 +39,13 @@ pipeline {
                     }
                 }
                 stage('Component Test') {
-                    options{ catchError(message: "Quick Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         RunIntegrationTests()
                     }
                 }
                 stage('Report') {
-                    options{ catchError(message: "Quick Report failed", stageResult: 'UNSTABLE',
+                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
