@@ -25,30 +25,29 @@ public class EventSimApp  extends  EventSim {
     }
 
     void executeRoutes(EventSimApp eventsimApi) throws SimulatorException {
-        source_.register("/apis/events/boot", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
-        source_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generateRasEvents);
-        source_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
-        source_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
-        source_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
-        source_.register("/apis/events/job", HttpMethod.POST.toString(), eventsimApi::generateJobEvents);
-        source_.register("/apis/events/echo", HttpMethod.POST.toString(),eventsimApi::generateEchoEvents);
-        source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeAllStateChangeNotifications);
-        source_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.POST.toString(), eventsimApi::subscribeStateChangeNotifications );
-        source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
-        source_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.GET.toString(), eventsimApi::getAllSubscriptionDetails );
-        source_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeStateChangeNotifications);
-        source_.register("/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
-        source_.register("/Inventory/Discover", HttpMethod.POST.toString(), eventsimApi::initiateInventoryDiscovery);
-        source_.register("/Inventory/DiscoveryStatus", HttpMethod.GET.toString(), eventsimApi::getAllInventoryDiscoveryStatus);
-        source_.register("/Inventory/Hardware", HttpMethod.GET.toString(), eventsimApi::getInventoryHardware);
-        source_.register("/Inventory/Hardware/*", HttpMethod.GET.toString(), eventsimApi::getInventoryHardwareForLocation);
-        source_.register("/Inventory/Hardware/Query/*", HttpMethod.GET.toString(), eventsimApi::getInventoryHardwareQueryForLocation);
-        source_.register("/wlm/createRes", HttpMethod.POST.toString(), eventsimApi::createReservation);
-        source_.register("/wlm/modifyRes", HttpMethod.POST.toString(), eventsimApi::modifyReservation);
-        source_.register("/wlm/deleteRes", HttpMethod.POST.toString(), eventsimApi::deleteReservation);
-        source_.register("/wlm/startJob", HttpMethod.POST.toString(), eventsimApi::startJob);
-        source_.register("/wlm/terminateJob", HttpMethod.POST.toString(), eventsimApi::terminateJob);
-        source_.register("/wlm/simulate", HttpMethod.POST.toString(), eventsimApi::simulateWlm);
+        network_.register("/apis/events/boot", HttpMethod.POST.toString(), eventsimApi::generateBootEvents);
+        network_.register("/apis/events/ras", HttpMethod.POST.toString(), eventsimApi::generateRasEvents);
+        network_.register("/apis/events/scenario", HttpMethod.POST.toString(), eventsimApi::generateEventsForScenario);
+        network_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
+        network_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
+        network_.register("/apis/events/echo", HttpMethod.POST.toString(),eventsimApi::generateEchoEvents);
+        network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeAllStateChangeNotifications);
+        network_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.POST.toString(), eventsimApi::subscribeStateChangeNotifications );
+        network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
+        network_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.GET.toString(), eventsimApi::getAllSubscriptionDetails );
+        network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeStateChangeNotifications);
+        network_.register("/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
+        network_.register("/Inventory/Discover", HttpMethod.POST.toString(), eventsimApi::initiateInventoryDiscovery);
+        network_.register("/Inventory/DiscoveryStatus", HttpMethod.GET.toString(), eventsimApi::getAllInventoryDiscoveryStatus);
+        network_.register("/Inventory/Hardware", HttpMethod.GET.toString(), eventsimApi::getInventoryHardware);
+        network_.register("/Inventory/Hardware/*", HttpMethod.GET.toString(), eventsimApi::getInventoryHardwareForLocation);
+        network_.register("/Inventory/Hardware/Query/*", HttpMethod.GET.toString(), eventsimApi::getInventoryHardwareQueryForLocation);
+        network_.register("/wlm/createRes", HttpMethod.POST.toString(), eventsimApi::createReservation);
+        network_.register("/wlm/modifyRes", HttpMethod.POST.toString(), eventsimApi::modifyReservation);
+        network_.register("/wlm/deleteRes", HttpMethod.POST.toString(), eventsimApi::deleteReservation);
+        network_.register("/wlm/startJob", HttpMethod.POST.toString(), eventsimApi::startJob);
+        network_.register("/wlm/terminateJob", HttpMethod.POST.toString(), eventsimApi::terminateJob);
+        network_.register("/wlm/simulate", HttpMethod.POST.toString(), eventsimApi::simulateWlm);
     }
 
     /**
@@ -116,29 +115,6 @@ public class EventSimApp  extends  EventSim {
     }
 
     /**
-     * This method is used to create and send job events to network.
-     * @param parameters input details of the request.
-     * @return Status = F if events are generated, Status = E on failure
-     */
-    String generateJobEvents(Map<String, String> parameters) {
-        try {
-            log_.info("Received job api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-            String burst = parameters.getOrDefault("burst", "false");
-            String eventsCount = parameters.getOrDefault("count", null);
-            String delay = parameters.getOrDefault("delay", null);
-            String label = parameters.getOrDefault("label", ".*");
-            String location = parameters.getOrDefault("locations", ".*");
-            String output = parameters.getOrDefault("output", null);
-            String seed = parameters.getOrDefault("seed", null);
-            eventSimEngine_.publishJobEvents(location, label, burst, delay, seed, eventsCount, output);
-            return create_result_json("F", "Success");
-
-        } catch (SimulatorException e) {
-            return create_result_json("E", "Error: " + e.getMessage());
-        }
-    }
-
-    /**
      * This method is used to echo a given event to network.
      * @param parameters input details of the request.
      * @return Status = F if events are generated, Status = E on failure
@@ -161,7 +137,7 @@ public class EventSimApp  extends  EventSim {
      */
     String getRandomizationSeed(Map<String, String> parameters) {
         log_.info("Received get-seed api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        String seed = eventSimEngine_.getRandomizationSeed();
+        String seed = foreignSimulatorEngine_.getRandomizationSeed();
         return create_result_json("F", seed);
     }
 
@@ -173,7 +149,7 @@ public class EventSimApp  extends  EventSim {
      */
     String unsubscribeAllStateChangeNotifications(Map<String, String> parameters) {
         log_.info("Received unsubscribeAllStateChangeNotifications api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        source_.unRegisterAll();
+        network_.unRegisterAll();
         return "";
     }
 
@@ -186,8 +162,8 @@ public class EventSimApp  extends  EventSim {
         log_.info("Received subscribeStateChangeNotifications api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String subscriber = parameters.getOrDefault("Subscriber", null);
         String subUrl = parameters.getOrDefault("Url", null);
-        source_.register(subUrl, subscriber, parameters);
-        PropertyMap subscription = source_.getSubscription(subUrl, subscriber);
+        network_.register(subUrl, subscriber, parameters);
+        PropertyMap subscription = network_.getSubscription(subUrl, subscriber);
         return parser_.toString(subscription);
     }
 
@@ -199,7 +175,7 @@ public class EventSimApp  extends  EventSim {
     String getSubscriptionDetailForId(Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getSubscriptionDetailForId api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String subId = parameters.getOrDefault("sub_component", null);
-        PropertyDocument result = source_.getSubscriptionForId(Long.parseLong(subId));
+        PropertyDocument result = network_.getSubscriptionForId(Long.parseLong(subId));
         if(result == null)
             throw new SimulatorException("No subscription for given details exists.");
         return parser_.toString(result);
@@ -213,7 +189,7 @@ public class EventSimApp  extends  EventSim {
      */
     String getAllSubscriptionDetails(Map<String, String> parameters) throws SimulatorException {
         log_.info("Received getAllSubscriptionDetails api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
-        PropertyDocument result = source_.getAllSubscriptions();
+        PropertyDocument result = network_.getAllSubscriptions();
         if(result == null)
             throw new SimulatorException("No subscriptions exists.");
         return parser_.toString(result);
@@ -227,7 +203,7 @@ public class EventSimApp  extends  EventSim {
     String unsubscribeStateChangeNotifications(Map<String, String> parameters) {
         log_.info("Received unsubscribeStateChangeNotifications api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String subid = parameters.getOrDefault("sub_component", null);
-        source_.unRegisterId(Long.parseLong(subid));
+        network_.unRegisterId(Long.parseLong(subid));
         return "";
     }
 
@@ -454,7 +430,7 @@ public class EventSimApp  extends  EventSim {
      * This method to start server.
      */
     void startServer() throws SimulatorException {
-        source_.startServer();
+        network_.startServer();
         isServerUp_ = true;
     }
 
@@ -462,7 +438,7 @@ public class EventSimApp  extends  EventSim {
      * This class is to imitate like a server.
      */
     void stopServer() throws SimulatorException {
-        source_.stopServer();
+        network_.stopServer();
         isServerUp_ = false;
     }
 
@@ -470,7 +446,7 @@ public class EventSimApp  extends  EventSim {
      * This method to fetch server status.
      */
     boolean serverStatus() {
-        source_.serverStatus();
+        network_.serverStatus();
         return isServerUp_;
     }
 
@@ -496,8 +472,8 @@ public class EventSimApp  extends  EventSim {
      * This method to generate url of the server
      */
     private String getForeignServerUrl() {
-        String foreignServerAddr = source_.getAddress();
-        String foreignServerPort = String.valueOf(source_.getPort());
+        String foreignServerAddr = network_.getAddress();
+        String foreignServerPort = String.valueOf(network_.getPort());
         return "http://" + foreignServerAddr + ":" + foreignServerPort;
     }
 

@@ -22,12 +22,10 @@ class EventSimAppSpec extends Specification {
 
         eventSimApp_.initialiseInstances()
 
-        eventSimApp_.source_ = Mock(NetworkObject.class)
-        eventSimApp_.source_.startServer() >> {}
-        eventSimApp_.source_.stopServer() >> {}
-        eventSimApp_.source_.serverStatus() >> {}
-        eventSimApp_.eventSimEngine_ = Mock(SimulatorEngine.class)
-        eventSimApp_.eventSimEngine_.initialize() >> {}
+        eventSimApp_.network_ = Mock(NetworkObject.class)
+        eventSimApp_.network_.startServer() >> {}
+        eventSimApp_.network_.stopServer() >> {}
+        eventSimApp_.network_.serverStatus() >> {}
         eventSimApp_.foreignSimulatorEngine_ = Mock(ForeignSimulatorEngine.class)
         eventSimApp_.bootParamsApi_ = Mock(BootParameters.class)
         eventSimApp_.hwInvApi_ = Mock(HardwareInventory.class)
@@ -111,21 +109,6 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.generateEventsForScenario(parameters).contains("test exception")
     }
 
-    def "generate job events"() {
-        Map<String, String> parameters = new HashMap<>()
-        parameters.put("locations", "test")
-        parameters.put("count", "1")
-
-        eventSimApp_.eventSimEngine_.publishJobEvents("test", ".*" , "false", null, null, "1", null) >> {}
-        eventSimApp_.eventSimEngine_.publishJobEvents("UNKNOWN", ".*" , "false", null, null, "1", null) >>
-                {throw new SimulatorException("test exception")}
-
-        expect:
-        eventSimApp_.generateJobEvents(parameters).contains("Success")
-        parameters.put("locations", "UNKNOWN")
-        eventSimApp_.generateJobEvents(parameters).contains("test exception")
-    }
-
     def "fetch boot parameters details"() {
         Map<String, String> parameters = new HashMap<>()
         parameters.put("hosts", "x0")
@@ -156,8 +139,8 @@ class EventSimAppSpec extends Specification {
         parameters.put("xnames", "test")
 
         eventSimApp_.dataLoader_.getHwInventoryDiscStatusUrl() >> "/Inventory/DiscoveryStatus"
-        eventSimApp_.source_.getAddress() >> "localhost"
-        eventSimApp_.source_.getPort() >> 1234
+        eventSimApp_.network_.getAddress() >> "localhost"
+        eventSimApp_.network_.getPort() >> 1234
         expect:
         eventSimApp_.initiateInventoryDiscovery(parameters).contains("[{\"URI\":\"http://localhost:1234/Inventory/DiscoveryStatus/0\"}]")
         eventSimApp_.getAllInventoryDiscoveryStatus(parameters).contains("{\"Status\":\"Complete\",\"Details\":null,\"LastUpdateTime\":")
