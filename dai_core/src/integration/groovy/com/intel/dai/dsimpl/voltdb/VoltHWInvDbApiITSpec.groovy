@@ -25,15 +25,8 @@ class VoltHWInvDbApiITSpec extends Specification {
         String[] servers = [server]
         ts = new VoltHWInvDbApi(logger, new HWInvUtilImpl(logger), servers)
         ts.initialize()
-        ts.delete''
         ts.deleteAllRawHistoricalRecords()
         ts.deleteAllCookedNodes()
-    }
-
-    def "delete"() {
-        setup: ts.ingest rawInventoryDataFilePath
-        when: ts.delete ''
-        then: ts.numberOfRawInventoryRows() == 0
     }
 
     def "ingest -- file"() {
@@ -97,15 +90,10 @@ class VoltHWInvDbApiITSpec extends Specification {
         then: ts.numberRawInventoryHistoryRows() == count
     }
 
-    def "lastHwInvHistoryUpdate"() {
-        setup: populateRawInvHistoryTable()
-        expect: '2003-10-02T15:00:00.05Z' == ts.lastHwInvHistoryUpdate()
-    }
-
     def "ingestCookedNodesChanged"() {
         Map<String, String> lastNodeChangeTimestamp = [:]
         lastNodeChangeTimestamp['R0-CB0-CN0'] = '2002-10-02T15:00:00.05Z'
-        given: ts.numberCookedNodeInventoryHistoryRows() == 0
+        given: ts.numberOfCookedNodes() == 0
         when:
         ts.ingest rawInventoryDataFilePath
 
@@ -114,7 +102,7 @@ class VoltHWInvDbApiITSpec extends Specification {
     }
 
     def populateRawInvHistoryTable() {
-        def event = new HWInvHistoryEvent();
+        def event = new HWInvHistoryEvent()
         event.Action = 'Added'
         event.ID = 'R0-CB0-CN0'
         event.FRUID = 'node.0'

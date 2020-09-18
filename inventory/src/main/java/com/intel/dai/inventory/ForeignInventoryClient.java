@@ -4,23 +4,20 @@
 //
 package com.intel.dai.inventory;
 
-import com.intel.dai.dsapi.HWInvDbApi;
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.inventory.api.HWInvDiscovery;
 import com.intel.dai.inventory.api.HWInvTranslator;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.io.IOException;
 
 /**
  * This class uses the foreign inventory discovery api and the online inventory api to produce inventory information in
  * canonical form.
  */
-public class ForeignInventoryClient {
-    public ForeignInventoryClient(Logger logger) {
+class ForeignInventoryClient {
+    ForeignInventoryClient(Logger logger) {
         log_ = logger;
         hwInvDiscovery_ = new HWInvDiscovery(log_);
     }
@@ -32,14 +29,6 @@ public class ForeignInventoryClient {
     String getCanonicalHWInvHistoryJson(String startTime) {
         return toCanonicalHWInvHistoryJson(
                 getForeignHWInvHistoryJson(startTime));
-    }
-
-    String lastHWInventoryHistoryUpdate(HWInvDbApi hwInvDbApi) {
-        try {
-            return hwInvDbApi.lastHwInvHistoryUpdate();
-        } catch (IOException | DataStoreException e) {
-            return "";
-        }
     }
 
     /**

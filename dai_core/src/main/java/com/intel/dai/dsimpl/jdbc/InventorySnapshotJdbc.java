@@ -20,6 +20,13 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         log_ = logger;
     }
 
+    /**
+     * Retrieves the foreign timestamp string of the last raw inventory history update.  This is a string
+     * because its only use case is as a string parameter in a request to the foreign server for more
+     * inventory history.
+     * @return timestamp string of the last raw inventory history update
+     * @throws DataStoreException when the timestamp string cannot be retrieved from the near line adapter
+     */
     @Override
     public String getLastHWInventoryHistoryUpdate() throws DataStoreException {
         PreparedStatement retrieveRefLastRawInventoryHistoryUpdate = null;

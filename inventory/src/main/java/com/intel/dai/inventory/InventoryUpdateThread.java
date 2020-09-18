@@ -9,7 +9,6 @@ import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,11 +20,15 @@ import java.util.regex.Pattern;
  * voltdb tables is performed by a thread started by app.postInitialize(),
  * and that this may be ongoing!
  */
-public class InventoryUpdateThread implements Runnable {
-    public InventoryUpdateThread(Logger log) {
+class InventoryUpdateThread implements Runnable {
+    InventoryUpdateThread(Logger log) {
         log_ = log;
     }
 
+    /**
+     * Runs a background thread that updates the DAI inventory database tables using
+     * information from the foreign server.
+     */
     public void run() {
         try {
             log_.info("HWI:%n  %s", "InventoryUpdateThread started");
@@ -83,7 +86,7 @@ class DatabaseSynchronizer {
 
         foreignInventoryDatabaseClient_ = new ForeignInventoryClient(log_);
         onlineInventoryDatabaseClient_ = factory_.createHWInvApi();
-        nearlineInventoryDatabaseClient_ = factory_.createInventorySnapshotApi();
+        nearLineInventoryDatabaseClient_ = factory_.createInventorySnapshotApi();
     }
 
     /**
@@ -92,7 +95,7 @@ class DatabaseSynchronizer {
      */
     private String getLastHWInventoryHistoryUpdate() {
         try {
-            String lastUpdateTimestamp = nearlineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
+            String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
         } catch (DataStoreException e) {
             log_.error("HWI:%n  getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
@@ -217,7 +220,12 @@ class DatabaseSynchronizer {
     }
 
     private int ingestCookedNodes(Map<String, String> lastNodeLocationChangeTimestamp) {
-        return onlineInventoryDatabaseClient_.ingestCookedNodesChanged(lastNodeLocationChangeTimestamp);
+        try {
+            return onlineInventoryDatabaseClient_.ingestCookedNodesChanged(lastNodeLocationChangeTimestamp);
+        } catch (DataStoreException e) {
+            log_.error("HWI:%n  DataStoreException: %s", e.getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -233,10 +241,6 @@ class DatabaseSynchronizer {
 
         try {
             return onlineInventoryDatabaseClient_.ingest(canonicalHwInvJson);
-        } catch (InterruptedException e) {
-            log_.error("HWI:%n  InterruptedException: %s", e.getMessage());
-        } catch (IOException e) {
-            log_.error("HWI:%n  IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
             log_.error("HWI:%n  DataStoreException: %s", e.getMessage());
         }
@@ -253,8 +257,6 @@ class DatabaseSynchronizer {
 
         try {
             return onlineInventoryDatabaseClient_.ingestHistory(canonicalHwInvHistJson);
-        } catch (IOException e) {
-            log_.error("HWI:%n  IOException: %s", e.getMessage());
         } catch (DataStoreException e) {
             log_.error("HWI:%n  DataStoreException: %s", e.getMessage());
         }
@@ -267,5 +269,5 @@ class DatabaseSynchronizer {
     protected HWInvUtil util_;
     protected HWInvDbApi onlineInventoryDatabaseClient_;                // voltdb
     protected ForeignInventoryClient foreignInventoryDatabaseClient_;   // foreign inventory server
-    InventorySnapshot nearlineInventoryDatabaseClient_;                 // postgres
+    InventorySnapshot nearLineInventoryDatabaseClient_;                 // postgres
 }

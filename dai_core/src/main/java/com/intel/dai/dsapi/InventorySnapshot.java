@@ -14,5 +14,13 @@ public interface InventorySnapshot {
     PropertyMap retrieveRefSnapshot(String location) throws DataStoreException;
     PropertyMap retrieveSnapshot(long id) throws DataStoreException;
     void setReferenceSnapshot(int id) throws DataStoreException;
+
+    /**
+     * Retrieves the foreign timestamp string of the last raw inventory history update.  This is a string
+     * because its only use case is as a string parameter in a request to the foreign server for more
+     * inventory history.
+     * @return timestamp string of the last raw inventory history update
+     * @throws DataStoreException when the timestamp string cannot be retrieved from the near line adapter
+     */
     String getLastHWInventoryHistoryUpdate() throws DataStoreException;
 }

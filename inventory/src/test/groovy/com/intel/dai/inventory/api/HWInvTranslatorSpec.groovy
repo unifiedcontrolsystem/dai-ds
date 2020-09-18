@@ -26,17 +26,6 @@ class HWInvTranslatorSpec extends Specification {
         ts = new HWInvTranslator()
     }
 
-    def "Test extractParentId"() {
-        expect: ts.extractParentId(id) == parentId
-
-        where:
-        id     || parentId
-        "x0n0" || "x0"
-        "x0"   || ""
-        ""     || ""
-        "123"  || ""
-    }
-
     def "toCanonical from ForeignHWInvByLoc - negative" () {
         def arg = new ForeignHWInvByLocMemory()
         arg.ID = ID
@@ -56,18 +45,6 @@ class HWInvTranslatorSpec extends Specification {
         "ID"    | "Type"    | 0         | "Populated"       | null
         "ID"    | "Type"    | 0         | "noSuchStatus"    | null
         "ID"    | "Type"    | 0         | "Empty"           | new ForeignFRU()
-    }
-
-    def "extractParentId"() {
-        expect: ts.extractParentId(candidate) == result
-
-        where:
-        candidate       | result
-        "x0"            | ""
-        "x0c0s0b0n0"    | "x0c0s0b0"
-        "x0c0s0b0n"     | ""
-        "^#^@!"         | ""
-        null            | null
     }
 
     def "foreignToCanonical - Path"() {
@@ -116,18 +93,5 @@ class HWInvTranslatorSpec extends Specification {
         where:
         ID      | EventType | Timestamp | FRUID
         "ID"    | "Type"    | "ts"      | "FRUID"
-    }
-
-    def "getValue" () {
-        expect: ts.getValue(Json, Name) == Value
-
-        where:
-        Json                        | Name      || Value
-        '{"name": "value"}'         | 'name'    || '"value"'
-        '{"name": {"n": "v"}}'      | 'name'    || '{"n":"v"}'
-        '{"name": [{"n": "v"}]}'    | 'name'    || '[{"n":"v"}]'
-        '{"name": null }'           | 'name'    || 'null'
-        '{"name": true }'           | 'name'    || 'true'
-        '{"name": false }'          | 'name'    || 'false'
     }
 }

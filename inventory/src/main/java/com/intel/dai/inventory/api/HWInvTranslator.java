@@ -140,8 +140,9 @@ public class HWInvTranslator {
 
     /**
      * <p> Converts a json string containing a HW inventory in foreign format to its
-     * canonical representation. Note that if the foreign json is a list, the
-     * HW inventory may not be a tree. </p>
+     * canonical representation.  Note that if the foreignJson describes a forest of
+     * inventory snapshot, the subject in the return value will be an empty string.
+     * If the conversion failed, the subject will be null.  </p>
      *
      * @param foreignJson json string containing a HW inventory in foreign format
      * @return a pair of the subject of the HW inventory and the json string
@@ -188,6 +189,14 @@ public class HWInvTranslator {
         return daiName;
     }
 
+    /**
+     * <p> Converts a json string containing a HW inventory history in foreign format to its
+     * canonical representation.  If the conversion succeeded, the subject is an empty string.
+     * If the conversion failed, the subject is null. </p>
+     * @param foreignJson json string containing a HW inventory history in foreign format
+     * @return a pair of the subject of the HW inventory history and the json string
+     * containing the HW inventory history in canonical form
+     */
     public ImmutablePair<String, String> foreignHistoryToCanonical(String foreignJson) {
         ImmutablePair<String, HWInvHistory> translatedResult = toCanonicalHistory(foreignJson);
         String subject = translatedResult.getKey();
@@ -574,34 +583,7 @@ public class HWInvTranslator {
         }
     }
 
-    String extractParentId(String id) {
-        try {
-            Pattern pattern = Pattern.compile("(^.*)\\D\\d+$");
-            Matcher matcher = pattern.matcher(id);
-            if (matcher.find()) {
-                return matcher.group(1);
-            }
-            return "";
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    public String getValue(String json, String name) {
-        JsonObject jsonObject;
-        try {
-            jsonObject = gson.fromJson(json, JsonObject.class);
-        } catch (Exception e) {
-            // EOFException can occur if the json is incomplete
-            logger.fatal("GSON parsing error: %s", e.getMessage());
-            return null;
-        }
-        return jsonObject.get(name).toString();
-    }
-
     private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
-
-//    private static final String emptyPrefix = "empty-";
 
     private final Gson gson;
     private final HWInvUtil util;

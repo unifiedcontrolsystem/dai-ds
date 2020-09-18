@@ -40,6 +40,11 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         this.util = util;
         this.servers = servers;
     }
+
+    /**
+     * <p> Initialize a client connection to the online tier database. </p>
+     */
+    @Override
     public void initialize() {
         VoltDbClient.initializeVoltDbClient(servers);
         client = VoltDbClient.getVoltClientInstance();
@@ -51,35 +56,39 @@ public class VoltHWInvDbApi implements HWInvDbApi {
      * The choice of DB is made in the implementation. </p>
      * @param canonicalHWInvPath path to the json containing the HW inventory in canonical form
      * @return number of HW inventory locations ingested
-     * @throws IOException i/o exception is possible because this includes a file operation
-     * @throws InterruptedException user may interrupt if this were to be run in a CLI
      * @throws DataStoreException DAI Data Store Exception
      */
-    @Override
-    public int ingest(Path canonicalHWInvPath) throws IOException, InterruptedException, DataStoreException {
+    int ingest(Path canonicalHWInvPath) throws DataStoreException {
         HWInvTree hwInv = util.toCanonicalPOJO(canonicalHWInvPath);
         if (hwInv == null) {
             logger.error("Foreign HW inventory conversion to POJO failed");
             return 0;
         }
-        return ingest(hwInv);
+        try {
+            return ingest(hwInv);
+        } catch (IOException | InterruptedException e) {
+            throw new DataStoreException(e.getMessage());
+        }
     }
 
     /**
-     * <p> Ingest json string containing HW inventory history. </p>
+     * <p> Ingest json string containing HW inventory history in the online database. </p>
      * @param canonicalHWInvHistoryJson json file containing HW inventory history in canonical form
-     * @return 0 if any location is ingested, otherwise 1
-     * @throws IOException IO Exception
-     * @throws DataStoreException DataStore Exception
+     * @return list of inventory history events ingested
+     * @throws DataStoreException when ingestion into online database failed
      */
     @Override
-    public List<HWInvHistoryEvent> ingestHistory(String canonicalHWInvHistoryJson) throws IOException, DataStoreException {
+    public List<HWInvHistoryEvent> ingestHistory(String canonicalHWInvHistoryJson) throws DataStoreException {
         HWInvHistory hist = util.toCanonicalHistoryPOJO(canonicalHWInvHistoryJson);
         if (hist == null) {
             logger.error("HWI:%n  Foreign HW inventory history conversion to POJO failed");
             return new ArrayList<>();
         }
-        return ingest(hist);
+        try {
+            return ingest(hist);
+        } catch (IOException e) {
+            throw new DataStoreException(e.getMessage());
+        }
     }
 
     private List<HWInvHistoryEvent> ingest(HWInvHistory hist) throws IOException, DataStoreException {
@@ -100,25 +109,22 @@ public class VoltHWInvDbApi implements HWInvDbApi {
      * as the given json string. </p>
      * @param canonicalHWInvJson json string containing a canonical HW inventory
      * @return number of HW inventory locations ingested
+     * @throws DataStoreException when ingestion into online database failed
      */
     @Override
-    public int ingest(String canonicalHWInvJson) throws InterruptedException, IOException, DataStoreException {
+    public int ingest(String canonicalHWInvJson) throws DataStoreException {
         HWInvTree hwInv = util.toCanonicalPOJO(canonicalHWInvJson);
         if (hwInv == null) {
             logger.error("HWI:%n  Foreign HW inventory conversion to POJO failed");
             return 0;
         }
-        return ingest(hwInv);
+        try {
+            return ingest(hwInv);
+        } catch (InterruptedException | IOException e) {
+            throw new DataStoreException(e.getMessage());
+        }
     }
 
-    /**
-     *
-     * @param hwInv
-     * @return number of items ingested
-     * @throws IOException
-     * @throws DataStoreException
-     * @throws InterruptedException
-     */
     private int ingest(HWInvTree hwInv) throws IOException, DataStoreException, InterruptedException {
         logger.debug("HWI:%n  ingest(HWInvTree hwInv=%s) >>", util.head(toString(), 360));
         int numRowsIngested = 0;
@@ -155,24 +161,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         return numRowsIngested;
     }
 
-    @Override
-    public void delete(String locationName) throws IOException, DataStoreException {
-        try {
-            ClientResponse cr = client.callProcedure("RawInventoryDelete", locationName);
-            if (cr.getStatus() != ClientResponse.SUCCESS) {
-                logger.error("HWI:%n  RawInventoryDelete(locationName=%s) => %d",
-                        locationName, cr.getStatus());
-            }
-        } catch (ProcCallException e) {
-            logger.error("ProcCallException during RawInventoryDelete");
-            throw new DataStoreException(e.getMessage());
-        } catch (NullPointerException e) {
-            logger.error("Null client");
-            throw new DataStoreException(e.getMessage());
-        }
-    }
-
-    public int ingestCookedNode(String nodeLocation, String foreignTimestamp)
+    int ingestCookedNode(String nodeLocation, String foreignTimestamp)
             throws IOException, DataStoreException {
 
         ImmutablePair<String, String> hwInfo = generateHWInfoJsonBlob(nodeLocation);
@@ -184,7 +173,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
                 nodeSerialNumber);
     }
 
-    public long numberOfCookedNodes() throws DataStoreException, IOException {
+    long numberOfCookedNodes() throws DataStoreException, IOException {
         try {
             return client.callProcedure("NodeHistoryRowCount").getResults()[0].asScalarLong();
         } catch (ProcCallException e) {
@@ -196,7 +185,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    public void deleteAllCookedNodes() throws IOException, DataStoreException {
+    void deleteAllCookedNodes() throws IOException, DataStoreException {
         try {
             ClientResponse cr = client.callProcedure("NodeHistoryDelete");
             if (cr.getStatus() != ClientResponse.SUCCESS) {
@@ -211,7 +200,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    private int insertNodeHistory(String nodeLocation, long foreignTimestampInMillisecondsSinceEpoch,
+    int insertNodeHistory(String nodeLocation, long foreignTimestampInMillisecondsSinceEpoch,
                                    String hwInfoJson, String nodeSerialNumber) throws IOException, DataStoreException {
         try {
             ClientResponse cr = client.callProcedure(
@@ -238,7 +227,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         return 1;
     }
 
-    private ImmutablePair<String, String> generateHWInfoJsonBlob(String nodeLocation)
+    ImmutablePair<String, String> generateHWInfoJsonBlob(String nodeLocation)
             throws IOException, DataStoreException {
         String node_serial_number = "";
 
@@ -266,8 +255,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         return new ImmutablePair<>(node_serial_number, hwInfoJson);
     }
 
-    // @Override
-    public HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws
+    HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws
             IOException, DataStoreException {
         try {
             HWInvTree t = new HWInvTree();
@@ -303,8 +291,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    @Override
-    public long numberOfRawInventoryRows() throws IOException, DataStoreException {
+    long numberOfRawInventoryRows() throws IOException, DataStoreException {
         try {
             return client.callProcedure("RawInventoryRowCount").getResults()[0].asScalarLong();
         } catch (ProcCallException e) {
@@ -316,37 +303,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    /**
-     * Return the latest HW inventory history update timestamp string in RFC-3339 format.  Notice that the foreign
-     * timestamp is stored as a string in the DB.  This is because we only use this timestamp as a string argument when
-     * making a rest api call to the foreign server.
-     *
-     * @return string containing the latest update timestamp if it can be determined; otherwise null
-     * @throws IOException io exception
-     * @throws DataStoreException datastore exception
-     */
-    @Override
-    public String lastHwInvHistoryUpdate() throws IOException, DataStoreException {
-        try {
-            return client.callProcedure("RawInventoryHistoryLastUpdate").getResults()[0].
-                    fetchRow(0).getString(0);
-        } catch (ProcCallException e) {
-            logger.error("ProcCallException during RawInventoryHistoryLastUpdate");
-            throw new DataStoreException(e.getMessage());
-        } catch (NullPointerException e) {
-            logger.error("Null client");
-            throw new DataStoreException(e.getMessage());
-        }
-    }
-
-    /**
-     *
-     * @param evt
-     * @return number of raw history events ingested
-     * @throws IOException
-     * @throws DataStoreException
-     */
-    public int insertRawHistoricalRecord(HWInvHistoryEvent evt)
+    int insertRawHistoricalRecord(HWInvHistoryEvent evt)
             throws IOException, DataStoreException {
         try {
             ClientResponse cr = client.callProcedure("RawInventoryHistoryInsert",
@@ -366,8 +323,12 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         return 1;
     }
 
-    @Override
-    public void deleteAllRawHistoricalRecords() throws IOException, DataStoreException {
+    /**
+     * Deletes all raw historical records from the raw inventory history voltdb table.  Note that this
+     * method is only used during testing.
+     * @throws DataStoreException when raw inventory history cannot be deleted
+     */
+    void deleteAllRawHistoricalRecords() throws DataStoreException {
         try {
             ClientResponse cr = client.callProcedure("RawInventoryHistoryDelete");
             if (cr.getStatus() != ClientResponse.SUCCESS) {
@@ -379,10 +340,13 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         } catch (NullPointerException e) {
             logger.error("Null client");
             throw new DataStoreException(e.getMessage());
+        } catch (IOException e) {
+            logger.error("IO IOException");
+            throw new DataStoreException(e.getMessage());
         }
     }
 
-    public long numberRawInventoryHistoryRows()
+    long numberRawInventoryHistoryRows()
             throws IOException, DataStoreException {
         try {
             return client.callProcedure("RawInventoryHistoryRowCount").
@@ -397,16 +361,14 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     }
 
     /**
-     * Ingests changed nodes from the raw inventory tables.
-     *
-     * Note that if the history table only contains the updated history then
-     * there is no need to consider start time.  We can guarantee this at
-     * the client side by always dropping the history and snapshot tables prior
-     * to calling this method.  Failing to do so will results in a lot of
-     * upsert operations.
+     * <p> Ingests cooked nodes changed into the unified node history table. </p>
+     * @param lastNodeLocationChangeTimestamp map of pairs of DAI node location and the timestamp when it changed
+     * @return number of nodes ingested
+     * @throws DataStoreException when node ingestion failed
      */
     @Override
-    public int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp) {
+    public int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp)
+            throws DataStoreException {
         int numCookedNodesIngested = 0;
         for (Map.Entry<String,String> entry : lastNodeLocationChangeTimestamp.entrySet()) {
             try {
@@ -414,14 +376,13 @@ public class VoltHWInvDbApi implements HWInvDbApi {
                 numCookedNodesIngested++;
             } catch (IOException e) {
                 logger.error("IOException:%s", e.getMessage());
-            } catch (DataStoreException e) {
-                logger.error("DataStoreException:%s", e.getMessage());
+                throw new DataStoreException(e.getMessage());
             }
         }
         return numCookedNodesIngested;
     }
 
-    public List<String> dumpCookedNodes() throws DataStoreException, IOException {
+    List<String> dumpCookedNodes() throws DataStoreException, IOException {
         List<String> dump = new ArrayList<>();
 
         try {
@@ -457,19 +418,6 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    public long numberCookedNodeInventoryHistoryRows()
-            throws IOException, DataStoreException {
-        try {
-            return client.callProcedure("NodeHistoryRowCount").
-                    getResults()[0].asScalarLong();
-        } catch (ProcCallException e) {
-            logger.error("ProcCallException during NodeHistoryRowCount");
-            throw new DataStoreException(e.getMessage());
-        } catch (NullPointerException e) {
-            logger.error("Null client");
-            throw new DataStoreException(e.getMessage());
-        }
-    }
 
     private final Logger logger;
     private final String[] servers;

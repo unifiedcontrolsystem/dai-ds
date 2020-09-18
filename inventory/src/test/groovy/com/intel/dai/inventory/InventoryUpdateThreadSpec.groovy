@@ -84,16 +84,16 @@ class DatabaseSynchronizerSpec extends Specification {
     }
 
     def "getLastHWInventoryHistoryUpdate"() {
-        ts.nearlineInventoryDatabaseClient_ = Mock(InventorySnapshot)
-        ts.nearlineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
+        ts.nearLineInventoryDatabaseClient_ = Mock(InventorySnapshot)
+        ts.nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
 
         expect:
         ts.getLastHWInventoryHistoryUpdate() == ""
     }
 
     def "ingestCanonicalHWInvHistoryJson"() {
-        ts.nearlineInventoryDatabaseClient_ = Mock(InventorySnapshot)
-        ts.nearlineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
+        ts.nearLineInventoryDatabaseClient_ = Mock(InventorySnapshot)
+        ts.nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
 
         expect:
         ts.ingestCanonicalHWInvHistoryJson(null) == []

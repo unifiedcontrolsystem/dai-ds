@@ -19,44 +19,32 @@ import java.util.Map;
  * location.
  */
 public interface HWInvDbApi {
-    void initialize();
-
     /**
-     * <p> Ingest the content of a json file containing the part of the HW inventory tree in
-     * canonical form.
-     * The choice of DB is made in the implementation. </p>
-     * @param canonicalHWInvPath path to the json containing the HW inventory in canonical form
-     * @return 0 if any location is ingested, otherwise 1
-     * @throws IOException i/o exception is possible because this includes a file operation
-     * @throws InterruptedException user may interrupt if this were to be run in a CLI
-     * @throws DataStoreException DAI Data Store Exception
+     * <p> Initialize a client connection to the online tier database. </p>
      */
-    int ingest(Path canonicalHWInvPath) throws IOException, InterruptedException, DataStoreException;
+    void initialize();
 
     /**
      * <p> Ingest part of the HW inventory tree canonical form encoded as the given json string. </p>
      * @param canonicalHWInvJson json string containing a canonical HW inventory
      * @return number of HW inventory locations ingested
+     * @throws DataStoreException when ingestion into online database failed
      */
-    int ingest(String canonicalHWInvJson) throws InterruptedException, IOException, DataStoreException;
-
-    void delete(String locationName) throws IOException, DataStoreException;
-    // HWInvTree allLocationsAt(String rootLocationName, String outputJsonFileName) throws IOException,
-    //         DataStoreException;
-    long numberOfRawInventoryRows() throws IOException, DataStoreException;
+    int ingest(String canonicalHWInvJson) throws DataStoreException;
 
     /**
-     * Return the latest HW inventory history update timestamp string in RFC-3339 format.
-     *
-     * @return string containing the latest update timestamp if it can be determined; otherwise null
-     * @throws IOException io exception
-     * @throws DataStoreException datastore exception
+     * <p> Ingest json string containing HW inventory history in the online database. </p>
+     * @param canonicalHWInvHistoryJson json file containing HW inventory history in canonical form
+     * @return list of inventory history events ingested
+     * @throws DataStoreException when ingestion into online database failed
      */
-    String lastHwInvHistoryUpdate() throws IOException, DataStoreException;
+    List<HWInvHistoryEvent> ingestHistory(String canonicalHWInvHistoryJson) throws DataStoreException;
 
-    void deleteAllRawHistoricalRecords() throws IOException, DataStoreException;
-
-    List<HWInvHistoryEvent> ingestHistory(String canonicalHWInvHistoryJson) throws IOException, DataStoreException;
-
-    int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp);
+    /**
+     * <p> Ingests cooked nodes changed into the unified node history table. </p>
+     * @param lastNodeLocationChangeTimestamp map of pairs of DAI node location and the timestamp when it changed
+     * @return number of nodes ingested
+     * @throws DataStoreException when node ingestion failed
+     */
+    int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp) throws DataStoreException;
 }
