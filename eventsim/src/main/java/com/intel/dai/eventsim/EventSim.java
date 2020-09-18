@@ -34,8 +34,7 @@ class EventSim {
      * @throws SimulatorException unable to create/initialise instances
      */
     void initialiseData() throws SimulatorException {
-        source_.initialise();
-        eventSimEngine_.initialize();
+        network_.initialise();
         foreignSimulatorEngine_.initialize();
     }
 
@@ -50,9 +49,8 @@ class EventSim {
         apiReq_ = new ApiReqData(log_);
 
         PropertyMap networkConfiguration = dataLoader_.getNetworkConfigurationData();
-        source_ = new NetworkObject(networkConfiguration, log_, apiReq_);
-        eventSimEngine_ = new SimulatorEngine(dataLoader_, source_, log_);
-        foreignSimulatorEngine_ = new ForeignSimulatorEngine(dataLoader_, source_, log_);
+        network_ = new NetworkObject(networkConfiguration, log_, apiReq_);
+        foreignSimulatorEngine_ = new ForeignSimulatorEngine(dataLoader_, network_, log_);
     }
 
     /**
@@ -66,9 +64,8 @@ class EventSim {
     protected BootParameters bootParamsApi_;
     protected HardwareInventory hwInvApi_;
     protected WlmApi wlmApi_;
-    protected NetworkObject source_;
+    protected NetworkObject network_;
     protected DataLoader dataLoader_;
-    protected SimulatorEngine eventSimEngine_;
     protected ForeignSimulatorEngine foreignSimulatorEngine_;
     protected ApiReqData apiReq_;
 

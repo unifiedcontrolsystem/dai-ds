@@ -29,15 +29,16 @@ import java.util.concurrent.TimeUnit;
  */
 class ForeignSimulatorEngine {
 
-    ForeignSimulatorEngine(DataLoader dataLoaderEngine, NetworkObject source, Logger log) {
+    ForeignSimulatorEngine(DataLoader dataLoaderEngine, NetworkObject networkSource, Logger log) {
         dataLoaderEngine_ = dataLoaderEngine;
-        source_ = source;
+        network_ = networkSource;
         log_ = log;
         jsonParser_ = ConfigIOFactory.getInstance("json");
         jsonPath_ = new JsonPath();
         eventTypeTemplate_ = new EventTypeTemplate(dataLoaderEngine_.getEventsTemplateConfigurationFile(), log_);
         filter_ = new ForeignFilter(jsonPath_, log_);
         foreignScenario_ = new ForeignScenario(log_);
+        echoEvent_ = new ForeignEventEcho();
     }
 
     void initialize() {
@@ -124,13 +125,12 @@ class ForeignSimulatorEngine {
         String streamID = parameters.get("connection");
 
         try {
-            ForeignEventEcho echoEvent = new ForeignEventEcho(streamID);
 
             // Read Event
-            echoEvent.processMessage(echoFile);
+            echoEvent_.processMessage(echoFile);
 
             // Publish Event
-            publishEchoEvent(echoEvent.props_, streamID);
+            publishEchoEvent(echoEvent_.props_, streamID);
 
         } catch(IllegalArgumentException e) {
             throw new SimulatorException( streamID + " is not a valid stream");
@@ -138,6 +138,14 @@ class ForeignSimulatorEngine {
             throw new SimulatorException(e.getMessage());
         }
 
+    }
+
+    /**
+     * This method is used to return prior randomization seed to replicate data.
+     * @return seed value
+     */
+    String getRandomizationSeed() {
+        return String.valueOf(randomiserSeed_);
     }
 
     private void publishEventsForScenario(Map<String, String> parameters, String scenario,
@@ -183,7 +191,7 @@ class ForeignSimulatorEngine {
                     String timestampJPath = eventInfo.getString(TIMESTAMP_PATH);
                     PropertyMap event = eventInfo.getMap(STREAM_MESSAGE);
                     publishedEvents_ += jsonPath_.setTime(timestampJPath, event.getAsMap(), zone);
-                    source_.send(streamId, jsonParser_.toString(event));
+                    network_.send(streamId, jsonParser_.toString(event));
                     if (!burstMode)
                         delayMicroSecond(timeDelayMus);
                 }
@@ -210,11 +218,11 @@ class ForeignSimulatorEngine {
             log_.info("Start Time : " + startTime.toString());
 
 
-            if ( !source_.isStreamIDValid(streamID ) ) {
+            if ( !network_.isStreamIDValid(streamID ) ) {
                 throw new SimulatorException(streamID + " is not a valid streamID.");
             }
 
-            source_.send(streamID, jsonParser_.toString(event));
+            network_.send(streamID, jsonParser_.toString(event));
 
             ZonedDateTime endTime = ZonedDateTime.now(ZoneId.systemDefault());
             log_.info("End Time : " + endTime.toString());
@@ -223,9 +231,6 @@ class ForeignSimulatorEngine {
             log_.debug(e.getMessage());
             throw new SimulatorException(e.getMessage());
         }
-
-
-
     }
 
     private PropertyDocument generateEvents(Map<String, String> parameters, String type) throws SimulatorException, PropertyNotExpectedType, IOException, ConfigIOParseException, ConversionException {
@@ -239,7 +244,7 @@ class ForeignSimulatorEngine {
         String eventName = defaults.getOrDefault("sub_component", type);
         String eventType = defaults.getOrDefault("type", eventTypeTemplate_.getDefaultEventType(eventName));
         long numOfEventsToGenerate = Long.parseLong(defaults.getOrDefault("count", DEFAULT_COUNT));
-        long seed = Long.parseLong(defaults.get("seed"));
+        randomiserSeed_ = Long.parseLong(defaults.get("seed"));
         String eventTypeTemplateFile = defaults.get("template");
 
         eventTypeTemplate_.validateEventNameAndType(eventName, eventType);
@@ -252,7 +257,7 @@ class ForeignSimulatorEngine {
         zone_ = defaults.get("timezone");
 
         PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilters_,
-                                templateFieldFilters_, numOfEventsToGenerate, seed).getAsArray();
+                                templateFieldFilters_, numOfEventsToGenerate, randomiserSeed_).getAsArray();
 
         String streamName = eventTypeTemplate_.getEventTypeStreamName();
         String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
@@ -466,8 +471,9 @@ class ForeignSimulatorEngine {
 
     private final DataLoader dataLoaderEngine_;
     private final ForeignFilter filter_;
+    private final ForeignEventEcho echoEvent_;
     private final JsonPath jsonPath_;
-    private final NetworkObject source_;
+    private final NetworkObject network_;
     private final Logger log_;
     private final ConfigIO jsonParser_;
     private final EventTypeTemplate eventTypeTemplate_;
@@ -477,6 +483,7 @@ class ForeignSimulatorEngine {
 
     private long publishedEvents_;
     private long timeDelay_;
+    private long randomiserSeed_;
 
     private String output_;
     private String zone_;
