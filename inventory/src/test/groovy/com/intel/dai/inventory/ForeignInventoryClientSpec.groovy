@@ -16,9 +16,6 @@ class ForeignInventoryClientSpec extends Specification {
         ts = new ForeignInventoryClient(Mock(Logger))
     }
 
-    def "lastHWInventoryHistoryUpdate"() {
-        expect: ts.lastHWInventoryHistoryUpdate(Mock(HWInvDbApi)) == null
-    }
     def "toCanonicalHWInvJson"() {
         expect: ts.toCanonicalHWInvJson(null) == null
     }
