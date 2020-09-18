@@ -8,7 +8,7 @@ services:
     container_name: dai-manager
     environment:
       - DAI_LOGGING_LEVEL=INFO
-      - HOSTNAME=am01-nmn
+      - HOSTNAME=am01-nmn.local
       - VOLTDB_SERVERS=am01-nmn.local
       - DAI_USE_BENCHMARKING=false
     volumes:
