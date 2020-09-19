@@ -24,8 +24,8 @@
         ]
       },
       "definitions": {
-        "rack2": {
-          "description": "HW1 Rack 2",
+        "rack1": {
+          "description": "HW1 Rack 1",
           "type": "Rack",
           "width": 0, "height": 0, "obscured": true,
           "content": [
@@ -143,31 +143,11 @@
               "name": "MN1",
               "definition": "service node",
               "x": 0, "y": 0
-            },
-            {
-              "name": "PDU3",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU1",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU2",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU0",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
             }
           ]
         },
-        "rack1": {
-          "description": "HW1 Rack 1",
+        "rack2": {
+          "description": "HW1 Rack 2",
           "type": "Rack",
           "width": 0, "height": 0, "obscured": true,
           "content": [
@@ -189,26 +169,6 @@
             {
               "name": "CH1",
               "definition": "compute node chassis",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU3",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU1",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU2",
-              "definition": "rack PDU",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "PDU0",
-              "definition": "rack PDU",
               "x": 0, "y": 0
             }
           ]
@@ -267,12 +227,6 @@
         "service node": {
           "description": "Service Node",
           "type": "ServiceNode",
-          "width": 0, "height": 0,
-          "content": []
-        },
-        "rack PDU": {
-          "description": "Rack PDU",
-          "type": "PDU",
           "width": 0, "height": 0,
           "content": []
         }

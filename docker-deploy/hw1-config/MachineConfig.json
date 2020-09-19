@@ -119,14 +119,14 @@
       "Queue": ""
     },
     {
-      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=sms01-nmn.local",
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=am01-nmn.local",
       "TypeOfAdapter": "ONLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataMover",
       "Queue": ""
     },
     {
-      "Parms": "RabbitMQHost=sms01-nmn.local",
+      "Parms": "RabbitMQHost=am01-nmn.local",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "DataReceiver",
@@ -197,7 +197,7 @@
       "BmcAddr": "unknown",
       "BootImageId": null,
       "HostName": "nid000001-nmn.local",
-      "MacAddr": "a4:bf:01:5e:94:96",
+      "MacAddr": "a4:bf:01:5e:b0:43",
       "Type": "ComputeNode",
       "BmcMacAddr": "unknown",
       "Lctn": "X3001-CH1-CN1"
@@ -248,7 +248,7 @@
       "MacAddr": "a4:bf:01:5e:a9:95",
       "Type": "ComputeNode",
       "BmcMacAddr": "unknown",
-      "Lctn": "X3001-CH1-CN5"
+      "Lctn": "X3002-CH1-CN1"
     },
     {
       "Aggregator": "X3001-AM1",
@@ -260,7 +260,7 @@
       "MacAddr": "a4:bf:01:5e:98:65",
       "Type": "ComputeNode",
       "BmcMacAddr": "unknown",
-      "Lctn": "X3001-CH1-CN6"
+      "Lctn": "X3002-CH1-CN2"
     },
     {
       "Aggregator": "X3001-AM1",
@@ -272,7 +272,7 @@
       "MacAddr": "a4:bf:01:5e:ae:54",
       "Type": "ComputeNode",
       "BmcMacAddr": "unknown",
-      "Lctn": "X3001-CH1-CN7"
+      "Lctn": "X3002-CH1-CN3"
     },
     {
       "Aggregator": "X3001-AM1",
@@ -284,7 +284,7 @@
       "MacAddr": "a4:bf:01:5e:af:94",
       "Type": "ComputeNode",
       "BmcMacAddr": "unknown",
-      "Lctn": "X3001-CH1-CN8"
+      "Lctn": "X3002-CH1-CN4"
     },
     {
       "Aggregator": "X3001-AM1",

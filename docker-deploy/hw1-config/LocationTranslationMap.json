@@ -11,6 +11,7 @@
 
 
     "compute nodes": null,
+    "x3001c0s34b4"     : "X3001-CH1-CN4",
     "x3001c0s34b4n0"   : "X3001-CH1-CN4",
     "x3001c0s34b4n0p0" : "X3001-CH1-CN4-CPU0",
     "x3001c0s34b4n0p1" : "X3001-CH1-CN4-CPU1",
@@ -27,6 +28,7 @@
     "x3001c0s34b4n0d10": "X3001-CH1-CN4-DIMM10",
     "x3001c0s34b4n0d11": "X3001-CH1-CN4-DIMM11",
 
+    "x3001c0s34b3"     : "X3001-CH1-CN3",
     "x3001c0s34b3n0"   : "X3001-CH1-CN3",
     "x3001c0s34b3n0p0" : "X3001-CH1-CN3-CPU0",
     "x3001c0s34b3n0p1" : "X3001-CH1-CN3-CPU1",
@@ -43,6 +45,7 @@
     "x3001c0s34b3n0d10": "X3001-CH1-CN4-DIMM10",
     "x3001c0s34b3n0d11": "X3001-CH1-CN4-DIMM11",
 
+    "x3001c0s34b2"     : "X3001-CH1-CN2",
     "x3001c0s34b2n0"   : "X3001-CH1-CN2",
     "x3001c0s34b2n0p0" : "X3001-CH1-CN2-CPU0",
     "x3001c0s34b2n0p1" : "X3001-CH1-CN2-CPU1",
@@ -59,6 +62,7 @@
     "x3001c0s34b2n0d10": "X3001-CH1-CN4-DIMM10",
     "x3001c0s34b2n0d11": "X3001-CH1-CN4-DIMM11",
 
+    "x3001c0s34b1"     : "X3001-CH1-CN1",
     "x3001c0s34b1n0"   : "X3001-CH1-CN1",
     "x3001c0s34b1n0p0" : "X3001-CH1-CN1-CPU0",
     "x3001c0s34b1n0p1" : "X3001-CH1-CN1-CPU1",
@@ -75,6 +79,7 @@
     "x3001c0s34b1n0d10": "X3001-CH1-CN4-DIMM10",
     "x3001c0s34b1n0d11": "X3001-CH1-CN4-DIMM11",
 
+    "x3002c0s34b4"     : "X3002-CH1-CN4",
     "x3002c0s34b4n0"   : "X3002-CH1-CN4",
     "x3002c0s34b4n0p0" : "X3002-CH1-CN4-CPU0",
     "x3002c0s34b4n0p1" : "X3002-CH1-CN4-CPU1",
@@ -91,6 +96,7 @@
     "x3002c0s34b4n0d10": "X3002-CH1-CN4-DIMM10",
     "x3002c0s34b4n0d11": "X3002-CH1-CN4-DIMM11",
 
+    "x3002c0s34b3"     : "X3002-CH1-CN3",
     "x3002c0s34b3n0"   : "X3002-CH1-CN3",
     "x3002c0s34b3n0p0" : "X3002-CH1-CN3-CPU0",
     "x3002c0s34b3n0p1" : "X3002-CH1-CN4-CPU1",
@@ -107,6 +113,7 @@
     "x3002c0s34b3n0d10": "X3002-CH1-CN4-DIMM10",
     "x3002c0s34b3n0d11": "X3002-CH1-CN4-DIMM11",
 
+    "x3002c0s34b2"     : "X3002-CH1-CN2",
     "x3002c0s34b2n0"   : "X3002-CH1-CN2",
     "x3002c0s34b2n0p0" : "X3002-CH1-CN2-CPU0",
     "x3002c0s34b2n0p1" : "X3002-CH1-CN4-CPU1",
@@ -123,6 +130,7 @@
     "x3002c0s34b2n0d10": "X3002-CH1-CN4-DIMM10",
     "x3002c0s34b2n0d11": "X3002-CH1-CN4-DIMM11",
 
+    "x3002c0s34b1"     : "X3002-CH1-CN1",
     "x3002c0s34b1n0"   : "X3002-CH1-CN1",
     "x3002c0s34b1n0p0" : "X3002-CH1-CN1-CPU0",
     "x3002c0s34b1n0p1" : "X3002-CH1-CN4-CPU1",
@@ -141,6 +149,7 @@
 
 
     "service nodes": null,
+    "x3001c0s30b0"     : "X3001-UAN1",
     "x3001c0s30b0n0"   : "X3001-UAN1",
     "x3001c0s30b0n0p0" : "X3001-UAN1-CPU0",
     "x3001c0s30b0n0p1" : "X3001-UAN1-CPU1",
@@ -157,6 +166,7 @@
     "x3001c0s30b0n0d10": "X3001-UAN1-DIMM10",
     "x3001c0s30b0n0d11": "X3001-UAN1-DIMM11",
 
+    "x3001c0s32b0"     : "X3001-UAN2",
     "x3001c0s32b0n0"   : "X3001-UAN2",
     "x3001c0s32b0n0p0" : "X3001-UAN2-CPU0",
     "x3001c0s32b0n0p1" : "X3001-UAN2-CPU1",
@@ -174,6 +184,7 @@
     "x3001c0s32b0n0d11": "X3001-UAN2-DIMM11",
 
 
+    "x3001c0s24b0"     : "X3001-AM1",
     "x3001c0s24b0n0"   : "X3001-AM1",
     "x3001c0s24b0n0p0" : "X3001-AM1-CPU0",
     "x3001c0s24b0n0p1" : "X3001-AM1-CPU1",
@@ -190,6 +201,7 @@
     "x3001c0s24b0n0d10": "X3001-AM1-DIMM10",
     "x3001c0s24b0n0d11": "X3001-AM1-DIMM11",
 
+    "x3001c0s26b0"     : "X3001-AM2",
     "x3001c0s26b0n0"   : "X3001-AM2",
     "x3001c0s26b0n0p0" : "X3001-AM2-CPU0",
     "x3001c0s26b0n0p1" : "X3001-AM2-CPU1",
@@ -206,6 +218,7 @@
     "x3001c0s26b0n0d10": "X3001-AM2-DIMM10",
     "x3001c0s26b0n0d11": "X3001-AM2-DIMM11",
 
+    "x3001c0s28b0"     : "X3001-AM3",
     "x3001c0s28b0n0"   : "X3001-AM3",
     "x3001c0s28b0n0p0" : "X3001-AM3-CPU0",
     "x3001c0s28b0n0p1" : "X3001-AM3-CPU1",
@@ -223,6 +236,7 @@
     "x3001c0s28b0n0d11": "X3001-AM3-DIMM11",
 
 
+    "x3001c0s19b0"     : "X3001-GWN1",
     "x3001c0s19b0n0"   : "X3001-GWN1",
     "x3001c0s19b0n0p0" : "X3001-GWN1-CPU0",
     "x3001c0s19b0n0p1" : "X3001-GWN1-CPU1",
@@ -239,6 +253,7 @@
     "x3001c0s19b0n0d10": "X3001-GWN1-DIMM10",
     "x3001c0s19b0n0d11": "X3001-GWN1-DIMM11",
 
+    "x3001c0s21b0"     : "X3001-GWN2",
     "x3001c0s21b0n0"   : "X3001-GWN2",
     "x3001c0s21b0n0p0" : "X3001-GWN2-CPU0",
     "x3001c0s21b0n0p1" : "X3001-GWN2-CPU1",
@@ -256,6 +271,7 @@
     "x3001c0s21b0n0d11": "X3001-GWN2-DIMM11",
 
 
+    "x3001c0s13b0"     : "X3001-WN1",
     "x3001c0s13b0n0"   : "X3001-WN1",
     "x3001c0s13b0n0p0" : "X3001-WN1-CPU0",
     "x3001c0s13b0n0p1" : "X3001-WN1-CPU1",
@@ -272,6 +288,7 @@
     "x3001c0s13b0n0d10": "X3001-WN1-DIMM10",
     "x3001c0s13b0n0d11": "X3001-WN1-DIMM11",
 
+    "x3001c0s15b0"     : "X3001-WN2",
     "x3001c0s15b0n0"   : "X3001-WN2",
     "x3001c0s15b0n0p0" : "X3001-WN2-CPU0",
     "x3001c0s15b0n0p1" : "X3001-WN2-CPU1",
@@ -288,6 +305,7 @@
     "x3001c0s15b0n0d10": "X3001-WN2-DIMM10",
     "x3001c0s15b0n0d11": "X3001-WN2-DIMM11",
 
+    "x3001c0s17b0"     : "X3001-WN3",
     "x3001c0s17b0n0"   : "X3001-WN3",
     "x3001c0s17b0n0p0" : "X3001-WN3-CPU0",
     "x3001c0s17b0n0p1" : "X3001-WN3-CPU1",
@@ -305,6 +323,7 @@
     "x3001c0s17b0n0d11": "X3001-WN3-DIMM11",
 
 
+    "x3001c0s7b0"      : "X3001-SN1",
     "x3001c0s7b0n0"    : "X3001-SN1",
     "x3001c0s7b0n0p0"  : "X3001-SN1-CPU0",
     "x3001c0s7b0n0p1"  : "X3001-SN1-CPU1",
@@ -321,6 +340,7 @@
     "x3001c0s7b0n0d10" : "X3001-SN1-DIMM10",
     "x3001c0s7b0n0d11" : "X3001-SN1-DIMM11",
 
+    "x3001c0s9b0"      : "X3001-SN2",
     "x3001c0s9b0n0"    : "X3001-SN2",
     "x3001c0s9b0n0p0"  : "X3001-SN2-CPU0",
     "x3001c0s9b0n0p1"  : "X3001-SN2-CPU1",
@@ -337,6 +357,7 @@
     "x3001c0s9b0n0d10" : "X3001-SN2-DIMM10",
     "x3001c0s9b0n0d11" : "X3001-SN2-DIMM11",
 
+    "x3001c0s11b0"     : "X3001-SN3",
     "x3001c0s11b0n0"   : "X3001-SN3",
     "x3001c0s11b0n0p0" : "X3001-SN3-CPU0",
     "x3001c0s11b0n0p1" : "X3001-SN3-CPU1",
@@ -354,6 +375,7 @@
     "x3001c0s11b0n0d11": "X3001-SN3-DIMM11",
 
 
+    "x3001c0s1b0"     : "X3001-MN1",
     "x3001c0s1b0n0"   : "X3001-MN1",
     "x3001c0s1b0n0p0" : "X3001-MN1-CPU0",
     "x3001c0s1b0n0p1" : "X3001-MN1-CPU1",
@@ -370,6 +392,7 @@
     "x3001c0s1b0n0d10": "X3001-MN1-DIMM10",
     "x3001c0s1b0n0d11": "X3001-MN1-DIMM11",
 
+    "x3001c0s3b0"     : "X3001-MN2",
     "x3001c0s3b0n0"   : "X3001-MN2",
     "x3001c0s3b0n0p0" : "X3001-MN2-CPU0",
     "x3001c0s3b0n0p1" : "X3001-MN2-CPU1",
@@ -386,6 +409,7 @@
     "x3001c0s3b0n0d10": "X3001-MN2-DIMM10",
     "x3001c0s3b0n0d11": "X3001-MN2-DIMM11",
 
+    "x3001c0s5b0"     : "X3001-MN3",
     "x3001c0s5b0n0"   : "X3001-MN3",
     "x3001c0s5b0n0p0" : "X3001-MN3-CPU0",
     "x3001c0s5b0n0p1" : "X3001-MN3-CPU1",

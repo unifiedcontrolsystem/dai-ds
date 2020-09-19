@@ -133,9 +133,9 @@ public class AdapterDaiMgr {
 
         public void run() {
             String sTempAdapterInfo = "Type=" + mAdapterInstanceInfo.mAdapterType + ", Instance=" + mAdapterInstanceInfo.mAdapterTypeInstanceNumber +
-                                      ", StartCmd=" + mAdapterInstanceInfo.mStartAdapterCmd + ", LogFile=" + mAdapterInstanceInfo.mLogFile +
-                                      ", Process=" + mAdapterInstanceInfo.mProcess + ", AdapterLctn=" + mAdapterInstanceInfo.mAdapterLctn +
-                                      ", PID=" + mAdapterInstanceInfo.mAdapterPid;
+                    ", StartCmd=" + mAdapterInstanceInfo.mStartAdapterCmd + ", LogFile=" + mAdapterInstanceInfo.mLogFile +
+                    ", Process=" + mAdapterInstanceInfo.mProcess + ", AdapterLctn=" + mAdapterInstanceInfo.mAdapterLctn +
+                    ", PID=" + mAdapterInstanceInfo.mAdapterPid;
             try {
                 //--------------------------------------------------------------
                 // Wait for this adapter instance to end.
@@ -166,7 +166,7 @@ public class AdapterDaiMgr {
                     if (lTermAdapterBaseWorkItemId > 0) {
                         adapter.teardownAdaptersBaseWorkItem("MonitorAdapterInstance - cleaning up base work item for deceased adapter instance", mAdapterInstanceInfo.mAdapterType, lTermAdapterBaseWorkItemId);
                         log_.warn("MonitorAdapterInstance - cleaned up the base work item for the deceased adapter instance - DeceasedAdapterType=%s, DeceasedAdapterWorkItemId=%d",
-                                  mAdapterInstanceInfo.mAdapterType, lTermAdapterBaseWorkItemId);
+                                mAdapterInstanceInfo.mAdapterType, lTermAdapterBaseWorkItemId);
                     }
                     else {
                         // the deceased adapter instance's base work item does not exist.
@@ -181,23 +181,23 @@ public class AdapterDaiMgr {
                 // Log the fact that we detected that the adapter instance ended (may not be a problem, but is still something that should be logged in case it is needed for debug purposes).
                 //--------------------------------------------------------------
                 adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDiscAnAdapterEnded")
-                                                ,sTempAdapterInfo                   // instance data
-                                                ,mAdapterInstanceInfo.mAdapterLctn  // Lctn
-                                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                ,adapter.adapterType()              // type of adapter that is requesting this
-                                                ,mTheDaiMgrsWorkItemId              // requesting work item
-                                                );
+                        ,sTempAdapterInfo                   // instance data
+                        ,mAdapterInstanceInfo.mAdapterLctn  // Lctn
+                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()              // type of adapter that is requesting this
+                        ,mTheDaiMgrsWorkItemId              // requesting work item
+                );
             }
             catch (Exception e) {
                 log_.error("MonitorAdapterInstance - %s - Exception occurred - %s!", sTempAdapterInfo, e);
                 log_.error("%s", Adapter.stackTraceToString(e));
                 adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasGenAdapterExceptionButContinue")
-                                                ,("Method=MonitorAdapterInstance, Exception=" + e)  // instance data
-                                                ,null                               // Lctn
-                                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                ,adapter.adapterType()              // type of adapter that is requesting this
-                                                ,mTheDaiMgrsWorkItemId              // requesting work item
-                                                );
+                        ,("Method=MonitorAdapterInstance, Exception=" + e)  // instance data
+                        ,null                               // Lctn
+                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()              // type of adapter that is requesting this
+                        ,mTheDaiMgrsWorkItemId              // requesting work item
+                );
             }
         }   // End run()
     }   // End class MonitorAdapterInstance
@@ -235,7 +235,7 @@ public class AdapterDaiMgr {
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
                 log_.error("requeueAnyZombieWorkItems - stored procedure WorkItemRequeueZombies failed - Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                            IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                        IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
                 throw new RuntimeException(response.getStatusString());
             }
             VoltTable vt = response.getResults()[0];
@@ -258,16 +258,16 @@ public class AdapterDaiMgr {
                     long   lWorkitemWorkingAdapterId    = vt.getLong("WorkitemWorkingAdapterId");
                     String sWorkitemWorkToBeDone        = vt.getString("WorkitemWorkToBeDone");
                     log_.warn("requeueAnyZombieWorkItems - requeued WorkitemId=%d, WorkitemWorkingAdapterType=%s, WorkitemWorkingAdapterId=%d, WorkitemWorkToBeDone=%s",
-                              lWorkitemId, sWorkitemWorkingAdapterType, lWorkitemWorkingAdapterId, sWorkitemWorkToBeDone);
+                            lWorkitemId, sWorkitemWorkingAdapterType, lWorkitemWorkingAdapterId, sWorkitemWorkToBeDone);
                     String sTempPertinentInfo = "AdapterName=" + adapter.adapterName() + ", WorkitemId=" + lWorkitemId + ", WorkitemWorkingAdapterType=" + sWorkitemWorkingAdapterType +
-                                                ", WorkitemWorkingAdapterId=" + lWorkitemWorkingAdapterId + ", WorkitemWorkToBeDone=" + sWorkitemWorkToBeDone;
+                            ", WorkitemWorkingAdapterId=" + lWorkitemWorkingAdapterId + ", WorkitemWorkToBeDone=" + sWorkitemWorkToBeDone;
                     adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasGenAdapterRequeuedWorkItem")
-                                                    ,sTempPertinentInfo                 // instance data
-                                                    ,null                               // lctn
-                                                    ,System.currentTimeMillis() * 1000L // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                    ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                                    ,lBaseWorkItemId                    // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                                    );
+                            ,sTempPertinentInfo                 // instance data
+                            ,null                               // lctn
+                            ,System.currentTimeMillis() * 1000L // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                            ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                            ,lBaseWorkItemId                    // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                    );
                 }   // loop through the requeued zombie work items - logging the appropriate information.
             }   // one or more work items were requeued.
 
@@ -295,8 +295,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("isDaiMgrRunningOnThisSn - Stored procedure AdapterInfoUsingTypeLctnPid FAILED - AdapterType=%s, AdapterLctn=%s, AdapterPid=%d, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       sAdapterType, sSnLctn, lAdapterPid,
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sAdapterType, sSnLctn, lAdapterPid,
+                    IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         // Ensure that there is at least one DaiMgr adapter instance.
@@ -330,8 +330,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("isThereFreeAdapterInstance - Stored procedure %s FAILED - AdapterType=%s, AdapterLctn=%s, AdapterPid=%d, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       sStoredProc, sWorkitemWorkingAdapterType, sSnLctn, lAdapterPid,
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sStoredProc, sWorkitemWorkingAdapterType, sSnLctn, lAdapterPid,
+                    IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         long lNumActiveAdapterInstances = response.getResults()[0].getRowCount();
@@ -342,8 +342,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("isThereFreeAdapterInstance - Stored procedure %s FAILED - WiWorkingAdapterType=%s, WiQueue=%s, WiState=%s, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       sStoredProc, sWorkitemWorkingAdapterType, sWorkitemQueue, sWorkItemState,
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sStoredProc, sWorkitemWorkingAdapterType, sWorkitemQueue, sWorkItemState,
+                    IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         long lNumActiveWorkItems = response.getResults()[0].getRowCount();
@@ -378,8 +378,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.error("startAdditionalAdapterInstance - stored procedure %s failed - Status=%s, StatusString=%s, SpecifiedAdapterType=%s, SpecifiedWorkItemQueue=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                       sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(),
-                       sWorkitemWorkingAdapterType, sWorkitemQueue, adapter.adapterType(), adapter.adapterId());
+                    sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(),
+                    sWorkitemWorkingAdapterType, sWorkitemQueue, adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         VoltTable vt = response.getResults()[0];
@@ -399,15 +399,15 @@ public class AdapterDaiMgr {
             // there is NOT a dai mgr adapter running on this service node.
             // Short-circuit there is no reason to bother starting an additional adapter instance as there is no DaiMgr running on this Service Node.
             log_.warn("startAdditionalAdapterInstance - did NOT start the requested adapter instance, as there is not yet a DaiMgr adapter running on the subject Service Node (%s) - SpecifiedAdapterType=%s, SpecifiedWorkItemQueue=%s",
-                      sMaiiSnLctn, sWorkitemWorkingAdapterType, sWorkitemQueue);
+                    sMaiiSnLctn, sWorkitemWorkingAdapterType, sWorkitemQueue);
             String sTempPertinentInfo = "SpecifiedAdapterType=" + sWorkitemWorkingAdapterType + ", SpecifiedWorkItemQueue=" + sWorkitemQueue;
             adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDidNotStartAddtlAdapterInstanceNoDaiMgr")
-                                            ,sTempPertinentInfo                 // event instance data
-                                            ,null                               // lctn
-                                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                            ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                            ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                            );
+                    ,sTempPertinentInfo                 // event instance data
+                    ,null                               // lctn
+                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                    ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                    ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+            );
             return -1L;
         }
 
@@ -419,15 +419,15 @@ public class AdapterDaiMgr {
             // there is already a free adapter instance that will handle this work.
             // Short-circuit there is no reason to bother starting an additional adapter instance as there already is a free adapter instance that can/will handle this type of work.
             log_.warn("startAdditionalAdapterInstance - did NOT start the requested adapter instance, as there is already a free/available adapter instance that will handle this work - SpecifiedAdapterType=%s, SpecifiedWorkItemQueue=%s",
-                      sMaiiSnLctn, sWorkitemWorkingAdapterType, sWorkitemQueue);
+                    sMaiiSnLctn, sWorkitemWorkingAdapterType, sWorkitemQueue);
             String sTempPertinentInfo = "SpecifiedAdapterType=" + sWorkitemWorkingAdapterType + ", SpecifiedWorkItemQueue=" + sWorkitemQueue;
             adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDidNotStartAddtlAdapterInstanceAlreadyFreeInstance")
-                                            ,sTempPertinentInfo                 // event instance data
-                                            ,null                               // lctn
-                                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                            ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                            ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                            );
+                    ,sTempPertinentInfo                 // event instance data
+                    ,null                               // lctn
+                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                    ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                    ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+            );
             return -2L;
         }
 
@@ -440,7 +440,7 @@ public class AdapterDaiMgr {
             // the new adapter instance should be started on the same service node we are on now.
             // Start up this requested adapter instance.
             startupAdapterInstanceOnThisSn(adapter.snLctn(), adapter.mapServNodeLctnToHostName().get(adapter.snLctn()), sMaiiAdapterType,
-                                           sMaiiStartInvocation, sMaiiLogFile, workQueue.workItemId());
+                    sMaiiStartInvocation, sMaiiLogFile, workQueue.workItemId());
         }
         else {
             // the new adapter instance should be started on a different service node then we are on now.
@@ -455,9 +455,9 @@ public class AdapterDaiMgr {
             String sTempParms = sMaiiAdapterType + "|" + sMaiiStartInvocation + "|" + sMaiiLogFile;
             // Actually queue the work item.
             long lQueuedWorkItemId = workQueue.queueWorkItem(sTypeOfAdapterToQueueWorkTo, sTempQueueForWi, sTempWorkToBeDone, sTempParms, false,  // false indicates that we do NOT want to know when this work item finishes
-                                                             adapter.adapterType(), workQueue.workItemId());
+                    adapter.adapterType(), workQueue.workItemId());
             log_.info("startAdditionalAdapterInstance - successfully queued %s work item to start up an additional adapter instance - WorkToBeDone=%s, TypeOfAdapterToDoWork=%s, Aggregator=%s, Parms='%s', NewWorkItemId=%d",
-                      sTempWorkToBeDone, sTempWorkToBeDone, sTypeOfAdapterToQueueWorkTo, sTempQueueForWi, sTempParms, lQueuedWorkItemId);
+                    sTempWorkToBeDone, sTempWorkToBeDone, sTypeOfAdapterToQueueWorkTo, sTempQueueForWi, sTempParms, lQueuedWorkItemId);
         }
 
         return 0L;
@@ -479,7 +479,7 @@ public class AdapterDaiMgr {
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
                 log_.error("performAdapterInstanceLoadBalancing - stored procedure %s failed - Status=%s, StatusString=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                           sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                        sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
                 throw new RuntimeException(response.getStatusString());
             }
             VoltTable vt = response.getResults()[0];
@@ -508,7 +508,7 @@ public class AdapterDaiMgr {
                     //long   lWorkItemDbUpdatedTimestamp  = vt.getLong("DbUpdatedTimestamp");
                     // Log info about the backlogged work item.
                     log_.info("performAdapterInstanceLoadBalancing - backlogged workitem - WorkingAdapterType=%s, WorkitemId=%d, Queue='%s', State=%s, WorkToBeDone=%s",
-                              sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemQueue, sWorkitemState, sWorkitemWorkToBeDone);
+                            sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemQueue, sWorkitemState, sWorkitemWorkToBeDone);
                     // Check & see if this is a "new type of adapter type" or if it is the same as the previous backlogged work item
                     // (the stored procedure sorts the work items so all work items of the same adapter type will appear next to each other).
                     if ((!Objects.equals(sPrevWiAdapterType, sWorkitemWorkingAdapterType)) || (!Objects.equals(sPrevQueue, sWorkitemQueue))) {  // safe comparison for strings when either or both may be null
@@ -519,16 +519,16 @@ public class AdapterDaiMgr {
                             // started an additional adapter instance.
                             // Log the fact that we created an additional adapter instance of this type.
                             log_.warn("performAdapterInstanceLoadBalancing - backlogged workitem - started an additional adapter of this type - AdapterType=%s, Queue='%s'!",
-                                      sWorkitemWorkingAdapterType, sWorkitemQueue);
+                                    sWorkitemWorkingAdapterType, sWorkitemQueue);
                             // Cut a ras event to capture the fact that we just created an additional instance.
                             String sTempPertinentInfo = "AdapterName=" + adapter.adapterName() + ", AdapterType=" + sWorkitemWorkingAdapterType + ", Queue=" + sWorkitemQueue;
                             adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrStartedAddtlAdapterInstance")
-                                                            ,sTempPertinentInfo
-                                                            ,null                               // lctn
-                                                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                            ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                                            ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                                            );
+                                    ,sTempPertinentInfo
+                                    ,null                               // lctn
+                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                    ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                                    ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                            );
                             ++lNumAddtlAdaptersStarted;  // bump the number of additional adapter instances that we started.
                         }
                         // Save away the new values for previous work item's working adapter type and queue.
@@ -538,7 +538,7 @@ public class AdapterDaiMgr {
                     else {
                         // this is a "repeat" adapter type - no need to start another adapter instance.
                         log_.info("performAdapterInstanceLoadBalancing - backlogged workitem - did not start an additional adapter of this type as one was already started - AdapterType=%s, Queue='%s'",
-                                  sWorkitemWorkingAdapterType, sWorkitemQueue);
+                                sWorkitemWorkingAdapterType, sWorkitemQueue);
                     }   // this is a "repeat" adapter type - no need to start another adapter instance.
                 }   // loop through the backlog of work items.
                 log_.info("performAdapterInstanceLoadBalancing - load balancing check finished - started %d additional adapter instances", lNumAddtlAdaptersStarted);
@@ -577,9 +577,9 @@ public class AdapterDaiMgr {
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
                 log_.error("ensureChildWrkItemsMakingProgress - stored procedure %s failed - Status=%s, StatusString=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                           sTempStoredProcedure,
-                           sWrkAdptrType, sQueue, sWorkToBeDone,
-                           IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                        sTempStoredProcedure,
+                        sWrkAdptrType, sQueue, sWorkToBeDone,
+                        IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
                 throw new RuntimeException(response.getStatusString());
             }
             VoltTable vtDataMoverWi = response.getResults()[0];
@@ -604,9 +604,9 @@ public class AdapterDaiMgr {
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
                 log_.error("ensureChildWrkItemsMakingProgress - stored procedure %s failed - WorkingAdapterType='%s', Queue='%s', WorkToBeDone='%s' - Status=%s, StatusString=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                           sTempStoredProcedure,
-                           sWrkAdptrType, sQueue, sWorkToBeDone,
-                           IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                        sTempStoredProcedure,
+                        sWrkAdptrType, sQueue, sWorkToBeDone,
+                        IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
                 throw new RuntimeException(response.getStatusString());
             }
             VoltTable vtDataRcvrWi = response.getResults()[0];
@@ -642,12 +642,12 @@ public class AdapterDaiMgr {
                     // Cut a ras event to capture the fact that DataReceiver appears to be stuck.
                     String sTempPertinentInfo = "DetectingAdapterName=" + adapter.adapterName() + ", DataMoverWrkResults='" + sDataMoverWrkResults + "', DataReceiverWrkResults='" + sDataRcvrWrkResults + "'";
                     adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntDataReceiverAppearsStuck")
-                                                    ,sTempPertinentInfo
-                                                    ,sSnLctn                            // lctn of this machine this executing adapter is running on
-                                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                    ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                                    ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                                    );
+                            ,sTempPertinentInfo
+                            ,sSnLctn                            // lctn of this machine this executing adapter is running on
+                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                            ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                            ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                    );
                     // Adjust the interval that will be used for determining when to check this item again - increase the interval so we don't flood admins with similar notifications.
                     mProgChkIntrvlDataReceiver = Math.min((60 * 60 * 1000L), (mProgChkIntrvlDataReceiver * 2));
                 }
@@ -681,7 +681,7 @@ public class AdapterDaiMgr {
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
                 log_.error("ensureDaiMgrsStillActive - stored procedure %s failed - Status=%s, StatusString=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                           sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                        sTempStoredProcedure, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
                 throw new RuntimeException(response.getStatusString());
             }
             VoltTable vt = response.getResults()[0];
@@ -698,7 +698,7 @@ public class AdapterDaiMgr {
                 Date   dTemp = new Date(lActiveTimeChkMillisecs);
                 String sTempActiveTimeChkSqlTimestamp = sqlDateFormat.format(dTemp);
                 log_.info("ensureDaiMgrsStillActive - checking that %d DaiMgr work items are active - they need to have a ProofOfLife >= %d milliseconds / '%s'",
-                          vt.getRowCount(), lActiveTimeChkMillisecs, sTempActiveTimeChkSqlTimestamp);
+                        vt.getRowCount(), lActiveTimeChkMillisecs, sTempActiveTimeChkSqlTimestamp);
                 // Loop through the work items.
                 for (int iWorkItemCntr = 0; iWorkItemCntr < vt.getRowCount(); ++iWorkItemCntr) {
                     vt.advanceRow();
@@ -712,7 +712,7 @@ public class AdapterDaiMgr {
                     ///long   lWorkItemDbUpdatedTimestamp  = vt.getLong("DbUpdatedTimestamp");
                     // Log info about this DaiMgr work item.
                     log_.info("ensureDaiMgrsStillActive - DaiMgr workitem - WorkingAdapterType=%s, WorkitemId=%d, Queue='%s', State=%s, WorkToBeDone=%s, WorkingResults='%s'",
-                              sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemQueue, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                            sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemQueue, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
                     // Check & see if this DaiMgr work item is "inactive", i.e., has not updated its ProofOfLife recently.
                     // - Example of a DaiMgr WorkingResult's field "ProofOfLife (Millisecs=1561731561282) (Timestamp=2019-06-28 14:19:21.282)"
                     if (sWorkingResults != null) {
@@ -731,12 +731,12 @@ public class AdapterDaiMgr {
                                 if (mInactiveDaiMgrWorkitemMap.get(sMapKey) != null) {
                                     // this is an already known inactive work item (it is already in the map).
                                     log_.warn("ensureDaiMgrsStillActive - detected an already known inactive DaiMgr work item - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s, WorkingResults=%s",
-                                              sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                                            sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
                                 }
                                 else {
                                     // this is a "new" inactive work item (is not yet in the map).
                                     log_.error("ensureDaiMgrsStillActive - detected a new inactive DaiMgr work item - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s, WorkingResults=%s!",
-                                               sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                                            sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
 
                                     //------------------------------------------
                                     // Check & see if the SSN is already missing (it has been powered off), if it is already missing there is no need to use the RAS event that marks the SSN in error!
@@ -748,7 +748,7 @@ public class AdapterDaiMgr {
                                     if (responseGetSsnInfo.getStatus() != ClientResponse.SUCCESS) {
                                         // stored procedure failed.
                                         log_.error("ensureDaiMgrsStillActive - stored procedure %s failed - Status=%s, StatusString=%s, ThisAdapterType=%s, ThisAdapterId=%d!",
-                                                   sTempStoredProcedureGetSsnInfo, IAdapter.statusByteAsString(responseGetSsnInfo.getStatus()), responseGetSsnInfo.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                                                sTempStoredProcedureGetSsnInfo, IAdapter.statusByteAsString(responseGetSsnInfo.getStatus()), responseGetSsnInfo.getStatusString(), adapter.adapterType(), adapter.adapterId());
                                         throw new RuntimeException(responseGetSsnInfo.getStatusString());
                                     }
                                     VoltTable vtGetSsnInfo = responseGetSsnInfo.getResults()[0];
@@ -758,27 +758,27 @@ public class AdapterDaiMgr {
                                     }
                                     // Cut a ras event to capture this occurrence
                                     String sTempPertinentInfo = "Queue=" + sWorkitemQueue + ", AdapterType=" + sWorkitemWorkingAdapterType + ", WorkItemId=" + lWorkitemId +
-                                                                ", State=" + sWorkitemState + ", WorkToBeDone=" + sWorkitemWorkToBeDone + ", WorkingResults=" + sWorkingResults;
+                                            ", State=" + sWorkitemState + ", WorkToBeDone=" + sWorkitemWorkToBeDone + ", WorkingResults=" + sWorkingResults;
                                     if (sSsnState.equals("A")) {
                                         // the SSN is currently considered active, so cut the flavor of ras event that also marks the SSN in error state
                                         // (we consider the SSN to be in error state because the SSN was active but now no longer has a DaiMgr adapter instance running).
                                         adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDetectedInactiveDaiManagerAndPutSsnInError")
-                                                                        ,sTempPertinentInfo
-                                                                        ,sWorkitemQueue                     // lctn - for DaiMgr work items it is specified in the queue field
-                                                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                                        ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                                                        ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                                                        );
+                                                ,sTempPertinentInfo
+                                                ,sWorkitemQueue                     // lctn - for DaiMgr work items it is specified in the queue field
+                                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                                ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                                                ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                                        );
                                     }
                                     else {
                                         // the SSN is not in an active state, so NO need to cut the flavor of ras event that also marks the SSN in error (just use the ras event that logs when and why this event occurred).
                                         adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDetectedInactiveDaiManager")
-                                                                        ,sTempPertinentInfo
-                                                                        ,sWorkitemQueue                     // lctn - for DaiMgr work items it is specified in the queue field
-                                                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                                        ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
-                                                                        ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                                                        );
+                                                ,sTempPertinentInfo
+                                                ,sWorkitemQueue                     // lctn - for DaiMgr work items it is specified in the queue field
+                                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                                ,adapter.adapterType()              // type of the adapter that is requesting/issuing this invocation
+                                                ,workQueue.workItemId()             // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                                        );
                                     }
 
                                     // Add this work item to the map of known inactive DaiMgr work items.
@@ -794,8 +794,8 @@ public class AdapterDaiMgr {
                                     if (responseDeceasedAdapters.getStatus() != ClientResponse.SUCCESS) {
                                         // stored procedure failed.
                                         log_.fatal("ensureDaiMgrsStillActive - Stored procedure AdapterInfoUsingTypeLctnPid FAILED - AdapterType=%s, AdapterLctn=%s, AdapterPid=%d, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                                                   sAdapterType, sWorkitemQueue, lAdapterPid, IAdapter.statusByteAsString(responseDeceasedAdapters.getStatus()),
-                                                   responseDeceasedAdapters.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                                                sAdapterType, sWorkitemQueue, lAdapterPid, IAdapter.statusByteAsString(responseDeceasedAdapters.getStatus()),
+                                                responseDeceasedAdapters.getStatusString(), adapter.adapterType(), adapter.adapterId());
                                         throw new RuntimeException(responseDeceasedAdapters.getStatusString());
                                     }
                                     // Loop through the list cleaning up these deceased adapter instances.
@@ -808,19 +808,19 @@ public class AdapterDaiMgr {
                                         // (this is needed so that it is possible to identify zombie work items and requeue them).
                                         adapter.teardownAdapter(sDeceasedAdapterType, lDeceasedAdapterId, adapter.adapterType() , workQueue.workItemId());
                                         log_.warn("ensureDaiMgrsStillActive - removed the entry from the Adapter table for the deceased adapter instance - AdapterType=%s, AdapterId=%d",
-                                                  sDeceasedAdapterType, lDeceasedAdapterId);
+                                                sDeceasedAdapterType, lDeceasedAdapterId);
                                         // Mark the deceased adapter's base work item as Finished (and implicitly also as Done as Base Work Items are NotifyWhenFinished = F)
                                         // (this will be done synchronously).
                                         long lDeceasedAdapterBaseWorkItemId = adapter.getAdapterInstancesBaseWorkItemId(sDeceasedAdapterType, lDeceasedAdapterId);
                                         if (lDeceasedAdapterBaseWorkItemId > 0) {
                                             adapter.teardownAdaptersBaseWorkItem("ensureDaiMgrsStillActive - cleaning up base work item for deceased adapter instance", sDeceasedAdapterType, lDeceasedAdapterBaseWorkItemId);
                                             log_.warn("ensureDaiMgrsStillActive - cleaned up the base work item for the deceased adapter instance - DeceasedAdapterType=%s, DeceasedAdapterBaseWorkItemId=%d",
-                                                      sDeceasedAdapterType, lDeceasedAdapterBaseWorkItemId);
+                                                    sDeceasedAdapterType, lDeceasedAdapterBaseWorkItemId);
                                         }
                                         else {
                                             // the deceased adapter instance's base work item does not exist.
                                             log_.info("ensureDaiMgrsStillActive - did not 'finish' the deceased adapters base work item as it had already been removed - AdapterType=%s, AdapterId=%d",
-                                                      sDeceasedAdapterType, lDeceasedAdapterId);
+                                                    sDeceasedAdapterType, lDeceasedAdapterId);
                                         }
                                     }
                                 }
@@ -830,7 +830,7 @@ public class AdapterDaiMgr {
                             else {
                                 // this work item is "active".
                                 log_.debug("ensureDaiMgrsStillActive - detected an active DaiMgr work item - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s, WorkingResults=%s",
-                                           sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                                        sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
                                 // Remove this work item from the map of known inactive DaiMgr work items (for the case when it was inactive but is now once again active).
                                 mInactiveDaiMgrWorkitemMap.remove(sMapKey);
                             }   // this work item is "active".
@@ -838,13 +838,13 @@ public class AdapterDaiMgr {
                         else {
                             // working results does not have the expected format.
                             log_.warn("ensureDaiMgrsStillActive - work item's working results does not start with 'ProofOfLife' - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s, WorkingResults=%s!",
-                                      sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
+                                    sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone, sWorkingResults);
                         }   // working results does not have the expected format.
                     }   // working results have been filled in.
                     else {
                         // working results have not yet been filled in.
                         log_.warn("ensureDaiMgrsStillActive - work item's working results have not yet been filled in - Queue='%s', AdapterType=%s, WorkItemId=%d, State=%s, WorkToBeDone=%s!",
-                                  sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone);
+                                sWorkitemQueue, sWorkitemWorkingAdapterType, lWorkitemId, sWorkitemState, sWorkitemWorkToBeDone);
                     }   // working results have not yet been filled in.
 
                 }   // loop through the work items.
@@ -896,8 +896,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("determineInitialNodeStates - stored procedure %s FAILED - Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       sTempStoredProcedureForGettingListOfChildren, IAdapter.statusByteAsString(response.getStatus()),
-                       response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sTempStoredProcedureForGettingListOfChildren, IAdapter.statusByteAsString(response.getStatus()),
+                    response.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         VoltTable vt = response.getResults()[0];
@@ -946,39 +946,39 @@ public class AdapterDaiMgr {
                 //       This is a special case (not the general case), so be careful making any changes in this flow!!
                 String sPertinentInfo = "Lctn=" + oNodePingInfo.mNodeLctn;
                 adapter.client().callProcedure(adapter.createHouseKeepingCallbackLongRtrnValue(adapter.adapterType(), adapter.adapterName(), sTempStoredProcedureForSavingStateInfo, sPertinentInfo, workQueue.baseWorkItemId()) // asynchronously invoke the procedure
-                                              ,sTempStoredProcedureForSavingStateInfo   // stored procedure name
-                                              ,oNodePingInfo.mNodeLctn                  // node's location string
-                                              ,sTempNewState                            // node's new state, M = Missing
-                                              ,System.currentTimeMillis() * 1000L       // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                              ,adapter.adapterType()                    // type of the adapter that is requesting/issuing this stored procedure
-                                              ,workQueue.baseWorkItemId());             // work item id for the work item that is being processed/executing, that is requesting/issuing this stored procedure
+                        ,sTempStoredProcedureForSavingStateInfo   // stored procedure name
+                        ,oNodePingInfo.mNodeLctn                  // node's location string
+                        ,sTempNewState                            // node's new state, M = Missing
+                        ,System.currentTimeMillis() * 1000L       // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()                    // type of the adapter that is requesting/issuing this stored procedure
+                        ,workQueue.baseWorkItemId());             // work item id for the work item that is being processed/executing, that is requesting/issuing this stored procedure
                 // NOTE: we PURPOSELY decided to NOT tell the WLM that it can start to use this node here in this situation!!!
                 //       The reason is that the WLM may already have taken the node offline for another reason, so if we
                 //       change the internal state of the WLM here, it could cause confusion and disruption!
                 // Cut a ras event indicating that we reset the initial state to active - since the db was reloaded, there isn't any job information available...
                 adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasProvFoundNodeAlreadyActive")
-                                                ,("AdapterName=" + adapter.adapterName() + ", Lctn=" + oNodePingInfo.mNodeLctn + ", IpAddr=" + oNodePingInfo.mNodeIpAddr + ", Newstate=" + sTempNewState)  // Instance data
-                                                ,oNodePingInfo.mNodeLctn                // lctn
-                                                ,System.currentTimeMillis() * 1000L     // time this occurred, in micro-seconds since epoch
-                                                ,adapter.adapterType()                  // type of the adapter that is requesting/issuing this stored procedure
-                                                ,workQueue.baseWorkItemId()             // requesting work item id
-                                                );
+                        ,("AdapterName=" + adapter.adapterName() + ", Lctn=" + oNodePingInfo.mNodeLctn + ", IpAddr=" + oNodePingInfo.mNodeIpAddr + ", Newstate=" + sTempNewState)  // Instance data
+                        ,oNodePingInfo.mNodeLctn                // lctn
+                        ,System.currentTimeMillis() * 1000L     // time this occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()                  // type of the adapter that is requesting/issuing this stored procedure
+                        ,workQueue.baseWorkItemId()             // requesting work item id
+                );
                 log_.info("determineInitialNodeStates - node is already active, called stored procedure %s - Lctn=%s, IpAddr=%s, NewState=%s",
-                          sTempStoredProcedureForSavingStateInfo, oNodePingInfo.mNodeLctn, oNodePingInfo.mNodeIpAddr, sTempNewState);
+                        sTempStoredProcedureForSavingStateInfo, oNodePingInfo.mNodeLctn, oNodePingInfo.mNodeIpAddr, sTempNewState);
             }
             else {
                 // ping did not get a response
                 // Set the node's state to Missing state - simply recording state change info, no need to wait for ack that this work has completed
                 String sTempNewState = "M";  // state of M is Missing/PoweredOff/Unusable.
                 adapter.client().callProcedure(adapter.createHouseKeepingCallbackNoRtrnValue(adapter.adapterType(), adapter.adapterName(), sTempStoredProcedureForSavingStateInfo, oNodePingInfo.mNodeLctn, workQueue.baseWorkItemId()) // asynchronously invoke the procedure
-                                              ,sTempStoredProcedureForSavingStateInfo   // stored procedure name
-                                              ,oNodePingInfo.mNodeLctn                  // node's location string
-                                              ,sTempNewState                            // node's new state, M = Missing
-                                              ,System.currentTimeMillis() * 1000L       // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                              ,adapter.adapterType()                    // type of the adapter that is requesting/issuing this stored procedure
-                                              ,workQueue.baseWorkItemId());             // work item id for the work item that is being processed/executing, that is requesting/issuing this stored procedure
+                        ,sTempStoredProcedureForSavingStateInfo   // stored procedure name
+                        ,oNodePingInfo.mNodeLctn                  // node's location string
+                        ,sTempNewState                            // node's new state, M = Missing
+                        ,System.currentTimeMillis() * 1000L       // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()                    // type of the adapter that is requesting/issuing this stored procedure
+                        ,workQueue.baseWorkItemId());             // work item id for the work item that is being processed/executing, that is requesting/issuing this stored procedure
                 log_.info("determineInitialNodeStates - node is not active, called stored procedure %s - Lctn=%s, IpAddr=%s, NewState=%s, ExitCode=%d",
-                          sTempStoredProcedureForSavingStateInfo, oNodePingInfo.mNodeLctn, oNodePingInfo.mNodeIpAddr, sTempNewState, iTempExitCode);
+                        sTempStoredProcedureForSavingStateInfo, oNodePingInfo.mNodeLctn, oNodePingInfo.mNodeIpAddr, sTempNewState, iTempExitCode);
             }
         }   // loop through each of the nodes in the result table.
 
@@ -1004,8 +1004,8 @@ public class AdapterDaiMgr {
         if (responseAdaptersToCheck.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("cleanupStaleAdapterInstancesOnThisServiceNode - Stored procedure AdapterInfoUsingSnLctn FAILED - AdapterLctn=%s, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       sSnLctn, IAdapter.statusByteAsString(responseAdaptersToCheck.getStatus()),
-                       responseAdaptersToCheck.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sSnLctn, IAdapter.statusByteAsString(responseAdaptersToCheck.getStatus()),
+                    responseAdaptersToCheck.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(responseAdaptersToCheck.getStatusString());
         }
 
@@ -1025,19 +1025,19 @@ public class AdapterDaiMgr {
                 // (this is needed so that it is possible to identify zombie work items and requeue them).
                 adapter.teardownAdapter(sTempAdapterType, lTempAdapterId, adapter.adapterType(), workQueue.workItemId());
                 log_.warn("cleanupStaleAdapterInstancesOnThisServiceNode - removed the entry from the Adapter table for the stale adapter instance - StaleAdapterType=%s, StaleAdapterId=%d",
-                          sTempAdapterType, lTempAdapterId);
+                        sTempAdapterType, lTempAdapterId);
                 // Mark the stale adapter's base work item as Finished (and implicitly also as Done as Base Work Items are NotifyWhenFinished = F)
                 // (this will be done synchronously).
                 long lTempAdapterBaseWorkItemId = adapter.getAdapterInstancesBaseWorkItemId(sTempAdapterType, lTempAdapterId);
                 if (lTempAdapterBaseWorkItemId > 0) {
                     adapter.teardownAdaptersBaseWorkItem("cleanupStaleAdapterInstancesOnThisServiceNode - cleaning up base work item for stale adapter instance", sTempAdapterType, lTempAdapterBaseWorkItemId);
                     log_.warn("cleanupStaleAdapterInstancesOnThisServiceNode - cleaned up the base work item for the stale adapter instance - StaleAdapterType=%s, StaleAdapterId=%d, StaleAdapterBaseWorkItemId=%d",
-                              sTempAdapterType, lTempAdapterId, lTempAdapterBaseWorkItemId);
+                            sTempAdapterType, lTempAdapterId, lTempAdapterBaseWorkItemId);
                 }
                 else {
                     // the stale adapter instance's base work item does not exist.
                     log_.info("cleanupStaleAdapterInstancesOnThisServiceNode - did not 'finish' the stale adapters base work item as it had already been removed - StaleAdapterType=%s, StaleAdapterId=%d",
-                              sTempAdapterType, lTempAdapterId);
+                            sTempAdapterType, lTempAdapterId);
                 }
             }   // the adapter instance being checked is NOT my adapter instance - so go ahead and clean it up!
         }   // loop through the list and clean up any adapter instances that are still marked as active.
@@ -1060,7 +1060,7 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("startupAdapterInstancesForThisSn - Stored procedure MachineAdapterInstancesForServiceNode FAILED - SnLctn=%s, SnHostname=%s, Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                sSnLctn, sSnHostname, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
+                    sSnLctn, sSnHostname, IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
             throw new RuntimeException(response.getStatusString());
         }
         // Loop through each of the pertinent MachineAdapterInstance entries and start the appropriate number of each type of adapter here on this service node.
@@ -1171,8 +1171,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("ensureNotZombie - Stored procedure %s FAILED - ThisAdapterType=%s, ThisAdapterId=%d, AdapterLctn=%s, AdapterPid=%d, Status=%s, StatusString=%s!",
-                       sStoredProc, adapter.adapterType(), adapter.adapterId(), mSnLctn, IAdapter.getProcessPid(),
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString());
+                    sStoredProc, adapter.adapterType(), adapter.adapterId(), mSnLctn, IAdapter.getProcessPid(),
+                    IAdapter.statusByteAsString(response.getStatus()), response.getStatusString());
             throw new RuntimeException(response.getStatusString());
         }
         VoltTable vt = response.getResults()[0];
@@ -1180,7 +1180,7 @@ public class AdapterDaiMgr {
             // this adapter no longer "exists" - it is a zombie.
             bZombie = true;
             log_.error("this adapter instance is a zombie, there is no row in the Adapter table for this adapter instance -  ThisAdapterType=%s, ThisAdapterId=%d!",
-                       adapter.adapterType(), adapter.adapterId());
+                    adapter.adapterType(), adapter.adapterId());
         }
         else {
             // this adapter does exist.
@@ -1189,7 +1189,7 @@ public class AdapterDaiMgr {
                 // this adapter is "no longer active" - it is a zombie.
                 bZombie = true;
                 log_.error("this adapter instance is a zombie, this adapter has a non-active state (%s) -  ThisAdapterType=%s, ThisAdapterId=%d!",
-                           vt.getString("State"), adapter.adapterType(), adapter.adapterId());
+                        vt.getString("State"), adapter.adapterType(), adapter.adapterId());
             }
         }
 
@@ -1201,8 +1201,8 @@ public class AdapterDaiMgr {
         if (response.getStatus() != ClientResponse.SUCCESS) {
             // stored procedure failed.
             log_.fatal("ensureNotZombie - Stored procedure %s FAILED - WorkItemId=%d, ThisAdapterType=%s, ThisAdapterId=%d, AdapterLctn=%s, AdapterPid=%d, Status=%s, StatusString=%s!",
-                       sStoredProc, workQueue.workItemId(), adapter.adapterType(), adapter.adapterId(), mSnLctn, IAdapter.getProcessPid(),
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString());
+                    sStoredProc, workQueue.workItemId(), adapter.adapterType(), adapter.adapterId(), mSnLctn, IAdapter.getProcessPid(),
+                    IAdapter.statusByteAsString(response.getStatus()), response.getStatusString());
             throw new RuntimeException(response.getStatusString());
         }
         vt = response.getResults()[0];
@@ -1210,7 +1210,7 @@ public class AdapterDaiMgr {
             // this work item no longer "exists" - so this adapter instance is a zombie.
             bZombie = true;
             log_.error("this adapter instance is a zombie, there is no row in the WorkItem table for this adapter instances work item (%d) - ThisAdapterType=%s, ThisAdapterId=%d!",
-                       workQueue.workItemId(), adapter.adapterType(), adapter.adapterId());
+                    workQueue.workItemId(), adapter.adapterType(), adapter.adapterId());
         }
         else {
             // this work item does exist.
@@ -1219,13 +1219,13 @@ public class AdapterDaiMgr {
                 // this work item is being worked on by a different adapter instance - so this adapter instance is a zombie.
                 bZombie = true;
                 log_.error("this adapter instance is a zombie, this work item (%d) is now being worked on by a different adapter id (%d) -  ThisAdapterType=%s, ThisAdapterId=%d!",
-                           workQueue.workItemId(), vt.getLong("WorkingAdapterId"), adapter.adapterType(), adapter.adapterId());
+                        workQueue.workItemId(), vt.getLong("WorkingAdapterId"), adapter.adapterType(), adapter.adapterId());
             }
             else if (!vt.getString("State").equals("W")) {
                 // this work item is still mine but it is not "being worked on" - so this adapter instance is a zombie.
                 bZombie = true;
                 log_.error("this adapter instance is a zombie, this work item (%d) is not active (%s) -  ThisAdapterType=%s, ThisAdapterId=%d!",
-                           workQueue.workItemId(), vt.getString("State"), adapter.adapterType(), adapter.adapterId());
+                        workQueue.workItemId(), vt.getString("State"), adapter.adapterType(), adapter.adapterId());
             }
         }
 
@@ -1236,17 +1236,17 @@ public class AdapterDaiMgr {
             // Cut RAS event indicating that the clocks are at least currently out of sync.
             String sInstanceData = "SnLctn=" + mSnLctn + ", AdapterType=" + adapter.adapterType() + ", AdapterId=" + adapter.adapterId();
             adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrDetectedThisIsZombieInstance")
-                                            ,sInstanceData                      // instance data
-                                            ,mSnLctn                            // Lctn
-                                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                            ,adapter.adapterType()              // type of adapter that is requesting this
-                                            ,-1                                 // requesting work item
-                                            );
+                    ,sInstanceData                      // instance data
+                    ,mSnLctn                            // Lctn
+                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                    ,adapter.adapterType()              // type of adapter that is requesting this
+                    ,-1                                 // requesting work item
+            );
             // Commit suicide and be reborn (restarting the entire systemctl service).
             try {
                 String sTempCmd = ("sudo systemctl restart ucs-dai-mgr");
                 log_.fatal("this adapter instance is a zombie, issuing '%s' to clean up this problem -  ThisAdapterType=%s, ThisAdapterId=%d!",
-                           sTempCmd, adapter.adapterType(), adapter.adapterId());
+                        sTempCmd, adapter.adapterType(), adapter.adapterId());
                 RuntimeCommand command = new RuntimeCommand(sTempCmd, log_);
                 command.execute();
                 if(!command.getStdErr().isEmpty()) {
@@ -1254,12 +1254,12 @@ public class AdapterDaiMgr {
                     // Cut RAS event indicating that the clocks are at least currently out of sync.
                     sInstanceData = "SnLctn=" + mSnLctn + ", AdapterType=" + adapter.adapterType() + ", AdapterId=" + adapter.adapterId();
                     adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrErrorDuringZombieRestart")
-                                                    ,sInstanceData                      // instance data
-                                                    ,mSnLctn                            // Lctn
-                                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                    ,adapter.adapterType()              // type of adapter that is requesting this
-                                                    ,-1                                 // requesting work item
-                                                    );
+                            ,sInstanceData                      // instance data
+                            ,mSnLctn                            // Lctn
+                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                            ,adapter.adapterType()              // type of adapter that is requesting this
+                            ,-1                                 // requesting work item
+                    );
                     throw new RuntimeException("Failed to restart ucs-dai-mgr systemctl service - " + command.getStdErr().trim());
                 }
             }
@@ -1269,12 +1269,12 @@ public class AdapterDaiMgr {
                 // Cut RAS event indicating that the clocks are at least currently out of sync.
                 sInstanceData = "SnLctn=" + mSnLctn + ", AdapterType=" + adapter.adapterType() + ", AdapterId=" + adapter.adapterId();
                 adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrExceptionDuringZombieRestart")
-                                                ,sInstanceData                      // instance data
-                                                ,mSnLctn                            // Lctn
-                                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                ,adapter.adapterType()              // type of adapter that is requesting this
-                                                ,-1                                 // requesting work item
-                                                );
+                        ,sInstanceData                      // instance data
+                        ,mSnLctn                            // Lctn
+                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                        ,adapter.adapterType()              // type of adapter that is requesting this
+                        ,-1                                 // requesting work item
+                );
                 throw new RuntimeException("Exception occurred when restarting ucs-dai-mgr systemctl service - " + ex);
             }
         }
@@ -1338,12 +1338,12 @@ public class AdapterDaiMgr {
                 log_.error("%s", Adapter.stackTraceToString(e));
                 try {
                     adapter.logRasEventSyncNoEffectedJob(adapter.getRasEventType("RasGenAdapterExceptionButContinue")  // using synchronous version as we are in a flow where we want to ensure that this occurs in a timely manner.
-                                                        ,("Exception=" + e)                 // instance data
-                                                        ,null                               // Lctn
-                                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                        ,adapter.adapterType()              // type of adapter that is requesting this
-                                                        ,workQueue.baseWorkItemId()         // requesting work item
-                                                        );
+                            ,("Exception=" + e)                 // instance data
+                            ,null                               // Lctn
+                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                            ,adapter.adapterType()              // type of adapter that is requesting this
+                            ,workQueue.baseWorkItemId()         // requesting work item
+                    );
                 }
                 catch (Exception e2) { log_.exception(e2); }
             } finally {
@@ -1396,12 +1396,12 @@ public class AdapterDaiMgr {
                 log_.error("%s", Adapter.stackTraceToString(e));
                 try {
                     adapter.logRasEventSyncNoEffectedJob(adapter.getRasEventType("RasGenAdapterExceptionButContinue")  // using synchronous version as we are in a flow where we want to ensure that this occurs in a timely manner.
-                                                        ,("Exception=" + e)                 // instance data
-                                                        ,null                               // Lctn
-                                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                        ,adapter.adapterType()              // type of adapter that is requesting this
-                                                        ,workQueue.baseWorkItemId()         // requesting work item
-                                                        );
+                            ,("Exception=" + e)                 // instance data
+                            ,null                               // Lctn
+                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                            ,adapter.adapterType()              // type of adapter that is requesting this
+                            ,workQueue.baseWorkItemId()         // requesting work item
+                    );
                 }
                 catch (Exception e2) { log_.exception(e2); }
             }
@@ -1506,7 +1506,7 @@ public class AdapterDaiMgr {
                 name = "UnknownHostName";
             }
         }
-        return name.split("\\.")[0];
+        return name;
     }
 
     private String getLocation(String[] args, String hostname) {
@@ -1563,7 +1563,7 @@ public class AdapterDaiMgr {
             UcsLogfileDirectory = adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsLogfileDirectory").getResults()[0].fetchRow(0).getString("Value");
             UcsLog4jConfigurationFile = adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsLog4jConfigurationFile").getResults()[0].fetchRow(0).getString("Value");
             log_.info("this adapter instance is running on lctn=%s, hostname=%s, pid=%d, VoltIpAddrs=%s, UcsClassPath=%s, UcsLogfileDirectory=%s",
-                      SnLctn, SnHostname, adapter.pid(), DbServers, UcsClassPath, UcsLogfileDirectory);
+                    SnLctn, SnHostname, adapter.pid(), DbServers, UcsClassPath, UcsLogfileDirectory);
 
             // Ensure that this system's clock is at least reasonably in sync with the Tier1 data store clock - loop retrying until it is.
             boolean bClocksAreSynced = false;  int iClockSyncRetryCntr = 0;
@@ -1593,21 +1593,21 @@ public class AdapterDaiMgr {
                     // this system clock is not synced with the Tier1 data store's clock.
                     if (iClockSyncRetryCntr++ > 300) {
                         String sTempMsg = "Detected that this system's clock is NOT synced with the Tier1 data store's clock, even after retrying - " +
-                                          "DifferenceInMillis=" + lClkDiffInMillisecs + ", SysClkInMillis=" + lCurMillisecs + ", Tier1ClkInMillis=" + lTier1ClkInMillis + "!";
+                                "DifferenceInMillis=" + lClkDiffInMillisecs + ", SysClkInMillis=" + lCurMillisecs + ", Tier1ClkInMillis=" + lTier1ClkInMillis + "!";
                         log_.fatal(sTempMsg);
                         // Cut RAS event indicating that the clocks are at least currently out of sync.
                         String sInstanceData = "SnLctn=" + SnLctn + ", DifferenceInMillis=" + lClkDiffInMillisecs + ", SystemClkInMillis=" + lCurMillisecs + ", Tier1ClkInMillis=" + lTier1ClkInMillis;
                         adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasDaimgrSysClkNotSynced")
-                                                        ,sInstanceData                      // instance data
-                                                        ,SnLctn                             // Lctn
-                                                        ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                        ,adapter.adapterType()              // type of adapter that is requesting this
-                                                        ,-1                                 // requesting work item
-                                                        );
+                                ,sInstanceData                      // instance data
+                                ,SnLctn                             // Lctn
+                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                ,adapter.adapterType()              // type of adapter that is requesting this
+                                ,-1                                 // requesting work item
+                        );
                         throw new AdapterException(sTempMsg);
                     }
                     log_.warn("Detected that this system's clock is NOT synced with the Tier1 data store's clock - DifferenceInMillis=%d, SysClkInMillis=%d, Tier1ClkInMillis=%d - will keep trying!",
-                              lClkDiffInMillisecs, lCurMillisecs, lTier1ClkInMillis);
+                            lClkDiffInMillisecs, lCurMillisecs, lTier1ClkInMillis);
                     Thread.sleep(1 * 1000);  // sleep 1 sec before retrying
                 }
             }
@@ -1681,7 +1681,7 @@ public class AdapterDaiMgr {
                                 String sNewAdapterInvocation = aWiParms[1];
                                 String sNewAdapterLogFile    = aWiParms[2];
                                 log_.info("processing work item StartAdditionalChildAdapterInstance - SnLctn=%s, SnHostName=%s, NewAdaptertype=%s, NewAdapterInvocation=%s, NewAdapterLogFile=%s",
-                                          SnLctn, SnHostname, sNewAdapterType, sNewAdapterInvocation, sNewAdapterLogFile);
+                                        SnLctn, SnHostname, sNewAdapterType, sNewAdapterInvocation, sNewAdapterLogFile);
                                 startupAdapterInstanceOnThisSn(SnLctn, SnHostname, sNewAdapterType, sNewAdapterInvocation, sNewAdapterLogFile, workQueue.workItemId());
                                 // We have finished all OUR work for this work item - Mark the work item that WE have been working on as finished.
                                 workQueue.finishedWorkItem(workQueue.workToBeDone(), workQueue.workItemId(), (workQueue.workToBeDone() + " successful"));
@@ -1703,12 +1703,12 @@ public class AdapterDaiMgr {
                     log_.error("%s", Adapter.stackTraceToString(e));
                     try {
                         adapter.logRasEventSyncNoEffectedJob(adapter.getRasEventType("RasGenAdapterExceptionButContinue")  // using synchronous version as we are in a flow where we want to ensure that this occurs in a timely manner.
-                                                            ,("Exception=" + e)                 // instance data
-                                                            ,null                               // Lctn
-                                                            ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                                            ,adapter.adapterType()              // type of adapter that is requesting this
-                                                            ,workQueue.baseWorkItemId()         // requesting work item
-                                                            );
+                                ,("Exception=" + e)                 // instance data
+                                ,null                               // Lctn
+                                ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                ,adapter.adapterType()              // type of adapter that is requesting this
+                                ,workQueue.baseWorkItemId()         // requesting work item
+                        );
                     }
                     catch (Exception e2) { log_.exception(e2); }
                 }
