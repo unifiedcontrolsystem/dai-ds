@@ -1453,7 +1453,7 @@ java -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${
 #
 # SPDX-License-Identifier: Apache-2.0
 
-jps -l | grep "com.intel.dai." | grep -v AdapterDaiMgr
+jps -l | grep "com.intel.dai."
 exit 0
 """
         new File((String)"${buildDir}/tmp/environment").text = """DAI_VERSION="${packageVersion}"
@@ -1677,7 +1677,7 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-jps -l | grep "com.intel.dai." | grep -v AdapterDaiMgr
+docker exec dai-manager jsp | grep -v Jps | awk '{print \$1 "\\t" \$2}'
 exit 0
 """
     }
