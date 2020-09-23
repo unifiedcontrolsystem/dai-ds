@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Description of class BootEventTransformer.
  */
-class NetworkListenerProviderForeignBus implements NetworkListenerProvider, Initializer {
+public class NetworkListenerProviderForeignBus implements NetworkListenerProvider, Initializer {
     public NetworkListenerProviderForeignBus(Logger logger) {
         log_ = logger;
     }

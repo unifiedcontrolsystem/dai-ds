@@ -5,6 +5,7 @@ import com.intel.networking.HttpMethod
 import com.intel.networking.restclient.RequestInfo
 import com.intel.networking.restclient.ResponseCallback
 import com.intel.networking.restclient.SSEEvent
+import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.StatusLine
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -36,6 +37,7 @@ class ApacheRESTClientSpec extends Specification implements ResponseCallback, SS
         response_ = GroovyMock(CloseableHttpResponse)
         response_.getEntity() >> { entity_ }
         response_.getStatusLine() >> { status_ }
+        response_.getAllHeaders() >> { new Header[0] }
         client_ = GroovyMock(CloseableHttpClient)
         client_.execute(_ as HttpUriRequest) >> { response_ }
         underTest_.client_ = client_

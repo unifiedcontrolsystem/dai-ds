@@ -1,10 +1,10 @@
 {
   "providerClassMap": {
-    "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
+    "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester",
+    "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication"
   },
   "providerConfigurations": {
     "tokenAuthProvider": {
-      "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
       "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
       "clientId": "admin-client",
       "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",

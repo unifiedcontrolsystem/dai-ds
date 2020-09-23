@@ -66,13 +66,13 @@ public class ApacheRESTClient extends RESTClient {
      */
     @Override
     protected void doSSERequest(RequestInfo request, ResponseCallback callback, SSEEvent eventsCallback) {
-        HttpGet methodRequest = new HttpGet(request.uri());
         log_.debug("*** SSE Request: uri='%s'", request.uri());
+        HttpRequestBase methodRequest = makeRequest(request);
         new Thread(()-> {
             try {
                 client_.execute(methodRequest, (response) -> {
                     for (Header header : response.getAllHeaders())
-                        log_.debug("HEADER: %s: %s", header.getName(), header.getValue());
+                        log_.debug("*** RESPONSE HEADER: %s: %s", header.getName(), header.getValue());
                     int code = response.getStatusLine().getStatusCode();
                     if (code >= 200 && code < 300) {
                         callback.responseCallback(code, null, request);
@@ -119,10 +119,12 @@ public class ApacheRESTClient extends RESTClient {
      */
     @Override
     protected BlockingResult doRESTRequest(RequestInfo request) {
-        HttpRequestBase methodRequest = makeRequest(request);
         log_.debug("*** REST Request: method='%s'; uri='%s'; body='%s'", request.method(), request.uri(),
                 request.body());
+        HttpRequestBase methodRequest = makeRequest(request);
         try (CloseableHttpResponse response = client_.execute(methodRequest)) {
+            for (Header header : response.getAllHeaders())
+                log_.debug("*** RESPONSE HEADER: %s: %s", header.getName(), header.getValue());
             try (InputStreamReader reader = new InputStreamReader(response.getEntity().getContent(),
                     StandardCharsets.UTF_8)) {
                 StringWriter writer = new StringWriter();
@@ -203,6 +205,9 @@ public class ApacheRESTClient extends RESTClient {
                 log_.exception(e);
             }
         }
+        log_.debug("*** REQUEST HEADER COUNT: %d", result.getAllHeaders().length);
+        for(Header header: result.getAllHeaders())
+            log_.debug("*** REQUEST HEADER: '%s: %s'", header.getName(), header.getValue());
         return result;
     }
 
