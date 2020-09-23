@@ -133,7 +133,7 @@ public class HWInvDiscovery {
         sess = toHWDiscoverySession(configPath);
         log.debug("HWI:%n  toHWDiscoverySession(configPath=%s) => %s", configPath, sess.toString());
 
-        RESTClient restClient = RESTClientFactory.getInstance("jdk11", log);
+        RESTClient restClient = RESTClientFactory.getInstance("apache", log);
         if (restClient == null) {
             throw new RESTClientException("HWI:%n  restClient == null");
         }
