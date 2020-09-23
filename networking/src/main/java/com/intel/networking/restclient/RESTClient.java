@@ -209,8 +209,8 @@ public abstract class RESTClient {
     }
 
     /**
-     * Subscribes to server side events at the URI specified. The request is a POST with the subjects in the body
-     * formatted by the SSERequestBuilder. This request is always asynchronous due the nature of the SSE protocol.
+     * Subscribes to server side events at the URI specified. This request is always asynchronous due the
+     * nature of the SSE protocol.
      *
      * @param uri The URI of the SSE subscription request (server must support this on the URI).
      * @param eventTypes The list of event types to be formatted by the current SSERequestBuilder instance.
