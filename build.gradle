@@ -70,9 +70,9 @@ def pythonVersion = pythonVersionString(packageVersion)
 // Dependent Package Versions (latest as of 12/5/2019)
 def voltdb_version = '9.1.1'
 def apache_version = '2.12.1'
-def httpcomponents_version = '4.5.10'
+def httpcomponents_version = '4.5.12'
 def cliftonjson_version = '3.1.0'
-def keycloak_version = '8.0.1'
+def keycloak_version = '10.0.2'
 def rabbitmq_version = '5.7.3'
 def picocli_version = '4.1.1'
 def commonsio_version = '2.6'
