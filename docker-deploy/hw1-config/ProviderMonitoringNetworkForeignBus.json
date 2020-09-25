@@ -5,6 +5,18 @@
   },
 
   "networkStreams": {
+    "fanTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-fan?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
     "energyTelemetry": {
       "arguments": {
         "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
@@ -70,6 +82,7 @@
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
+        "fanTelemetry",
         "energyTelemetry",
         "powerTelemetry",
         "temperatureTelemetry",
