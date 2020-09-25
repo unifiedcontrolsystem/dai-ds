@@ -3,7 +3,7 @@
 ## 1. Introduction
 This documentation describes prerequisites, configuration and setup to start EventSim with docker container.
 EventSim is a simulation tool which acts as a rest-server serving several rest api's. It is used to generate events, gather and view information from DAI database through the EventSim CLI interface.
-It enables client to make subscriptions(SSE or http callback) with respective network steam(s) to gather data.
+It enables client to make subscriptions(SSE request) with respective network steam(s) to gather data.
 
 ## 2. Steps to start EventSim with docker container(s).
 ### 2.1 Prerequisites with docker container
@@ -53,19 +53,28 @@ This file is located at /opt/dai-docker/etc directory (default installation is i
 Below json explains about the default data for EventSim seerver.
 ```json
 ...
- "eventsimConfig" : {
-      "SensorMetadata": "/resources/ForeignSensorMetaData.json",
-      "RASMetadata": "/resources/ForeignEventMetaData.json",
-      ...
-      "eventCount": 10,
-      "timeDelayMus": 1,
-      "eventRatioSensorToRas": 1,
-      "randomizerSeed": "234"
-  }
+
+  "api-simulator-config" : {
+      "boot-parameters" : "simulation_data_file_boot_parameters_api",
+      "hw-inventory" : "simulation_data_file_hw_inventory",
+      "hw-inventory-path" : "path_to_hw_inventory",
+      "hw-inventory-query-path" : "path_to_hw_inventory_query",
+      "hw-inv-discover-status-url" : "uri_hw_inventory_discovery_status"
+  },
+  "events-simulator-config" : {
+    "count": 10,
+    "events-template-config" : "/opt/ucs/etc/EventsTemplate.json",
+    "seed": "1234",
+    "time-delay-mus": 1,
+    "timezone": "GMT"
+  },
+  
 ...
 ```
 
- **_eventCount_** = default value of number of events to be generated.
+ **_count_** = default value of number of events to be generated.
+ 
+ **_events-template-config_** = events template configuration file. 
  
  **_timeDelayMus_** = default time delay to send between event-to-event.
  
@@ -75,28 +84,22 @@ Below json explains about the client subscriptions details.
 
 ```json
 ...
-"networkConfig" : {
-      "network" : "sse",
-      "sse": {
-          "server-address": "rest_server_ip_address_or_hostname" ,
-          "server-port": "rest_server_port" ,
-          "urls": {
-            "network_stream_telemety_url": [
-              "monitor_adapter_profile_subject_name"
-            ] ,
-            "network_stream_boot_states_url": [
-              "provisioner_adapter_profile_subject_name"
-            ] ,
-            "network_stream_ras_url": [
-              "monitor_adapter_profile_subject_name"
-            ]
-          }
-      } ,
-      "rabbitmq": {
-          "exchangeName": "rabbitmq_exchange_name" ,
-          "uri": "amqp://127.0.0.1"
-      }
-  }
+ 
+    "network-config" : {
+        "network" : "sse",
+        "sse": {
+            "server-address": "rest_server_ip_address_or_hostname" ,
+            "server-port": "rest_server_port" ,
+            "urls": {
+             "network_stream_telemety_url" : "network_stream_telemety_url_id"
+            }
+        } ,
+        "rabbitmq": {
+            "exchangeName": "name",
+            "uri": "amqp://rabbitmq_hosted_server"
+        }
+    }
+    
 ...
 ```
 
@@ -112,125 +115,25 @@ Note:
 
 ```json
 ...
-"networkConfig" : {
-      "network" : "sse",
-      "sse": {
-          "server-address": "rest_server_ip_address_or_hostname" , //data-point 3
-          "server-port": "rest_server_port" , //data-point 4
-          "urls": {
-            "network_stream_telemety_url": [ //data-point 1
-              "monitor_adapter_profile_subject_name" //data-point 2
-            ]
-          }
-      } ,
-      "rabbitmq": {
-          "exchangeName": "rabbitmq_exchange_name" ,
-          "uri": "amqp://127.0.0.1"
-      }
-  }
-...
-```
-**ProviderMonitoringNetworkForeignBus.json** file
 
-```json
-...
-  "networkStreams": {
-    "dtmfResourceEvents": { //data-point 5
-      "arguments": {
-        "connectPort": "rest_server_ip_address_or_hostname", //data-point 3
-        "connectAddress": "rest_server_port", //data-point 4
-        "urlPath": "network_stream_telemety_url", //data-point 1
-        "connectTimeout": "30",
-        "requestBuilder": "com.intel.dai.monitoring.SSEStreamRequestBuilder",
-        "requestType": "GET",
-        "requestBuilderSelectors": {
-          "stream_id": "dmtfEvents"
+    "network-config" : {
+        "network" : "sse",
+        "sse": {
+            "server-address": "rest_server_ip_address_or_hostname" ,
+            "server-port": "rest_server_port" ,
+            "urls": {
+             "network_stream_telemety_url" : "network_stream_telemety_url_id"
+            }
+        } ,
+        "rabbitmq": {
+            "exchangeName": "name",
+            "uri": "amqp://rabbitmq_hosted_server"
         }
-      },
-      "name": "sse"
     }
-  },
-
-  "adapterProfiles": {
-    "environmental": {
-      "networkStreamsRef": [
-        "dtmfResourceEvents" //point 5
-      ],
-      "subjects": [
-        "monitor_adapter_profile_subject_name" //point 2
-      ],
-      "adapterProvider": "environmentalData"
-    }
-  },
 ...
 ```
 
-**Note: Data-Point numbers should match between simulation server and respective SSE adapter subscription configuration file. 
-In above example compare data-points between EventSim.json (simulation-server) and ProviderMonitoringNetworkForeignBus.json (SSE adapter subscription)**
-
-#### 2.2.3.2 For Http Callback type client subscription
-
-**EventSim.json** file 
-
-```json
-...
-"networkConfig" : {
-      "network" : "sse",
-      "sse": {
-          "server-address": "rest_server_ip_address_or_hostname" , //data-point 3
-          "server-port": "rest_server_port" , //data-point 4
-          "urls": {
-            "network_stream_telemety_url": [ //data-point 1
-              "provisioner_adapter_profile_subject_name" //data-point 2
-            ]
-          }
-      } ,
-      "rabbitmq": {
-          "exchangeName": "rabbitmq_exchange_name" ,
-          "uri": "amqp://127.0.0.1"
-      }
-  }
-...
-```
-**ProviderProvisionerNetworkForeignBus.json** file
-
-```json
-...
-
-"networkStreams": {
-    "stateChangeSource": { //data-point 5
-      "arguments": {
-        "connectAddress": "subscription_server_ip_address", //data-point 3
-        "connectPort": "subscription_server_port", //data-point 4
-        "bindAddress": "callback_server_bind_address", //ip address where this adapter is launched
-        "bindPort": "callback_server_bind_port", // call back listening port
-        "urlPath": "/apis/smd/hsm/v1/Subscriptions/SCN", //data-point 1
-        "subjects": "provisioner_adapter_profile_subject_name", //data-point 2
-        "requestBuilder": "com.intel.dai.provisioners.ForeignSubscriptionRequest",
-        "responseParser": "com.intel.dai.provisioners.ForeignSubscriptionResponseParser",
-        "subscriberName": "daiSubscriptionID",
-        "use-ssl": false
-      },
-      "name": "http_callback"
-    }
-  },
-
-  "adapterProfiles": {
-    "default": {
-      "networkStreamsRef": [
-        "stateChangeSource" //data-point 5
-      ],
-      "subjects": [
-        "stateChanges" //data-point 2
-      ],
-      "adapterProvider": "bootEventData"
-    }
-  }
-...
-```
-
-**Note: Data-Point numbers should match between simulation server and respective callback adapter subscription configuration file. 
-In above example compare data-points between EventSim.json (simulation-server) and ProviderProvisionerNetworkForeignBus.json (callback adapter subscription)**
+**Note: The "network_stream_telemety_url" in EventSim.json should match the url in the "fullUrl" of client subscriptions**
 
 
 Refer to the **README.md** for commands.
@@ -287,3 +190,104 @@ To enable debug mode
 add following line in eventsim-server service file found in /opt/ucs/bin directory.
 
 -DdaiLoggingLevel = DEBUG
+
+
+## 3. Usage of template based data generation EventSim.
+### 3.1 Prerequisites events template file
+This file contains all the possible types of events data that can be generated using this EventSim data generation tool. This template configuration file requires following details.
+
+1. Types of events and its sub-categories. (Ex: sensor = power, temperature, voltage etc)
+2. Sample template of data of each sub-type/category event.
+
+### 3.2 Configure events template file
+
+Below json explains about the configuration of template based data generation.
+
+```json
+
+{
+  "event": { //provide event types and its sub-types/categories
+    "ras" : {
+      "default" : "old-ras",
+      "types" :[
+        "old-ras"
+      ]
+    },
+
+    "sensor" : {
+      "default" : "energy",
+      "types" :[
+        "energy"
+      ]
+    }
+  } ,
+  "event-types": { //define event-type/catergory template structure for each mentioned above
+    "energy": { //name from sensor sub-type
+      "template": "file_path_to_sample_data_template" , //sample template data how data looks like/want to create
+      "stream-type": "energyTelemetry" , //to which uri/stream you want to send data check detials in EvnetSim.json configuration file
+      "single-template": {
+        "json_path_field_1": ".*" , //provide json-path from field in template
+        "json_path_field_2": ".*" //provide json-path from field in template
+      },
+      "single-template-count": {
+        "json_path_1" : 1, //Drill down from n level template to 1 level template at each json-path level
+        "json_path_2" : 1
+      },
+      "path-count" : {
+        "json_path_field_1" : 4, //number of items under the json-path-level
+        "json_path_field_2" : 1
+      },
+      "update-fields": {
+        "json_path_1": {
+          "Location": {
+            "metadata": "DB-Locations" , //to updtae field from outside resource/file
+            "metadata-filter": ".*" //filter data from outside resource/file
+          } ,
+          "Value": {
+            "metadata": "Integer" ,
+            "metadata-filter": [10, 12]  //range of values
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : { //path-count key restrict count under json-path-levl, if excess needed where should they move
+        "json_path_field_1" : "metrics/messages[*]",
+        "json_path_field_2" : "new"
+      },
+      "timestamp" : "json_path_time_stamp" //to update time in template data
+    },
+
+    "old-ras": {
+      "template": "/resources/templates/old-ras.json" ,
+      "stream-type": "dmtfEvent" ,
+      "single-template": {
+        "json_path_field_1": ".*" ,
+        "json_path_field_2": ".*"
+      },
+      "single-template-count": {
+        "json_path_1":1
+      },
+      "path-count" : {
+        "json_path_1" : 1
+      },
+      "update-fields": {
+        "json_path_1": {
+          "event-type": {
+            "metadata": "/resources/metadata/dataValues.json" ,
+            "metadata-filter": ".*"
+          } ,
+          "location": {
+            "metadata": "DB-Locations" ,
+            "metadata-filter": ".*"
+          }
+        }
+      },
+      "generate-data-and-overflow-path" : {
+        "json_path_field_1" : "new"
+      },
+      "timestamp" : "path_timestamp"
+    }
+  }
+}
+
+``` 
+
