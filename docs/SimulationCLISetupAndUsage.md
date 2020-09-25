@@ -61,10 +61,10 @@ It helps user to get seed value used to generate events in-order to replicate da
 
 ```bash
 user@/opt/ucs/bin:~> eventsim events --help
-usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...
+usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed,echo} ...
 
 positional arguments:
-  {ras,sensor,job,boot,scenario,get-seed}
+  {ras,sensor,job,boot,scenario,get-seed,echo}
                         subparser for events
     ras                 generate ras events
     sensor              generate sensor events
@@ -72,6 +72,7 @@ positional arguments:
     boot                generate boot events
     scenario            generate events for a given scenario
     get-seed            fetch prior seed to replicate same data.
+    echo                echo json directly to connection
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -85,27 +86,55 @@ Events RAS  Command:
 ##### user@/opt/ucs/bin:~> eventsim events ras --help
 ```bash
 usage: eventsim events ras [-h] [--burst] [--count COUNT] [--delay DELAY]
-                           [--label LABEL] [--locations LOCATIONS]
-                           [--output OUTPUT] [--seed SEED] [--timeout TIMEOUT]
+                           [--locations LOCATIONS] [--output OUTPUT]
+                           [--seed SEED] [--template TEMPLATE]
+                           [--timeout TIMEOUT] [--timezone TIMEZONE]
+                           [--type {fabric-crit,old-ras}]
+                           [--update-field-jpath UPDATE_FIELD_JPATH]
+                           [--update-field-metadata UPDATE_FIELD_METADATA]
+                           [--update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER]
+                           [--template-field-jpath TEMPLATE_FIELD_JPATH]
+                           [--template-field-filter TEMPLATE_FIELD_FILTER]
 
 optional arguments:
   -h, --help            show this help message and exit
   --burst               generate ras events without delay. Default is constant
-                        mode with delay.
+                        mode with delay
   --count COUNT         given number of ras events are generated. The default
-                        values exists in eventsim config file.
+                        values exists in eventsim config file
   --delay DELAY         pause for given value in microseconds to generate ras
                         events. The default values exists in eventsim config
-                        file.
-  --label LABEL         generate ras events for a given type/description
+                        file
   --locations LOCATIONS
                         generate ras events at a given location. Provide regex
-                        for multiple locations.
-  --output OUTPUT       store data in a file
+                        for multiple locations
+  --output OUTPUT       save data to a file
   --seed SEED           seed to duplicate data
+  --template TEMPLATE   sample template to generate ras events
   --timeout TIMEOUT     ras sub-command execution timeout
-  
+  --timezone TIMEZONE   generate ras events for a given timezone. The default
+                        values exists in config file
+  --type {fabric-crit,old-ras}
+                        provide type of the ras event to generate events
+  --update-field-jpath UPDATE_FIELD_JPATH
+                        Provide multiple json-paths to field only, separated
+                        by comma(,). Ex: level0/level1[*]/item1
+  --update-field-metadata UPDATE_FIELD_METADATA
+                        Provide file path with all possible values. Ex:
+                        /tmp/source.json
+  --update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER
+                        Provide multiple regex value to fill data in update-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
+  --template-field-jpath TEMPLATE_FIELD_JPATH
+                        Provide multiple json-paths to template-field only,
+                        separated by comma(,). Ex: level0/level1[*]/item1
+  --template-field-filter TEMPLATE_FIELD_FILTER
+                        Provide multiple regex value to fill data in template-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
 
+  
 Example:
 user@/opt/ucs/bin:~> eventsim events ras --location R0.*
 ```
@@ -118,26 +147,53 @@ Events Sensor Command:
 ##### user@/opt/ucs/bin:~> eventsim events sensor --help
 ```bash
 usage: eventsim events sensor [-h] [--burst] [--count COUNT] [--delay DELAY]
-                              [--label LABEL] [--locations LOCATIONS]
-                              [--output OUTPUT] [--seed SEED]
-                              [--timeout TIMEOUT]
+                              [--locations LOCATIONS] [--output OUTPUT]
+                              [--seed SEED] [--template TEMPLATE]
+                              [--timeout TIMEOUT] [--timezone TIMEZONE]
+                              [--type {energy,fabric-perf,power,temperature,voltage}]
+                              [--update-field-jpath UPDATE_FIELD_JPATH]
+                              [--update-field-metadata UPDATE_FIELD_METADATA]
+                              [--update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER]
+                              [--template-field-jpath TEMPLATE_FIELD_JPATH]
+                              [--template-field-filter TEMPLATE_FIELD_FILTER]
 
 optional arguments:
   -h, --help            show this help message and exit
   --burst               generate sensor events without delay. Default is
-                        constant mode with delay.
+                        constant mode with delay
   --count COUNT         given number of sensor events are generated. The
-                        default values exists in eventsim config file.
+                        default values exists in eventsim config file
   --delay DELAY         pause for given value in microseconds to generate
                         sensor events. The default values exists in eventsim
-                        config file.
-  --label LABEL         generate sensor events for a given type/description
+                        config file
   --locations LOCATIONS
                         generate sensor events at a given location. Provide
-                        regex for multiple locations.
-  --output OUTPUT       store data in a file
+                        regex for multiple locations
+  --output OUTPUT       save data to a file
   --seed SEED           seed to duplicate data
+  --template TEMPLATE   sample template to generate sensor events
   --timeout TIMEOUT     sensor sub-command execution timeout
+  --timezone TIMEZONE   generate sensor events for given timezone. The default
+                        values exists in config file
+  --type {energy,fabric-perf,power,temperature,voltage}
+                        provide type of the sensor event to generate events
+  --update-field-jpath UPDATE_FIELD_JPATH
+                        Provide multiple json-paths to field only, separated
+                        by comma(,). Ex: level0/level1[*]/item1
+  --update-field-metadata UPDATE_FIELD_METADATA
+                        Provide file path with all possible values. Ex:
+                        /tmp/source.json
+  --update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER
+                        Provide multiple regex value to fill data in update-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
+  --template-field-jpath TEMPLATE_FIELD_JPATH
+                        Provide multiple json-paths to template-field only,
+                        separated by comma(,). Ex: level0/level1[*]/item1
+  --template-field-filter TEMPLATE_FIELD_FILTER
+                        Provide multiple regex value to fill data in template-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
 
 
 Example:
@@ -154,7 +210,13 @@ Events Boot Command:
 usage: eventsim events boot [-h] [--burst] [--delay DELAY]
                             [--locations LOCATIONS] [--output OUTPUT]
                             [--probability PROBABILITY] [--seed SEED]
-                            [--timeout TIMEOUT] [--type {off,on,ready}]
+                            [--template TEMPLATE] [--timeout TIMEOUT]
+                            [--timezone TIMEZONE] [--type {off,on,ready}]
+                            [--update-field-jpath UPDATE_FIELD_JPATH]
+                            [--update-field-metadata UPDATE_FIELD_METADATA]
+                            [--update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER]
+                            [--template-field-jpath TEMPLATE_FIELD_JPATH]
+                            [--template-field-filter TEMPLATE_FIELD_FILTER]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -171,10 +233,31 @@ optional arguments:
                         generate boot events with probability failure. Default
                         no failure.
   --seed SEED           seed to duplicate data
+  --template TEMPLATE   sample template to generate boot events
   --timeout TIMEOUT     boot sub-command execution timeout
+  --timezone TIMEZONE   generate boot events for given timezone. The default
+                        values exists in config file
   --type {off,on,ready}
                         generate given type of boot events. Default generates
                         all [on/off/ready] types of boot events.
+  --update-field-jpath UPDATE_FIELD_JPATH
+                        Provide multiple json-paths to field only, separated
+                        by comma(,). Ex: level0/level1[*]/item1
+  --update-field-metadata UPDATE_FIELD_METADATA
+                        Provide file path with all possible values. Ex:
+                        /tmp/source.json
+  --update-field-metadata-filter UPDATE_FIELD_METADATA_FILTER
+                        Provide multiple regex value to fill data in update-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
+  --template-field-jpath TEMPLATE_FIELD_JPATH
+                        Provide multiple json-paths to template-field only,
+                        separated by comma(,). Ex: level0/level1[*]/item1
+  --template-field-filter TEMPLATE_FIELD_FILTER
+                        Provide multiple regex value to fill data in template-
+                        field-jpath separated by comma(,). Ex:
+                        level0/level1[*]/item1
+
 
 
 Example:
@@ -202,42 +285,42 @@ Events Scenario Command:
 usage: eventsim events scenario [-h] [--burst] [--counter COUNTER]
                                 [--delay DELAY] [--duration DURATION]
                                 [--locations LOCATIONS] [--output OUTPUT]
-                                [--probability PROBABILITY]
-                                [--ras-label RAS_LABEL]
-                                [--sensor-label SENSOR_LABEL] [--seed SEED]
+                                [--probability PROBABILITY] [--seed SEED]
                                 [--start-time START_TIME] [--timeout TIMEOUT]
-                                [--mode {burst,group-burst,repeat}]
+                                [--timezone TIMEZONE]
+                                [--type {burst,group-burst,repeat}]
                                 file
 
 positional arguments:
-  file                  scenario configuration file
+  file                  scenario configuration file. The file should exist in
+                        installed configuration files folder. Ex:
+                        /opt/ucs/etc/
 
 optional arguments:
   -h, --help            show this help message and exit
   --burst               generate events for a given scenario without delay.
                         Default is constant mode with delay.
-  --counter COUNTER     repeat scenario for a given counter
+  --counter COUNTER     repeat scenario for a given counter iterations
   --delay DELAY         pause for given value in microseconds to generate
                         events for a given scenario. The default values exists
                         in eventsim config file.
-  --duration DURATION   scenario occurs for a given duration
+  --duration DURATION   scenario occurs for a given duration time. The default
+                        units is minutes only.
   --locations LOCATIONS
                         generate events for a given scenario at a given
                         location. Provide regex for multiple locations.
   --output OUTPUT       Store data in a file.
   --probability PROBABILITY
                         generate boot events with probability failure
-  --ras-label RAS_LABEL
-                        generate ras events of a particular type/description
-  --sensor-label SENSOR_LABEL
-                        generate sensor events of a particular
-                        type/description
   --seed SEED           seed to duplicate data
   --start-time START_TIME
-                        start time to generate events for a given scenario
+                        start time/scheduled time to generate events for a
+                        given scenario
   --timeout TIMEOUT     scenario sub-command execution timeout
-  --mode {burst,group-burst,repeat}
-                        generate events given type of scenario. Default
+  --timezone TIMEZONE   generate events for given timezone. The default values
+                        exists in config file
+  --type {burst,group-burst,repeat}
+                        generate events for a given type of scenario. Default
                         generates burst type scenario. Scenario data exists in
                         scenario config file.
 
@@ -248,39 +331,43 @@ user@/opt/ucs/bin:~> eventsim events scenario /tmp/scenario.json --type repeat -
 
 #####Events scenario configuration template
 ```json
+
 {
-  "mode" : "repeat", // mode-name = {burst, group-burst, repeat}
-  "group-burst" : {
-    "totalRas" : "700000", //Total ras events to generate
-    "totalSensor" : "300000",  //Total sensor events to generate
-    "totalBootOn" : "0",  //Total boot-on events to generate
-    "totalBootOff" : "0",  //Total boot-off events to generate
-    "totalBootReady" : "0",  //Total boot-ready events to generate
-    "ras" : "500000", //In a group how many ras events to send
-    "sensor" : "100000", //In a group how many sensor events to send
-    "boot-on" : "0", //In a group how many boot-on events to send
-    "boot-off" : "0", //In a group how many boot-off events to send
-    "boot-ready" : "0", //In a group how many boot-ready events to send
-    "seed" : "123" //to replicate data
-  },
+  "mode" : "repeat", //mode to repeat
+  "events" : ["ras", "sensor", "boot"], //types of events
+  "ras" : ["old-ras"], //types of ras events
+  "sensor" : ["energy", "fabric-perf", "power", "temperature", "voltage"], //types of sensor events
+  "boot" : ["off", "on", "ready"], //types of boot events
+
   "burst" : {
-    "ras" : "600000", //Total ras events to generate
-    "sensor" : "400000",  //Total sensor events to generate
-    "boot-on" : "0", //Total boot-on events to generate
-    "boot-off" : "0", //Total boot-off events to generate
-    "boot-ready" : "0", //Total boot-ready events to generate
-    "rate" : "500000", //randomly picks events from ras/sensor/boot and form group of count rate
-    "seed" : "123" //to  replicate data
+    "ras" : "6", //Total ras events to generate
+    "sensor" : "4", //Total sensor events to generate
+    "boot" : "0", //Total boot events to generate
+    "rate" : "5", //randomly picks events from ras/sensor/boot and form group of count rate
+    "seed" : "123" //To replicate data
   },
+
+  "group-burst" : {
+    "ras" : "7", //Total ras events to generate
+    "sensor" : "3",  //Total sensor events to generate
+    "boot" : "0",  //Total boot events to generate
+    "group-batch-ras" : "5", //In a group how many ras events to send
+    "group-batch-sensor" : "1", //In a group how many sensor events to send
+    "group-batch-boot" : "0", //In a group how many boot events to send
+    "seed" : "123" //To replicate data
+  },
+
   "repeat" : {
     "mode" : "burst", //mode to repeat
     "clock-mode" : "duration", //how to re-run counter/counter/start-time
     "duration" : "1", //how long to run
     "counter" : "1", //how many times
-    "start-time" : "2020-05-27 16:34:50.607Z" //schedule start-time
+    "start-time" : "2020-05-27 16:34:50.607Z"
   },
-  "delay" : "2000000" //delay between bursts microseconds only, here it is 2 seconds
+
+  "time-delay-mus" : "2000000" //delay between bursts microseconds only, here it is 2 second
 }
+
 ``` 
 
 ### Events subcommand – get-seed
