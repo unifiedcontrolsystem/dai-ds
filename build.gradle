@@ -1677,7 +1677,7 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-docker exec dai-manager jsp | grep -v Jps | awk '{print \$1 "\\t" \$2}'
+docker exec dai-manager jps | grep -v Jps | awk '{print \$1 "\\t" \$2}'
 exit 0
 """
     }
