@@ -194,7 +194,7 @@ add following line in eventsim-server service file found in /opt/ucs/bin directo
 
 ## 3. Usage of template based data generation EventSim.
 ### 3.1 Prerequisites events template file
-This file contains all the possible types of events data that can be generated using this EventSim data generation tool. This template configuration file requires following details.
+Events template configuration file contains possible type of events data that can be created. The file requires following details.
 
 1. Types of events and its sub-categories. (Ex: sensor = power, temperature, voltage etc)
 2. Sample template of data of each sub-type/category event.
