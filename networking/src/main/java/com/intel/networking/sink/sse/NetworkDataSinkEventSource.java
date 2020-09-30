@@ -262,7 +262,8 @@ public class NetworkDataSinkEventSource implements NetworkDataSinkEx, EventSourc
     }
 
     protected EventSourceClient createEventSource() { // Overridden for testing only.
-        return new EventSourceClient(uri_.toString(), this, lastId_, tokenProvider_);
+        int inputBufferSize = Integer.parseInt(args_.getOrDefault("inputBufferSize", "1024"));
+        return new EventSourceClient(uri_.toString(), this, lastId_, tokenProvider_, inputBufferSize);
     }
 
     private void makeQueryMap(String query) {

@@ -7,6 +7,7 @@
     "stateChangeSource": {
       "arguments": {
         "fullUrl": "http://api-gw-service-nmn.local:8080/apis/smd/hsm/v1/Subscriptions/SCN?stream_id=dai-inventory",
+        "inputBufferSize": "4",
         "connectTimeout": "30"
       },
       "name": "eventSource"
