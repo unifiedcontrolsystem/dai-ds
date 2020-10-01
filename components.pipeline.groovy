@@ -6,65 +6,97 @@ pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
-        description: 'Speeds up build by only performing a partial gradle clean')
-    }    
+                description: 'Speeds up build by skipping gradle clean')
+        choice(name: 'AGENT', choices: [
+                'NRE-COMPONENT',
+                'cmcheung-centos-7-component-functional',
+                'css-centos-8-00-component',
+                'css-centos-8-01-component-functional'
+        ], description: 'Agent label')
+    }
     stages {
-        stage('Component Tests') {
-            agent { label 'Nightly-Build' }
-            environment {
-                PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
-            }
-            steps {
-                lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
-                        matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
-                        specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
+        stage ('component-test') {
+            agent { label "${AGENT}" }
+            environment { PATH = "${PATH}:/home/${USER}/voltdb9.1/bin" }
+            stages {
+                stage('Preparation') {
+                    steps {
+                        echo "Building on ${AGENT}"
+                        sh 'hostname'
+                        lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
+                                matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
+                                specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                copyArtifacts filter: '**', fingerprintArtifacts: true,
-                        projectName: "external-components",
-                        selector: lastWithArtifacts()
-
-                script {
-                    utilities.FixFilesPermission()
-                    StopHWInvDb()
-                    StartHWInvDb()
-
-                    if ( "${params.QUICK_BUILD}" == 'true' ) {
-                        echo '*** This is a QUICK build'
-                        utilities.InvokeGradle(":inventory:clean")
-                    } else {
-                        echo '*** This is a CLEAN build'
-                        utilities.InvokeGradle("clean")
+                        script{ utilities.FixFilesPermission() }
+                        CleanUpMachine()
                     }
-
-                    utilities.InvokeGradle("compilejava compiletestjava compileIntegrationGroovy")
-                    utilities.InvokeGradle("integrationTest || true")
-                    StopHWInvDb()
                 }
+                stage('Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    steps {
+                        sh 'rm -rf build'
+                        script{ utilities.InvokeGradle("clean") }
+                    }
+                }
+                stage('Component Test') {
+                    options{ catchError(message: "Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        RunIntegrationTests()
+                    }
+                }
+                stage('Report') {
+                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
+                            buildResult: 'UNSTABLE') }
+                    steps {
+                        jacoco classPattern: '**/classes/java/main/com/intel/'
+                        junit '**/test-results/**/*.xml'
+                    }
+                }
+                stage('Archive') {
+                    steps {
+                        archiveArtifacts 'build/reports/**'
+                        sh 'rm -f *.zip'
+                        zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
 
-                sh 'rm -f *.zip'
-                zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
-                zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
-
-                jacoco classPattern: '**/classes/java/main/com/intel/', execPattern: '**/integrationTest.exec'
-                junit '**/test-results/**/*.xml'
+                        jacoco classPattern: '**/classes/java/main/com/intel/', execPattern: '**/integrationTest.exec'
+                        junit '**/test-results/**/*.xml'
+                    }
+                }
             }
         }
     }
 }
 
+def RunIntegrationTests() {
+    utilities.InvokeGradle("build")
+    StartHWInvDb()
+    utilities.InvokeGradle("integrationTest")
+    sh 'touch ./inventory/build/test-results/test/*.xml'  // in case no new tests ran; make junit step happy
+    StopHWInvDb()
+}
+
+def CleanUpMachine() {
+    sh './inventory/src/integration/resources/scripts/clean_up_machine.sh'
+}
+
+// This is one way to setup for component level testing.  You can also use docker-compose or partially
+// starts DAI.
+// Currently, our docker image has some dependencies that are fulfilled after DAI is installed.  So,
+// we cannot use this easily for component tests.
 def StartHWInvDb() {
-    sh './init-voltdb.sh'
-    sh './start-voltdb.sh'
-    sh './wait-for-voltdb.sh 21211'
-    sh 'sqlcmd < hw-inv.sql'
+    def scriptDir = './inventory/src/integration/resources/scripts'
+    sh "${scriptDir}/init-voltdb.sh"
+    sh "${scriptDir}/start-voltdb.sh"
+    sh "${scriptDir}/wait-for-voltdb.sh 21211"
+    sh "sqlcmd < ${scriptDir}/load_procedures.sql"
+    sh "sqlcmd < data/db/DAI-Volt-Tables.sql"
+    sh "sqlcmd < data/db/DAI-Volt-Procedures.sql"
 }
+
+// Shutdown method depends on how voltdb was procured.  For example,
+// if docker-compose was used to procure the voltdb, the relevant
+// containers need to be shutdown.
 def StopHWInvDb() {
-    StopHWInvDocker()
     sh 'voltadmin shutdown --force || true'
-}
-def StopHWInvDocker() {
-    sh 'docker-compose -f /opt/dai-docker/voltdb.yml down || true'
-    sh 'docker-compose -f /opt/dai-docker/postgres.yml down || true'
-    sh 'docker stop hw-inv-db || true'
-    sh 'docker rm hw-inv-db || true'
 }
