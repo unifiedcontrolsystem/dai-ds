@@ -5,6 +5,7 @@
 package com.intel.dai.inventory
 
 import com.intel.dai.dsapi.HWInvDbApi
+import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.inventory.api.HWInvDiscovery
 import com.intel.logging.Logger
 import org.apache.commons.lang3.tuple.ImmutablePair
@@ -22,6 +23,11 @@ class ForeignInventoryClientSpec extends Specification {
 
     def "getForeignHWInvJson"() {
         expect: ts.getForeignHWInvJson(null) == null
+    }
+
+    def "getForeignHWInvJson - exception"() {
+        when: ts.getForeignHWInvJson("x0n0")
+        then: thrown NullPointerException   // behavior when config file is missing
     }
 
     def "getCanonicalHWInvJson"() {
