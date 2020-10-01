@@ -7,6 +7,7 @@
     "stateChangeSource": {
       "arguments": {
         "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-provisioner",
+        "inputBufferSize": "4",
         "connectTimeout": "30",
         "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
         "tokenServer": "https://api-gw-service-nmn.local/keycloak/",

@@ -106,7 +106,7 @@ data:
     }
 
     def "Test stop"() {
-        underTest_ = new EventSourceClient("https://localhost/sse/stream1", handlers_, null, null)
+        underTest_ = new EventSourceClient("https://localhost/sse/stream1", handlers_, null, null, 1)
         underTest_.state_ = START
         underTest_.stop()
         expect: underTest_.state_ == RESULT
@@ -117,7 +117,7 @@ data:
     }
 
     def "Test protected overrides"() {
-        underTest_ = new EventSourceClient("/", handlers_, null, null)
+        underTest_ = new EventSourceClient("/", handlers_, null, null, 1)
         underTest_.safeSleep(1)
         expect: underTest_.state_ == EventSourceClient.State.INITIAL
         and:    underTest_.createClientBuilder() != null
@@ -154,7 +154,7 @@ data:
 
     static class MockEventSourceClient extends EventSourceClient {
         MockEventSourceClient(String uri, EventSourceHandlers callback, String lastId, TokenAuthentication authentication) {
-            super(uri, callback, lastId, authentication)
+            super(uri, callback, lastId, authentication, 1)
         }
         @Override protected HttpClientBuilder createClientBuilder() { return clientBuilder_ }
         @Override protected EventSourceClient.State getState() {

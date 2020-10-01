@@ -38,13 +38,22 @@ import java.util.Map;
  *  https://html.spec.whatwg.org/multipage/server-sent-events.html
  */
 class EventSourceClient implements Runnable {
-    EventSourceClient(String uri, EventSourceHandlers callback, String lastId, TokenAuthentication authentication) {
+    /**
+     * @param uri Full url to resource including any '?' parameters needed.
+     * @param callback The listener for SSE events.
+     * @param lastId The last ID used (or null if not known) for SSE communication resiliency.
+     * @param authentication Object that gets an OUth2 token or null isf not required.
+     * @param bufferSize Size of the buffer to use when reading the stream. A value <1 will use the default buffer size.
+     */
+    EventSourceClient(String uri, EventSourceHandlers callback, String lastId, TokenAuthentication authentication,
+                      int bufferSize) {
         if(uri == null) throw new IllegalArgumentException("'uri' in EventListener cannot be null");
         if(callback == null) throw new IllegalArgumentException("'callback' in initialize cannot be null");
         uri_ = uri;
         callback_ = callback;
         id_ = lastId;
         auth_ = authentication;
+        bufferSize_ = (bufferSize < 1)?DEFAULT_BUFFER_SIZE:bufferSize;
     }
 
     /**
@@ -142,7 +151,7 @@ class EventSourceClient implements Runnable {
             signalOpen();
             try (Reader baseReader = new InputStreamReader(response.getEntity().getContent(),
                     StandardCharsets.UTF_8)) {
-                try (LineNumberReader reader = new LineNumberReader(baseReader)) {
+                try (LineNumberReader reader = new LineNumberReader(baseReader, bufferSize_)) {
                     String line = reader.readLine();
                     while (line != null) {
                         processLine(line);
@@ -220,11 +229,12 @@ class EventSourceClient implements Runnable {
     private final String uri_;
     private String id_;
             State state_ = State.INITIAL;
-    private TokenAuthentication auth_ = null;
+    private final TokenAuthentication auth_;
     private CloseableHttpClient client_;
-    private EventSourceHandlers callback_ = null;
+    private final EventSourceHandlers callback_;
     private String event_ = "";
     private String data_ = "";
+    private final int bufferSize_;
 
     @SuppressWarnings("serial")
     private static final Map<String,String> headers_ = new HashMap<String,String>() {{
@@ -250,4 +260,5 @@ class EventSourceClient implements Runnable {
     }
 
     private static final long RETRY_DELAY_MS = 10_000L; // ten second delay between connection attempts.
+    private static final int DEFAULT_BUFFER_SIZE = 1024; // Default input buffer size.
 }
