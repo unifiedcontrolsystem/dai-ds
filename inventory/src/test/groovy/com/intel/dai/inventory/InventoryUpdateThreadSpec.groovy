@@ -92,11 +92,18 @@ class DatabaseSynchronizerSpec extends Specification {
     }
 
     def "ingestCanonicalHWInvHistoryJson"() {
+        def hwInvApiMock = Mock(HWInvDbApi)
+        hwInvApiMock.ingestHistory(canonicalHwInvHistJson) >> res
+        ts.onlineInventoryDatabaseClient_ = hwInvApiMock
         ts.nearLineInventoryDatabaseClient_ = Mock(InventorySnapshot)
-        ts.nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate(_) >> null
 
         expect:
-        ts.ingestCanonicalHWInvHistoryJson(null) == []
+        ts.ingestCanonicalHWInvHistoryJson(canonicalHwInvHistJson) == res
+
+        where:
+        canonicalHwInvHistJson  || res
+        null                    || []
+        '{}'                    || []
     }
 
     def "ingestRawInventoryHistoryEvents"() {
@@ -115,5 +122,14 @@ class DatabaseSynchronizerSpec extends Specification {
 
         expect:
         ts.ingestRawInventorySnapshot("", []) == 0
+    }
+
+    def "updateDaiInventoryTables"() {
+        ts.util_ = new HWInvUtilImpl(Mock(Logger))
+        ts.foreignInventoryDatabaseClient_ = Mock(ForeignInventoryClient)
+        ts.foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(_) >> null
+
+        expect:
+        ts.updateDaiInventoryTables()
     }
 }
