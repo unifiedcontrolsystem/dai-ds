@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# set -e  # do not add this; many steps can fail benignly if clean is already clean
+
 echo "*** Stop any local voltdb instance ***"
 voltadmin shutdown
 
