@@ -9,7 +9,7 @@ pipeline {
                 description: 'Skips the clean step')
         choice(name: 'AGENT', choices: [
                 'Nightly-Build',
-                'loki-n1-build',
+                'loki-n3-build',
                 'Sindhu-test'
         ], description: 'Agent label')
     }

@@ -9,9 +9,8 @@ pipeline {
                 description: 'Speeds up build by skipping gradle clean')
         choice(name: 'AGENT', choices: [
                 'NRE-COMPONENT',
-                'cmcheung-centos-7-component-functional',
-                'css-centos-8-00-component',
-                'css-centos-8-01-component-functional'
+                'loki-n3-test',
+                'Sindhu-test'
         ], description: 'Agent label')
     }
     stages {
