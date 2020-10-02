@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Intel Corporation
+// Copyright (C) 2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,7 +14,6 @@ import org.keycloak.representations.AccessTokenResponse;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Implementation of TokenAuthentication using Keycloak libraries. Supported arguments in the passes map are:
