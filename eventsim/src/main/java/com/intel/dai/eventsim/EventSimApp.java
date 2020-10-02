@@ -36,7 +36,9 @@ public class EventSimApp  extends  EventSim {
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.GET.toString(), eventsimApi::getAllSubscriptionDetails );
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeStateChangeNotifications);
-        network_.register("/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
+        network_.register("/apis/bss/boot/v1/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
+        network_.register("/apis/ims/images", HttpMethod.GET.toString(), eventsimApi::getBootImages);
+        network_.register("/apis/ims/images/*", HttpMethod.GET.toString(), eventsimApi::getBootImageForImageId);
         network_.register("/Inventory/Discover", HttpMethod.POST.toString(), eventsimApi::initiateInventoryDiscovery);
         network_.register("/Inventory/DiscoveryStatus", HttpMethod.GET.toString(), eventsimApi::getAllInventoryDiscoveryStatus);
         network_.register("/Inventory/Hardware", HttpMethod.GET.toString(), eventsimApi::getInventoryHardware);
@@ -217,10 +219,38 @@ public class EventSimApp  extends  EventSim {
         log_.info("Received getBootParameters api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         bootParamsApi_.setBootParamsConfigFile(dataLoader_.getBootParamsFileLocation());
         assert parameters != null;
-        String location = parameters.getOrDefault("hosts",null);
+        String location = parameters.getOrDefault("name",null);
         if(location == null || location.equals("null"))
             return parser_.toString(bootParamsApi_.getBootParameters());
         return parser_.toString(bootParamsApi_.getBootParametersForLocation(location));
+    }
+
+    /**
+     * This method used to fetch boot images data.
+     * @param parameters input details of the request.
+     * @return boot images data
+     * @throws SimulatorException when unable to find configuration file or process data.
+     */
+    public String getBootImages(final Map<String, String> parameters) throws SimulatorException {
+        log_.info("Received getBootImages api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+        bootImagesApi_.setBootImagesConfigFile(dataLoader_.getBootImagesFileLocation());
+        return parser_.toString(bootImagesApi_.getBootImages());
+    }
+
+    /**
+     * This method used to fetch boot images data for a given image id.
+     * @param parameters input details of the request.
+     * @return boot images data for given image id
+     * @throws SimulatorException when unable to find configuration file or process data.
+     */
+    public String getBootImageForImageId(final Map<String, String> parameters) throws SimulatorException {
+        log_.info("Received getBootImages api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+        bootImagesApi_.setBootImagesConfigFile(dataLoader_.getBootImagesFileLocation());
+        assert parameters != null;
+        String imageId = parameters.getOrDefault("sub_component",null);
+        if(imageId == null || imageId.isEmpty())
+            parser_.toString(new PropertyArray());
+        return parser_.toString(bootImagesApi_.getBootImageForId(imageId));
     }
 
     /**

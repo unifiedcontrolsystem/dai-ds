@@ -85,6 +85,7 @@ class DataLoaderSpec extends Specification {
     private final String FOREIGN_SIM_CONFIG = "{\n" +
             "  \"api-simulator-config\" : {\n" +
             "      \"boot-parameters\" : \"/tmp/boot_parameters.json\",\n" +
+            "      \"boot-images\" : \"/tmp/boot_images.json\",\n" +
             "      \"hw-inventory\" : \"/tmp/hw_inventory.json\",\n" +
             "      \"hw-inventory-path\" : \"/tmp\",\n" +
             "      \"hw-inventory-query-path\" : \"/tmp\",\n" +

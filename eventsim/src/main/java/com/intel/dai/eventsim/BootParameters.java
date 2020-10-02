@@ -65,7 +65,7 @@ public class BootParameters {
      */
     private PropertyArray processData(PropertyDocument data) throws SimulatorException {
         if (data == null || !data.isArray() || data.getAsArray().isEmpty())
-            throw new SimulatorException("No boot-images data.");
+            throw new SimulatorException("No boot-parameters data.");
         return data.getAsArray();
     }
 
@@ -77,18 +77,16 @@ public class BootParameters {
      * @throws PropertyNotExpectedType when unable to fetch hosts information data.
      */
     private PropertyArray processDataForLocation(PropertyArray data, String location) throws PropertyNotExpectedType {
-        PropertyArray defaultBootImage = new PropertyArray();
+        PropertyArray result = new PropertyArray();
         for(int i = 0; i < data.size(); i++) {
-            PropertyMap bootImageData = data.getMap(i);
-            if(bootImageData.getArrayOrDefault("hosts", new PropertyArray()).contains("Default"))
-                defaultBootImage.add(bootImageData);
-            if(bootImageData.getArrayOrDefault("hosts", new PropertyArray()).contains(location)) {
-                defaultBootImage.clear();
-                defaultBootImage.add(bootImageData);
-                return defaultBootImage;
+            PropertyMap bootParamsData = data.getMap(i);
+            if(bootParamsData.getArrayOrDefault("hosts", new PropertyArray()).contains(location)) {
+                result.clear();
+                result.add(bootParamsData);
+                break;
             }
         }
-        return defaultBootImage;
+        return result;
     }
 
     /**
@@ -99,9 +97,12 @@ public class BootParameters {
      * @throws ConfigIOParseException unable to find file or parse data.
      */
     private PropertyDocument readConfigFile(String bootParametersConfigFile) throws IOException, ConfigIOParseException {
-        return LoadFileLocation.fromFileLocation(bootParametersConfigFile);
+        try {
+            return LoadFileLocation.fromFileLocation(bootParametersConfigFile).getAsArray();
+        } catch (FileNotFoundException e) {
+            return LoadFileLocation.fromResources(bootParametersConfigFile).getAsArray();
+        }
     }
 
-    private final static String BOOT_IMAGES_KEY = "boot-images";
     private String bootParamsConfigFile_;
 }

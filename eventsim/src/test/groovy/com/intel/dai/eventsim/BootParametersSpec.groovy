@@ -20,10 +20,10 @@ class BootParametersSpec extends Specification {
         e.message.equals(output)
         where:
         input       |   output
-        null        |   "No boot-images data."
-        data        |   "No boot-images data."
-        EMPTY_MAP   |   "No boot-images data."
-        EMPTY_ARRAY |   "No boot-images data."
+        null        |   "No boot-parameters data."
+        data        |   "No boot-parameters data."
+        EMPTY_MAP   |   "No boot-parameters data."
+        EMPTY_ARRAY |   "No boot-parameters data."
     }
 
     def "Set boot parameters configuration file as empty or null"() {

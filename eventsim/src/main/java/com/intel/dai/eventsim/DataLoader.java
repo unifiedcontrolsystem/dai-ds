@@ -141,13 +141,14 @@ class DataLoader {
         PropertyMap apiConfiguration = serverConfiguration_.getMap(FOREIGN_SERVER_CONFIG[0]);
         DataValidation.validateKeys(apiConfiguration, FOREIGN_API_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
         bootParamsFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[0]);
-        hwInventoryFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[1]);
-        hwInventoryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[2]);
-        hwInventoryQueryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[3]);
-        hwInventoryDiscStatusUrl_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[4]);
-        sensorMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[5]);
-        rasMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[6]);
-        jobsMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[7]);
+        bootImagesFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[1]);
+        hwInventoryFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[2]);
+        hwInventoryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[3]);
+        hwInventoryQueryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[4]);
+        hwInventoryDiscStatusUrl_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[5]);
+        sensorMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[6]);
+        rasMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[7]);
+        jobsMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[8]);
     }
 
     /**
@@ -251,6 +252,7 @@ class DataLoader {
     List<String> getAllLocations() { return allLocations_ ; }
 
     public String getBootParamsFileLocation() { return bootParamsFileAbsolutePath_; }
+    public String getBootImagesFileLocation() { return bootImagesFileAbsolutePath_; }
     public String getHwInventoryFileLocation() { return hwInventoryFileAbsolutePath_; }
     public String getHwInventoryFileLocationPath() { return hwInventoryFilePath_; }
     public String getHwInventoryQueryLocationPath() { return hwInventoryQueryFilePath_; }
@@ -270,6 +272,7 @@ class DataLoader {
     private PropertyMap networkConfiguration_;
 
     private String bootParamsFileAbsolutePath_;
+    private String bootImagesFileAbsolutePath_;
     private String hwInventoryFileAbsolutePath_;
     private String hwInventoryFilePath_;
     private String hwInventoryQueryFilePath_;
@@ -284,7 +287,7 @@ class DataLoader {
     private final String serverConfigFile_;
     private final String voltdbServer_;
 
-    private final String[] FOREIGN_API_CONFIG_KEYS = {"boot-parameters", "hw-inventory", "hw-inventory-path", "hw-inventory-query-path",
+    private final String[] FOREIGN_API_CONFIG_KEYS = {"boot-parameters", "boot-images", "hw-inventory", "hw-inventory-path", "hw-inventory-query-path",
             "hw-inv-discover-status-url", "sensor-metadata", "ras-metadata", "jobs-metadata"};
     private final String[] FOREIGN_EVENTS_CONFIG_KEYS = {"count", "events-template-config", "time-delay-mus"};
     private final String[] NETWORK_CONFIG_KEYS = {"network"};

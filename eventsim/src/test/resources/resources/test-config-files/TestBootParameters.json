@@ -1,0 +1,38 @@
+[
+  {
+    "kernel": "s3://boot-images/boot-image-id-0/kernel"
+  },
+  {
+    "kernel": "s3://boot-images/boot-image-id-1/kernel"
+  },
+  {
+    "initrd": "s3://boot-images/boot-image-id-0/initrd"
+  },
+  {
+    "initrd": "s3://boot-images/boot-image-id-1/initrd"
+  },
+  {
+    "hosts": [
+      "host0"
+    ],
+    "params": "param0",
+    "kernel": "s3://boot-images/boot-image-id-0/kernel",
+    "initrd": "s3://boot-images/boot-image-id-0/initrd"
+  },
+  {
+    "hosts": [
+      "host1"
+    ],
+    "params": "param1",
+    "kernel": "s3://boot-images/boot-image-id-0/kernel",
+    "initrd": "s3://boot-images/boot-image-id-0/initrd"
+  },
+  {
+    "hosts": [
+      "host2"
+    ],
+    "params": "param2",
+    "kernel": "s3://boot-images/boot-image-id-2/kernel",
+    "initrd": "s3://boot-images/boot-image-id-2/initrd"
+  }
+]

@@ -111,27 +111,57 @@ class EventSimAppSpec extends Specification {
 
     def "fetch boot parameters details"() {
         Map<String, String> parameters = new HashMap<>()
-        parameters.put("hosts", "x0")
+        parameters.put("name", "host0")
 
-        File input = createAndLoadDataToFile("test.json", BOOT_PARAM_CONFIG)
-        eventSimApp_.dataLoader_.getBootParamsFileLocation() >> input.getAbsolutePath()
+        eventSimApp_.dataLoader_.getBootParamsFileLocation() >> BOOT_PARAMETERS_CONFIG
         eventSimApp_.bootParamsApi_ = new BootParameters()
 
         expect:
         eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
                 .containsKey("hosts")
         eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
-                .getArray("hosts").get(0).equals("x0")
-        parameters.put("hosts", "x1")
-        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
-                .containsKey("hosts")
-        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
-                .getArray("hosts").get(0).equals("Default")
-        parameters.put("hosts", null)
-        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
-                .containsKey("hosts")
-        eventSimApp_.parser_.fromString(eventSimApp_.getBootParameters(parameters)).getAsArray().getMap(0)
-                .getArray("hosts").get(0).equals("Default")
+                .getArray("hosts").get(0).equals("host0")
+    }
+
+    def "fetch boot images details"() {
+        Map<String, String> parameters = new HashMap<>()
+
+        eventSimApp_.dataLoader_.getBootImagesFileLocation() >> BOOT_IMAGES_CONFIG
+        eventSimApp_.bootImagesApi_ = new BootImages()
+
+        expect:
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImages(parameters)).getAsArray().getMap(0)
+                .containsKey("id")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImages(parameters)).getAsArray().getMap(0)
+                .getString("id").equals("boot-image-id-0")
+    }
+
+    def "Read tmp file, fetch boot images details"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("sub_component", "boot-image-id-0")
+
+        when:
+        File testConfig = createAndLoadDataToFile("test.json", file_data)
+        eventSimApp_.dataLoader_.getBootImagesFileLocation() >> testConfig.getAbsolutePath()
+        then:
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImages(parameters)).getAsArray().size() == result0
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsMap().size() == result1
+        where:
+        file_data                          | result0 |  result1
+        "[]"                               |   0     |     0
+        "[{\"id\" : \"boot-image-id-0\"}]" |   1     |     1
+    }
+
+    def "fetch boot images details for a given boot image id"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("sub_component", "boot-image-id-0")
+
+        eventSimApp_.dataLoader_.getBootImagesFileLocation() >> BOOT_IMAGES_CONFIG
+
+        expect:
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsMap().containsKey("id")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsMap().getString("id")
+                .equals("boot-image-id-0")
     }
 
     def "Initiate inventory discovery and observe discovery status"() {
@@ -201,7 +231,6 @@ class EventSimAppSpec extends Specification {
         parameters.put("users", "root")
         parameters.put("nodes", "node01 node02")
         parameters.put("starttime", "2019-02-14 02:15:58")
-
         expect :
         eventSimApp_.modifyReservation(parameters).contains("{\"Status\":\"F\"")
     }
@@ -304,6 +333,8 @@ class EventSimAppSpec extends Specification {
 
     private Logger logMock_
     private EventSimApp eventSimApp_
+    private final String BOOT_IMAGES_CONFIG = "/resources/test-config-files/TestBootImages.json"
+    private final String BOOT_PARAMETERS_CONFIG = "/resources/test-config-files/TestBootParameters.json"
 
     private final String NETWORK_CONFIG = "{\n" +
             "  \"network\" : \"sse\",\n" +
@@ -321,21 +352,6 @@ class EventSimAppSpec extends Specification {
             "    \"uri\": \"amqp://127.0.0.1\"\n" +
             "  }\n" +
             "}"
-
-    private final String BOOT_PARAM_CONFIG = "[\n" +
-            "  {\n" +
-            "    \"hosts\": [\n" +
-            "      \"Default\"\n" +
-            "    ],\n" +
-            "    \"id\": \"default-boot-image-id\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"hosts\": [\n" +
-            "      \"x0\"\n" +
-            "    ],\n" +
-            "    \"id\": \"boot-image-id-x0\"\n" +
-            "  }\n" +
-            "]"
 
     private final String HARDWARE_INVENTORY_CONFIG = "[{\n" +
             "  \"Nodes\": [\n" +
