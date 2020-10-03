@@ -34,6 +34,7 @@ pipeline {
                     }
                 }
                 stage('Quick Component Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {
@@ -43,6 +44,7 @@ pipeline {
                     }
                 }
                 stage('Full Component Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         sh 'rm -rf build'
@@ -50,21 +52,6 @@ pipeline {
                             utilities.InvokeGradle("clean")
                             utilities.InvokeGradle("build")
                         }
-                    }
-                }
-                stage('Full Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    steps {
-                        sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
-                        RunIntegrationTests()
-                    }
-                }
-                stage('Partial Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    steps {
-                        script{ utilities.InvokeGradle(":inventory:clean") }
-                        RunIntegrationTests()
                     }
                 }
                 stage('Archive') {
