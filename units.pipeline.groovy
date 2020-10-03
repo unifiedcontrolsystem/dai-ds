@@ -9,7 +9,6 @@ pipeline {
                 description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'NRE-UNIT',
-                'loki-n3-build',
                 'Sindhu-test'
         ], description: 'Agent label')
     }
