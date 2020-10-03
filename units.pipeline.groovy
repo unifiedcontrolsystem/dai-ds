@@ -33,28 +33,28 @@ pipeline {
                             utilities.FixFilesPermission()
                             utilities.CleanUpMachine('build/distributions')
                         }
-
-                        sh 'rm -rf build/distributions'
-                        script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
                     }
                 }
-                stage('Quick Unit Tests') {
-                    options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    steps {
-                        script {
-                            utilities.InvokeGradle("build")
-                            utilities.InvokeGradle("makeAllArtifacts")
-                        }
-                    }
-                }
-                stage('Full Unit Tests') {
-                    options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                stage('Full Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -rf build'
-                        script{
-                            utilities.InvokeGradle("clean")
-                            utilities.InvokeGradle("build")
-                        }
+                        script{ utilities.InvokeGradle("clean") }
+                    }
+                }
+                stage('Partial Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    steps {
+                        sh 'rm -rf build/distributions/*.sh'
+                        script{ utilities.InvokeGradle(":inventory:clean") }
+                    }
+                }
+                stage('Unit Tests') {
+                    options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        script { utilities.InvokeGradle("build") }
+                        script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
+
                     }
                 }
                 stage('Reports') {
@@ -71,7 +71,7 @@ pipeline {
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-                        archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/**, build/reports/**'
+                        archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/*.sh, build/reports/**'
                     }
                 }
             }
