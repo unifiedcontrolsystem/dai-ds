@@ -29,13 +29,13 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
-                            utilities.CopyIntegrationTestScriptsToBuildDistributions()
+                            utilities.CopyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
                             utilities.FixFilesPermission()
                             utilities.CleanUpMachine('build/distributions')
                         }
 
                         sh 'rm -rf build/distributions'
-                        utilities.CopyIntegrationTestScriptsToBuildDistributions()
+                        script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
                     }
                 }
                 stage('Clean') {
