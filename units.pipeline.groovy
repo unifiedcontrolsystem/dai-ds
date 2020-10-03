@@ -52,8 +52,7 @@ pipeline {
                     }
                 }
                 stage('Reports') {
-                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE',
-                            buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit '**/test-results/**/*.xml'
