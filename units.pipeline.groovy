@@ -66,7 +66,7 @@ pipeline {
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-                        archiveArtifacts 'build/distributions/**, build/reports/**'
+                        archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/**, build/reports/**'
                     }
                 }
             }

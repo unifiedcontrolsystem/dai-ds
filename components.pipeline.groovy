@@ -58,7 +58,7 @@ pipeline {
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
-                        archiveArtifacts allowEmptyArchive: true, 'build/reports/**'
+                        archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**'
                     }
                 }
             }
