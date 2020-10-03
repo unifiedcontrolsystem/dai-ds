@@ -38,17 +38,22 @@ pipeline {
                         script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
                     }
                 }
-                stage('Clean') {
+                stage('Full Clean') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -rf build'
                         script{ utilities.InvokeGradle("clean") }
                     }
                 }
+                stage('Partial Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    steps {
+                        script{ utilities.InvokeGradle(":inventory:clean") }
+                    }
+                }
                 stage('Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        sh 'inventory/src/main/java/com/intel/dai/inventory/InventoryUpdateThread.java' // force some activities
                         script { utilities.InvokeGradle("build") }
                     }
                 }
