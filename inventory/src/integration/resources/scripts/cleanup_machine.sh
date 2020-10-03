@@ -1,5 +1,8 @@
 #!/bin/bash
 
+distributions=$(dirname "$0")
+echo "*** distributions_dir: ${distributions}"
+
 echo "*** Stop any local voltdb instance ***"
 voltadmin shutdown
 
@@ -21,7 +24,7 @@ echo "*** Delete logstash configuration files ***"
 sudo rm -f /etc/logstash/conf.d/*.conf
 
 echo "*** Uninstall DAI ***"
-for installer in $(find distributions -maxdepth 1 -name "install-*.sh")
+for installer in $(find ${distributions} -maxdepth 1 -name "install-*.sh")
 do
   sudo $installer -U
 done
