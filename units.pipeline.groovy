@@ -14,7 +14,7 @@ pipeline {
         ], description: 'Agent label')
     }
     stages {
-        stage ('unit-test') {
+        stage ('unit-tests') {
             agent { label "${AGENT}" }
             environment {
                 PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
@@ -33,6 +33,8 @@ pipeline {
                             utilities.FixFilesPermission()
                             utilities.CleanUpMachine('build/distributions')
                         }
+
+                        sh 'rm -rf build/distributions'
                     }
                 }
                 stage('Clean') {
@@ -42,15 +44,15 @@ pipeline {
                         script{ utilities.InvokeGradle("clean") }
                     }
                 }
-                stage('Unit Test') {
+                stage('Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script { utilities.InvokeGradle("build") }
                         sh 'touch inventory/build/test-results/test/*.xml' // overrides strict behavior of junit step
                     }
                 }
-                stage('Report') {
-                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
+                stage('Reports') {
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'

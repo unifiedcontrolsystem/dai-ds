@@ -14,7 +14,7 @@ pipeline {
         ], description: 'Agent label')
     }
     stages {
-        stage ('component-test') {
+        stage ('component-tests') {
             agent { label "${AGENT}" }
             environment { PATH = "${PATH}:/home/${USER}/voltdb9.1/bin" }
             stages {
@@ -40,14 +40,14 @@ pipeline {
                         script{ utilities.InvokeGradle("clean") }
                     }
                 }
-                stage('Component Test') {
+                stage('Component Tests') {
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         RunIntegrationTests()
                     }
                 }
-                stage('Report') {
-                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
+                stage('Reports') {
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE',
                             buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
@@ -56,10 +56,10 @@ pipeline {
                 }
                 stage('Archive') {
                     steps {
-                        archiveArtifacts 'build/reports/**'
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
+                        archiveArtifacts 'build/reports/**'
                     }
                 }
             }
