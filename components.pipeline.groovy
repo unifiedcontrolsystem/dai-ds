@@ -5,7 +5,7 @@
 pipeline {
     agent none
     parameters {
-        booleanParam(name: 'QUICK_BUILD', defaultValue: false,
+        booleanParam(name: 'QUICK_BUILD', defaultValue: true,
                 description: 'Speeds up build by skipping gradle clean')
         choice(name: 'AGENT', choices: [
                 'NRE-COMPONENT',
@@ -28,7 +28,7 @@ pipeline {
 
                         script {
                             utilities.FixFilesPermission()
-                            utilities.CleanUpMachine()
+                            CleanUpMachine()
                         }
                     }
                 }
@@ -93,4 +93,10 @@ def StartHWInvDb() {
 // containers need to be shutdown.
 def StopHWInvDb() {
     sh 'voltadmin shutdown --force || true'
+}
+
+def CleanUpMachine() {
+    def script = 'inventory/src/integration/resources/scripts/clean_up_machine.sh'
+    sh "chmod a+x ${script} > /dev/null"
+    sh "${script}"
 }
