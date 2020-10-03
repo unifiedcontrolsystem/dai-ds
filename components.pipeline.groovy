@@ -13,14 +13,15 @@ pipeline {
         ], description: 'Agent label')
     }
     stages {
-        stage ('component-tests') {
+        stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
             agent { label "${AGENT}" }
             environment { PATH = "${PATH}:/home/${USER}/voltdb9.1/bin" }
-            stages {
+            stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
                         echo "Building on ${AGENT}"
                         sh 'hostname'
+
                         lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
