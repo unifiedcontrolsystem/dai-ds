@@ -46,7 +46,7 @@ pipeline {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
                         sh 'rm -rf build/distributions/*.sh'
-                        script{ utilities.InvokeGradle(":inventory:clean") }
+                        script{ utilities.InvokeGradle(":properties:clean") }
                     }
                 }
                 stage('Unit Tests') {
