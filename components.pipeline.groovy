@@ -57,9 +57,6 @@ pipeline {
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
-
-                        jacoco classPattern: '**/classes/java/main/com/intel/', execPattern: '**/integrationTest.exec'
-                        junit '**/test-results/**/*.xml'
                     }
                 }
             }
