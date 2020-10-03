@@ -27,8 +27,9 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
+                            utilities.CopyIntegrationTestScriptsToBuildDistributions()
                             utilities.FixFilesPermission()
-                            CleanUpMachine()
+                            utilities.CleanUpMachine('build/distributions')
                         }
                     }
                 }
@@ -93,10 +94,4 @@ def StartHWInvDb() {
 // containers need to be shutdown.
 def StopHWInvDb() {
     sh 'voltadmin shutdown --force || true'
-}
-
-def CleanUpMachine() {
-    def script = 'inventory/src/integration/resources/scripts/clean_up_machine.sh'
-    sh "chmod a+x ${script} > /dev/null"
-    sh "${script}"
 }

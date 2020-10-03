@@ -29,8 +29,9 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
+                            utilities.CopyIntegrationTestScriptsToBuildDistributions()
                             utilities.FixFilesPermission()
-                            CleanUpMachine()
+                            utilities.CleanUpMachine('build/distributions')
                         }
                     }
                 }
@@ -71,8 +72,3 @@ pipeline {
     }
 }
 
-def CleanUpMachine() {
-    def script = 'inventory/src/integration/resources/scripts/clean_up_machine.sh'
-    sh "chmod a+x ${script} > /dev/null"
-    sh "${script}"
-}

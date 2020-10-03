@@ -27,8 +27,9 @@ pipeline {
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
+                        utilities.CopyIntegrationTestScriptsToBuildDistributions()
                         script{ utilities.FixFilesPermission() }
-                        CleanUpMachine()
+                        utilities.CleanUpMachine('build/distributions')
                     }
                 }
                 stage('Clean') {
@@ -67,10 +68,6 @@ def RunIntegrationTests() {
     StartHWInvDb()
     utilities.InvokeGradle("integrationTest")
     sh 'touch ./inventory/build/test-results/test/*.xml'  // in case no new tests ran; make junit step happy
-}
-
-def CleanUpMachine() {
-    sh './inventory/src/integration/resources/scripts/clean_up_machine.sh'
 }
 
 // This is one way to setup for component level testing.  You can also use docker-compose or partially

@@ -30,9 +30,9 @@ pipeline {
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        script { utilities.FixFilesPermission() }
-                        // No need to clean up system because component tests and functional tests should
-                        // not have run on this system
+                        utilities.CopyIntegrationTestScriptsToBuildDistributions()
+                        script{ utilities.FixFilesPermission() }
+                        utilities.CleanUpMachine('build/distributions')
                     }
                 }
                 stage('Clean') {
@@ -72,5 +72,5 @@ def CopyIntegrationTestScriptsToBuildDistributions() {
     sh 'mkdir -p build/json-server'
     sh 'mkdir -p build/distributions'
     sh 'cp ./inventory/src/integration/resources/scripts/json-server/* ./build/json-server'
-    sh 'cp ./inventory/src/integration/resources/scripts/clean_up_machine.sh ./build/distributions'
+    sh 'cp ./inventory/src/integration/resources/scripts/cleanup_machine.sh ./build/distributions'
 }
