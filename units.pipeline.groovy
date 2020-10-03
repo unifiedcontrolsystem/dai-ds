@@ -6,7 +6,7 @@ pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: true,
-                description: 'Skips the clean step')
+                description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'Nightly-Build',
                 'loki-n3-build',
