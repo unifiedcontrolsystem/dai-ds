@@ -28,10 +28,8 @@ pipeline {
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        script {
-                            utilities.FixFilesPermission()
-                            CleanUpMachine()
-                        }
+                        script { utilities.FixFilesPermission() }
+                        CleanUpMachine()
                     }
                 }
                 stage('Clean') {
@@ -44,10 +42,8 @@ pipeline {
                 stage('Unit Test') {
                     options{ catchError(message: "Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script {
-                            utilities.InvokeGradle("build")
-                            sh 'touch inventory/build/test-results/test/*.xml' // overrides strict behavior of junit step
-                        }
+                        script { utilities.InvokeGradle("build") }
+                        sh 'touch inventory/build/test-results/test/*.xml' // overrides strict behavior of junit step
                     }
                 }
                 stage('Report') {

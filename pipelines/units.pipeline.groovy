@@ -45,10 +45,8 @@ pipeline {
                 stage('Unit Test') {
                     options{ catchError(message: "Unit Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script {
-                            utilities.InvokeGradle("build")
-                            sh 'touch inventory/build/test-results/test/*.xml'
-                        }
+                        script { utilities.InvokeGradle("build") }
+                        sh 'touch inventory/build/test-results/test/*.xml'
                     }
                 }
                 stage('Report') {
