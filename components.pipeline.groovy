@@ -48,7 +48,11 @@ pipeline {
                 stage('Component Tests') {
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        RunIntegrationTests()
+                            script { utilities.InvokeGradle("jar", 5) }
+                            StartHWInvDb()
+                            script {utilities.InvokeGradle("integrationTest", 5) }
+                            StopHWInvDb()
+                        }
                     }
                 }
                 stage('Reports') {
@@ -69,13 +73,6 @@ pipeline {
             }
         }
     }
-}
-
-def RunIntegrationTests() {
-    utilities.InvokeGradle("jar", 5)
-    StartHWInvDb()
-    utilities.InvokeGradle("integrationTest", 5)
-    StopHWInvDb()
 }
 
 // This is one way to setup for component level testing.  You can also use docker-compose or partially
