@@ -48,11 +48,10 @@ pipeline {
                 stage('Component Tests') {
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                            script { utilities.InvokeGradle("jar", 5) }
-                            StartHWInvDb()
-                            script {utilities.InvokeGradle("integrationTest", 5) }
-                            StopHWInvDb()
-                        }
+                        script { utilities.InvokeGradle("jar", 5) }
+                        StartHWInvDb()
+                        script {utilities.InvokeGradle("integrationTest", 5) }
+                        StopHWInvDb()
                     }
                 }
                 stage('Reports') {
