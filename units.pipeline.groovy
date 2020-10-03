@@ -28,8 +28,10 @@ pipeline {
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        script { utilities.FixFilesPermission() }
-                        CleanUpMachine()
+                        script {
+                            utilities.FixFilesPermission()
+                            utilities.CleanUpMachine()
+                        }
                     }
                 }
                 stage('Clean') {
@@ -67,8 +69,4 @@ pipeline {
             }
         }
     }
-}
-
-def CleanUpMachine() {
-    sh 'inventory/src/integration/resources/scripts/clean_up_machine.sh'
 }
