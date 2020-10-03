@@ -35,6 +35,7 @@ pipeline {
                         }
 
                         sh 'rm -rf build/distributions'
+                        utilities.CopyIntegrationTestScriptsToBuildDistributions()
                     }
                 }
                 stage('Clean') {
