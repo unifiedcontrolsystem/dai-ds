@@ -68,7 +68,7 @@ pipeline {
 }
 
 def RunIntegrationTests() {
-    utilities.InvokeGradle("build")
+//    utilities.InvokeGradle("build")
     StartHWInvDb()
     utilities.InvokeGradle("integrationTest")
     sh 'touch ./inventory/build/test-results/test/*.xml'  // in case no new tests ran; make junit step happy
