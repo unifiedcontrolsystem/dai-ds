@@ -43,7 +43,7 @@ pipeline {
                 stage('Partial Clean') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
-                        script{ utilities.InvokeGradle(":inventory:clean") }
+                        script{ utilities.InvokeGradle(":dai_core:clean") }
                     }
                 }
                 stage('Component Tests') {
