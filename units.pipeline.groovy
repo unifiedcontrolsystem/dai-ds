@@ -38,23 +38,35 @@ pipeline {
                         script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
                     }
                 }
-                stage('Full Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    steps {
-                        sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
-                    }
-                }
-                stage('Partial Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    steps {
-                        script{ utilities.InvokeGradle(":inventory:clean") }
-                    }
-                }
-                stage('Unit Tests') {
+//                stage('Full Clean') {
+//                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+//                    steps {
+//
+//                    }
+//                }
+//                stage('Partial Clean') {
+//                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+//                    steps {
+//                        script{ utilities.InvokeGradle(":inventory:clean") }
+//                    }
+//                }
+                stage('Quick Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script { utilities.InvokeGradle("build") }
+                        script {
+                            utilities.InvokeGradle("build")
+                            utilities.InvokeGradle("makeAllArtifacts")
+                        }
+                    }
+                }
+                stage('Full Unit Tests') {
+                    options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        sh 'rm -rf build'
+                        script{
+                            utilities.InvokeGradle("clean")
+                            utilities.InvokeGradle("build")
+                        }
                     }
                 }
                 stage('Reports') {
