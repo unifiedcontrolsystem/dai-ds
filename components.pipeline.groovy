@@ -6,7 +6,7 @@ pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: true,
-                description: 'Speeds up build by skipping gradle clean')
+                description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'NRE-COMPONENT',
                 'loki-n3-test',
@@ -33,11 +33,17 @@ pipeline {
                         }
                     }
                 }
-                stage('Clean') {
+                stage('Full Clean') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -rf build'
                         script{ utilities.InvokeGradle("clean") }
+                    }
+                }
+                stage('Partial Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    steps {
+                        script{ utilities.InvokeGradle(":inventory:clean") }
                     }
                 }
                 stage('Component Tests') {
