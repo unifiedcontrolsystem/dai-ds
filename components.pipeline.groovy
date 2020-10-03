@@ -33,25 +33,30 @@ pipeline {
                         }
                     }
                 }
-                stage('Quick Component Tests') {
-                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    steps {
-                        script {
-                            utilities.InvokeGradle("build")
-                            utilities.InvokeGradle("makeAllArtifacts")
-                        }
-                    }
-                }
-                stage('Full Component Tests') {
+                stage('Full Clean') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         sh 'rm -rf build'
-                        script{
-                            utilities.InvokeGradle("clean")
-                            utilities.InvokeGradle("build")
-                        }
+                        script{ utilities.InvokeGradle("clean") }
+                    }
+                }
+                stage('Partial Clean') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    steps {
+                        script{ utilities.InvokeGradle(":inventory:clean") }
+                    }
+                }
+                stage('Component Tests') {
+                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        RunIntegrationTests()
+                    }
+                }
+                stage('Reports') {
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        jacoco classPattern: '**/classes/java/main/com/intel/'
+                        junit '**/test-results/**/*.xml'
                     }
                 }
                 stage('Archive') {
