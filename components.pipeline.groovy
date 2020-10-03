@@ -48,7 +48,9 @@ pipeline {
                 stage('Component Tests') {
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        RunIntegrationTests()
+                        retry(5) {
+                            RunIntegrationTests()
+                        }
                     }
                 }
                 stage('Reports') {
