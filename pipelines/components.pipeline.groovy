@@ -67,7 +67,7 @@ def RunIntegrationTests() {
     utilities.InvokeGradle("build")
     StartHWInvDb()
     utilities.InvokeGradle("integrationTest")
-    sh 'touch ./inventory/build/test-results/test/*.xml'  // in case no new tests ran; make junit step happy
+    sh 'touch ./dai_core/build/test-results/integrationTest/*.xml'  // in case no new tests ran; make junit step happy
 }
 
 // This is one way to setup for component level testing.  You can also use docker-compose or partially
