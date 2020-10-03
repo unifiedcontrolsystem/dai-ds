@@ -51,9 +51,7 @@ pipeline {
                 stage('Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        retry(5) {
-                            script { utilities.InvokeGradle("build") }
-                        }
+                        script { utilities.InvokeGradle("build", 5) }
                         script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
 
                     }

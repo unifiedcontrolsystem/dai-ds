@@ -48,9 +48,7 @@ pipeline {
                 stage('Component Tests') {
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        retry(5) {
-                            RunIntegrationTests()
-                        }
+                        RunIntegrationTests()
                     }
                 }
                 stage('Reports') {
@@ -74,9 +72,9 @@ pipeline {
 }
 
 def RunIntegrationTests() {
-    utilities.InvokeGradle("jar")
+    utilities.InvokeGradle("jar", 5)
     StartHWInvDb()
-    utilities.InvokeGradle("integrationTest")
+    utilities.InvokeGradle("integrationTest", 5)
     StopHWInvDb()
 }
 
