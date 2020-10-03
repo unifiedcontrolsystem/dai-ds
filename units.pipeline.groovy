@@ -30,7 +30,7 @@ pipeline {
                         script {
                             utilities.CopyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
                             utilities.FixFilesPermission()
-                            utilities.CleanUpMachine('build/distributions')
+                            // Do NOT clean the machine here!  It will break component tests
                         }
                     }
                 }
