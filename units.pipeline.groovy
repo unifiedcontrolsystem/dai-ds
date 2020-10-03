@@ -38,18 +38,6 @@ pipeline {
                         script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
                     }
                 }
-//                stage('Full Clean') {
-//                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-//                    steps {
-//
-//                    }
-//                }
-//                stage('Partial Clean') {
-//                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-//                    steps {
-//                        script{ utilities.InvokeGradle(":inventory:clean") }
-//                    }
-//                }
                 stage('Quick Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
