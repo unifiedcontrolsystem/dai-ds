@@ -48,8 +48,8 @@ pipeline {
                 stage('Unit Tests') {
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
+                        sh 'inventory/src/main/java/com/intel/dai/inventory/InventoryUpdateThread.java' // force some activities
                         script { utilities.InvokeGradle("build") }
-                        sh 'touch inventory/build/test-results/test/*.xml' // overrides strict behavior of junit step
                     }
                 }
                 stage('Reports') {
