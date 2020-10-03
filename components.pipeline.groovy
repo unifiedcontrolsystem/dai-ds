@@ -76,7 +76,6 @@ def RunIntegrationTests() {
     utilities.InvokeGradle("jar")
     StartHWInvDb()
     utilities.InvokeGradle("integrationTest")
-    sh 'touch ./dai_core/build/test-results/integrationTest/*.xml'  // in case no new tests ran; make junit step happy
     StopHWInvDb()
 }
 
