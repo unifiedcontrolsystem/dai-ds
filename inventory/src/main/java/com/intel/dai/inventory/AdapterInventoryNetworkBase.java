@@ -49,25 +49,16 @@ abstract class AdapterInventoryNetworkBase {
         return execute(adapterCore);
     }
 
-    /**
-     * Ingests the initial HW inventory data into data base.
-     * Patch missing HW inventory history.
-     *          1. Check with postgres to see if the last time stamp is "", if so we need to populate the empty inventory snapshot tables
-     *          2. Get inventory history; ingest to raw
-     *
-     *          Note that multiple adapter instances can be running SIMULTANEOUSLY!  Dropping the table
-     *          here will lead to nondeterminism.
-     *          onlineInventoryDatabaseClient_.deleteAllRawHistoricalRecords();
-     */
-    void postInitialize() {
-        Thread t = new Thread(new InventoryUpdateThread(log_));
-        t.start();  // background updates of HW inventory
-    }
+    void postInitialize() { }
 
     /**
-     * Initializes required hardware inventory api instances used to fetch initial hw inventory data and load into db.
+     * Ingests HW inventory data into database.  Note that if postgres already contains inventory data
+     * only a patching of the inventory data is performed.
      */
     void preInitialize() {
+        log_.info("Starting InventoryUpdateThread ...");
+        Thread t = new Thread(new InventoryUpdateThread(log_));
+        t.start();  // background updates of HW inventory
     }
 
     private final AdapterInformation adapter_;

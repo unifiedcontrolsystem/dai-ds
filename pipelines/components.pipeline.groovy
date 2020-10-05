@@ -5,72 +5,73 @@
 pipeline {
     agent none
     parameters {
-        booleanParam(name: 'QUICK_BUILD', defaultValue: false,
-                description: 'Speeds up build by skipping gradle clean')
+        booleanParam(name: 'QUICK_BUILD', defaultValue: true,
+                description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'NRE-COMPONENT',
-                'cmcheung-centos-7-component-functional',
-                'css-centos-8-00-component',
-                'css-centos-8-01-component-functional'
+                'Sindhu-test'
         ], description: 'Agent label')
     }
     stages {
-        stage ('component-test') {
+        stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
             agent { label "${AGENT}" }
             environment { PATH = "${PATH}:/home/${USER}/voltdb9.1/bin" }
-            stages {
+            stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
                         echo "Building on ${AGENT}"
                         sh 'hostname'
+
                         lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        script{ utilities.FixFilesPermission() }
-                        CleanUpMachine()
+                        script {
+                            utilities.copyIntegrationTestScriptsToBuildDistributions()
+                            utilities.fixFilesPermission()
+                            utilities.cleanUpMachine('build/distributions')
+                        }
                     }
                 }
-                stage('Clean') {
+                stage('Quick Component Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    options{ catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    steps {
+                        script { utilities.invokeGradle("jar") }
+                        StartHWInvDb()
+                        script {utilities.invokeGradle("integrationTest") }
+                        StopHWInvDb()
+                    }
+                }
+                stage('Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
+                        script { utilities.invokeGradle("clean jar") }
+                        StartHWInvDb()
+                        script { utilities.invokeGradle("integrationTest") }
+                        StopHWInvDb()
                     }
                 }
-                stage('Component Test') {
-                    options{ catchError(message: "Component Test failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
-                    steps {
-                        RunIntegrationTests()
-                    }
-                }
-                stage('Report') {
-                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
-                            buildResult: 'UNSTABLE') }
+                stage('Reports') {
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        junit '**/test-results/**/*.xml'
+                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
                     }
                 }
                 stage('Archive') {
                     steps {
-                        archiveArtifacts 'build/reports/**'
+                        sh 'rm -f *.zip'
+                        zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
+                        archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**'
                     }
                 }
             }
         }
     }
-}
-
-def RunIntegrationTests() {
-    utilities.InvokeGradle("build")
-    StartHWInvDb()
-    utilities.InvokeGradle("integrationTest")
-    sh 'touch ./inventory/build/test-results/test/*.xml'  // in case no new tests ran; make junit step happy
-}
-
-def CleanUpMachine() {
-    sh './inventory/src/integration/resources/scripts/clean_up_machine.sh'
 }
 
 // This is one way to setup for component level testing.  You can also use docker-compose or partially

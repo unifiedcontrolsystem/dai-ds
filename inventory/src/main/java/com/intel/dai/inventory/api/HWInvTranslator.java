@@ -3,10 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 package com.intel.dai.inventory.api;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
@@ -23,8 +21,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -325,7 +321,6 @@ public class HWInvTranslator {
         return canonicalTree;
     }
 
-
     private HWInvHistory toCanonical(ForeignHWInvHistory foreignHist) {
         HWInvHistory hist = new HWInvHistory();
         for (ForeignHWInvHistoryAtLoc componentHistory: foreignHist.Components) {
@@ -583,7 +578,8 @@ public class HWInvTranslator {
         }
     }
 
-    private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
+    private static Logger logger =  // this cannot be final or unit tests will fail
+            LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
 
     private final Gson gson;
     private final HWInvUtil util;

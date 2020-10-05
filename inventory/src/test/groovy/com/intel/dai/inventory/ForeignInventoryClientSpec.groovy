@@ -4,8 +4,6 @@
 //
 package com.intel.dai.inventory
 
-import com.intel.dai.dsapi.HWInvDbApi
-import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.inventory.api.HWInvDiscovery
 import com.intel.logging.Logger
 import org.apache.commons.lang3.tuple.ImmutablePair
