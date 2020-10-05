@@ -578,7 +578,8 @@ public class HWInvTranslator {
         }
     }
 
-    private static final Logger logger = LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
+    private static Logger logger =  // this cannot be final or unit tests will fail
+            LoggerFactory.getInstance("CLIApi", "HWInvTranslator", "console");
 
     private final Gson gson;
     private final HWInvUtil util;

@@ -96,4 +96,9 @@ class HWInvTranslatorSpec extends Specification {
         ID      | EventType | Timestamp | FRUID
         "ID"    | "Type"    | "ts"      | "FRUID"
     }
+
+    // Uncomment the following test to debug the build infrastructure
+//    def "force failure" () {
+//        expect: false
+//    }
 }
