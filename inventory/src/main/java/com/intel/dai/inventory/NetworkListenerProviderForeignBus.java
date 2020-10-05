@@ -143,6 +143,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             return;
         }
 
+        log_.info("Starting InventoryUpdateThread ...");
         Thread t = new Thread(new InventoryUpdateThread(log_));
         t.start();  // background update of inventory
     }

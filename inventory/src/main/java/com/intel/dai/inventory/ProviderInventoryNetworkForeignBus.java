@@ -40,9 +40,11 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
         ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory_, adapterInfo,
                 "/opt/ucs/log/ProviderInventoryNetworkForeignBus-Benchmarking.json", 5);
         String configName = ProviderInventoryNetworkForeignBus.class.getSimpleName() + ".json";
+
+        app.preInitialize();
+        app.postInitialize();
+
         try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
-            app.preInitialize();
-            app.postInitialize();
             app.entryPoint(configStream);
         } catch (IOException | ConfigIOParseException e) {
             logger.exception(e, "Missing or unreadable configuration is fatal, halting the provider process.");

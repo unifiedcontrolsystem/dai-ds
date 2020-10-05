@@ -24,6 +24,7 @@ class HWInvTranslatorSpec extends Specification {
 
     def setup() {
         ts = new HWInvTranslator()
+        ts.logger = Mock(Logger)
     }
 
     def "toCanonical from ForeignHWInvByLoc - negative" () {
@@ -50,8 +51,9 @@ class HWInvTranslatorSpec extends Specification {
     def "foreignToCanonical - Path"() {
         def ts = new HWInvTranslator(new HWInvUtilImpl(Mock(Logger)))
         def res = ts.foreignToCanonical(Paths.get(inputFileName))
-        println "Translated " + inputFileName + ":"
-        println res.getValue()
+        // Uncomment the println statements if we really need to debug the translations
+//        println "Translated " + inputFileName + ":"
+//        println res.getValue()
         expect:
         res.getKey() == location
 

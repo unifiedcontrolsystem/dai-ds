@@ -30,6 +30,11 @@ class InventoryUpdateThread implements Runnable {
      * information from the foreign server.
      */
     public void run() {
+        final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
+        if (factory_ == null) {
+            log_.error("HWI:%n %s", "ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
+            return;
+        }
         try {
             log_.info("HWI:%n  %s", "InventoryUpdateThread started");
             DatabaseSynchronizer synchronizer = new DatabaseSynchronizer(log_, factory_);
@@ -40,7 +45,6 @@ class InventoryUpdateThread implements Runnable {
     }
 
     private final Logger log_;
-    private final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
 }
 
 /**

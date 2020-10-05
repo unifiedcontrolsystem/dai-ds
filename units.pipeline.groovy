@@ -29,48 +29,45 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
-                            utilities.CopyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
-                            utilities.FixFilesPermission()
+                            utilities.copyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
+                            utilities.fixFilesPermission()
                             // Do NOT clean the machine here!  It will break component tests
                         }
                     }
                 }
-                stage('Full Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    steps {
-                        sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
-                    }
-                }
-                stage('Partial Clean') {
+                stage('Quick Unit Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    options{ catchError(message: "Quick Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        sh 'rm -rf build/distributions/*.sh'
-                        script{ utilities.InvokeGradle(":properties:clean") }
+                        // Quick build assumes that the current build artifacts are not corrupted
+                        script { utilities.invokeGradle("build") }
                     }
                 }
                 stage('Unit Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script { utilities.InvokeGradle("build", 5) }
-                        script { utilities.CopyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
-
+                        sh 'rm -rf build'
+                        script { utilities.invokeGradle("clean build") }
                     }
                 }
                 stage('Reports') {
                     options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        junit '**/test-results/**/*.xml'
+                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
                     }
                 }
                 stage('Archive') {
                     steps {
+                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
+
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+
                         archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/*, build/reports/**'
                     }
                 }

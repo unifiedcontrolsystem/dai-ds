@@ -6,61 +6,69 @@ pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
-                description: 'Skips the clean step')
+                description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'NRE-UNIT',
-                'cmcheung-centos-7-unit',
-                'css-centos-8-00-unit',
-                'css-centos-8-01-unit'
+                'Sindhu-test'
         ], description: 'Agent label')
-    }    
-
+    }
     stages {
-        stage ('unit-test') {
+        stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
             agent { label "${AGENT}" }
             environment {
                 PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
             }
-            stages {
+            stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
                         echo "Building on ${AGENT}"
                         sh 'hostname'
+
                         lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
                                 matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
-                        utilities.CopyIntegrationTestScriptsToBuildDistributions()
-                        script{ utilities.FixFilesPermission() }
-                        utilities.CleanUpMachine('build/distributions')
+                        script {
+                            utilities.copyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
+                            utilities.fixFilesPermission()
+                            // Do NOT clean the machine here!  It will break component tests
+                        }
                     }
                 }
-                stage('Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                stage('Quick Unit Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    options{ catchError(message: "Quick Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
+                        // Quick build assumes that the current build artifacts are not corrupted
+                        script { utilities.invokeGradle("build") }
                     }
                 }
-                stage('Unit Test') {
+                stage('Unit Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script { utilities.InvokeGradle("build") }
-                        sh 'touch inventory/build/test-results/test/*.xml'
+                        sh 'rm -rf build'
+                        script { utilities.invokeGradle("clean build") }
                     }
                 }
-                stage('Report') {
-                    options{ catchError(message: "Report failed", stageResult: 'UNSTABLE',
-                            buildResult: 'UNSTABLE') }
+                stage('Reports') {
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        junit '**/test-results/**/*.xml'
+                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
                     }
                 }
                 stage('Archive') {
                     steps {
-                        CopyIntegrationTestScriptsToBuildDistributions()
-                        archiveArtifacts 'build/reports/**, build/distributions/*.sh, build/json-server/**'
+                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
+
+                        sh 'rm -f *.zip'
+                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
+                        zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+
+                        archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/*, build/reports/**'
                     }
                 }
             }
@@ -68,9 +76,3 @@ pipeline {
     }
 }
 
-def CopyIntegrationTestScriptsToBuildDistributions() {
-    sh 'mkdir -p build/json-server'
-    sh 'mkdir -p build/distributions'
-    sh 'cp ./inventory/src/integration/resources/scripts/json-server/* ./build/json-server'
-    sh 'cp ./inventory/src/integration/resources/scripts/cleanup_machine.sh ./build/distributions'
-}

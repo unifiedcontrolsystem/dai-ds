@@ -27,31 +27,30 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
-                            utilities.CopyIntegrationTestScriptsToBuildDistributions()
-                            utilities.FixFilesPermission()
-                            utilities.CleanUpMachine('build/distributions')
+                            utilities.copyIntegrationTestScriptsToBuildDistributions()
+                            utilities.fixFilesPermission()
+                            utilities.cleanUpMachine('build/distributions')
                         }
                     }
                 }
-                stage('Full Clean') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    steps {
-                        sh 'rm -rf build'
-                        script{ utilities.InvokeGradle("clean") }
-                    }
-                }
-                stage('Partial Clean') {
+                stage('Quick Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    options{ catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script{ utilities.InvokeGradle(":dai_core:clean") }
+                        script { utilities.invokeGradle("jar") }
+                        StartHWInvDb()
+                        script {utilities.invokeGradle("integrationTest") }
+                        StopHWInvDb()
                     }
                 }
                 stage('Component Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script { utilities.InvokeGradle("jar", 5) }
+                        sh 'rm -rf build'
+                        script { utilities.invokeGradle("clean jar") }
                         StartHWInvDb()
-                        script {utilities.InvokeGradle("integrationTest", 5) }
+                        script { utilities.invokeGradle("integrationTest") }
                         StopHWInvDb()
                     }
                 }
@@ -59,7 +58,7 @@ pipeline {
                     options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        junit '**/test-results/**/*.xml'
+                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
                     }
                 }
                 stage('Archive') {

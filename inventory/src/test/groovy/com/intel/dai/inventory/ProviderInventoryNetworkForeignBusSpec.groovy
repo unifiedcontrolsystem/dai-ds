@@ -1,5 +1,6 @@
 package com.intel.dai.inventory
 
+
 import spock.lang.Specification
 
 class ProviderInventoryNetworkForeignBusSpec extends Specification {

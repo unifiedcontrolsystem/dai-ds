@@ -3,10 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 package com.intel.dai.inventory.api;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
@@ -23,8 +21,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -324,7 +320,6 @@ public class HWInvTranslator {
                 canonicalTree);
         return canonicalTree;
     }
-
 
     private HWInvHistory toCanonical(ForeignHWInvHistory foreignHist) {
         HWInvHistory hist = new HWInvHistory();
