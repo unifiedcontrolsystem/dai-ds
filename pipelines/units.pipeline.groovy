@@ -5,7 +5,7 @@
 pipeline {
     agent none
     parameters {
-        booleanParam(name: 'QUICK_BUILD', defaultValue: false,
+        booleanParam(name: 'QUICK_BUILD', defaultValue: true,
                 description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
                 'NRE-UNIT',
