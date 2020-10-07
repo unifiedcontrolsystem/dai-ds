@@ -36,14 +36,14 @@ public class SSEConnectionManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        types_ = new ArrayList<>() {{
+        types_ = new ArrayList<String>() {{
             add("type1");
             add("type2");
             add("type3");
         }};
         server_ = mock(RESTServer.class);
         manager_ = new SSEConnectionManager(server_, mock(Logger.class));
-        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<>() {{
+        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<String>() {{
             add("type2");
         }});
         exchange_ = mock(HttpExchange.class);
@@ -102,18 +102,18 @@ public class SSEConnectionManagerTest {
     @Test
     public void checkForWantedEventTypes() {
         assertTrue(manager_.checkForWantedEventTypes("anything", null));
-        assertTrue(manager_.checkForWantedEventTypes("anything", new ArrayList<>()));
-        assertTrue(manager_.checkForWantedEventTypes("anything", new ArrayList<>() {{ add("anything"); }}));
-        assertFalse(manager_.checkForWantedEventTypes("anything", new ArrayList<>() {{ add("nothing"); }}));
+        assertTrue(manager_.checkForWantedEventTypes("anything", new ArrayList<String>()));
+        assertTrue(manager_.checkForWantedEventTypes("anything", new ArrayList<String>() {{ add("anything"); }}));
+        assertFalse(manager_.checkForWantedEventTypes("anything", new ArrayList<String>() {{ add("nothing"); }}));
     }
 
     @Test
     public void checkForPossibleEventTypes() {
         when(server_.getEventTypesFromPath(anyString())).thenReturn(null);
         assertTrue(manager_.checkForPossibleEventTypes("anything", "/path"));
-        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<>());
+        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<String>());
         assertTrue(manager_.checkForPossibleEventTypes("anything", "/path"));
-        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<>(){{ add("anything"); }});
+        when(server_.getEventTypesFromPath(anyString())).thenReturn(new ArrayList<String>(){{ add("anything"); }});
         assertTrue(manager_.checkForPossibleEventTypes("anything", "/path"));
         assertFalse(manager_.checkForPossibleEventTypes("nothing", "/path"));
     }

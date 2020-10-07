@@ -258,8 +258,8 @@ final public class CommonFunctions {
                     "'/resources/LocationTranslationMap.json'");
     }
 
-    private static boolean loadConversionsMapsfromStream(InputStream stream) {
-        try (stream) {
+    private static boolean loadConversionsMapsfromStream(InputStream iStream) {
+        try (InputStream stream = iStream) {
             ConfigIO parser = ConfigIOFactory.getInstance("json");
             assert parser != null : "Failed to get the JSON parser!";
             PropertyMap root = parser.readConfig(stream).getAsMap();

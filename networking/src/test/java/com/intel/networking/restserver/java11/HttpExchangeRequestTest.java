@@ -20,7 +20,7 @@ public class HttpExchangeRequestTest {
     @Before
     public void setUp() throws Exception {
         headers_ = new Headers();
-        headers_.put("Content-type", new ArrayList<>() {{ add("application/json"); }});
+        headers_.put("Content-type", new ArrayList<String>() {{ add("application/json"); }});
         exchange_ = mock(HttpExchange.class);
         request_ = new HttpExchangeRequest(exchange_);
         when(exchange_.getRequestBody()).thenReturn(new ByteArrayInputStream("{}\n  \n".getBytes()));

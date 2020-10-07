@@ -121,7 +121,7 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
     private ConfigIO parser_;
     private PropertyMap eventMetaData_;
     @SuppressWarnings("serial")
-    private static final List<String> requiredInMessage_ = new ArrayList<>() {{
+    private static final List<String> requiredInMessage_ = new ArrayList<String>() {{
         add("__FullName__");
         add("Value");
         add("Timestamp");

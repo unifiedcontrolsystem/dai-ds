@@ -103,7 +103,7 @@ public class Java11RESTServer extends RESTServer {
     }
 
     void urlHandler(HttpExchange exchange) {
-        exchange.getResponseHeaders().put("Content-Type", new ArrayList<>() {{ add("application/json"); }});
+        exchange.getResponseHeaders().put("Content-Type", new ArrayList<String>() {{ add("application/json"); }});
         RouteObject route = getRouteFromExchange(exchange);
         if(route == null) {
             doError(exchange, 404, "Route not found on server", null);
@@ -123,8 +123,8 @@ public class Java11RESTServer extends RESTServer {
                 params.put(parts[0], parts[1]);
             }
             route.eventTypes = requestTranslator_.getSSESubjects(params);
-            exchange.getResponseHeaders().put("Connection", new ArrayList<>() {{ add("keep-alive"); }});
-            exchange.getResponseHeaders().put("Content-Type", new ArrayList<>() {{ add("text/event-stream"); }});
+            exchange.getResponseHeaders().put("Connection", new ArrayList<String>() {{ add("keep-alive"); }});
+            exchange.getResponseHeaders().put("Content-Type", new ArrayList<String>() {{ add("text/event-stream"); }});
             exchange.sendResponseHeaders(200, 0L);
             exchange.getResponseBody().write(":Accepted\n".getBytes(StandardCharsets.UTF_8));
             exchange.getResponseBody().flush();
@@ -150,7 +150,7 @@ public class Java11RESTServer extends RESTServer {
     private void doReply(HttpExchangeResponse response) throws IOException {
         HttpExchange exchange = response.exchange_;
         for(String key: response.headers_.keySet())
-            exchange.getResponseHeaders().put(key, new ArrayList<>() {{ add(response.headers_.get(key)); }});
+            exchange.getResponseHeaders().put(key, new ArrayList<String>() {{ add(response.headers_.get(key)); }});
         exchange.sendResponseHeaders(response.code_, response.body_.length());
         exchange.getResponseBody().write(response.body_.getBytes(StandardCharsets.UTF_8));
         exchange.getResponseBody().flush();

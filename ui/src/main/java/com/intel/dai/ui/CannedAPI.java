@@ -28,7 +28,7 @@ public class CannedAPI {
     private final Logger log_;
 
     private static final Map<String, String> owner_map = Collections.unmodifiableMap(
-            new HashMap<>() {{
+            new HashMap<String,String>() {{
                 put("W", "WLM");
                 put("S", "Service");
                 put("G", "General");
@@ -36,7 +36,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> state_map = Collections.unmodifiableMap(
-            new HashMap<>() {{
+            new HashMap<String,String>() {{
                 put("B", "Bios Starting");
                 put("D", "Discovered (dhcp discover)");
                 put("I", "IP address assigned (dhcp request)");
@@ -50,7 +50,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> wlmstate_map = Collections.unmodifiableMap(
-            new HashMap<>() {{
+            new HashMap<String,String>() {{
                 put("A", "Available");
                 put("U", "Unavailable");
                 put("G", "General");
@@ -58,7 +58,7 @@ public class CannedAPI {
             }});
 
     private static final Map<String, String> jobstate_map = Collections.unmodifiableMap(
-            new HashMap<>() {{
+            new HashMap<String,String>() {{
                 put("T", "Terminated");
                 put("S", "Started");
             }});

@@ -34,8 +34,7 @@ class ReportJacoco(object):
             self.__results.append(ReportJacoco.__parse_xml_file(file))
         self.__add_totals()
         self.__sort_data()
-        self.__output_report(self.__html_file)
-        return 0
+        return self.__output_report(self.__html_file)
 
     @staticmethod
     def __parse_xml_file(file):
@@ -122,6 +121,8 @@ class ReportJacoco(object):
                     color = 'LightCoral'
                 html += '<td title="{}/{} covered" align="center" style="background-color:{};">{:3.1f}%</td></tr>'.\
                     format(data['branch_covered'], data['branch_total'], color, data['branch_percent'])
+        final_method = 0.0
+        final_branch = 0.0
         for data in self.__results:
             if data['name'] in ['TOTAL']:
                 html += '<tr style="background-color:yellow;"><td><b>{}</b></td>'.format(data['name'])
@@ -144,12 +145,21 @@ class ReportJacoco(object):
                 print('\n###############################################################################')
                 print('### Total Coverage = {:3.1f}% / {:3.1f}% (method / branch)'.format(
                     data['line_percent'], data['branch_percent']))
+                final_branch = data['branch_percent']
+                final_method = data['line_percent']
+                if (final_method < 90.0) or (final_branch < 70.0):
+                    print('### FAILED: Must be at least 90%/70%')
+                else:
+                    print('### OK')
                 print('###############################################################################')
         html += '</table>'
         html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div>'
         html += '</blockquote></body></html>'
         with open(out_file, 'w') as file:
             file.write(html)
+        if (final_method < 90.0) or (final_branch < 70.0):
+            return 0  # TODO: Will soon fail (return 1) if the coverage is too low!!!
+        return 0
 
 
 if __name__ == '__main__':

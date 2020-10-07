@@ -35,7 +35,7 @@ public class VoltDbNodeInformationTest {
     private Logger log_ = mock(Logger.class);
     private VoltDbNodeInformation nodeInfo_;
 
-    private final Map<String,VoltType> types_ = new HashMap<>() {{
+    private final Map<String,VoltType> types_ = new HashMap<String,VoltType>() {{
         put("SequenceNumber", VoltType.BIGINT);
     }};
 
@@ -58,7 +58,7 @@ public class VoltDbNodeInformationTest {
     public void setUp() throws IOException, ProcCallException {
         client_ = mock(Client.class);
 
-        List<String> allColumnNames = new ArrayList<>() {{
+        List<String> allColumnNames = new ArrayList<String>() {{
             add("Lctn");
             add("HostName");
             add("State");
@@ -67,7 +67,7 @@ public class VoltDbNodeInformationTest {
             add("BmcIpAddr");
             add("Aggregator");
         }};
-        List<List<?>> computeNodeTable = new ArrayList<>() {{
+        List<List<?>> computeNodeTable = new ArrayList<List<?>>() {{
             add(new ArrayList<Object>(
                     Arrays.asList("location1", "name1", "A", 100L, "10.0.0.10", "10.1.0.10", "service1")));
             add(new ArrayList<Object>(
@@ -75,7 +75,7 @@ public class VoltDbNodeInformationTest {
             add(new ArrayList<Object>(
                     Arrays.asList("location3", "name3", "A", 300L, "10.0.0.12", "10.1.0.12", "service3")));
         }};
-        List<List<?>> serviceNodeTable = new ArrayList<>() {{
+        List<List<?>> serviceNodeTable = new ArrayList<List<?>>() {{
             add(new ArrayList<Object>(
                     Arrays.asList("master", "smw", "A", 1L, "10.192.0.2", "10.193.0.2", null)));
             add(new ArrayList<Object>(
@@ -128,7 +128,7 @@ public class VoltDbNodeInformationTest {
             when(response.getStatus()).thenReturn(ClientResponse.SUCCESS);
             List<Object> oneRow = new ArrayList<Object>(Arrays.asList("location1", "A"));
             when(response.getResults()).thenReturn(infoToVoltTable(Arrays.asList("Lctn", "State"),
-                    new ArrayList<>() {{ add(oneRow); }}));
+                    new ArrayList<List<?>>() {{ add(oneRow); }}));
             return response;
         }).when(client_).callProcedure(eq("ComputeNodeState"), eq("location1"));
         doAnswer(invocation ->  {
@@ -136,7 +136,7 @@ public class VoltDbNodeInformationTest {
             when(response.getStatus()).thenReturn(ClientResponse.SUCCESS);
             List<Object> oneRow = new ArrayList<Object>(Arrays.asList("location2", "N"));
             when(response.getResults()).thenReturn(infoToVoltTable(Arrays.asList("Lctn", "State"),
-                    new ArrayList<>() {{ add(oneRow); }}));
+                    new ArrayList<List<?>>() {{ add(oneRow); }}));
             return response;
         }).when(client_).callProcedure(eq("ComputeNodeState"), eq("location2"));
         assertEquals("A", nodeInfo_.getComputeNodeState("location1"));

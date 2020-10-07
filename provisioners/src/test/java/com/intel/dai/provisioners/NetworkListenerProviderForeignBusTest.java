@@ -51,10 +51,12 @@ public class NetworkListenerProviderForeignBusTest {
 
         when(config_.getProviderConfigurationFromClassName(anyString())).thenReturn(map_);
 
-        List<String> streams =  new ArrayList<>() {{add("testStream");}};
+        List<String> streams =  new ArrayList<String>() {{add("testStream");}};
         when(config_.getProfileStreams()).thenReturn(streams);
 
-        Map<String, String> testStreamHMap = new HashMap<>() {{put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");}};
+        Map<String, String> testStreamHMap = new HashMap<String, String>() {{
+            put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");
+        }};
         PropertyMap testStreamMap = new PropertyMap(testStreamHMap);
         when(config_.getNetworkArguments(anyString())).thenReturn(testStreamMap);
     }
@@ -104,7 +106,7 @@ public class NetworkListenerProviderForeignBusTest {
         System.setProperty("daiBootImagePollingMs", "150");
         MockNetworkListenerProviderForeignBus actions = new MockNetworkListenerProviderForeignBus(mock(Logger.class));
         actions.initialize();
-        Map<String, String> testStreamHMap = new HashMap<>() {{put("tokenAuthProvider", "testAuth");}};
+        Map<String, String> testStreamHMap = new HashMap<String, String>() {{put("tokenAuthProvider", "testAuth");}};
         PropertyMap testStreamMap = new PropertyMap(testStreamHMap);
         when(config_.getNetworkArguments(anyString())).thenReturn(testStreamMap);
         actions.actOnData(data, config_, system_);
