@@ -1,7 +1,6 @@
 package com.intel.dai.eventsim;
 
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.util.Map;
 
@@ -19,7 +18,7 @@ class DataValidation {
      * @param message error message
      * @throws SimulatorException if key is missing/key-data is empty
      */
-    static void validateKeys(@NotNull final PropertyMap data, @NotNull final String[] keys, @NotNull final String message)
+    static void validateKeys(final PropertyMap data, final String[] keys, final String message)
             throws SimulatorException {
         if(data == null || data.isEmpty() || keys == null || keys.length == 0 || message == null || message.length() == 0)
             throw new SimulatorException("data/keys/message is empty or null");
@@ -35,7 +34,7 @@ class DataValidation {
      * This method is used to validate key-value data contains not null values
      * @throws SimulatorException if input key-value data contains null values
      */
-    static void validateData(@NotNull final Map<String, String> data, @NotNull final String message)
+    static void validateData(final Map<String, String> data, final String message)
             throws SimulatorException {
         if(data == null || data.isEmpty() || message == null || message.length() == 0)
             throw new SimulatorException("data/message is empty or null");

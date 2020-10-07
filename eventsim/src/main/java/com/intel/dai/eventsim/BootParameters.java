@@ -5,7 +5,6 @@ import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
-import com.sun.istack.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +21,6 @@ public class BootParameters {
      * @return boot parameters data
      * @throws SimulatorException when unable to find configuration file or process data.
      */
-    @NotNull
     PropertyDocument getBootParameters() throws SimulatorException {
         try {
             return processData(readConfigFile(bootParamsConfigFile_));
@@ -38,7 +36,6 @@ public class BootParameters {
      * @return boot parameters data for a location
      * @throws SimulatorException when unable to find configuration file or process data.
      */
-    @NotNull
     PropertyDocument getBootParametersForLocation(String location) throws SimulatorException {
         try {
             return processDataForLocation(processData(readConfigFile(bootParamsConfigFile_)), location);
@@ -54,7 +51,7 @@ public class BootParameters {
      * @param bootParamsConfigFile location of boot parameters configuration file.
      * @throws SimulatorException when unable to set the location of boot parameters configuration file.
      */
-    void setBootParamsConfigFile(@NotNull final String bootParamsConfigFile) throws SimulatorException {
+    void setBootParamsConfigFile(final String bootParamsConfigFile) throws SimulatorException {
         if (bootParamsConfigFile == null || bootParamsConfigFile.isEmpty())
             throw new SimulatorException("Invalid or null boot parameters config file.");
         bootParamsConfigFile_ = bootParamsConfigFile;

@@ -2,7 +2,6 @@ package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyDocument;
-import com.sun.istack.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +18,7 @@ public class HardwareInventory {
      * @param hwInventoryConfigFile location of hardware inventory configuration file.
      * @throws SimulatorException when unable to set the location of hardware inventory configuration file.
      */
-    void setInventoryHardwareConfigLocation(@NotNull final String hwInventoryConfigFile) throws SimulatorException {
+    void setInventoryHardwareConfigLocation(final String hwInventoryConfigFile) throws SimulatorException {
         if (hwInventoryConfigFile == null || hwInventoryConfigFile.isEmpty())
             throw new SimulatorException("Invalid or null hardware inventory config file");
         hwInventoryConfigFile_ = hwInventoryConfigFile;
@@ -45,7 +44,7 @@ public class HardwareInventory {
      * @param hwInventoryConfigPath location of hardware inventory configuration file path.
      * @throws SimulatorException when unable to set the location of hardware inventory configuration file path.
      */
-    void setInventoryHardwareConfigPath(@NotNull final String hwInventoryConfigPath) throws SimulatorException {
+    void setInventoryHardwareConfigPath(final String hwInventoryConfigPath) throws SimulatorException {
         if (hwInventoryConfigPath == null || hwInventoryConfigPath.isEmpty())
             throw new SimulatorException("Invalid or null hardware inventory config path");
         hwInventoryConfigPath_ = hwInventoryConfigPath;
@@ -72,7 +71,7 @@ public class HardwareInventory {
      * @param hwInventoryQuery location of hardware inventory query configuration file.
      * @throws SimulatorException when unable to set the location of hardware inventory query configuration file.
      */
-    void setInventoryHardwareQueryPath(@NotNull final String hwInventoryQuery) throws SimulatorException {
+    void setInventoryHardwareQueryPath(final String hwInventoryQuery) throws SimulatorException {
         if (hwInventoryQuery == null || hwInventoryQuery.isEmpty())
             throw new SimulatorException("Invalid or null hardware inventory query path");
         hwInventoryQueryPath_ = hwInventoryQuery;

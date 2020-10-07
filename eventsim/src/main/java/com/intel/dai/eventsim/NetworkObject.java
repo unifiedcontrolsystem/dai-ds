@@ -6,7 +6,6 @@ import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.restserver.RESTServerException;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.util.Map;
 
@@ -59,7 +58,7 @@ public class NetworkObject {
      *
      * @return all subscription details.
      */
-    public PropertyMap getSubscription(@NotNull final String subUrl, @NotNull final String subscriber) throws SimulatorException {
+    public PropertyMap getSubscription(final String subUrl, final String subscriber) throws SimulatorException {
         if (subUrl == null || subscriber == null)
             throw new SimulatorException("Could not find details with url or subscriber 'NULL' value(s)");
         try {
@@ -94,7 +93,7 @@ public class NetworkObject {
      * @throws SimulatorException when unable to register.
      *                            expects non null values.
      */
-    public void register(@NotNull final String url, @NotNull final String subscriberName, @NotNull final Map<String, String> parameters) throws SimulatorException {
+    public void register(final String url, final String subscriberName, final Map<String, String> parameters) throws SimulatorException {
         if (url == null || subscriberName == null || parameters == null)
             throw new SimulatorException("Could not register URL or HttpMethod or input params : NULL value(s)");
         try {
@@ -113,7 +112,7 @@ public class NetworkObject {
      * @throws SimulatorException when unable to register.
      *                            expects non null values.
      */
-    public void register(@NotNull final String url, @NotNull final String httpMethod, @NotNull final NetworkSimulator callback) throws SimulatorException {
+    public void register(final String url, final String httpMethod, final NetworkSimulator callback) throws SimulatorException {
         if (url == null || httpMethod == null || callback == null)
             throw new SimulatorException("Could not register URL or HttpMethod or call back method : NULL value(s)");
         try {
