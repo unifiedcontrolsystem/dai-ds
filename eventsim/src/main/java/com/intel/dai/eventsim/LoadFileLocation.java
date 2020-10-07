@@ -5,7 +5,6 @@ import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 
-import javax.validation.constraints.NotNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +49,7 @@ public class LoadFileLocation {
      * @param file file path
      * @throws IOException null/empty data or file provided
      */
-    static void writeFile(@NotNull final PropertyArray data, @NotNull final String file, boolean prettyPrint) throws IOException {
+    static void writeFile(final PropertyArray data, final String file, boolean prettyPrint) throws IOException {
         if(data == null || data.isEmpty() || file == null || file.isEmpty())
             throw new IOException("data or file path is null or empty.");
 
@@ -68,7 +67,7 @@ public class LoadFileLocation {
      * @param file file path
      * @throws IOException null/empty data or file provided
      */
-    private static void writeFile(@NotNull final PropertyArray data, @NotNull final String file, int indent) throws IOException {
+    private static void writeFile(final PropertyArray data, final String file, int indent) throws IOException {
         loadParser();
         parser_.setIndent(indent);
         parser_.writeConfig(data, file);
