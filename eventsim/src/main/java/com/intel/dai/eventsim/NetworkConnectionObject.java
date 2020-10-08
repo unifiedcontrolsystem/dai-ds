@@ -6,7 +6,6 @@ import com.intel.networking.restserver.RESTServerException;
 import com.intel.networking.restserver.RESTServerHandler;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.util.Map;
 
@@ -66,7 +65,7 @@ public abstract class NetworkConnectionObject {
      * @throws RESTClientException when unable to register.
      *                             expects non null values.
      */
-    public boolean register(@NotNull final String url, @NotNull final String subscriberName, @NotNull final Map<String, String> parameters) throws RESTClientException {
+    public boolean register(final String url, final String subscriberName, final Map<String, String> parameters) throws RESTClientException {
         return callBack.register(url, subscriberName, parameters);
     }
 
@@ -79,7 +78,7 @@ public abstract class NetworkConnectionObject {
      * @throws RESTServerException when unable to register.
      *                             expects non null values.
      */
-    public void register(@NotNull final String url, @NotNull final String httpMethod, @NotNull final RESTServerHandler callback) throws RESTServerException {
+    public void register(final String url, final String httpMethod, final RESTServerHandler callback) throws RESTServerException {
         sseServer.register(url, httpMethod, callback);
     }
 
@@ -88,7 +87,7 @@ public abstract class NetworkConnectionObject {
      *
      * @return all subscription details.
      */
-    public PropertyMap getSubscription(@NotNull final String subUrl, @NotNull final String subscriber) throws RESTClientException {
+    public PropertyMap getSubscription(final String subUrl, final String subscriber) throws RESTClientException {
         return callBack.getSubscription(subUrl, subscriber);
     }
 

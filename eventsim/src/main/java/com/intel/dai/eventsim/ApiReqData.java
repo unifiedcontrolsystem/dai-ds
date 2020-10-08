@@ -9,7 +9,6 @@ import com.intel.networking.restserver.Request;
 import com.intel.networking.restserver.RequestException;
 import com.intel.networking.restserver.Response;
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -76,7 +75,7 @@ public class ApiReqData {
      * @param callBack callback method to requested api.
      * @throws SimulatorException this method requires input with non null values.
      */
-    public void registerPathCallBack(@NotNull final PropertyMap urlMethodObj, @NotNull final NetworkSimulator callBack) throws SimulatorException {
+    public void registerPathCallBack(final PropertyMap urlMethodObj, final NetworkSimulator callBack) throws SimulatorException {
         if (urlMethodObj == null || callBack == null)
             throw new SimulatorException("Could not register API URL or call back method : NULL value(s)");
         dispatchMap.put(urlMethodObj, callBack);

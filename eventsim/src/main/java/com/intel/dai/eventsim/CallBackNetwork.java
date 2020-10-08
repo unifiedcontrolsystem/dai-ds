@@ -5,7 +5,6 @@ import com.intel.networking.restclient.RESTClient;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.restclient.RESTClientFactory;
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.util.Map;
 
@@ -27,7 +26,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * @throws RESTClientException when null values passed to this method.
      * expects non null values.
      */
-    public PropertyMap getSubscription(@NotNull final String url, @NotNull final String subscriber) throws RESTClientException {
+    public PropertyMap getSubscription(final String url, final String subscriber) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
         return connectionManager_.getSubscription(url, subscriber);
@@ -57,7 +56,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * @throws RESTClientException when null values passed to this method.
      * expects non null values.
      */
-    public void publish(final String url, @NotNull final String events) throws RESTClientException {
+    public void publish(final String url, final String events) throws RESTClientException {
         if (events == null)
             throw new RESTClientException("No events to publish to network");
         connectionManager_.publish(events);
@@ -73,7 +72,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * @throws RESTClientException when null values passed to this method.
      * expects non null values
      */
-    public boolean register(@NotNull final String url, @NotNull final String subscriber, final Map<String, String> parameters) throws RESTClientException {
+    public boolean register(final String url, final String subscriber, final Map<String, String> parameters) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Could not register url or httpmethod : NULL value(s)");
         return connectionManager_.addSubscription(url, subscriber, parameters);

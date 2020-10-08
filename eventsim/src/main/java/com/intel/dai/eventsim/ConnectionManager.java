@@ -5,7 +5,6 @@ import com.intel.networking.restclient.RESTClient;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
-import com.sun.istack.NotNull;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -36,7 +35,7 @@ public class ConnectionManager {
      * @throws RESTClientException when null values passed to this method.
      * expects non null values
      */
-    public boolean addSubscription(@NotNull final String url, @NotNull final String subscriber, Map<String, String> parameters) throws RESTClientException {
+    public boolean addSubscription(final String url, final String subscriber, Map<String, String> parameters) throws RESTClientException {
         if (subscriber == null || url == null)
             throw new RESTClientException("Could not add subscription: url or subscriber null value(s)");
         if (!checkSubscription(url, subscriber)) {
@@ -77,7 +76,7 @@ public class ConnectionManager {
      * @throws RESTClientException when null values passed to this method.
      * expects non null values.
      */
-    public PropertyMap getSubscription(@NotNull final String url, @NotNull final String subscriber) throws RESTClientException {
+    public PropertyMap getSubscription(final String url, final String subscriber) throws RESTClientException {
         if (url == null || subscriber == null)
             throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
         for (Map.Entry<ConnectionObject, Long> connection : connectionsToId.entrySet()) {
