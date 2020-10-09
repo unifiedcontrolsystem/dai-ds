@@ -123,7 +123,7 @@ public class NetworkDataSourceSSETest {
         source_.sendMessage("subject", "{}");
     }
 
-    private static Map<String,String> args_ = new HashMap<>() {{
+    private static Map<String,String> args_ = new HashMap<String,String>() {{
         put("implementation", "test");
     }};
     private static NetworkDataSource source_;

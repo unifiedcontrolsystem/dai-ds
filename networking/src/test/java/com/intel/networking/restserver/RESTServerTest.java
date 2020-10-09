@@ -216,7 +216,7 @@ public class RESTServerTest {
 
     @Test
     public void addSSE1() throws RESTServerException {
-        Collection<String> eventTypes = new HashSet<>() {{
+        Collection<String> eventTypes = new HashSet<String>() {{
             add("type1");
             add("type2");
         }};
@@ -271,7 +271,7 @@ public class RESTServerTest {
 
     @Test
     public void getEventTypes() throws Exception {
-        Collection<String> eventTypes = new HashSet<>() {{
+        Collection<String> eventTypes = new HashSet<String>() {{
             add("type1");
             add("type2");
         }};

@@ -80,10 +80,10 @@ public class VoltDbWorkQueueTest {
         data_ += data_;
         client_ = mock(Client.class);
         response_ = mock(ClientResponse.class);
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("Id", VoltType.BIGINT));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add(9999L);
             }}); // Row 0
         }});
@@ -193,10 +193,10 @@ public class VoltDbWorkQueueTest {
 
     @Test(expected = RuntimeException.class)
     public void setupAdaptersBaseWorkItem2() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
-            add(new VoltDbWorkQueueTest.Pair<>("Id", VoltType.BIGINT));         // Column 0
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("Id", VoltType.BIGINT));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add(9999L);
             }}); // Row 0
         }});
@@ -215,10 +215,10 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void setupAdaptersBaseWorkItem3() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
-            add(new VoltDbWorkQueueTest.Pair<>("Id", VoltType.BIGINT));         // Column 0
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("Id", VoltType.BIGINT));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add(9999L);
             }}); // Row 0
         }});
@@ -246,9 +246,9 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void grabNextAvailWorkItem2() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
-            add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
-            add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("State", VoltType.STRING));         // Column 0
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>()); // No rows
         when(client_.callProcedure(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyLong(), ArgumentMatchers.anyString(),
@@ -260,13 +260,13 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void grabNextAvailWorkItem3() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
-            add(new VoltDbWorkQueueTest.Pair<>("Id", VoltType.BIGINT));             // Column 0
-            add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));          // Column 1
-            add(new VoltDbWorkQueueTest.Pair<>("WorkingResults", VoltType.STRING)); // Column 2
-            add(new VoltDbWorkQueueTest.Pair<>("WorkToBeDone", VoltType.STRING));   // Column 3
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("Id", VoltType.BIGINT));             // Column 0
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("State", VoltType.STRING));          // Column 1
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("WorkingResults", VoltType.STRING)); // Column 2
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("WorkToBeDone", VoltType.STRING));   // Column 3
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add(9999L);
                 add("Q"); // State
                 add("Results"); // Results
@@ -298,10 +298,10 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void getClientParameters() {
-        VoltTable table = makeTable(new ArrayList<>() {{
-            add(new VoltDbWorkQueueTest.Pair<>("Parameters", VoltType.STRING));         // Column 0
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
+            add(new VoltDbWorkQueueTest.Pair<String,VoltType>("Parameters", VoltType.STRING));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("A,B,C");
             }}); // Row 0
         }});
@@ -313,10 +313,10 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void getClientParameters1() {
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("Parameters", VoltType.STRING));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("Key1#Value1$Key2#Value2$Key3#Value3");
             }}); // Row 0
         }});
@@ -339,10 +339,10 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void queueWorkItem2() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("Id", VoltType.BIGINT));         // Column 0
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add(9999L);
             }}); // Row 0
         }});
@@ -413,15 +413,15 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void waitForWorkItemToFinishAndMarkDone2() throws Exception {
-        VoltTable table1 = makeTable(new ArrayList<>() {{
+        VoltTable table1 = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>()); // No rows
-        VoltTable table2 = makeTable(new ArrayList<>() {{
+        VoltTable table2 = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("F"); // State
                 add(VoltDbWorkQueue.compressResult(data_)); // Results
             }}); // Row 0
@@ -436,15 +436,15 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void waitForWorkItemToFinishAndMarkDone3() throws Exception {
-        VoltTable table1 = makeTable(new ArrayList<>() {{
+        VoltTable table1 = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>()); // No rows
-        VoltTable table2 = makeTable(new ArrayList<>() {{
+        VoltTable table2 = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("E"); // State
                 add(VoltDbWorkQueue.compressResult(data_)); // Results
             }}); // Row 0
@@ -502,7 +502,7 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void getWorkItemStatus2() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>()); // No rows
@@ -515,11 +515,11 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void getWorkItemStatus3() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("F"); // State
                 add(VoltDbWorkQueue.compressResult(data_)); // Results
             }}); // Row 0
@@ -533,11 +533,11 @@ public class VoltDbWorkQueueTest {
 
     @Test
     public void getWorkItemStatus4() throws Exception {
-        VoltTable table = makeTable(new ArrayList<>() {{
+        VoltTable table = makeTable(new ArrayList<VoltDbWorkQueueTest.Pair<String,VoltType>>() {{
             add(new VoltDbWorkQueueTest.Pair<>("State", VoltType.STRING));         // Column 0
             add(new VoltDbWorkQueueTest.Pair<>("Results", VoltType.STRING));         // Column 1
         }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<>() {{
+            add(new ArrayList<Object>() {{
                 add("E"); // State
                 add(VoltDbWorkQueue.compressResult(data_)); // Results
             }}); // Row 0

@@ -409,7 +409,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
     private Map<String,BasicNodeInfo> nodes_ = null;
 
     @SuppressWarnings("serial")
-    private static Map<BootState,String> states_ = new HashMap<>() {{
+    private static Map<BootState,String> states_ = new HashMap<BootState,String>() {{
         put(BootState.NODE_BOOTING, "B");
         put(BootState.NODE_OFFLINE, "M");
         put(BootState.NODE_ONLINE, "A");

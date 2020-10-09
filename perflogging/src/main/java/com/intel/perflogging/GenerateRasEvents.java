@@ -202,7 +202,8 @@ public class GenerateRasEvents {
 
     private int errors_ = 0;                                // Errors count writing RAS events during the run().
     private final List<String> nodes_ = new ArrayList<>();  // Nodes list from VoltDb
-    private Map<String, Long> options_ = new HashMap<>() {{ // Allowed commandline options with defaults.
+    @SuppressWarnings("serial")
+    private Map<String, Long> options_ = new HashMap<String, Long>() {{ // Allowed commandline options with defaults.
         put("seed", 0L);
         put("count", 100_000L);
         put("percent-jobs", 0L);
@@ -213,7 +214,8 @@ public class GenerateRasEvents {
     private Random random_;      // PRNG used for deciding when job IDs and/or control operations are needed.
 
     private static Client client_ = null; // VoltDb client
-    private static final Map<Byte,String> statusString_ = new HashMap<>() {{ // Convert status to string map.
+    @SuppressWarnings("serial")
+    private static final Map<Byte,String> statusString_ = new HashMap<Byte,String>() {{ // Convert status to string map.
         put(ClientResponse.USER_ABORT,         "USER_ABORT");
         put(ClientResponse.CONNECTION_LOST,    "CONNECTION_LOST");
         put(ClientResponse.CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");

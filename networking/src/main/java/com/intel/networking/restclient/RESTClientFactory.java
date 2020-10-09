@@ -82,8 +82,9 @@ public final class RESTClientFactory {
 
     private RESTClientFactory() {} // Make instantiation impossible.
 
-    static final Map<String, Class<? extends RESTClient>> implementations_ = new HashMap<>() {{
-        put("jdk11", com.intel.networking.restclient.java11.Java11RESTClient.class);
+    @SuppressWarnings("serial")
+    static final Map<String, Class<? extends RESTClient>> implementations_ =
+            new HashMap<String, Class<? extends RESTClient>>() {{
         put("apache", com.intel.networking.restclient.apache.ApacheRESTClient.class);
     }};
 }

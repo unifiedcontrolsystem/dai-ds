@@ -32,7 +32,7 @@ public class VoltDbRasEventLog implements RasEventLog {
     // "0001000013" is a Ras EventType indicating that the specified descriptive name does not exist in RasEventMetaData
     private static final String NON_DESCRIPTIVE_RAS_EVENT = "0001000013";
     private static final String query = "select EventType, DescriptiveName from RasMetaData;";
-    private static final Map<Byte,String> statusMap_ = new HashMap<>() {{
+    private static final Map<Byte,String> statusMap_ = new HashMap<Byte,String>() {{
         put(ClientResponse.USER_ABORT, "USER_ABORT");
         put(ClientResponse.CONNECTION_LOST, "CONNECTION_LOST");
         put(ClientResponse.CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");

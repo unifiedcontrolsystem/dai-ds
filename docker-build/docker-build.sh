@@ -25,8 +25,6 @@ build_docker="false"
 # Conditionally build the docker container if not already built.
 if [ "${build_docker}" = "true" ]; then
   cat <<EOF1 >~/.gradle/docker/gradle.properties
-systemProp.ucs.includeDbgSymbols=true
-systemProp.java8.bootstrapClasspath=/usr/lib64/jvm/java-1.8.0
 org.gradle.daemon=false
 org.gradle.console=plain
 org.gradle.parallel=true

@@ -73,7 +73,7 @@ public class NetworkListenerCoreTest {
         when(workQueue_.grabNextAvailWorkItem()).thenReturn(true);
         operations_ = mock(AdapterOperations.class);
         when(workQueue_.workToBeDone()).thenReturn("HandleInputFromExternalComponent");
-        when(workQueue_.getClientParameters()).thenReturn(new HashMap<>() {{
+        when(workQueue_.getClientParameters()).thenReturn(new HashMap<String,String>() {{
             put("Profile", "default");
         }});
         when(adapter_.factory_.createWorkQueue(any(AdapterInformation.class))).thenReturn(workQueue_);

@@ -51,7 +51,7 @@ public class NetworkDataSinkFactoryTest {
 
     @Before
     public void setUp() {
-        NetworkDataSinkFactory.registeredImplementations_ = new HashMap<>() {{
+        NetworkDataSinkFactory.registeredImplementations_ = new HashMap<String, Class<? extends NetworkDataSink>>() {{
             put("rabbitmq", NetworkDataSinkRabbitMQ.class);
             put("eventSource", NetworkDataSinkEventSource.class);
             put("benchmark", NetworkDataSinkBenchmark.class);

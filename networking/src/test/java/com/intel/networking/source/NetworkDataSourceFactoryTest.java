@@ -42,7 +42,8 @@ public class NetworkDataSourceFactoryTest {
 
     @Before
     public void setUp() {
-        NetworkDataSourceFactory.registeredImplementations_ = new HashMap<>() {{
+        NetworkDataSourceFactory.registeredImplementations_ =
+                new HashMap<String, Class<? extends NetworkDataSource>>() {{
             put("rabbitmq", NetworkDataSourceRabbitMQ.class);
             put("sse", NetworkDataSourceSSE.class);
         }};

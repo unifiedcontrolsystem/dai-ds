@@ -155,7 +155,7 @@ public class CallBackNetwork extends NetworkConnectionObject {
      */
     private void createClient() throws RESTClientException {
         if (restClient_ == null)
-            restClient_ = RESTClientFactory.getInstance("jdk11", log_);
+            restClient_ = RESTClientFactory.getInstance("apache", log_);
     }
 
     /**

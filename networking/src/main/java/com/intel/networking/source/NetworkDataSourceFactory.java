@@ -96,7 +96,8 @@ public final class NetworkDataSourceFactory {
         return false;
     }
 
-    static Map<String, Class<? extends NetworkDataSource>> registeredImplementations_ = new HashMap<>() {{
+    static Map<String, Class<? extends NetworkDataSource>> registeredImplementations_ =
+            new HashMap<String, Class<? extends NetworkDataSource>>() {{
         put("rabbitmq", NetworkDataSourceRabbitMQ.class);
         put("sse", NetworkDataSourceSSE.class);
     }};

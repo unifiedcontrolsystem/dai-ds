@@ -449,14 +449,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private static final Object OBJECT = new Object();
 
     private final ConfigIO parser_;
-    private final static Map<String, BootState> conversionMap_ = new HashMap<>() {{
+    private final static Map<String, BootState> conversionMap_ = new HashMap<String, BootState>() {{
         put("Ready", BootState.NODE_ONLINE);
         put("Off", BootState.NODE_OFFLINE);
         put("Empty", BootState.EMPTY);
         put("On", BootState.NODE_BOOTING);
     }};
 
-    private Map<String, String> bootImageInfo_ = new HashMap<>() {{
+    private Map<String, String> bootImageInfo_ = new HashMap<String, String>() {{
                 put("id", "");
                 put("description", "");
                 put("bootimagefile", "");

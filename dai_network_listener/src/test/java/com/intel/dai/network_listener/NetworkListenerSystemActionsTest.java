@@ -175,11 +175,11 @@ public class NetworkListenerSystemActionsTest {
 
     @Test
     public void upsertBootImages() {
-        actions_.upsertBootImages(new ArrayList<>() {{ add(new HashMap<>()); }});
+        actions_.upsertBootImages(new ArrayList<Map<String,String>>() {{ add(new HashMap<String,String>()); }});
         try {
             doThrow(DataStoreException.class).when(bootImage_).editBootImageProfile(any());
         } catch(DataStoreException e) { /* Cannot happen in this context! */ }
-        actions_.upsertBootImages(new ArrayList<>() {{ add(new HashMap<>()); }});
+        actions_.upsertBootImages(new ArrayList<Map<String,String>>() {{ add(new HashMap<String,String>()); }});
     }
 
     private NetworkListenerSystemActions actions_;

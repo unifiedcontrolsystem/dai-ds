@@ -113,7 +113,8 @@ public final class RESTServerFactory {
     }
     private RESTServerFactory() {}
 
-    private static final Map<String, Class<? extends RESTServer>> implementations_ = new HashMap<>() {{
+    private static final Map<String, Class<? extends RESTServer>> implementations_ =
+            new HashMap<String, Class<? extends RESTServer>>() {{
         put("jdk11", com.intel.networking.restserver.java11.Java11RESTServer.class);
     }};
     private static Map<String,RESTServer> singletons_ = new HashMap<>();

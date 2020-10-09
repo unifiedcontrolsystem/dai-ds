@@ -117,7 +117,7 @@ public class Java11RESTServerTest {
 
     @Test public void addInternalRoute() throws Exception {
         server_.addHandler("/path", HttpMethod.GET, this::callback);
-        server_.addSSEHandler("/events", new ArrayList<>() {{ add("type2"); }});
+        server_.addSSEHandler("/events", new ArrayList<String>() {{ add("type2"); }});
     }
 
     @Test public void removeInternalRoute() throws Exception {
@@ -134,20 +134,20 @@ public class Java11RESTServerTest {
     }
 
     @Test public void incomingMessage2() throws Exception {
-        server_.addSSEHandler("/events", new ArrayList<>() {{ add("type2"); }});
+        server_.addSSEHandler("/events", new ArrayList<String>() {{ add("type2"); }});
         HttpExchange exchange = mock(HttpExchange.class);
         simulateIncomingMessage(exchange, "/events", HttpMethod.POST, "{\"subjects\":[\"type2\"]}");
     }
 
     @Test public void incomingMessage3() throws Exception {
-        server_.addSSEHandler("/events", new ArrayList<>() {{ add("type2"); }});
+        server_.addSSEHandler("/events", new ArrayList<String>() {{ add("type2"); }});
         HttpExchange exchange = mock(HttpExchange.class);
         throwIOException_ = true;
         simulateIncomingMessage(exchange, "/events", HttpMethod.POST, "{\"subjects\":[\"type2\"]}");
     }
 
     @Test public void incomingMessage4() throws Exception {
-        server_.addSSEHandler("/events", new ArrayList<>() {{ add("type2"); }});
+        server_.addSSEHandler("/events", new ArrayList<String>() {{ add("type2"); }});
         HttpExchange exchange = mock(HttpExchange.class);
         throwHttpRequestException_ = true;
         simulateIncomingMessage(exchange, "/events", HttpMethod.POST, "{\"subjects\":[\"type2\"]}");

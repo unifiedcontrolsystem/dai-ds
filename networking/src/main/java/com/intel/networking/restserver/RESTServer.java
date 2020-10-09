@@ -163,7 +163,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
                 addInternalRouteMethod(route);
                 log_.debug("*** Added route method %s to the existing URL %s", route.method, route.url);
             } else {
-                routes_.put(route.url, new HashMap<>() {{
+                routes_.put(route.url, new HashMap<HttpMethod,RouteObject>() {{
                     put(method, route);
                 }});
                 addInternalRouteUrl(route);
@@ -178,7 +178,8 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
      * @param url The URL that responds to SSE eventing requests.
      * @throws RESTServerException  If the underlying implementation fails to set the route.
      */
-    synchronized public final void addSSEHandler(String url, Collection<String> possibleEventTypes) throws RESTServerException {
+    synchronized public final void addSSEHandler(String url, Collection<String> possibleEventTypes)
+            throws RESTServerException {
         synchronized (this) {
             HttpMethod method = HttpMethod.GET;
             if (routes_.containsKey(url) && routes_.get(url).containsKey(method))
@@ -191,7 +192,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
                 routes_.get(url).put(method, route);
                 addInternalRouteMethod(route);
             } else {
-                routes_.put(url, new HashMap<>() {{
+                routes_.put(url, new HashMap<HttpMethod,RouteObject>() {{
                     put(method, route);
                 }});
                 addInternalRouteUrl(route);
