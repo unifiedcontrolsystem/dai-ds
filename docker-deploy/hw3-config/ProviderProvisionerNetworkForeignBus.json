@@ -1,0 +1,55 @@
+{
+  "providerClassMap": {
+    "bootEventData": "com.intel.dai.provisioners.NetworkListenerProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "stateChangeSource": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-provisioner",
+        "inputBufferSize": "4",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    }
+  },
+
+  "adapterProfiles": {
+    "default": {
+      "networkStreamsRef": [
+        "stateChangeSource"
+      ],
+      "subjects": [
+        "*"
+      ],
+      "adapterProvider": "bootEventData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://am03-nmn.local"
+    },
+    "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
+      "publishTopic": "ucs_boot_event",
+      "informWorkLoadManager": false,
+      "bootImageInfoUrlPath": "/bootparameters",
+      "publish": true
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}
