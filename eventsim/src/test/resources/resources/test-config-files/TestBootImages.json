@@ -1,0 +1,32 @@
+[
+  {
+    "created": "2020-07-14T23:42:14.144283+00:00" ,
+    "id": "boot-image-id-0" ,
+    "link": {
+      "etag": "etag-0" ,
+      "path": "s3://boot-images/boot-image-id-0/manifest.json" ,
+      "type": "s3"
+    } ,
+    "name": "boot-image-name-0"
+  } ,
+  {
+    "created": "2020-07-15T17:04:04.130810+00:00" ,
+    "id": "boot-image-id-1" ,
+    "link": {
+      "etag": "etag-1" ,
+      "path": "s3://boot-images/boot-image-id-1/manifest.json" ,
+      "type": "s3"
+    } ,
+    "name": "boot-image-name-1"
+  } ,
+  {
+    "created": "2020-07-15T00:55:22.030740+00:00" ,
+    "id": "boot-image-id-2" ,
+    "link": {
+      "etag": "etag-2" ,
+      "path": "s3://boot-images/boot-image-id-2/manifest.json" ,
+      "type": "s3"
+    } ,
+    "name": "boot-image-name-2"
+  }
+]

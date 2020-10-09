@@ -8,7 +8,6 @@ package com.intel.dai.dsimpl.voltdb;
 import com.intel.dai.dsapi.BootImage;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltTableRow;
 import org.voltdb.client.Client;
@@ -148,7 +147,7 @@ public class VoltDbBootImage implements BootImage {
                     , bootImg.getOrDefault("bootoptions", "")
                     , bootImg.getOrDefault("bootstrapimagefile", "")
                     , bootImg.getOrDefault("bootstrapimagechecksum", "")
-                    ,"A"
+                    , bootImg.getOrDefault("state", "M")
                     ,(System.currentTimeMillis() * 1000L)
                     ,(System.currentTimeMillis() * 1000L)
                     ,adapterType

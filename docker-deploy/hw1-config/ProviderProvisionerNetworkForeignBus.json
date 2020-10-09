@@ -40,7 +40,10 @@
     "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_boot_event",
       "informWorkLoadManager": false,
-      "bootImageInfoUrlPath": "/bootparameters",
+      "bootParametersInfoUrl": "https://api-gw-service-nmn.local/apis/bss/boot/v1/bootparameters",
+      "bootParameterForLocationInfoUrl": "https://api-gw-service-nmn.local/apis/bss/boot/v1/bootparameters?name=",
+      "bootImageInfoUrl" : "https://api-gw-service-nmn.local/apis/ims/images",
+      "bootImageForImageIdInfoUrl" : "https://api-gw-service-nmn.local/apis/ims/images/",
       "publish": true
     }
   },

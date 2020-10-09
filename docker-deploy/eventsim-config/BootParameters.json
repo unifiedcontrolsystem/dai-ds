@@ -1,98 +1,134 @@
 [
   {
-    "hosts": [
-      "Default"
-    ],
-    "initrd": "http://api-gw-service-nmn.local/apis/ars/assets/artifacts/generic/initrd-4.12.14-15.5_8.1.96-cray_shasta_c",
-    "kernel": "http://api-gw-service-nmn.local/apis/ars/assets/artifacts/generic/vmlinuz-4.12.14-15.5_8.1.96-cray_shasta_c",
-    "params": "console=tty0 console=ttyS0,115200n8 initrd=initrd-4.12.14-15.5_8.1.96-cray_shasta_c root=crayfs nfsserver=10.2.0.1 nfspath=/var/opt/cray/boot_images imagename=/SLES15 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https://api-gw-service-nmn.local/apis/hbtd/hmi/v1/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999",
-    "id": "centos7.3-vtune",
-    "description": "Centos 7.3 w/ Vtune VNFS",
-    "BootImageFile": "centos7.3-vtune",
-    "BootImageChecksum": "ecaa78c6c36a3442a45f20852f99a7cf",
-    "BootOptions": null,
-    "KernelArgs": null,
-    "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
-    "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel"
+  },
+  {
+    "kernel": "s3://boot-images/966f3766-5e59-4c1e-8760-f1c1cb810c35/kernel"
+  },
+  {
+    "initrd": "s3://boot-images/966f3766-5e59-4c1e-8760-f1c1cb810c35/initrd"
+  },
+  {
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   },
   {
     "hosts": [
-      "Unknown-x86_64"
+      "x0c0s36b0n0"
     ],
-    "initrd": "http://10.2.100.50/apis/ars/assets/artifacts/generic/bootstrap-initramfs-x86_64.img",
-    "kernel": "http://10.2.100.50/apis/ars/assets/artifacts/generic/bootstrap-vmlinuz-x86_64",
-    "params": "console=ttyS0,115200n8 console=tty0 initrd=bootstrap-initramfs-x86_64.img   rw selinux=0 nofb rd.shell rd.net.timeout.carrier=20 ip=dhcp rd.neednet=1 rd.retry=60 crashkernel=256M reds=use_server api_gw_ip=10.2.100.50",
-    "id": "centos7.3-slurm",
-    "description": "Centos 7.3 w/ Slurm VNFS",
-    "BootImageFile": "centos7.3-1611-slurm",
-    "BootImageChecksum": "7427dbf6ec4e028f22d595195fe72563",
-    "BootOptions": null,
-    "KernelArgs": null,
-    "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
-    "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=on intel_pstate=disable ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   },
   {
     "hosts": [
-      "x0c0s26b0n0"
+      "x0c0s34b0n0"
     ],
-    "initrd": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_initrd-mOS-test1",
-    "kernel": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_vmlinuz-mOS-test1",
-    "params": "console=tty0 console=ttyS0,115200n8 initrd=mnt_image_image-root_boot_initrd-mOS-test1 root=crayfs nfsserver=10.2.0.1 nfspath=/var/opt/cray/boot_images imagename=/mnt_image_sles_15_mOS_test1.sqsh selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https://api-gw-service-nmn.local/apis/hbtd/hmi/v1/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999 kernelcore=16G"
-    "id": "centos7.3-slurm-vtune",
-    "description": "Centos 7.3 w/ Slurm and Vtune VNFS",
-    "BootImageFile": "centos7.3-1611-slurm-vtune",
-    "BootImageChecksum": "d94a4a134d1ea146afc7a82a084ae1a4",
-    "BootOptions": null,
-    "KernelArgs": null,
-    "BootStrapImageFile": "3.10.0-514.16.1.el7.x86_64",
-    "BootStrapImageChecksum": "93a94d8985aa3b10e38122d2bd8bbba1"
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=on intel_pstate=disable ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   },
   {
     "hosts": [
-      "x0c0s26b0n0"
+      "x0c0s32b0n0"
     ],
-    "initrd": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_initrd-mOS-test1",
-    "kernel": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_vmlinuz-mOS-test1",
-    "params": "console=tty0 console=ttyS0,115200n8 initrd=mnt_image_image-root_boot_initrd-mOS-test1 root=crayfs nfsserver=10.2.0.1 nfspath=/var/opt/cray/boot_images imagename=/mnt_image_sles_15_mOS_test1.sqsh selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https://api-gw-service-nmn.local/apis/hbtd/hmi/v1/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999 kernelcore=16G"
-    "id": "diagImage",
-    "description": "HPC Offline Diagnostics Image",
-    "BootImageFile": "centos7.3-1611-slurm-vtune",
-    "BootImageChecksum": "d94a4a134d1ea146afc7a82a084ae1a4",
-    "BootOptions": null,
-    "KernelArgs": null,
-    "BootStrapImageFile": "sklDiagImage",
-    "BootStrapImageChecksum": "addc1dce586cf6b96d28bc5eb099773f"
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   },
   {
     "hosts": [
-      "x0c0s26b0n0"
+      "x0c0s30b0n0"
     ],
-    "initrd": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_initrd-mOS-test1",
-    "kernel": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_vmlinuz-mOS-test1",
-    "params": "console=tty0 console=ttyS0,115200n8 initrd=mnt_image_image-root_boot_initrd-mOS-test1 root=crayfs nfsserver=10.2.0.1 nfspath=/var/opt/cray/boot_images imagename=/mnt_image_sles_15_mOS_test1.sqsh selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https://api-gw-service-nmn.local/apis/hbtd/hmi/v1/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999 kernelcore=16G"
-    "id": "proprietaryOS",
-    "description": "Proprietary Operating System",
-    "BootImageFile": "proprietary_os_11.2.7",
-    "BootImageChecksum": "42ade6a34d1ea146afc7a82a084ae1a4",
-    "BootOptions": null,
-    "KernelArgs": null,
-    "BootStrapImageFile": "proprietary_os_11.2.7_bootstrap",
-    "BootStrapImageChecksum": "333c1dce586cf6b96d28bc5eb099773f"
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x0c0s40b0n0"
+    ],
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x0c0s42b0n0"
+    ],
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x0c0s28b0n0"
+    ],
+    "params": "console=tty0 console=ttyS0,115200n8 selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M bad_page=panic crashkernel=256M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=40 rd.shell turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   },
   {
     "hosts": [
       "x0c0s26b0n0"
     ],
-    "initrd": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_initrd-mOS-test1",
-    "kernel": "http://10.2.100.50/apis/ars/assets/artifacts/generic/mnt_image_image-root_boot_vmlinuz-mOS-test1",
-    "params": "console=tty0 console=ttyS0,115200n8 initrd=mnt_image_image-root_boot_initrd-mOS-test1 root=crayfs nfsserver=10.2.0.1 nfspath=/var/opt/cray/boot_images imagename=/mnt_image_sles_15_mOS_test1.sqsh selinux=0 rd.shell rd.net.timeout.carrier=40 rd.retry=40 ip=dhcp rd.neednet=1 crashkernel=256M htburl=https://api-gw-service-nmn.local/apis/hbtd/hmi/v1/heartbeat bad_page=panic hugepagelist=2m-2g intel_iommu=off iommu=pt numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y quiet turbo_boost_limit=999 kernelcore=16G"
-    "id": "mOS",
-    "description": "mOS",
-    "BootImageFile": "mOS",
-    "BootImageChecksum": "589a4eedbf582d5e96bd62d6ec0bf1c0",
-    "BootOptions": null,
-    "KernelArgs": "console=tty0 console=ttyS0,115200 selinux=0 intel_idle.max_cstate=1 intel_pstate=disable nmi_watchdog=0 tsc=reliable lwkcpus=40.1-19,41-59:60.21-39,61-79 lwkmem=108G kernelcore=16G",
-    "BootStrapImageFile": "4.9.61-attaufer-mos-8139",
-    "BootStrapImageChecksum": "4c09b8f5908802ce64fb898eda8964d6"
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3001c0s34b2n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3001c0s34b3n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 rd.modules_load=mlx5_core root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3001c0s34b4n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3002c0s34b1n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3002c0s34b2n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 rd.modules_load=mlx5_core root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3002c0s34b3n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
+  },
+  {
+    "hosts": [
+      "x3002c0s34b4n0"
+    ],
+    "params": "console=ttyS0,115200 bad_page=panic crashkernel=320M hugepagelist=2m-2g intel_iommu=off intel_pstate=disable iommu=pt ip=dhcp numa_interleave_omit=headless numa_zonelist_order=node oops=panic pageblock_order=14 pcie_ports=native printk.synchronous=y rd.neednet=1 rd.retry=10 rd.shell k8s_gw=api-gw-service-nmn.local quiet turbo_boost_limit=999 root=craycps-s3:s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/rootfs:f4175f2d18e479ab1d698d5741379f71-169:dvs:api-gw-service-nmn.local:300:eth0",
+    "kernel": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/kernel",
+    "initrd": "s3://boot-images/7eb91e57-7f34-4053-8c4e-d11183cd3952/initrd"
   }
 ]

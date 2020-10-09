@@ -193,7 +193,7 @@ CREATE TABLE public.tier2_computenode_history (
     sequencenumber integer NOT NULL,
     state character varying(1) NOT NULL,
     hostname character varying(63),
-    bootimageid character varying(30),
+    bootimageid character varying(50),
     environment character varying(120),
     ipaddr character varying(25),
     macaddr character varying(17),
@@ -300,22 +300,23 @@ CREATE TABLE public.tier2_chassis_history (
 --
 
 CREATE TABLE public.tier2_bootimage_history (
-    id character varying(30) NOT NULL,
+    id character varying(50) NOT NULL,
     description character varying(200),
-    bootimagefile character varying(80) NOT NULL,
+    bootimagefile character varying(100) NOT NULL,
     bootimagechecksum character varying(32) NOT NULL,
     bootoptions character varying(80),
-    bootstrapimagefile character varying(80) NOT NULL,
+    bootstrapimagefile character varying(100) NOT NULL,
     bootstrapimagechecksum character varying(32) NOT NULL,
     state character varying(1),
     dbupdatedtimestamp timestamp without time zone NOT NULL,
     lastchgtimestamp timestamp without time zone NOT NULL,
     lastchgadaptertype character varying(20) NOT NULL,
     lastchgworkitemid bigint NOT NULL,
-    kernelargs character varying(300),
+    kernelargs character varying(800),
     files character varying(300),
     entrynumber bigint NOT NULL
 );
+
 
 --
 -- Name: tier2_job_history; Type: TABLE; Schema: public; Owner: -
@@ -435,7 +436,7 @@ CREATE TABLE public.tier2_servicenode_history (
     sequencenumber integer NOT NULL,
     hostname character varying(63),
     state character varying(1) NOT NULL,
-    bootimageid character varying(30),
+    bootimageid character varying(50),
     ipaddr character varying(25),
     macaddr character varying(17),
     bmcipaddr character varying(25),
@@ -757,7 +758,7 @@ CREATE TABLE public.tier2_computenode_ss (
     sequencenumber integer NOT NULL,
     state character varying(1) NOT NULL,
     hostname character varying(63),
-    bootimageid character varying(30),
+    bootimageid character varying(50),
     environment character varying(120),
     ipaddr character varying(25),
     macaddr character varying(17),
@@ -817,7 +818,7 @@ CREATE TABLE public.tier2_servicenode_ss (
     sequencenumber integer NOT NULL,
     hostname character varying(63),
     state character varying(1) NOT NULL,
-    bootimageid character varying(30),
+    bootimageid character varying(50),
     ipaddr character varying(25),
     macaddr character varying(17),
     bmcipaddr character varying(25),

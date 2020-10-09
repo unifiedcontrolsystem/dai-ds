@@ -640,7 +640,7 @@ CREATE TABLE ComputeNode (
                                                             --    - E = Error
                                                             --    - U = Unknown (do not yet know what state this node is in)
    HostName             VarChar(63),                        -- Compute nodes hostname
-   BootImageId          VarChar(30),                        -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId          VarChar(50),                        -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    Environment          VarChar(120),                       -- Boot images can have multiple environments associated with them.
    IpAddr               VarChar(25),                        -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
    MacAddr              VarChar(17),                        -- E.g., 52:54:00:fc:4a:87
@@ -687,7 +687,7 @@ CREATE TABLE ComputeNode_History (
                                                          --    - E = Error
                                                          --    - U = Unknown (do not yet know what state this node is in)
    HostName             VarChar(63),                     -- Compute nodes hostname
-   BootImageId          VarChar(30),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    Environment          VarChar(120),                    -- Boot images can have multiple environments associated with them.
    IpAddr               VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
    MacAddr              VarChar(17),                     -- E.g., 52:54:00:fc:4a:87
@@ -726,7 +726,7 @@ CREATE TABLE Tier2_ComputeNode_History (
                                                          --    - E = Error
                                                          --    - U = Unknown (do not yet know what state this node is in)
    HostName                VarChar(63),                  -- Compute nodes hostname
-   BootImageId             VarChar(30),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId             VarChar(50),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    Environment             VarChar(120),                 -- Boot images can have multiple environments associated with them
    IpAddr                  VarChar(25),                  -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
    MacAddr                 VarChar(17),                  -- E.g., 52:54:00:fc:4a:87
@@ -836,7 +836,7 @@ CREATE TABLE ServiceNode (
    SequenceNumber       Integer        NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName             VarChar(63),                     -- Host name
    State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
-   BootImageId          VarChar(30),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr               VarChar(25),
    MacAddr              VarChar(17),
    BmcIpAddr            VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
@@ -869,7 +869,7 @@ CREATE TABLE ServiceNode_History (
    SequenceNumber       Integer        NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName             VarChar(63),                     -- Host name
    State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
-   BootImageId          VarChar(30),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr               VarChar(25),
    MacAddr              VarChar(17),
    BmcIpAddr            VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
@@ -897,7 +897,7 @@ CREATE TABLE Tier2_ServiceNode_History (
    SequenceNumber          Integer        NOT NULL,      -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName                VarChar(63),                  -- Host name
    State                   VarChar(1)     NOT NULL,      -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
-   BootImageId             VarChar(30),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   BootImageId             VarChar(50),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr                  VarChar(25),
    MacAddr                 VarChar(17),
    BmcIpAddr               VarChar(25),                  -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
@@ -1370,19 +1370,19 @@ CREATE ASSUMEUNIQUE INDEX Tier2_Adapter_History_EntryNum ON Tier2_Adapter_Histor
 -- - There will be a reference in each node pointing back to this table about what images should be used when booting that node.
 --------------------------------------------------------------
 CREATE TABLE BootImage (
-   Id                      VarChar(30) UNIQUE   NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
+   Id                      VarChar(50) UNIQUE   NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
    Description             VarChar(200),                    -- Description of this boot image
-   BootImageFile           VarChar(80)          NOT NULL,   -- Boot image file name
+   BootImageFile           VarChar(100)          NOT NULL,   -- Boot image file name
    BootImageChecksum       VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    BootOptions             VarChar(80),                     -- Boot options / Boot command that should be used with this image
-   BootStrapImageFile      VarChar(80)          NOT NULL,   -- BootStrap image file name
+   BootStrapImageFile      VarChar(100)          NOT NULL,   -- BootStrap image file name
    BootStrapImageChecksum  VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootStrapImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    State                   VarChar(1),                      -- State of this image information
    DbUpdatedTimestamp      TIMESTAMP            NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP            NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
    LastChgAdapterType      VarChar(20)          NOT NULL,   -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
    LastChgWorkItemId       BigInt               NOT NULL,   -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   KernelArgs              VarChar(300),                    -- Kernel arguments to use with this boot image
+   KernelArgs              VarChar(800),                    -- Kernel arguments to use with this boot image
    Files                   varchar(300),                    -- File arguments to use with thia boot image
    PRIMARY KEY (Id)
 );
@@ -1396,19 +1396,19 @@ PARTITION TABLE BootImage ON COLUMN Id;
 -- Subscription Routing Key: BootImage.State
 --------------------------------------------------------------
 CREATE TABLE BootImage_History (
-   Id                      VarChar(30)          NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
+   Id                      VarChar(50)          NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
    Description             VarChar(200),                    -- Description of this boot image
-   BootImageFile           VarChar(80)          NOT NULL,   -- Boot image file name
+   BootImageFile           VarChar(100)          NOT NULL,   -- Boot image file name
    BootImageChecksum       VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    BootOptions             VarChar(80),                     -- Boot options / Boot command that should be used with this image
-   BootStrapImageFile      VarChar(80)          NOT NULL,   -- BootStrap image file name
+   BootStrapImageFile      VarChar(100)          NOT NULL,   -- BootStrap image file name
    BootStrapImageChecksum  VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootStrapImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    State                   VarChar(1),                      -- State of this image information
    DbUpdatedTimestamp      TIMESTAMP            NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP            NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
    LastChgAdapterType      VarChar(20)          NOT NULL,   -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
    LastChgWorkItemId       BigInt               NOT NULL,   -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   KernelArgs              VarChar(300),                    -- Kernel arguments to use with this boot image
+   KernelArgs              VarChar(800),                    -- Kernel arguments to use with this boot image
    Files                   varchar(300),                    -- File arguments to use with thia boot image
 );
 PARTITION TABLE BootImage_History ON COLUMN Id;
@@ -1417,19 +1417,19 @@ CREATE INDEX BootImageHistoryByDbUpdatedTimestamp ON BootImage_History(DbUpdated
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
 --------------------------------------------------------------
 CREATE TABLE Tier2_BootImage_History (
-   Id                      VarChar(30)          NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
+   Id                      VarChar(50)          NOT NULL,   -- Uniquely identifies this particular set of Boot Image information aka AOE
    Description             VarChar(200),                    -- Description of this boot image
-   BootImageFile           VarChar(80)          NOT NULL,   -- Boot image file name
+   BootImageFile           VarChar(100)          NOT NULL,   -- Boot image file name
    BootImageChecksum       VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    BootOptions             VarChar(80),                     -- Boot options / Boot command that should be used with this image
-   BootStrapImageFile      VarChar(80)          NOT NULL,   -- BootStrap image file name
+   BootStrapImageFile      VarChar(100)          NOT NULL,   -- BootStrap image file name
    BootStrapImageChecksum  VarChar(32)          NOT NULL,   -- Checksum for the above-mentioned BootStrapImage - e.g., 7d94c67a1b23f5fdd799a72411158709
    State                   VarChar(1),                      -- State of this image information
    DbUpdatedTimestamp      TIMESTAMP            NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP            NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
    LastChgAdapterType      VarChar(20)          NOT NULL,   -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
    LastChgWorkItemId       BigInt               NOT NULL,   -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   KernelArgs              VarChar(300),                    -- Kernel arguments to use with this boot image
+   KernelArgs              VarChar(800),                    -- Kernel arguments to use with this boot image
    Files                   varchar(300),                    -- File arguments to use with thia boot image
    Tier2DbUpdatedTimestamp TIMESTAMP            NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt               NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.

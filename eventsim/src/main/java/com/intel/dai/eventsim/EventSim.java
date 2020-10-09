@@ -44,6 +44,7 @@ class EventSim {
      */
     void initialise() throws SimulatorException {
         bootParamsApi_ = new BootParameters();
+        bootImagesApi_ = new BootImages();
         hwInvApi_ = new HardwareInventory();
         wlmApi_ = new WlmApi(log_);
         apiReq_ = new ApiReqData(log_);
@@ -62,6 +63,7 @@ class EventSim {
     }
 
     protected BootParameters bootParamsApi_;
+    protected BootImages bootImagesApi_;
     protected HardwareInventory hwInvApi_;
     protected WlmApi wlmApi_;
     protected NetworkObject network_;

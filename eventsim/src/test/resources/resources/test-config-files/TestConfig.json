@@ -1,6 +1,7 @@
 {
   "api-simulator-config" : {
-    "boot-parameters" : "/opt/ucs/etc/BootParameters.json",
+    "boot-parameters" : "/resources/test-config-files/TestBootParameters.json",
+    "boot-images" : "/resources/test-config-files/TestBootImages.json",
     "hw-inventory" : "/opt/ucs/etc/HWInventory.json",
     "hw-inventory-path" : "/opt/ucs/etc",
     "hw-inventory-query-path" : "/opt/ucs/etc/HwInvQuery_",

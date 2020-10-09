@@ -324,11 +324,6 @@ public class NetworkListenerConfigTest {
         assertEquals(0, map.size());
     }
 
-    @Test
-    public void getFirstNetworkBaseUrl() throws Exception {
-        config_.setCurrentProfile("default");
-        assertEquals("http://127.0.0.1:5678", config_.getFirstNetworkBaseUrl());
-    }
 
     private NetworkListenerConfig config_;
     private AdapterInformation info_;

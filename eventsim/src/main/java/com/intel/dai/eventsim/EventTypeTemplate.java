@@ -155,7 +155,7 @@ class EventTypeTemplate {
     private final String MISSING_EVENT_TYPE_TEMP_CONFIG = "Event type template configuration is missing required " +
             "fields, fields =";
 
-    Map<String, Object> dataDscByKeyLen_ = new TreeMap<String, Object>(
+    private Map<String, Object> dataDscByKeyLen_ = new TreeMap<String, Object>(
             new Comparator<String>() {
                 @Override
                 public int compare(String a1, String a2) {
@@ -165,7 +165,7 @@ class EventTypeTemplate {
             }
     );
 
-    Map<String, Object> dataAscByKeyLen_ = new TreeMap<String, Object>(
+    private Map<String, Object> dataAscByKeyLen_ = new TreeMap<String, Object>(
             new Comparator<String>() {
                 @Override
                 public int compare(String a1, String a2) {
