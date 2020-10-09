@@ -1,0 +1,10 @@
+{
+  "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-fabric-telemetry?stream_id=dai-fabric-telemetry",
+  "exchangeName": "ucs",
+  "publishServerUrl": "amqp://am03-nmn.local",
+  "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+  "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+  "clientId": "admin-client",
+  "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+  "realm": "shasta"
+}

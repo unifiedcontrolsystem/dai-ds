@@ -7,9 +7,9 @@ services:
     entrypoint: /opt/ucs/dai/entryPoint.sh
     container_name: dai-manager
     environment:
-      - DAI_LOGGING_LEVEL=INFO
-      - HOSTNAME=am01-nmn.local
-      - VOLTDB_SERVERS=am01-nmn.local
+      - DAI_LOGGING_LEVEL=DEBUG
+      - HOSTNAME=am02-nmn.local
+      - VOLTDB_SERVERS=am02-nmn.local
       - DAI_USE_BENCHMARKING=false
     volumes:
       - "/opt/dai-docker/etc:/opt/ucs/etc"
