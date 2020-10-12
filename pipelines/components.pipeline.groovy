@@ -7,7 +7,10 @@ pipeline {
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: true,
                 description: 'Performs a partial clean to speed up the build.')
-        choice(name: 'AGENT', choices: ['COMPONENT'], description: 'Agent label')
+        choice(name: 'AGENT', choices: [
+                'NRE-COMPONENT',
+                'Sindhu-test'
+        ], description: 'Agent label')
     }
     stages {
         stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
@@ -19,7 +22,9 @@ pipeline {
                         echo "Building on ${AGENT}"
                         sh 'hostname'
 
-                        lastChanges since: 'PREVIOUS_REVISION', format:'SIDE', matching: 'LINE'
+                        lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
+                                matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
+                                specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
                             utilities.copyIntegrationTestScriptsToBuildDistributions()
@@ -30,17 +35,17 @@ pipeline {
                 }
                 stage('Quick Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options { catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script { utilities.invokeGradle("jar") }
                         StartHWInvDb()
-                        script { utilities.invokeGradle("integrationTest") }
+                        script {utilities.invokeGradle("integrationTest") }
                         StopHWInvDb()
                     }
                 }
                 stage('Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options { catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         sh 'rm -rf build'
                         script { utilities.invokeGradle("clean jar") }
@@ -50,10 +55,10 @@ pipeline {
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        junit allowEmptyResults: true, testResults: '**/test-results/integrationTest/*.xml'
+                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
                     }
                 }
                 stage('Archive') {
