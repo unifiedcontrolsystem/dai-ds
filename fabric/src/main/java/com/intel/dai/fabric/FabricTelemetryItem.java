@@ -109,6 +109,7 @@ public class FabricTelemetryItem extends FabricItemBase {
         minimum_ = minimum;
         average_ = average;
         maximum_ = maximum;
+        haveStats_ = true;
     }
 
     /**
@@ -117,7 +118,7 @@ public class FabricTelemetryItem extends FabricItemBase {
      * @return true when setStatistics has been called successfully on this instance, false otherwise.
      */
     public boolean haveStatistics() {
-        return minimum_ != Double.MIN_VALUE && maximum_ != Double.MIN_VALUE && average_ != Double.MIN_VALUE;
+        return haveStats_;
     }
 
     /**
@@ -140,5 +141,6 @@ public class FabricTelemetryItem extends FabricItemBase {
     private double minimum_ = Double.MIN_VALUE;
     private double maximum_ = Double.MIN_VALUE;
     private double average_ = Double.MIN_VALUE;
+    private boolean haveStats_ = false;
     private boolean skipAggregateAndStore_ = false;
 }

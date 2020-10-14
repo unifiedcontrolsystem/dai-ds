@@ -53,16 +53,10 @@ class FabricTelemetryItemSpec extends Specification {
     }
 
     def "Test haveStatistics"() {
-        underTest_.minimum_ = MIN
-        underTest_.average_ = AVG
-        underTest_.maximum_ = MAX
-        expect: underTest_.haveStatistics() == RESULT
-        where:
-        MIN              | AVG              | MAX              || RESULT
-        Double.MIN_VALUE | 1.0              | 1.0              || false
-        1.0              | Double.MIN_VALUE | 1.0              || false
-        1.0              | 1.0              | Double.MIN_VALUE || false
-        1.0              | 1.0              | 1.0              || true
+        boolean before = underTest_.haveStatistics()
+        underTest_.setStatistics(1.0, 2.0, 3.0)
+        expect: !before
+        and:    underTest_.haveStatistics() == true
     }
 
     def "Test skipAggregationAndStore"() {

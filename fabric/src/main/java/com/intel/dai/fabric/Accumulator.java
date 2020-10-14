@@ -14,7 +14,7 @@ class Accumulator {
         log_ = logger;
     }
 
-    public void addValue(FabricTelemetryItem data) {
+    synchronized public void addValue(FabricTelemetryItem data) {
         values_.add(data.getValue());
         log_.debug("Accumulator: value count now %d compared to %d", values_.size(), count_);
         timestamps_.add(data.getTimestamp());

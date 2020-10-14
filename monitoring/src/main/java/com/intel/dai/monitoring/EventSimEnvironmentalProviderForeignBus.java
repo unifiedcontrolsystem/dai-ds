@@ -88,7 +88,7 @@ public class EventSimEnvironmentalProviderForeignBus implements NetworkListenerP
             systemActions.publishNormalizedData(rawTopic_, data.getDescription(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getValue());
         }
-        if(Math.abs(data.getAverage() - Double.MIN_VALUE) >= 0.000001) {
+        if(data.haveSummary()) {
             // Store and publish aggregate data it available...
             log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
                     data.getDescription(), data.getLocation(), data.getNanoSecondTimestamp(),
