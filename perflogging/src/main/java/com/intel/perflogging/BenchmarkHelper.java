@@ -57,7 +57,7 @@ public class BenchmarkHelper {
     public void changeDataSetName(String newName) {
         if(doBenchmarking_) {
             assert newName != null : "Benchmarking: changeDataSetName: new name cannot be null";
-            assert !newName.isBlank():"Benchmarking: changeDataSetName: new name cannot be blank";
+            assert !newName.trim().isEmpty():"Benchmarking: changeDataSetName: new name cannot be blank";
             dataSetName_ = newName;
         }
     }
@@ -69,8 +69,8 @@ public class BenchmarkHelper {
      * @param value The replacement for the variable.
      */
     public void replaceFilenameVariable(String variableName, String value) {
-        if(variableName == null || variableName.isBlank()) throw new NullPointerException("variableName cannot be null or empty!");
-        if(value == null || value.isBlank()) throw new NullPointerException("value cannot be null or empty!");
+        if(variableName == null || variableName.trim().isEmpty()) throw new NullPointerException("variableName cannot be null or empty!");
+        if(value == null || value.trim().isEmpty()) throw new NullPointerException("value cannot be null or empty!");
         file_ = new File(file_.toString().replace("{{" + variableName + "}}", value));
     }
 

@@ -104,7 +104,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         if(config_ == null)
             getConfig(config, systemActions);
         String bootImageId = data.retrieveExtraData(FOREIGN_IMAGE_ID_KEY);
-        boolean matched = bootImageId == null || bootImageId.isBlank() || knownIds_.containsKey(bootImageId);
+        boolean matched = bootImageId == null || bootImageId.trim().isEmpty() || knownIds_.containsKey(bootImageId);
         if(!matched || Instant.now().toEpochMilli() >= targetRequestTimeMs_.get())
             new Thread(this::updateBootImageTable).start(); // Background updates of table...
         long dataTimestamp = data.getNanoSecondTimestamp();

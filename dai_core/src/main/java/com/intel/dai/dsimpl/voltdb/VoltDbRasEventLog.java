@@ -181,7 +181,7 @@ public class VoltDbRasEventLog implements RasEventLog {
         String sTempStoredProcedure = "RasEventStore";
         try {
             // Ensure that a lctn was specified, no use looking for an associated job if there was no lctn specified.
-            if ((sLctn == null) || (sLctn.isBlank())) {
+            if ((sLctn == null) || (sLctn.trim().isEmpty())) {
                 logger.info("logRasEventCheckForEffectedJob - no lctn was specified on this invocation so we are invoking logRasEventNoEffectedJob() instead - EventType=%s, Lctn=%s, InstanceData='%s'", sEventType, sLctn, sInstanceData);
                 logRasEventNoEffectedJob(sEventType, sInstanceData, sLctn, lTsInMicroSecs, sReqAdapterType, lReqWorkItemId);
                 return;

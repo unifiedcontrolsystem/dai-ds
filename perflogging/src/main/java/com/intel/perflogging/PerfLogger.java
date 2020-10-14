@@ -4,10 +4,7 @@
 
 package com.intel.perflogging;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -78,13 +75,15 @@ public class PerfLogger {
 
             File fp = new File(outputFile_);
 
-            try (FileWriter fw = new FileWriter(fp, StandardCharsets.UTF_8, fp.exists())) {
-                BufferedWriter writer = new BufferedWriter(fw);
-                writer.write(firstTimestamp_.getTime().getTime() + " : " + firstEvent_);
-                writer.newLine();
-                writer.write(lastTimestamp.getTime().getTime() + " : " + event);
-                writer.newLine();
-                writer.close();
+            try (OutputStream os = new FileOutputStream(fp, fp.exists())) {
+                try (Writer fw = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                    BufferedWriter writer = new BufferedWriter(fw);
+                    writer.write(firstTimestamp_.getTime().getTime() + " : " + firstEvent_);
+                    writer.newLine();
+                    writer.write(lastTimestamp.getTime().getTime() + " : " + event);
+                    writer.newLine();
+                    writer.close();
+                }
             }
 
         } else {

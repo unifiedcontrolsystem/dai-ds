@@ -6,6 +6,7 @@ package com.intel.networking.restclient.apache;
 
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.*;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.*;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -15,15 +16,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
+
 
 /**
  * Description of class ApacheRESTClient. This REST client uses permissive SSL (trusts ALL certificates and host names).
@@ -128,7 +127,7 @@ public class ApacheRESTClient extends RESTClient {
             try (InputStreamReader reader = new InputStreamReader(response.getEntity().getContent(),
                     StandardCharsets.UTF_8)) {
                 StringWriter writer = new StringWriter();
-                if(reader.transferTo(writer) == 0L)
+                if(IOUtils.copy(reader, writer) == 0L)
                     log_.warn("Failed to transfer data from network to StringWriter.");
                 return new BlockingResult(response.getStatusLine().getStatusCode(), writer.toString(), request);
             }
@@ -141,7 +140,7 @@ public class ApacheRESTClient extends RESTClient {
     private String streamToBody(InputStream stream) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             StringWriter writer = new StringWriter();
-            if(reader.transferTo(writer) == 0L)
+            if(IOUtils.copy(reader, writer) == 0L)
                 log_.warn("Failed to transfer data from network to StringWriter.");
             return writer.toString();
         }
@@ -196,7 +195,7 @@ public class ApacheRESTClient extends RESTClient {
         }
         for(Map.Entry<String,String> entry: info.headers().entrySet())
             result.addHeader(entry.getKey(), entry.getValue());
-        if(info.body() != null && !info.body().isBlank() && result instanceof HttpEntityEnclosingRequestBase) {
+        if(info.body() != null && !info.body().trim().isEmpty() && result instanceof HttpEntityEnclosingRequestBase) {
             if(!info.headers().containsKey("Content-Type"))
                 result.addHeader("Content-Type", "application/json");
             try {

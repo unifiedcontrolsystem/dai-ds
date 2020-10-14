@@ -72,7 +72,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
         }
         long usTimestamp = nsTimestamp / 1000L;
         try {
-            if (location == null || location.isBlank() || nodeInformation_.isServiceNodeLocation(location))
+            if (location == null || location.trim().isEmpty() || nodeInformation_.isServiceNodeLocation(location))
                 eventActions_.logRasEventNoEffectedJob(type, instanceData, location, usTimestamp,
                         adapter_.getType(), adapter_.getBaseWorkItemId());
             else
@@ -254,7 +254,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
             publisherConfigured_ = true;
             Map<String, String> args = new HashMap<>();
             String publisherName = config_.getStringOrDefault("sourceType", null);
-            if (publisherName == null || publisherName.isBlank())
+            if (publisherName == null || publisherName.trim().isEmpty())
                 return;
             for (Map.Entry<String,Object> entry : config_.entrySet()) {
                 Object value = config_.getOrDefault(entry, null);
