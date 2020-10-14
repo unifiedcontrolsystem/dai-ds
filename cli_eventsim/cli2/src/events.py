@@ -54,7 +54,7 @@ class EventsCli(object):
         ras_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         ras_events_parser.add_argument('--template', help='sample template to generate ras events')
         ras_events_parser.add_argument('--timeout', type=int, help='ras sub-command execution timeout')
-        ras_events_parser.add_argument('--timezone', type=int,
+        ras_events_parser.add_argument('--timezone',
             help='generate ras events for a given timezone. The default values exists in config file')
         ras_events_parser.add_argument('--type', choices=['fabric-crit', 'old-ras'], default='old-ras',
             help='provide type of the ras event to generate events')
@@ -90,7 +90,7 @@ class EventsCli(object):
         sensor_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         sensor_events_parser.add_argument('--template', help='sample template to generate sensor events')
         sensor_events_parser.add_argument('--timeout', type=int, help='sensor sub-command execution timeout')
-        sensor_events_parser.add_argument('--timezone', type=int,
+        sensor_events_parser.add_argument('--timezone',
             help='generate sensor events for given timezone. The default values exists in config file')
         sensor_events_parser.add_argument('--type', choices=['energy', 'fabric-perf', 'power', 'temperature',
                                                              'voltage'],
@@ -147,7 +147,7 @@ class EventsCli(object):
         boot_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
         boot_events_parser.add_argument('--template', help='sample template to generate boot events')
         boot_events_parser.add_argument('--timeout', type=int, help='boot sub-command execution timeout')
-        boot_events_parser.add_argument('--timezone', type=int,
+        boot_events_parser.add_argument('--timezone',
             help='generate boot events for given timezone. The default values exists in config file')
         boot_events_parser.add_argument('--type', choices=['off', 'on', 'ready'], default='all',
             help='generate given type of boot events. Default generates all [on/off/ready] types of boot events.')
@@ -190,7 +190,7 @@ class EventsCli(object):
         scenario_events_parser.add_argument('--start-time',
             help='start time/scheduled time to generate events for a given scenario')
         scenario_events_parser.add_argument('--timeout', type=int, help='scenario sub-command execution timeout')
-        scenario_events_parser.add_argument('--timezone', type=int,
+        scenario_events_parser.add_argument('--timezone',
             help='generate events for given timezone. The default values exists in config file')
         scenario_events_parser.add_argument('--type', choices=['burst', 'group-burst', 'repeat'], default='burst',
             help='generate events for a given type of scenario. Default generates burst type scenario. Scenario data '
