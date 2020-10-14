@@ -36,10 +36,12 @@ public final class CommonDataFormat {
     public String getUnits() { return units_; }
     public String getTelemetryDataType() { return telemetryDataType_; }
 
-    public void setMinMaxAvg(double min, double max, double avg) { min_ = min; max_ = max; average_ = avg; }
+    public void setMinMaxAvg(double min, double max, double avg)
+        { min_ = min; max_ = max; average_ = avg; haveSummary_ = true; }
     public double getMinimum() { return min_; }
     public double getMaximum() { return max_; }
     public double getAverage() { return average_; }
+    public boolean haveSummary() { return haveSummary_; }
 
     public void setRasEvent(String event, String payload) { event_ = event; rasEventPayload_ = payload; }
     public void setStateChangeEvent(BootState event) { bootStateEvent_ = event; }
@@ -75,6 +77,7 @@ public final class CommonDataFormat {
     private DataType type_;
     private String telemetryDataType_;
     private String units_ = null;
+    private boolean haveSummary_ = false;
     private double value_ = Double.MIN_VALUE;
     private double min_ = Double.MAX_VALUE;
     private double max_ = Double.MIN_VALUE;

@@ -53,7 +53,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
                         String name = item.getString("__FullName__");
                         CommonDataFormat common = new CommonDataFormat(ts, location, DataType.EnvironmentalData);
                         common.setDescription(name);
-                        common.setValue(Double.parseDouble(item.getString("Value")));
+                        common.setValueAndUnits(Double.parseDouble(item.getString("Value")), "", name);
                         aggregateData(common);
                         results.add(common);
                     } catch(PropertyNotExpectedType e) {
@@ -90,12 +90,12 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
             systemActions.publishNormalizedData(rawTopic_, data.getDescription(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getValue());
         }
-        if(Math.abs(data.getAverage() - Double.MIN_VALUE) >= 0.000001) {
+        if(data.haveSummary()) {
             // Store and publish aggregate data it available...
             log_.debug("Storing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
                     data.getDescription(), data.getLocation(), data.getNanoSecondTimestamp(),
                     data.getMinimum(), data.getMaximum(), data.getAverage());
-            systemActions.storeAggregatedData(data.getDescription(), data.getLocation(),
+            systemActions.storeAggregatedData(data.getTelemetryDataType(), data.getLocation(),
                     data.getNanoSecondTimestamp(), data.getMinimum(), data.getMaximum(), data.getAverage());
             if(publish_) {
                 log_.debug("Publishing aggregate data: type=%s,location=%s,ts=%d,min=%f,max=%f,agv=%f",
@@ -138,6 +138,7 @@ public class EnvironmentalProviderForeignBus implements NetworkListenerProvider,
                 accum = new Accumulator(log_);
                 accumulators_.put(key, accum);
             }
+            //log_.debug("===RAW_DATA_VALUE: %s = %f", key, raw.getValue()); // Leave for debugging for developers.
             accum.addValue(raw);
         }
         return raw;

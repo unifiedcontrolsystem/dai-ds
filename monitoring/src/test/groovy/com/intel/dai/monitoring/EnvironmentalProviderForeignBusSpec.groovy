@@ -89,6 +89,67 @@ class EnvironmentalProviderForeignBusSpec extends Specification {
         true    | true   || true
     }
 
+    boolean doubleEquals(double value, double expected) {
+        return (value >= (expected - 0.0001) && value <= (expected + 0.0001))
+    }
+
+    def "Test windows count accumulation"() {
+        EnvironmentalProviderForeignBus.Accumulator accumulator =
+                new EnvironmentalProviderForeignBus.Accumulator(Mock(Logger))
+        EnvironmentalProviderForeignBus.Accumulator.count_ = 10
+        EnvironmentalProviderForeignBus.Accumulator.useTime_ = false
+        EnvironmentalProviderForeignBus.Accumulator.moving_ = false
+        CommonDataFormat data
+        for(int v = 1; v <= 10; v++) {
+            data = new CommonDataFormat(1_000_000_000L * v, "loc", DataType.EnvironmentalData)
+            data.setValue((double)v)
+            accumulator.addValue(data)
+        }
+        expect: data != null
+        and:    doubleEquals(data.average, 5.5)
+        and:    doubleEquals(data.maximum, 10.0)
+        and:    doubleEquals(data.minimum, 1.0)
+        and:    accumulator.values_.size() == 0
+    }
+
+    def "Test time window accumulation"() {
+        EnvironmentalProviderForeignBus.Accumulator accumulator =
+                new EnvironmentalProviderForeignBus.Accumulator(Mock(Logger))
+        EnvironmentalProviderForeignBus.Accumulator.ns_ = 10_000_000_000L
+        EnvironmentalProviderForeignBus.Accumulator.useTime_ = true
+        EnvironmentalProviderForeignBus.Accumulator.moving_ = false
+        CommonDataFormat data
+        for(int v = 1; v <= 11; v++) {
+            data = new CommonDataFormat(1_000_000_000L * v, "loc", DataType.EnvironmentalData)
+            data.setValue((double)v)
+            accumulator.addValue(data)
+        }
+        expect: data != null
+        and:    doubleEquals(data.average, 6)
+        and:    doubleEquals(data.maximum, 11.0)
+        and:    doubleEquals(data.minimum, 1.0)
+        and:    accumulator.values_.size() == 0
+    }
+
+    def "Test count moving average accumulation"() {
+        EnvironmentalProviderForeignBus.Accumulator accumulator =
+                new EnvironmentalProviderForeignBus.Accumulator(Mock(Logger))
+        EnvironmentalProviderForeignBus.Accumulator.count_ = 5
+        EnvironmentalProviderForeignBus.Accumulator.useTime_ = false
+        EnvironmentalProviderForeignBus.Accumulator.moving_ = true
+        CommonDataFormat data
+        for(int v = 1; v <= 10; v++) {
+            data = new CommonDataFormat(1_000_000_000L * v, "loc", DataType.EnvironmentalData)
+            data.setValue((double)v)
+            accumulator.addValue(data)
+        }
+        expect: data != null
+        and:    doubleEquals(data.average, 8)
+        and:    doubleEquals(data.maximum, 10.0)
+        and:    doubleEquals(data.minimum, 6.0)
+        and:    accumulator.values_.size() == 4
+    }
+
     def payload_ = """
 {
   "metrics": {
