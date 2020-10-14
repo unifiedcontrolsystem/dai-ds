@@ -1,10 +1,9 @@
-package com.intel.networking.restserver.java11;
+package com.intel.dai.eventsim.java11;
 
 import com.sun.net.httpserver.HttpExchange;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class HttpExchangeResponseTest {

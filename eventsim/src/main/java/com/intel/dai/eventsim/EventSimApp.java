@@ -1,8 +1,11 @@
 package com.intel.dai.eventsim;
 
+import com.intel.dai.eventsim.java11.Java11RESTServer;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import com.intel.networking.HttpMethod;
+import com.intel.networking.restserver.RESTServerException;
+import com.intel.networking.restserver.RESTServerFactory;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
@@ -539,7 +542,8 @@ public class EventSimApp  extends  EventSim {
         setup();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RESTServerException {
+        RESTServerFactory.addImplementation("jdk11", Java11RESTServer.class);
         if(args.length != 2) {
             log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");
             System.exit(1);

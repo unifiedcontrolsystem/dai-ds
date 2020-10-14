@@ -150,11 +150,11 @@ subprojects {
     }
 
     compileJava {
-        doFirst {
-            if(JAVA8_HOME != null && JAVA8_HOME != "" && sourceCompatibility.toString() == "1.8") {
-                options.bootstrapClasspath = fileTree(include: ['*.jar'], dir: "$JAVA8_HOME/jre/lib/")
-            }
-        }
+//        doFirst {
+//            if(JAVA8_HOME != null && JAVA8_HOME != "" && sourceCompatibility.toString() == "8") {
+//                options.bootstrapClasspath = fileTree(include: ['*.jar'], dir: "$JAVA8_HOME/jre/lib/")
+//            }
+//        }
         if(!includeDbgSymbols)
             options.compilerArgs << '-g:none'
         options.compilerArgs << '-Werror'
@@ -172,7 +172,7 @@ subprojects {
     }
 
     sourceCompatibility = 8
-    targetCompatibility = 11
+    targetCompatibility = 8
 
     jacoco {
         toolVersion = "0.8.5"
@@ -275,8 +275,7 @@ project(':xdg') {
 }
 
 project(':properties') {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    targetCompatibility = 8
 
     jacocoTestCoverageVerification {
         violationRules {
@@ -356,8 +355,7 @@ project(':runtime_utils') {
 }
 
 project(':config_io') {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    targetCompatibility = 8
 
     dependencies {
         compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
@@ -426,8 +424,7 @@ project(':perflogging') {
 project(':procedures') {
     apply plugin: 'groovy'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    targetCompatibility = 8
 
     dependencies {
         compileOnly group: 'org.voltdb', name: 'voltdb', version: voltdb_version
@@ -998,6 +995,9 @@ project(':eventsim') {
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'
     }
+
+    targetCompatibility = 11
+
     project.mainClassName = project.hasProperty("main") ? project.getProperty("main") : 'com.intel.dai.EventSimApp'
 
     jar {
