@@ -121,27 +121,29 @@ public class BenchmarkHelper {
 
     private void recordAndReset() {
         if(aboveThreshold()) {
-            try (Writer out = new FileWriter(file_, StandardCharsets.UTF_8, true)) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("{\"name\":\"").append(dataSetName_).append("\",");
-                builder.append("\"start\":\"").append(firstTs_.get()).append("\",");
-                builder.append("\"finish\":\"").append(lastTs_.get()).append("\",");
-                builder.append("\"duration\":\"").append(lastTs_.get() - firstTs_.get()).append("\",");
-                builder.append("\"counts\":{");
-                boolean first = true;
-                if(defaultValue_.get() > 0) {
-                    builder.append("\"DEFAULT\":").append(defaultValue_.get());
-                    first = false;
-                }
-                for(Map.Entry<String, AtomicLong> entry : values_.entrySet()) {
-                    if(first)
+            try (OutputStream os = new FileOutputStream(file_, true)) {
+                try (Writer out = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("{\"name\":\"").append(dataSetName_).append("\",");
+                    builder.append("\"start\":\"").append(firstTs_.get()).append("\",");
+                    builder.append("\"finish\":\"").append(lastTs_.get()).append("\",");
+                    builder.append("\"duration\":\"").append(lastTs_.get() - firstTs_.get()).append("\",");
+                    builder.append("\"counts\":{");
+                    boolean first = true;
+                    if (defaultValue_.get() > 0) {
+                        builder.append("\"DEFAULT\":").append(defaultValue_.get());
                         first = false;
-                    else
-                        builder.append(",");
-                    builder.append("\"").append(entry.getKey()).append("\":").append(entry.getValue().get());
+                    }
+                    for (Map.Entry<String, AtomicLong> entry : values_.entrySet()) {
+                        if (first)
+                            first = false;
+                        else
+                            builder.append(",");
+                        builder.append("\"").append(entry.getKey()).append("\":").append(entry.getValue().get());
+                    }
+                    builder.append("}}\n");
+                    out.write(builder.toString());
                 }
-                builder.append("}}\n");
-                out.write(builder.toString());
             } catch (IOException e) {
                 System.err.println("*** Benchmarking Error: Failed to write result of benchmarking to file: " +
                         file_.toString());
