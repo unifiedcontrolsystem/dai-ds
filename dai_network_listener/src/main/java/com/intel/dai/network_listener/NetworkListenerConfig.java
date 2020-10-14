@@ -68,7 +68,7 @@ public class NetworkListenerConfig {
     public AdapterInformation getAdapterInformation() { return adapter_; }
     public String getCurrentProfile() { return currentProfile_; }
     public void setCurrentProfile(String currentProfile) {
-        assert currentProfile != null && !currentProfile.isBlank() : "Illegal profile name!";
+        assert currentProfile != null && !currentProfile.trim().isEmpty() : "Illegal profile name!";
         if(!profiles_.containsKey(currentProfile))
             throw new IllegalArgumentException();
         currentProfile_ = currentProfile;

@@ -58,7 +58,7 @@ class SensorMetaDataForeignBus {
     }
 
     String normalizeLocation(String sensor, String location) {
-        if(entries_.get(sensor).extraLocation.isBlank())
+        if(entries_.get(sensor).extraLocation.trim().isEmpty())
             return location;
         return location + "-" + entries_.get(sensor).extraLocation;
     }

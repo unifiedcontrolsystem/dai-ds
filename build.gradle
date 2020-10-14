@@ -500,6 +500,7 @@ project(':networking') {
         compile project(':config_io')
         compile project(":authentication")
         compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
+        compile group: 'commons-io', name: 'commons-io', version: commonsio_version
 
         testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
         testCompile 'cglib:cglib-nodep:3.1'

@@ -86,7 +86,7 @@ public abstract class RESTServer implements AutoCloseable, Closeable {
      */
     public final void setAddress(String address) throws RESTServerException {
         if(isRunning()) throw new RESTServerException("Server is already running, cannot set port");
-        if(address == null || address.isBlank()) throw new RESTServerException("Bad address (null or blank)");
+        if(address == null || address.trim().isEmpty()) throw new RESTServerException("Bad address (null or blank)");
         address_ = address.trim();
     }
 

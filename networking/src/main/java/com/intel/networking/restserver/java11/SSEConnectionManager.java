@@ -128,7 +128,7 @@ class SSEConnectionManager implements AutoCloseable, Closeable {
         try {
             connection.exchange.getResponseBody().write(String.format("event:%s%n",
                     publishPath.trim()).getBytes(StandardCharsets.UTF_8));
-            if(id != null && !id.isBlank())
+            if(id != null && !id.trim().isEmpty())
                 connection.exchange.getResponseBody().write(String.format("id:%s%n", id).
                             getBytes(StandardCharsets.UTF_8));
             else if(FORCE_EVENT_ID)

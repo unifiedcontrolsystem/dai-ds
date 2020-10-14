@@ -1553,7 +1553,7 @@ public class AdapterDaiMgr {
             final String SnHostname = getHostName(args);
             final String SnLctn     = getLocation(args, SnHostname);
             mSnLctn = SnLctn;
-            if(SnLctn == null || SnLctn.isBlank()) {
+            if(SnLctn == null || SnLctn.trim().isEmpty()) {
                 log_.error("Hostname specified or found was '%s' which was not found in the service nodes and " +
                         "could not be resolved to a location!", SnHostname);
                 adapter.handleMainlineAdapterCleanup(true);
