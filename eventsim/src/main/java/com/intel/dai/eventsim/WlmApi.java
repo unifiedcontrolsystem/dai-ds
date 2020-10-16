@@ -2,6 +2,7 @@ package com.intel.dai.eventsim;
 
 import com.intel.logging.Logger;
 
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Random;
@@ -9,8 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.text.SimpleDateFormat;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class WlmApi {
@@ -28,22 +27,18 @@ public class WlmApi {
 
         logger_.info("Generate create reservation log line");
         String logstring = "";
-        FileWriter bgschedLog = null;
-        try {
-            bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
-            String[] userArr = users.split(" ");
-            String[] nodeArr = nodes.split(" ");
+        try (OutputStream os = new FileOutputStream(bgschedPath, true)) {
+            try (Writer bgschedLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                String[] userArr = users.split(" ");
+                String[] nodeArr = nodes.split(" ");
 
-            Reservation reservation = new Reservation(name, userArr, nodeArr, starttime.getTime()/1000, Long.parseLong(duration), 0);
-            logstring = reservation.createReservation();
-            bgschedLog.write(logstring);
+                Reservation reservation = new Reservation(name, userArr, nodeArr, starttime.getTime() / 1000, Long.parseLong(duration), 0);
+                logstring = reservation.createReservation();
+                bgschedLog.write(logstring);
+            }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            if (bgschedLog != null)
-                bgschedLog.close();
         }
 
         return logstring;
@@ -53,28 +48,24 @@ public class WlmApi {
 
         logger_.info("Generate modify reservation log line");
         String logstring = "";
-        FileWriter bgschedLog = null;
-        try {
-            bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
-            String updateStr = "[{";
-            if (!"false".equals(users))
-                updateStr += "'users': '" + users.replace(",",":").replace(" ",":") + "',";
-            if (!"false".equals(nodes))
-                updateStr += "'nodes': '" + nodes.replace(" ",",")  + "',";
-            if (!"false".equals(starttime))
-                updateStr += "'start': '" + Timestamp.valueOf(starttime).getTime()/1000 + "',";
-            updateStr += "}]";
+        try (OutputStream os = new FileOutputStream(bgschedPath, true)) {
+            try (Writer bgschedLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                String updateStr = "[{";
+                if (!"false".equals(users))
+                    updateStr += "'users': '" + users.replace(",", ":").replace(" ", ":") + "',";
+                if (!"false".equals(nodes))
+                    updateStr += "'nodes': '" + nodes.replace(" ", ",") + "',";
+                if (!"false".equals(starttime))
+                    updateStr += "'start': '" + Timestamp.valueOf(starttime).getTime() / 1000 + "',";
+                updateStr += "}]";
 
-            Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
-            logstring = reservation.modifyReservation(updateStr);
-            bgschedLog.write(logstring);
+                Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
+                logstring = reservation.modifyReservation(updateStr);
+                bgschedLog.write(logstring);
+            }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            if (bgschedLog != null)
-                bgschedLog.close();
         }
 
         return logstring;
@@ -83,20 +74,16 @@ public class WlmApi {
     String deleteReservation(String name) throws IOException {
 
         logger_.info("Generate delete reservation log line");
-        FileWriter bgschedLog = null;
         String logstring = "";
-        try {
-            bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
-            Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
-            logstring = reservation.deleteReservation();
-            bgschedLog.write(logstring);
+        try (OutputStream os = new FileOutputStream(bgschedPath, true)) {
+            try (Writer bgschedLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                Reservation reservation = new Reservation(name, null, null, 0, 0, 0);
+                logstring = reservation.deleteReservation();
+                bgschedLog.write(logstring);
+            }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            if (bgschedLog != null)
-                bgschedLog.close();
         }
 
         return logstring;
@@ -106,22 +93,18 @@ public class WlmApi {
     String startJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir) throws IOException {
 
         logger_.info("Generate start job log line");
-        FileWriter cqmLog = null;
         String logstring = "";
-        try {
-            cqmLog = new FileWriter(cqmPath, StandardCharsets.UTF_8, true);
-            String[] userArr = users.split(" ");
-            String[] nodeArr = nodes.split(" ");
-            Job job_ = new Job(Integer.parseInt(jobid), name, nodeArr, userArr, starttime.getTime()/1000, 0, workdir);
-            logstring = job_.startJob();
-            cqmLog.write(logstring);
+        try (OutputStream os = new FileOutputStream(cqmPath, true)) {
+            try (Writer cqmLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                String[] userArr = users.split(" ");
+                String[] nodeArr = nodes.split(" ");
+                Job job_ = new Job(Integer.parseInt(jobid), name, nodeArr, userArr, starttime.getTime() / 1000, 0, workdir);
+                logstring = job_.startJob();
+                cqmLog.write(logstring);
+            }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            if (cqmLog != null)
-                cqmLog.close();
         }
 
         return logstring;
@@ -130,24 +113,20 @@ public class WlmApi {
     String terminateJob(String jobid, String name, String users, String nodes, Timestamp starttime, String workdir, String exitStatus) throws IOException {
 
         logger_.info("Generate terminate job log line");
-        FileWriter cqmLog = null;
         String logstring = "";
-        try {
-            cqmLog = new FileWriter(cqmPath, StandardCharsets.UTF_8, true);
-            Date now = new Date();
-            long endTime = now.getTime()/1000;
-            String[] userArr = users.split(" ");
-            String[] nodeArr = nodes.split(" ");
-            Job job_ = new Job(Integer.parseInt(jobid), name, nodeArr, userArr, starttime.getTime()/1000, endTime, workdir);
-            logstring = job_.terminateJob(Integer.parseInt(exitStatus));
-            cqmLog.write(logstring);
+        try (OutputStream os = new FileOutputStream(cqmPath, true)) {
+            try (Writer cqmLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                Date now = new Date();
+                long endTime = now.getTime() / 1000;
+                String[] userArr = users.split(" ");
+                String[] nodeArr = nodes.split(" ");
+                Job job_ = new Job(Integer.parseInt(jobid), name, nodeArr, userArr, starttime.getTime() / 1000, endTime, workdir);
+                logstring = job_.terminateJob(Integer.parseInt(exitStatus));
+                cqmLog.write(logstring);
+            }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            if (cqmLog != null)
-                cqmLog.close();
         }
 
         return logstring;
@@ -163,89 +142,75 @@ public class WlmApi {
         Date now;
         String logstring, key, nextStep, updateStr;
         Reservation reservation;
-        FileWriter cqmLog = null;
-        FileWriter bgschedLog = null;
 
-        try {
-            cqmLog = new FileWriter(cqmPath, StandardCharsets.UTF_8, true);
-            bgschedLog = new FileWriter(bgschedPath, StandardCharsets.UTF_8, true);
+        try (OutputStream os = new FileOutputStream(cqmPath, true)) {
+            try (Writer cqmLog = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                try (OutputStream os2 = new FileOutputStream(bgschedPath, true)) {
+                    try (Writer bgschedLog = new OutputStreamWriter(os2, StandardCharsets.UTF_8)) {
 
-            for(int i = 0; i < numRes; i++) {
-                reservedNodes = getRandomSubArray(nodes);
-                now = new Date();
-                reservation = new Reservation("reservation" + i, getRandomSubArray(users), reservedNodes, now.getTime()/1000, rand.nextInt(86400000), i);
-                logItems.put("createRes_" + i, reservation);
-            }
+                        for (int i = 0; i < numRes; i++) {
+                            reservedNodes = getRandomSubArray(nodes);
+                            now = new Date();
+                            reservation = new Reservation("reservation" + i, getRandomSubArray(users), reservedNodes, now.getTime() / 1000, rand.nextInt(86400000), i);
+                            logItems.put("createRes_" + i, reservation);
+                        }
 
-            while(!logItems.isEmpty()) {
-                key = logItems.keySet().toArray(new String[0])[rand.nextInt(logItems.size())];
-                id = key.split("_");
-                logger_.info("Picked item " + key);
+                        while (!logItems.isEmpty()) {
+                            key = logItems.keySet().toArray(new String[0])[rand.nextInt(logItems.size())];
+                            id = key.split("_");
+                            logger_.info("Picked item " + key);
 
-                if(id[0].equals("createRes")) {
-                    logstring = logItems.get(key).createReservation();
-                    bgschedLog.write(logstring);
-                    choices = "startJob modifyRes deleteRes".split(" ");
-                    nextStep = choices[rand.nextInt(choices.length)];
-                    logItems.put(nextStep + "_" + id[1], logItems.get(key));
-                    logItems.remove(key);
-                }
-                if(id[0].equals("modifyRes")) {
-                    int modify = rand.nextInt(7) + 1;
-                    updateStr = "[{";
-                    // Cases 1, 2, 3 and 4
-                    if (modify < 5)
-                        updateStr += "'users': '" + String.join(":", getRandomSubArray(users)) + "',";
-                    // Cases 2, 4, 6, 7
-                    if (modify % 2 == 0 || modify == 7)
-                        updateStr += "'nodes': '" + String.join(",", getRandomSubArray(nodes)) + "',";
-                    // Cases 3, 4, 5, 6
-                    if (modify > 2 && modify < 7)
-                        updateStr += "'start': " + (new Date()).getTime()/1000 + ".0,";
-                    updateStr += "}]";
-                    logstring = logItems.get(key).modifyReservation(updateStr);
-                    bgschedLog.write(logstring);
-                    choices = "startJob deleteRes".split(" ");
-                    nextStep = choices[rand.nextInt(choices.length)];
-                    logItems.put(nextStep + "_" + id[1], logItems.get(key));
-                    logItems.remove(key);
-                }
-                if(id[0].equals("deleteRes")) {
-                    logstring = logItems.get(key).deleteReservation();
-                    bgschedLog.write(logstring);
-                    logItems.remove(key);
-                }
-                if(id[0].equals("startJob")) {
-                    logstring = logItems.get(key).getJob().startJob();
-                    cqmLog.write(logstring);
-                    logItems.put("terminateJob_" + id[1], logItems.get(key));
-                    logItems.remove(key);
-                }
-                if(id[0].equals("terminateJob")) {
-                    logstring = logItems.get(key).getJob().terminateJob(rand.nextInt(2));
-                    cqmLog.write(logstring);
-                    logItems.remove(key);
+                            if (id[0].equals("createRes")) {
+                                logstring = logItems.get(key).createReservation();
+                                bgschedLog.write(logstring);
+                                choices = "startJob modifyRes deleteRes".split(" ");
+                                nextStep = choices[rand.nextInt(choices.length)];
+                                logItems.put(nextStep + "_" + id[1], logItems.get(key));
+                                logItems.remove(key);
+                            }
+                            if (id[0].equals("modifyRes")) {
+                                int modify = rand.nextInt(7) + 1;
+                                updateStr = "[{";
+                                // Cases 1, 2, 3 and 4
+                                if (modify < 5)
+                                    updateStr += "'users': '" + String.join(":", getRandomSubArray(users)) + "',";
+                                // Cases 2, 4, 6, 7
+                                if (modify % 2 == 0 || modify == 7)
+                                    updateStr += "'nodes': '" + String.join(",", getRandomSubArray(nodes)) + "',";
+                                // Cases 3, 4, 5, 6
+                                if (modify > 2 && modify < 7)
+                                    updateStr += "'start': " + (new Date()).getTime() / 1000 + ".0,";
+                                updateStr += "}]";
+                                logstring = logItems.get(key).modifyReservation(updateStr);
+                                bgschedLog.write(logstring);
+                                choices = "startJob deleteRes".split(" ");
+                                nextStep = choices[rand.nextInt(choices.length)];
+                                logItems.put(nextStep + "_" + id[1], logItems.get(key));
+                                logItems.remove(key);
+                            }
+                            if (id[0].equals("deleteRes")) {
+                                logstring = logItems.get(key).deleteReservation();
+                                bgschedLog.write(logstring);
+                                logItems.remove(key);
+                            }
+                            if (id[0].equals("startJob")) {
+                                logstring = logItems.get(key).getJob().startJob();
+                                cqmLog.write(logstring);
+                                logItems.put("terminateJob_" + id[1], logItems.get(key));
+                                logItems.remove(key);
+                            }
+                            if (id[0].equals("terminateJob")) {
+                                logstring = logItems.get(key).getJob().terminateJob(rand.nextInt(2));
+                                cqmLog.write(logstring);
+                                logItems.remove(key);
+                            }
+                        }
+                    }
                 }
             }
         }
         catch (IOException e) {
             logger_.exception(e, "Failed to open log file");
-        }
-        finally {
-            try {
-                if (bgschedLog != null)
-                    bgschedLog.close();
-            }
-            catch (IOException e) {
-                logger_.exception(e, "Failed to close bgsched log file");
-            }
-            try {
-                if (cqmLog != null)
-                    cqmLog.close();
-            }
-            catch (IOException e) {
-                logger_.exception(e, "Failed to close cqm log file");
-            }
         }
     }
 
