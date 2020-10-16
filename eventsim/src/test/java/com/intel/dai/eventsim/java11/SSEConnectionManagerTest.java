@@ -1,4 +1,4 @@
-package com.intel.networking.restserver.java11;
+package com.intel.dai.eventsim.java11;
 
 import com.intel.logging.Logger;
 import com.intel.networking.restserver.RESTServer;

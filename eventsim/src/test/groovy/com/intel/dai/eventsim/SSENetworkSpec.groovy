@@ -1,8 +1,10 @@
 package com.intel.dai.eventsim
 
+import com.intel.dai.eventsim.java11.Java11RESTServer
 import com.intel.logging.Logger
 import com.intel.networking.restserver.RESTServer
 import com.intel.networking.restserver.RESTServerException
+import com.intel.networking.restserver.RESTServerFactory
 import com.intel.networking.restserver.RESTServerHandler
 import com.intel.properties.PropertyMap
 import org.apache.commons.io.FileUtils
@@ -16,6 +18,14 @@ class SSENetworkSpec extends Specification {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
+
+    def setupSpec() {
+        RESTServerFactory.addImplementation("jdk11", Java11RESTServer.class)
+    }
+
+    def cleanupSpec() {
+        RESTServerFactory.removeImplementation("jdk11")
+    }
 
     def "initialise sse instance" () {
         loadData()

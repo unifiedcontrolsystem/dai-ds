@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-package com.intel.networking.restserver.java11;
+package com.intel.dai.eventsim.java11;
 
 import com.intel.networking.HttpMethod;
 import com.intel.networking.restserver.Request;
