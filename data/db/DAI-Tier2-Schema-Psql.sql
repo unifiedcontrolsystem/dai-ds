@@ -1237,10 +1237,10 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
             max("timestamp")
           from Tier2_aggregatedenvdata;
 
-      return query
-          select 'Inv_Max_Timestamp'::varchar,
-            max(dbupdatedtimestamp)
-          from tier2_hwinventorylocation;
+      --return query
+      --    select 'Inv_Max_Timestamp'::varchar,
+      --      max(dbupdatedtimestamp)
+      --    from tier2_hwinventorylocation;
 
       return query
           select 'Replacement_Max_Timestamp'::varchar,
