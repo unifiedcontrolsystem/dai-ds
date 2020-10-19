@@ -66,7 +66,7 @@ class ForeignInventoryClient {
      * @param root root location for a HW inventory tree or "" for the root of the entire HPC
      * @return json containing the requested locations
      */
-    private String getForeignHWInvJson(String root) {
+    private String  getForeignHWInvJson(String root) {
         if (root == null) return null;
 
         try {

@@ -128,7 +128,7 @@ public class HWInvDiscovery {
         XdgConfigFile xdg = new XdgConfigFile("ucs");
         String configPath = xdg.FindFile("HWInvDiscoveryConfig.json");
         if(configPath == null)
-            throw new NullPointerException("HWI:%n  Was unable to find the configuration file: HWInvDiscoveryConfig.json");
+            throw new RESTClientException("HWI:%n  Was unable to find the configuration file: HWInvDiscoveryConfig.json");
 
         sess = toHWDiscoverySession(configPath);
         log.debug("HWI:%n  toHWDiscoverySession(configPath=%s) => %s", configPath, sess.toString());

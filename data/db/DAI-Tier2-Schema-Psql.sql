@@ -4627,7 +4627,7 @@ END
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION LastTimestampOfActionOnFruRaw(
+CREATE OR REPLACE FUNCTION public.LastTimestampOfActionOnFruRaw(
         p_action varchar
         , p_fru_id varchar
         ) RETURNS varchar
@@ -4651,7 +4651,7 @@ $$ LANGUAGE plpgsql;
 
 -- -- Indirect inclusion test does NOT work!
 -- -- InventoryInfo::json#>>'{HWInfo,fru/DIMM_0/fru_id,value}'='Node.0.08246d06-d1e8-11ea-b1f6-801f0258d541'
-CREATE OR REPLACE FUNCTION OccupationHistoryOfFruInHWInfo(
+CREATE OR REPLACE FUNCTION public.OccupationHistoryOfFruInHWInfo(
         p_fru_id varchar
         , p_slot_loc varchar
         , p_start_time timestamp without time zone
@@ -4717,7 +4717,7 @@ $$ LANGUAGE plpgsql;
 
 -- Trying to get the slot address will require a lot more coding.
 -- Fru ids are assumed to be globally unique.
-CREATE OR REPLACE FUNCTION ComponentInCurrentInventorySnapshot(
+CREATE OR REPLACE FUNCTION public.ComponentInCurrentInventorySnapshot(
         p_node_sernum varchar
         , p_fru_id varchar
         ) RETURNS
@@ -4741,7 +4741,7 @@ END
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION IsComponentInCurrentInventorySnapshot(
+CREATE OR REPLACE FUNCTION public.IsComponentInCurrentInventorySnapshot(
         p_node_sernum varchar
         , p_fru_id varchar
         ) RETURNS boolean
@@ -4791,7 +4791,7 @@ $$ LANGUAGE plpgsql;
 -- Occupation history of an fru in the p_slot_loc of any machine in the HPC.
 -- This needs to be invoked once for each slot of a typical node in order to reconstruct the full occupation
 -- history of the fru.
-CREATE OR REPLACE FUNCTION OccupationHistoryOfFruInSlot(
+CREATE OR REPLACE FUNCTION public.OccupationHistoryOfFruInSlot(
         p_fru_id varchar
         , p_slot_loc varchar
         , p_start_time timestamp without time zone
@@ -4983,7 +4983,7 @@ $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION NoDuplicateRawReplacementHistory(
+CREATE OR REPLACE FUNCTION public.NoDuplicateRawReplacementHistory(
     p_start_time timestamp without time zone
     , p_end_time timestamp without time zone
     )

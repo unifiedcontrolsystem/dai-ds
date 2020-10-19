@@ -30,6 +30,7 @@ class InventoryUpdateThread implements Runnable {
      * information from the foreign server.
      */
     public void run() {
+        log_.debug("HWI:%n %s", "run()");
         final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
         if (factory_ == null) {
             log_.error("HWI:%n %s", "ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
@@ -97,7 +98,8 @@ class DatabaseSynchronizer {
      * This method can return both null or the string "null".
      * @return last raw inventory update timestamp, "null" if the raw history table is empty, or null if there was an error.
      */
-    private String getLastHWInventoryHistoryUpdate() {
+    String getLastHWInventoryHistoryUpdate() {  // must not be private or Spy will not work
+        log_.error("HWI:%n  %s", ">> getLastHWInventoryHistoryUpdate()");
         try {
             String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
