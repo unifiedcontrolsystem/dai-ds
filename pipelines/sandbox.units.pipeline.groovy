@@ -73,20 +73,20 @@ pipeline {
                         sh 'hostname'
                         echo "Reason for build: ${params.reason}"
 
-                        lastChanges since: 'PREVIOUS_REVISION', format:'SIDE', matching: 'LINE'
+                        lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
                         script { utilities.fixFilesPermission() }
                         script { utilities.copyIntegrationTestScriptsToBuildDistributions() }
                         script { utilities.cleanUpMachine('build/distributions') }
                         // You can no longer run component tests on the same machine as unit tests
-                        }
                     }
+                }
                 stage('Launch Component Tests') {
                     steps {
                         build job: 'component-tests',
                                 parameters: [booleanParam(name: 'QUICK_BUILD', value: "${params.QUICK_BUILD}")],
                                 quietPeriod: 0, wait: false
-                }
+                    }
                 }
                 stage('Quick Unit Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
@@ -105,8 +105,8 @@ pipeline {
                         script {
                             utilities.cleanWithGit()
                             utilities.invokeGradle("clean build")
+                        }
                     }
-                }
                 }
                 stage('Reports') {
                     options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }

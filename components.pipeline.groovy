@@ -15,16 +15,22 @@ pipeline {
     stages {
         stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
             agent { label "${AGENT}" }
-            environment { PATH = "${PATH}:/home/${USER}/voltdb9.1/bin" }
+            environment {
+                PATH = "${PATH}:/home/${USER}/voltdb9.1/bin"
+                scriptDir = 'inventory/src/integration/resources/scripts'
+                dataDir = 'inventory/src/integration/resources/data'
+                etcDir = '/opt/ucs/etc'
+                tmpDir = 'build/tmp'
+            }
             stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
+                        buildName "#${BUILD_NUMBER} ${USER}@${NODE_NAME}"
+
                         echo "Building on ${AGENT}"
                         sh 'hostname'
 
-                        lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
-                                matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
-                                specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
+                        lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
                         script {
                             utilities.copyIntegrationTestScriptsToBuildDistributions()
@@ -35,38 +41,40 @@ pipeline {
                 }
                 stage('Quick Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options{ catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options { catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        script { utilities.invokeGradle("jar") }
-                        StartHWInvDb()
-                        script {utilities.invokeGradle("integrationTest") }
-                        StopHWInvDb()
+                        script {utilities.invokeGradleNoRetries("jar")}
+                        teardownTestbed()
+                        setupTestbed()
+                        script { utilities.invokeGradleNoRetries("integrationTest") }
                     }
                 }
                 stage('Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options{ catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options { catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
-                        sh 'rm -rf build'
-                        script { utilities.invokeGradle("clean jar") }
-                        StartHWInvDb()
+                        script {
+                            utilities.cleanWithGit()
+                            utilities.invokeGradle("clean jar")
+                        }
+                        teardownTestbed()
+                        setupTestbed()
                         script { utilities.invokeGradle("integrationTest") }
-                        StopHWInvDb()
                     }
                 }
                 stage('Reports') {
-                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
+                        script { utilities.generateJunitReport('**/test-results/integrationTest/*.xml') }
                     }
                 }
                 stage('Archive') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/integrationTest.exec', zipFile: 'component-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'component-test-results.zip'
-                        archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**'
                     }
                 }
             }
@@ -74,23 +82,10 @@ pipeline {
     }
 }
 
-// This is one way to setup for component level testing.  You can also use docker-compose or partially
-// starts DAI.
-// Currently, our docker image has some dependencies that are fulfilled after DAI is installed.  So,
-// we cannot use this easily for component tests.
-def StartHWInvDb() {
-    def scriptDir = './inventory/src/integration/resources/scripts'
-    sh "${scriptDir}/init-voltdb.sh"
-    sh "${scriptDir}/start-voltdb.sh"
-    sh "${scriptDir}/wait-for-voltdb.sh 21211"
-    sh "sqlcmd < ${scriptDir}/load_procedures.sql"
-    sh "sqlcmd < data/db/DAI-Volt-Tables.sql"
-    sh "sqlcmd < data/db/DAI-Volt-Procedures.sql"
+def setupTestbed() {
+    sh 'inventory/src/integration/resources/scripts/setup_testbed.sh'
 }
 
-// Shutdown method depends on how voltdb was procured.  For example,
-// if docker-compose was used to procure the voltdb, the relevant
-// containers need to be shutdown.
-def StopHWInvDb() {
-    sh 'voltadmin shutdown --force || true'
+def teardownTestbed() {
+    sh 'inventory/src/integration/resources/scripts/teardown_testbed.sh'
 }
