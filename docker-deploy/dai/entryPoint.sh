@@ -11,4 +11,4 @@ mkdir -p /opt/ucs
 echo "*** Logging level: ${DAI_LOGGING_LEVEL}" >${LOG}
 echo >>${LOG}
 
-java -cp '/opt/ucs/lib/*' ${PROPS} ${CLASS} ${ARGS} 2>&1 >>${LOG}
+java ${COVERAGE_OPTIONS} -cp '/opt/ucs/lib/*' ${PROPS} ${CLASS} ${ARGS} 2>&1 >>${LOG}
