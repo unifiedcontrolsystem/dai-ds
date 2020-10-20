@@ -64,6 +64,7 @@ class HWInvTranslatorSpec extends Specification {
         dataDir+"foreignHwByLocList/inv_loc.json"               || ""
         dataDir+"foreignHwInventory/nodeNoMemoryNoCpu.json"     || "x0c0s21b0n0"
         dataDir+"foreignHwInventory/hsm-inv-hw-query-s0.json"   || "s0"
+        dataDir+"foreignHwInventory/missingFromRealData.json"   || "x0c0"
     }
 
     def "toCanonical from ForeignHWInvHistoryEvent - negative" () {

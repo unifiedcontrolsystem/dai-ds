@@ -1,0 +1,34 @@
+{
+  "providerClassMap": {
+    "requester": "com.intel.dai.inventory.api.ForeignHwInventoryRequester"
+  },
+  "providerConfigurations": {
+    "requester": {
+      "initiateDiscovery": {
+        "endpoint": "http://localhost:3000",
+        "verb": "POST",
+        "resource": "/Inventory/Discover"
+      },
+      "getDiscoveryStatus": {
+        "endpoint": "http://localhost:3000",
+        "verb": "GET",
+        "resource": "/Inventory/DiscoveryStatus"
+      },
+      "getHwInventorySnapshot": {
+        "endpoint": "http://localhost:3000",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware"
+      },
+      "getHWInventoryUpdate": {
+        "endpoint": "http://localhost:3000",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware/"
+      },
+      "getHWInventoryHistory": {
+        "endpoint": "http://localhost:3000",
+        "verb": "GET",
+        "resource": "/Inventory/Hardware/History"
+      }
+    }
+  }
+}

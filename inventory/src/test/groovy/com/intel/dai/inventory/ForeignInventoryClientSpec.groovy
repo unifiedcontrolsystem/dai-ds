@@ -23,9 +23,9 @@ class ForeignInventoryClientSpec extends Specification {
         expect: ts.getForeignHWInvJson(null) == null
     }
 
+    // Meed to this to component tests
     def "getForeignHWInvJson - exception"() {
-        when: ts.getForeignHWInvJson("x0n0")
-        then: thrown NullPointerException   // behavior when config file is missing
+        expect: ts.getForeignHWInvJson("x0n0") == null  // behavior when config file is missing
     }
 
     def "getCanonicalHWInvJson"() {

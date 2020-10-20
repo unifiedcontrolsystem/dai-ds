@@ -1237,11 +1237,6 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
             max("timestamp")
           from Tier2_aggregatedenvdata;
 
-      --return query
-      --    select 'Inv_Max_Timestamp'::varchar,
-      --      max(dbupdatedtimestamp)
-      --    from tier2_hwinventorylocation;
-
       return query
           select 'Replacement_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
@@ -4503,6 +4498,557 @@ CREATE UNIQUE INDEX machineadapterinstancebysnlctnandadaptertype ON public.tier2
 --
 
 CREATE UNIQUE INDEX workitembyadaptertypeandid ON public.tier2_workitem_ss USING btree (workingadaptertype, id);
+
+
+-------- New Inventory Indexes Start
+-- It is best to leave these indexes here while we incorporate them into the CLI,
+-- otherwise, an inordinate amount of time need to be expended to locate and modify them.
+--
+-- Name: NodeInventoryHistoryByDbUpdatedTimestamp; Type: INDEX; Schema: public; Owner: -
+--
+CREATE INDEX NodeInventoryHistoryByDbUpdatedTimestamp ON public.tier2_nodeinventory_history(DbUpdatedTimestamp);
+
+--
+-- Name: NodeInventoryHistoryBySernum; Type: INDEX; Schema: public; Owner: -
+--
+CREATE INDEX NodeInventoryHistoryBySernum ON public.tier2_nodeinventory_history(Sernum);
+
+
+--
+-- Name: json field indexes; Type: INDEX; Schema: public; Owner: -
+--
+CREATE INDEX inventory_node_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/NODE/fru_id') jsonb_path_ops);
+
+
+CREATE INDEX inventory_cpu0_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/CPU0/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_cpu1_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/CPU1/fru_id') jsonb_path_ops);
+
+
+CREATE INDEX inventory_drive0_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DRIVE0/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_drive1_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DRIVE1/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_drive2_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DRIVE2/fru_id') jsonb_path_ops);
+
+
+CREATE INDEX inventory_dimm0_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM0/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm1_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM1/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm2_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM2/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm3_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM3/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm4_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM4/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm5_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM5/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm6_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM6/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm7_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM7/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm8_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM8/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm9_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM9/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm10_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM10/fru_id') jsonb_path_ops);
+
+CREATE INDEX inventory_dimm11_fru_id ON public.tier2_nodeinventory_history
+USING GIN (((InventoryInfo->'HWInfo')->'fru/DIMM11/fru_id') jsonb_path_ops);
+
+
+CREATE INDEX NodeInventoryHistoryByfruIdAndAction ON public.tier2_RawHWInventory_History(FRUID, Action);
+CREATE INDEX NodeInventoryHistoryByfruId ON public.tier2_RawHWInventory_History(FRUID);
+CREATE INDEX NodeInventoryHistoryByLctn ON public.tier2_RawHWInventory_History(ID);
+
+-------- New Inventory Indexes End
+
+-------- New Inventory Stored Procedures Start
+-- It is best to leave these procedure here while we incorporate them into the CLI,
+-- otherwise, an inordinate amount of time need to be expended to locate and modify them.
+
+CREATE OR REPLACE FUNCTION public.NumberOfRecordsInNodeInventoryHistory() RETURNS bigint
+AS $$
+DECLARE
+    cnt bigint;
+BEGIN
+    EXECUTE 'SELECT COUNT(*) FROM tier2_nodeinventory_history' into cnt;
+    RETURN cnt;
+END
+$$ LANGUAGE plpgsql;
+
+-- -- Inventory snapshot of part of the HPC
+-- --   All location names starts with p_lctn_prefix
+CREATE OR REPLACE FUNCTION public.CurrentInventorySnapshotAt(
+        p_lctn_prefix varchar
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+        , node_location character varying
+        , node_serial_number character varying
+        , InventoryInfo JSONB
+        )
+AS $$
+DECLARE
+    lctn_prefix varchar := coalesce(p_lctn_prefix, '');
+BEGIN
+    RETURN QUERY
+        SELECT t.InventoryTimestamp
+                , t.Lctn AS node_location
+                , t.Sernum AS node_serial_number
+                , t.InventoryInfo JSONB
+        FROM public.tier2_nodeinventory_history AS t
+        INNER JOIN
+        (SELECT Lctn, MAX(t1.InventoryTimestamp) AS MaxInventoryTimestamp
+            FROM public.tier2_nodeinventory_history AS t1
+            GROUP BY Lctn) AS groupedt
+        ON t.Lctn = groupedt.Lctn AND t.InventoryTimestamp = groupedt.MaxInventoryTimestamp
+        WHERE lctn_prefix = '' OR lctn_prefix = t.Lctn OR position(lctn_prefix || '-' in t.Lctn) = 1
+        ORDER BY t.Lctn ASC;
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.LastTimestampOfActionOnFruRaw(
+        p_action varchar
+        , p_fru_id varchar
+        ) RETURNS varchar
+AS $$
+DECLARE
+    last_action_timestamp varchar;
+BEGIN
+    EXECUTE FORMAT(
+        'SELECT MAX(t.ForeignTimestamp)
+         FROM public.tier2_RawHWInventory_History AS t
+         WHERE ''%s'' = t.FRUID
+         AND t.Action = ''%s''
+         GROUP BY t.FRUID, t.Action'
+        , p_fru_id
+        , p_action
+        ) into last_action_timestamp;
+    RETURN last_action_timestamp;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- -- Indirect inclusion test does NOT work!
+-- -- InventoryInfo::json#>>'{HWInfo,fru/DIMM_0/fru_id,value}'='Node.0.08246d06-d1e8-11ea-b1f6-801f0258d541'
+CREATE OR REPLACE FUNCTION public.OccupationHistoryOfFruInHWInfo(
+        p_fru_id varchar
+        , p_slot_loc varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+            , component_serial_number text
+            , node_serial_number character varying
+            , node_location character varying
+            , component_location text
+            )
+AS $$
+DECLARE
+    fru_id varchar := format('(t.InventoryInfo->''HWInfo'')::json#>>''{fru/%s/fru_id, value}''', p_slot_loc);
+
+    json_fru_id_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/fru_id'')', p_slot_loc);
+    json_fru_id_value varchar := format('(%s::json->>''value'')', json_fru_id_path);
+
+    json_fru_loc_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/loc'')', p_slot_loc);
+    json_fru_loc_value varchar := format('(%s::json->>''value'')', json_fru_loc_path);
+
+    target_json_element_fru_id jsonb := format('{"value": "%s"}', p_fru_id);
+
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+    max_records varchar := coalesce(to_char(p_limit, '9999999'), 'ALL');
+BEGIN
+    RETURN QUERY EXECUTE format(
+        'SELECT InventoryTimestamp' ||
+                ', %s AS component_serial_number' ||
+                ', Sernum AS node_serial_number' ||
+                ', Lctn As node_location' ||
+                ', %s AS component_location' ||
+        ' FROM public.tier2_nodeinventory_history AS t' ||
+        ' WHERE %s = ''%s''' ||
+        ' AND t.dbupdatedtimestamp >= ''%s''' ||
+        ' AND t.dbupdatedtimestamp <= ''%s''' ||
+        ' ORDER BY InventoryTimestamp DESC, node_location ASC, component_location ASC' ||
+        ' LIMIT %s',
+        json_fru_id_value, json_fru_loc_value
+--         , json_fru_id_path, target_json_element_fru_id
+        , fru_id, p_fru_id
+        , start_time, end_time, max_records);
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.IsComponentInCurrentInventorySnapshotRaw(
+        p_fru_id varchar
+        ) RETURNS boolean
+AS $$
+DECLARE
+    last_inserted varchar;
+    last_deleted varchar;
+BEGIN
+    EXECUTE FORMAT('SELECT LastTimestampOfActionOnFruRaw(''INSERTED'', ''%s'')', p_fru_id) INTO last_inserted;
+    EXECUTE FORMAT('SELECT LastTimestampOfActionOnFruRaw(''DELETED'', ''%s'')', p_fru_id) INTO last_deleted;
+    RETURN last_inserted > last_deleted;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- Trying to get the slot address will require a lot more coding.
+-- Fru ids are assumed to be globally unique.
+CREATE OR REPLACE FUNCTION public.ComponentInCurrentInventorySnapshot(
+        p_node_sernum varchar
+        , p_fru_id varchar
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+        , node_location character varying
+        , node_serial_number character varying
+        )
+AS $$
+DECLARE
+    fru_id_json_value varchar := '"' || p_fru_id || '"';
+BEGIN
+    RETURN QUERY
+        SELECT t.inventory_timestamp
+                , t.node_location
+                , t.node_serial_number
+            FROM CurrentInventorySnapshotAt(NULL) AS t
+            WHERE (p_node_sernum IS NULL OR p_node_sernum = 'ANY' OR p_node_sernum = t.node_serial_number)
+            AND (p_fru_id IS NULL OR p_fru_id = 'ANY' OR position(fru_id_json_value in t.InventoryInfo::text) > 0);
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.IsComponentInCurrentInventorySnapshot(
+        p_node_sernum varchar
+        , p_fru_id varchar
+        ) RETURNS boolean
+AS $$
+DECLARE
+    cnt bigint;
+BEGIN
+    EXECUTE FORMAT('SELECT COUNT(*) FROM ComponentInCurrentInventorySnapshot(''%s'', ''%s'')',
+                    p_node_sernum, p_fru_id) into cnt;
+    RETURN cnt > 0;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- List of node locations that hosted the node with p_node_sernum.  This stored procedure only necessary if
+-- Sernum is not the same as the node fru id.
+CREATE OR REPLACE FUNCTION public.MigrationHistoryOfNode(
+        p_node_sernum varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+        , node_serial_number character varying
+        , node_location varchar
+        )
+AS $$
+DECLARE
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+BEGIN
+    RETURN QUERY
+        SELECT t.InventoryTimestamp
+            , t.Sernum AS node_serial_number
+            , t.Lctn AS node_location
+        FROM public.tier2_nodeinventory_history AS t
+        WHERE t.Sernum = p_node_sernum
+            AND t.dbupdatedtimestamp <= end_time
+            AND t.dbupdatedtimestamp >= start_time
+        ORDER BY t.InventoryTimestamp DESC, node_serial_number ASC, node_location ASC
+        LIMIT p_limit;
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- Occupation history of an fru in the p_slot_loc of any machine in the HPC.
+-- This needs to be invoked once for each slot of a typical node in order to reconstruct the full occupation
+-- history of the fru.
+CREATE OR REPLACE FUNCTION public.OccupationHistoryOfFruInSlot(
+        p_fru_id varchar
+        , p_slot_loc varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(InventoryTimestamp timestamp without time zone
+            , component_serial_number text
+            , node_serial_number character varying
+            , node_location character varying
+            , component_location text
+            )
+AS $$
+DECLARE
+    json_fru_id_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/fru_id'')', p_slot_loc);
+    json_fru_id_value varchar := format('(%s::json->>''value'')', json_fru_id_path);
+
+    json_fru_loc_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/loc'')', p_slot_loc);
+    json_fru_loc_value varchar := format('(%s::json->>''value'')', json_fru_loc_path);
+
+    target_json_element_fru_id jsonb := format('{"value": "%s"}', p_fru_id);
+
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+    max_records varchar := coalesce(to_char(p_limit, '9999999'), 'ALL');
+BEGIN
+    RETURN QUERY EXECUTE format(
+        'SELECT InventoryTimestamp' ||
+                ', %s AS component_serial_number' ||
+                ', Sernum AS node_serial_number' ||
+                ', Lctn As node_location' ||
+                ', %s AS component_location' ||
+        ' FROM public.tier2_nodeinventory_history AS t' ||
+        ' WHERE %s @> ''%s''' ||
+        ' AND t.dbupdatedtimestamp >= ''%s''' ||
+        ' AND t.dbupdatedtimestamp <= ''%s''' ||
+        ' ORDER BY InventoryTimestamp DESC, node_location ASC, component_location ASC' ||
+        ' LIMIT %s',
+        json_fru_id_value, json_fru_loc_value, json_fru_id_path, target_json_element_fru_id
+         , start_time, end_time, max_records);
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.MigrationHistoryOfFru(
+        p_fru_id varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+            , component_location text
+            , node_serial_number character varying
+            , component_serial_number text
+            )
+AS $$
+DECLARE
+    arr_split_data text[];
+    slot varchar;
+
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+    max_records integer := coalesce(p_limit, 9999999);
+BEGIN
+    SELECT INTO arr_split_data regexp_split_to_array(
+        'DIMM0,DIMM1,DIMM2,DIMM3,DIMM4,DIMM5,DIMM6,DIMM7,DIMM8,DIMM9,DIMM10,DIMM11' ||
+        ',CPU0,CPU1' ||
+        ',DRIVE0,DRIVE1,DRIVE2' ||
+        ',NODE', ',');
+    FOREACH slot IN array arr_split_data LOOP
+        RETURN QUERY EXECUTE format(
+            'SELECT InventoryTimestamp' ||
+                ', component_location' ||
+                ', node_serial_number' ||
+                ', component_serial_number' ||
+            ' FROM OccupationHistoryOfFruInSlot(''%s'', ''%s'', ''%s'', ''%s'', %s);'
+            , p_fru_id, slot, start_time, end_time, max_records);
+    END LOOP;
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- Occupation history at the node location
+CREATE OR REPLACE FUNCTION public.OccupationHistoryAtNodeLocation(
+        p_lctn varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+        , node_location character varying
+        , Sernum character varying
+        )
+AS $$
+DECLARE
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+BEGIN
+    RETURN QUERY
+        SELECT t.InventoryTimestamp
+                , t.Lctn As node_location
+                , t.Sernum AS node_serial_number
+        FROM public.tier2_nodeinventory_history AS t
+        WHERE Lctn=p_lctn
+            AND t.dbupdatedtimestamp >= start_time
+            AND t.dbupdatedtimestamp <= end_time
+        ORDER BY t.InventoryTimestamp DESC, t.Sernum ASC
+        LIMIT p_limit;
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+
+-- Occupation history of the specified relative fru location in the specified node location.
+--   The fru location specification is analogous to specified a file location as directory path containing the file,
+--   and relative path of the file within the directory.
+CREATE OR REPLACE FUNCTION public.OccupationHistoryAtComponentLocation(
+        p_node_loc varchar      -- node that contains the fru slot
+        , p_slot_loc varchar    -- slot in the specified node
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone    -- timestamp of fru occupancy of the specified slot
+        , component_location text
+        , component_fru_id text                             -- fru in the slot at the time specified by the timestamp
+        )
+AS $$
+DECLARE
+    json_fru_id_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/fru_id'')', p_slot_loc);
+    json_fru_id_value varchar := format('(%s::json->>''value'')', json_fru_id_path);
+
+    json_fru_loc_path varchar := format('((t.InventoryInfo->''HWInfo'')->''fru/%s/loc'')', p_slot_loc);
+    json_fru_loc_value varchar := format('(%s::json->>''value'')', json_fru_loc_path);
+
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+    max_records integer := coalesce(p_limit, 9999999);
+BEGIN
+    RETURN QUERY EXECUTE format(
+        'SELECT InventoryTimestamp
+            , %s AS component_location
+            , %s AS component_fru_id
+        FROM public.tier2_nodeinventory_history AS t
+        WHERE Lctn = ''%s''
+            AND t.dbupdatedtimestamp >= ''%s''
+            AND t.dbupdatedtimestamp <= ''%s''
+        ORDER BY t.InventoryTimestamp DESC, component_fru_id ASC
+        LIMIT %s',
+        json_fru_loc_value, json_fru_id_value, p_node_loc
+        , start_time, end_time, max_records);
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- -- Name: GetRawReplacementHistoryForLctn(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+-- --
+CREATE OR REPLACE FUNCTION public.RawReplacementHistoryForLctn(
+    p_lctn character varying
+    , p_start_time timestamp without time zone
+    , p_end_time timestamp without time zone
+    , p_limit integer
+    )
+    RETURNS TABLE(foreign_timestamp character varying
+        , action character varying
+        , component_location character varying
+        , component_fru_id character varying
+    )
+AS $$
+DECLARE
+    lctn varchar := coalesce(p_lctn, '');
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+BEGIN
+    return query
+    SELECT t.foreign_timestamp
+            , t.action
+            , t.component_location
+            , t.component_fru_id
+    FROM NoDuplicateRawReplacementHistory(start_time, end_time) AS t
+    WHERE (lctn = '' OR lctn = t.component_location OR position(lctn || '-' in t.component_location) = 1)
+    ORDER BY t.foreign_timestamp DESC, t.component_location, t.action ASC, t.component_fru_id ASC
+    LIMIT p_limit;
+    RETURN;
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.NoDuplicateRawReplacementHistory(
+    p_start_time timestamp without time zone
+    , p_end_time timestamp without time zone
+    )
+    RETURNS TABLE(foreign_timestamp character varying
+        , Action character varying
+        , component_location character varying
+        , component_fru_id character varying
+    )
+AS $$
+DECLARE
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+BEGIN
+    return query
+    SELECT DISTINCT t.ForeignTimestamp
+            , t.Action
+            , t.id AS component_location
+            , t.fruid as component_fru_id
+    FROM public.tier2_RawHWInventory_History AS t
+    WHERE t.dbupdatedtimestamp >= start_time
+        AND t.dbupdatedtimestamp <= end_time;
+    RETURN;
+END
+$$
+LANGUAGE plpgsql;
+
+
+-- This is for testing only.
+CREATE OR REPLACE FUNCTION public.MigrationHistoryOfFruIndirectInclusion(
+        p_fru_id varchar
+        , p_start_time timestamp without time zone
+        , p_end_time timestamp without time zone
+        , p_limit integer
+        ) RETURNS
+    TABLE(inventory_timestamp timestamp without time zone
+            , component_serial_number text
+            , node_serial_number character varying
+            , node_location character varying
+            , component_location text
+            )
+AS $$
+DECLARE
+    arr_split_data text[];
+    slot varchar;
+
+    start_time timestamp := coalesce(p_start_time, to_timestamp('0001', 'YYYY'));
+    end_time timestamp := coalesce(p_end_time, to_timestamp('9999', 'YYYY'));
+    max_records integer := coalesce(p_limit, 9999999);
+BEGIN
+    SELECT INTO arr_split_data regexp_split_to_array(
+        'DIMM0,DIMM1,DIMM2,DIMM3,DIMM4,DIMM5,DIMM6,DIMM7,DIMM8,DIMM9,DIMM10,DIMM11' ||
+        ',CPU0,CPU1' ||
+        ',DRIVE0,DRIVE1,DRIVE2' ||
+        ',NODE', ',');
+    FOREACH slot IN array arr_split_data LOOP
+        RETURN QUERY EXECUTE format(
+            'SELECT * FROM OccupationHistoryOfFruInHWInfo(''%s'', ''%s'', ''%s'', ''%s'', %s);'
+            , p_fru_id, slot, start_time, end_time, max_records);
+    END LOOP;
+    RETURN;
+END
+$$ LANGUAGE plpgsql;
+
+-------- New Inventory Stored Procedures End
+
 
 call public.create_first_partition();
 

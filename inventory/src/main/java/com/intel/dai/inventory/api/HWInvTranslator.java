@@ -60,11 +60,11 @@ public class HWInvTranslator {
         }
     }
 
-   /**
-    * <p> Parse the given json containing the foreign HW inventory history. </p>
-    * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
-    * @return POJO containing the Parsed as json, or null if parsing failed
-    */
+    /**
+     * <p> Parse the given json containing the foreign HW inventory history. </p>
+     * @param foreignHWInvHistoryJson string containing the foreign server response to a HW inventory history query
+     * @return POJO containing the Parsed as json, or null if parsing failed
+     */
     private ForeignHWInvHistory toForeignHWInvHistory(String foreignHWInvHistoryJson) {
         try {
             return gson.fromJson(foreignHWInvHistoryJson, ForeignHWInvHistory.class);
@@ -463,14 +463,14 @@ public class HWInvTranslator {
         return numAdded;
     }
 
-    private int addForeignCabinetPDUToCanonical(List<ForeignHWInvByLocCabinetPDU> foreigncabinetPduList,
+    private int addForeignCabinetPDUToCanonical(List<ForeignHWInvByLocCabinetPDU> foreignCabinetPduList,
                                                 HWInvTree canonicalTree) {
-        int numAdded = addForeignLocsNotChildrenToCanonical(foreigncabinetPduList, canonicalTree);
+        int numAdded = addForeignLocsNotChildrenToCanonical(foreignCabinetPduList, canonicalTree);
         if (numAdded == 0) {
             return 0;
         }
 
-        for (ForeignHWInvByLocCabinetPDU cabPdu : foreigncabinetPduList) {
+        for (ForeignHWInvByLocCabinetPDU cabPdu : foreignCabinetPduList) {
             numAdded += addForeignLocsNotChildrenToCanonical(cabPdu.CabinetPDUOutlets, canonicalTree);
         }
         return numAdded;
@@ -489,7 +489,7 @@ public class HWInvTranslator {
     }
 
     private <T> int addForeignFlatLocsToCanonical(List<T> foreignLocList,
-                                              HWInvTree canonicalTree) {
+                                                  HWInvTree canonicalTree) {
         if (foreignLocList == null) {
             return 0;
         }

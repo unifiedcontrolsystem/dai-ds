@@ -1,0 +1,52 @@
+{
+  "XName": "x0c0",
+  "Format": "NestNodesOnly",
+  "Cabinets": [
+    {
+      "ID": "x0c0s0j0",
+      "Type": "Cabinet",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocCabinet",
+      "CabinetLocationInfo": {
+        "Id": "Cabinet.0"
+      }
+    }
+  ],
+  "Chassis": [
+    {
+      "ID": "x0c0s0b0k0",
+      "Type": "Chassis",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocChassis",
+      "ChassisLocationInfo": {
+        "Id": "Chassis.0"
+      }
+    }
+  ],
+  "ComputeModules": [
+    {
+      "ID": "x0c0s0b0w0",
+      "Type": "ComputeModule",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocComputeModule",
+      "ComputeModuleLocationInfo": {
+        "Id": "ComputeModule.0"
+      }
+    }
+  ],
+  "CabinetPduList": [
+    {
+      "ID": "x0c0s0b0q0",
+      "Type": "CabinetPduList",
+      "Ordinal": 0,
+      "Status": "Empty",
+      "HWInventoryByLocationType": "HWInvByLocCabinetPduList",
+      "CabinetPduListLocationInfo": {
+        "Id": "CabinetPduList.0"
+      }
+    }
+  ]
+}
