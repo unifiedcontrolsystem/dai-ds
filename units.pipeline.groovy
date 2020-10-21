@@ -31,7 +31,8 @@ pipeline {
                         script {
                             utilities.copyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
                             utilities.fixFilesPermission()
-                            // Do NOT clean the machine here!  It will break component tests
+                            script { utilities.cleanUpMachine('build/distributions') }
+                            // You can no longer run component tests and unit tests concurrently on the same machine
                         }
                     }
                 }

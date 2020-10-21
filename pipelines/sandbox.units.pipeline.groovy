@@ -75,10 +75,10 @@ pipeline {
 
                         lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
-                        script { utilities.fixFilesPermission() }
                         script { utilities.copyIntegrationTestScriptsToBuildDistributions() }
+                        script { utilities.fixFilesPermission() }
                         script { utilities.cleanUpMachine('build/distributions') }
-                        // You can no longer run component tests on the same machine as unit tests
+                        // You can no longer run component tests and unit tests concurrently on the same machine
                     }
                 }
                 stage('Launch Component Tests') {
