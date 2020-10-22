@@ -4843,6 +4843,7 @@ CREATE OR REPLACE FUNCTION public.MigrationHistoryOfFru(
         , p_limit integer
         ) RETURNS
     TABLE(inventory_timestamp timestamp without time zone
+            , node_location character varying
             , component_location text
             , node_serial_number character varying
             , component_serial_number text
@@ -4863,9 +4864,10 @@ BEGIN
         ',NODE', ',');
     FOREACH slot IN array arr_split_data LOOP
         RETURN QUERY EXECUTE format(
-            'SELECT InventoryTimestamp' ||
-                ', component_location' ||
-                ', node_serial_number' ||
+            'SELECT InventoryTimestamp'     ||
+                ', node_location'           ||
+                ', component_location'      ||
+                ', node_serial_number'      ||
                 ', component_serial_number' ||
             ' FROM OccupationHistoryOfFruInSlot(''%s'', ''%s'', ''%s'', ''%s'', %s);'
             , p_fru_id, slot, start_time, end_time, max_records);
