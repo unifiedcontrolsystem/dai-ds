@@ -2,116 +2,182 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
 package com.intel.authentication
 
 import com.intel.logging.Logger
-import org.keycloak.admin.client.Keycloak
-import org.keycloak.admin.client.KeycloakBuilder
-import org.keycloak.admin.client.token.TokenManager
-import org.keycloak.representations.AccessTokenResponse
 import spock.lang.Specification
 
-class KeycloakTokenAuthenticationSpec extends Specification {
-    def builder_ = Mock(KeycloakBuilder)
-    def cloak_ = Mock(Keycloak)
-    def manager_ = Mock(TokenManager)
-    def response_ = Mock(AccessTokenResponse)
-    def logger_ = Mock(Logger)
-    def now_ = 0L
-    def token_
-    class UnderTest extends KeycloakTokenAuthentication {
-        @Override KeycloakBuilder getBuilder() { return builder_ }
-        @Override long now() { return now_ }
-    }
+import java.nio.charset.StandardCharsets
 
+class KeycloakTokenAuthenticationSpec extends Specification {
+    def process_ = Mock(Process)
+    static Logger logger_
+    def now_ = 0L
     def underTest_
-    def arguments_
+    static Map<String,String> arguments_
+    def savedParser_
+    static String json1_
+    static String json2_
+    static String badJson1_
+    static String badJson2_
     void setup() {
+        savedParser_ = KeycloakTokenAuthentication.parser_
+        logger_ = Mock(Logger)
         arguments_ = [
-                "tokenServer":"https://localhost:8080/auth",
+                "tokenServer":"https://localhost:8080/auth/{{REALM}}",
                 "clientId":"testClientId",
                 "clientSecret":"some_secret",
-                "realm":"null",
-                "username":"null",
-                "password":"null"
+                "realm":"realm",
+                "username":null,
+                "password":null,
+                "curl":"/usr/bin/curl"
         ]
-        builder_.grantType(_) >> builder_
-        builder_.serverUrl(_) >> builder_
-        builder_.realm(_) >> builder_
-        builder_.clientId(_) >> builder_
-        builder_.clientSecret(_) >> builder_
-        builder_.username(_) >> builder_
-        builder_.password(_) >> builder_
-        builder_.build() >> cloak_
-        cloak_.tokenManager() >> manager_
-        manager_.getAccessToken() >> response_
-        manager_.refreshToken() >> response_
-        response_.getExpiresIn() >> 60
-        response_.getRefreshExpiresIn() >> 120
-        token_ = "newToken"
-        response_.getToken() >> { token_ }
-
+        json1_ = """{"token_type":"bearer","access_token":"newToken","refresh_token":"refreshToken","expires_on":31557600}"""
+        json2_ = """{"token_type":"bearer","access_token":"brandNewToken","refresh_token":"refreshToken2","expires_on":31557600}"""
+        badJson1_ = """{"token_type":"bearer","access_token:"brandNewToken","refresh_token":"refreshToken2","expires_on":31557600}"""
+        badJson2_ = """{"token_type":"other","access_token":"brandNewToken","refresh_token":"refreshToken2","expires_on":31557600}"""
         underTest_ = new UnderTest()
     }
 
-    def "Test initialize with negative inputs"() {
-        when:
-        underTest_.initialize(logger, args)
-        then:
-        def e = thrown(except)
-        e.cause == null
-        where:
-        logger       | args | except
-        Mock(Logger) | null | IllegalArgumentException
-        Mock(Logger) | [:]  | TokenAuthenticationException
-        null         | null | IllegalArgumentException
+    void cleanup() {
+        KeycloakTokenAuthentication.parser_ = savedParser_
     }
 
-    def "Test initialize with varying arguments"() {
-        arguments_."realm" = realm
-        arguments_."username" = user
-        arguments_."password" = pass
-        when: underTest_.initialize(logger_, arguments_)
-        then: thrown(TokenAuthenticationException)
-        where:
-        realm   | user   | pass
-        null    | null   | "passwd"
-        null    | "name" | null
-//        "realm" | "name" | "passwd"
+    def "Test getProcess"() {
+        KeycloakTokenAuthentication auth = new KeycloakTokenAuthentication()
+        Process process = auth.getProcess(new ArrayList<String>() {{ add("/bin/ls") }})
+        expect: process != null
     }
 
-    def "Test getToken without initializing"() {
-        when:
-        underTest_.getToken()
-        then:
-        def e = thrown(TokenAuthenticationException)
-        e.cause == null
+    def "Test now"() {
+        KeycloakTokenAuthentication auth = new KeycloakTokenAuthentication()
+        long now = auth.now()
+        expect: now > 0L
+    }
+
+    def "Test reset"() {
+        KeycloakTokenAuthentication auth = new KeycloakTokenAuthentication()
+        auth.expiresOn_ = 100L
+        auth.reset()
+        expect: auth.expiresOn_ == 0L
+    }
+
+    def "Test initialize negative 1"() {
+        KeycloakTokenAuthentication ut = new KeycloakTokenAuthentication()
+        when: ut.initialize(LOG, ARGS)
+        then: thrown(EXCEPT)
+        where:
+        LOG     | ARGS       || EXCEPT
+        null    | arguments_ || IllegalArgumentException.class
+        logger_ | null       || IllegalArgumentException.class
+    }
+
+    def "Test initialize negative 2"() {
+        KeycloakTokenAuthentication ut = new KeycloakTokenAuthentication()
+        ut.doCheck_ = true
+        arguments_."curl" = CURL
+        if(SKIP_REALM)
+            arguments_.remove("realm")
+        when: ut.initialize(LOG, arguments_)
+        then: thrown(EXCEPT)
+        where:
+        LOG     | CURL                  | SKIP_REALM || EXCEPT
+        logger_ | "/usr/bin/cUrl"       | false      || TokenAuthenticationException.class
+        logger_ | "/opt/bin/curl"       | false      || TokenAuthenticationException.class
+        logger_ | "/tmp/curl"           | false      || TokenAuthenticationException.class
+        logger_ | "/home/user/bin/curl" | false      || TokenAuthenticationException.class
+        logger_ | "/usr/local/bin/curl" | false      || TokenAuthenticationException.class
+        logger_ | "/usr/bin/curl"       | true       || TokenAuthenticationException.class
+    }
+
+    def "Test ctor negative"() {
+        KeycloakTokenAuthentication.parser_ = null
+        when: new KeycloakTokenAuthentication()
+        then: thrown(NullPointerException)
+    }
+
+    def "Test initialize 1"() {
+        KeycloakTokenAuthentication ut = new KeycloakTokenAuthentication()
+        ut.doCheck_ = false
+        ut.initialize(logger_, arguments_)
+        expect: ut.username_ == null
+        and:    ut.password_ == null
+        and:    ut.realm_ == "realm"
+        and:    ut.clientId_ == "testClientId"
+        and:    ut.clientSecret_ == "some_secret"
+        and:    ut.serverUrl_ == "https://localhost:8080/auth/realm"
+        and:    !ut.userPass_
+    }
+
+    def "Test initialize 2"() {
+        arguments_."clientSecret" = null
+        arguments_."username" = "user"
+        arguments_."password" = "pass"
+        KeycloakTokenAuthentication ut = new KeycloakTokenAuthentication()
+        ut.doCheck_ = false
+        ut.initialize(logger_, arguments_)
+        expect: ut.username_ == "user"
+        and:    ut.password_ == "pass"
+        and:    ut.realm_ == "realm"
+        and:    ut.clientId_ == "testClientId"
+        and:    ut.clientSecret_ == null
+        and:    ut.serverUrl_ == "https://localhost:8080/auth/realm"
+        and:    ut.userPass_
     }
 
     def "Test getToken"() {
+        if(retVal == "brandNewToken") {
+            arguments_."username" = "user"
+            arguments_."password" = "pass"
+        }
         underTest_.initialize(logger_, arguments_)
-        token_ = (token == "SKIP")?"newToken":token
-        underTest_.token_ = (time == 1L)?null:"newToken"
+        process_.exitValue() >> 0
+        process_.getInputStream() >> new ByteArrayInputStream(((String)json).getBytes(StandardCharsets.UTF_8))
         now_ = time
+        underTest_.token_ = token
         underTest_.expiresOn_ = expire
         underTest_.refreshOn_ = refresh
         expect: underTest_.getToken() == retVal
         where:
-        time | expire | refresh | token           || retVal
-        1L   | 0L     | 0L      | "SKIP"          || "newToken"
-        31L  | 60L    | 120L    | "SKIP"          || "newToken"
-        91L  | 60L    | 120L    | "SKIP"          || "newToken"
-        121L | 60L    | 120L    | "brandNewToken" || "brandNewToken"
+        time | refresh | expire | token      | json   || retVal
+        1L   | 0L      | 0L     | null       | json1_ || "newToken"
+        31L  | 60L     | 120L   | "newToken" | json1_ || "newToken"
+        91L  | 60L     | 120L   | "newToken" | json1_ || "newToken"
+        121L | 60L     | 120L   | "newToken" | json2_ || "brandNewToken"
     }
 
-    def "Test the getBuilder method"() {
-        KeycloakTokenAuthentication instance = new KeycloakTokenAuthentication()
-        expect: instance.getBuilder() != null
+    def "Test getToken negative"() {
+        underTest_.initialize(logger_, arguments_)
+        process_.exitValue() >> EXIT
+        process_.getInputStream() >> new ByteArrayInputStream(((String)JSON).getBytes(StandardCharsets.UTF_8))
+        when: underTest_.getToken()
+        then: thrown(EXCEPT)
+        where:
+        EXIT | JSON      || EXCEPT
+        1    | badJson1_ || TokenAuthenticationException.class
+        0    | badJson1_ || TokenAuthenticationException.class
+        0    | badJson2_ || TokenAuthenticationException.class
     }
 
-    def "Test the now method"() {
-        KeycloakTokenAuthentication instance = new KeycloakTokenAuthentication()
-        expect: instance.now() > 0L
+    def "Test getToken negative 2"() {
+        underTest_.initialize(logger_, arguments_)
+        process_.exitValue() >> 0
+        process_.getInputStream() >> { throw new IOException("TEST") }
+        when: underTest_.getToken()
+        then: thrown(TokenAuthenticationException)
+        where:
+        EXIT | JSON      || EXCEPT
+        1    | badJson1_ || TokenAuthenticationException.class
+        0    | badJson1_ || TokenAuthenticationException.class
+        0    | badJson2_ || TokenAuthenticationException.class
+    }
+
+    class UnderTest extends KeycloakTokenAuthentication {
+        @Override void initialize(Logger logger, Map<String, String> arguments) throws TokenAuthenticationException {
+            super.doCheck_ = false
+            super.initialize(logger, arguments)
+        }
+        @Override Process getProcess(List<String> command) { return process_ }
+        @Override long now() { return now_ }
     }
 }

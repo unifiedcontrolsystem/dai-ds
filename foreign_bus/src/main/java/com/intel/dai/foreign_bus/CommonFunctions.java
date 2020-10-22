@@ -188,9 +188,14 @@ final public class CommonFunctions {
             } catch(PropertyNotExpectedType e) {
                 throw new ConfigIOParseException("The actual data under the 'Sensors' array was not an object");
             }
-            String fullName = prefix + ".";
-            fullName += leaf.getStringOrDefault("PhysicalContext", "PhysicalContextMissing");
-            fullName += "." + leaf.getStringOrDefault("DeviceSpecificContext", "DeviceSpecificContextMissing");
+            String fullName = prefix;
+            String tmp = leaf.getStringOrDefault("PhysicalContext", null);
+            if(tmp != null)
+                fullName += "." + tmp;
+            tmp = leaf.getStringOrDefault("DeviceSpecificContext", null);
+            if(tmp != null)
+                fullName += "." + tmp;
+            //fullName = fullName.replaceAll("\\.", "/"); // This may be decided to be used in the future.
             leaf.put("__FullName__", fullName);
             allLeafs.add(leaf);
         }

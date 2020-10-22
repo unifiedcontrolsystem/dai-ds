@@ -153,8 +153,10 @@ class ReportJacoco(object):
                     print('### OK')
                 print('###############################################################################')
         html += '</table>'
-        html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div>'
-        html += '</blockquote></body></html>'
+        html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div></blockquote>'
+        html += '<h2><b>CLI Python Coverage:</h2><div><a href="../../python/coverage-report/index.html">build/python/coverage-report/index.html<a></div>'
+        html += '<h2><b>CLI Python Results:</h2><div><a href="../../python/results.txt">build/python/results.txt<a></div>'
+        html += '</body></html>'
         with open(out_file, 'w') as file:
             file.write(html)
         if (final_method < 90.0) or (final_branch < 70.0):

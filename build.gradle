@@ -20,24 +20,9 @@ apply plugin: 'nebula.rpm'
 apply plugin: 'java'
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// To build this gradle project you need both JDK 8 and JDK 11 with JDK 11 being the   //
-// default/primary Java and compiler. The System property 'java8.bootstrapClasspath'   //
-// in gradle MUST be set correctly to the JAVA_HOME of the Java 8 JDK where the rt.jar //
-// file is located. Alternatively, the environment variable JAVA8_BOOTSTRAP_CLASSPATH  //
-// can be set to the JAVA_HOME for Java 8 JDK. This is required because VoltDB 9.x     //
-// requires Java 8 and will fail with Java 11 JAR files. This may also be set in the   //
-// ~/.gradle/gradle.properties file:                                                   //
-//                                                                                     //
-//   systemProp.java8.bootstrapClasspath=/usr/lib/jvm/java-8-openjdk-amd64             //
-//                                                                                     //
-/////////////////////////////////////////////////////////////////////////////////////////
-def JAVA8_HOME=System.getProperty("java8.bootstrapClasspath",
-        System.getenv("JAVA8_BOOTSTRAP_CLASSPATH"))
-
-/////////////////////////////////////////////////////////////////////////////////////////
 // Build variables                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////
-boolean SUPPRESS_RELEASE_AND_HASH=Boolean.parseBoolean(System.getProperty("suppressReleaseAndHash", "false"))
+boolean INCLUDE_DEBIAN=Boolean.parseBoolean(System.getProperty("includeDebianPackages", "false"))
 
 def gitVersionString() {
     def stdout = new ByteArrayOutputStream()
@@ -57,11 +42,8 @@ def static pythonVersionString(String gitVersion) {
         pyVersion += ".dev" + parts[1]
     return pyVersion
 }
+
 def packageVersion = gitVersionString()
-if (SUPPRESS_RELEASE_AND_HASH) {
-    println("*** Suppressing git release and hash for this build!")
-    packageVersion = packageVersion.split('-')[0]
-}
 def packageRelease = '0'
 if(packageVersion.split('-').length > 1)
     packageRelease = packageVersion.split('-')[1]
@@ -72,7 +54,6 @@ def voltdb_version = '9.1.1'
 def apache_version = '2.12.1'
 def httpcomponents_version = '4.5.12'
 def cliftonjson_version = '3.1.0'
-def keycloak_version = '10.0.2'
 def rabbitmq_version = '5.7.3'
 def picocli_version = '4.1.1'
 def commonsio_version = '2.6'
@@ -100,6 +81,8 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 
 def enforceCodeCoverage = true
 
+
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 def thisYear = Instant.now().toDate().toYear().toString()
 
@@ -112,6 +95,8 @@ def etc_dir     = install_dir + "/etc"
 def share_dir   = install_dir + "/share"
 def lib_dir     = install_dir + "/lib"
 def log_dir     = install_dir + "/log"
+def docker_dir  = install_dir + "/docker"
+def python_dir  = install_dir + "/python"
 
 println("\n*** Build Version: " + packageVersion)
 if(!includeDbgSymbols)
@@ -153,11 +138,6 @@ subprojects {
     }
 
     compileJava {
-//        doFirst {
-//            if(JAVA8_HOME != null && JAVA8_HOME != "" && sourceCompatibility.toString() == "8") {
-//                options.bootstrapClasspath = fileTree(include: ['*.jar'], dir: "$JAVA8_HOME/jre/lib/")
-//            }
-//        }
         if(!includeDbgSymbols)
             options.compilerArgs << '-g:none'
         options.compilerArgs << '-Werror'
@@ -472,12 +452,12 @@ project(':authentication') {
     apply plugin: 'groovy'
     dependencies {
         compile project(':logging')
-        compile group: 'org.keycloak', name: 'keycloak-admin-client', version: keycloak_version
+        compile project(':properties')
+        compile project(':config_io')
+        compile group: 'commons-io', name: 'commons-io', version: commonsio_version
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
-        testCompile group: 'org.jboss.resteasy', name: 'resteasy-client', version: '4.3.0.Final'
-        testCompile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '4.3.0.Final'
     }
 
     jacocoTestCoverageVerification {
@@ -510,6 +490,7 @@ project(':networking') {
         compile project(":authentication")
         compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
         compile group: 'commons-io', name: 'commons-io', version: commonsio_version
+        compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
@@ -1041,354 +1022,292 @@ project(':eventsim') {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// Test the Python cli code (manual test)                                              //
+/////////////////////////////////////////////////////////////////////////////////////////
+task testPython(type: Exec) {
+    new File((String) "${buildDir}/python").mkdirs()
+    workingDir("${projectDir}/cli")
+    ByteArrayOutputStream stream = new ByteArrayOutputStream()
+    standardOutput = stream
+    errorOutput = standardOutput
+    commandLine("python3", "-m", "pytest", "-v", "--cov-config=.coveragerc", "--cov=cli", "--cov-report=term-missing",
+    "--cov-report=xml:${buildDir}/python/results.xml", "--cov-report=html:${buildDir}/python/coverage-report",
+    "--fulltrace", ".")
+    doLast {
+        String result = stream.toString(StandardCharsets.UTF_8)
+        println(result)
+        new File((String)"${buildDir}/python/results.txt").text = result
+        delete fileTree("${projectDir}/cli/cli/__pycache__")
+        delete fileTree("${projectDir}/cli/cli/src/__pycache__")
+        delete fileTree("${projectDir}/cli/cli/src/tests/__pycache__")
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // Summarize coverage HTML                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////
 task makeSummaryHtml(type: Exec) {
     dependsOn subprojects.jacocoTestReport
     workingDir = "${projectDir}"
-    commandLine "python3", "build-scripts/reportCoverage.py"
+    commandLine "python3", "${projectDir}/build-scripts/reportCoverage.py"
 }
 rootProject.test.finalizedBy(makeSummaryHtml)
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// Java RPM and Docker Packaging                                                       //
+// Java RPM Packaging                                                                  //
 /////////////////////////////////////////////////////////////////////////////////////////
-task makeDaiVoltRpm(type: Rpm) {
+/*** New RPM and DEB files ***/
+task cleanupDeb(type: Delete) {
+    delete fileTree("build/distributions").matching {
+        include "**/*.changes"
+    }
+}
+
+task make3rdPartyDeb(type: Deb) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/populate-voltdb").text = """#!/usr/bin/env bash
-# Copyright (C) ${thisYear} Intel Corporation
+        new File((String)"${buildDir}/tmp/dai-postgres.service").text = """# Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
-PROG=\$(basename "\$0")
-
-umask 077
-
-[[ -z "\$LOG_LEVEL" ]] && LOG_LEVEL=INFO
-
-if [ \$# -ne 1 ]; then
-  echo "Error: Must be one parameter with a comma separated list of VoltDB servers with no spaces!" >&2
-  echo "Usage: \$PROG <voltdb_server(s)>"
-  exit 1
-fi
-
-UCS_DIR="${install_dir}"
-UCS_LIB="\${UCS_DIR}/lib"
-UCS_ETC="\${UCS_DIR}/etc"
-UCS_BIN="\${UCS_DIR}/bin"
-UCS_LOG="\${UCS_DIR}/log"
-
-VOLT_SERVERS=127.0.0.1
-[[ -n "\$1" ]] && VOLT_SERVERS="\$1" && shift
-
-export CLASSPATH="\${CLASSPATH}:\${UCS_LIB}/*:\${UCS_LIB}/postgresql-42.2.5.jar"
-logging=-DdaiLoggingLevel=\${LOG_LEVEL}
-
-java -jar \$logging "\${UCS_LIB}/populate_schema-${packageVersion}.jar" \$VOLT_SERVERS "\${UCS_ETC}/SystemManifest.json" "\${
-            UCS_ETC
-        }/MachineConfig.json" "\${UCS_ETC}/RasEventMetaData.json" 2>&1 | tee "\${UCS_LOG}/populate-voltdb.log"
-
-exit \$?
-"""
-        new File((String)"${buildDir}/tmp/preUninstall-volt.sh").text = """#!/bin/bash
-# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-state="\$(systemctl is-active dai-volt | cat)"
-if [ "\${state}" == "active" ]; then
-  systemctl stop dai-volt
-fi
-systemctl disable dai-volt
-
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/postUninstall-volt.sh").text = """#!/bin/bash
-# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-systemctl daemon-reload
-
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/postInstall-volt.sh").text = """#!/bin/bash
-# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-systemctl daemon-reload
-systemctl enable dai-volt
-
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/dai-volt.service").text = """# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
 [Unit]
-Description=DAI Volt daemon
+Description=DAI PostgreSQL Docker service.
+Requires=docker.service
+After=docker.service
 
 [Service]
-Type=forking
-ExecStart=/usr/bin/voltctl start
-ExecStop=/usr/bin/voltctl stop
-ExecReload=/usr/bin/voltctl restart
-TimeoutStartSec=600
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml down -v
 
 [Install]
 WantedBy=multi-user.target
 """
-        new File((String)"${buildDir}/tmp/voltctl").text = """#!/usr/bin/env bash
-# Copyright (C) 2018-${thisYear} Intel Corporation
+        new File((String)"${buildDir}/tmp/postgres.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-postgres:
+    network_mode: host
+    image: postgres:11.4
+    container_name: dai-postgres
+    environment:
+      - POSTGRES_DB=dai
+      - POSTGRES_USER=dai
+      - POSTGRES_PASSWORD=123@dai
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - "${docker_dir}/tier2/log:/var/log/postgresql"
+      - "${docker_dir}/tier2/init.d:/docker-entrypoint-initdb.d"
+      - "${docker_dir}/tier2/data/pgdata:/var/lib/postgresql/data/pgdata"
+    restart: always
+"""
+        new File((String)"${buildDir}/tmp/dai-rabbitmq.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI RabbitMQ broker.
+Requires=docker.service
+After=docker.service
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/rabbitmq.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-rabbitmq:
+    network_mode: host
+    image: rabbitmq:3.7-management
+    container_name: dai-rabbitmq
+    environment:
+      - RABBITMQ_NODE_IP="0.0.0.0"
+    restart: always
+"""
+        new File((String)"${buildDir}/tmp/dai-voltdb.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI VoltDB Docker service with schema.
+Requires=docker.service
+After=docker.service
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/voltdb.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-voltdb:
+    network_mode: host
+    image: voltdb/voltdb-community:9.2.1
+    entrypoint: /opt/voltdb/schema/voltdb-entrypoint.sh
+    container_name: dai-voltdb
+    hostname: am01-nmn.local
+    environment:
+      - HTTP_PORT=18080
+    volumes:
+      - "${etc_dir}:${etc_dir}"
+      - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
+      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+    restart: always
+
+  dai-populate-schema:
+    network_mode: host
+    depends_on:
+      - dai-voltdb
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/voltdb/schema/populateSchema.sh
+    container_name: dai-populate-schema
+    environment:
+      - DAI_LOGGING_LEVEL=DEBUG
+    volumes:
+      - "/opt/ucs/docker/tier1/log:/opt/ucs/log"
+      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+      - "/opt/ucs/etc:/opt/ucs/etc"
+      - "/opt/ucs/lib:/opt/ucs/lib"
+    restart: 'no'
+"""
+        new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
-#######################################################################
-# Program Variables
-PROG=\$(basename \$0)
+HOSTNAME="\$(cat ${etc_dir}/volt.hostname)"
+LOG="/opt/ucs/log/populate_schema.log"
+ARGS="\$(cat ${etc_dir}/volt.ip) /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
+JAR="/opt/ucs/lib/populate_schema.jar"
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
 
-#######################################################################
-# UCS Installed Location Variables
-VOLT_BIN="/opt/voltdb/bin"
-UCS_VER="${packageVersion}"
-UCS_DIR="${install_dir}"
-UCS_DATA="\${UCS_DIR}/share"
-UCS_LIB="\${UCS_DIR}/lib"
-UCS_LOGDIR="\${UCS_DIR}/log"
-UCS_LOG="\${UCS_LOGDIR}/\${PROG}.log"
-UCS_CFG="\${UCS_DIR}/etc"
-MANIFEST="\${UCS_CFG}/SystemManifest.json"
-CONFIG="\${UCS_CFG}/MachineConfig.json"
-RAS_META_DATA="\${UCS_CFG}/RasEventMetaData.json"
-[ -z "\$VOLT_HTTP_PORT" ] && VOLT_HTTP_PORT=18080
+umask 077
 
-#######################################################################
-# JAR file names
-PROPERTIES="\${UCS_LIB}/properties.jar"
-CONFIG_IO="\${UCS_LIB}/config_io.jar"
-PROCEDURES="\${UCS_LIB}/procedures.jar"
-POPULATE_SCHEMA="\${UCS_LIB}/populate_schema.jar"
+java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
-#######################################################################
-# Low Level Functions
-function usage_exit() {
-  echo "Usage: \${PROG} [-h | --help | --version | start | stop | restart]"
-  exit \$1
-}
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/voltdb-entrypoint.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 
-function rotate_logs() {
-  local size="\$(du -m "/opt/ucs/log/\${PROG}.log" | cut -f1)"
-  [ "\${size}" == "" ] && size=0
-  if [ \$size -gt 16 ]; then
-      local next
-      local i
-      [ -f "\${UCS_LOGDIR}/\${PROG}.log.10" ] && rm "\${UCS_LOGDIR}/\${PROG}.log.10"
-      for i in 9 8 7 6 5 4 3 2 1; do
-        next=`expr \$i + 1`
-        [ -f "\${UCS_LOGDIR}/\${PROG}.log.\$i" ] && mv "\${UCS_LOGDIR}/\${PROG}.log.\${i}" "\${UCS_LOGDIR}/\${PROG}.log.\${next}"
-      done
-      [ -f "\${UCS_LOG}" ] && mv "\${UCS_LOG}" "\${UCS_LOGDIR}/\${PROG}.log.1"
-      echo >"\${UCS_LOG}"
-  fi
-}
-
-function log() {
-  if [ -f "\${UCS_LOG}" ]; then
-    echo \$* | tee -a \${UCS_LOG}
-  else
-    echo \$* | tee \${UCS_LOG}
-  fi
-}
-
-function disable_transparent_pages() {
-  if [ -z "\$(cat /sys/kernel/mm/transparent_hugepage/enabled | grep '\\[never\\]')" ]; then
-    log -n "Setting transparent huge pages 'enable' to never..."
-    if [ -w "/sys/kernel/mm/transparent_hugepage/enabled" ]; then
-      log "as root..."
-      echo never >/sys/kernel/mm/transparent_hugepage/enabled
-    else
-      log "elevating to root..."
-      sudo bash -c "echo never >/sys/kernel/mm/transparent_hugepage/enabled"
-    fi
-  fi
-  if [ -z "\$(cat /sys/kernel/mm/transparent_hugepage/defrag | grep '\\[never\\]')" ]; then
-    log "Setting transparent huge pages 'defrag' to never..."
-    if [ -w "/sys/kernel/mm/transparent_hugepage/defrag" ]; then
-      log "as root..."
-      echo never >/sys/kernel/mm/transparent_hugepage/defrag
-    else
-      log "elevating to root..."
-      sudo bash -c "echo never >/sys/kernel/mm/transparent_hugepage/defrag"
-    fi
-  fi
-}
+LOGFILE="/var/voltdb/voltdbroot/log/voltdb-startup.log"
+export HOSTNAME="\$(cat ${etc_dir}/volt.hostname)"
 
 function is_running() {
-  \${VOLT_BIN}/voltadmin validate >/dev/null 2>&1
-  return \$?
+  voltadmin validate >/dev/null 2>&1
+  return \${?}
 }
 
-function start_db_and_wait() {
-  \${VOLT_BIN}/voltdb init -f 2>&1 | tee -a \$UCS_LOG
-  \${VOLT_BIN}/voltdb start --http=\${VOLT_HTTP_PORT} --background 2>&1 | tee -a \$UCS_LOG
-  if [ \${PIPESTATUS[0]} -ne 0 ]; then
-    return \${PIPESTATUS[0]}
-  fi
-  is_running
-  while [ \$? -ne 0 ]; do is_running; done
-  return 0
+function add_jar_file() {
+  sqlcmd --query="load classes \${1};" 2>&1 | tee -a "\${LOGFILE}"
+  return \${?}
 }
 
-function populate_tables() {
-  \${VOLT_BIN}/sqlcmd <"\${UCS_DATA}/DAI-Volt-Tables.sql" 2>&1 | tee -a \$UCS_LOG
-  local rv=\${PIPESTATUS[0]}
-  [[ \$rv -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: voltctl failed to load tables into schema!'" | \${
-            VOLT_BIN
-        }/sqlcmd | tee -a \$UCS_LOG
-  return \$rv
-}
-
-function populate_procedures() {
-  \${VOLT_BIN}/sqlcmd <"\${UCS_DATA}/DAI-Volt-Procedures.sql" 2>&1 | tee -a \$UCS_LOG
-  local rv=\${PIPESTATUS[0]}
-  [[ \$rv -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: voltctl failed to load procedures into schema!'" | \${
-            VOLT_BIN
-        }/sqlcmd | tee -a \$UCS_LOG
-  return \$rv
-}
-
-function load_classes() {
-  \${VOLT_BIN}/sqlcmd --query="load classes \${PROPERTIES};" 2>&1 | tee -a \$UCS_LOG
-  \${VOLT_BIN}/sqlcmd --query="load classes \${UCS_LIB}/json-simple-3.0.2.jar;" 2>&1 | tee -a \$UCS_LOG
-  \${VOLT_BIN}/sqlcmd --query="load classes \${CONFIG_IO};" 2>&1 | tee -a \$UCS_LOG
-  \${VOLT_BIN}/sqlcmd --query="load classes \${PROCEDURES};" 2>&1 | tee -a \$UCS_LOG
-  return \${PIPESTATUS[0]}
-}
-
-#######################################################################
-# High Level Functions
-function startVolt() {
-  is_running
-  if [ \$? -eq 0 ]; then
-    log "voltdb is already running!"
-    return 1
-  fi
-  log "Starting voltdb..."
-  start_db_and_wait
-  local rv=\$?
-  if [ \$rv -eq 0 ]; then
-    populate_tables
-    rv=\$?
-    if [ \$rv -eq 0 ]; then
-      load_classes
-      rv=\$?
-      if [ \$rv -eq 0 ]; then
-        populate_procedures
-        rv=\$?
-      fi
-    fi
-  else
-    log "Starting voltdb failed!"
-    return \$rv
-  fi
-  if [ \$rv -ne 0 ]; then
-    log "Creating the DB failed!"
-    is_running
-    if [ \$? -eq 0 ]; then
-      log "Stopping voltdb..."
-      \${VOLT_BIN}/voltadmin shutdown 2>&1 | tee -a \$UCS_LOG
-    fi
-  fi
-  return \$rv
-}
-
-function stopVolt() {
-  is_running
-  if [ \$? -ne 0 ]; then
-    log "Error: voltdb is not currently running!"
-    return 1
-  fi
-
-  log "Stopping voltdb..."
-  \${VOLT_BIN}/voltadmin shutdown 2>&1 | tee -a \$UCS_LOG
-  return \${PIPESTATUS[0]}
-}
-
-function populateSchema() {
-  if [ ! -f "\${MANIFEST}" ]; then
-    log "Error: system manifest file is required!"
-    return 1
-  fi
-
-  if [ ! -f "\$CONFIG" ]; then
-    log "Error: machine configuration file is required!"
-    return 1
-  fi
-
-  java -jar "\${POPULATE_SCHEMA}" localhost \${MANIFEST} \${CONFIG} \${RAS_META_DATA} 2>&1 | tee -a \$UCS_LOG
-
-  return \${PIPESTATUS[0]}
-}
-
-function startAll() {
-  disable_transparent_pages
-  startVolt
-  local rv=1
-  if [ \$? -eq 0 ]; then
-    populateSchema  # Cannot run properly after RPM install, files must be setup for the system by the administrator.
-    rv=\$?
-    if [ \$rv -ne 0 ]; then
-        log "Error: Populating the system schema failed!"
-        stopVolt
-    fi
-  fi
+function add_sql_file() {
+  sqlcmd <"\${1}" 2>&1 | tee -a "\${LOGFILE}"
+  rv=\${?}
+  [[ \${rv} -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: Loading SQL file \${1}!'" | sqlcmd 2>&1 | tee -a "\${LOGFILE}"
   return \${rv}
 }
 
-function stopAll() {
-    stopVolt
-    return 0
+function wait_for_start() {
+  is_running
+  while [ \${?} -ne 0 ]; do is_running; done
 }
 
-#######################################################################
-# Main Entry Point
-umask 077
-rotate_logs
+function wait_for_stop() {
+  is_running
+  while [ \${?} -eq 0 ]; do sleep 5; is_running; done
+}
 
-case "\$1" in
-  "-h")
-    usage_exit 0
-    ;;
-  "--help")
-    usage_exit 0
-    ;;
-  "--version")
-    echo "\${PROG} version \${VERSION}"
-    exit 0
-    ;;
-  "start")
-    startAll
-    exit \$?
-    ;;
-  "stop")
-    stopAll
-    exit \$?
-    ;;
-  "restart")
-    stopAll
-    startAll
-    exit \$?
-    ;;
-  *)
-    echo "Syntax Error: Bad commandline option!" >&2
-    usage_exit 1
-    ;;
-esac
+umask 077
+
+[[ -z "\${HTTP_PORT}" ]] && HTTP_PORT=8080
+>"\${LOGFILE}"
+
+cd /opt/voltdb/schema
+JARS=\$(ls *.jar | sort)
+echo "*** JAR Manifest:" | tee -a "\${LOGFILE}"
+echo "\${JARS}" | tee -a "\${LOGFILE}"
+
+SQLS=\$(ls *.sql | sort)
+echo "*** SQL Files To Load:" | tee -a "\${LOGFILE}"
+echo "\${SQLS}" | tee -a "\${LOGFILE}"
+cd -
+
+errors=0
+echo "Initializing VoltDB..." | tee -a "\${LOGFILE}"
+voltdb init --force -D /var/voltdb 2>&1 | tee -a "\${LOGFILE}"
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Starting VoltDB..." | tee -a "\${LOGFILE}"
+[[ \${errors} -eq 0 ]] && voltdb start -B -D /var/voltdb --count=1 --http=\${HTTP_PORT} 2>&1 | tee -a "\${LOGFILE}"
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Waiting for VoltDB..." | tee -a "\${LOGFILE}"
+wait_for_start
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Loading jar file classes..." | tee -a "\${LOGFILE}"
+for file in \$JARS; do
+  [[ \${errors} -eq 0 ]] && add_jar_file "/opt/voltdb/schema/\${file}"
+  errors=\$(expr \${errors} + \${?})
+done
+
+echo "*** Loading schema files..."
+for file in \$SQLS; do
+  [[ \$errors -eq 0 ]] && add_sql_file "/opt/voltdb/schema/\${file}"
+  errors=\$(expr \${errors} + \${?})
+done
+
+echo "*** Waiting for VoltDB to finish..."
+[[ \${errors} -eq 0 ]] && wait_for_stop
+errors=\$(expr \${errors} + \${?})
+
+exit \${errors}
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-3rd-party.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-voltdb.service
+/bin/systemctl stop dai-rabbitmq.service
+/bin/systemctl stop dai-postgres.service
+/bin/systemctl disable dai-voltdb.service
+/bin/systemctl disable dai-rabbitmq.service
+/bin/systemctl disable dai-postgres.service
+exit \$?
 """
     }
-    summary = 'The Data Access Interface (DAI) VoltDB Service and Utilities for HPC clusters.'
+    summary = 'DAI 3rd Party Dependency Docker Containers'
     release = "${packageRelease}"
     version = "${packageVersion}".split("-")[0]
 
@@ -1397,69 +1316,731 @@ esac
     user = 'root'
     fileMode = 0600
     dirMode = 0700
-    packageName = 'dai-voltdb'
+    packageName = 'dai-3rd-party'
 
-    preUninstall    file("${buildDir}/tmp/preUninstall-volt.sh")
-    postInstall     file("${buildDir}/tmp/postInstall-volt.sh")
-    postUninstall   file("${buildDir}/tmp/postUninstall-volt.sh")
+    preUninstall  file("${buildDir}/tmp/preUninstall-3rd-party.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
 
-    directory(log_dir, 0700)
+    directory("${docker_dir}/tier2/log", 0700)
+    directory("${docker_dir}/tier1/log", 0700)
 
     into("/")
 
-    from("${buildDir}/tmp/voltctl") {
-        into(bin_dir)
-        fileMode = 0700
+    // Postgres setup
+    from("${buildDir}/tmp/postgres.yml") {
+        into("opt/ucs/docker")
     }
-
-    from("${buildDir}/tmp/populate-voltdb") {
-        into(bin_dir)
-        fileMode = 0700
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("opt/ucs/docker/tier2/init.d")
+        fileMode(0644)
     }
-
-    from("${buildDir}/tmp/dai-volt.service") {
-        into("/etc/systemd/system")
-        fileMode = 0644
+    // RabbitMQ setup
+    from("${buildDir}/tmp/rabbitmq.yml") {
+        into("opt/ucs/docker")
     }
-
-    link("/usr/bin/voltctl", bin_dir + '/voltctl')
-    link("/usr/bin/populate-voltdb", bin_dir + '/populate-voltdb')
+    //VoltDB setup
+    from("${buildDir}/tmp/voltdb-entrypoint.sh") {
+        into("opt/ucs/docker/tier1/init.d")
+        fileMode(0700)
+    }
+    from("${buildDir}/jars/json-simple-3.1.0.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
+    }
+    from("${buildDir}/libs/properties.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("properties.jar", "20-properties.jar")
+    }
+    from("${buildDir}/libs/config_io.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("config_io.jar", "50-config_io.jar")
+    }
+    from("${buildDir}/libs/procedures.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("procedures.jar", "99-procedures.jar")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
+    }
+    from("${buildDir}/tmp/voltdb.yml") {
+        into("opt/ucs/docker")
+    }
+    // Populate VoltDB
+    from("${buildDir}/tmp/populateSchema.sh") {
+        into("opt/ucs/docker/tier1/init.d")
+        fileMode(0700)
+    }
+    // Services
+    from("${buildDir}/tmp/dai-postgres.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-voltdb.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-rabbitmq.service") {
+        into("etc/systemd/system")
+    }
 }
 
-task makeDaiRpm(type: Rpm) {
+task make3rdPartyRpm(type: Rpm) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/volt.ip").text = """127.0.0.1
+        new File((String)"${buildDir}/tmp/dai-postgres.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI PostgreSQL Docker service.
+Requires=docker.service
+After=docker.service
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/postgres.yml down -v
+
+[Install]
+WantedBy=multi-user.target
 """
-        new File((String)"${buildDir}/tmp/ucs-dai-mgr.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+        new File((String)"${buildDir}/tmp/postgres.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-postgres:
+    network_mode: host
+    image: postgres:11.4
+    container_name: dai-postgres
+    environment:
+      - POSTGRES_DB=dai
+      - POSTGRES_USER=dai
+      - POSTGRES_PASSWORD=123@dai
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - "${docker_dir}/tier2/log:/var/log/postgresql"
+      - "${docker_dir}/tier2/init.d:/docker-entrypoint-initdb.d"
+      - "${docker_dir}/tier2/data/pgdata:/var/lib/postgresql/data/pgdata"
+    restart: always
+"""
+        new File((String)"${buildDir}/tmp/dai-rabbitmq.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI RabbitMQ broker.
+Requires=docker.service
+After=docker.service
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/rabbitmq.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/rabbitmq.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-rabbitmq:
+    network_mode: host
+    image: rabbitmq:3.7-management
+    container_name: dai-rabbitmq
+    environment:
+      - RABBITMQ_NODE_IP="0.0.0.0"
+    restart: always
+"""
+        new File((String)"${buildDir}/tmp/dai-voltdb.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI VoltDB Docker service with schema.
+Requires=docker.service
+After=docker.service
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml rm -v
+ExecStart=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml up
+ExecStop=/usr/bin/docker-compose -f /opt/ucs/docker/voltdb.yml down -v
+
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/voltdb.yml").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+services:
+  dai-voltdb:
+    network_mode: host
+    image: voltdb/voltdb-community:9.2.1
+    entrypoint: /opt/voltdb/schema/voltdb-entrypoint.sh
+    container_name: dai-voltdb
+    environment:
+      - HTTP_PORT=18080
+    volumes:
+      - "${etc_dir}:${etc_dir}"
+      - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
+      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+    restart: always
+
+  dai-populate-schema:
+    network_mode: host
+    depends_on:
+      - dai-voltdb
+    image: openjdk:11.0.5-jdk
+    entrypoint: /opt/voltdb/schema/populateSchema.sh
+    container_name: dai-populate-schema
+    environment:
+      - DAI_LOGGING_LEVEL=DEBUG
+    volumes:
+      - "/opt/ucs/docker/tier1/log:/opt/ucs/log"
+      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+      - "/opt/ucs/etc:/opt/ucs/etc"
+      - "/opt/ucs/lib:/opt/ucs/lib"
+    restart: 'no'
+"""
+        new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
-[Unit]
-Description=UCS DAI Manager
+HOSTNAME="\$(cat ${etc_dir}/volt.hostname)"
+LOG="/opt/ucs/log/populate_schema.log"
+ARGS="\$(cat ${etc_dir}/volt.ip) /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
+JAR="/opt/ucs/lib/populate_schema.jar"
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
 
+umask 077
+
+java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/voltdb-entrypoint.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+LOGFILE="/var/voltdb/voltdbroot/log/voltdb-startup.log"
+export HOSTNAME="\$(cat ${etc_dir}/volt.hostname)"
+
+function is_running() {
+  voltadmin validate >/dev/null 2>&1
+  return \${?}
+}
+
+function add_jar_file() {
+  sqlcmd --query="load classes \${1};" 2>&1 | tee -a "\${LOGFILE}"
+  return \${?}
+}
+
+function add_sql_file() {
+  sqlcmd <"\${1}" 2>&1 | tee -a "\${LOGFILE}"
+  rv=\${?}
+  [[ \${rv} -ne 0 ]] && echo "exec SetDbSchemaFailed 'Error: Loading SQL file \${1}!'" | sqlcmd 2>&1 | tee -a "\${LOGFILE}"
+  return \${rv}
+}
+
+function wait_for_start() {
+  is_running
+  while [ \${?} -ne 0 ]; do is_running; done
+}
+
+function wait_for_stop() {
+  is_running
+  while [ \${?} -eq 0 ]; do sleep 5; is_running; done
+}
+
+umask 077
+
+[[ -z "\${HTTP_PORT}" ]] && HTTP_PORT=8080
+>"\${LOGFILE}"
+
+cd /opt/voltdb/schema
+JARS=\$(ls *.jar | sort)
+echo "*** JAR Manifest:" | tee -a "\${LOGFILE}"
+echo "\${JARS}" | tee -a "\${LOGFILE}"
+
+SQLS=\$(ls *.sql | sort)
+echo "*** SQL Files To Load:" | tee -a "\${LOGFILE}"
+echo "\${SQLS}" | tee -a "\${LOGFILE}"
+cd -
+
+errors=0
+echo "Initializing VoltDB..." | tee -a "\${LOGFILE}"
+voltdb init --force -D /var/voltdb 2>&1 | tee -a "\${LOGFILE}"
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Starting VoltDB..." | tee -a "\${LOGFILE}"
+[[ \${errors} -eq 0 ]] && voltdb start -B -D /var/voltdb --count=1 --http=\${HTTP_PORT} 2>&1 | tee -a "\${LOGFILE}"
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Waiting for VoltDB..." | tee -a "\${LOGFILE}"
+wait_for_start
+errors=\$(expr \${errors} + \${?})
+
+echo "*** Loading jar file classes..." | tee -a "\${LOGFILE}"
+for file in \$JARS; do
+  [[ \${errors} -eq 0 ]] && add_jar_file "/opt/voltdb/schema/\${file}"
+  errors=\$(expr \${errors} + \${?})
+done
+
+echo "*** Loading schema files..."
+for file in \$SQLS; do
+  [[ \$errors -eq 0 ]] && add_sql_file "/opt/voltdb/schema/\${file}"
+  errors=\$(expr \${errors} + \${?})
+done
+
+echo "*** Waiting for VoltDB to finish..."
+[[ \${errors} -eq 0 ]] && wait_for_stop
+errors=\$(expr \${errors} + \${?})
+
+exit \${errors}
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-3rd-party.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-voltdb.service
+/bin/systemctl stop dai-rabbitmq.service
+/bin/systemctl stop dai-postgres.service
+/bin/systemctl disable dai-voltdb.service
+/bin/systemctl disable dai-rabbitmq.service
+/bin/systemctl disable dai-postgres.service
+exit \$?
+"""
+    }
+    summary = 'DAI 3rd Party Dependency Docker Containers'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+    packageName = 'dai-3rd-party'
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-3rd-party.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    directory("${docker_dir}/tier2/log", 0700)
+    directory("${docker_dir}/tier1/log", 0700)
+
+    into("/")
+
+    // Postgres setup
+    from("${buildDir}/tmp/postgres.yml") {
+        into("opt/ucs/docker")
+    }
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("opt/ucs/docker/tier2/init.d")
+        fileMode(0644)
+    }
+    // RabbitMQ setup
+    from("${buildDir}/tmp/rabbitmq.yml") {
+        into("opt/ucs/docker")
+    }
+    //VoltDB setup
+    from("${buildDir}/tmp/voltdb-entrypoint.sh") {
+        into("opt/ucs/docker/tier1/init.d")
+        fileMode(0700)
+    }
+    from("${buildDir}/jars/json-simple-3.1.0.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
+    }
+    from("${buildDir}/libs/properties.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("properties.jar", "20-properties.jar")
+    }
+    from("${buildDir}/libs/config_io.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("config_io.jar", "50-config_io.jar")
+    }
+    from("${buildDir}/libs/procedures.jar") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("procedures.jar", "99-procedures.jar")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("opt/ucs/docker/tier1/init.d")
+        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
+    }
+    from("${buildDir}/tmp/voltdb.yml") {
+        into("opt/ucs/docker")
+    }
+    // Populate VoltDB
+    from("${buildDir}/tmp/populateSchema.sh") {
+        into("opt/ucs/docker/tier1/init.d")
+        fileMode(0700)
+    }
+    // Services
+    from("${buildDir}/tmp/dai-postgres.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-voltdb.service") {
+        into("etc/systemd/system")
+    }
+    from("${buildDir}/tmp/dai-rabbitmq.service") {
+        into("etc/systemd/system")
+    }
+}
+
+task makeVoltDBSchemaSetupDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/setupVoltDbSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+echo "*** NOTE: This script and referenced collateral must be installed on the same"
+echo "          system that VoltDB is installed on in order to setup VoltDB. VoltDB"
+echo "          requires that SQL files and JAR files be on the same local system."
+echo
+
+which sqlcmd >/dev/null
+if [ \$? -ne 0 ]; then
+  echo "ERROR: Missing 'sqlcmd' application in PATH!" >&2
+  exit 1
+fi
+
+umask 077
+cd ${share_dir}/for_voltdb
+JARS="\$(/bin/ls *.jar | /usr/bin/sort)"
+SQLS="\$(/bin/ls *.sql | /usr/bin/sort)"
+
+for jar in \${JARS}; do
+  fulljar="\$(pwd)/\${jar}"
+  echo "*** Installing JAR Fail: \${fulljar}..."
+  echo "load \${fulljar};" | sqlcmd --servers=127.0.0.1
+done
+
+for sql in \${SQLS}; do
+  fullsql="\$(pwd)/\${sql}"
+  echo "*** Installing SQL File: \${fullsql}..."
+  echo "file \${fullsql};" | sqlcmd --servers=127.0.0.1
+done
+
+exit \$?
+"""
+    }
+    summary = 'The DAI VoltDB Schema Setup installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+    packageName = 'dai-volt-schema'
+
+    into("/")
+
+    from("${buildDir}/tmp/setupVoltDbSchema.sh") {
+        into("${share_dir}/for_voltdb")
+        fileMode = 0700
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("${share_dir}/for_voltdb")
+        rename("DAI-Volt-Tables.sql","20-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("${share_dir}/for_voltdb")
+        rename("DAI-Volt-Procedures.sql","40-DAI-Volt-Procedures.sql")
+    }
+    from("${buildDir}/jars/json-simple-3.1.0.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("json-simple-3.1.0.jar", "00-json-simple-3.1.0.jar")
+    }
+    from("${buildDir}/libs/properties.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("properties.jar", "20-properties.jar")
+    }
+    from("${buildDir}/libs/config_io.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("config_io.jar", "60-config_io.jar")
+    }
+    from("${buildDir}/libs/procedures.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("procedures.jar", "99-procedures.jar")
+    }
+}
+
+task makeVoltDBSchemaSetupRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/setupVoltDbSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+echo "*** NOTE: This script and referenced collateral must be installed on the same"
+echo "          system that VoltDB is installed on in order to setup VoltDB. VoltDB"
+echo "          requires that SQL files and JAR files be on the same local system."
+echo
+
+which sqlcmd >/dev/null
+if [ \$? -ne 0 ]; then
+  echo "ERROR: Missing 'sqlcmd' application in PATH!" >&2
+  exit 1
+fi
+
+umask 077
+cd ${share_dir}/for_voltdb
+JARS="\$(/bin/ls *.jar | /usr/bin/sort)"
+SQLS="\$(/bin/ls *.sql | /usr/bin/sort)"
+
+for jar in \${JARS}; do
+  fulljar="\$(pwd)/\${jar}"
+  echo "*** Installing JAR Fail: \${fulljar}..."
+  echo "load \${fulljar};" | sqlcmd --servers=127.0.0.1
+done
+
+for sql in \${SQLS}; do
+  fullsql="\$(pwd)/\${sql}"
+  echo "*** Installing SQL File: \${fullsql}..."
+  echo "file \${fullsql};" | sqlcmd --servers=127.0.0.1
+done
+
+exit \$?
+"""
+    }
+    summary = 'The DAI VoltDB Schema Setup installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+    packageName = 'dai-volt-schema'
+
+    into("/")
+
+    from("${buildDir}/tmp/setupVoltDbSchema.sh") {
+        into("${share_dir}/for_voltdb")
+        fileMode = 0700
+    }
+    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
+        into("${share_dir}/for_voltdb")
+        rename("DAI-Volt-Tables.sql","20-DAI-Volt-Tables.sql")
+    }
+    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
+        into("${share_dir}/for_voltdb")
+        rename("DAI-Volt-Procedures.sql","40-DAI-Volt-Procedures.sql")
+    }
+    from("${buildDir}/jars/json-simple-3.1.0.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("json-simple-3.1.0.jar", "00-json-simple-3.1.0.jar")
+    }
+    from("${buildDir}/libs/properties.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("properties.jar", "20-properties.jar")
+    }
+    from("${buildDir}/libs/config_io.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("config_io.jar", "60-config_io.jar")
+    }
+    from("${buildDir}/libs/procedures.jar") {
+        into("${share_dir}/for_voltdb")
+        rename("procedures.jar", "99-procedures.jar")
+    }
+}
+
+task makePostgresSchemaSetupDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/setupInitialPostgresSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+which psql >/dev/null
+if [ \$? -ne 0 ]; then
+  echo "ERROR: Missing 'psql' application in PATH!" >&2
+  exit 1
+fi
+
+if [ "\${1}" = "-h" -o "\${1}" = "--help" ]; then
+  echo "Usage: \$(basename \${0}) [dbname [username]]
+  exit 0
+fi
+
+user=dai
+db=dai
+
+[[ -n "\${1}" ]] && db="\${1}" && shift 
+[[ -n "\${1}" ]] && user="\${1}" && shift
+
+cd ${share_dir}/for_postgres
+
+psql -U \${user} \${db} <./DAI-Tier2-Schema-Psql.sql
+
+exit \$?
+"""
+    }
+    summary = 'The DAI Postgres Schema Setup installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+    packageName = 'dai-postgres-schema'
+
+    into("/")
+
+    // For Postgres
+    from("${projectDir}/data/DAI-schema-migration") {
+        into("${share_dir}/for_postgres/schema-migration")
+    }
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("${share_dir}/for_postgres")
+    }
+    from("${buildDir}/tmp/setupInitialPostgresSchema.sh") {
+        into("${share_dir}/for_postgres")
+        fileMode(0700)
+    }
+}
+
+task makePostgresSchemaSetupRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/setupInitialPostgresSchema.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+which psql >/dev/null
+if [ \$? -ne 0 ]; then
+  echo "ERROR: Missing 'psql' application in PATH!" >&2
+  exit 1
+fi
+
+if [ "\${1}" = "-h" -o "\${1}" = "--help" ]; then
+  echo "Usage: \$(basename \${0}) [dbname [username]]
+  exit 0
+fi
+
+user=dai
+db=dai
+
+[[ -n "\${1}" ]] && db="\${1}" && shift 
+[[ -n "\${1}" ]] && user="\${1}" && shift
+
+cd ${share_dir}/for_postgres
+
+psql -U \${user} \${db} <./DAI-Tier2-Schema-Psql.sql
+
+exit \$?
+"""
+    }
+    summary = 'The DAI Postgres Schema Setup installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+    packageName = 'dai-postgres-schema'
+
+    into("/")
+
+    // For Postgres
+    from("${projectDir}/data/DAI-schema-migration") {
+        into("${share_dir}/for_postgres/schema-migration")
+    }
+    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
+        into("${share_dir}/for_postgres")
+    }
+    from("${buildDir}/tmp/setupInitialPostgresSchema.sh") {
+        into("${share_dir}/for_postgres")
+        fileMode(0700)
+    }
+}
+
+task makeDaiDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dai-manager.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI Manager Service
 [Service]
 TasksMax=8192
 Type=simple
 User=root
 WorkingDirectory=/tmp
-ExecStart=/usr/bin/ucs-start-dai-mgr
-
+EnvironmentFile=/opt/ucs/etc/dai.environment
+ExecStart=/opt/ucs/bin/dai-manager
+RestartSec=10
+Restart=always
 [Install]
 WantedBy=multi-user.target
 """
-        new File((String)"${buildDir}/tmp/ucs-start-dai-mgr").text = """#!/usr/bin/env bash
+        new File((String)"${buildDir}/tmp/dai.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+DAI_USE_BENCHMARKING=false"""
+        new File((String)"${buildDir}/tmp/dai-manager").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
+
 MACHINECONFIG=${etc_dir}/MachineConfig.json
-HOSTNAME=\$(hostname)
+HOSTNAME=\$(cat ${etc_dir}/volt.hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
-LOGNAME="AdapterDaiMgr-MotherSuperior.log"
+LOGNAME="AdapterDaiMgr.log"
 
-java -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-manager.service
+/bin/systemctl disable dai-manager.service
+exit \$?
 """
         new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
@@ -1469,59 +2050,22 @@ java -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${
 jps -l | grep "com.intel.dai."
 exit 0
 """
-        new File((String)"${buildDir}/tmp/environment").text = """DAI_VERSION="${packageVersion}"
-"""
-        new File((String)"${buildDir}/tmp/postInstall-dai.sh").text = """#!/bin/bash
+        new File((String)"${buildDir}/tmp/loadVoltDbInitialData.sh").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
+LOG="/opt/ucs/log/populate_schema.log"
+SERVERS="\$(cat ${etc_dir}/volt.ip)"
+ARGS="\${SERVERS} ${etc_dir}/SystemManifest.json ${etc_dir}/MachineConfig.json ${etc_dir}/RasEventMetaData.json"
+JAR="${lib_dir}/populate_schema.jar"
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
 
-systemctl daemon-reload
-systemctl enable ucs-dai-mgr
+java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/postUninstall-dai.sh").text = """#!/bin/bash
-# Copyright (C) 2018-${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-systemctl daemon-reload
-
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """#!/bin/bash
-# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-state="\$(systemctl is-active ucs-dai-mgr | cat)"
-if [ "\${state}" == "active" ]; then
-  systemctl stop ucs-dai-mgr
-fi
-systemctl disable ucs-dai-mgr
-
-exit 0
-"""
-        new File((String)"${buildDir}/tmp/eventsim-server").text = """#!/usr/bin/env bash
-# Copyright (C) ${thisYear} Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-java -cp ${lib_dir}/\\* com.intel.dai.eventsim.EventSimApp \$@
-"""
-        new File((String)"${buildDir}/tmp/hw-discovery-2.sh").text ="""#!/bin/bash -x
-
-java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDiscoveryCLI -m \$@
-exit \$?
-"""
-        new File((String)"${buildDir}/tmp/hw-ingestion-2.sh").text ="""#!/bin/bash -x
-SERVER="localhost"
-java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDbClientCLI -s \${SERVER} -m v2d -i \$@
 exit \$?
 """
     }
-    summary = 'The Data Access Interface (DAI) for HPC clusters.'
+    summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
     release = "${packageRelease}"
     version = "${packageVersion}".split("-")[0]
 
@@ -1534,530 +2078,555 @@ exit \$?
     packageName = "dai"
 
     preUninstall  file("${buildDir}/tmp/preUninstall-dai.sh")
-    postUninstall file("${buildDir}/tmp/postUninstall-dai.sh")
-    postInstall   file("${buildDir}/tmp/postInstall-dai.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
 
     directory(log_dir, 0700)
 
     into("/")
 
+    // Service
+    from("${buildDir}/tmp/dai-manager.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai-manager") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+    // DAI Jars
+    from ("${buildDir}/jars") {
+        into(lib_dir)
+        exclude "**/procedures.jar", "**/eventsim.jar"
+    }
+    // For VoltDB
+    from("${buildDir}/tmp/loadVoltDbInitialData.sh") {
+        into("${share_dir}/for_voltdb")
+        fileMode = 0700
+    }
+    // Misc.
     from("${buildDir}/tmp/show-adapters") {
         into(bin_dir)
         fileMode = 0755
     }
 
-    from("data/db") {
-        into(share_dir)
-    }
-
-    from("${buildDir}/tmp/ucs-dai-mgr.service") {
-        into("/etc/systemd/system")
-        fileMode = 0644
-    }
-
-    from("data/DAI-schema-migration") {
-        into(share_dir + "/schema-migration")
-    }
-
-    from("${buildDir}/tmp/ucs-start-dai-mgr") {
-        into(bin_dir)
-        fileMode = 0700
-    }
-
-    from("config-files") {
-        into(etc_dir)
-    }
-
-    from("${buildDir}/tmp/volt.ip") {
-        into(etc_dir)
-    }
-
-    from ('build/jars') {
-        into(lib_dir)
-    }
-
-    from("${buildDir}/tmp/eventsim-server") {
-        into(bin_dir)
-        fileMode = 0755
-    }
-
-    from("${buildDir}/tmp/environment") {
-        into(bin_dir)
-    }
-
-    // HW Inventory
-    from("${projectDir}/config-files/HWInvDiscoveryConfig.json") {
-        into(etc_dir)
-    }
-
-    from("${buildDir}/tmp/hw-discovery-2.sh") {
-        into(bin_dir)
-        rename("hw-discovery-2.sh", "hw-discovery.sh")
-        fileMode = 0700
-    }
-
-    from("${buildDir}/tmp/hw-ingestion-2.sh") {
-        into(bin_dir)
-        rename("hw-ingestion-2.sh", "hw-ingestion.sh")
-        fileMode = 0700
-    }
-
-    link("/usr/bin/ucs-start-dai-mgr", bin_dir + '/ucs-start-dai-mgr')
-    link("/usr/bin/show-adapters", bin_dir + '/show-adapters')
-    link("/usr/bin/eventsim-server", bin_dir + '/eventsim-server')
+    link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
 }
 
-task makeDeveloperDockerTarball(type: Tar) {
+task makeDaiRpm(type: Rpm) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/manifest.txt").text = """json-simple-3.1.0.jar
-properties.jar
-config_io.jar
-procedures.jar
-"""
-    }
-    archiveFileName = "${project.name}-docker-dev-${packageVersion}.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/distributions")
-    from("${projectDir}/docker-dev-cluster")
-    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
-        into("tier2")
-    }
-    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
-        into("tier1")
-        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
-    }
-    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
-        into("tier1")
-        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
-    }
-    from("${buildDir}/tmp/manifest.txt") {
-        into("jars")
-    }
-    from("${buildDir}/jars") {
-        into("jars")
-    }
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("config")
-    }
-    from("${projectDir}/config-files/BootParameters.json") {
-        into("config")
-    }
-    into("docker")
-}
-
-task makeDockerInstallTarballDai(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/dockerDai.yml").text = """# DAI Docker Deployment Config
-name: docker_dai_${packageVersion}
-tarball: ${buildDir}/tmp/docker-deploy-dai.tar.gz
-destination_folder: ${buildDir}/distributions
-services:
-  - dai-manager.service
-soft_links:
-  - from: '/opt/ucs/bin/show-adapters'
-    to: '/usr/bin/show-adapters'
-"""
-        new File((String)"${buildDir}/tmp/dai-manager.service").text = """[Unit]
-Description=DAI Manager Service.
-Requires=dai-voltdb.service dai-rabbitmq.service dai-postgres.service
-After=dai-voltdb.service dai-rabbitmq.service dai-postgres.service
-
+        new File((String)"${buildDir}/tmp/dai-manager.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI Manager Service
 [Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+ExecStart=/opt/ucs/bin/dai-manager
+RestartSec=10
 Restart=always
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml down -v
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml rm -v
-ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml up
-ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/dai.yml down -v
-
 [Install]
 WantedBy=multi-user.target
 """
-        new File((String)"${buildDir}/tmp/hw-discovery.sh").text ="""#!/bin/bash -x
-
-java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDiscoveryCLI -m \$@
-exit \$?
-"""
-        new File((String)"${buildDir}/tmp/hw-ingestion.sh").text ="""#!/bin/bash -x
-SERVER="localhost"
-java -cp "/opt/dai-docker/lib/*" com.intel.dai.hwinventory.api.HWInvDbClientCLI -s \${SERVER} -m v2d -i \$@
-exit \$?
-"""
-        new File((String)"${buildDir}/tmp/empty.txt").text = """Created folder for logs."""
-        new File((String)"${buildDir}/tmp/show-adapters2").text = """#!/usr/bin/env bash
+        new File((String)"${buildDir}/tmp/dai.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+DAI_USE_BENCHMARKING=false"""
+        new File((String)"${buildDir}/tmp/dai-manager").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
-docker exec dai-manager jps | grep -v Jps | awk '{print \$1 "\\t" \$2}'
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
+
+MACHINECONFIG=${etc_dir}/MachineConfig.json
+HOSTNAME=\$(cat ${etc_dir}/volt.hostname)
+VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
+CLASS="com.intel.dai.AdapterDaiMgr"
+LOGNAME="AdapterDaiMgr.log"
+
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-manager.service
+/bin/systemctl disable dai-manager.service
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+jps -l | grep "com.intel.dai."
 exit 0
 """
-    }
-    // main section
-    archiveFileName = "docker-deploy-dai.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
-    fileMode = 0600
-    dirMode = 0700
-
-    from("${buildDir}/jars") {
-        exclude("**/procedures.jar")
-        exclude("**/populate_schema.jar")
-        into("opt/dai-docker/lib")
-    }
-    from("${buildDir}/tmp/dai-manager.service") {
-        into("etc/systemd/system")
-    }
-    from("${projectDir}/docker-deploy/dai/entryPoint.sh") {
-        into("opt/dai-docker/dai")
-        fileMode = 0700
-    }
-    from("${buildDir}/tmp/show-adapters2") {
-        into("opt/ucs/bin")
-        rename("show-adapters2", "show-adapters")
-        fileMode = 0700
-    }
-    // EventSim Server
-    from ("${projectDir}/docker-deploy/eventsim.yml") {
-        into("opt/dai-docker")
-    }
-    from("${projectDir}/docker-deploy/dai/eventsimEntryPoint.sh") {
-        into("opt/dai-docker/dai")
-        fileMode = 0700
-    }
-    // HW Inventory
-    from("${buildDir}/tmp/hw-discovery.sh") {
-        into("opt/ucs/bin")
-        fileMode = 0700
-    }
-    from("${buildDir}/tmp/hw-ingestion.sh") {
-        into("opt/ucs/bin")
-        fileMode = 0700
-    }
-    into("/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/dockerDai.yml"
-        }
-    }
-}
-
-task makeDockerInstallTarball3rdParty(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/docker3rdParty.yml").text = """# DAI 3rd Party Docker Deployment Config
-name: docker_3rd_party_${packageVersion}
-tarball: ${buildDir}/tmp/dai-deploy-3rd-party.tar.gz
-destination_folder: ${buildDir}/distributions
-services:
-  - dai-postgres.service
-  - dai-voltdb.service
-  - dai-rabbitmq.service
-"""
-        new File((String)"${buildDir}/tmp/dai-postgres.service").text = """[Unit]
-Description=DAI PostgreSQL Docker service.
-Requires=docker.service
-After=docker.service
-
-[Service]
-Restart=always
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml down -v
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml rm -v
-ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml up
-ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/postgres.yml down -v
-
-[Install]
-WantedBy=multi-user.target
-"""
-        new File((String)"${buildDir}/tmp/dai-rabbitmq.service").text = """[Unit]
-Description=DAI RabbitMQ broker.
-Requires=dai-postgres.service
-After=dai-postgres.service
-
-[Service]
-Restart=always
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml down -v
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml rm -v
-ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml up
-ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/rabbitmq.yml down -v
-
-[Install]
-WantedBy=multi-user.target
-"""
-        new File((String)"${buildDir}/tmp/dai-voltdb.service").text = """[Unit]
-Description=DAI VoltDB Docker service with schema.
-Requires=dai-rabbitmq.service
-After=dai-rabbitmq.service
-
-[Service]
-Restart=always
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml down -v
-ExecStartPre=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml rm -v
-ExecStart=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml up
-ExecStop=/usr/bin/docker-compose -f /opt/dai-docker/voltdb.yml down -v
-
-[Install]
-WantedBy=multi-user.target
-"""
-        new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
-
+        new File((String)"${buildDir}/tmp/loadVoltDbInitialData.sh").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 LOG="/opt/ucs/log/populate_schema.log"
-ARGS="\${VOLTDB_SERVER} /opt/ucs/etc/SystemManifest.json /opt/ucs/etc/MachineConfig.json /opt/ucs/etc/RasEventMetaData.json"
-JAR="/opt/ucs/lib/populate_schema.jar"
+SERVERS="\$(cat ${etc_dir}/volt.ip)"
+ARGS="\${SERVERS} ${etc_dir}/SystemManifest.json ${etc_dir}/MachineConfig.json ${etc_dir}/RasEventMetaData.json"
+JAR="${lib_dir}/populate_schema.jar"
 PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
-
-umask 077
 
 java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
 exit \$?
 """
     }
-    archiveFileName = "dai-deploy-3rd-party.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
+    summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    // Postgres setup
-    from("${projectDir}/docker-deploy/postgres.yml") {
-        into("opt/dai-docker")
-    }
-    from("${projectDir}/data/db/DAI-Tier2-Schema-Psql.sql") {
-        into("opt/dai-docker/tier2/init.d")
-        fileMode(0644)
-    }
-    // RabbitMQ setup
-    from("${projectDir}/docker-deploy/rabbitmq.yml") {
-        into("opt/dai-docker")
-    }
-    //VoltDB setup
-    from("${projectDir}/docker-deploy/tier1/init.d/docker-entrypoint.sh") {
-        into("opt/dai-docker/tier1/init.d")
-        fileMode(0700)
-    }
-    from("${buildDir}/jars/json-simple-3.1.0.jar") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
-    }
-    from("${buildDir}/libs/properties.jar") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("properties.jar", "20-properties.jar")
-    }
-    from("${buildDir}/libs/config_io.jar") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("config_io.jar", "50-config_io.jar")
-    }
-    from("${buildDir}/libs/procedures.jar") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("procedures.jar", "99-procedures.jar")
-    }
-    from("${projectDir}/data/db/DAI-Volt-Tables.sql") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("DAI-Volt-Tables.sql", "10-DAI-Volt-Tables.sql")
-    }
-    from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
-        into("opt/dai-docker/tier1/init.d")
-        rename("DAI-Volt-Procedures.sql", "50-DAI-Volt-Procedures.sql")
-    }
-    // Populate VoltDB
-    from("${buildDir}/tmp/populateSchema.sh") {
-        into("opt/dai-docker/tier1/init.d")
-        fileMode(0700)
-    }
-    from("${buildDir}/jars") {
-        exclude("**/procedures.jar")
-        into("opt/dai-docker/lib")
-    }
-    // Services
-    from("${buildDir}/tmp/dai-postgres.service") {
-        into("etc/systemd/system")
-    }
-    from("${buildDir}/tmp/dai-voltdb.service") {
-        into("etc/systemd/system")
-    }
-    from("${buildDir}/tmp/dai-rabbitmq.service") {
-        into("etc/systemd/system")
-    }
+    packageName = "dai"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    directory(log_dir, 0700)
+
     into("/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/docker3rdParty.yml"
-        }
+
+    // Service
+    from("${buildDir}/tmp/dai-manager.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
     }
+    from("${buildDir}/tmp/dai.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai-manager") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+    // DAI Jars
+    from ("${buildDir}/jars") {
+        into(lib_dir)
+        exclude "**/procedures.jar", "**/eventsim.jar"
+    }
+    // For VoltDB
+    from("${buildDir}/tmp/loadVoltDbInitialData.sh") {
+        into("${share_dir}/for_voltdb")
+        fileMode = 0700
+    }
+    // Misc.
+    from("${buildDir}/tmp/show-adapters") {
+        into(bin_dir)
+        fileMode = 0755
+    }
+
+    link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
 }
 
-task makeDockerInstallEventSimConfig(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/dockerEventSimConfig.yml").text =
-"""# DAI EventSim Config Docker Deployment Config
-name: docker_eventsim_config_${packageVersion}
-tarball: ${buildDir}/tmp/dai-docker-eventsim-config.tar.gz
-destination_folder: ${buildDir}/distributions
-"""
-    }
-    archiveFileName = "dai-docker-eventsim-config.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
+task makeEventSimConfigDeb(type: Deb) {
+    summary = 'The DAI EventSim Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("dai-docker/etc")
+    packageName = "dai-eventsim-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/eventsim") {
+        into(etc_dir)
     }
-    from("${projectDir}/docker-deploy/eventsim-config") {
-        exclude("**/*.yml")
-        into("dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/eventsim-config") {
-        include("**/*.yml")
-        into("dai-docker")
-    }
-    into("/opt/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
-                    "${buildDir}/tmp/dockerEventSimConfig.yml"
-        }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
     }
 }
 
-task makeDockerInstallHW1Config(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/dockerHW1Config.yml").text =
-"""# DAI HW1 Config Docker Deployment Config
-name: docker_hw1_config_${packageVersion}
-tarball: ${buildDir}/tmp/dai-docker-hw1-config.tar.gz
-destination_folder: ${buildDir}/distributions
-"""
-    }
-    archiveFileName = "dai-docker-hw1-config.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
+task makeEventSimConfigRpm(type: Rpm) {
+    summary = 'The DAI EventSim Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("dai-docker/etc")
+    packageName = "dai-eventsim-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/eventsim") {
+        into(etc_dir)
     }
-    from("${projectDir}/docker-deploy/hw1-config") {
-        exclude("**/*.yml")
-        into("dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/hw1-config") {
-        include("**/*.yml")
-        into("dai-docker")
-    }
-    into("/opt/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
-                    "${buildDir}/tmp/dockerHW1Config.yml"
-        }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
     }
 }
 
-task makeDockerInstallHW2Config(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/dockerHW2Config.yml").text =
-                """# DAI HW2 Config Docker Deployment Config
-name: docker_hw2_config_${packageVersion}
-tarball: ${buildDir}/tmp/dai-docker-hw2-config.tar.gz
-destination_folder: ${buildDir}/distributions
-"""
-    }
-    archiveFileName = "dai-docker-hw2-config.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
+task makeHw1ConfigDeb(type: Deb) {
+    summary = 'The DAI HW1 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("dai-docker/etc")
+    packageName = "dai-hw1-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw1") {
+        into(etc_dir)
     }
-    from("${projectDir}/docker-deploy/hw2-config") {
-        exclude("**/*.yml")
-        into("dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/hw2-config") {
-        include("**/*.yml")
-        into("dai-docker")
-    }
-    into("/opt/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
-                    "${buildDir}/tmp/dockerHW2Config.yml"
-        }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
     }
 }
 
-task makeDockerInstallHW3Config(type: Tar) {
-    doFirst {
-        new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/dockerHW3Config.yml").text =
-                """# DAI HW3 Config Docker Deployment Config
-name: docker_hw3_config_${packageVersion}
-tarball: ${buildDir}/tmp/dai-docker-hw3-config.tar.gz
-destination_folder: ${buildDir}/distributions
-"""
-    }
-    archiveFileName = "dai-docker-hw3-config.tar.gz"
-    compression = Compression.GZIP
-    destinationDirectory = file("${buildDir}/tmp")
+task makeHw1ConfigRpm(type: Rpm) {
+    summary = 'The DAI HW1 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/config-files/RasEventMetaData.json") {
-        into("dai-docker/etc")
+    packageName = "dai-hw1-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw1") {
+        into(etc_dir)
     }
-    from("${projectDir}/docker-deploy/hw3-config") {
-        exclude("**/*.yml")
-        into("dai-docker/etc")
-    }
-    from("${projectDir}/docker-deploy/hw3-config") {
-        include("**/*.yml")
-        into("dai-docker")
-    }
-    into("/opt/")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py",
-                    "${buildDir}/tmp/dockerHW3Config.yml"
-        }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
     }
 }
 
-task makeEventSimCliInstaller(type: Tar) {
+task makeHw2ConfigDeb(type: Deb) {
+    summary = 'The DAI HW2 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-hw2-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw2") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+}
+
+task makeHw2ConfigRpm(type: Rpm) {
+    summary = 'The DAI HW2 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-hw2-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw2") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+}
+
+task makeHw3ConfigDeb(type: Deb) {
+    summary = 'The DAI HW3 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-hw3-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw3") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+}
+
+task makeHw3ConfigRpm(type: Rpm) {
+    summary = 'The DAI HW3 Configuration.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-hw3-config"
+
+    into("/")
+
+    from("${projectDir}/configurations/hw3") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+}
+
+task makeEventSimServerDeb(type: Deb) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String)"${buildDir}/tmp/eventsim_cli.yml").text = """# EventSim CLI Install Config
-name: cli_eventsim_${packageVersion}
-tarball: ${buildDir}/tmp/eventsim.tar.gz
-destination_folder: ${buildDir}/distributions
+        new File((String)"${buildDir}/tmp/eventsim-server").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 
-python_installers:
-  - '${install_dir}/python/eventsim_cli-install-py3-none-any.whl'
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL="DEBUG"
 
-soft_links:
-  - from: '${bin_dir}/eventsim'
-    to: '/usr/bin/eventsim'
+LOG="/opt/ucs/log/EventSim-Server.log"
+ARGS="\$(cat ${etc_dir}/volt.ip) /opt/ucs/etc/EventSim.json"
+CLASS=com.intel.dai.eventsim.EventSimApp
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
+
+mkdir -p /opt/ucs
+echo "*** Logging level: \${DAI_LOGGING_LEVEL}" | tee \${LOG}
+echo | tee -a \${LOG}
+
+java -cp '/opt/ucs/lib/*' \${PROPS} \${CLASS} \${ARGS} 2>&1 | tee -a \${LOG}
+"""
+        new File((String)"${buildDir}/tmp/dai-eventsim.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI EventSim Service
+[Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+ExecStart=/opt/ucs/bin/eventsim-server
+RestartSec=10
+Restart=always
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/eventsim-server.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai-eventsim.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-eventsim.service
+/bin/systemctl disable dai-eventsim.service
+exit \$?
+"""
+    }
+    summary = 'The DAI EventSim Server Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-eventsim-server"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai-eventsim.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    into("/")
+
+    from("${buildDir}/libs/eventsim.jar") {
+        into("${lib_dir}")
+    }
+    from("${buildDir}/tmp/eventsim-server") {
+        into(bin_dir)
+        fileMode(0755)
+    }
+    from("${buildDir}/tmp/dai-eventsim.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/eventsim-server.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+
+    link("/usr/bin/eventsim-server","${bin_dir}/eventsim-server")
+}
+
+task makeEventSimServerRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/eventsim-server").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL="DEBUG"
+
+LOG="/opt/ucs/log/EventSim-Server.log"
+ARGS="\$(cat ${etc_dir}/volt.ip) /opt/ucs/etc/EventSim.json"
+CLASS=com.intel.dai.eventsim.EventSimApp
+PROPS="-DdaiLoggingLevel=\${DAI_LOGGING_LEVEL}"
+
+mkdir -p /opt/ucs
+echo "*** Logging level: \${DAI_LOGGING_LEVEL}" | tee \${LOG}
+echo | tee -a \${LOG}
+
+java -cp '/opt/ucs/lib/*' \${PROPS} \${CLASS} \${ARGS} 2>&1 | tee -a \${LOG}
+"""
+        new File((String)"${buildDir}/tmp/dai-eventsim.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI EventSim Service
+[Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+ExecStart=/opt/ucs/bin/eventsim-server
+RestartSec=10
+Restart=always
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/eventsim-server.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai-eventsim.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-eventsim.service
+/bin/systemctl disable dai-eventsim.service
+exit \$?
+"""
+    }
+    summary = 'The DAI EventSim Server Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-eventsim-server"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai-eventsim.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    into("/")
+
+    from("${buildDir}/libs/eventsim.jar") {
+        into("${lib_dir}")
+    }
+    from("${buildDir}/tmp/eventsim-server") {
+        into(bin_dir)
+        fileMode(0755)
+    }
+    from("${buildDir}/tmp/dai-eventsim.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/eventsim-server.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+
+    link("/usr/bin/eventsim-server","${bin_dir}/eventsim-server")
+}
+
+task makeEventSimCliDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/postInstall-eventsim-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+cd ${python_dir}
+
+/usr/bin/python3 -m pip install eventsim_cli-install-py3-none-any.whl
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-eventsim-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+/usr/bin/python3 -m pip uninstall -y eventsim-cli
+
+exit \$? 
 """
         exec {
             workingDir = "${projectDir}/cli_eventsim"
@@ -2072,47 +2641,126 @@ soft_links:
         delete("${projectDir}/cli_eventsim/dist", "${projectDir}/cli_eventsim/eventsim_cli.egg-info",
                 "${projectDir}/cli_eventsim/build")
     }
-    archiveFileName = "eventsim.tar.gz"
-    destinationDirectory = file("${buildDir}/tmp")
-    compression = Compression.GZIP
+    summary = 'The DAI EventSim CLI Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/cli_eventsim/eventsim") {
-        into("bin")
-        fileMode = 0755
-    }
-    from("${projectDir}/cli_eventsim/eventsim_cli_config.json") {
-        into("etc")
-    }
+    packageName = "dai-eventsim-cli"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-eventsim-cli.sh")
+    postInstall   file("${buildDir}/tmp/postInstall-eventsim-cli.sh")
+
+    into("/")
+
     from("${buildDir}/tmp/eventsim_cli-${pythonVersion}-py3-none-any.whl") {
+        into(python_dir)
         rename("eventsim_cli-${pythonVersion}-py3-none-any.whl", "eventsim_cli-install-py3-none-any.whl")
-        into("python")
     }
-    into("/opt/ucs")
-    doLast {
-        exec {
-            workingDir = "${projectDir}"
-            errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/eventsim_cli.yml"
-        }
+    from("${projectDir}/cli_eventsim/eventsim") {
+        into(bin_dir)
+        fileMode(0700)
     }
+
+    link("/usr/bin/eventsim", "${bin_dir}/eventsim")
 }
 
-task makeUcsCliInstaller(type: Tar, dependsOn: makeDaiRpm) {
+task makeEventSimCliRpm(type: Rpm) {
     doFirst {
         new File((String)"${buildDir}/tmp").mkdirs()
-        new File((String) "${buildDir}/tmp/ucs_cli.yml").text = """# UCS CLI Install Config
-name: cli_ucs_${packageVersion}
-tarball: ${buildDir}/tmp/ucs_cli.tar.gz
-destination_folder: ${buildDir}/distributions
+        new File((String)"${buildDir}/tmp/postInstall-eventsim-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 
-python_installers:
-  - '${install_dir}/python/ucs_cli-install-py3-none-any.whl'
+cd ${python_dir}
 
-soft_links:
-  - from: '${bin_dir}/ucs'
-    to: '/usr/bin/ucs'
+/usr/bin/python3 -m pip install eventsim_cli-install-py3-none-any.whl
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-eventsim-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+/usr/bin/python3 -m pip uninstall -y eventsim-cli
+
+exit \$? 
+"""
+        exec {
+            workingDir = "${projectDir}/cli_eventsim"
+            errorOutput = standardOutput
+            environment("DAIVER", "${pythonVersion}")
+            commandLine "python3", "setup-eventsim.py", "bdist_wheel"
+        }
+        copy {
+            from("${projectDir}/cli_eventsim/dist/")
+            into("${buildDir}/tmp")
+        }
+        delete("${projectDir}/cli_eventsim/dist", "${projectDir}/cli_eventsim/eventsim_cli.egg-info",
+                "${projectDir}/cli_eventsim/build")
+    }
+    summary = 'The DAI EventSim CLI Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-eventsim-cli"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-eventsim-cli.sh")
+    postInstall   file("${buildDir}/tmp/postInstall-eventsim-cli.sh")
+
+    into("/")
+
+    from("${buildDir}/tmp/eventsim_cli-${pythonVersion}-py3-none-any.whl") {
+        into(python_dir)
+        rename("eventsim_cli-${pythonVersion}-py3-none-any.whl", "eventsim_cli-install-py3-none-any.whl")
+    }
+    from("${projectDir}/cli_eventsim/eventsim") {
+        into(bin_dir)
+        fileMode(0700)
+    }
+
+    link("/usr/bin/eventsim", "${bin_dir}/eventsim")
+}
+
+task makeCliDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/postInstall-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+cd ${python_dir}
+
+/usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
+
+[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/eventsim ]] && ln -s ${bin_dir}/eventsim /usr/bin/eventsim
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[[ -L /usr/bin/eventsim ]] && /bin/rm /usr/bin/eventsim
+
+/usr/bin/python3 -m pip uninstall -y eventsim-cli
+
+exit \$? 
 """
         exec {
             workingDir = "${projectDir}/cli"
@@ -2121,40 +2769,116 @@ soft_links:
             commandLine "python3", "setup.py", "bdist_wheel"
         }
         copy {
-            from("${projectDir}/cli/dist/ucs_cli-${pythonVersion}-py3-none-any.whl")
+            from("${projectDir}/ucs_cli/dist/")
             into("${buildDir}/tmp")
         }
-        delete("${projectDir}/cli/dist", "${projectDir}/cli/ucs_cli.egg-info", "${projectDir}/cli/build")
+        delete("${projectDir}/ucs_cli/dist", "${projectDir}/ucs_cli/eventsim_cli.egg-info",
+                "${projectDir}/ucs_cli/build")
     }
-    archiveFileName = "ucs_cli.tar.gz"
-    destinationDirectory = file("${buildDir}/tmp")
-    compression = Compression.GZIP
+    summary = 'The DAI CLI Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
     fileMode = 0600
     dirMode = 0700
 
-    from("${projectDir}/cli/ucs") {
-        into("opt/ucs/bin")
-        fileMode = 0755
-    }
-    from("${projectDir}/cli/cli_config.json") {
-        into("opt/ucs/etc")
-    }
+    packageName = "dai-cli"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-cli.sh")
+    postInstall   file("${buildDir}/tmp/postInstall-cli.sh")
+
+    into("/")
+
     from("${buildDir}/tmp/ucs_cli-${pythonVersion}-py3-none-any.whl") {
-        into("opt/ucs/python")
+        into(python_dir)
         rename("ucs_cli-${pythonVersion}-py3-none-any.whl", "ucs_cli-install-py3-none-any.whl")
+    }
+    from("${projectDir}/cli/ucs") {
+        into(bin_dir)
+        fileMode(0700)
     }
     from("${projectDir}/cli/ucs_completion.sh") {
         into("etc/bash_completion.d")
-        fileMode = 0644
+        fileMode(0755)
     }
-    into("/")
-    doLast {
+
+    link("/usr/bin/ucs", "${bin_dir}/ucs")
+}
+
+task makeCliRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/postInstall-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+cd ${python_dir}
+
+/usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
+
+[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/eventsim ]] && ln -s ${bin_dir}/eventsim /usr/bin/eventsim
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-cli.sh").text = """#!/bin/bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[[ -L /usr/bin/eventsim ]] && /bin/rm /usr/bin/eventsim
+
+/usr/bin/python3 -m pip uninstall -y eventsim-cli
+
+exit \$? 
+"""
         exec {
-            workingDir = "${projectDir}"
+            workingDir = "${projectDir}/cli"
             errorOutput = standardOutput
-            commandLine "python3", "${projectDir}/build-scripts/install-builder.py", "${buildDir}/tmp/ucs_cli.yml"
+            environment("DAIVER", "${pythonVersion}")
+            commandLine "python3", "setup.py", "bdist_wheel"
         }
+        copy {
+            from("${projectDir}/ucs_cli/dist/")
+            into("${buildDir}/tmp")
+        }
+        delete("${projectDir}/ucs_cli/dist", "${projectDir}/ucs_cli/eventsim_cli.egg-info",
+                "${projectDir}/ucs_cli/build")
     }
+    summary = 'The DAI CLI Installer.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-cli"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-cli.sh")
+    postInstall   file("${buildDir}/tmp/postInstall-cli.sh")
+
+    into("/")
+
+    from("${buildDir}/tmp/ucs_cli-${pythonVersion}-py3-none-any.whl") {
+        into(python_dir)
+        rename("ucs_cli-${pythonVersion}-py3-none-any.whl", "ucs_cli-install-py3-none-any.whl")
+    }
+    from("${projectDir}/cli/ucs") {
+        into(bin_dir)
+        fileMode(0700)
+    }
+    from("${projectDir}/cli/ucs_completion.sh") {
+        into("etc/bash_completion.d")
+        fileMode(0755)
+    }
+
+    link("/usr/bin/ucs", "${bin_dir}/ucs")
 }
 
 task makeAllArtifacts {
@@ -2162,10 +2886,18 @@ task makeAllArtifacts {
         file("${buildDir}/distributions").mkdirs()
     }
     dependsOn subprojects.jar
-    finalizedBy "makeDaiRpm", "makeDaiVoltRpm", "makeEventSimCliInstaller", "makeUcsCliInstaller",
-            "makeDockerInstallHW1Config", "makeDockerInstallHW2Config", "makeDockerInstallHW3Config",
-            "makeDockerInstallEventSimConfig", "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai",
-            "makeDeveloperDockerTarball"
+    def rpms = [ "make3rdPartyRpm", "makeVoltDBSchemaSetupRpm", "makePostgresSchemaSetupRpm", "makeDaiRpm",
+                 "makeEventSimConfigRpm", "makeHw1ConfigRpm", "makeHw2ConfigRpm", "makeHw3ConfigRpm",
+                 "makeEventSimServerRpm", "makeEventSimCliRpm", "makeCliRpm" ]
+    def debs = [ "make3rdPartyDeb", "makeVoltDBSchemaSetupDeb", "makePostgresSchemaSetupDeb", "makeDaiDeb",
+                 "makeEventSimConfigDeb", "makeHw1ConfigDeb", "makeHw2ConfigDeb", "makeHw3ConfigDeb",
+                 "makeEventSimServerDeb", "makeEventSimCliDeb", "makeCliDeb" ]
+    def cleanup = [ "cleanupDeb" ]
+    def packages = rpms
+    if(INCLUDE_DEBIAN)
+        packages = packages + debs + cleanup
+    println("*** BUILING PACKAGES: " + packages)
+    finalizedBy packages
 }
 rootProject.build.finalizedBy(makeAllArtifacts)
 

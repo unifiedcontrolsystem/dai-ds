@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
-import com.intel.runtime_utils.RuntimeCommand;
 
 /**
  * AdapterDaiMgr for the VoltDB database.
@@ -1845,6 +1844,28 @@ public class AdapterDaiMgr {
         }
     }
 
+    /**
+     * Decide to use a passed location or a lookup from a hostname to location table.
+     *
+     * @param argLocation Location specified from command line.
+     * @param hostname Hostname from command line.
+     * @return The location either looked up or specified.
+     *
+     * @throws IOException If the node query fails.
+     * @throws ProcCallException If the node query fails.
+     * @throws RuntimeException If the hostname is not valid in the defined system.
+     */
+    private String getLocation(String argLocation, String hostname) throws IOException, ProcCallException {
+        if(argLocation.equals("-")) {
+            String location = adapter.mapCompNodeHostNameToLctn().getOrDefault(hostname, null);
+            if(location == null)
+                throw new RuntimeException(String.format("Failed to get the location from the hostname (%s) at startup!",
+                        hostname));
+            return location;
+        }
+        return argLocation;
+    }
+
     //--------------------------------------------------------------------------
     // This method handles the general processing flow for DaiMgr adapters (regardless of specific implementation).
     //--------------------------------------------------------------------------
@@ -1862,7 +1883,7 @@ public class AdapterDaiMgr {
             adapter.setShutdownHandler(tempShutdownHandler);
             adapter.enableSignalHandlers();
 
-            DbServers = (args.length >= 1) ? args[0] : "localhost";
+            DbServers = args[0];
 
             // Wait for VoltDB Servers to appear and be in a usable state or throw a TimeoutException.
             waitForVoltDB(DbServers, CONNECTION_TOTAL_TIMEOUT, CONNECTION_LOOP_DELAY);
@@ -1873,8 +1894,8 @@ public class AdapterDaiMgr {
             adapter.loadRasMetadata();
 
             // Get the Lctn and Hostname of the Service Node that this adapter is running on - args[1] and args[2]
-            mSnLctn = (args.length >= 2) ? args[1] : "UnknownLctn";
-            final String SnHostname = (args.length >= 3) ? args[2] : "UnknownHostName";
+            final String SnHostname = args[2];
+            mSnLctn = getLocation(args[1], SnHostname);
             UcsClassPath = adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsClasspath").getResults()[0].fetchRow(0).getString("Value");
             UcsLogfileDirectory = adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsLogfileDirectory").getResults()[0].fetchRow(0).getString("Value");
             UcsLog4jConfigurationFile = adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsLog4jConfigurationFile").getResults()[0].fetchRow(0).getString("Value");
@@ -2043,10 +2064,16 @@ public class AdapterDaiMgr {
         final String type = "DAI_MGR";
         final Logger logger = LoggerFactory.getInstance(type, AdapterDaiMgr.class.getName(), "console");
         for (String arg : args) logger.info("CP: arg: %s", arg);
+        logger.info("Command line args: '%s'", String.join(" ", args));
+        if(args.length != 3) {
+            logger.error("Wrong number of parameters specified. Must have 3 parameters in order: " +
+                    "'voltdb_servers location hostname'");
+            return; // Bail here quickly with bad number of arguments.
+        }
         AdapterSingletonFactory.initializeFactory(type, AdapterDaiMgr.class.getName(), logger);
         final IAdapter adapter = AdapterSingletonFactory.getAdapter();
         final AdapterDaiMgr obj = new AdapterDaiMgr(adapter, logger,
-                new DataStoreFactoryImpl((args.length >= 1) ? args[0] : "localhost", logger));
+                new DataStoreFactoryImpl(args[0], logger));
         // Start up the main processing flow for DaiMgr adapters.
         obj.mainProcessingFlow(args);
     }   // End main(String[] args)

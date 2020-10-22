@@ -59,7 +59,7 @@ public class VoltDbCallBackForHouseKeepingTest {
 
     @BeforeClass
     public static void setUpTestClass() throws Exception  {
-        File src = new File("../config-files/RasEventMetaData.json");
+        File src = new File("../configurations/common/RasEventMetaData.json");
         Files.copy(src.toPath(), rasEventMetaData_.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
