@@ -39,6 +39,7 @@ pipeline {
 
         string(name: 'functionalAgent', defaultValue: 'FUNCTIONAL', description: 'Enter your FUNCTIONAL test machine')
         choice(name: 'functionalTestTag', choices: [
+                '@smokeTest',
                 '@beingDebugged',
                 '@underDevelopment',
                 '@diagnostics',
