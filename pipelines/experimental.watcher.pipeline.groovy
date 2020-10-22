@@ -11,6 +11,7 @@ pipeline {
         stage('Run Master CD') {
             steps {
                 build job: 'master-continuous-delivery-pipeline',
+                        parameters: [string(name: 'tag', value: '@smokeTest')],
                         quietPeriod: 0, wait: true
             }
         }

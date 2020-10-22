@@ -74,3 +74,6 @@ cli2/dist/
 cli2/results.xml
 cli2/.coverage
 cli2/ucs_cli2.egg-info/
+/0-todos/
+#.gitignore is already added
+**/.*
