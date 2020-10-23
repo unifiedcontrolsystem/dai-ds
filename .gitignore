@@ -77,3 +77,4 @@ cli2/ucs_cli2.egg-info/
 /0-todos/
 #.gitignore is already added
 **/.*
+tmp*.*
