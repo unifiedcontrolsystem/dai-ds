@@ -116,11 +116,10 @@ pipeline {
                         script { utilities.generateJunitReport('**/test-results/test/*.xml') }
                     }
                 }
-                stage('Launch Functional Tests') {
+                stage('Archive') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
                         // Archive zips for total coverage report generation later
-                        sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
@@ -130,7 +129,11 @@ pipeline {
                         sh 'cp data/db/*.sql build/distributions/'  // for database debugging
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.s*'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
-
+                    }
+                }
+                stage('Launch Functional Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    steps {
                         build job: 'functional-tests',
                                 parameters: [
                                         string(name: 'repository', value: "${params.functionalTestRepository}"),
