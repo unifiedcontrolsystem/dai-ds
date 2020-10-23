@@ -246,6 +246,15 @@ subprojects {
     task integrationTest(type: Test) {
         testClassesDirs = sourceSets.integration.output.classesDirs
         classpath = sourceSets.integration.runtimeClasspath
+
+        testLogging {
+            outputs.upToDateWhen {false}
+            showCauses = true
+            showExceptions = true
+            showStackTraces = true
+            showStandardStreams = true
+            exceptionFormat = 'full'
+        }
     }
 }
 clean.dependsOn(subprojects.clean)
