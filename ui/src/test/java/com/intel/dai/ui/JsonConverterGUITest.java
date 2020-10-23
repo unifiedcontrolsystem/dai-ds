@@ -1,4 +1,4 @@
-package com.intel.runtime_utils;
+package com.intel.dai.ui;
 
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
