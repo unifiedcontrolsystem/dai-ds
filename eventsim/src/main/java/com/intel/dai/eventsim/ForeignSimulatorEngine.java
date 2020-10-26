@@ -288,10 +288,6 @@ class ForeignSimulatorEngine {
         if(clockModeStartTime != null)
             clockMode = "start-time";
 
-        if(clockMode.equals("start-time")) {
-            waitForSceduleTime(clockModeStartTime);
-        }
-
         if (clockModeCounter != null)
             clockMode = "counter";
 
@@ -299,13 +295,20 @@ class ForeignSimulatorEngine {
             clockMode = "duration";
 
         if(clockMode.isEmpty())
-            clockMode = scenarioParameters.getString("mode");
+            clockMode = scenarioParameters.getString("clock-mode");
 
-        if(clockMode.equals("counter") && clockModeCounter != null) {
+        if(clockMode.equals("start-time")) {
+            clockModeStartTime = parameters.getOrDefault("start-time", scenarioParameters.getString("start-time"));
+            waitForSceduleTime(clockModeStartTime);
+        }
+
+        if(clockMode.equals("counter")) {
+            clockModeCounter = parameters.getOrDefault("counter", scenarioParameters.getString("counter"));
             long counterL = Long.parseLong(clockModeCounter);
             publishEventsCounterMode(publishEvents, counterL);
         }
-        else if(clockMode.equals("duration") && clockModeDuration != null) {
+        else if(clockMode.equals("duration")) {
+            clockModeDuration = parameters.getOrDefault("duration", scenarioParameters.getString("duration"));
             long durationL = Long.parseLong(clockModeDuration);
             publishEventsDurationMode(publishEvents, durationL);
         }
