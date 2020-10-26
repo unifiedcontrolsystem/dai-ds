@@ -89,8 +89,8 @@ public class JsonConverterGUITest {
         assertEquals("Monitor", mapObject.get("AdapterName"));
         assertEquals(34, mapObject.get("SensorNumber"));
         assertEquals(1, mapObject.get("SensorID"));
-        assertEquals(17.1f, mapObject.get("SensorValue1"));
-        assertEquals(25.1, mapObject.get("SensorValue2"));
+        assertEquals("17.1000", mapObject.get("SensorValue1"));
+        assertEquals("25.1000", mapObject.get("SensorValue2"));
         assertEquals(java.sql.Date.valueOf("2019-06-19"), mapObject.get("CurrentDate"));
         assertEquals("2019-06-19 12:00:00.0", mapObject.get("CurrentTimestamp"));
         assertEquals(true, mapObject.get("ValidSensor"));

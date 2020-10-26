@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class JsonConverterGUI {
 
@@ -36,10 +38,14 @@ public class JsonConverterGUI {
                     obj_json.put(column_name, resultsetinp.getInt(i));
                 }
                 else if(rasmetadata.getColumnType(i)== Types.DOUBLE){
-                    obj_json.put(column_name, resultsetinp.getDouble(i));
+                    BigDecimal bd = new BigDecimal(Double.toString(resultsetinp.getDouble(i)));
+                    bd = bd.setScale(4, RoundingMode.HALF_UP);
+                    obj_json.put(column_name, bd.toPlainString());
                 }
                 else if(rasmetadata.getColumnType(i)== Types.FLOAT){
-                    obj_json.put(column_name, resultsetinp.getFloat(i));
+                    BigDecimal bd = new BigDecimal(Float.toString(resultsetinp.getFloat(i)));
+                    bd = bd.setScale(4, RoundingMode.HALF_UP);
+                    obj_json.put(column_name, bd.toPlainString());
                 }
                 else if(rasmetadata.getColumnType(i)== Types.INTEGER){
                     obj_json.put(column_name, resultsetinp.getInt(i));
