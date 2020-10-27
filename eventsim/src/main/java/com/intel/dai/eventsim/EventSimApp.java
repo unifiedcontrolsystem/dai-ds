@@ -40,6 +40,8 @@ public class EventSimApp  extends  EventSim {
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.GET.toString(), eventsimApi::getAllSubscriptionDetails );
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeStateChangeNotifications);
         network_.register("/apis/bss/boot/v1/bootparameters", HttpMethod.GET.toString(), eventsimApi::getBootParameters);
+        network_.register("/apis/smd/hsm/v1/State/Components", HttpMethod.GET.toString(), eventsimApi::getNodeStates);
+        network_.register("/apis/smd/hsm/v1/State/Components/*", HttpMethod.GET.toString(), eventsimApi::getNodeStatesForLocation);
         network_.register("/apis/ims/images", HttpMethod.GET.toString(), eventsimApi::getBootImages);
         network_.register("/apis/ims/images/*", HttpMethod.GET.toString(), eventsimApi::getBootImageForImageId);
         network_.register("/Inventory/Discover", HttpMethod.POST.toString(), eventsimApi::initiateInventoryDiscovery);
@@ -229,6 +231,34 @@ public class EventSimApp  extends  EventSim {
     }
 
     /**
+     * This method used to fetch node states data.
+     * @param parameters input details of the request.
+     * @return node states data
+     * @throws SimulatorException when unable to find configuration file or process data.
+     */
+    public String getNodeStates(final Map<String, String> parameters) throws SimulatorException {
+        log_.info("Received getNodeStates api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+        nodeStatesApi_.setNodeStatesConfigFile(dataLoader_.getNodeStateFileLocation());
+        return parser_.toString(nodeStatesApi_.getNodeStates());
+    }
+
+    /**
+     * This method used to fetch node states data for a given location.
+     * @param parameters input details of the request.
+     * @return node states data for given location
+     * @throws SimulatorException when unable to find configuration file or process data.
+     */
+    public String getNodeStatesForLocation(final Map<String, String> parameters) throws SimulatorException {
+        log_.info("Received getNodeStatesForLocation api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+        nodeStatesApi_.setNodeStatesConfigFile(dataLoader_.getNodeStateFileLocation());
+        assert parameters != null;
+        String location = parameters.getOrDefault("sub_component",null);
+        if(location == null || location.isEmpty())
+            return parser_.toString(new PropertyMap());
+        return parser_.toString(nodeStatesApi_.getNodeStateForLocation(location));
+    }
+
+    /**
      * This method used to fetch boot images data.
      * @param parameters input details of the request.
      * @return boot images data
@@ -252,7 +282,7 @@ public class EventSimApp  extends  EventSim {
         assert parameters != null;
         String imageId = parameters.getOrDefault("sub_component",null);
         if(imageId == null || imageId.isEmpty())
-            parser_.toString(new PropertyArray());
+            return parser_.toString(new PropertyArray());
         return parser_.toString(bootImagesApi_.getBootImageForId(imageId));
     }
 
