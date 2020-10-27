@@ -92,7 +92,8 @@ class DataLoaderSpec extends Specification {
             "      \"hw-inv-discover-status-url\" : \"/url/discovery_status\",\n" +
             "      \"sensor-metadata\": \"/tmp/sensor.json\",\n" +
             "      \"ras-metadata\": \"/tmp/ras.json\",\n" +
-            "      \"jobs-metadata\" : \"/tmp/jobs.json\"\n" +
+            "      \"jobs-metadata\" : \"/tmp/jobs.json\",\n" +
+            "      \"node-state\" : \"/tmp/nodestate.json\"\n" +
             "  },\n" +
             "  \"events-simulator-config\" : {\n" +
             "    \"count\": 10,\n" +

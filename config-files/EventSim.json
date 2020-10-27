@@ -8,7 +8,8 @@
       "hw-inv-discover-status-url" : "/Inventory/DiscoveryStatus",
       "sensor-metadata": "/resources/ForeignSensorMetaData.json",
       "ras-metadata": "/resources/ForeignEventMetaData.json",
-      "jobs-metadata" : "/resources/ForeignJobsMetaData.json"
+      "jobs-metadata" : "/resources/ForeignJobsMetaData.json",
+      "node-state" : "/opt/ucs/etc/NodeState.json"
   },
   "events-simulator-config" : {
     "count": 10,

@@ -9,10 +9,7 @@ import com.intel.networking.sink.NetworkDataSink;
 import com.intel.networking.sink.NetworkDataSinkDelegate;
 import com.intel.networking.sink.NetworkDataSinkFactory;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -122,10 +119,12 @@ public class NetworkDataSinkBenchmark implements NetworkDataSink {
     private void processFile() throws IOException {
         log_.info("*** Processing the file '%s'...", rawDataFileName_);
         List<String> lines = new ArrayList<>();
-        try (FileReader reader = new FileReader(rawDataFileName_, StandardCharsets.UTF_8)) {
-            try (Scanner scanner = new Scanner(reader)) {
-                while(scanner.hasNext())
-                    lines.add(scanner.nextLine().trim());
+        try (InputStream stream = new FileInputStream(rawDataFileName_)) {
+            try (Reader reader = new InputStreamReader(stream)) {
+                try (Scanner scanner = new Scanner(reader)) {
+                    while (scanner.hasNext())
+                        lines.add(scanner.nextLine().trim());
+                }
             }
         }
         log_.info("*** Processed the file '%s'", rawDataFileName_);

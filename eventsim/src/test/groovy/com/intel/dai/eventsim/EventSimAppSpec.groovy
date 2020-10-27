@@ -162,6 +162,52 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsMap().containsKey("id")
         eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsMap().getString("id")
                 .equals("boot-image-id-0")
+        parameters.put("sub_component", "")
+        eventSimApp_.parser_.fromString(eventSimApp_.getBootImageForImageId(parameters)).getAsArray().size() == 0
+    }
+
+    def "fetch node state details"() {
+        Map<String, String> parameters = new HashMap<>()
+
+        eventSimApp_.dataLoader_.getNodeStateFileLocation() >> NODE_STATE_CONFIG
+        eventSimApp_.nodeStatesApi_ = new NodeState()
+
+        expect:
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStates(parameters)).getAsMap().containsKey("Components")
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStates(parameters)).getAsMap().getArray("Components")
+                .getMap(0).containsKey("ID")
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStates(parameters)).getAsMap().getArray("Components")
+                .getMap(0).getString("ID").equals("xname-0")
+    }
+
+    def "Read tmp file, fetch node state details"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("sub_component", "xname-0")
+
+        when:
+        File testConfig = createAndLoadDataToFile("test.json", file_data)
+        eventSimApp_.dataLoader_.getNodeStateFileLocation() >> testConfig.getAbsolutePath()
+        then:
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStates(parameters)).getAsMap().size() == result0
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().size() == result1
+        where:
+        file_data                                   | result0 |  result1
+        "{\"Components\": [{}]}"                    |   1     |     0
+        "{\"Components\": [{\"ID\": \"xname-0\"}]}" |   1     |     1
+    }
+
+    def "fetch node states details for a given location"() {
+        Map<String, String> parameters = new HashMap<>()
+        parameters.put("sub_component", "xname-0")
+
+        eventSimApp_.dataLoader_.getNodeStateFileLocation() >> NODE_STATE_CONFIG
+
+        expect:
+/*        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().containsKey("ID")
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().getString("ID")
+                .equals("xname-0")*/
+        parameters.put("sub_component", "")
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().size() == 0
     }
 
     def "Initiate inventory discovery and observe discovery status"() {
@@ -335,6 +381,7 @@ class EventSimAppSpec extends Specification {
     private EventSimApp eventSimApp_
     private final String BOOT_IMAGES_CONFIG = "/resources/test-config-files/TestBootImages.json"
     private final String BOOT_PARAMETERS_CONFIG = "/resources/test-config-files/TestBootParameters.json"
+    private final String NODE_STATE_CONFIG = "/resources/test-config-files/TestNodeState.json"
 
     private final String NETWORK_CONFIG = "{\n" +
             "  \"network\" : \"sse\",\n" +

@@ -149,6 +149,7 @@ class DataLoader {
         sensorMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[6]);
         rasMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[7]);
         jobsMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[8]);
+        nodeStateFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[9]);
     }
 
     /**
@@ -252,6 +253,7 @@ class DataLoader {
     List<String> getAllLocations() { return allLocations_ ; }
 
     public String getBootParamsFileLocation() { return bootParamsFileAbsolutePath_; }
+    public String getNodeStateFileLocation() { return nodeStateFileAbsolutePath_; }
     public String getBootImagesFileLocation() { return bootImagesFileAbsolutePath_; }
     public String getHwInventoryFileLocation() { return hwInventoryFileAbsolutePath_; }
     public String getHwInventoryFileLocationPath() { return hwInventoryFilePath_; }
@@ -272,6 +274,7 @@ class DataLoader {
     private PropertyMap networkConfiguration_;
 
     private String bootParamsFileAbsolutePath_;
+    private String nodeStateFileAbsolutePath_;
     private String bootImagesFileAbsolutePath_;
     private String hwInventoryFileAbsolutePath_;
     private String hwInventoryFilePath_;
@@ -288,7 +291,7 @@ class DataLoader {
     private final String voltdbServer_;
 
     private final String[] FOREIGN_API_CONFIG_KEYS = {"boot-parameters", "boot-images", "hw-inventory", "hw-inventory-path", "hw-inventory-query-path",
-            "hw-inv-discover-status-url", "sensor-metadata", "ras-metadata", "jobs-metadata"};
+            "hw-inv-discover-status-url", "sensor-metadata", "ras-metadata", "jobs-metadata", "node-state"};
     private final String[] FOREIGN_EVENTS_CONFIG_KEYS = {"count", "events-template-config", "time-delay-mus"};
     private final String[] NETWORK_CONFIG_KEYS = {"network"};
     private final String[] FOREIGN_SERVER_CONFIG = {"api-simulator-config", "events-simulator-config", "network-config"};
