@@ -475,6 +475,9 @@ class ViewCli(object):
             return hw_info_dict
 
         def pretty_format_inventory_info_dict_list(data_list):
+            if not data_list:
+                return ''
+
             pretty_formatted_str = '----------------------------------------------------------------------------\n'
             pretty_formatted_str += 'Details:\n'
             for data_row in data_list:
@@ -508,7 +511,7 @@ class ViewCli(object):
             else:
                 columns_order = ["lctn", "inventorytimestamp", "sernum"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-                data_to_display += '\n' + pretty_format_response(response) + '\n'
+                data_to_display += '\n' + pretty_format_response(response)
         else:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
