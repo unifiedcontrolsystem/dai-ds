@@ -7,6 +7,8 @@ import com.intel.logging.Logger
 import spock.lang.Specification
 
 class AdapterProvisionerNetworkBaseSpec extends Specification {
+    private static AdapterProvisionerApi adapterProvisionerApiMock_
+
     static class TestProvider extends AdapterProvisionerNetworkBase {
         TestProvider(Logger logger, DataStoreFactory factory, AdapterInformation info) {
             super(logger, factory, info, "./build/tmp/benchmarking.json", 1)
@@ -20,12 +22,17 @@ class AdapterProvisionerNetworkBaseSpec extends Specification {
                 return true
         }
 
+        @Override
+        AdapterProvisionerApi createAdapterProvisioner() {
+            return adapterProvisionerApiMock_
+        }
+
         boolean callSuper = false;
     }
 
     def configName_ = this.getClass().getSimpleName() + ".json"
     def configFile_ = new File("/tmp/" + configName_)
-    def underTest_;
+    def underTest_
     void setup() {
         configFile_.delete()
         configFile_.write(""" 
@@ -62,7 +69,12 @@ class AdapterProvisionerNetworkBaseSpec extends Specification {
     }
   },
   "providerConfigurations": {
-    "com.intel.dai.provisioners.TestTransformer": {}
+    "com.intel.dai.provisioners.TestTransformer": {},
+    "TestApi": {
+      "informWorkLoadManager": false,
+      "nodeStateInfoUrl" : "http:localhost:1234/api",
+      "nodeStateForLocationInfoUrl" : "http://localhost:1234/api/"
+    },
   },
   "subjectMap": {
     "telemetry": "EnvironmentalData",
@@ -73,7 +85,9 @@ class AdapterProvisionerNetworkBaseSpec extends Specification {
   }
 }
 """)
-        underTest_ = new TestProvider(Mock(Logger),Mock(DataStoreFactory),Mock(AdapterInformation))
+        adapterProvisionerApiMock_ = Mock(AdapterProvisionerApi)
+        underTest_ = new TestProvider(Mock(Logger), Mock(DataStoreFactory), Mock(AdapterInformation))
+        adapterProvisionerApiMock_.getClass().getCanonicalName() >> "TestApi"
     }
 
     void cleanup() {

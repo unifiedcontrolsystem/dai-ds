@@ -12,7 +12,6 @@ import com.intel.dai.dsapi.AdapterOperations;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.exceptions.ProviderException;
 import com.intel.logging.Logger;
 import com.intel.networking.sink.NetworkDataSink;

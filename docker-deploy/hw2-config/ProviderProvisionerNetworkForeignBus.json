@@ -40,11 +40,21 @@
     "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_boot_event",
       "informWorkLoadManager": false,
-      "bootParametersInfoUrl": "http://api-gw-service-nmn.local:8080/apis/bss/boot/v1/bootparameters",
-      "bootParameterForLocationInfoUrl": "http://api-gw-service-nmn.local:8080/apis/bss/boot/v1/bootparameters?name=",
-      "bootImageInfoUrl" : "http://api-gw-service-nmn.local:8080/apis/ims/images",
-      "bootImageForImageIdInfoUrl" : "http://api-gw-service-nmn.local:8080/apis/ims/images/",
+      "bootParametersInfoUrl": "http://api-gw-service-nmn.local/apis/bss/boot/v1/bootparameters",
+      "bootParameterForLocationInfoUrl": "http://api-gw-service-nmn.local/apis/bss/boot/v1/bootparameters?name=",
+      "bootImageInfoUrl" : "http://api-gw-service-nmn.local/apis/ims/images",
+      "bootImageForImageIdInfoUrl" : "http://api-gw-service-nmn.local/apis/ims/images/",
       "publish": true
+    },
+    "com.intel.dai.provisioners.AdapterProvisionerApi": {
+      "informWorkLoadManager": false,
+      "nodeStateInfoUrl" : "http://api-gw-service-nmn.local/apis/smd/hsm/v1/State/Components",
+      "nodeStateForLocationInfoUrl" : "http://api-gw-service-nmn.local/apis/smd/hsm/v1/State/Components/",
+      "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+      "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+      "clientId": "admin-client",
+      "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+      "realm": "shasta"
     }
   },
 
