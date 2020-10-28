@@ -990,7 +990,7 @@ class ViewTest(TestCase):
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
 
-        self.assertIn('inventoryinfo', captured_output.getvalue())
+        self.assertIn('SERNUM', captured_output.getvalue())
         captured_output.close()
 
     def test__view_inventory_info_execute_positive_json(self):
