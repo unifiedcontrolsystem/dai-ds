@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'NRE-MASTER-CD' }
+    agent { label 'NRE-DAI-WATCHER' }   // since we are polling the repo, there must be only 1 watcher agent per watched repo
 
     stages {
         stage('Preparation') {
