@@ -2164,7 +2164,14 @@ task makeAllArtifacts {
             "makeDockerInstallEventSimConfig", "makeDockerInstallTarball3rdParty", "makeDockerInstallTarballDai",
             "makeDeveloperDockerTarball"
 }
-rootProject.build.finalizedBy(makeAllArtifacts)
+
+task('pytest', type: Exec) {
+    workingDir 'cli'
+    commandLine 'pytest', '.',
+            '--cov-config=.coveragerc --cov=cli --cov-report term-missing --cov-report xml:results.xml --cov-report html:coverage-report.xml --fulltrace'
+}
+
+rootProject.build.finalizedBy(pytest, makeAllArtifacts)
 
 task dockerBuild(type: Exec) {
     group = 'build'
