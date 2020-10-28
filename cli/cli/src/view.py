@@ -481,9 +481,9 @@ class ViewCli(object):
             pretty_formatted_str = '----------------------------------------------------------------------------\n'
             pretty_formatted_str += 'Details:\n'
             for data_row in data_list:
-                pretty_formatted_str += '----------------------------------------------------------------------------\n'
+                pretty_formatted_str += '============================================================================\n'
                 inventory_info_dict = json.loads(data_row[3])   # 'inventory info'
-                pretty_formatted_str += data_row[4] + ' at ' + data_row[0] + ' on ' + data_row[2] + ':\n'     # sernum, location, inventory timestamp
+                pretty_formatted_str += data_row[4] + ' in ' + data_row[0] + ' at ' + data_row[2] + ':\n'     # sernum, location, inventory timestamp
                 pretty_formatted_str += '----------------------------------------------------------------------------\n'
                 pretty_formatted_str +=\
                     pretty_format_json_dict(fix_up_hw_info_dict(inventory_info_dict['HWInfo'])) + '\n'

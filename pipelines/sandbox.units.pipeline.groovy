@@ -91,7 +91,6 @@ pipeline {
                 }
                 stage('Quick Unit Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options { catchError(message: "Quick Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         // Quick build will not produce artifacts for components not tested
                         // So, functional tests cannot use these artifacts
@@ -101,31 +100,31 @@ pipeline {
                 }
                 stage('Unit') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options { catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {
                             utilities.cleanWithGit()
-                            utilities.invokeGradle("clean build")
+                            utilities.invokeGradleNoRetries("clean build")
                         }
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options { catchError(message: "Reports failed", buildResult: 'SUCCESS') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        script { utilities.generateJunitReport('**/test-results/test/*.xml') }
+                        junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
+                                testResults: '**/test-results/test/*.xml'
                     }
                 }
                 stage('Archive') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
-                        // Archive zips for total coverage report generation later
+                        // Archive zips for total coverage reports generation later
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
 
-                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning functional machines
+                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning functional-test machines
                         sh 'cp data/db/*.sql build/distributions/'  // for database debugging
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.s*'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
