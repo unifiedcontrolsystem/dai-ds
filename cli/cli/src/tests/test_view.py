@@ -930,61 +930,81 @@ class ViewTest(TestCase):
         self.assertIn('fruid', captured_output.getvalue())
         captured_output.close()
 
+    def inventory_rest_result_str(self):
+        result_dict = {
+            "schema": [
+                {
+                    "unit": "string",
+                    "data": "lctn",
+                    "heading": "lctn"
+                },
+                {
+                    "unit": "string",
+                    "data": "dbupdatedtimestamp",
+                    "heading": "dbupdatedtimestamp"
+                },
+                {
+                    "unit": "string",
+                    "data": "inventorytimestamp",
+                    "heading": "inventorytimestamp"
+                },
+                {
+                    "unit": "string",
+                    "data": "inventoryinfo",
+                    "heading": "inventoryinfo"
+                },
+                {
+                    "unit": "string",
+                    "data": "sernum",
+                    "heading": "sernum"
+                }
+            ],
+            "result-data-lines": 1,
+            "result-status-code": 0,
+            "data": [
+                [
+                    "X0-CH6-CN2",
+                    "2020-10-28 15:41:14.617",
+                    "2020-08-01 15:44:39.346",
+                    "{\"HWInfo\": {\"fru/CPU0/loc\": {\"value\": \"X0-CH6-CN2_CPU0\"}}}",
+                    "Node.WO105483L01S010"
+                ]
+            ],
+            "result-data-columns": 5
+        }
+
+        return json.dumps(result_dict)
+
     def test_view_inventory_info_execute_positive(self):
+        result_str = self.inventory_rest_result_str()
+
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'x0c0s24b0n0']
+        sys.argv = ['ucs', 'view', 'inventory', 'X0-CH6-CN2']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\","
-                                                         "\"data\":\"dbupdatedtimestamp\","
-                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"inventorytimestamp\","
-                                                         "\"heading\":\"inventorytimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"sernum\", "
-                                                         "\"heading\":\"sernum\"},{\"unit\":\"string\","
-                                                         "\"data\":\"inventoryinfo\",\"heading\":\"inventoryinfo\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"frusubtype\","
-                                                         "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
-                                                         "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
-                                                         "\"2020-02-06 16:12:44.0\",0,\"FRUIDforx0c0s24b0n0d4\","
-                                                         "\"Memory\",\"Memory\",\"Memory\"]],\"result-data-columns\":7}"
-                                })
+                    json.dumps({"Status": "F", "Result": result_str})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('INVENTORYINFO', captured_output.getvalue())
+
+        self.assertIn('inventoryinfo', captured_output.getvalue())
         captured_output.close()
 
     def test__view_inventory_info_execute_positive_json(self):
+        result_str = self.inventory_rest_result_str()
+
         captured_output = io.StringIO()
         sys.stdout = captured_output
         parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'x0c0s24b0n0', '--format', 'json']
+        sys.argv = ['ucs', 'view', 'inventory', 'X0-CH6-CN2', '--format', 'json']
         with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\","
-                                                         "\"data\":\"dbupdatedtimestamp\","
-                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"inventorytimestamp\","
-                                                         "\"heading\":\"inventorytimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"sernum\", "
-                                                         "\"heading\":\"sernum\"},{\"unit\":\"string\","
-                                                         "\"data\":\"inventoryinfo\",\"heading\":\"inventoryinfo\"},"
-                                                         "{\"unit\":\"string\",\"data\":\"frusubtype\","
-                                                         "\"heading\":\"frusubtype\"}],\"result-data-lines\":1,"
-                                                         "\"result-status-code\":0,\"data\":[[\"x0c0s24b0n0d4\","
-                                                         "\"2020-02-06 16:12:44.0\",0,\"FRUIDforx0c0s24b0n0d4\","
-                                                         "\"Memory\",\"Memory\",\"Memory\"]],\"result-data-columns\":7}"
-                                })
+                    json.dumps({"Status": "F", "Result": result_str})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('inventoryinfo', captured_output.getvalue())

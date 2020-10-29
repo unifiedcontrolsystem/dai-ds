@@ -457,6 +457,42 @@ class ViewCli(object):
         return CommandResult(response_code, data_to_display)
 
     def _view_inventory_execute(self, args):
+        def pretty_format_json_dict(json_dict):
+            return json.dumps(json_dict, sort_keys=True,
+                             indent=4, separators=(',', ': '))
+
+        def decodeJsonElementStr(str):
+            try:
+                return json.loads(str)
+            except ValueError:
+                return str
+            except TypeError:
+                return str
+
+        def fix_up_hw_info_dict(hw_info_dict):
+            for key in hw_info_dict.keys():
+                hw_info_dict[key]['value'] = decodeJsonElementStr(hw_info_dict[key]['value'])
+            return hw_info_dict
+
+        def pretty_format_inventory_info_dict_list(data_list):
+            if not data_list:
+                return ''
+
+            pretty_formatted_str = '----------------------------------------------------------------------------\n'
+            pretty_formatted_str += 'Details:\n'
+            for data_row in data_list:
+                pretty_formatted_str += '============================================================================\n'
+                inventory_info_dict = json.loads(data_row[3])   # 'inventory info'
+                pretty_formatted_str += data_row[4] + ' in ' + data_row[0] + ' at ' + data_row[2] + ':\n'     # sernum, location, inventory timestamp
+                pretty_formatted_str += '----------------------------------------------------------------------------\n'
+                pretty_formatted_str +=\
+                    pretty_format_json_dict(fix_up_hw_info_dict(inventory_info_dict['HWInfo'])) + '\n'
+            return pretty_formatted_str
+
+        def pretty_format_response(response_str):
+            response_dict = json.loads(response_str)
+            return pretty_format_inventory_info_dict_list(response_dict['data'])
+
         client = HttpClient()
         if not args.history:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
@@ -473,8 +509,9 @@ class ViewCli(object):
             if display_format == 'json':
                 data_to_display = json_display.display_raw_json()
             else:
-                columns_order = ["lctn", "inventorytimestamp", "sernum", "inventoryinfo"]
+                columns_order = ["lctn", "inventorytimestamp", "sernum"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+                data_to_display += '\n' + pretty_format_response(response)
         else:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user

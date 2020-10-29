@@ -38,7 +38,6 @@ pipeline {
                 }
                 stage('Quick Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options { catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {utilities.invokeGradleNoRetries("jar")}
                         teardownTestbed()
@@ -48,22 +47,22 @@ pipeline {
                 }
                 stage('Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options { catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {
                             utilities.cleanWithGit()
-                            utilities.invokeGradle("clean jar")
+                            utilities.invokeGradleNoRetries("clean jar")
                         }
                         teardownTestbed()
                         setupTestbed()
-                        script { utilities.invokeGradle("integrationTest") }
+                        script { utilities.invokeGradleNoRetries("integrationTest") }
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                    options { catchError(message: "Reports failed", buildResult: 'SUCCESS') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        script { utilities.generateJunitReport('**/test-results/integrationTest/*.xml') }
+                        junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
+                                testResults: '**/test-results/integrationTest/*.xml'
                     }
                 }
                 stage('Archive') {
