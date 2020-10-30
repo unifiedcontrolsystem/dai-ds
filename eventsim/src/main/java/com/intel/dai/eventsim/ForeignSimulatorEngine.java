@@ -491,7 +491,7 @@ class ForeignSimulatorEngine {
     private String output_;
     private String zone_;
 
-    private final String TIMESTAMP_PATH = "";
+    private final String TIMESTAMP_PATH = "TIMESTAMP_PATH";
 
     private static final String DEFAULT_COUNT = "0";
     private static final String STREAM_ID = "STREAM_ID";
