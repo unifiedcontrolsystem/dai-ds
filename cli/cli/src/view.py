@@ -497,7 +497,7 @@ class ViewCli(object):
                 pretty_formatted_str += location + ' contains ' + serial_number + ' at ' + inventory_timestamp + ':\n'
                 pretty_formatted_str += \
                     pretty_format_json_dict_str(fixed_up_hw_info_dict) + '\n'
-            pretty_formatted_str += '----------------------------------------------------------------------------\n'
+                pretty_formatted_str += '----------------------------------------------------------------------------\n'
             return pretty_formatted_str
 
         def pretty_format_response_str(response_str, component=None):
