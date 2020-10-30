@@ -45,7 +45,7 @@ public class HWInvLoc {
 
         JsonObject entries = new JsonObject();
 
-        String slotName = Type.equals("Node") ? "fru/NODE/loc"
+        String slotName = Type.equals("Node") ? "fru/NODE"
                 : String.format("fru/%s%d", translation.get(Type), Ordinal);
 
         String locField = String.format("%s/loc", slotName);
