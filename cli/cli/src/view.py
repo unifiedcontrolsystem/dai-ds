@@ -457,11 +457,11 @@ class ViewCli(object):
         return CommandResult(response_code, data_to_display)
 
     def _view_inventory_execute(self, args):
-        def pretty_format_json_dict(json_dict):
+        def pretty_format_json_dict_str(json_dict):
             return json.dumps(json_dict, sort_keys=True,
-                             indent=4, separators=(',', ': '))
+                              indent=4, separators=(',', ': '))
 
-        def decodeJsonElementStr(str):
+        def decode_json_element_str(str):
             try:
                 return json.loads(str)
             except ValueError:
@@ -471,31 +471,73 @@ class ViewCli(object):
 
         def fix_up_hw_info_dict(hw_info_dict):
             for key in hw_info_dict.keys():
-                hw_info_dict[key]['value'] = decodeJsonElementStr(hw_info_dict[key]['value'])
+                hw_info_dict[key]['value'] = decode_json_element_str(hw_info_dict[key]['value'])
             return hw_info_dict
 
-        def pretty_format_inventory_info_dict_list(data_list):
-            if not data_list:
+        def pretty_format_inventory_info_dict_list_str(node_location_hist_list, component):
+            if not node_location_hist_list:
                 return ''
 
-            pretty_formatted_str = '----------------------------------------------------------------------------\n'
+            pretty_formatted_str = '============================================================================\n'
             pretty_formatted_str += 'Details:\n'
-            for data_row in data_list:
-                pretty_formatted_str += '============================================================================\n'
-                inventory_info_dict = json.loads(data_row[3])   # 'inventory info'
-                pretty_formatted_str += data_row[4] + ' in ' + data_row[0] + ' at ' + data_row[2] + ':\n'     # sernum, location, inventory timestamp
+            pretty_formatted_str += '============================================================================\n'
+            for node_location_hist_entry in node_location_hist_list:
+                location = node_location_hist_entry[0]
+                serial_number = node_location_hist_entry[4]
+                inventory_timestamp = get_inventory_timestamp(node_location_hist_entry)
+
+                inventory_info_dict = json.loads(node_location_hist_entry[3])
+                hw_info_dict = inventory_info_dict['HWInfo']
+                fixed_up_hw_info_dict = fix_up_hw_info_dict(hw_info_dict)
+
+                if component is not None:
+                    fixed_up_hw_info_dict = extract_component_dict(fixed_up_hw_info_dict, component)
+                    location = get_component_loc(hw_info_dict, component)
+                    serial_number = get_component_fru_id(hw_info_dict, component)
+                pretty_formatted_str += location + ' contains ' + serial_number + ' at ' + inventory_timestamp + ':\n'
+                pretty_formatted_str += \
+                    pretty_format_json_dict_str(fixed_up_hw_info_dict) + '\n'
                 pretty_formatted_str += '----------------------------------------------------------------------------\n'
-                pretty_formatted_str +=\
-                    pretty_format_json_dict(fix_up_hw_info_dict(inventory_info_dict['HWInfo'])) + '\n'
             return pretty_formatted_str
 
-        def pretty_format_response(response_str):
+        def pretty_format_response_str(response_str, component=None):
             response_dict = json.loads(response_str)
-            return pretty_format_inventory_info_dict_list(response_dict['data'])
+            node_location_hist_list = response_dict['data']
+            return pretty_format_inventory_info_dict_list_str(node_location_hist_list, component)
+
+        def extract_component_dict(hw_info_dict, component):
+            return {
+                f"fru/{component}/loc": get_component_loc(hw_info_dict, component),
+                f"fru/{component}/loc_info": component_loc_info(hw_info_dict, component),
+                f"fru/{component}/fru_id": get_component_fru_id(hw_info_dict, component),
+                f"fru/{component}/fru_info": component_fru_info(hw_info_dict, component),
+            }
+
+        def get_component_fru_id(hw_info_dict, component):
+            return hw_info_dict[f"fru/{component}/fru_id"]['value']
+
+        def get_component_loc(hw_info_dict, component):
+            return hw_info_dict[f"fru/{component}/loc"]['value']
+
+        def component_loc_info(hw_info_dict, component):
+            return hw_info_dict[f"fru/{component}/loc_info"]['value']
+
+        def component_fru_info(hw_info_dict, component):
+            return hw_info_dict[f"fru/{component}/fru_info"]['value']
+
+        def get_inventory_timestamp(node_location_hist_entry):
+            return node_location_hist_entry[2]
 
         client = HttpClient()
         if not args.history:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+            location_parts = lctn.split('_')  # this may change since it looks really weird
+
+            component_lctn = None
+            if len(location_parts) == 2:
+                lctn = location_parts[0]
+                component_lctn = location_parts[1]
+
             user = 'user=' + self.user
             sernum = ''
             if args.sernum is not None:
@@ -511,7 +553,7 @@ class ViewCli(object):
             else:
                 columns_order = ["lctn", "inventorytimestamp", "sernum"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-                data_to_display += '\n' + pretty_format_response(response)
+                data_to_display += '\n' + pretty_format_response_str(response, component_lctn)
         else:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
