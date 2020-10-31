@@ -457,24 +457,24 @@ class ViewCli(object):
         return CommandResult(response_code, data_to_display)
 
     def _view_inventory_execute(self, args):
-        def pretty_format_json_dict_str(json_dict):
+        def convert_json_dict_to_pretty_formatted_str(json_dict):
             return json.dumps(json_dict, sort_keys=True,
                               indent=4, separators=(',', ': '))
 
-        def decode_json_element_str(str):
+        def convert_json_str_to_json(json_str):
             try:
-                return json.loads(str)
+                return json.loads(json_str)
             except ValueError:
-                return str
+                return json_str
             except TypeError:
-                return str
+                return json_str
 
-        def fix_up_hw_info_dict(hw_info_dict):
+        def replace_value_json_str_with_json(hw_info_dict):
             for key in hw_info_dict.keys():
-                hw_info_dict[key]['value'] = decode_json_element_str(hw_info_dict[key]['value'])
+                hw_info_dict[key]['value'] = convert_json_str_to_json(hw_info_dict[key]['value'])
             return hw_info_dict
 
-        def pretty_format_inventory_info_dict_list_str(node_location_hist_list, component):
+        def convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component):
             if not node_location_hist_list:
                 return ''
 
@@ -488,29 +488,29 @@ class ViewCli(object):
 
                 inventory_info_dict = json.loads(node_location_hist_entry[3])
                 hw_info_dict = inventory_info_dict['HWInfo']
-                fixed_up_hw_info_dict = fix_up_hw_info_dict(hw_info_dict)
+                fixed_up_hw_info_dict = replace_value_json_str_with_json(hw_info_dict)
 
                 if component is not None:
-                    fixed_up_hw_info_dict = extract_component_dict(fixed_up_hw_info_dict, component)
+                    fixed_up_hw_info_dict = extract_component_location_dict(fixed_up_hw_info_dict, component)
                     location = get_component_loc(hw_info_dict, component)
                     serial_number = get_component_fru_id(hw_info_dict, component)
                 pretty_formatted_str += location + ' contains ' + serial_number + ' at ' + inventory_timestamp + ':\n'
                 pretty_formatted_str += \
-                    pretty_format_json_dict_str(fixed_up_hw_info_dict) + '\n'
+                    convert_json_dict_to_pretty_formatted_str(fixed_up_hw_info_dict) + '\n'
                 pretty_formatted_str += '----------------------------------------------------------------------------\n'
             return pretty_formatted_str
 
-        def pretty_format_response_str(response_str, component=None):
+        def pretty_format_response(response_str, component=None):
             response_dict = json.loads(response_str)
             node_location_hist_list = response_dict['data']
-            return pretty_format_inventory_info_dict_list_str(node_location_hist_list, component)
+            return convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component)
 
-        def extract_component_dict(hw_info_dict, component):
+        def extract_component_location_dict(hw_info_dict, component):
             return {
                 f"fru/{component}/loc": get_component_loc(hw_info_dict, component),
-                f"fru/{component}/loc_info": component_loc_info(hw_info_dict, component),
+                f"fru/{component}/loc_info": get_component_loc_info(hw_info_dict, component),
                 f"fru/{component}/fru_id": get_component_fru_id(hw_info_dict, component),
-                f"fru/{component}/fru_info": component_fru_info(hw_info_dict, component),
+                f"fru/{component}/fru_info": get_component_fru_info(hw_info_dict, component),
             }
 
         def get_component_fru_id(hw_info_dict, component):
@@ -519,10 +519,10 @@ class ViewCli(object):
         def get_component_loc(hw_info_dict, component):
             return hw_info_dict[f"fru/{component}/loc"]['value']
 
-        def component_loc_info(hw_info_dict, component):
+        def get_component_loc_info(hw_info_dict, component):
             return hw_info_dict[f"fru/{component}/loc_info"]['value']
 
-        def component_fru_info(hw_info_dict, component):
+        def get_component_fru_info(hw_info_dict, component):
             return hw_info_dict[f"fru/{component}/fru_info"]['value']
 
         def get_inventory_timestamp(node_location_hist_entry):
@@ -553,7 +553,7 @@ class ViewCli(object):
             else:
                 columns_order = ["lctn", "inventorytimestamp", "sernum"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-                data_to_display += '\n' + pretty_format_response_str(response, component_lctn)
+                data_to_display += '\n' + pretty_format_response(response, component_lctn)
         else:
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
             user = 'user=' + self.user
