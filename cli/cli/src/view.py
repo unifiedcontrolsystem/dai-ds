@@ -492,8 +492,8 @@ class ViewCli(object):
 
                 if component is not None:
                     fixed_up_hw_info_dict = extract_component_location_dict(fixed_up_hw_info_dict, component)
-                    location = get_component_loc(hw_info_dict, component)
-                    serial_number = get_component_fru_id(hw_info_dict, component)
+                    location = get_component_value(hw_info_dict, component, 'loc')
+                    serial_number = get_component_value(hw_info_dict, component, 'fru_id')
                 pretty_formatted_str += location + ' contains ' + serial_number + ' at ' + inventory_timestamp + ':\n'
                 pretty_formatted_str += \
                     convert_json_dict_to_pretty_formatted_str(fixed_up_hw_info_dict) + '\n'
@@ -506,24 +506,18 @@ class ViewCli(object):
             return convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component)
 
         def extract_component_location_dict(hw_info_dict, component):
-            return {
-                f"fru/{component}/loc": get_component_loc(hw_info_dict, component),
-                f"fru/{component}/loc_info": get_component_loc_info(hw_info_dict, component),
-                f"fru/{component}/fru_id": get_component_fru_id(hw_info_dict, component),
-                f"fru/{component}/fru_info": get_component_fru_info(hw_info_dict, component),
-            }
+            component_location_dict = {}
+            for attribute in ['loc', 'loc_info', 'fru_id', 'fru_info']:
+                component_location_dict[f"fru/{component}/{attribute}"] = get_component_value(
+                    hw_info_dict, component, attribute)
 
-        def get_component_fru_id(hw_info_dict, component):
-            return hw_info_dict[f"fru/{component}/fru_id"]['value']
+            return component_location_dict
 
-        def get_component_loc(hw_info_dict, component):
-            return hw_info_dict[f"fru/{component}/loc"]['value']
-
-        def get_component_loc_info(hw_info_dict, component):
-            return hw_info_dict[f"fru/{component}/loc_info"]['value']
-
-        def get_component_fru_info(hw_info_dict, component):
-            return hw_info_dict[f"fru/{component}/fru_info"]['value']
+        def get_component_value(hw_info_dict, component, attribute):
+            try:
+                return hw_info_dict[f"fru/{component}/{attribute}"]['value']
+            except KeyError as e:
+                return f"KeyError: {str(e)}"
 
         def get_inventory_timestamp(node_location_hist_entry):
             return node_location_hist_entry[2]
