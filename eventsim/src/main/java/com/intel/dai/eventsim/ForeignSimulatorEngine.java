@@ -57,10 +57,8 @@ class ForeignSimulatorEngine {
                 parameters.put("type", BOOT_STATES.on.toString());
                 events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
                 parameters.put("type", BOOT_STATES.ready.toString());
-                events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
             }
-            else
-                events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+            events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
 
             PropertyArray publishEvents = new PropertyArray();
             publishEvents.add(events);
@@ -182,6 +180,7 @@ class ForeignSimulatorEngine {
             ZonedDateTime startTime = ZonedDateTime.now(ZoneId.systemDefault());
             log_.info("Start Time : " + startTime.toString());
             PropertyArray batchInfo = batch.getAsArray();
+            PropertyArray batchOutput = new PropertyArray();
             long publishedMessages = 0;
             for (int i = 0; i < batchInfo.size(); i++) {
                 PropertyArray eventsInfo = batchInfo.getArray(i);
@@ -192,6 +191,7 @@ class ForeignSimulatorEngine {
                     PropertyMap event = eventInfo.getMap(STREAM_MESSAGE);
                     publishedEvents_ += jsonPath_.setTime(timestampJPath, event.getAsMap(), zone);
                     network_.send(streamId, jsonParser_.toString(event));
+                    batchOutput.add(event);
                     if (!burstMode)
                         delayMicroSecond(timeDelayMus);
                 }
@@ -204,7 +204,7 @@ class ForeignSimulatorEngine {
             log_.info("Published messages =  " + publishedMessages);
             log_.debug("Total Time to publish " + publishedEvents_ + " events :" + (Duration.between(startTime, endTime).toMillis()) + " milli-seconds");
             if(output != null) {
-                LoadFileLocation.writeFile(batchInfo, output, true);
+                LoadFileLocation.writeFile(batchOutput, output, true);
             }
         } catch (RESTClientException | IOException e) {
             throw new SimulatorException(e.getMessage());
@@ -384,9 +384,9 @@ class ForeignSimulatorEngine {
         STREAM_DATA.put(TIMESTAMP_PATH, "");
 
         updateJpathFieldFilters_.clear();
-        String updateFieldJpaths[] = parameters.getOrDefault("update-field-jpath", "").split(",");
-        String updateFieldMetadata[] = parameters.getOrDefault("update-field-metadata", "").split(",");
-        String updateFieldMetadataFilters[] = parameters.getOrDefault("update-field-metadata-filter", "").split(",");
+        String[] updateFieldJpaths = parameters.getOrDefault("update-field-jpath", "").split(",");
+        String[] updateFieldMetadata = parameters.getOrDefault("update-field-metadata", "").split(",");
+        String[] updateFieldMetadataFilters = parameters.getOrDefault("update-field-metadata-filter", "").split(",");
 
         for(int index = 0; index < updateFieldJpaths.length && index < updateFieldMetadataFilters.length; index++) {
             PropertyMap updateJpathFieldFilter = new PropertyMap();
@@ -402,8 +402,8 @@ class ForeignSimulatorEngine {
 
 
         templateFieldFilters_.clear();
-        String templateFieldJpaths[] = parameters.getOrDefault("template-field-jpath", "").split(",");
-        String templateFieldFilters[] = parameters.getOrDefault("template-field-filter", "").split(",");
+        String[] templateFieldJpaths = parameters.getOrDefault("template-field-jpath", "").split(",");
+        String[] templateFieldFilters = parameters.getOrDefault("template-field-filter", "").split(",");
 
         for(int index = 0; index < templateFieldJpaths.length && index < templateFieldFilters.length; index++) {
             PropertyMap templateField = new PropertyMap();
@@ -427,7 +427,7 @@ class ForeignSimulatorEngine {
      */
     private void delayMicroSecond(final long delayTimeMus) {
         long waitUntil = System.nanoTime() + (delayTimeMus * 1000);
-        while(waitUntil > System.nanoTime()) {;}
+        while(waitUntil > System.nanoTime());
     }
 
     /**
@@ -468,9 +468,9 @@ class ForeignSimulatorEngine {
             publishEvents(events, burst_, timeDelay_, output_, zone_);
     }
 
-    private Map<String, String> defaults = new HashMap<>();
-    private PropertyArray updateJpathFieldFilters_ = new PropertyArray();
-    private PropertyArray templateFieldFilters_ = new PropertyArray();
+    private final Map<String, String> defaults = new HashMap<>();
+    private final PropertyArray updateJpathFieldFilters_ = new PropertyArray();
+    private final PropertyArray templateFieldFilters_ = new PropertyArray();
 
     private final DataLoader dataLoaderEngine_;
     private final ForeignFilter filter_;
@@ -498,7 +498,7 @@ class ForeignSimulatorEngine {
     private static final String STREAM_MESSAGE = "STREAM_MESSAGE";
     private static final String MISSING_KEY = "Given key/data is null, key = ";
 
-    private PropertyMap STREAM_DATA = new PropertyMap();
+    private final PropertyMap STREAM_DATA = new PropertyMap();
 
     private enum EVENT_TYPE {
         RAS,
