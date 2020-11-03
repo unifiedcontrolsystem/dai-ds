@@ -13,5 +13,6 @@ public enum DataType {
     RasEvent,
     StateChangeEvent,
     InventoryChangeEvent,
+    InitialNodeStateData,
     LogData
 }

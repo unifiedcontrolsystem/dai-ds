@@ -11,6 +11,7 @@ import com.intel.dai.network_listener.NetworkListenerConfig;
 import com.intel.dai.network_listener.NetworkListenerCore;
 import com.intel.logging.Logger;
 import com.intel.perflogging.BenchmarkHelper;
+import com.intel.properties.PropertyMap;
 import com.intel.xdg.XdgConfigFile;
 
 import java.io.FileNotFoundException;
@@ -42,12 +43,21 @@ abstract class AdapterProvisionerNetworkBase {
         return adapterCore.run() == 0;
     }
 
+    protected AdapterProvisionerApi createAdapterProvisioner() {
+        return new AdapterProvisionerApi(factory_, adapter_, log_);
+    }
+
     boolean entryPoint(InputStream configStream) throws IOException, ConfigIOParseException {
-        NetworkListenerConfig config = new NetworkListenerConfig(adapter_, log_);
-        config.loadFromStream(configStream);
-        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config, factory_, benchmarking_);
+        NetworkListenerConfig config_ = new NetworkListenerConfig(adapter_, log_);
+        config_.loadFromStream(configStream);
+        adapterProvisionerApi = createAdapterProvisioner();
+        PropertyMap apiConfig = config_.getProviderConfigurationFromClassName(adapterProvisionerApi.getClass().getCanonicalName());
+        adapterProvisionerApi.initialise(apiConfig);
+        NetworkListenerCore adapterCore = new NetworkListenerCore(log_, config_, factory_, benchmarking_);
         return execute(adapterCore);
     }
+
+    private AdapterProvisionerApi adapterProvisionerApi;
 
     private final AdapterInformation adapter_;
     private final Logger log_;

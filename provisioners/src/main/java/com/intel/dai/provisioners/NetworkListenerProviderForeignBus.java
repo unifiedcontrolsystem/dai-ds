@@ -248,10 +248,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     }
 
     protected RESTClient createClient() throws RESTClientException { // protected for test mocking.
-        RESTClient client = RESTClientFactory.getInstance("apache", log_);
-        if (client == null)
-            throw new RESTClientException("Failed to get the REST client implementation");
-        return client;
+        return RESTClientFactory.getInstance("apache", log_);
     }
 
     private void createTokenProvider() {
@@ -337,22 +334,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private PropertyDocument sendForeignApiRequest(String url, String argument) {
         String requestedUrl = "";
         try {
-
-            if(client_ == null) {
-                client_ = createClient();
-                createTokenProvider();
-            }
-
+            checkAndCreateClient();
             URI apiReqURI = makeUri(url, argument);
-            requestedUrl = apiReqURI.toURL().toString();
-            log_.info("URL= %s", requestedUrl);
-            BlockingResult result = client_.getRESTRequestBlocking(apiReqURI);
-
-            if(result.code != 200) {
-                throw new RESTClientException("RESTClient resulted in HTTP code: " + result.code +
-                        ":" + result.responseDocument);
-            }
-            return parser_.fromString(result.responseDocument);
+            return sendForeignAPIRequest(apiReqURI);
 
         } catch(RESTClientException | ConfigIOParseException | MalformedURLException | URISyntaxException e) {
             log_.exception(e);
@@ -364,28 +348,36 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private PropertyDocument sendForeignApiRequest(String url) {
         String requestedUrl = "";
         try {
-
-            if(client_ == null) {
-                client_ = createClient();
-                createTokenProvider();
-            }
-
+            checkAndCreateClient();
             URI apiReqURI = makeUri(url);
-            requestedUrl = apiReqURI.toURL().toString();
-            log_.info("URL= %s", requestedUrl);
-            BlockingResult result = client_.getRESTRequestBlocking(apiReqURI);
-
-            if(result.code != 200) {
-                throw new RESTClientException("RESTClient resulted in HTTP code: " + result.code +
-                        ":" + result.responseDocument);
-            }
-            return parser_.fromString(result.responseDocument);
+            return sendForeignAPIRequest(apiReqURI);
 
         } catch(RESTClientException | ConfigIOParseException | MalformedURLException | URISyntaxException e) {
             log_.exception(e);
             actions_.logFailedToUpdateBootImageInfo(String.format("Full URL=%s", requestedUrl));
         }
         return null;
+    }
+
+    private PropertyDocument sendForeignAPIRequest(URI apiReqURI) throws MalformedURLException, RESTClientException, ConfigIOParseException {
+        String requestedUrl = apiReqURI.toURL().toString();
+        log_.info("URL= %s", requestedUrl);
+        BlockingResult result = client_.getRESTRequestBlocking(apiReqURI);
+
+        if(result.code != 200) {
+            throw new RESTClientException("RESTClient resulted in HTTP code: " + result.code +
+                    ":" + result.responseDocument);
+        }
+        return parser_.fromString(result.responseDocument);
+    }
+
+    private void checkAndCreateClient() throws RESTClientException {
+        if(client_ == null) {
+            client_ = createClient();
+            if (client_ == null)
+                throw new RESTClientException("Failed to get the REST client implementation");
+            createTokenProvider();
+        }
     }
 
     private String fetchBootImageId(PropertyMap bootParamsData) {
@@ -456,7 +448,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         put("On", BootState.NODE_BOOTING);
     }};
 
-    private Map<String, String> bootImageInfo_ = new HashMap<String, String>() {{
+    private final Map<String, String> bootImageInfo_ = new HashMap<String, String>() {{
                 put("id", "");
                 put("description", "");
                 put("bootimagefile", "");
@@ -468,7 +460,6 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 put("kernelargs", "");
                 put("files", "");
             }};
-
 
     private final static String ORIG_FOREIGN_LOCATION_KEY = "foreignLocation";
     private TokenAuthentication tokenProvider_ = null;
