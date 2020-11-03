@@ -435,6 +435,7 @@
     "x3000c0s1b0n0g1k3": "R0-MGT0-DRIVE3",
     "x3000c0s1b0n0g1k2": "R0-MGT0-DRIVE2",
     "x3000c0s1b0n0g1k1": "R0-MGT0-DRIVE1",
-    "x3000c0s1b0n0g1k0": "R0-MGT0-DRIVE0"
+    "x3000c0s1b0n0g1k0": "R0-MGT0-DRIVE0",
+    "xname-0": "test-location-0"
   }
 }

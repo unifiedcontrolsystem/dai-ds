@@ -40,6 +40,11 @@
       "bootImageInfoUrl" : "https://api-gw-service-nmn.local/apis/ims/images",
       "bootImageForImageIdInfoUrl" : "https://api-gw-service-nmn.local/apis/ims/images/",
       "publish": true
+    },
+    "com.intel.dai.provisioners.AdapterProvisionerApi": {
+      "informWorkLoadManager": false,
+      "nodeStateInfoUrl" : "http://api-gw-service-nmn.local/apis/smd/hsm/v1/State/Components",
+      "nodeStateForLocationInfoUrl" : "http://api-gw-service-nmn.local/apis/smd/hsm/v1/State/Components/"
     }
   },
 
