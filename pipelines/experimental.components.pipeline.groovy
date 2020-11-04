@@ -22,7 +22,7 @@ pipeline {
             stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
-                        buildName "#${BUILD_NUMBER} ${USER}@${NODE_NAME}"
+                        script { utilities.updateBuildName() }
 
                         echo "Building on ${AGENT}"
                         sh 'hostname'
