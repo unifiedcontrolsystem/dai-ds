@@ -1295,7 +1295,7 @@ function startVolt() {
     is_running
     if [ \$? -eq 0 ]; then
       log "Stopping voltdb..."
-      \${VOLT_BIN}/voltdb stop 2>&1 | tee -a \$UCS_LOG
+      \${VOLT_BIN}/voltadmin shutdown 2>&1 | tee -a \$UCS_LOG
     fi
   fi
   return \$rv
@@ -1309,7 +1309,7 @@ function stopVolt() {
   fi
 
   log "Stopping voltdb..."
-  \${VOLT_BIN}/voltdb stop 2>&1 | tee -a \$UCS_LOG
+  \${VOLT_BIN}/voltadmin shutdown 2>&1 | tee -a \$UCS_LOG
   return \${PIPESTATUS[0]}
 }
 
