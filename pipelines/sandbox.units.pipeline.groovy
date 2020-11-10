@@ -138,7 +138,8 @@ pipeline {
                                         string(name: 'repository', value: "${params.functionalTestRepository}"),
                                         string(name: 'branch', value: "${params.functionalTestBranch}"),
                                         string(name: 'INSTALLER_SOURCE', value: "${JOB_BASE_NAME}"),
-                                        string(name: 'tag', value: "${params.functionalTestTag}")
+                                        string(name: 'tag', value: "${params.functionalTestTag}"),
+                                        string(name: 'AGENT', value: "${params.functionalAgent}")
                                 ],
                                 quietPeriod: 0, wait: false
                     }
