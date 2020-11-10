@@ -6,6 +6,7 @@ services:
     image: voltdb/voltdb-community:9.2.1
     entrypoint: /opt/voltdb/schema/docker-entrypoint.sh
     container_name: dai-voltdb
+    hostname: am01-nmn.local
     environment:
       - HTTP_PORT=18080
     volumes:
