@@ -34,6 +34,7 @@ public class EventSimApp  extends  EventSim {
         network_.register("/apis/events/seed", HttpMethod.GET.toString(), eventsimApi::getRandomizationSeed);
         network_.register("/apis/events/sensor", HttpMethod.POST.toString(), eventsimApi::generateSensorEvents);
         network_.register("/apis/events/echo", HttpMethod.POST.toString(),eventsimApi::generateEchoEvents);
+        network_.register("/apis/events/locations", HttpMethod.GET.toString(), eventsimApi::getAllAvailableLocations);
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.DELETE.toString(), eventsimApi::unsubscribeAllStateChangeNotifications);
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN", HttpMethod.POST.toString(), eventsimApi::subscribeStateChangeNotifications );
         network_.register("/apis/smd/hsm/v1/Subscriptions/SCN/*", HttpMethod.GET.toString(), eventsimApi::getSubscriptionDetailForId);
@@ -146,6 +147,17 @@ public class EventSimApp  extends  EventSim {
         log_.info("Received get-seed api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
         String seed = foreignSimulatorEngine_.getRandomizationSeed();
         return create_result_json("F", seed);
+    }
+
+    /**
+     * This method is used to get the avialble locations data.
+     * @param parameters input details of the request.
+     * @return Status = F if seed is found, Status = E on failure
+     */
+    String getAllAvailableLocations(Map<String, String> parameters) {
+        log_.info("Received list-locations api request : " + ZonedDateTime.now(ZoneId.systemDefault()).toString());
+        PropertyDocument locations =  foreignSimulatorEngine_.getAllAvailableLocations();
+        return create_result_json("F", parser_.toString(locations));
     }
 
     /**

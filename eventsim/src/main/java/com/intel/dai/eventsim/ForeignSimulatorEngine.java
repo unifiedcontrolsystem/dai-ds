@@ -146,6 +146,14 @@ class ForeignSimulatorEngine {
         return String.valueOf(randomiserSeed_);
     }
 
+    /**
+     * This method is used to return available locatiosn data.
+     * @return locations data
+     */
+    PropertyArray getAllAvailableLocations() {
+        return new PropertyArray(dataLoaderEngine_.getNodeLocations());
+    }
+
     private void publishEventsForScenario(Map<String, String> parameters, String scenario,
                                           PropertyMap events, PropertyMap scenarioParameters)
             throws PropertyNotExpectedType, SimulatorException {
