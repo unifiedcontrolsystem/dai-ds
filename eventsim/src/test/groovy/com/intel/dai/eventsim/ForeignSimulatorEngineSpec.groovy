@@ -81,6 +81,7 @@ class ForeignSimulatorEngineSpec extends Specification {
         then:
         foreignSimEngineTest.publishedEvents_ == publishedEvents
         foreignSimEngineTest.getRandomizationSeed().equals("1234")
+        foreignSimEngineTest.getAllAvailableLocations().equals(locations_)
 
         where:
         count  |  publishedEvents
@@ -108,6 +109,7 @@ class ForeignSimulatorEngineSpec extends Specification {
         then:
         foreignSimEngineTest.publishedEvents_ == publishedEvents
         foreignSimEngineTest.getRandomizationSeed().equals("1234")
+        foreignSimEngineTest.getAllAvailableLocations().equals(locations_)
 
         where:
         type           |    count    |  publishedEvents
@@ -166,6 +168,7 @@ class ForeignSimulatorEngineSpec extends Specification {
         then:
         foreignSimEngineTest.publishedEvents_ == publishedEvents
         foreignSimEngineTest.getRandomizationSeed().equals("1234")
+        foreignSimEngineTest.getAllAvailableLocations().equals(locations_)
 
         where:
         type            |  counter  |  duration | start_time  |   publishedEvents

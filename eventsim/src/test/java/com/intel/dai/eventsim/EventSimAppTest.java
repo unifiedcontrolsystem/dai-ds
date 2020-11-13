@@ -169,15 +169,4 @@ public class EventSimAppTest {
         when(eventSimApiTest.network_.getAllSubscriptions()).thenReturn(null);
         eventSimApiTest.getAllSubscriptionDetails(input_parameters);
     }
-
-    @Test
-    public void fetchRandomSeed() {
-        Map<String, String> parameters = new HashMap<>();
-        Logger log = mock(Logger.class);
-        EventSimApp eventSimApiTest = new EventSimApp("", "", log);
-        EventSimApp.log_ = mock(Logger.class);
-        eventSimApiTest.foreignSimulatorEngine_ = mock(ForeignSimulatorEngine.class);
-        when(eventSimApiTest.foreignSimulatorEngine_.getRandomizationSeed()).thenReturn("123");
-        assertEquals("{\"Status\":\"F\",\"Result\":\"123\"}", eventSimApiTest.getRandomizationSeed(parameters));
-    }
 }

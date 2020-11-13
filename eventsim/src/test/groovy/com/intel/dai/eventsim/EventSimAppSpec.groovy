@@ -1,6 +1,7 @@
 package com.intel.dai.eventsim
 
 import com.intel.logging.Logger
+import com.intel.properties.PropertyArray
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -86,6 +87,23 @@ class EventSimAppSpec extends Specification {
 
         expect:
         eventSimApp_.generateSensorEvents(parameters).contains("Success")
+    }
+
+    def "fetch random seed" () {
+        Map<String, String> parameters = new HashMap<>()
+        eventSimApp_.foreignSimulatorEngine_.getRandomizationSeed() >> "123"
+        expect :
+        eventSimApp_.getRandomizationSeed(parameters).contains("{\"Status\":\"F\",\"Result\":\"123\"}")
+    }
+
+    def "fetch available locations" () {
+        Map<String, String> parameters = new HashMap<>()
+        PropertyArray locations = new PropertyArray();
+        locations.add("location-0")
+        locations.add("location-1")
+        eventSimApp_.foreignSimulatorEngine_.getAllAvailableLocations() >> locations
+        expect :
+        eventSimApp_.getAllAvailableLocations(parameters).contains("{\"Status\":\"F\",\"Result\":\"[\\\"location-0\\\",\\\"location-1\\\"]\"}")
     }
 
     def "generate boot/ras/sensor/scenario events with exception"() {
@@ -203,9 +221,9 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.dataLoader_.getNodeStateFileLocation() >> NODE_STATE_CONFIG
 
         expect:
-/*        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().containsKey("ID")
+        eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().containsKey("ID")
         eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().getString("ID")
-                .equals("xname-0")*/
+                .equals("xname-0")
         parameters.put("sub_component", "")
         eventSimApp_.parser_.fromString(eventSimApp_.getNodeStatesForLocation(parameters)).getAsMap().size() == 0
     }

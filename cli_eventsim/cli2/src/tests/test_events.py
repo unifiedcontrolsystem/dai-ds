@@ -26,13 +26,15 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
-                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
-                      'events\n    job                 generate job events\n    boot                generate boot '
-                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
-                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
-                      'this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h]\n                       {ras,sensor,job,boot,scenario,get-seed,'
+                      'echo,list-locations}\n                       ...\n\npositional arguments:\n  {ras,sensor,job,'
+                      'boot,scenario,get-seed,echo,list-locations}\n                        subparser for events\n    '
+                      'ras                 generate ras events\n    sensor              generate sensor events\n    '
+                      'job                 generate job events\n    boot                generate boot events\n    '
+                      'scenario            generate events for a given scenario\n    get-seed            fetch prior '
+                      'seed to replicate same data.\n    echo                echo json directly to connection\n    '
+                      'list-locations      fetch locations data available in system.\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -44,13 +46,15 @@ class EventsCliTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('usage: eventsim events [-h] {ras,sensor,job,boot,scenario,get-seed} ...\n\npositional '
-                      'arguments:\n  {ras,sensor,job,boot,scenario,get-seed}\n                        subparser for '
-                      'events\n    ras                 generate ras events\n    sensor              generate sensor '
-                      'events\n    job                 generate job events\n    boot                generate boot '
-                      'events\n    scenario            generate events for a given scenario\n    get-seed            '
-                      'fetch prior seed to replicate same data.\n\noptional arguments:\n  -h, --help            show '
-                      'this help message and exit\n',
+        self.assertIn('usage: eventsim events [-h]\n                       {ras,sensor,job,boot,scenario,get-seed,'
+                      'echo,list-locations}\n                       ...\n\npositional arguments:\n  {ras,sensor,job,'
+                      'boot,scenario,get-seed,echo,list-locations}\n                        subparser for events\n    '
+                      'ras                 generate ras events\n    sensor              generate sensor events\n    '
+                      'job                 generate job events\n    boot                generate boot events\n    '
+                      'scenario            generate events for a given scenario\n    get-seed            fetch prior '
+                      'seed to replicate same data.\n    echo                echo json directly to connection\n    '
+                      'list-locations      fetch locations data available in system.\n\noptional arguments:\n  -h, '
+                      '--help            show this help message and exit\n',
             captured_output.getvalue())
         captured_output.close()
 
@@ -231,6 +235,20 @@ class EventsCliTest(TestCase):
                       'arguments:\n  -h, --help         show this help message and exit\n  --seed SEED        seed to '
                       'duplicate data\n  --timeout TIMEOUT  get-seed sub-command execution timeout\n',
             captured_output.getvalue())
+        captured_output.close()
+
+    def test_list_locations_help(self):
+        parser = Parser()
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        sys.argv = ['eventsim', 'events', 'list-locations', '-h']
+        with self.assertRaises(SystemExit):
+            parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('usage: eventsim events list-locations [-h] [--timeout TIMEOUT]\n\noptional arguments:\n  -h, '
+                      '--help         show this help message and exit\n  --timeout TIMEOUT  list-locations '
+                      'sub-command execution timeout\n',
+                      captured_output.getvalue())
         captured_output.close()
 
     def test_ras_positive(self):
@@ -449,3 +467,19 @@ class EventsCliTest(TestCase):
         self.assertIn('Error:unable to get seed data\n', captured_output.getvalue())
         captured_output.close()
 
+    def test_list_locations_positive(self):
+        parser = Parser()
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        sys.argv = ['eventsim', 'events', 'list-locations']
+        with patch('cli2.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F",
+                                "Result": "[\"location-0\",\"location-1\"]"
+                                })
+                type(patched_get.return_value).status_code = 200
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('0 - ["location-0","location-1"]', captured_output.getvalue())

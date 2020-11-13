@@ -29,6 +29,7 @@ class EventsCli(object):
         self._add_scenario_event_parser(event_subparsers)
         self._add_get_seed_parser(event_subparsers)
         self._add_echo_event_parser(event_subparsers)
+        self._add_list_locations_parser(event_subparsers)
 
     """
     This method displays help text for each sub-command.
@@ -207,6 +208,14 @@ class EventsCli(object):
         get_seed_parser.set_defaults(func=self._fetch_event_seed_execute)
 
     """
+       This method describes 'list-locations' sub-command arguments.
+       """
+    def _add_list_locations_parser(self, event_parser):
+        list_locations_parser = event_parser.add_parser('list-locations', help='fetch locations data available in system.')
+        list_locations_parser.add_argument('--timeout', type=int, help='list-locations sub-command execution timeout')
+        list_locations_parser.set_defaults(func=self._list_locations_execute)
+
+    """
     This method describes 'json' sub-command arguments.
     """
     def _add_echo_event_parser(self, event_parser):
@@ -332,6 +341,20 @@ class EventsCli(object):
         client = HttpClient()
         # URL will be GET http://127.0.0.1:9998/api/events/seed
         url = client.get_base_url() + 'apis/events/seed'
+
+        timeout = args.timeout
+        if timeout is None:
+            timeout = self.default_timeout
+        response_code, response = client.send_get_request(url, timeout)
+        return CommandResult(response_code, response)
+
+    """
+    This method generates url and send api request to list locations.
+    """
+    def _list_locations_execute(self, args):
+        client = HttpClient()
+        # URL will be GET http://127.0.0.1:9998/api/events/seed
+        url = client.get_base_url() + 'apis/events/locations'
 
         timeout = args.timeout
         if timeout is None:
