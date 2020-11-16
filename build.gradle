@@ -81,6 +81,9 @@ def spark_version = '2.9.1'
 def postgres_jdbc_version = '42.2.8'
 def slf4j_version = '1.7.29'
 def commonslang3_version = '3.9'
+def lombok_version = '1.18.16'
+def spock_core_version = '1.3-groovy-2.4'
+def cglib_nodep_version = '3.3.0'
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Developers and the CI must define the System property 'includeDebugSymbols' as      //
@@ -339,8 +342,8 @@ project(':runtime_utils') {
         compile project(':properties')
         compile project(':logging')
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -395,8 +398,8 @@ project(':perflogging') {
     dependencies {
         compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jar {
@@ -440,8 +443,8 @@ project(':procedures') {
         compile project(':properties')
         compile project(':config_io')
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
         testCompile group: 'org.voltdb', name: 'voltdb', version: voltdb_version
     }
 
@@ -471,8 +474,8 @@ project(':authentication') {
         compile project(':logging')
         compile group: 'org.keycloak', name: 'keycloak-admin-client', version: keycloak_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
         testCompile group: 'org.jboss.resteasy', name: 'resteasy-client', version: '4.3.0.Final'
         testCompile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '4.3.0.Final'
     }
@@ -508,8 +511,8 @@ project(':networking') {
         compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
         compile group: 'commons-io', name: 'commons-io', version: commonsio_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -552,10 +555,10 @@ project(':dai_core') {
         compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
-        compileOnly 'org.projectlombok:lombok:1.18.8'
-        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
+        compileOnly "org.projectlombok:lombok:${lombok_version}"
+        annotationProcessor "org.projectlombok:lombok:${lombok_version}"
     }
 
     project.mainClassName = 'com.intel.dai.AdapterDaiMgr'
@@ -608,8 +611,8 @@ project(':ui') {
         compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
 
         testCompile "com.despegar:spark-test:1.1.8"
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
     project.mainClassName = 'com.intel.dai.ui.AdapterUIRest'
 
@@ -660,8 +663,8 @@ project(':populate_schema') {
         compile group: 'org.postgresql', name: 'postgresql', version: postgres_jdbc_version
         compileOnly group: 'org.voltdb', name: 'voltdb', version: voltdb_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
     project.mainClassName = 'com.intel.dai.populate.OnlineTierDataLoaderApp'
 
@@ -709,8 +712,8 @@ project(':dai_network_listener') {
         compile project(':properties')
         compile project(':config_io')
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -742,8 +745,8 @@ project(":provisioners") {
         compile project(':dai_network_listener')
         compile project(":foreign_bus")
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -778,10 +781,10 @@ project(":inventory") {
         compile "com.google.code.gson:gson:${gson_version}"
         compile group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3_version
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
-        compileOnly 'org.projectlombok:lombok:1.18.8'
-        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
+        compileOnly "org.projectlombok:lombok:${lombok_version}"
+        annotationProcessor "org.projectlombok:lombok:${lombok_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -813,8 +816,8 @@ project(":monitoring") {
         compile project(':dai_network_listener')
         compile project(":foreign_bus")
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -844,8 +847,8 @@ project(":ras") {
         compile project(':logging')
         compile project(':dai_core')
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -882,10 +885,10 @@ project(':foreign_bus') {
         compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
         compile "com.sparkjava:spark-core:${spark_version}"
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
-        compileOnly 'org.projectlombok:lombok:1.18.8'
-        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
+        compileOnly "org.projectlombok:lombok:${lombok_version}"
+        annotationProcessor "org.projectlombok:lombok:${lombok_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -919,8 +922,8 @@ project(':fabric') {
         compile project(':networking')
         compile project(':foreign_bus')
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     jacocoTestCoverageVerification {
@@ -956,8 +959,8 @@ project(':resource_managers') {
         compile "commons-io:commons-io:${commonsio_version}" // Used by the Pbs and Slurm Adapters
         compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version // Used directly by this component.
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
     project.mainClassName = project.hasProperty("main") ? project.getProperty("main") : 'com.intel.dai.AdapterWlmCobalt'
 
@@ -1001,8 +1004,8 @@ project(':eventsim') {
         compile project(':runtime_utils')
         compile project(":foreign_bus")
 
-        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-        testCompile 'cglib:cglib-nodep:3.1'
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+        testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
     }
 
     targetCompatibility = 11
