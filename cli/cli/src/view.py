@@ -26,10 +26,11 @@ class ViewCli(object):
 
     def __init__(self, root_parser):
         self._root_parser = root_parser
-        view_subparsers = root_parser.add_subparsers(help='subparser for quering/viewing data from the database')
+        view_subparsers = root_parser.add_subparsers(help='subparser for querying/viewing data from the database')
         self._root_parser.set_defaults(func=self._view_execute)
         self._add_environment_parser(view_subparsers)
         self._add_events_parser(view_subparsers)
+        self._add_fru_migration_parser(view_subparsers)
         self._add_inventory_parser(view_subparsers)
         self._add_job_info_parser(view_subparsers)
         self._add_network_config_parser(view_subparsers)
@@ -108,9 +109,27 @@ class ViewCli(object):
                                         action='store_true')
         environment_parser.set_defaults(func=self._view_environment_execute)
 
+    def _add_fru_migration_parser(self, view_parser):
+        parser = view_parser.add_parser('fru-migration',
+                                                      help='view the migration history for a specific fru')
+
+        # cli only understands locations as a required argument.
+        parser.add_argument('locations', help='Display the migration history for a given fru. ')
+
+        parser.add_argument('--limit', default=100, type=int,
+                                          help='Provide a limit to the number of records of data being retrieved. '
+                                          'The default value is 100')
+        parser.add_argument('--format', choices=['json', 'table'], default='table',
+                                          help='Display data either in JSON or table format. '
+                                          'Default will be to display data in tabular format')
+        parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+                                          'Uses a default of 900s')
+
+        parser.set_defaults(func=self._view_fru_migration_history_execute)
+
     def _add_inventory_parser(self, view_parser):
         inventory_parser = view_parser.add_parser('inventory', help='view the inventory info data for a '
-                                                                         'specific location')
+                                                  'specific location')
         inventory_parser.add_argument('locations',
                                       help='Filter all inventory info data for a given locations. '
                                            'Provide comma separated location list or location group. '
@@ -184,6 +203,7 @@ class ViewCli(object):
         replacement_parser.add_argument('--all', help='Specify all output fields for more information than default view',
                                       action='store_true')
         replacement_parser.set_defaults(func=self._view_replacement_history_execute)
+
     def _add_job_info_parser(self, view_parser):
         job_parser = view_parser.add_parser('job', help='view the job information for the cluster')
         job_parser.add_argument('--start-time', dest="start_time",
@@ -453,6 +473,32 @@ class ViewCli(object):
             data_to_display = json_display.display_raw_json()
         else:
             columns_order = ["foreigntimestamp", "id", "action", "fruid"]
+            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+        return CommandResult(response_code, data_to_display)
+
+    def _view_fru_migration_history_execute(self, args):
+        client = HttpClient()
+        if args.locations is None:
+            response_msg = 'The fru migration history requires fru to be specified. ' \
+                           'Try again with a fru'
+            return self._parse_response_as_per_user_request(args.format, 1,
+                                                            JsonError(response_msg).construct_error_result())
+
+        limit, fru, display_format, time_out = self._retrieve_from_args(args)  # there is no lctn; only fru
+        user = 'user=' + self.user
+        url = client.get_base_url() + 'cli/getfrumigrationhistory?' + "&".join(
+            [x for x in [limit, fru, user] if x != ""])
+        self.lgr.debug("_view_fru_migration_history_execute: URL for request is {0}".format(url))
+        response_code, response = client.send_get_request(url, time_out)
+
+        json_display = JsonDisplay(response)
+
+        if display_format == 'json':
+            data_to_display = json_display.display_raw_json()
+        else:
+            columns_order = ["inventory_timestamp",
+                             "node_location", "component_location",
+                             "node_serial_number", "component_serial_number"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 

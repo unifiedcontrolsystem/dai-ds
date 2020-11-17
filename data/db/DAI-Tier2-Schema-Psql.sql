@@ -1670,6 +1670,7 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
 
 --
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Note that p_lctn can refer to a fruid instead of a location.  N.B. the searching it the tier2_RawHWInventory_History table,
 --
 
 CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_RawHWInventory_History
@@ -1679,7 +1680,7 @@ CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp with
         p_fruid character varying;
     BEGIN
         p_fruid := (select distinct on (fruid) fruid from tier2_RawHWInventory_History where fruid = p_lctn);
-        if (p_fruid is not null) then
+        if (p_fruid is not null) then   -- p_lctn is really a fruid ...
         return query
             select * from  tier2_RawHWInventory_History
             where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
@@ -4848,9 +4849,9 @@ END
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION public.MigrationHistoryOfFru(p_fru_id varchar
-                                                       , p_start_time timestamp without time zone
+CREATE OR REPLACE FUNCTION public.MigrationHistoryOfFru(p_start_time timestamp without time zone
                                                        , p_end_time timestamp without time zone
+                                                       , p_fru_id varchar
                                                        , p_limit integer)
     RETURNS
         TABLE
