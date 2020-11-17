@@ -4,21 +4,20 @@
 
 package com.intel.dai.ui;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.lang.Integer;
-
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
-import com.intel.config_io.*;
+import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.exceptions.ProviderException;
 import com.intel.logging.Logger;
-import com.intel.properties.*;
-import com.intel.dai.exceptions.DataStoreException;
+import com.intel.properties.PropertyArray;
+import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
+
+import java.sql.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class CannedAPI {
@@ -133,8 +132,13 @@ public class CannedAPI {
                     jsonResult.put("service", map_state_values(executeProcedure("{call GetServiceNodeSummary()}")));
                     break;
                 }
-                case "getinvchanges": {
+                case "getfrumigrationhistory": {
                     String lctn = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedureOneVariableFilter("{call MigrationHistoryOfFru(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    break;
+                }
+                case "getinvchanges": {
+                    String lctn = params_map.getOrDefault("Lctn", null);
                     jsonResult = executeProcedureOneVariableFilter("{call GetInventoryChange(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
                     break;
                 }
