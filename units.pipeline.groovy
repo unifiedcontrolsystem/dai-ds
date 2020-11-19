@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
 pipeline {
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
-                'NRE-UNIT',
-                'Sindhu-test'
+                'NRE-UNIT'
         ], description: 'Agent label')
     }
     stages {
@@ -21,12 +21,11 @@ pipeline {
             stages {    // another stages is required to force operations on the same machine
                 stage('Preparation') {
                     steps {
+                        script { utilities.updateBuildName() }
                         echo "Building on ${AGENT}"
                         sh 'hostname'
 
-                        lastChanges format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE',
-                                matchingMaxComparisons: '1000', showFiles: true, since: 'PREVIOUS_REVISION',
-                                specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
+                        lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
                         script {
                             utilities.fixFilesPermission()
@@ -35,24 +34,34 @@ pipeline {
                         }
                     }
                 }
-                stage('Quick Unit Tests') {
-                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options{ catchError(message: "Quick Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                stage('Pytests') {
+                    options { catchError(message: "Pytests failed", stageResult: 'UNSTABLE', buildResult: 'SUCCESS') }
                     steps {
-                        // Quick build assumes that the current build artifacts are not corrupted
-                        script { utilities.invokeGradle("build") }
+                        dir('cli/cli') {
+                            sh 'pytest . --cov-config=.coveragerc --cov=cli --cov-report term-missing' +
+                                    ' --cov-report xml:results.xml --cov-report html:coverage-report.xml --fulltrace'
+                        }
                     }
                 }
-                stage('Unit Tests') {
-                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options{ catchError(message: "Unit Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
+                stage('Quick Unit Tests') {
+                    when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
-                        sh 'rm -rf build'
-                        script { utilities.invokeGradle("clean build") }
+                        // Quick build will not produce artifacts for components not tested
+                        // So, functional tests cannot use these artifacts                        sh 'rm -rf build/distributions'
+                        script { utilities.invokeGradleNoRetries("build") }
+                        sh 'touch inventory/build/test-results/test/*.xml'  // prevents junit report failures if no tests were run
+                    }
+                }
+                stage('Unit') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    steps {
+                        script {
+                            utilities.cleanWithGit()
+                            utilities.invokeGradleNoRetries("clean build")
+                        }
                     }
                 }
                 stage('Reports') {
-                    options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
@@ -60,7 +69,14 @@ pipeline {
                     }
                 }
                 stage('Archive') {
+                    when { expression { "${params.QUICK_BUILD}" == 'false' } }
                     steps {
+                        // Archive zips for total coverage reports generation later
+                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
+                        zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
+                        zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
+                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+
                         fileOperations([fileCopyOperation(
                                 includes: 'cleanup_machine.sh',
                                 targetLocation: 'build/distributions')])    // for clean other test machines
@@ -69,17 +85,11 @@ pipeline {
                                 includes: 'data/db/*.sql build/distributions/',
                                 targetLocation: 'build/distributions')])    // for database debugging
 
-                        sh 'rm -f *.zip'
-                        zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'
-                        zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
-                        zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
-                        zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
-
-                        archiveArtifacts allowEmptyArchive: true, artifacts:'build/distributions/*, build/reports/**'
+                        archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.s*'
+                        archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
                     }
                 }
             }
         }
     }
 }
-
