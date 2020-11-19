@@ -3,9 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/**
- ** This is the sandbox unit test.
- **/
 pipeline {
     agent none
     parameters {

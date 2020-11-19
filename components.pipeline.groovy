@@ -8,8 +8,7 @@ pipeline {
         booleanParam(name: 'QUICK_BUILD', defaultValue: false,
                 description: 'Performs a partial clean to speed up the build.')
         choice(name: 'AGENT', choices: [
-                'NRE-COMPONENT',
-                'Sindhu-test'
+                'NRE-COMPONENT'
         ], description: 'Agent label')
     }
     stages {
@@ -40,7 +39,6 @@ pipeline {
                 }
                 stage('Quick Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
-                    options { catchError(message: "Quick Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {utilities.invokeGradleNoRetries("jar")}
                         teardownTestbed()
@@ -50,19 +48,17 @@ pipeline {
                 }
                 stage('Component Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
-                    options { catchError(message: "Component Tests failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         script {
                             utilities.cleanWithGit()
-                            utilities.invokeGradle("clean jar")
+                            utilities.invokeGradleNoRetries("clean jar")
                         }
                         teardownTestbed()
                         setupTestbed()
-                        script { utilities.invokeGradle("integrationTest") }
+                        script { utilities.invokeGradleNoRetries("integrationTest") }
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
