@@ -31,6 +31,7 @@ class ViewCli(object):
         self._add_environment_parser(view_subparsers)
         self._add_events_parser(view_subparsers)
         self._add_fru_migration_parser(view_subparsers)
+        self._add_inventory_snapshot_parser(view_subparsers)
         self._add_inventory_parser(view_subparsers)
         self._add_job_info_parser(view_subparsers)
         self._add_network_config_parser(view_subparsers)
@@ -109,12 +110,27 @@ class ViewCli(object):
                                         action='store_true')
         environment_parser.set_defaults(func=self._view_environment_execute)
 
+    def _add_inventory_snapshot_parser(self, view_parser):
+        parser = view_parser.add_parser('inventory-snapshot', help='view the snapshot for a specific location')
+
+        parser.add_argument('locations', help='Display the snapshot history for a given location.')
+
+        parser.add_argument('--limit', default=1, type=int,
+                            help='Provide a limit to the number of records of data being retrieved. '
+                            'The default value is 100')
+        parser.add_argument('--format', choices=['json', 'table'], default='table',
+                            help='Display data either in JSON or table format. '
+                            'Default will be to display data in tabular format')
+        parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
+                            'Uses a default of 900s')
+
+        parser.set_defaults(func=self._view_inventory_snapshot_execute)
+
     def _add_fru_migration_parser(self, view_parser):
-        parser = view_parser.add_parser('fru-migration',
-                                                      help='view the migration history for a specific fru')
+        parser = view_parser.add_parser('fru-migration', help='view the migration history for a specific fru')
 
         # cli only understands locations as a required argument.
-        parser.add_argument('locations', help='Display the migration history for a given fru. ')
+        parser.add_argument('locations', help='Display the migration history for a given fru.')
 
         parser.add_argument('--limit', default=100, type=int,
                                           help='Provide a limit to the number of records of data being retrieved. '
@@ -473,6 +489,33 @@ class ViewCli(object):
             data_to_display = json_display.display_raw_json()
         else:
             columns_order = ["foreigntimestamp", "id", "action", "fruid"]
+            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+        return CommandResult(response_code, data_to_display)
+
+    def _view_inventory_snapshot_execute(self, args):
+        client = HttpClient()
+        if args.locations is None:
+            response_msg = 'The inventory snapshot requires location to be specified. ' \
+                           'Try again with a location'
+            return self._parse_response_as_per_user_request(args.format, 1,
+                                                            JsonError(response_msg).construct_error_result())
+
+        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+        user = 'user=' + self.user
+
+        # This implementation is only for this milestone.  When the underlying HPC API is decided, it may
+        # be replaced with a more sophistical implementation
+
+        url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user, ''] if x != ""])
+        self.lgr.debug("_view_inventory_snapshot_execute: URL for request is {0}".format(url))
+        response_code, response = client.send_get_request(url, time_out)
+
+        json_display = JsonDisplay(response)
+
+        if display_format == 'json':
+            data_to_display = json_display.display_raw_json()
+        else:
+            columns_order = ["lctn", "inventorytimestamp", "sernum"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 

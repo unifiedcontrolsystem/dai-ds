@@ -26,7 +26,7 @@ class ViewTest(TestCase):
         sys.argv = ['ucs', 'view']
         parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -38,7 +38,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -50,7 +50,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 

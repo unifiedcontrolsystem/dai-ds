@@ -39,8 +39,8 @@ pipeline {
 
         string(name: 'functionalAgent', defaultValue: 'FUNCTIONAL', description: 'Enter your FUNCTIONAL test machine')
         choice(name: 'functionalTestTag', choices: [
-                '@smokeTest',
                 '@beingDebugged',
+                '@smokeTest',
                 '@underDevelopment',
                 '@diagnostics',
                 '@inventory',
@@ -76,10 +76,11 @@ pipeline {
 
                         lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
-                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }
-                        script { utilities.fixFilesPermission() }
-                        script { utilities.cleanUpMachine('build/distributions') }
-                        // You can no longer run component tests and unit tests concurrently on the same machine
+                        script {
+                            utilities.fixFilesPermission()
+                            utilities.cleanUpMachine('.')
+                            // You can no longer run component tests and unit tests concurrently on the same machine
+                        }
                     }
                 }
                 stage('Launch Component Tests') {
@@ -89,6 +90,15 @@ pipeline {
                                 quietPeriod: 0, wait: false
                     }
                 }
+                stage('Pytests') {
+                    options { catchError(message: "Pytests failed", stageResult: 'UNSTABLE', buildResult: 'SUCCESS') }
+                    steps {
+                        dir('cli/cli') {
+                            sh 'pytest . --cov-config=.coveragerc --cov=cli --cov-report term-missing' +
+                                    ' --cov-report xml:results.xml --cov-report html:coverage-report.xml --fulltrace'
+                        }
+                    }
+                }
                 stage('Quick Unit Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
                     steps {
@@ -96,6 +106,7 @@ pipeline {
                         // So, functional tests cannot use these artifacts
                         sh 'rm -rf build/distributions'
                         script { utilities.invokeGradleNoRetries("build") }
+                        sh 'touch inventory/build/test-results/test/*.xml'  // prevents junit report failures if no tests were run
                     }
                 }
                 stage('Unit') {
@@ -108,7 +119,6 @@ pipeline {
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", buildResult: 'SUCCESS') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
@@ -124,8 +134,14 @@ pipeline {
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
 
-                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning functional-test machines
-                        sh 'cp data/db/*.sql build/distributions/'  // for database debugging
+                        fileOperations([fileCopyOperation(
+                                includes: 'cleanup_machine.sh',
+                                targetLocation: 'build/distributions')])    // for clean other test machines
+
+                        fileOperations([fileCopyOperation(
+                                includes: 'data/db/*.sql build/distributions/',
+                                targetLocation: 'build/distributions')])    // for database debugging
+
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.s*'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
                     }
