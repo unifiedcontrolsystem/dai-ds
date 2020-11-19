@@ -29,9 +29,8 @@ pipeline {
                                 specificBuild: '', specificRevision: '', synchronisedScroll: true, vcsDir: ''
 
                         script {
-                            utilities.copyIntegrationTestScriptsToBuildDistributions()  // for cleaning this machine
                             utilities.fixFilesPermission()
-                            script { utilities.cleanUpMachine('build/distributions') }
+                            utilities.cleanUpMachine('.')
                             // You can no longer run component tests and unit tests concurrently on the same machine
                         }
                     }
@@ -56,12 +55,19 @@ pipeline {
                     options{ catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        script { utilities.generateJunitReport('**/test-results/**/*.xml') }
+                        junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
+                                testResults: '**/test-results/test/*.xml'
                     }
                 }
                 stage('Archive') {
                     steps {
-                        script { utilities.copyIntegrationTestScriptsToBuildDistributions() }   // for cleaning other machines
+                        fileOperations([fileCopyOperation(
+                                includes: 'cleanup_machine.sh',
+                                targetLocation: 'build/distributions')])    // for clean other test machines
+
+                        fileOperations([fileCopyOperation(
+                                includes: 'data/db/*.sql build/distributions/',
+                                targetLocation: 'build/distributions')])    // for database debugging
 
                         sh 'rm -f *.zip'
                         zip archive: true, dir: '', glob: '**/build/jacoco/test.exec', zipFile: 'unit-test-coverage.zip'

@@ -33,9 +33,8 @@ pipeline {
                         lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
                         script {
-                            utilities.copyIntegrationTestScriptsToBuildDistributions()
                             utilities.fixFilesPermission()
-                            utilities.cleanUpMachine('build/distributions')
+                            utilities.cleanUpMachine('.')
                         }
                     }
                 }
@@ -66,7 +65,8 @@ pipeline {
                     options { catchError(message: "Reports failed", stageResult: 'UNSTABLE', buildResult: 'UNSTABLE') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
-                        script { utilities.generateJunitReport('**/test-results/integrationTest/*.xml') }
+                        junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
+                                testResults: '**/test-results/integrationTest/*.xml'
                     }
                 }
                 stage('Archive') {

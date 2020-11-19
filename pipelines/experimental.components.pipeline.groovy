@@ -30,9 +30,8 @@ pipeline {
                         lastChanges since: 'PREVIOUS_REVISION', format: 'SIDE', matching: 'LINE'
 
                         script {
-                            utilities.copyIntegrationTestScriptsToBuildDistributions()
                             utilities.fixFilesPermission()
-                            utilities.cleanUpMachine('build/distributions')
+                            utilities.cleanUpMachine('.')
                         }
                     }
                 }
@@ -58,7 +57,6 @@ pipeline {
                     }
                 }
                 stage('Reports') {
-                    options { catchError(message: "Reports failed", buildResult: 'SUCCESS') }
                     steps {
                         jacoco classPattern: '**/classes/java/main/com/intel/'
                         junit allowEmptyResults: true, keepLongStdio: true, skipPublishingChecks: true,
