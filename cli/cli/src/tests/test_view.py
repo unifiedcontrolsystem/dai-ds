@@ -1010,6 +1010,86 @@ class ViewTest(TestCase):
         self.assertIn('inventoryinfo', captured_output.getvalue())
         captured_output.close()
 
+    def fru_migration_result_str(self):
+        result_dict = {
+            "schema": [
+                {
+                  "unit": "string",
+                  "data": "inventory_timestamp",
+                  "heading": "inventory_timestamp"
+                },
+                {
+                  "unit": "string",
+                  "data": "node_location",
+                  "heading": "node_location"
+                },
+                {
+                  "unit": "string",
+                  "data": "component_location",
+                  "heading": "component_location"
+                },
+                {
+                  "unit": "string",
+                  "data": "node_serial_number",
+                  "heading": "node_serial_number"
+                },
+                {
+                  "unit": "string",
+                  "data": "component_serial_number",
+                  "heading": "component_serial_number"
+                }
+            ],
+            "result-data-lines": 1,
+            "result-status-code": 0,
+            "data": [
+                 [
+                      "2020-07-19 15:44:30.051",
+                      "X0-CH6-CN2",
+                      "X0-CH6-CN2_DIMM1",
+                      "Node.WO105483L01S010",
+                      "FRUIDforx0c0s28b0n0d1"
+                ]
+            ],
+            "result-data-columns": 5
+        }
+
+        return json.dumps(result_dict)
+
+    def test_view_fru_migration_execute_positive(self):
+        result_str = self.fru_migration_result_str()
+
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'fru-migration', 'FRUIDforx0c0s28b0n0d1']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": result_str})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+
+        self.assertIn('NODE_LOCATION', captured_output.getvalue())
+        captured_output.close()
+
+    def test__view_fru_migration_execute_positive_json(self):
+        result_str = self.fru_migration_result_str()
+
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'fru-migration', 'FRUIDforx0c0s28b0n0d1', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status": "F", "Result": result_str})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('node_location', captured_output.getvalue())
+        captured_output.close()
+
     def test_is_bad_input(self):
         self.assertTrue(ViewCli.is_bad_input('123?'))
 
