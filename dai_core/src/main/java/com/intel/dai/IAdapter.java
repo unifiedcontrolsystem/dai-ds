@@ -36,6 +36,8 @@ public interface IAdapter {
     void adapterShutdownStarted(boolean newState);
     boolean adapterShuttingDown();
     Map<String, String> mapCompNodeLctnToHostName() throws IOException, ProcCallException;
+    // Check the specified linux PID to see if it is still active.
+    boolean isPidActive(long lPid);
 
     String getNodesBmcIpAddr(String sNodeLctn);
     Map<String, String[]> mapNodeLctnToIpAddrAndBmcIpAddr() throws IOException, ProcCallException;

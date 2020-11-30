@@ -466,6 +466,39 @@ public class VoltDbWorkQueue implements WorkQueue {
         logger.info("finished work item %s - AdapterType=%s, FinishedWorkItem=%d", sCmdForMsg, adapterType, lWorkItemId);
 
     }
+    //--------------------------------------------------------------------------
+    // Handle the processing when a work item finished due to an error.
+    //  - we have finished working on this work item but the work item completed due to an error.
+    // Parms:
+    //      String sCmdForMsg - work item's WorkToBeDone
+    //      String sAdapterType - work item's working adapter type
+    //      long lWorkItemId - work item's id
+    //      String sWorkItemResults - Results that should be written into the work item's result field
+    //      String sAllowNonWorkingWiToBeFinished - indicates whether or not to override the work item state check
+    //          "T"  - special case, do override the work item state check and mark this work item in error regardless of which state the work item is in
+    //          !"T" - normal case, perform the work item state check and only perform the function when this work item is in the desired state
+    //--------------------------------------------------------------------------
+    @Override
+    public void finishedWorkItemDueToError(String sCmdForMsg, String sAdapterType, long lWorkItemId, String sWorkItemResults, String sAllowNonWorkingWiToBeFinished)
+            throws IOException
+    {
+        ClientResponse response;
+        try {
+            response = getVoltClient().callProcedure("WorkItemFinishedDueToError", sAdapterType, lWorkItemId, compressResult(sWorkItemResults), sAllowNonWorkingWiToBeFinished);
+        }
+        catch (ProcCallException ie) {
+            logger.error("finishedWorkItemDueToError - WorkItemFinishedDueToError failed - %s", Adapter.stackTraceToString(ie));
+            throw new RuntimeException("An exception occurred when the WorkItemFinishedDueToError stored procedure was called");
+        }
+
+        if (response.getStatus() != ClientResponse.SUCCESS) {
+            // stored procedure failed.
+            logger.error("WorkItemFinished FAILED for work item %s - Status=%s, StatusString=%s, WorkItem=%d!",
+                    sCmdForMsg, VoltDbClient.statusByteAsString(response.getStatus()), response.getStatusString(), lWorkItemId);
+            throw new RuntimeException(response.getStatusString());
+        }
+        logger.info("finished work item %s - WorkingAdapterType=%s, FinishedWorkItem=%d", sCmdForMsg, sAdapterType, lWorkItemId);
+    }   // End finishedWorkItemDueToError(String sCmdForMsg, String sAdapterType, long lWorkItemId, String sWorkItemResults, String sAllowNonWorkingWiToBeFinished)
 
     @Override
     public long workItemId()

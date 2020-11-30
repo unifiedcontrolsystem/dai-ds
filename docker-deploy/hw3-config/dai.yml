@@ -9,6 +9,7 @@ services:
     environment:
       - DAI_LOGGING_LEVEL=DEBUG
       - HOSTNAME=am03-nmn.local
+      - LOCATION=X3001-AM3
       - VOLTDB_SERVERS=am03-nmn.local
       - DAI_USE_BENCHMARKING=false
     volumes:

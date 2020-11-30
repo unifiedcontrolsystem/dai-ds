@@ -7,7 +7,6 @@ import com.intel.dai.dsapi.Location
 import com.intel.dai.dsapi.WorkQueue
 import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
-import org.junit.Ignore
 import org.voltdb.VoltTable
 import org.voltdb.VoltType
 import org.voltdb.client.Client
@@ -89,7 +88,7 @@ class AdapterDaiMgrSpec extends Specification {
         AdapterDaiMgr.AdapterInstanceInfo info = new AdapterDaiMgr.AdapterInstanceInfo("", 0L, "", "",
                 Mock(Process), "", 0L)
         AdapterDaiMgr.MonitorAdapterInstance instance = new AdapterDaiMgr.MonitorAdapterInstance(info, 0L,
-                baseAdapter_, logger_)
+                logger_, baseAdapter_)
         baseAdapter_.getAdapterInstancesAdapterId(_,_,_) >> instanceId
         baseAdapter_.getAdapterInstancesBaseWorkItemId(_,_) >> baseId
         instance.run()
@@ -108,7 +107,7 @@ class AdapterDaiMgrSpec extends Specification {
         AdapterDaiMgr.AdapterInstanceInfo info = new AdapterDaiMgr.AdapterInstanceInfo("", 0L, "", "",
                 Mock(Process), "", 0L)
         AdapterDaiMgr.MonitorAdapterInstance instance = new AdapterDaiMgr.MonitorAdapterInstance(info, 0L,
-                baseAdapter_, logger_)
+                logger_, baseAdapter_)
         baseAdapter_.getAdapterInstancesAdapterId(_,_,_) >> 1L
         baseAdapter_.getAdapterInstancesBaseWorkItemId(_ as String,_ as Long) >> { throw new IOException("TEST") }
 
@@ -117,16 +116,6 @@ class AdapterDaiMgrSpec extends Specification {
 
         then:
         instance.log_ == logger_
-    }
-
-    def "Test for replaceVariable"() {
-        def str = "\$JAVA \$CLASSPATH \$JAVA"
-        def replaced = AdapterDaiMgr.replaceVariable(str, key, value)
-        expect: replaced == result
-        where:
-        key           | value      | result
-        "\$JAVA"      | "green"    | "green \$CLASSPATH green"
-        "\$CLASSPATH" | "blue"    | "\$JAVA blue \$JAVA"
     }
 
     def "Test for keywordSubstitutions"() {
@@ -338,7 +327,9 @@ class AdapterDaiMgrSpec extends Specification {
     def "Test performAdapterInstanceLoadBalancing bad db status"() {
         given:
         def response = Mock(ClientResponse)
+        underTest_.mTimeLastCheckedBacklog = System.currentTimeMillis() - 60_000
         response.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
+        response.getStatusString() >> "ClientResponse.OPERATIONAL_FAILURE"
         client_.callProcedure("WorkItemBackLog", _ as Long) >> response
 
         when: underTest_.performAdapterInstanceLoadBalancing()
@@ -350,6 +341,7 @@ class AdapterDaiMgrSpec extends Specification {
         given:
         def response = Mock(ClientResponse)
         response.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
+        response.getStatusString() >> "ClientResponse.OPERATIONAL_FAILURE"
         underTest_.mProgChkIntrvlDataReceiver = 0L
         client_.callProcedure("WorkItemInfoWrkadaptrtypeQueueWorktobddone", _, _, _) >> response
 
@@ -452,20 +444,6 @@ class AdapterDaiMgrSpec extends Specification {
         then: thrown(RuntimeException)
     }
 
-    def "Test startupAdapterInstanceOnThisSn with exception"() {
-        given:
-        underTest_.mHaveStartedAdapterInstancesForThisSn = false
-        def response = Mock(ClientResponse)
-        VoltTable table = new VoltTable(new VoltTable.ColumnInfo("count", VoltType.BIGINT))
-        table.addRow(1L)
-        response.getResults() >> [ table ]
-        client_.callProcedure(_ as String, _ as String, _ as String) >> response
-
-        when: underTest_.startupAdapterInstanceOnThisSn("", "", "", "", "", 0L)
-
-        then: thrown(RuntimeException)
-    }
-
     def "Test proofOfLife"() {
         given:
         underTest_.mTimeLastProvedAlive = 0L
@@ -509,18 +487,15 @@ class AdapterDaiMgrSpec extends Specification {
         expect: AdapterDaiMgr.getProcessPid(process) == -1
     }
 
-    def "Test connectRetryPhase"() {
-        def legacy = Mock(LegacyVoltDbDirectAccess)
-        factory_.createVoltDbLegacyAccess() >> legacy
-        legacy.getVoltDbClient() >> client_
-        expect: underTest_.connectRetryPhase(new String[1], 0L, 0L)
-    }
-
     def "Test connectRetryPhase with exception"() {
         given:
         def legacy = Mock(LegacyVoltDbDirectAccess)
+        def status = Mock(DbStatusApi)
+        status.waitForDataPopulated(_) >> true
         factory_.createVoltDbLegacyAccess() >> legacy
-        legacy.getVoltDbClient() >> { throw new RuntimeException("TEST") }
+        factory_.createDbStatusApi(_) >> status
+        legacy.getVoltDbClient() >> client_
+        underTest_.quickClient_ = client_
 
         when: underTest_.connectRetryPhase(new String[1], 0L, 0L)
 
@@ -534,7 +509,9 @@ class AdapterDaiMgrSpec extends Specification {
         factory_.createVoltDbLegacyAccess() >> legacy
         factory_.createDbStatusApi(_) >> status
         legacy.getVoltDbClient() >> client_
-        underTest_.waitForVoltDB("localhost", 0L, 0L)
+        underTest_.quickClient_ = client_
+
+        underTest_.waitForVoltDB("localhost", 300_000L, 15_000L)
         expect: true
     }
 
@@ -546,6 +523,7 @@ class AdapterDaiMgrSpec extends Specification {
         factory_.createVoltDbLegacyAccess() >> legacy
         factory_.createDbStatusApi(_) >> status
         legacy.getVoltDbClient() >> client_
+        underTest_.quickClient_ = client_
 
         when: underTest_.waitForVoltDB("localhost", 0L, 0L)
 
@@ -566,38 +544,6 @@ class AdapterDaiMgrSpec extends Specification {
         then: thrown(TimeoutException)
     }
 
-    def "Test getHostName"() {
-        def realArgs = new String[args]
-        if(args == 3)
-            realArgs[2] = "hostname"
-        underTest_.getHostName(realArgs)
-        expect: result
-
-        where:
-        args || result
-        1    || true
-        3    || true
-    }
-
-    def "Test getLocation"() {
-        def realArgs = new String[args]
-        def location = Mock(Location)
-        location.getLocationFromHostname(_) >> "location"
-        factory_.createLocation() >> location
-        realArgs[0] = "localhost"
-        if(args == 3) {
-            realArgs[1] = "location"
-            realArgs[2] = "hostname"
-        }
-        underTest_.getLocation(realArgs, "hostname")
-        expect: result
-
-        where:
-        args || result
-        1    || true
-        3    || true
-    }
-
     def "Test monitorAdapterInstance"() {
         underTest_.monitorAdapterInstance(null, 0)
         expect: true
@@ -615,6 +561,7 @@ class AdapterDaiMgrSpec extends Specification {
         factory_.createDbStatusApi(_) >> status
         factory_.createWorkQueue(_) >> workQueue
         legacy.getVoltDbClient() >> client_
+        underTest_.quickClient_ = client_
         workQueue.grabNextAvailWorkItem(_) >>> [ true, true, true, true, false ]
         workQueue.workToBeDone() >> work
         def params = new String[3]
@@ -651,5 +598,45 @@ class AdapterDaiMgrSpec extends Specification {
         true    | "location" | 5000L  | "Y"  | "other"                               || true
         false   | " "        | 0L     | "N"  | "other"                               || true
         false   | null       | 0L     | "N"  | "other"                               || true
+    }
+
+    def "Test startupAdapterInstanceOnThisSn"() {
+        def response = Mock(ClientResponse)
+        def columns = new VoltTable.ColumnInfo[1]
+        columns[0] = new VoltTable.ColumnInfo("State", VoltType.BIGINT)
+        def table = new VoltTable(columns)
+        table.addRow(0L)
+        response.getResults() >> [table]
+        client_.callProcedure("MachineAdapterInstanceBumpNextInstanceNumAndReturn", _ as String, _ as String) >> response
+        when: underTest_.startupAdapterInstanceOnThisSn("lctn", "host", "MONITOR", "invocation", "/dev/null", 0L)
+        then: thrown IOException
+    }
+
+    def "Test logDaimgrProofOfLife"() {
+        underTest_.mTimeLastProvedAlive = 0L
+        def response1 = Mock(ClientResponse)
+        response1.getStatus() >> ClientResponse.SUCCESS
+        def columns1 = new VoltTable.ColumnInfo[1]
+        columns1[0] = new VoltTable.ColumnInfo("State", VoltType.STRING)
+        def table1 = new VoltTable(columns1)
+        if(ROW1)
+            table1.addRow("R")
+        response1.getResults() >> [table1]
+        client_.callProcedure("AdapterInstanceInfoUsingTypeId", _ as String, _ as Long) >> response1
+        def response2 = Mock(ClientResponse)
+        response2.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
+        when: underTest_.logDaimgrProofOfLife()
+        then: thrown RuntimeException
+
+        where:
+        ROW1  | TS    || RESULT
+        true  | false || true
+        false | true  || true
+    }
+
+    def "Test logDaimgrProofOfLife 2"() {
+        underTest_.mTimeLastProvedAlive = System.currentTimeMillis()
+        underTest_.logDaimgrProofOfLife()
+        expect: true
     }
 }

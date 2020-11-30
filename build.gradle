@@ -584,7 +584,7 @@ project(':dai_core') {
                 enabled = enforceCodeCoverage
                 limit {
                     counter = 'BRANCH'
-                    minimum = 0.52
+                    minimum = 0.50
                 }
             }
         }

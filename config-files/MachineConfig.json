@@ -5,27 +5,27 @@
       "ServiceNode":"SN0-SMS1",
       "TypeOfAdapter":"RAS",
       "NumberOfInstances":1,
-      "Invocation":"com.intel.dai.AdapterRasForeignBus",
+      "Invocation":"$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterRasForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile":"$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$INSTANCE.log"
     },
     {
       "ServiceNode":"SN0-SMS1",
       "TypeOfAdapter":"NEARLINE_TIER",
       "NumberOfInstances":1,
-      "Invocation":"com.intel.dai.AdapterNearlineTierVolt",
+      "Invocation":"$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterNearlineTierVolt $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile":"$UCSLOGFILEDIRECTORY/AdapterNearlineTier.log"
     },
     {
       "ServiceNode":"SN0-SMS1",
       "TypeOfAdapter":"ONLINE_TIER",
       "NumberOfInstances":1,
-      "Invocation":"com.intel.dai.AdapterOnlineTierVolt",
+      "Invocation":"$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterOnlineTierVolt $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile":"$UCSLOGFILEDIRECTORY/AdapterOnlineTier.log"
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
       "ServiceNode": "SN0-SMS1",
-      "Invocation": "com.intel.dai.ui.AdapterUIRest",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ui.AdapterUIRest $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "UI",
       "NumberOfInstances": 1
     },
@@ -33,21 +33,21 @@
       "ServiceNode":"SN0-SMS1",
       "TypeOfAdapter":"MONITOR",
       "NumberOfInstances":2,
-      "Invocation":"com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
+      "Invocation":"$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile":"$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log"
     },
     {
       "ServiceNode":"SN0-SMS1",
       "TypeOfAdapter":"PROVISIONER",
       "NumberOfInstances":1,
-      "Invocation":"com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus",
+      "Invocation":"$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile":"$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log"
     },
     {
       "ServiceNode": "SN0-SMS1",
       "TypeOfAdapter": "WLM",
       "NumberOfInstances": 1,
-      "Invocation": "com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log"
     }
   ],
