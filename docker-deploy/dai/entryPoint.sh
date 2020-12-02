@@ -3,7 +3,7 @@
 [[ -z "${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL="INFO"
 
 LOG="/opt/ucs/log/AdapterDaiMgr-${HOSTNAME}.log"
-ARGS="${VOLTDB_SERVERS} - ${HOSTNAME}"
+ARGS="${VOLTDB_SERVERS} ${LOCATION} ${HOSTNAME}"
 CLASS=com.intel.dai.AdapterDaiMgr
 PROPS="-Dlog4j.configurationFile=/opt/ucs/etc/log4j2.xml -DdaiLoggingLevel=${DAI_LOGGING_LEVEL}"
 

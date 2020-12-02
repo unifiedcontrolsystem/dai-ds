@@ -35,6 +35,8 @@ public interface WorkQueue {
     String[] waitForWorkItemToFinishAndMarkDone(String sCmdForMsg, String sWaitingForAdapterType,
                                                 long lWaitingForWorkItemId, String sReqAdapterType, long lReqWorkItemId)
             throws IOException, InterruptedException;
+    void finishedWorkItemDueToError(String sCmdForMsg, String sAdapterType, long lWorkItemId, String sWorkItemResults, String sAllowNonWorkingWiToBeFinished)
+            throws IOException;
     String workingResults();
     long saveWorkItemsRestartData(long lWorkItemId, String sRestartData, boolean bInsertRowIntoHistory, long lTsInMicroSecs)
             throws IOException;

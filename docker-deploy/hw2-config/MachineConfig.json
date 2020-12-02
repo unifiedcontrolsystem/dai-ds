@@ -15,83 +15,87 @@
     {
       "Value": "am02-nmn.local",
       "Key": "SmwHostname"
+    },
+    {
+      "Value": "/opt/voltdb/voltdb/*:/opt/ucs/lib/*",
+      "Key": "UcsClasspath"
     }
   ],
   "AdapterInstances": [
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.AdapterOnlineTierVolt",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterOnlineTierVolt $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "ONLINE_TIER",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.ui.AdapterUIRest",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ui.AdapterUIRest $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "UI",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.ras.AdapterRasForeignBus",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRasForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "RAS",
       "NumberOfInstances": 2
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.AdapterNearlineTierJdbc",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterNearlineTierJdbc $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "NEARLINE_TIER",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "PROVISIONER",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderInventoryNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.inventory.ProviderInventoryNetworkForeignBus",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.inventory.ProviderInventoryNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "INVENTORY",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "MONITOR",
       "NumberOfInstances": 2
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "WLM",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabric-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.fabric.FabricTelemetryProvider",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "FABRIC",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricPerf-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.fabric.FabricPerfTelemetryProvider",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricPerfTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "FABRICPERF",
       "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricCrit-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "com.intel.dai.fabric.FabricCritTelemetryProvider",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricCritTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "FABRICCRIT",
       "NumberOfInstances": 1
     }

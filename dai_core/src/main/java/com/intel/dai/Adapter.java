@@ -2076,4 +2076,26 @@ public class Adapter implements IAdapter {
     }   // End getOwningSubsystem(String sLctn)
 
 
+    //--------------------------------------------------------------------------
+    // Check the specified linux PID to see if it is still active.
+    //--------------------------------------------------------------------------
+    public boolean isPidActive(long lPid) {
+        try {
+            //----------------------------------------------------------------------
+            // Note: ps will return an exit code 0 if the process exists, a 1 if it doesn't.
+            //----------------------------------------------------------------------
+            // Check & see if the node is already active.
+            String sTempCmd = "ps -p " + lPid;
+            Process process = Runtime.getRuntime().exec(sTempCmd);
+            int iTempExitCode = process.waitFor();
+            return (iTempExitCode == 0);  // 0=process exists, 1= process does not.
+        }
+        catch (Exception e) {
+            mLogger.error("isPidActive - exception occurred - pid=%d!", lPid);
+            mLogger.error("isPidActive - %s", Adapter.stackTraceToString(e));
+            return true;  // since an exception occurred we can't tell you whether or not the pid is still active.
+        }
+    }   // End isPidActive(long lPid)
+
+
 }   // End class Adapter
