@@ -1004,13 +1004,13 @@ public class Adapter implements IAdapter {
 
     @Override
     public void abend(String sReason) throws IOException, InterruptedException, AdapterException {
-        logRasEventSyncNoEffectedJob(getRasEventType("RasGenAdapterAbend")
-                                    ,("AdapterName=" + mAdapterName + ", Reason=" + sReason)
-                                    ,null                               // lctn
-                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                    ,mAdapterType                       // type of the adapter that is requesting/issuing this invocation
-                                    ,workQueue().baseWorkItemId()       // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                    );
+        logRasEventNoEffectedJob(getRasEventType("RasGenAdapterAbend")
+                                 ,("AdapterName=" + mAdapterName + ", Reason=" + sReason)
+                                 ,null                               // lctn
+                                 ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                 ,mAdapterType                       // type of the adapter that is requesting/issuing this invocation
+                                 ,workQueue().baseWorkItemId()       // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                                 );
         adapterTerminating("Work Item terminated ABNORMALLY (" + sReason + ")");
         mLogger.fatal("Finished ABNORMALLY (%s)!", sReason);
         System.exit(-1);

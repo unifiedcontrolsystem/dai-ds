@@ -111,7 +111,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                         ,adapter_.getType()                 // type of adapter that is requesting this
                         ,adapter_.getBaseWorkItemId()       // requesting work item
                 );
-                ras_.logRasEventSyncNoEffectedJob(ras_.getRasEventType("RasGenAdapterAbend"
+                ras_.logRasEventNoEffectedJob(ras_.getRasEventType("RasGenAdapterAbend"
                         ,adapter_.getBaseWorkItemId())
                         ,("AdapterName=" + adapter_.getName() + ", Reason=exception")
                         ,null                               // lctn

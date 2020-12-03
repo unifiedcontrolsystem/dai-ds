@@ -147,7 +147,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
                 String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
                 String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
-                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
+                raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         catch (Exception e) {
@@ -156,7 +156,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 log_.exception(e, "handleDelivery - Exception occurred!");
                 String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
                 String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
-                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
+                raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
             catch (Exception ex) {
                 log_.exception(ex, "Unable to log RAS EVENT");
@@ -209,7 +209,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 // Cut RAS event indicating that the job has been killed - we do know which job was effected by this occurrence.
                 String eventtype = raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId());
                 String instancedata = "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
-                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
+                raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
         }
         // Also associate all of these nodes with this job in the InternalCachedJobs table - so information is available for others to use when checking which nodes are being used by which jobs, and visa versa.
