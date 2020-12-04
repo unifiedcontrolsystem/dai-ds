@@ -195,7 +195,10 @@ class LoggerConsole implements Logger {
     }
 
     int getLevel() {
-        String sLevel = System.getProperty("daiLoggingLevel", "WARN"); // Default changed to WARN for production.
+        String sLevel = System.getenv("DAI_LOGGING_LEVEL"); // Environment variable lower priority...
+        if(sLevel == null)
+            sLevel = "INFO";
+        sLevel = System.getProperty("daiLoggingLevel", sLevel).toUpperCase(); // Property higher priority.
         int level;
         switch(sLevel) {
             case "ERROR":
@@ -208,7 +211,7 @@ class LoggerConsole implements Logger {
                 level = LoggerUtils.DEBUG;
                 break;
             default:
-                level = LoggerUtils.INFO;
+                level = LoggerUtils.INFO; // INFO is the default level.
                 break;
         }
         return level;
