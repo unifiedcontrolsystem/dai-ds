@@ -173,7 +173,7 @@ public abstract class FabricAdapter {
      */
     final protected void logBenignSoftwareRasEvent(String msg, String data) {
         log_.error(msg);
-        rasEventLogging_.logRasEventSyncNoEffectedJob("RasGenAdapterException",
+        rasEventLogging_.logRasEventNoEffectedJob("RasGenAdapterException",
                 makeInstanceData(msg, data), adapter_.snLctn(), usTimestamp(), adapterType(),
                 workQueue_.baseWorkItemId());
     }
@@ -183,7 +183,7 @@ public abstract class FabricAdapter {
      *
      * @param exception The exception to log.
      * @param message The message or string format.
-     * @param params THe parameters for the format string.
+     * @param params The parameters for the format string.
      */
     final protected void logException(Throwable exception, String message, Object... params) {
         String data = String.format(message, params);
