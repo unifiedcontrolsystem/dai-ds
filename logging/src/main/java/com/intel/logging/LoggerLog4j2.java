@@ -241,7 +241,10 @@ final class LoggerLog4j2 implements Logger {
     }
 
     Level getLevel() {
-        String sLevel = System.getProperty("daiLoggingLevel", "INFO");
+        String sLevel = System.getenv("DAI_LOGGING_LEVEL"); // Environment variable lower priority...
+        if(sLevel == null)
+            sLevel = "INFO";
+        sLevel = System.getProperty("daiLoggingLevel", sLevel).toUpperCase(); // Property higher priority.
         Level level;
         switch(sLevel) {
             case "ERROR":
@@ -254,7 +257,7 @@ final class LoggerLog4j2 implements Logger {
                 level = Level.DEBUG;
                 break;
             default:
-                level = Level.INFO;
+                level = Level.INFO; // INFO is the default level.
                 break;
         }
         return level;
