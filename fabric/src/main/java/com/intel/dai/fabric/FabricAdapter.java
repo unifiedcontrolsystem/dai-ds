@@ -171,11 +171,10 @@ public abstract class FabricAdapter {
      * @param msg The logged message string.
      * @param data Specific data to make the logged RAS event more useful.
      */
-    final protected void logBenignSoftwareRasEvent(String msg, String data) {
+    final protected void logBenignSoftwareRasEvent(String msg, String data) { // Logs RasGenAdapterException
         log_.error(msg);
-        rasEventLogging_.logRasEventNoEffectedJob("RasGenAdapterException",
-                makeInstanceData(msg, data), adapter_.snLctn(), usTimestamp(), adapterType(),
-                workQueue_.baseWorkItemId());
+        rasEventLogging_.logRasEventNoEffectedJob("0001000014", makeInstanceData(msg, data),
+                adapter_.snLctn(), usTimestamp(), adapterType(), workQueue_.baseWorkItemId());
     }
 
     /**
