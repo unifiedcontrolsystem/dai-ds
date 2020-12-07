@@ -1212,7 +1212,8 @@ public class Adapter implements IAdapter {
                 mLogger.exception(e);
                 System.exit(-1);
             } finally {
-                stream.close();
+                if(stream != null)
+                    stream.close();
             }
         }
     }   // End addRasMetaDataIntoDataStore()

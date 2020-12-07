@@ -394,7 +394,7 @@ public class NetworkListenerCore {
             switch(entry.getKey()) {
                 case "subjects":
                     int size = 0;
-                    List<?> subjects = null;
+                    List<?> subjects = new ArrayList<>();
                     if(entry.getValue() instanceof List) {
                         subjects = (List<?>)entry.getValue();
                         size = subjects.size();
