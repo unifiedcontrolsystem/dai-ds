@@ -35,7 +35,7 @@ final class LoggerUtils {
     static String[] getFormattedExceptionTrace(Throwable exception, Map<String, String> info) {
         String[] result = new String[exception.getStackTrace().length];
         for(int i = 0; i < exception.getStackTrace().length; i++)
-            result[i] = String.format("%s DEBUG [%s] :  %s", info.get("timestamp"), info.get("thread"),
+            result[i] = String.format("%s ERROR [%s] :  %s", info.get("timestamp"), info.get("thread"),
                     exception.getStackTrace()[i].toString());
         return result;
     }

@@ -175,12 +175,12 @@ final class LoggerLog4j2 implements Logger {
     private void printStackTrace(Throwable e, Map<String, String> info) {
         log_.error(LoggerUtils.formatMessage("Exception: " + e.getMessage(), info));
         for(String line: LoggerUtils.getFormattedExceptionTrace(e, info))
-            log_.info(line);
+            log_.error(line);
         Throwable cause = e.getCause();
         while (cause != null) {
             log_.error(LoggerUtils.formatMessage(String.format("Caused by: %s", cause.getMessage()), info));
             for(String line: LoggerUtils.getFormattedExceptionTrace(cause, info))
-                log_.info(line);
+                log_.error(line);
             cause = cause.getCause();
         }
     }

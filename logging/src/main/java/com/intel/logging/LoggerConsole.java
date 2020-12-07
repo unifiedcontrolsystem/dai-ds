@@ -179,17 +179,13 @@ class LoggerConsole implements Logger {
 
     private void printStackTrace(Throwable e, Map<String, String> info) {
         output(LoggerUtils.formatMessage("Exception: " + e.getMessage(), info));
-        if(LoggerUtils.DEBUG >= filterLevel_) {
-            for (String line : LoggerUtils.getFormattedExceptionTrace(e, info))
-                output(line);
-        }
+        for (String line : LoggerUtils.getFormattedExceptionTrace(e, info))
+            output(line);
         Throwable cause = e.getCause();
         while (cause != null) {
             output(LoggerUtils.formatMessage(String.format("Caused by: %s", cause.getMessage()), info));
-            if(LoggerUtils.DEBUG >= filterLevel_) {
-                for (String line : LoggerUtils.getFormattedExceptionTrace(cause, info))
-                    output(line);
-            }
+            for (String line : LoggerUtils.getFormattedExceptionTrace(cause, info))
+                output(line);
             cause = cause.getCause();
         }
     }
