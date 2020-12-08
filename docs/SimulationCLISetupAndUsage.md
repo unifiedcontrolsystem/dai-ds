@@ -389,6 +389,24 @@ Example:
 user@/opt/ucs/bin:~> eventsim events get-seed
 ```
 
+### Events subcommand – list-locations
+
+This subcommand is used to display locations available in system.
+
+Events list-locations command:
+##### user@/opt/ucs/bin:~> eventsim events list-locations --help
+```bash
+usage: eventsim events list-locations [-h] [--timeout TIMEOUT]
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --timeout TIMEOUT  list-locations sub-command execution timeout
+
+
+Example:
+user@/opt/ucs/bin:~> eventsim events list-locations
+```
+
 **Note:**
 
 By default, events are sent to network with constant delays between events.
