@@ -9,10 +9,19 @@ public final class PropertyLoader {
         Properties result = new Properties();
 
         if ( resource != null ) {
-            try ( InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource) ) {
-                if ( is != null )
+            InputStream is = null;
+            try {
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+                if (is != null)
                     result.load(is);
-            } catch ( IOException ignore ) {}
+            } catch ( IOException ignore ) {
+            } finally {
+                if(is != null) {
+                    try {
+                        is.close();
+                    } catch(IOException e) { /* Ignore close failure... */ }
+                }
+            }
         }
 
 
