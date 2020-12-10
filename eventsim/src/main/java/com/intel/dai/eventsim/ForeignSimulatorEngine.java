@@ -158,13 +158,16 @@ class ForeignSimulatorEngine {
                                           PropertyMap events, PropertyMap scenarioParameters)
             throws PropertyNotExpectedType, SimulatorException {
         PropertyArray publishEvents;
+        String startTime =  parameters.getOrDefault("start-time", scenarioParameters.getStringOrDefault("start-time", ZonedDateTime.now(ZoneId.systemDefault()).toLocalDateTime().toString()) + "Z");
         switch (scenario) {
             case "burst":
                 publishEvents = foreignScenario_.generateEventsForBurstMode(events, scenario);
+                waitForSceduleTime(startTime);
                 publishEvents(publishEvents, burst_, timeDelay_, output_, zone_);
                 break;
             case "group-burst":
                 publishEvents = foreignScenario_.generateEventsForGroupBurstMode(events, scenario);
+                waitForSceduleTime(startTime);
                 publishEvents(publishEvents, burst_, timeDelay_, output_, zone_);
                 break;
             default:
@@ -280,45 +283,40 @@ class ForeignSimulatorEngine {
                                              PropertyMap scenarioParameters) throws PropertyNotExpectedType, SimulatorException {
         String repeatModeScenario = scenarioParameters.getString("mode");
 
-        PropertyArray publishEvents = new PropertyArray();
+        PropertyArray events_ = new PropertyArray();
         if(repeatModeScenario.equals("burst"))
-            publishEvents = foreignScenario_.generateEventsForBurstMode(events, repeatModeScenario);
+            events_ = foreignScenario_.generateEventsForBurstMode(events, repeatModeScenario);
 
         else if (repeatModeScenario.equals("group-burst"))
-            publishEvents = foreignScenario_.generateEventsForGroupBurstMode(events, repeatModeScenario);
+            events_ = foreignScenario_.generateEventsForGroupBurstMode(events, repeatModeScenario);
 
+        String startTime = parameters.getOrDefault("start-time", scenarioParameters.getString("start-time"));
+        waitForSceduleTime(startTime);
 
-        String clockModeCounter = parameters.getOrDefault("counter", null);
-        String clockModeDuration = parameters.getOrDefault("duration", null);
-        String clockModeStartTime = parameters.getOrDefault("start-time", null);
         String clockMode = "";
-
-        if(clockModeStartTime != null)
-            clockMode = "start-time";
-
-        if (clockModeCounter != null)
+        if (parameters.getOrDefault("counter", null) != null)
             clockMode = "counter";
 
-        if(clockModeDuration != null)
+        if(parameters.getOrDefault("duration", null) != null)
             clockMode = "duration";
 
         if(clockMode.isEmpty())
             clockMode = scenarioParameters.getString("clock-mode");
 
         if(clockMode.equals("start-time")) {
-            clockModeStartTime = parameters.getOrDefault("start-time", scenarioParameters.getString("start-time"));
-            waitForSceduleTime(clockModeStartTime);
+            while(true)
+                publishEvents(events_, burst_, timeDelay_, output_, zone_);
         }
 
         if(clockMode.equals("counter")) {
-            clockModeCounter = parameters.getOrDefault("counter", scenarioParameters.getString("counter"));
+            String clockModeCounter = parameters.getOrDefault("counter", scenarioParameters.getString("counter"));
             long counterL = Long.parseLong(clockModeCounter);
-            publishEventsCounterMode(publishEvents, counterL);
+            publishEventsCounterMode(events_, counterL);
         }
         else if(clockMode.equals("duration")) {
-            clockModeDuration = parameters.getOrDefault("duration", scenarioParameters.getString("duration"));
+            String clockModeDuration = parameters.getOrDefault("duration", scenarioParameters.getString("duration"));
             long durationL = Long.parseLong(clockModeDuration);
-            publishEventsDurationMode(publishEvents, durationL);
+            publishEventsDurationMode(events_, durationL);
         }
     }
 
@@ -445,7 +443,9 @@ class ForeignSimulatorEngine {
     private void waitForSceduleTime(String startTime) {
         startTime = startTime.replace(" ","T");
         LocalDateTime startTimeZ = ZonedDateTime.parse(startTime).toLocalDateTime();
+        log_.info("Scenario start-time = " + startTimeZ);
         LocalDateTime currentTime = ZonedDateTime.now(ZoneId.systemDefault()).toLocalDateTime();
+        log_.info("Scenario current-time = " + currentTime);
         Duration diffTime =Duration.between(currentTime, startTimeZ);
         delayMicroSecond(diffTime.toSeconds() * 1000 * 1000);
     }
