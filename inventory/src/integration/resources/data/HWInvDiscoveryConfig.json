@@ -22,7 +22,7 @@
       "getHWInventoryUpdate": {
         "endpoint": "http://localhost:3000",
         "verb": "GET",
-        "resource": "/Inventory/Hardware/"
+        "resource": "/Inventory/Hardware/Query/"
       },
       "getHWInventoryHistory": {
         "endpoint": "http://localhost:3000",

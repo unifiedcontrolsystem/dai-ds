@@ -28,7 +28,7 @@
       "getHWInventoryUpdate": {
         "endpoint": "http://api-gw-service-nmn.local:8080",
         "verb": "GET",
-        "resource": "/Inventory/Hardware/"
+        "resource": "/Inventory/Hardware/Query/"
       },
       "getHWInventoryHistory": {
         "endpoint": "http://api-gw-service-nmn.local:8080",
