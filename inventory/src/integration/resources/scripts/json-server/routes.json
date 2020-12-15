@@ -2,6 +2,6 @@
   "/Inventory/Hardware" : "/",
   "/Inventory/Hardware/History" : "/history_all",
   "/Inventory/Hardware/History?start_time=*" : "/updateHistory/$1",
-  "/Inventory/Hardware/all" : "/all",
+  "/Inventory/Hardware/Query/all" : "/all",
   "/Inventory/Hardware/*": "/updatedLocations/$1"
 }
