@@ -1682,7 +1682,7 @@ public class AdapterDaiMgr {
 
                 // Detect and handle any nodes that are "stuck" shutting down / halting
                 // (checks for nodes that have been in halting state for NodeMaxShuttingDownInterval or more minutes and handles any outliers).
-                checkNodesStuckShuttingDown();
+//                checkNodesStuckShuttingDown();    //TODO: Revisit after the current milestone
 
                 // Periodically log a "DaiMgr Proof of Life" operation so that the Mother Superior (MoS) DAI Manager's backup instance knows this MoS DAI Mgr instance is still alive.
                 logDaimgrProofOfLife();
