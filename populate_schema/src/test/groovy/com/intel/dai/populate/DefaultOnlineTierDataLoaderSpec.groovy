@@ -52,7 +52,7 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
     }
 
     def "Test populateRasEventMetaData"() {
-        underTest_.populateRasEventMetaData("../config-files/RasEventMetaData.json")
+        underTest_.populateRasEventMetaData("../configurations/common/RasEventMetaData.json")
         expect: true
     }
 
@@ -169,8 +169,8 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         client_.callProcedure("ComputeNodeCount") >> buildScalarResponse(value, ClientResponse.SUCCESS)
         client_.callProcedure("UCSCONFIGVALUE.select", "UcsLogfileDirectory") >>
                 buildUcsValueResponse("", ClientResponse.SUCCESS, true)
-        expect: underTest_.doPopulate("localhost", "../config-files/SystemManifest.json",
-                "../config-files/MachineConfig.json", "../config-files/RasEventMetaData.json") == 1
+        expect: underTest_.doPopulate("localhost", "../configurations/eventsim/SystemManifest.json",
+                "../configurations/eventsim/MachineConfig.json", "../configurations/eventsim/RasEventMetaData.json") == 1
         where:
         value || result
         0     || 0

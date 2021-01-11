@@ -111,6 +111,32 @@ __NOTE:__ Examine the docker-build/Dockerfile for how it's done for a docker
 
 Run Requirements and Instructions (Deployment)
 =================================================
+
+Packages (RPMs shown but there are .deb equivelents)
+---------
+<table BORDER=2>
+<tr><th>Package Name</th><th>Required</th><th>Description</th></tr>
+<tr><td>dai-{version}.noarch.rpm</td><td>Yes</td><td>This package contains the istallation of the DAI-DS application.</td></tr>
+<tr><td>dai-3rd-party-{version}.noarch.rpm</td><td>No*</td><td>This package contains the docker images and docker-compoose YAML files that are used for testing or quick trials. This includes VoltDB, Postgres DB, and RabbitMQ containers.</td></tr>
+<tr><td>dai-cli-{version}.noarch.rpm            </td><td>Yes</td><td></td></tr>
+<tr><td>dai-eventsim-cli-{version}.noarch.rpm   </td><td>No*</td><td></td></tr>
+<tr><td>dai-eventsim-config-{version}.noarch.rpm</td><td>No*</td><td></td></tr>
+<tr><td>dai-eventsim-server-{version}.noarch.rpm</td><td>No**</td><td></td></tr>
+<tr><td>dai-hw1-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
+<tr><td>dai-hw2-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
+<tr><td>dai-hw3-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
+<tr><td>dai-postgres-schema-{version}.noarch.rpm</td><td>Yes***</td><td></td></tr>
+<tr><td>dai-volt-schema-{version}.noarch.rpm    </td><td>Yes***</td><td></td></tr>
+</table>
+<ul>
+<li>(*)&nbsp;&nbsp;&nbsp; When testing with eventsim or using eventsim for evaluation these must be installed. On a real system voltDB, Postgres, and RabbitMQ servers must manually be installed.</li>
+<li>(**)&nbsp;&nbsp; When using Eventsim for trial or testing the eventsim-server, eventsim-cli, and eventsim-config should be installed.</li>
+<li>(***) X</li>
+</ul>
+
+Use cases for installation
+---------------------------
+
 Installers to use after build:
 ```
 build/distributions/install-docker_3rd_party_{version}.sh

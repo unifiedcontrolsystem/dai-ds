@@ -5,7 +5,6 @@ import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
-import com.sun.istack.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +21,6 @@ public class BootImages {
      * @return boot images data
      * @throws SimulatorException when unable to find configuration file or process data.
      */
-    @NotNull
     PropertyDocument getBootImages() throws SimulatorException {
         try {
             return processData(readConfigFile(bootImagesConfigFile_));
@@ -38,7 +36,6 @@ public class BootImages {
      * @return boot images data for a bootImageId
      * @throws SimulatorException when unable to find configuration file or process data.
      */
-    @NotNull
     PropertyDocument getBootImageForId(String bootImageId) throws SimulatorException {
         try {
             return processDataForImageId(processData(readConfigFile(bootImagesConfigFile_)), bootImageId);
@@ -54,7 +51,7 @@ public class BootImages {
      * @param bootImagesConfigFile location of boot images configuration file.
      * @throws SimulatorException when unable to set the location of boot images configuration file.
      */
-    void setBootImagesConfigFile(@NotNull final String bootImagesConfigFile) throws SimulatorException {
+    void setBootImagesConfigFile(final String bootImagesConfigFile) throws SimulatorException {
         if (bootImagesConfigFile == null || bootImagesConfigFile.isEmpty())
             throw new SimulatorException("Invalid or null boot images config file.");
         bootImagesConfigFile_ = bootImagesConfigFile;

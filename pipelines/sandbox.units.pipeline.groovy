@@ -111,7 +111,8 @@ pipeline {
                     steps {
                         script {
                             utilities.cleanWithGit()
-                            utilities.invokeGradleNoRetries("clean build")
+                            utilities.invokeGradleNoRetries("clean")
+                            utilities.invokeGradleNoRetries("build")
                         }
                     }
                 }
@@ -139,7 +140,7 @@ pipeline {
                                 includes: 'data/db/*.sql build/distributions/',
                                 targetLocation: 'build/distributions')])    // for database debugging
 
-                        archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.s*'
+                        archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.rpm'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
                     }
                 }

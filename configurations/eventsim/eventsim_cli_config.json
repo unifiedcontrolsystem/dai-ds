@@ -1,4 +1,4 @@
 {
   "rest_server_address" : "am01-nmn.local",
-  "rest_server_port" : "4567"
+  "rest_server_port" : "8080"
 }

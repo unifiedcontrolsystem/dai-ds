@@ -81,6 +81,7 @@ public class NetworkListenerCore {
         try {
             result = runMainLoop();
         } catch(RuntimeException e) {
+            log_.exception(e);
             result = 2;
         }
 
