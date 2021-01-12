@@ -87,6 +87,7 @@ pipeline {
                                 targetLocation: 'build/distributions')])    // for database debugging
 
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.rpm'
+                        archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/cleanup_machine.sh'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/reports/**'
                     }
                 }
