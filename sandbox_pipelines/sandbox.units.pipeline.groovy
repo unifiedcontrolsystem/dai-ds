@@ -88,16 +88,14 @@ pipeline {
                     }
                 }
                 stage('Pytests') {
-                    options { catchError(message: "Pytests failed", stageResult: 'UNSTABLE', buildResult: 'SUCCESS') }
+                    options { catchError(message: "Pytests failed", stageResult: 'FAILURE', buildResult: 'FAILURE') }
                     steps {
-                        dir('cli/cli') {
-                            sh 'pytest . --cov-config=.coveragerc --cov=cli --cov-report term-missing' +
-                                    ' --cov-report xml:results.xml --cov-report html:coverage-report.xml --fulltrace'
-                        }
+                        script { utilities.invokeGradleNoRetries("testPython") }
                     }
                 }
                 stage('Quick Unit Tests') {
                     when { expression { "${params.QUICK_BUILD}" == 'true' } }
+                    options { catchError(message: "Quick Unit Tests failed", stageResult: 'FAILURE', buildResult: 'FAILURE') }
                     steps {
                         // Quick build will not produce artifacts for components not tested
                         // So, functional tests cannot use these artifacts
@@ -108,6 +106,7 @@ pipeline {
                 }
                 stage('Unit') {
                     when { expression { "${params.QUICK_BUILD}" == 'false' } }
+                    options { catchError(message: "Full Unit Tests failed", stageResult: 'FAILURE', buildResult: 'FAILURE') }
                     steps {
                         script {
                             utilities.cleanWithGit()
