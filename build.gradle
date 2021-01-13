@@ -2148,10 +2148,11 @@ DAI_USE_BENCHMARKING=false"""
 MACHINECONFIG=${etc_dir}/MachineConfig.json
 HOSTNAME=\$(cat ${etc_dir}/volt.hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
+LOCATION=\$(cat ${etc_dir}/daiManager.location)
 CLASS="com.intel.dai.AdapterDaiMgr"
 LOGNAME="AdapterDaiMgr.log"
 
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 """
         new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
 #
