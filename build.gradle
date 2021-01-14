@@ -2770,11 +2770,11 @@ exit \$?
             commandLine "python3", "setup.py", "bdist_wheel"
         }
         copy {
-            from("${projectDir}/ucs_cli/dist/")
+            from("${projectDir}/cli/dist/")
             into("${buildDir}/tmp")
         }
-        delete("${projectDir}/ucs_cli/dist", "${projectDir}/ucs_cli/eventsim_cli.egg-info",
-                "${projectDir}/ucs_cli/build")
+        delete("${projectDir}/cli/dist", "${projectDir}/cli/eventsim_cli.egg-info",
+                "${projectDir}/cli/build")
     }
     summary = 'The DAI CLI Installer.'
     release = "${packageRelease}"
@@ -2843,11 +2843,11 @@ exit \$?
             commandLine "python3", "setup.py", "bdist_wheel"
         }
         copy {
-            from("${projectDir}/ucs_cli/dist/")
+            from("${projectDir}/cli/dist/")
             into("${buildDir}/tmp")
         }
-        delete("${projectDir}/ucs_cli/dist", "${projectDir}/ucs_cli/eventsim_cli.egg-info",
-                "${projectDir}/ucs_cli/build")
+        delete("${projectDir}/cli/dist", "${projectDir}/cli/eventsim_cli.egg-info",
+                "${projectDir}/cli/build")
     }
     summary = 'The DAI CLI Installer.'
     release = "${packageRelease}"
