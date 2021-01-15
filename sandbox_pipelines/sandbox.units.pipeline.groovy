@@ -135,14 +135,11 @@ pipeline {
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+                        zip archive: true, dir: 'data/db', glob: '*.sql', zipFile: 'sql-files-for-debugging.zip'
 
                         fileOperations([fileCopyOperation(
                                 includes: 'cleanup_machine.sh',
-                                targetLocation: 'build/distributions')])    // for clean other test machines
-
-                        fileOperations([fileCopyOperation(
-                                includes: 'data/db/*.sql build/distributions/',
-                                targetLocation: 'build/distributions')])    // for database debugging
+                                targetLocation: 'build/distributions')])    // for cleaning other functional test machines
 
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.rpm'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/cleanup_machine.sh'
