@@ -21,6 +21,11 @@ pipeline {
          * You do NOT need to create the following in the Jenkins GUI by hand.  This pipeline will create the
          * Jenkins GUI.  The UI elements will be available after the first pipeline run.
          **/
+        string(name: 'FUNCTIONAL_TEST_TIMEOUT_MINUTES', defaultValue: '180',
+                description: 'Time limit of functional tests in minutes.')
+        booleanParam(name: 'FUNCTIONAL_TEST_VERBOSE_MODE', defaultValue: false,
+                description: 'Always display stdio and stderr.')
+
         string(name: 'reason', defaultValue: 'developer build',
                 description: 'Reason for launching this build.')
 
@@ -31,7 +36,7 @@ pipeline {
         string(name: 'functionalTestRepository',
                 defaultValue: 'ssh://sid-gerrit.devtools.intel.com:29418/css/dai_val',
                 description: 'Repository, perhaps your GitHub fork.')
-        string(name: 'functionalTestBranch', defaultValue: 'sandbox',
+        string(name: 'functionalTestBranch', defaultValue: 'nre',
                 description: 'Branch, perhaps the branch on which you are developing.')
 
         string(name: 'functionalAgent', defaultValue: 'FUNCTIONAL', description: 'Enter your FUNCTIONAL test machine')
@@ -153,7 +158,9 @@ pipeline {
                                         string(name: 'branch', value: "${params.functionalTestBranch}"),
                                         string(name: 'INSTALLER_SOURCE', value: "${JOB_BASE_NAME}"),
                                         string(name: 'tag', value: "${params.functionalTestTag}"),
-                                        string(name: 'AGENT', value: "${params.functionalAgent}")
+                                        string(name: 'AGENT', value: "${params.functionalAgent}"),
+                                        string(name: 'TIMEOUT_MINUTES', value: "${params.FUNCTIONAL_TEST_TIMEOUT_MINUTES}"),
+                                        string(name: 'VERBOSE_MODE', value: "${params.FUNCTIONAL_TEST_VERBOSE_MODE}")
                                 ],
                                 quietPeriod: 0, wait: false
                     }
