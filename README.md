@@ -109,33 +109,229 @@ __NOTE:__ Examine the docker-build/Dockerfile for how it's done for a docker
     ```
 
 
-Run Requirements and Instructions (Deployment)
-=================================================
+Run Requirements and Install Instructions (Deployment)
+=======================================================
 
-Packages (RPMs shown but there are .deb equivelents)
----------
-<table BORDER=2>
-<tr><th>Package Name</th><th>Required</th><th>Description</th></tr>
-<tr><td>dai-{version}.noarch.rpm</td><td>Yes</td><td>This package contains the istallation of the DAI-DS application.</td></tr>
-<tr><td>dai-3rd-party-{version}.noarch.rpm</td><td>No*</td><td>This package contains the docker images and docker-compoose YAML files that are used for testing or quick trials. This includes VoltDB, Postgres DB, and RabbitMQ containers.</td></tr>
-<tr><td>dai-cli-{version}.noarch.rpm            </td><td>Yes</td><td></td></tr>
-<tr><td>dai-eventsim-cli-{version}.noarch.rpm   </td><td>No*</td><td></td></tr>
-<tr><td>dai-eventsim-config-{version}.noarch.rpm</td><td>No*</td><td></td></tr>
-<tr><td>dai-eventsim-server-{version}.noarch.rpm</td><td>No**</td><td></td></tr>
-<tr><td>dai-hw1-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
-<tr><td>dai-hw2-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
-<tr><td>dai-hw3-config-{version}.noarch.rpm     </td><td>No**</td><td></td></tr>
-<tr><td>dai-postgres-schema-{version}.noarch.rpm</td><td>Yes***</td><td></td></tr>
-<tr><td>dai-volt-schema-{version}.noarch.rpm    </td><td>Yes***</td><td></td></tr>
-</table>
+Pre-requisites:
+----------------
+<ol>
+<li>System must have at least 32GB of RAM and 8 cores to run smoothly.</li>
+<li>Java 11 JDK</li>
+<li>The "curl" program must be installed on DAI-DS hosts.</li>
+<li>Both docker and docker-compose must be installed and configured for the root user if using 3rd party docker components.</li>
+<li>ALL configuration files changed to support the target system. This includes:</li>
 <ul>
-<li>(*)&nbsp;&nbsp;&nbsp; When testing with eventsim or using eventsim for evaluation these must be installed. On a real system voltDB, Postgres, and RabbitMQ servers must manually be installed.</li>
-<li>(**)&nbsp;&nbsp; When using Eventsim for trial or testing the eventsim-server, eventsim-cli, and eventsim-config should be installed.</li>
-<li>(***) X</li>
+<li>SystemManifest.json</li>
+<li>MachineConfig.json</li>
+<li>NearlineConfig.json</li>
+<li>ProviderMonitoringNetworkForeignBus.json</li>
+<li>ProviderProvisionerNetworkForeignBus.json</li>
+<li>LocationTranslationMap.json - <i><b>If the contents of this file do not correlate with
+                                    the MachineConfig.json file's contents, the
+                                    provisioning and monitoring providers may not
+                                    function as expected. Make sure ALL Foreign
+                                    names match a DAI name and no "location" is missing
+                                    or unexpected.</b></i></li>
+</ul>                                    
+<li>The real target API (or EventSim container) must be available for the
+   ProviderMonitoringNetworkForeignBus and ProviderProvisionerNetworkForeignBus
+   to connect.</li>
+<li>If the deployment system for the first use case below does not have internet access you must download and save the following docker images from Docker Hub then copy and reload them onto the target system's local docker repository:</li>
+<ul>
+<li>postgres:11.4</li>
+<li>rabbitmq:3.7-management</li>
+<li>voltdb/voltdb-community:9.2.1</li>
+<li>openjdk:11.0.5-jdk</li>
+</ul>
+<li>Python 3.5 or 3.6 plus the following PIP packages (for hosts installing cli or eventsim-cli):</li>
+<ul>
+<li>requests</li>
+<li>clustershell</li>
+<li>python-dateutil</li>
+<li>progress</li>
+<li>texttable</li>
+<li>timeout-decorator</li>
+</ul>
+</ol>
+
+Packages (.rpm files are shown but there are .deb equivelents if enabled in the build<sup>$</sup>)
+---------------------------------------------------------------------------------------------------
+<table BORDER=2>
+<tr style="background-color: navy; color: yellow; font-style: italic"><th>Package Name</th><th>Required</th><th>Description</th></tr>
+<tr><td>dai-{version}.noarch.rpm</td><td>Yes</td><td>This package contains the istallation of the DAI-DS application. A configuration RPM must be installed for the DAI-DS to function correctly.</td></tr>
+<tr><td>dai-3rd-party-{version}.noarch.rpm</td><td>No<sup>*</sup></td><td>This package contains the docker images and docker-compoose YAML files that are used for testing or quick trials. This includes VoltDB, Postgres DB, and RabbitMQ containers. Starting these contains is turnkey and they will all be ready for use.</td></tr>
+<tr><td>dai-cli-{version}.noarch.rpm            </td><td>Yes</td><td>This package contains the UCS CLI program minus it's configuration. A configuration RPM must be installed.</td></tr>
+<tr><td>dai-hw1-config-{version}.noarch.rpm     </td><td>No<sup>**</sup></td><td>This package contains the DAI-DS configuration for hardware configuration #1. Only one configuration can be installed on the DAI-DS host at a time!</td></tr>
+<tr><td>dai-hw2-config-{version}.noarch.rpm     </td><td>No<sup>**</sup></td><td>This package contains the DAI-DS configuration for hardware configuration #2. Only one configuration can be installed on the DAI-DS host at a time!</td></tr>
+<tr><td>dai-hw3-config-{version}.noarch.rpm     </td><td>No<sup>**</sup></td><td>This package contains the DAI-DS configuration for hardware configuration #3. Only one configuration can be installed on the DAI-DS host at a time!</td></tr>
+<tr><td>dai-postgres-schema-{version}.noarch.rpm</td><td>Yes<sup>***</sup></td><td>This package contains stuff to populate the postgres schema. It must be installed on the same server with the postgres database install. This need not be the same location as VoltDB or DAI.</td></tr>
+<tr><td>dai-volt-schema-{version}.noarch.rpm    </td><td>Yes<sup>***</sup></td><td>This package contains the schema files and loadable JAR files for VoltDB setup. This does not contain the <span style="font-family: monospace; text-decoration: underline">loadVoltDbInitialData.sh</span> script. This is intended to be loaded on the VoltDB server host where the sqlcmd is present after VoltDB install is completed. The <span style="font-family: monospace; text-decoration: underline">loadVoltDbInitialData.sh</span> script can be run from the DAI-DS installed host remotely to populate the schema with initial data.</td></tr>
+<tr style="background-color: navy; color: yellow; font-style: italic"><th>EventSim Related</th><th></th><th></th></tr>
+<tr><td>dai-eventsim-server-{version}.noarch.rpm</td><td>No<sup>**</sup></td><td>This package contains the EventSim REST server that takes rquests from the EventSim CLI and simulates the target systems behavior wrt telemetry, events, inventory, etc...</td></tr>
+<tr><td>dai-eventsim-cli-{version}.noarch.rpm   </td><td>No<sup>*</sup></td><td>This package contains the EventSim CLI for simulating scenarios during simulation. The EventSim configuration RPM must be installed for EventSim to function correctly.</td></tr>
+<tr><td>dai-eventsim-config-{version}.noarch.rpm</td><td>No<sup>*</sup></td><td>This package contains the DAI-DS configuration for EventSim using a small machine configuration. Only one configuration can be installed on the DAI-DS host at a time!</td></tr>
+</table>
+<ul style="list-style-type:none">
+<li><span style="font-family: monospace"><sup>$</sup>&nbsp;&nbsp;&nbsp;</span>To enable Debian compatible packages add "systemProp.includeDebianPackages=true" to your ~/.gradle/gradle.properties file.</li>
+<li><span style="font-family: monospace"><sup>*</sup>&nbsp;&nbsp;&nbsp;</span>When testing with EventSim or using EventSim for evaluation these must be installed. On a real system voltDB, Postgres, and RabbitMQ servers must manually be installed.</li>
+<li><span style="font-family: monospace"><sup>**</sup>&nbsp;&nbsp;</span>When using Eventsim for trial or testing the EventSim server, EventSim CLI, and EventSim configuration should be installed.</li>
+<li><span style="font-family: monospace"><sup>***</sup>&nbsp;</span>These are not installed on DAI-DS systems unless DAI-DS is also on a host with the Postgres or VoltDB databases.</li>
 </ul>
 
-Use cases for installation
----------------------------
+Use Cases for Installation
+===========================
+Installation of all DAI-DS packages are in the <b>/opt/ucs/**</b> tree.
+
+__NOTE:__ This single host using eventsim scenario's below run on a single system out-of-the box if you edit the
+___/etc/hosts___ file and add "_am01-nmn.local_" and "_am01-nmn_" as an aliases
+for the system. Then stop using the services (see below). If you are behind a proxy
+please make sure that the no_proxy and NO_PROXY environmental variables have the
+"_.local_" domain excluded from the proxy lookups. The non-domain alias name "_am01-nmn_"
+is required only for the voltdb container to start correctly.
+
+Testing and Evaluation on One Host (Docker and Eventsim)
+---------------------------------------------------------
+<dl>
+<dt style="font-style: italic">Scenario:</dt>
+<dd>As stated in the title this is a single system for testing or evaluation using docker for third party copmponents.</dd>
+<dt style="font-style: italic">Install DAI-DS Packages:</dt>
+<dd><ul style="list-style: none">
+<li>dai-3rd-party-{version}.noarch.rpm</li>
+<li>dai-{version}.noarch.rpm</li>
+<li>dai-cli-{version}.noarch.rpm</li>
+<li>dai-eventsim-server-{version}.noarch.rpm</li>
+<li>dai-eventsim-cli-{version}.noarch.rpm</li>
+<li>dai-eventsim-config-{version}.noarch.rpm</li>
+</ul></dd>
+<dt style="font-style: italic">Third Party Component Setup:</dt>
+<dd><ol>
+<li># systemctl start dai-postgres.service</li>
+<li># systemctl start dai-rabbitmq.service</li>
+<li># systemctl start dai-voltdb.service</li>
+<li># systemctl start dai-manager.service</li>
+<li># systemctl start dai-eventsim.service</li>
+</ol></dd>
+</dl>
+
+Testing and Evaluation on One Host (Non-Docker and Eventsim)
+-------------------------------------------------------------
+<dl>
+<dt style="font-style: italic">Scenario:</dt>
+<dd>As stated in the title this is a single system for testing or evaluation without using docker.</dd>
+<dt style="font-style: italic">Manually Install on your Host:</dt>
+<dd><ul style="list-style: none">
+<li>VoltDB 9.2.*</li>
+<li>PostgreSQL 11.4.*</li>
+<li>RabittMQ 3.7.*</li>
+</ul></dd>
+<dt style="font-style: italic">Install DAI-DS Packages:</dt>
+<dd><ul style="list-style: none">
+<li>dai-postgres-schema-{version}.noarch.rpm</li>
+<li>dai-volt-schema-{version}.noarch.rpm</li>
+<li>dai-{version}.noarch.rpm</li>
+<li>dai-cli-{version}.noarch.rpm</li>
+<li>dai-eventsim-server-{version}.noarch.rpm</li>
+<li>dai-eventsim-cli-{version}.noarch.rpm</li>
+<li>dai-eventsim-config-{version}.noarch.rpm</li>
+</ul></dd>
+<dt style="font-style: italic">Third Party Component Setup:</dt>
+<dd><ol>
+<li>Configure Postgres with users and "dai" database and restart postgres service on your host</li>
+<li>Configure and start RabbitMQ on your host</li>
+<li>Configure and start VoltDB on your host (make sure both locahhost and management IPs on this host are active)</li>
+<li>Populate VoltDB DB by running: <span style="font-family: monospace; font-weight: bold">/opt/ucs/share/for_voltdb/setupVoltDbSchema.sh</span></li>
+<li>Populate Postgres DB schema by running: <span style="font-family: monospace; font-weight: bold">/opt/ucs/share/for_postgres/setupInitialPostgresSchema.sh</span></li>
+</ol></dd>
+<dt style="font-style: italic">Start DAI-DS:</dt>
+<dd><ol>
+<li># systemctl start dai-manager.service</li>
+</ol></dd>
+</dl>
+
+Fully Separate Installs (Multi-host)
+-------------------------------------
+This procedure assumes you have a configuration for you machine layout already defined and called <b>my-config.noarch.rpm</b>.
+<dl>
+<dt style="font-style: italic">Scenario:</dt>
+<dd>This scenerio assumes that you have a separate host for each role in the DAI-DS system. We will define a VoltDB server host (voltdb), a RabbitMQ server host (rabbitmq), a Postgres DB server host (postgres), 2 DAI-DS software hosts (dai1 and dai2), and an administrator access node (admin). </dd>
+<dt style="font-style: italic">Install and Setup <b>postgres</b> Host:</dt>
+<dd><ol>
+<li>Install PostgreSQL 11.4.* on this host</li>
+<li>Configure Postgres with users and "dai" database and restart postgres service on this host</li>
+<li>Install <b>dai-postgres-schema-{version}.noarch.rpm</b></li>
+<li>Populate Postgres DB's schema by running: <span style="font-family: monospace; font-weight: bold">/opt/ucs/share/for_postgres/setupInitialPostgresSchema.sh</</ol></dd>
+<dt style="font-style: italic">Install and Setup <b>voltdb</b> Host:</dt>
+<dd><ol>
+<li>Install VoltDB 9.2.* on this host</li>
+<li>Install <b>dai-volt-schema-{version}.noarch.rpm</b> on this host</li>
+<li>Install <b>my-config.noarch.rpm</b> on this host</li>
+<li>Configure and start VoltDB on this host (make sure both locahhost and management IPs on this host are active)</li>
+<li>Populate VoltDB DB by running: <span style="font-family: monospace; font-weight: bold">/opt/ucs/share/for_voltdb/setupVoltDbSchema.sh</span></li>
+</ol></dd>
+<dt style="font-style: italic">Install <b>rabbitmq</b> Host:</dt>
+<dd><ol>
+<li>Install RabittMQ 3.7.*</li>
+<li>Configure for remote access and start RabbitMQ on your host</li>
+</ol></dd>
+<dt style="font-style: italic">Install <b>da1</b> and <b>dai2</b> Hosts:</dt>
+<dd><ol>
+<li>Install <b>dai-{version}.noarch.rpm</b> on hosts dai1 and dai2</li>
+<li>Install <b>my-config.noarch.rpm</b> on hosts dai1 and dai2</li>
+</ol></dd>
+<dt style="font-style: italic">Install <b>admin</b> Host:</dt>
+<dd><ol>
+<li>Install <b>dai-cli-{version}.noarch.rpm</b> on this host</li>
+<li>Install <b>my-config.noarch.rpm</b> on this host</li>
+</ol></dd>
+<dt style="font-style: italic">Start DAI-DS on dai1 and dai2:</dt>
+<dd><ol>
+<li># systemctl start dai-manager.service</li>
+</ol></dd>
+</dl>
+
+Checking for Running DAI Components:
+-------------------------------------
+If your host system has the Java JDK 8 or newer installed (JRE alone is not enough) then there is an included
+script called ___show_adapters___ which will show a detailed list of running DAI-DS java processes. This tool
+must be run as the root user.
+
+If you don't have a new Java JDK installed, and are using the services then use the normal systemctl tool to
+check the status of the services.
+
+Log Output:
+------------
+Log output in either execution case will be in:
+<ul>
+<li><b>/opt/ucs/log/*</b> for EventSim and DAI components log files.</li>
+<li><b>/opt/ucs/docker/tier1/log/*</b> for voltdb and the schema population containers log files.</li>
+<li>Postgres logs are not available at this time.</li>
+</ul>
+
+Uninstalling DAI and Third Party Components:
+--------------------------------------------
+Since all DAI-DS components are RPMs (or debian packages) use the normal method of uninstallation for your distribution. Please not that all services will be stopped gracefully during uninstallation. Log files will remain in the /opt/ucs.** tree.
+
+Notes When Using Docker Containers:
+------------------------------------
+* Postgres persistent data is stored in /opt/ucs/docker/tier2/data/pgdata
+    + To clear the data and start over do the following as root:
+        ```bash
+        # systemctl stop dai-manager dai-voltdb dai-rabbitmq dai-postgres
+        # rm -rf /opt/ucs/docker/tier2/data/pgdata
+        ```
+    + To backup the data (as root):
+        ```bash
+        # systemctl stop dai-manager dai-voltdb dai-rabbitmq dai-postgres
+        # recursively copy/tar /opt/ucs/docker/tier2/data/pgdata
+        ```
+* If you start all services together with one command, expect errors and
+  restarts of the dai-manager service until all other services are running and setup.
+
+<!--
+<hr />
+<hr />
+<hr />
+<h1>OLD Install Stuff Below</h1>
 
 Installers to use after build:
 ```
@@ -272,3 +468,4 @@ Notes:
         ```
 * If you start all services together with one command, expect errors and
   restarts of the dai-manager service until all other services are running.
+-->
