@@ -591,7 +591,13 @@ class ViewCli(object):
 
         def pretty_format_response(response_str, component=None):
             response_dict = json.loads(response_str)
-            node_location_hist_list = response_dict['data']
+
+            try:
+                node_location_hist_list = response_dict['data']
+            except KeyError:
+                # Error message is printed by the http client code
+                node_location_hist_list = []
+
             return convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component)
 
         def extract_component_location_dict(hw_info_dict, component):

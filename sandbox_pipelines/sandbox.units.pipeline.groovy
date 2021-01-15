@@ -21,6 +21,11 @@ pipeline {
          * You do NOT need to create the following in the Jenkins GUI by hand.  This pipeline will create the
          * Jenkins GUI.  The UI elements will be available after the first pipeline run.
          **/
+        string(name: 'FUNCTIONAL_TEST_TIMEOUT_MINUTES', defaultValue: '180',
+                description: 'Time limit of functional tests in minutes.')
+        booleanParam(name: 'FUNCTIONAL_TEST_VERBOSE_MODE', defaultValue: false,
+                description: 'Always display stdio and stderr.')
+
         string(name: 'reason', defaultValue: 'developer build',
                 description: 'Reason for launching this build.')
 
@@ -31,7 +36,7 @@ pipeline {
         string(name: 'functionalTestRepository',
                 defaultValue: 'ssh://sid-gerrit.devtools.intel.com:29418/css/dai_val',
                 description: 'Repository, perhaps your GitHub fork.')
-        string(name: 'functionalTestBranch', defaultValue: 'sandbox',
+        string(name: 'functionalTestBranch', defaultValue: 'nre',
                 description: 'Branch, perhaps the branch on which you are developing.')
 
         string(name: 'functionalAgent', defaultValue: 'FUNCTIONAL', description: 'Enter your FUNCTIONAL test machine')
@@ -130,14 +135,11 @@ pipeline {
                         zip archive: true, dir: '', glob: '**/main/**/*.java', zipFile: 'src.zip'
                         zip archive: true, dir: '', glob: '**/build/classes/java/main/**/*.class', zipFile: 'classes.zip'
                         zip archive: true, dir: '', glob: '**/test-results/test/*.xml', zipFile: 'unit-test-results.zip'
+                        zip archive: true, dir: 'data/db', glob: '*.sql', zipFile: 'sql-files-for-debugging.zip'
 
                         fileOperations([fileCopyOperation(
                                 includes: 'cleanup_machine.sh',
-                                targetLocation: 'build/distributions')])    // for clean other test machines
-
-                        fileOperations([fileCopyOperation(
-                                includes: 'data/db/*.sql build/distributions/',
-                                targetLocation: 'build/distributions')])    // for database debugging
+                                targetLocation: 'build/distributions')])    // for cleaning other functional test machines
 
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/*.rpm'
                         archiveArtifacts allowEmptyArchive: false, artifacts: 'build/distributions/cleanup_machine.sh'
@@ -153,7 +155,9 @@ pipeline {
                                         string(name: 'branch', value: "${params.functionalTestBranch}"),
                                         string(name: 'INSTALLER_SOURCE', value: "${JOB_BASE_NAME}"),
                                         string(name: 'tag', value: "${params.functionalTestTag}"),
-                                        string(name: 'AGENT', value: "${params.functionalAgent}")
+                                        string(name: 'AGENT', value: "${params.functionalAgent}"),
+                                        string(name: 'TIMEOUT_MINUTES', value: "${params.FUNCTIONAL_TEST_TIMEOUT_MINUTES}"),
+                                        string(name: 'VERBOSE_MODE', value: "${params.FUNCTIONAL_TEST_VERBOSE_MODE}")
                                 ],
                                 quietPeriod: 0, wait: false
                     }
