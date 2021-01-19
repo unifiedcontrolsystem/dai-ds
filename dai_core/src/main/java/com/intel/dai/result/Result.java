@@ -1,17 +1,17 @@
 package com.intel.dai.result;
 
-public class Result {
+public class Result<T> {
 
     private long returnCode;
-    private String message;
+    private T message;
 
-    public Result(long returnCode, String message) {
+    public Result(long returnCode, T message) {
         this.returnCode = returnCode;
         this.message = message;
     }
 
     public Result() {
-        this(0, "");
+        this(0, null);
     }
 
     public long getReturnCode() {
@@ -22,11 +22,11 @@ public class Result {
         this.returnCode = returnCode;
     }
 
-    public String getMessage() {
+    public T getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(T message) {
         this.message = message;
     }
 }

@@ -1,5 +1,5 @@
 {
-  "fullUrl": "http://am01-nmn.local.local:8080/apis/sma-telemetry/v1/stream/cray-fabric-telemetry?stream_id=dai-fabric-telemetry",
+  "fullUrl": "http://am01-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-fabric-telemetry?stream_id=dai-fabric-telemetry",
   "exchangeName": "ucs",
   "publishServerUrl": "amqp://am01-nmn.local",
   "tokenAuthProvider": null

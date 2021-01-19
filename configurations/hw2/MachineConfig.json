@@ -37,11 +37,11 @@
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM2",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRasForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRas $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "RAS",
-      "NumberOfInstances": 2
+      "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
@@ -107,6 +107,13 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "MotherSuperiorDaiMgr",
       "Queue": "X3001-AM2"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"RAS",
+      "WorkToBeDone":"HandleFillingInJobIdsAndControlOps",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
     },
     {
       "Parms": null,

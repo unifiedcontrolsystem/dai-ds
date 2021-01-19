@@ -1,18 +1,34 @@
 package com.intel.dai.inventory
 
 import com.intel.dai.dsapi.BootState
+import com.intel.dai.foreign_bus.CommonFunctions
 import com.intel.dai.network_listener.CommonDataFormat
 import com.intel.dai.network_listener.DataType
 import com.intel.dai.network_listener.NetworkListenerConfig
 import com.intel.dai.network_listener.NetworkListenerProviderException
 import com.intel.dai.network_listener.SystemActions
 import com.intel.logging.Logger
+import com.intel.properties.PropertyMap
 import spock.lang.Specification
 
 class NetworkListenerProviderForeignBusSpec extends Specification {
-    def underTest_
-    void setup() {
+    NetworkListenerProviderForeignBus underTest_
+    def setup() {
         underTest_ = new NetworkListenerProviderForeignBus(Mock(Logger))
+    }
+
+    def setupSpec() {
+        CommonFunctions.nodeMap_ = new PropertyMap()
+        CommonFunctions.reverseNodeMap_ = new PropertyMap()
+        CommonFunctions.nodeMap_.put("x3000c0s34b4n0", "R0-CB3-CN0")
+        CommonFunctions.nodeMap_.put("x3000c0s34b3n0", "R0-CB2-CN0")
+        CommonFunctions.reverseNodeMap_.put("R0-CB3-CN0", "x3000c0s34b4n0")
+        CommonFunctions.reverseNodeMap_.put("R0-CB2-CN0", "x3000c0s34b3n0")
+    }
+
+    def cleanupSpec() {
+        CommonFunctions.nodeMap_ = null
+        CommonFunctions.reverseNodeMap_ = null
     }
 
     def "initialize"() {

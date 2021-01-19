@@ -86,6 +86,14 @@ CREATE PROCEDURE
 CREATE PROCEDURE
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ComputeNodeSetWlmNodeState;
+-- Set a compute node's proof of life time to the specified value.
+CREATE PROCEDURE
+   PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.ComputeNodeSetProofOfLifeTs;
+-- Save new BIOS info into the DB for the specified compute node.
+CREATE PROCEDURE
+   PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.ComputeNodeSaveBiosInfo;
 
 -- Get the count of compute nodes that have the specified State.
 CREATE PROCEDURE ComputeNodeCountWithThisState
@@ -103,7 +111,7 @@ CREATE PROCEDURE ComputeNodeCount
 -- Get the Compute Node State for the specified compute node location.
 CREATE PROCEDURE ComputeNodeState
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
-   AS SELECT State FROM ComputeNode WHERE Lctn = ?;
+   AS SELECT State, WlmNodeState FROM ComputeNode WHERE Lctn = ?;
 -- Get the Compute Node's MacAddr for the specified node location.
 CREATE PROCEDURE ComputeNodeMacAddr
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
@@ -112,7 +120,7 @@ CREATE PROCEDURE ComputeNodeListLctnAndSeqNum
    AS SELECT Lctn, SequenceNumber FROM ComputeNode Order By Lctn;
 CREATE PROCEDURE ComputeNodeInfo
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
-   AS SELECT * FROM ComputeNode WHERE Lctn = ?;
+   AS SELECT * FROM ComputeNode WHERE Lctn=?;
 CREATE PROCEDURE ComputeNodeBasicInformation
    AS SELECT Lctn, HostName, SequenceNumber, Owner FROM ComputeNode Order By Lctn;
 CREATE PROCEDURE ServiceNodeBasicInformation
@@ -122,7 +130,7 @@ CREATE PROCEDURE ComputeNodeListLctnAndState
 CREATE PROCEDURE ComputeNodeListLctnAndHostname
    AS SELECT Lctn, HostName FROM ComputeNode Order By Lctn;
 CREATE PROCEDURE ComputeNodeListLctnHostnameAndBmcHostname
-   AS SELECT Lctn, HostName, BmcHostName FROM ComputeNode Order By Lctn;
+   AS SELECT Lctn, HostName, BmcHostName, Aggregator FROM ComputeNode Order By Lctn;
 -- Get the BootImageId of compute node
 CREATE PROCEDURE ComputeNodeGetBootImageId
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
@@ -142,6 +150,14 @@ CREATE PROCEDURE
 -- Get list of Aggregator nodes that have computenodes as children
 CREATE PROCEDURE ComputeNodeAggregators
    AS SELECT DISTINCT Aggregator FROM ComputeNode;
+-- Get the list of active Compute Nodes that have not recorded a proof of life message since the specified timestamp.
+CREATE PROCEDURE ComputeNodeListOfMissingProofOfLifeMsgs
+   AS SELECT Lctn, State, ProofOfLifeTimestamp FROM ComputeNode WHERE (State='A'  AND (ProofOfLifeTimestamp IS NULL  OR  ProofOfLifeTimestamp<?));
+-- Get the list of currently halting Compute Nodes that have been halting since the specified timestamp (i.e. can be used to find nodes stuck shutting down).
+CREATE PROCEDURE ComputeNodeListOfNodesStuckHalting
+   AS SELECT Lctn, State, DbUpdatedTimestamp FROM ComputeNode WHERE (State='H'  AND  DbUpdatedTimestamp<?);
+
+
 
 -- This stored procedure returns a single VoltTable:
 --    - that contains the Lctn, State, and BootImageId information for each of the nodes in the specified node list that are NOT booted with the specified BootImageId
@@ -161,10 +177,14 @@ CREATE PROCEDURE
 -- This stored procedure returns all the contents in the ComputeNode table
 CREATE PROCEDURE ComputeNodesList
    AS SELECT * FROM ComputeNode ORDER BY Lctn;
--- Get the inventory info for the specified compute node lctn - 0 rows returned means either a bad lctn string or lack of inventory info (null).
+-- Get the inventory info for the specified compute node lctn - 0 rows returned means either a bad lctn string or lack of inventory information (null).
 CREATE PROCEDURE ComputeNodeInventoryInfo
    PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
    AS SELECT ComputeNode.Lctn, ComputeNode.InventoryTimestamp, NodeInventory_History.InventoryInfo FROM ComputeNode INNER JOIN NodeInventory_History ON (ComputeNode.Lctn=NodeInventory_History.Lctn AND ComputeNode.InventoryTimestamp=NodeInventory_History.InventoryTimestamp) WHERE (ComputeNode.Lctn=? AND ComputeNode.InventoryTimestamp IS NOT NULL);
+-- Get the bios info for the specified compute node lctn - 0 rows returned means either a bad lctn string or lack of bios information (null).
+CREATE PROCEDURE ComputeNodeBiosInfo
+   PARTITION ON TABLE ComputeNode COLUMN Lctn PARAMETER 0
+   AS SELECT ComputeNode.Lctn, ComputeNode.InventoryTimestamp, NodeInventory_History.BiosInfo FROM ComputeNode INNER JOIN NodeInventory_History ON (ComputeNode.Lctn=NodeInventory_History.Lctn AND ComputeNode.InventoryTimestamp=NodeInventory_History.InventoryTimestamp) WHERE (ComputeNode.Lctn=? AND ComputeNode.InventoryTimestamp IS NOT NULL);
 
 
 
@@ -198,7 +218,7 @@ CREATE PROCEDURE
 CREATE PROCEDURE ServiceNodeListLctnAndHostname
    AS SELECT Lctn, HostName FROM ServiceNode Order By Lctn;
 CREATE PROCEDURE ServiceNodeListLctnHostnameAndBmcHostname
-   As SELECT Lctn, HostName, BmcHostName From ServiceNode Order By Lctn;
+   As SELECT Lctn, HostName, BmcHostName, Aggregator From ServiceNode Order By Lctn;
 -- Set the Service Node's state.
 CREATE PROCEDURE
    PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
@@ -234,6 +254,11 @@ CREATE PROCEDURE TempServiceNodeLctn
 CREATE PROCEDURE
    PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ServiceNodeSetOwner;
+-- Set a service node's proof of life time to the specified value.
+CREATE PROCEDURE
+   PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.ServiceNodeSetProofOfLifeTs;
+
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.ServiceNodeHistoryListOfStateAtTime;
 CREATE PROCEDURE ServiceNodeHistoryOldestTimestamp
@@ -248,7 +273,26 @@ CREATE PROCEDURE ServiceNodeCheckMacAddr
 CREATE PROCEDURE ServiceNodeInventoryInfo
    PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
    AS SELECT ServiceNode.Lctn, ServiceNode.InventoryTimestamp, NodeInventory_History.InventoryInfo FROM ServiceNode INNER JOIN NodeInventory_History ON (ServiceNode.Lctn=NodeInventory_History.Lctn AND ServiceNode.InventoryTimestamp=NodeInventory_History.InventoryTimestamp) WHERE (ServiceNode.Lctn=? AND ServiceNode.InventoryTimestamp IS NOT NULL);
+-- Get the bios info for the specified service node lctn - 0 rows returned means either a bad lctn string or lack of bios information (null).
+CREATE PROCEDURE ServiceNodeBiosInfo
+   PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
+   AS SELECT ServiceNode.Lctn, ServiceNode.InventoryTimestamp, NodeInventory_History.BiosInfo FROM ServiceNode INNER JOIN NodeInventory_History ON (ServiceNode.Lctn=NodeInventory_History.Lctn AND ServiceNode.InventoryTimestamp=NodeInventory_History.InventoryTimestamp) WHERE (ServiceNode.Lctn=? AND ServiceNode.InventoryTimestamp IS NOT NULL);
+CREATE PROCEDURE ServiceNodeInfo
+   PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
+   AS SELECT * FROM ServiceNode WHERE Lctn=?;
+-- Get the list of active Service Nodes that have not recorded a proof of life message since the specified timestamp.
+CREATE PROCEDURE ServiceNodeListOfMissingProofOfLifeMsgs
+   AS SELECT Lctn, State, ProofOfLifeTimestamp FROM ServiceNode WHERE (State='A'  AND (ProofOfLifeTimestamp IS NULL  OR  ProofOfLifeTimestamp<?));
+-- Get the list of currently halting Service Nodes that have been halting since the specified timestamp (i.e. can be used to find nodes stuck shutting down).
+CREATE PROCEDURE ServiceNodeListOfNodesStuckHalting
+   AS SELECT Lctn, State, DbUpdatedTimestamp FROM ServiceNode WHERE (State='H'  AND  DbUpdatedTimestamp<?);
+-- Save new BIOS info into the DB for the specified service node.
+CREATE PROCEDURE
+   PARTITION ON TABLE ServiceNode COLUMN Lctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.ServiceNodeSaveBiosInfo;
 
+CREATE PROCEDURE NonNodeHwListLctnHostname
+   As SELECT Lctn, Hostname, '' AS BmcHostname, Aggregator From NonNodeHw Order by Lctn;
 
 
 -- Store a triplet (Max, Min, Avg) of aggregated environmental telemetry that occurred for the specified location over the last interval.
@@ -274,6 +318,11 @@ CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.JobTerminated;
 CREATE PROCEDURE JobHistoryOldestTimestamp
    AS SELECT MIN(LastChgTimestamp) FROM Job_History;
+-- Get job information for a specified JobId.
+CREATE PROCEDURE
+   PARTITION ON TABLE Job COLUMN JobId PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.JobGetInfo;
+
 
 
 
@@ -295,7 +344,10 @@ CREATE PROCEDURE InternalCachedJobsRemoveExpiredJobs
 CREATE PROCEDURE InternalCachedJobsGetJobidForNodeLctnAndMatchingTimestamp
    PARTITION ON TABLE InternalCachedJobs COLUMN NodeLctn PARAMETER 0
    AS SELECT JobId FROM InternalCachedJobs WHERE ((NodeLctn=?) AND (StartTimestamp<=?) AND ((EndTimestamp IS NULL) OR (? <= EndTimestamp)));
-
+-- Get the JobId (if any) for the specified Node location that is active right now
+CREATE PROCEDURE InternalCachedJobsGetCurrentlyActiveJobidForNodeLctn
+   PARTITION ON TABLE InternalCachedJobs COLUMN NodeLctn PARAMETER 0
+   AS SELECT JobId FROM InternalCachedJobs WHERE (NodeLctn=? AND StartTimestamp<=NOW AND EndTimestamp IS NULL);
 -- Get the list of InternalCachedJobs information for jobs that may have been active at the specified time,
 -- this information will then be used when there are multiple entries that need to be checked for.
 -- Note: if there is only 1 entry to be checked for it is likely more efficient to use something like
@@ -307,7 +359,6 @@ CREATE PROCEDURE InternalCachedJobsGetJobidForNodeLctnAndMatchingTimestamp
 --       we want entries where the job's StartTimestamp <= the specified timestamp <= job's EndTimestamp)
 CREATE PROCEDURE InternalCachedJobsGetListOfActiveInternalCachedJobsUsingTimestamp
    AS SELECT * FROM InternalCachedJobs WHERE ((StartTimestamp<=?) AND ((EndTimestamp IS NULL) OR (? <= EndTimestamp))) ORDER BY NodeLctn, StartTimestamp;
-
 
 
 -- Handle processing that is necessary in the InternalJobInfo table so the JobInfo reflects that the job has started.
@@ -450,11 +501,13 @@ CREATE PROCEDURE WorkItemInfoNonBaseworkUsingAdaptertypeQueueState
 CREATE PROCEDURE WorkItemsForSmwAndSsnDaimgrs
    PARTITION ON TABLE WorkItem COLUMN WorkingAdapterType PARAMETER 0
    AS SELECT Queue, WorkingAdapterType, Id, State, WorkToBeDone, WorkingResults, DbUpdatedTimestamp FROM WorkItem WHERE (WorkingAdapterType=? AND WorkToBeDone In ('MotherSuperiorDaiMgr', 'ChildDaiMgr') AND State IN ('W', 'R')) Order By ID, DbUpdatedTimestamp;
-
 -- Get the work item information for work items of specified working adapter type, queue, and work to be done.
 CREATE PROCEDURE WorkItemInfoWrkadaptrtypeQueueWorktobddone
    PARTITION ON TABLE WorkItem COLUMN WorkingAdapterType PARAMETER 0
    AS SELECT * FROM WorkItem WHERE (WorkingAdapterType=? AND Queue=? AND WorkToBeDone=?);
+CREATE PROCEDURE WorkItemInfoWrkadaptrtypeWorktobddoneNotBaseWorkItem
+   PARTITION ON TABLE WorkItem COLUMN WorkingAdapterType PARAMETER 0
+   AS SELECT * FROM WorkItem WHERE (WorkingAdapterType=? AND Queue!='BaseWorkItem' AND WorkToBeDone=?);
 -- Get work item information for specified work item using WorkingAdapterType and WorkItemId.
 --     Note: WorkingAdapterType and WorkItemId together provide a unique result.  NO need to loop through a number of rows!!!
 CREATE PROCEDURE WorkItemInfoUsingWorkadaptertypeId
@@ -524,39 +577,40 @@ CREATE PROCEDURE
    PARTITION ON TABLE DiagResults COLUMN DiagId PARAMETER 0
    FROM CLASS com.intel.dai.procedures.DiagResultSavePerUnit;
 
+
+
+-- Store / insert a RAS event into the data store.
 CREATE PROCEDURE
-   PARTITION ON TABLE RasEvent COLUMN EventType PARAMETER 0
+   PARTITION ON TABLE RasEvent COLUMN DescriptiveName PARAMETER 0
    FROM CLASS com.intel.dai.procedures.RasEventStore;
 
-CREATE PROCEDURE
-   FROM CLASS com.intel.dai.procedures.RasEventProcessNewControlOperations;
-
--- This stored procedure returns an array of VoltTables:
---    the first contains the details for the list of RasEvents which have specified that UCS should check for an associated WLM Job ID
---    the second contains the maximum value for the LastChgTimestamp column in the above-mentioned list of RasEvents
-CREATE PROCEDURE
-   FROM CLASS com.intel.dai.procedures.RasEventListThatNeedJobId;
-
--- Method to update a RasEvent's JobId value.
-CREATE PROCEDURE RasEventUpdateJobId
-   PARTITION ON TABLE RasEvent COLUMN EventType PARAMETER 1
-   AS UPDATE RasEvent SET JobId=?, DbUpdatedTimestamp=NOW WHERE (EventType=? AND Id=?);
--- Method to update a RasEvent's ControlOperationDone value.
-CREATE PROCEDURE RasEventUpdateControlOperationDone
-   PARTITION ON TABLE RasEvent COLUMN EventType PARAMETER 1
-   AS UPDATE RasEvent SET ControlOperationDone=?, DbUpdatedTimestamp=NOW WHERE (EventType=? AND Id=?);
-
+-- Method that updates the specified RAS event's JobId, Done, and DbUpdatedTimestamp columns.
+CREATE PROCEDURE RasEventUpdate
+  PARTITION ON TABLE RasEvent COLUMN DescriptiveName PARAMETER 2
+  AS UPDATE RasEvent SET JobId=?, Done=?, DbUpdatedTimestamp=NOW WHERE (DescriptiveName=? AND Id=?);
 
 CREATE PROCEDURE RasEventCountNodeResetRecently
-   PARTITION ON TABLE RasEvent COLUMN EventType PARAMETER 0
-   AS SELECT COUNT(*) FROM RasEvent WHERE EventType = ? AND Lctn = ? AND  LastChgTimestamp >= ?;
-
+   PARTITION ON TABLE RasEvent COLUMN DescriptiveName PARAMETER 0
+   AS SELECT COUNT(*) FROM RasEvent WHERE DescriptiveName = ? AND Lctn = ? AND LastChgTimestamp >= ?;
 
 -- Check & see if there is already RAS Event Meta data in the data store.
 CREATE PROCEDURE RasEventCountMetaDataEntries
    AS SELECT COUNT(*) FROM RasMetaData;
-CREATE PROCEDURE getAllEventMetaData
-   AS SELECT EventType, DescriptiveName, ControlOperation, Msg FROM RASMETADATA where (EventType like ? OR DescriptiveName like ?) LIMIT ?;
+CREATE PROCEDURE RasEventGetMetaDataUsingDescrName
+   AS SELECT DescriptiveName AS Type, ControlOperation, Msg FROM RASMETADATA where (DescriptiveName like ?) LIMIT ?;
+-- CREATE PROCEDURE RasEventList
+--    AS  SELECT RasEvent.DescriptiveName, RasEvent.Timestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.ControlOperation, RasMetaData.Msg FROM RasEvent INNER JOIN RasMetaData on RasEvent.DescriptiveName=RasMetaData.DescriptiveName Order By Timestamp DESC, Lctn;
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.RasEventListAtTime;
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.RasEventListByLimit;
+-- This stored procedure returns an array of VoltTables:
+--    the first contains the details for the list of RasEvents which the RAS adapter needs to work on
+--    the second contains the maximum value for the LastChgTimestamp column in the above-mentioned list of RasEvents
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.RasEventListThatNeedToBeDone;
+
+
 
 CREATE PROCEDURE
    PARTITION ON TABLE WlmReservation_History COLUMN ReservationName PARAMETER 0
@@ -569,6 +623,10 @@ CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.ReservationDeleted;
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.ReservationListAtTime;
+-- This stored procedure handles the processing needed when purging data from the WlmReservation_History table
+-- (we don't want to purge a reservation that is still "in effect", i.e., reservation has not ended and has not been deleted).
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.ReservationPurging;
 
 
 
@@ -583,20 +641,19 @@ CREATE PROCEDURE Tier2_UpdateWorkItem
    AS UPDATE Tier2_WorkItem_History SET WorkingResults=?, DbUpdatedTimestamp=?, RequestingWorkItemId=?, RowInsertedIntoHistory=?, Tier2DbUpdatedTimestamp=? WHERE WorkingAdapterType=? AND Id=? AND State=? AND WorkingAdapterId=?;
 
 
+-- Get the information for the specified ConstraintId.
+CREATE PROCEDURE ConstraintInfo
+   PARTITION ON TABLE Constraint COLUMN ConstraintId PARAMETER 0
+   AS SELECT * FROM Constraint WHERE ConstraintId=?;
 
--- CREATE PROCEDURE RasEventList
---    AS  SELECT RasEvent.EventType, RasEvent.Timestamp,  RasMetaData.Severity, RasEvent.Lctn, RasEvent.ControlOperation, RasMetaData.Msg FROM RasEvent INNER JOIN RasMetaData on RasEvent.EventType=RasMetaData.EventType Order By Timestamp DESC, Lctn;
-CREATE PROCEDURE
-   FROM CLASS com.intel.dai.procedures.RasEventListAtTime;
-CREATE PROCEDURE
-   FROM CLASS com.intel.dai.procedures.RasEventListByLimit;
+
 
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.DiagListOfActiveDiagsAtTime;
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.DiagListOfNonActiveDiagsAtTime;
 CREATE PROCEDURE
-PARTITION ON TABLE Diag_List COLUMN DiagListId PARAMETER 0
+   PARTITION ON TABLE Diag_List COLUMN DiagListId PARAMETER 0
    FROM CLASS com.intel.dai.procedures.DiagGetDiagToolId;
 
 CREATE PROCEDURE
@@ -604,13 +661,14 @@ CREATE PROCEDURE
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.JobHistoryListOfNonActiveJobsAtTime;
 
--- This stored procedure returns all the contents in the LogicalGroups table
+-- This stored procedure returns all the contents in the LogicalGroups table for the specified GroupName.
 CREATE PROCEDURE ListLogicalGroups
-   AS SELECT * FROM LogicalGroups WHERE GroupName=? ORDER BY GroupName;
+   PARTITION ON TABLE LogicalGroups COLUMN GroupName PARAMETER 0
+   AS SELECT * FROM LogicalGroups WHERE GroupName=?;
 
 -- This stored procedure returns GroupName(s) in the LogicalGroups table
 CREATE PROCEDURE ListGroupNames
-   AS SELECT GroupName FROM LogicalGroups ORDER BY GroupName;
+   AS SELECT DISTINCT GroupName FROM LogicalGroups ORDER BY GroupName;
 
 CREATE PROCEDURE UpsertLogicalGroups
    PARTITION ON TABLE LogicalGroups COLUMN GroupName PARAMETER 0
@@ -621,46 +679,54 @@ CREATE PROCEDURE DeleteGroupInLogicalGroups
    PARTITION ON TABLE LogicalGroups COLUMN GroupName PARAMETER 0
    AS DELETE FROM LogicalGroups WHERE GroupName=?;
 
--- CREATE PROCEDURE
---    FROM CLASS com.intel.dai.procedures.TempStoredProcToTestTimeouts;
+
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.TempStoredProcToTestTimeouts;
+
 
 CREATE PROCEDURE GetManifestContent
    AS SELECT manifestcontent from Machine;
 
+
 -- This stored procedure adds a new entry to ServiceOperation to indicate start of a service operation
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ServiceStarted;
 
 -- This stored procedure adds a new entry to ServiceOperation to indicate completion of service-start operation
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ServiceStartPrepared;
 
 -- This stored procedure adds a new entry to ServiceOperation to indicate failure of service-start operation
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 0
    FROM CLASS com.intel.dai.procedures.ServiceStartFailed;
 
 -- This stored procedure updates an existing  ServiceOperation of type "Repair"  to indicate end of repair
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
    FROM CLASS com.intel.dai.procedures.ServiceEndRepair;
 
 -- This stored procedure updates an existing  ServiceOperation of type "Repair"  to indicate end of repair
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
    FROM CLASS com.intel.dai.procedures.ServiceEndRepairError;
 
 -- This stored procedure updates an existing  ServiceOperation as "Complete" and removes it after adding it to history
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
    FROM CLASS com.intel.dai.procedures.ServiceCloseOperation;
 
 -- This stored procedure updates an existing  ServiceOperation as "Complete" and status "Error"(forceclosed) removes it after adding it to history
 CREATE PROCEDURE
-PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
    FROM CLASS com.intel.dai.procedures.ServiceForceCloseOperation;
+
+-- Updates the specified operation and inserts a new record into corresponding history table
+CREATE PROCEDURE
+   PARTITION ON TABLE ServiceOperation COLUMN Lctn PARAMETER 1
+   FROM CLASS com.intel.dai.procedures.ServiceUpdateRemarks;
 
 CREATE PROCEDURE ComputeNodeInventoryList
   AS SELECT DISTINCT(lctn) lctn, state, hostname, bootimageid, ipaddr, macaddr, bmcipaddr,
@@ -673,32 +739,102 @@ CREATE PROCEDURE ServiceNodeInventoryList
   ServiceNode order by lctn, dbupdatedtimestamp desc;
 
 CREATE PROCEDURE
-PARTITION ON TABLE UcsConfigValue COLUMN Key PARAMETER 0
+   PARTITION ON TABLE UcsConfigValue COLUMN Key PARAMETER 0
   FROM CLASS com.intel.dai.procedures.UcsConfigValueSet;
 
 -- Get the UcsConfig value for the key provided
 CREATE PROCEDURE UcsConfigValueGet
-PARTITION ON TABLE UcsConfigValue COLUMN Key PARAMETER 0
-  AS SELECT Value from UcsConfigValue where Key = ?;
+   PARTITION ON TABLE UcsConfigValue COLUMN Key PARAMETER 0
+   AS SELECT Value from UcsConfigValue where Key = ?;
 
 
 -- This stored procedure handles the processing needed when purging data out of the NodeInventory_History table
 -- (this table needs special processing as we do not want to purge the inventory info for the "active" compute node).
 CREATE PROCEDURE
    FROM CLASS com.intel.dai.procedures.NodePurgeInventory_History;
+-- This stored procedure returns an array of VoltTables:
+--    the first contains the list of compute nodes that are being serviced (compute nodes which have an Owner = 'S')
+--    the second contains the list of service nodes that are being serviced (service nodes which have an Owner = 'S')
+CREATE PROCEDURE
+   FROM CLASS com.intel.dai.procedures.NodeListBeingServiced;
+-- This procedure goes through all of the node components (e.g., Dimms, Processors, Accelerators, Hfi Nics) and ensures that they all have the specified state.
+--    It will only change the state of those components that currently have a different state (it does not change those that already have the specified state).
+--    Note: it is NOT A MISTAKE that "PARTITION ON TABLE Dimm" is specified, even though other tables are referenced in this procedure.
+--          Since all of these tables have the exact same node lctn strings, the partitioning is done correctly and successfully!
+CREATE PROCEDURE
+   PARTITION ON TABLE Dimm COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.NodeComponentSetStateUnlessInThatState;
 
--- F/W (TBD)
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.FwVersionUpsert;
 
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.FwVersionDump;
+-- This stored procedure returns all the contents in the Dimm table
+CREATE PROCEDURE DimmsList
+   AS SELECT Lctn, ModuleLocator FROM Dimm ORDER BY Lctn;
+-- Get the specified Dimm's current info.
+CREATE PROCEDURE DimmInfo
+   PARTITION ON TABLE Dimm COLUMN NodeLctn PARAMETER 0
+   AS SELECT * FROM Dimm WHERE NodeLctn=? AND Lctn=?;
+-- Set this Dimm's state.
+CREATE PROCEDURE
+   PARTITION ON TABLE Dimm COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.DimmSetState;
+-- Set this Dimm's State, SizeMB, and BankLocator.
+CREATE PROCEDURE
+   PARTITION ON TABLE Dimm COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.DimmSetStateSizeBank;
 
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.FwVersionHistoryInsert;
 
-CREATE PROCEDURE FROM
-    CLASS com.intel.dai.procedures.FwVersionHistoryDump;
+
+-- This stored procedure returns all the contents in the Processor table
+CREATE PROCEDURE ProcessorsList
+   AS SELECT * FROM Processor ORDER BY Lctn;
+-- Get the specified Processor's current info.
+CREATE PROCEDURE ProcessorInfo
+   PARTITION ON TABLE Processor COLUMN NodeLctn PARAMETER 0
+   AS SELECT * FROM Processor WHERE NodeLctn=? AND Lctn=?;
+-- Set this Processor's state.
+CREATE PROCEDURE
+   PARTITION ON TABLE Processor COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.ProcessorSetState;
+
+
+
+-- This stored procedure returns all the contents in the Accelerator table
+CREATE PROCEDURE AcceleratorsList
+   AS SELECT Lctn, Slot FROM Accelerator ORDER BY Lctn;
+---------------------------------------- CREATE PROCEDURE AcceleratorsListByLimit
+----------------------------------------   AS SELECT Lctn, Slot FROM Accelerator Limit 10000 Offset ?;
+-- Get the specified Accelerator's current info.
+CREATE PROCEDURE AcceleratorInfo
+   PARTITION ON TABLE Accelerator COLUMN NodeLctn PARAMETER 0
+   AS SELECT * FROM Accelerator WHERE NodeLctn=? AND Lctn=?;
+-- Set this Accelerator's state.
+CREATE PROCEDURE
+   PARTITION ON TABLE Accelerator COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.AcceleratorSetState;
+-- Set this Accelerator's State and Slot.
+CREATE PROCEDURE
+   PARTITION ON TABLE Accelerator COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.AcceleratorSetStateBusAddr;
+
+
+-- This stored procedure returns all the contents in the Hfi table
+CREATE PROCEDURE HfisList
+   AS SELECT Lctn, Slot FROM Hfi ORDER BY Lctn;
+-------------------- CREATE PROCEDURE HfisListByLimit
+--------------------    AS SELECT Lctn, Slot FROM Hfi Limit 10000 Offset ?;
+-- Get the specified Hfi's current info.
+CREATE PROCEDURE HfiInfo
+   PARTITION ON TABLE Hfi COLUMN NodeLctn PARAMETER 0
+   AS SELECT * FROM Hfi WHERE NodeLctn=? AND Lctn=?;
+-- Set this Hfi's state.
+CREATE PROCEDURE
+   PARTITION ON TABLE Hfi COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.HfiSetState;
+-- Set this Hfi's State and Slot.
+CREATE PROCEDURE
+   PARTITION ON TABLE Hfi COLUMN NodeLctn PARAMETER 0
+   FROM CLASS com.intel.dai.procedures.HfiSetStateBusAddr;
+
 
 -- >>> Inventory stored procedures
 

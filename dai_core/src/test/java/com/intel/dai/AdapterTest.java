@@ -69,6 +69,18 @@ public class AdapterTest {
         }
 
         @Override
+        ClientResponse response() {
+            if (callBase_)
+                return super.response();
+            return response_;
+        }
+
+        @Override
+        public String ensureRasDescrNameIsValid(String sEventDescrName) {
+            return sEventDescrName;
+        }
+
+        @Override
         void adapterTerminating(String sBaseWorkItemResults)
                 throws IOException, InterruptedException, AdapterException {
             super.adapterTerminating(sBaseWorkItemResults);
@@ -77,12 +89,22 @@ public class AdapterTest {
         }
 
         @Override
-        public boolean isComputeNodeLctn(String lctn) throws IOException, ProcCallException {
+        public boolean isComputeNodeLctn(String lctn) {
             if(dontCallBase_)
                 return true;
             else
                 return super.isComputeNodeLctn(lctn);
         }
+
+        @Override
+        public void chgAllNodeComponentsToPoweredOff(String sNodeLctn, long lTsInMicroSecs, String sWorkItemAdapterType, long lWorkItemId) throws IOException, ProcCallException
+        {
+            if (dontCallBase_)
+                return;
+            else
+                super.chgAllNodeComponentsToPoweredOff(sNodeLctn, lTsInMicroSecs, sWorkItemAdapterType, lWorkItemId);
+        }
+
 
         boolean callBase_ = false;
         boolean throwRuntimeException_ = false;
@@ -101,6 +123,7 @@ public class AdapterTest {
 
     @Before
     public void setUp() throws Exception {
+        log_ = LoggerFactory.getInstance("TEST", "Testing", "console");
         adapter_ = new MockAdapter("TEST", "Testing");
         adapter_.setShutdownHandler(mock(AdapterShutdownHandler.class));
         workQueue_ = adapter_.setUpAdapter("localhost", null);
@@ -237,36 +260,6 @@ public class AdapterTest {
     }
 
     @Test
-    public void mapCompNodeLctnToIpAddrAndBmcIpAddr() throws Exception {
-        setUp();
-        VoltTable table = makeTable(new ArrayList<Pair<String, VoltType>>() {{
-            add(new Pair<>("Lctn", VoltType.STRING));         // Column 0
-            add(new Pair<>("IpAddr", VoltType.STRING));       // Column 1
-            add(new Pair<>("BmcIpAddr", VoltType.STRING));    // Column 2
-        }}, new ArrayList<ArrayList<Object>>() {{
-            add(new ArrayList<Object>() {{
-                add("R0-CN43");
-                add("10.128.0.43");
-                add("10.129.0.43");
-            }}); // Row 0
-            add(new ArrayList<Object>() {{
-                add("R0-CN44");
-                add("10.128.0.44");
-                add("10.129.0.44");
-            }}); // Row 1
-            add(new ArrayList<Object>() {{
-                add("R0-CN45");
-                add("10.128.0.45");
-                add("10.129.0.45");
-            }}); // Row 2
-        }});
-        when(client_.callProcedure(ArgumentMatchers.anyString())).thenReturn(response_);
-        when(response_.getResults()).thenReturn(new VoltTable[]{table});
-        adapter_.mapCompNodeLctnToIpAddrAndBmcIpAddr();
-        adapter_.mapCompNodeLctnToIpAddrAndBmcIpAddr();
-    }
-
-    @Test
     public void miscAccessors() {
         adapter_.adapterAbnormalShutdown();
         adapter_.adapterAbnormalShutdown(false);
@@ -280,6 +273,7 @@ public class AdapterTest {
         adapter_.client(mock(Client.class));
         adapter_.dataMoverResultTblIndxToTableNameMap();
         adapter_.callBase_ = true;
+        adapter_.response();
         adapter_.callBase_ = false;
         adapter_.signalHandler();
     }
@@ -550,8 +544,7 @@ public class AdapterTest {
                 ArgumentMatchers.anyLong(),
                 ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyLong())).thenReturn(true);
-        adapter_.logRasEventWithEffectedJob("Type", "data", "Lctn", "JobId", 1000L,
-                "RAS", 9999L);
+        adapter_.logRasEventWithEffectedJob("Type", "data", "Lctn", "JobId", 1000L, "RAS", 9999L);
     }
 
     @Test
@@ -599,12 +592,13 @@ public class AdapterTest {
     @Test
     public void markNodePoweredOff() throws Exception {
         adapter_.dontCallBase_ = true;
-        adapter_.markNodePoweredOff("Lctn", 1000L, "kernel", 9999L);
+        adapter_.markNodePoweredOff("Lctn", false, 1000L, "kernel", 9999L);
         adapter_.dontCallBase_ = false;
     }
 
     MockAdapter adapter_;
     WorkQueue workQueue_;
+    Logger log_;
     static File rasEventMetaData_ = new File("/tmp/RasEventMetaData.json");
     ClientStatusListenerExt clientStatus_;
     Client client_;

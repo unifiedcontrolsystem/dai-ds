@@ -4,7 +4,6 @@
 
 package com.intel.dai.populate;
 
-import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import org.junit.BeforeClass;
@@ -30,8 +29,8 @@ import static org.mockito.Mockito.when;
 
 public class DbSchemaPopulateTest {
     private static class MockDbSchemaPopulate extends DefaultOnlineTierDataLoader {
-        protected MockDbSchemaPopulate(Logger log) {
-            super(log, factory_);
+        protected MockDbSchemaPopulate() {
+            super(mock(Logger.class));
         }
 
         @Override
@@ -55,13 +54,26 @@ public class DbSchemaPopulateTest {
 
     @BeforeClass
     public static void setUpClass() {
-        LoggerFactory.getInstance("TEST", "Testing", "console");
+    }
+
+    @Test
+    @Ignore
+    public void testAll() throws Exception {
+        String config = Paths.get(new java.io.File( "." ).getCanonicalPath(),
+                "../install-configs/MachineConfig.json").toFile().getCanonicalPath();
+        String manifest = Paths.get(new java.io.File( "." ).getCanonicalPath(),
+                "../install-configs/SystemManifest.json").toFile().getCanonicalPath();
+        String rasMetaData = Paths.get(new java.io.File( "." ).getCanonicalPath(),
+                "../install-configs/RasEventMetaData.json").toFile().getCanonicalPath();
+        System.setProperty("daiLoggingLevel","DEBUG");
+        DefaultOnlineTierDataLoader populator = new MockDbSchemaPopulate();
+        assertEquals(0, populator.doPopulate("localhost", manifest, config, rasMetaData));
     }
 
     @Test
     public void testMachineConfigEntry() {
         DefaultOnlineTierDataLoader.MachineConfigEntry mce = new DefaultOnlineTierDataLoader.MachineConfigEntry("","","",
-                "","", "", "", "", "");
+                "","", "", "", "", "", "", "", "", "");
     }
 
     @Test
@@ -94,6 +106,4 @@ public class DbSchemaPopulateTest {
         listen = new DefaultOnlineTierDataLoader.MyClientStatusListenerExt(mock(Logger.class), shuttingDown);
         listen.connectionLost("", 0, 0, ClientStatusListenerExt.DisconnectCause.CONNECTION_CLOSED);
     }
-
-    private static final DataStoreFactory factory_ = mock(DataStoreFactory.class);
 }

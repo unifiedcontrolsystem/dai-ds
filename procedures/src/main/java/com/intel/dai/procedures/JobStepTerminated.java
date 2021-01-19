@@ -38,7 +38,7 @@ public class JobStepTerminated extends JobStepCommon {
 
 
     public long run(String sJobId, String sJobStepId, int iExitStatus, String sJobStepName, String sWlmJobStepState, long lEndTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId)
-            throws VoltAbortException
+                throws VoltAbortException
     {
         //--------------------------------------------------
         // Grab the object's pre-change values so they are available for use creating the history record.

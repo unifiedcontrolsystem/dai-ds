@@ -6,7 +6,6 @@ package com.intel.dai;
 
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
-import com.intel.perflogging.BenchmarkHelper;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.voltdb.VoltTable;
@@ -20,31 +19,33 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class NearlineTableUpdaterTest {
+    Logger log_ = mock(Logger.class);
+
     @Test
     public void update1() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class), mock(BenchmarkHelper.class));
+        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
-        updater.update("Adapter", makeTable());
-        updater.update("Adapter", makeTable());
+        updater.Update("Adapter", makeTable());
+        updater.Update("Adapter", makeTable());
     }
 
     @Test
     public void update2() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class), mock(BenchmarkHelper.class));
+        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
         when(connection.prepareCall(ArgumentMatchers.anyString())).thenReturn(mock(CallableStatement.class));
-        updater.update("RasMetaData", makeTable());
-        updater.update("RasMetaData", makeTable());
+        updater.Update("RasMetaData", makeTable());
+        updater.Update("RasMetaData", makeTable());
     }
 
     @Test
     public void update_error() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, mock(Logger.class), mock(BenchmarkHelper.class));
+        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
         try {
-            updater.update("Adapter_TEST", makeTable());
+            updater.Update("Adapter_TEST", makeTable());
         }
         catch (DataStoreException e){}
     }

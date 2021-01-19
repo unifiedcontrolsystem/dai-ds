@@ -1,12 +1,12 @@
 file -inlinebatch END_OF_HEADER
 CREATE TABLE DbStatus (
-  Id                   Integer                  NOT NULL,   -- Id for row in table of which there is only one and this should be 0.
-  Status               VarChar(32)              NOT NULL,   -- Current VoltDB UCS Status (schema-loading, schema-loaded, schema-error, populate-started, populate-completed, populate-error).
-  Description          VarChar(4096)            NOT NULL,   -- Used for detailed error information when either 'schema-error' or 'populate_error' are set as status.
-  SchemaStartStamp     TIMESTAMP                NOT NULL,   -- Timestamp when the schema started loading.
-  SchemeCompletedStamp TIMESTAMP,                           -- Timestamp when the schema is loaded or a schema error occurred.
-  PopulateStartStamp   TIMESTAMP,                           -- Timestamp when data population started.
-  PopulateFinishStamp  TIMESTAMP,                           -- Timestamp when data population is completed.
+   Id                   Integer                  NOT NULL,   -- Id for row in table of which there is only one and this should be 0.
+   Status               VarChar(32)              NOT NULL,   -- Current VoltDB UCS Status (schema-loading, schema-loaded, schema-error, populate-started, populate-completed, populate-error).
+   Description          VarChar(4096)            NOT NULL,   -- Used for detailed error information when either 'schema-error' or 'populate_error' are set as status.
+   SchemaStartStamp     TIMESTAMP                NOT NULL,   -- Timestamp when the schema started loading.
+   SchemeCompletedStamp TIMESTAMP,                           -- Timestamp when the schema is loaded or a schema error occurred.
+   PopulateStartStamp   TIMESTAMP,                           -- Timestamp when data population started.
+   PopulateFinishStamp  TIMESTAMP,                           -- Timestamp when data population is completed.
 );
 CREATE PROCEDURE GetDbStatus AS -- Method to check for current DbStatus may return single status pair or empty table.
 SELECT Status, Description FROM DbStatus;
@@ -137,8 +137,6 @@ CREATE INDEX MachineAdapterInstanceBySnLctnAndAdaptertype ON MachineAdapterInsta
 
 --------------------------------------------------------------
 -- MachineAdapterInstance history Table
--- - Info in this table is filled in by
---    a)  PopulateSchema stored procedure using information from the MachineConfiguration file
 --------------------------------------------------------------
 CREATE TABLE MachineAdapterInstance_History (
    SnLctn               VarChar(63)             NOT NULL,   -- Service node's lctn string
@@ -328,7 +326,7 @@ CREATE TABLE InternalJobStepInfo (
                                                    --    F = false - we have not yet seen the JobStep ended message
 );
 PARTITION TABLE InternalJobStepInfo ON COLUMN JobId;
-CREATE UNIQUE INDEX InternalJobStepInfoByJobStepIdNodeLctnAndJobId ON InternalJobStepInfo(JobId, JobStepId);
+CREATE UNIQUE INDEX InternalJobStepInfoByJobIdAndJobStepId ON InternalJobStepInfo(JobId, JobStepId);
 
 --------------------------------------------------------------
 -- Internal Inflight WLM Prolog/Epilog Requests Table
@@ -407,7 +405,6 @@ CREATE TABLE JobStep_History (
 );
 PARTITION TABLE JobStep_History ON COLUMN JobId;
 CREATE UNIQUE INDEX JobStepHistoryByJobIdAndJobStepIdAndLastChgTimestamp on JobStep_History(JobId, JobStepId, LastChgTimestamp);
-CREATE INDEX JobStepHistoryByJobId on JobStep_History(JobId);
 CREATE INDEX JobStepHistoryByDbUpdatedTimestamp ON JobStep_History(DbUpdatedTimestamp);
 --------------------------------------------------------------
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
@@ -447,7 +444,7 @@ CREATE ASSUMEUNIQUE INDEX Tier2_JobStep_History_EntryNum ON Tier2_JobStep_Histor
 CREATE TABLE WlmReservation_History (
    ReservationName      Varchar(35)    NOT NULL,            -- Identifier that identifies a specific WLM reservation
    Users                VarChar(100)   NOT NULL,            -- Users of this reservation
-   Nodes                VarChar(5000),                      -- Nodes assigned to this reservation
+   Nodes                VarChar(1000),                      -- Nodes assigned to this reservation
    StartTimestamp       TIMESTAMP      NOT NULL,            -- Time that this reservation begins - from timestamp on event record
    EndTimestamp         TIMESTAMP,                          -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp     TIMESTAMP,                          -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
@@ -466,7 +463,7 @@ CREATE INDEX WlmReservation_HistoryByDbUpdatedTimestamp                 ON WlmRe
 CREATE TABLE Tier2_WlmReservation_History (
    ReservationName         Varchar(35)    NOT NULL,         -- Identifier that identifies a specific WLM reservation
    Users                   VarChar(100)   NOT NULL,         -- Users of this reservation
-   Nodes                   VarChar(5000),                   -- Nodes assigned to this reservation
+   Nodes                   VarChar(1000),                   -- Nodes assigned to this reservation
    StartTimestamp          TIMESTAMP      NOT NULL,         -- Time that this reservation begins - from timestamp on event record
    EndTimestamp            TIMESTAMP,                       -- Time that this reservation ends - from timestamp on event record
    DeletedTimestamp        TIMESTAMP,                       -- Time that this reservation was deleted (if appropriate) - from timestamp on event record
@@ -630,18 +627,22 @@ CREATE TABLE ComputeNode (
    Lctn                 VarChar(25)       UNIQUE NOT NULL,
    SequenceNumber       Integer           NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
-                                                            --    - B = BiosStarting
+                                                            --    - R = Bios is being started due to a reset (the bios itself is being started due to a reset occurring) aka BiosStartedDueToReset
+                                                            --    - S = Selecting boot device (selecting what device will be used for booting) aka SelectBootDevice
+                                                            --    - P = PXE downloading NBP file (pxe is being used to download the Network Boot Program file) aka PxeDownloadingNbpFile
+                                                            --    - B = Bios starting a network boot (the node's bios has started to perform a network boot) aka BiosStartingNetworkBoot
                                                             --    - D = Discovered (dhcp discover)
                                                             --    - I = IP address assigned (dhcp request)
-                                                            --    - L = Starting Load of Boot images
+                                                            --    - L = Started loading the linux boot image onto the node aka LoadingLinuxBootImage
                                                             --    - K = Starting kernel boot (kernel boot started)
-                                                            --    - A = Active    (available, booted)
-                                                            --    - M = Missing   (powered off)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - H = Halting / Shutting Down (started to shutdown node)
+                                                            --    - M = Missing (powered off)
                                                             --    - E = Error
                                                             --    - U = Unknown (do not yet know what state this node is in)
    HostName             VarChar(63),                        -- Compute nodes hostname
    BootImageId          VarChar(50),                        -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
-   Environment          VarChar(120),                       -- Boot images can have multiple environments associated with them.
+   Environment          VarChar(240),                       -- Boot images can have multiple environments associated with them.
    IpAddr               VarChar(25),                        -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
    MacAddr              VarChar(17),                        -- E.g., 52:54:00:fc:4a:87
    BmcIpAddr            VarChar(25),                        -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
@@ -657,14 +658,16 @@ CREATE TABLE ComputeNode (
    Aggregator           VarChar(63)       NOT NULL,         -- Location of the service node that "controls/owns" this node.
    InventoryTimestamp   TIMESTAMP,                          -- Time the event occurred that resulted in this inventory being changed.
    WlmNodeState         VarChar(1)        NOT NULL,         -- Indicates the state of this node from the WLM's perspective: "A" - available (WLM will use this node for running jobs), "U" - unavailable (WLM will not use this node for running jobs), "M" - maintenance (WLM will not use this node for running jobs), "X" - Unexpected/unknown value
+   ConstraintId         VarChar(50),                        -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp TIMESTAMP,                          -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
    PRIMARY KEY (Lctn)
 );
 PARTITION TABLE ComputeNode ON COLUMN Lctn;
-CREATE INDEX ComputeNodeState    on ComputeNode(State);
-CREATE INDEX ComputeNodeSeqNum   on ComputeNode(SequenceNumber);
-CREATE INDEX ComputeNodeMacAddr  on ComputeNode(MacAddr) WHERE MacAddr IS NOT NULL;
-CREATE INDEX ComputeNodeIpAddr   on ComputeNode(IpAddr)  WHERE IpAddr  IS NOT NULL;
-CREATE INDEX ComputeNodeAggregator     on ComputeNode(Aggregator);
+CREATE INDEX ComputeNodeState         on ComputeNode(State);
+CREATE INDEX ComputeNodeSeqNum        on ComputeNode(SequenceNumber);
+CREATE INDEX ComputeNodeMacAddr       on ComputeNode(MacAddr) WHERE MacAddr IS NOT NULL;
+CREATE INDEX ComputeNodeAggregator    on ComputeNode(Aggregator);
+CREATE INDEX ComputeNodeOwner         on ComputeNode(Owner);
 
 --------------------------------------------------------------
 -- Compute Node history Table
@@ -675,35 +678,41 @@ CREATE INDEX ComputeNodeAggregator     on ComputeNode(Aggregator);
 --------------------------------------------------------------
 CREATE TABLE ComputeNode_History (
    Lctn                 VarChar(25)       NOT NULL,
-   SequenceNumber       Integer           NOT NULL,      -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
-   State                VarChar(1)        NOT NULL,      -- Actual state that this item is in:
-                                                         --    - B = BiosStarting
-                                                         --    - D = Discovered (dhcp discover)
-                                                         --    - I = IP address assigned (dhcp request)
-                                                         --    - L = Starting Load of Boot images
-                                                         --    - K = Starting kernel boot (kernel boot started)
-                                                         --    - A = Active    (available, booted)
-                                                         --    - M = Missing   (powered off)
-                                                         --    - E = Error
-                                                         --    - U = Unknown (do not yet know what state this node is in)
-   HostName             VarChar(63),                     -- Compute nodes hostname
-   BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
-   Environment          VarChar(120),                    -- Boot images can have multiple environments associated with them.
-   IpAddr               VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
-   MacAddr              VarChar(17),                     -- E.g., 52:54:00:fc:4a:87
-   BmcIpAddr            VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
-   BmcMacAddr           VarChar(17),                     -- E.g., 52:54:00:fc:4a:87
+   SequenceNumber       Integer           NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - R = Bios is being started due to a reset (the bios itself is being started due to a reset occurring) aka BiosStartedDueToReset
+                                                            --    - S = Selecting boot device (selecting what device will be used for booting) aka SelectBootDevice
+                                                            --    - P = PXE downloading NBP file (pxe is being used to download the Network Boot Program file) aka PxeDownloadingNbpFile
+                                                            --    - B = Bios starting a network boot (the node's bios has started to perform a network boot) aka BiosStartingNetworkBoot
+                                                            --    - D = Discovered (dhcp discover)
+                                                            --    - I = IP address assigned (dhcp request)
+                                                            --    - L = Started loading the linux boot image onto the node aka LoadingLinuxBootImage
+                                                            --    - K = Starting kernel boot (kernel boot started)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - H = Halting / Shutting Down (started to shutdown node)
+                                                            --    - M = Missing (powered off)
+                                                            --    - E = Error
+                                                            --    - U = Unknown (do not yet know what state this node is in)
+   HostName             VarChar(63),                        -- Compute nodes hostname
+   BootImageId          VarChar(50),                        -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   Environment          VarChar(240),                       -- Boot images can have multiple environments associated with them.
+   IpAddr               VarChar(25),                        -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
+   MacAddr              VarChar(17),                        -- E.g., 52:54:00:fc:4a:87
+   BmcIpAddr            VarChar(25),                        -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
+   BmcMacAddr           VarChar(17),                        -- E.g., 52:54:00:fc:4a:87
    BmcHostName          VarChar(63),
-   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,      -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
-   LastChgTimestamp     TIMESTAMP         NOT NULL,      -- Time the event occurred that resulted in this entry being changed.
-                                                         -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
-                                                         --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
-   LastChgAdapterType   VarChar(20)       NOT NULL,      -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
-   LastChgWorkItemId    BigInt            NOT NULL,      -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   Owner                VarChar(1)        NOT NULL,      -- Indicates which subsystem "owns" this entity, e.g., "W" - owned by WLM, "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
-   Aggregator           VarChar(63)       NOT NULL,      -- Location of the service node that "controls/owns" this node.
-   InventoryTimestamp   TIMESTAMP,                       -- Time the event occurred that resulted in this inventory being changed.
-   WlmNodeState         VarChar(1)        NOT NULL,      -- Indicates the state of this node from the WLM's perspective: "A" - available (WLM will use this node for running jobs), "U" - unavailable (WLM will not use this node for running jobs), "M" - maintenance (WLM will not use this node for running jobs), "X" - Unexpected/unknown value
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   Owner                VarChar(1)        NOT NULL,         -- Indicates which subsystem "owns" this entity, e.g., "W" - owned by WLM, "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
+   Aggregator           VarChar(63)       NOT NULL,         -- Location of the service node that "controls/owns" this node.
+   InventoryTimestamp   TIMESTAMP,                          -- Time the event occurred that resulted in this inventory being changed.
+   WlmNodeState         VarChar(1)        NOT NULL,         -- Indicates the state of this node from the WLM's perspective: "A" - available (WLM will use this node for running jobs), "U" - unavailable (WLM will not use this node for running jobs), "M" - maintenance (WLM will not use this node for running jobs), "X" - Unexpected/unknown value
+   ConstraintId         VarChar(50),                        -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp TIMESTAMP,                          -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
 );
 PARTITION TABLE ComputeNode_History ON COLUMN Lctn;
 CREATE UNIQUE INDEX ComputeNodeHistoryByLctnAndLastChgTimestamp on ComputeNode_History(Lctn, LastChgTimestamp);
@@ -714,37 +723,43 @@ CREATE INDEX ComputeNodeHistoryByDbUpdatedTimestamp ON ComputeNode_History(DbUpd
 --------------------------------------------------------------
 CREATE TABLE Tier2_ComputeNode_History (
    Lctn                    VarChar(25)       NOT NULL,
-   SequenceNumber          Integer           NOT NULL,   -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
-   State                   VarChar(1)        NOT NULL,   -- Actual state that this item is in:
-                                                         --    - B = BiosStarting
-                                                         --    - D = Discovered (dhcp discover)
-                                                         --    - I = IP address assigned (dhcp request)
-                                                         --    - L = Starting Load of Boot images
-                                                         --    - K = Starting kernel boot (kernel boot started)
-                                                         --    - A = Active    (available, booted)
-                                                         --    - M = Missing   (powered off)
-                                                         --    - E = Error
-                                                         --    - U = Unknown (do not yet know what state this node is in)
-   HostName                VarChar(63),                  -- Compute nodes hostname
-   BootImageId             VarChar(50),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
-   Environment             VarChar(120),                 -- Boot images can have multiple environments associated with them
-   IpAddr                  VarChar(25),                  -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
-   MacAddr                 VarChar(17),                  -- E.g., 52:54:00:fc:4a:87
-   BmcIpAddr               VarChar(25),                  -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
-   BmcMacAddr              VarChar(17),                  -- E.g., 52:54:00:fc:4a:87
+   SequenceNumber          Integer           NOT NULL,      -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
+   State                   VarChar(1)        NOT NULL,      -- Actual state that this item is in:
+                                                            --    - R = Bios is being started due to a reset (the bios itself is being started due to a reset occurring) aka BiosStartedDueToReset
+                                                            --    - S = Selecting boot device (selecting what device will be used for booting) aka SelectBootDevice
+                                                            --    - P = PXE downloading NBP file (pxe is being used to download the Network Boot Program file) aka PxeDownloadingNbpFile
+                                                            --    - B = Bios starting a network boot (the node's bios has started to perform a network boot) aka BiosStartingNetworkBoot
+                                                            --    - D = Discovered (dhcp discover)
+                                                            --    - I = IP address assigned (dhcp request)
+                                                            --    - L = Started loading the linux boot image onto the node aka LoadingLinuxBootImage
+                                                            --    - K = Starting kernel boot (kernel boot started)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - H = Halting / Shutting Down (started to shutdown node)
+                                                            --    - M = Missing (powered off)
+                                                            --    - E = Error
+                                                            --    - U = Unknown (do not yet know what state this node is in)
+   HostName                VarChar(63),                     -- Compute nodes hostname
+   BootImageId             VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
+   Environment             VarChar(240),                    -- Boot images can have multiple environments associated with them
+   IpAddr                  VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
+   MacAddr                 VarChar(17),                     -- E.g., 52:54:00:fc:4a:87
+   BmcIpAddr               VarChar(25),                     -- E.g., (IPV4) 192.168.122.115  (IPV6) fe80::428d:5cff:fe51:d45a
+   BmcMacAddr              VarChar(17),                     -- E.g., 52:54:00:fc:4a:87
    BmcHostName             VarChar(63),
-   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
-   LastChgTimestamp        TIMESTAMP         NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
-                                                         -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
-                                                         --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
-   LastChgAdapterType      VarChar(20)       NOT NULL,   -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
-   LastChgWorkItemId       BigInt            NOT NULL,   -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   Owner                   VarChar(1)        NOT NULL,   -- Indicates which subsystem "owns" this entity, e.g., "W" - owned by WLM, "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
-   Aggregator              VarChar(63)       NOT NULL,   -- Location of the service node that "controls/owns" this node.
-   InventoryTimestamp      TIMESTAMP,                    -- Time the event occurred that resulted in this inventory being changed.
-   WlmNodeState            VarChar(1)        NOT NULL,   -- Indicates the state of this node from the WLM's perspective: "A" - available (WLM will use this node for running jobs), "U" - unavailable (WLM will not use this node for running jobs), "M" - maintenance (WLM will not use this node for running jobs), "X" - Unexpected/unknown value
-   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
-   EntryNumber             BigInt            NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,      -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp        TIMESTAMP         NOT NULL,      -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType      VarChar(20)       NOT NULL,      -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId       BigInt            NOT NULL,      -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   Owner                   VarChar(1)        NOT NULL,      -- Indicates which subsystem "owns" this entity, e.g., "W" - owned by WLM, "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
+   Aggregator              VarChar(63)       NOT NULL,      -- Location of the service node that "controls/owns" this node.
+   InventoryTimestamp      TIMESTAMP,                       -- Time the event occurred that resulted in this inventory being changed.
+   WlmNodeState            VarChar(1)        NOT NULL,      -- Indicates the state of this node from the WLM's perspective: "A" - available (WLM will use this node for running jobs), "U" - unavailable (WLM will not use this node for running jobs), "M" - maintenance (WLM will not use this node for running jobs), "X" - Unexpected/unknown value
+   ConstraintId            VarChar(50),                     -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp    TIMESTAMP,                       -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
+   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,      -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt            NOT NULL,      -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
 PARTITION TABLE Tier2_ComputeNode_History ON COLUMN Lctn;
 CREATE ASSUMEUNIQUE INDEX Tier2_ComputeNode_History_EntryNum ON Tier2_ComputeNode_History(EntryNumber);
@@ -761,6 +776,7 @@ CREATE TABLE NodeInventory_History (
                                                       --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
    InventoryInfo        VarChar(65536),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
    Sernum               VarChar(50),                  -- Identifies the specific hw currently in this location (i.e., Product Serial)
+   BiosInfo             VarChar(30000),               -- Json string containing the bios information.
    PRIMARY KEY (Lctn, InventoryTimestamp)
 );
 PARTITION TABLE NodeInventory_History ON COLUMN Lctn;
@@ -777,11 +793,337 @@ CREATE TABLE Tier2_NodeInventory_History (
                                                          --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
    InventoryInfo           VarChar(65536),               -- Additional inventory details not part of the standard manifest, e.g. part numbers, CPU details (CPU ID, speed, sockets, hyper threads), memory module details (type, size, speed)
    Sernum                  VarChar(50),                  -- Identifies the specific hw currently in this location (i.e., Product Serial)
+   BiosInfo                VarChar(30000),               -- Json string containing the bios information.
    Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt            NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
    PRIMARY KEY (Lctn, InventoryTimestamp)
 );
 PARTITION TABLE Tier2_NodeInventory_History ON COLUMN Lctn;
+
+
+
+--------------------------------------------------------------
+-- Dimm Table (Memory)
+--------------------------------------------------------------
+CREATE TABLE Dimm (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-D8
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not installed, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   SizeMB               BigInt            NOT NULL,         -- Size of this memory module in megabyte units
+   ModuleLocator        VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
+   BankLocator          VarChar(25),                        -- E.g., Node 1, Node 2
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this dimm is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this dimm, rather the service operation is done on the node!
+   PRIMARY KEY (NodeLctn, Lctn)
+);
+PARTITION TABLE Dimm ON COLUMN NodeLctn;
+CREATE INDEX DimmByState ON Dimm(State);
+
+--------------------------------------------------------------
+-- Dimm History Table
+--------------------------------------------------------------
+CREATE TABLE Dimm_History (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-D8
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not installed, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   SizeMB               BigInt            NOT NULL,         -- Size of this memory module in megabyte units
+   ModuleLocator        VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
+   BankLocator          VarChar(25),                        -- E.g., Node 1, Node 2
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this dimm is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this dimm, rather the service operation is done on the node!
+);
+PARTITION TABLE Dimm_History ON COLUMN NodeLctn;
+CREATE UNIQUE INDEX DimmHistoryByNodelctnLctnAndLastchgtimestamp ON Dimm_History(NodeLctn, Lctn, LastChgTimestamp);
+CREATE INDEX DimmHistoryByDbUpdatedTimestamp ON Dimm_History(DbUpdatedTimestamp);
+
+--------------------------------------------------------------
+-- Temporary table being used in the prototype (when do not actually have a Tier2)
+--------------------------------------------------------------
+CREATE TABLE Tier2_Dimm_History (
+   NodeLctn                VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                    VarChar(30)       NOT NULL,         -- R2-CH03-N2-D8
+   State                   VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                               --    - M = Missing (not installed, disabled)
+                                                               --    - A = Active  (available, booted)
+                                                               --    - E = Error
+                                                               --    - U = Unknown
+   SizeMB                  BigInt            NOT NULL,         -- Size of this memory module in megabyte units
+   ModuleLocator           VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
+   BankLocator             VarChar(25),                        -- E.g., Node 1, Node 2
+   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                               -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                               --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType      VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId       BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                          -- Note: there is no need for an InventoryTimestamp here as the inventory information for this dimm is actually recorded in the node's inventory info.
+                                                               -- Note: there is not a Service Operation to replace this dimm, rather the service operation is done on the node!
+   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt            NOT NULL,         -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+);
+PARTITION TABLE Tier2_Dimm_History ON COLUMN NodeLctn;
+CREATE ASSUMEUNIQUE INDEX Tier2_Dimm_History_EntryNum ON Tier2_Dimm_History(EntryNumber);
+
+
+
+--------------------------------------------------------------
+-- Processor (Socket) Table
+--------------------------------------------------------------
+CREATE TABLE Processor (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-P6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not populated, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   SocketDesignation    VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Processor is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Processor, rather the service operation is done on the node!
+   PRIMARY KEY (NodeLctn, Lctn)
+);
+PARTITION TABLE Processor ON COLUMN NodeLctn;
+CREATE INDEX ProcessorByState ON Processor(State);
+
+--------------------------------------------------------------
+-- Processor History Table
+--------------------------------------------------------------
+CREATE TABLE Processor_History (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-P6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not installed, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   SocketDesignation    VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Processor is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Processor, rather the service operation is done on the node!
+);
+PARTITION TABLE Processor_History ON COLUMN NodeLctn;
+CREATE UNIQUE INDEX ProcessorHistoryByNodelctnLctnAndLastchgtimestamp ON Processor_History(NodeLctn, Lctn, LastChgTimestamp);
+CREATE INDEX ProcessorHistoryByDbUpdatedTimestamp ON Processor_History(DbUpdatedTimestamp);
+
+--------------------------------------------------------------
+-- Temporary table being used in the prototype (when do not actually have a Tier2)
+--------------------------------------------------------------
+CREATE TABLE Tier2_Processor_History (
+   NodeLctn                VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                    VarChar(30)       NOT NULL,         -- R2-CH03-N2-P6
+   State                   VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                               --    - M = Missing (not installed, disabled)
+                                                               --    - A = Active  (available, booted)
+                                                               --    - E = Error
+                                                               --    - U = Unknown
+   SocketDesignation       VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                               -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                               --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType      VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId       BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                          -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Processor is actually recorded in the node's inventory info.
+                                                               -- Note: there is not a Service Operation to replace this Processor, rather the service operation is done on the node!
+   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt            NOT NULL,         -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+);
+PARTITION TABLE Tier2_Processor_History ON COLUMN NodeLctn;
+CREATE ASSUMEUNIQUE INDEX Tier2_Processor_History_EntryNum ON Tier2_Processor_History(EntryNumber);
+
+
+
+--------------------------------------------------------------
+-- Accelerator Table
+--------------------------------------------------------------
+CREATE TABLE Accelerator (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-A6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not populated, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Accelerator is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Accelerator, rather the service operation is done on the node!
+   PRIMARY KEY (NodeLctn, Lctn)
+);
+PARTITION TABLE Accelerator ON COLUMN NodeLctn;
+CREATE INDEX AcceleratorByState ON Accelerator(State);
+
+--------------------------------------------------------------
+-- Accelerator History Table
+--------------------------------------------------------------
+CREATE TABLE Accelerator_History (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-A6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not installed, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Accelerator is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Accelerator, rather the service operation is done on the node!
+);
+PARTITION TABLE Accelerator_History ON COLUMN NodeLctn;
+CREATE UNIQUE INDEX AcceleratorHistoryByNodelctnLctnAndLastchgtimestamp ON Accelerator_History(NodeLctn, Lctn, LastChgTimestamp);
+CREATE INDEX AcceleratorHistoryByDbUpdatedTimestamp ON Accelerator_History(DbUpdatedTimestamp);
+
+--------------------------------------------------------------
+-- Temporary table being used in the prototype (when do not actually have a Tier2)
+--------------------------------------------------------------
+CREATE TABLE Tier2_Accelerator_History (
+   NodeLctn                VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                    VarChar(30)       NOT NULL,         -- R2-CH03-N2-A6
+   State                   VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                               --    - M = Missing (not installed, disabled)
+                                                               --    - A = Active  (available, booted)
+                                                               --    - E = Error
+                                                               --    - U = Unknown
+   BusAddr                 VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                    VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                               -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                               --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType      VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId       BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                          -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Accelerator is actually recorded in the node's inventory info.
+                                                               -- Note: there is not a Service Operation to replace this Accelerator, rather the service operation is done on the node!
+   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt            NOT NULL,         -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+);
+PARTITION TABLE Tier2_Accelerator_History ON COLUMN NodeLctn;
+CREATE ASSUMEUNIQUE INDEX Tier2_Accelerator_History_EntryNum ON Tier2_Accelerator_History(EntryNumber);
+
+
+
+--------------------------------------------------------------
+-- Hfi (High-speed Fabric Interface) Table
+--------------------------------------------------------------
+CREATE TABLE Hfi (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-H6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not populated, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Hfi is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Hfi, rather the service operation is done on the node!
+   PRIMARY KEY (NodeLctn, Lctn)
+);
+PARTITION TABLE Hfi ON COLUMN NodeLctn;
+CREATE INDEX HfiState  ON Hfi(State);
+
+--------------------------------------------------------------
+-- Hfi History Table
+--------------------------------------------------------------
+CREATE TABLE Hfi_History (
+   NodeLctn             VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                 VarChar(30)       NOT NULL,         -- R2-CH03-N2-H6
+   State                VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                            --    - M = Missing (not installed, disabled)
+                                                            --    - A = Active  (available, booted)
+                                                            --    - E = Error
+                                                            --    - U = Unknown
+   BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                            -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                            --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType   VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                       -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Hfi is actually recorded in the node's inventory info.
+                                                            -- Note: there is not a Service Operation to replace this Hfi, rather the service operation is done on the node!
+);
+PARTITION TABLE Hfi_History ON COLUMN NodeLctn;
+CREATE UNIQUE INDEX HfiHistoryByNodelctnLctnAndLastchgtimestamp ON Hfi_History(NodeLctn, Lctn, LastChgTimestamp);
+CREATE INDEX HfiHistoryByDbUpdatedTimestamp ON Hfi_History(DbUpdatedTimestamp);
+
+--------------------------------------------------------------
+-- Temporary table being used in the prototype (when do not actually have a Tier2)
+--------------------------------------------------------------
+CREATE TABLE Tier2_Hfi_History (
+   NodeLctn                VarChar(25)       NOT NULL,         -- R2-CH03-N2
+   Lctn                    VarChar(30)       NOT NULL,         -- R2-CH03-N2-H6
+   State                   VarChar(1)        NOT NULL,         -- Actual state that this item is in:
+                                                               --    - M = Missing (not installed, disabled)
+                                                               --    - A = Active  (available, booted)
+                                                               --    - E = Error
+                                                               --    - U = Unknown
+   BusAddr                 VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
+   Slot                    VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
+                                                               -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
+                                                               --       See the DbUpdatedTimestamp field, if you want the time the change was recorded in the database.
+   LastChgAdapterType      VarChar(20)       NOT NULL,         -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId       BigInt            NOT NULL,         -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   ---InventoryTimestamp   TIMESTAMP,                          -- Note: there is no need for an InventoryTimestamp here as the inventory information for this Hfi is actually recorded in the node's inventory info.
+                                                               -- Note: there is not a Service Operation to replace this Hfi, rather the service operation is done on the node!
+   Tier2DbUpdatedTimestamp TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt            NOT NULL,         -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+);
+PARTITION TABLE Tier2_Hfi_History ON COLUMN NodeLctn;
+CREATE ASSUMEUNIQUE INDEX Tier2_Hfi_History_EntryNum ON Tier2_Hfi_History(EntryNumber);
+
 
 
 --------------------------------------------------------------------------------
@@ -835,7 +1177,7 @@ CREATE TABLE ServiceNode (
    Lctn                 VarChar(30)    UNIQUE NOT NULL,  -- Location string
    SequenceNumber       Integer        NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName             VarChar(63),                     -- Host name
-   State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
+   State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Halting, Missing, Error
    BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr               VarChar(25),
    MacAddr              VarChar(17),
@@ -851,11 +1193,15 @@ CREATE TABLE ServiceNode (
    Owner                VarChar(1)     NOT NULL,         -- Indicates which subsystem "owns" this entity, e.g., "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
    Aggregator           VarChar(63)    NOT NULL,         -- Location of the service node that "controls/owns" this node.
    InventoryTimestamp   TIMESTAMP,                       -- Time the event occurred that resulted in this inventory being changed.
+   ConstraintId         VarChar(50),                     -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp TIMESTAMP,                       -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
    PRIMARY KEY (Lctn)
 );
 PARTITION TABLE ServiceNode ON COLUMN Lctn;
-CREATE INDEX ServiceNodeAggregator on ServiceNode(Aggregator);
-CREATE INDEX ServiceNodeSeqNum     on ServiceNode(SequenceNumber);
+CREATE INDEX ServiceNodeAggregator    on ServiceNode(Aggregator);
+CREATE INDEX ServiceNodeSeqNum        on ServiceNode(SequenceNumber);
+CREATE INDEX ServiceNodeOwner         on ServiceNode(Owner);
+
 
 --------------------------------------------------------------
 -- Service Node history Table
@@ -868,7 +1214,7 @@ CREATE TABLE ServiceNode_History (
    Lctn                 VarChar(30)    NOT NULL,         -- Location string
    SequenceNumber       Integer        NOT NULL,         -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName             VarChar(63),                     -- Host name
-   State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
+   State                VarChar(1)     NOT NULL,         -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Halting, Missing, Error
    BootImageId          VarChar(50),                     -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr               VarChar(25),
    MacAddr              VarChar(17),
@@ -884,6 +1230,8 @@ CREATE TABLE ServiceNode_History (
    Owner                VarChar(1)     NOT NULL,         -- Indicates which subsystem "owns" this entity, e.g., "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
    Aggregator           VarChar(63)    NOT NULL,         -- Location of the service node that "controls/owns" this node.
    InventoryTimestamp   TIMESTAMP,                       -- Time the event occurred that resulted in this inventory being changed.
+   ConstraintId         VarChar(50),                     -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp TIMESTAMP,                       -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
 );
 PARTITION TABLE ServiceNode_History ON COLUMN Lctn;
 CREATE UNIQUE INDEX ServiceNodeHistoryByLctnAndLastChgTimestamp on ServiceNode_History(Lctn, LastChgTimestamp);
@@ -896,7 +1244,7 @@ CREATE TABLE Tier2_ServiceNode_History (
    Lctn                    VarChar(30)    NOT NULL,      -- Location string
    SequenceNumber          Integer        NOT NULL,      -- Unique sequence number that can be used to correlate Lctn to index - assigned during PopulateSchema
    HostName                VarChar(63),                  -- Host name
-   State                   VarChar(1)     NOT NULL,      -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Missing, Error
+   State                   VarChar(1)     NOT NULL,      -- Actual state that this item is in - BiosStarting, Discovered, IP address assigned, Loading boot images, Kernel boot started, Active, Halting, Missing, Error
    BootImageId             VarChar(50),                  -- ID that identifies the BootTimages information that should be used when booting this node (see BootImage table)
    IpAddr                  VarChar(25),
    MacAddr                 VarChar(17),
@@ -912,6 +1260,8 @@ CREATE TABLE Tier2_ServiceNode_History (
    Owner                   VarChar(1)     NOT NULL,      -- Indicates which subsystem "owns" this entity, e.g., "S" - owned by Service, "G" - owned by General System, "F" - unowned / in the free pool
    Aggregator              VarChar(63)    NOT NULL,      -- Location of the service node that "controls/owns" this node.
    InventoryTimestamp      TIMESTAMP,                    -- Time the event occurred that resulted in this inventory being changed.
+   ConstraintId            VarChar(50),                  -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   ProofOfLifeTimestamp    TIMESTAMP,                    -- Time that this node last reported Proof of Life.  This message is generated every 15 minutes by an active node.  Proves that node's serial console messages are flowing all the way into the Provisioner adapter.
    Tier2DbUpdatedTimestamp TIMESTAMP      NOT NULL,      -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt         NOT NULL,      -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
@@ -1076,18 +1426,11 @@ CREATE ASSUMEUNIQUE INDEX Tier2_Replacement_History_EntryNum ON Tier2_Replacemen
 
 --------------------------------------------------------------
 -- RAS Event Table
--- - Info in this table is filled in either by
---    a)  SenSys
---    b)  adapters
---    c)  ELK
---    d)  Aggregators
---    e)  Log file processors
---    f)  Other software generating RAS events
--- Subscription Routing Key: RasEvent (or possibly RasEvent.Lctn.ControlOperation)
+--    Subscription Routing Key: RasEvent (or possibly RasEvent.Lctn.ControlOperation)
 --------------------------------------------------------------
 CREATE TABLE RasEvent (
-   Id                   BigInt         NOT NULL,               -- Identifier that uniquely identifies a specific instance WITHIN a specific EventType (it is not unique over all ras events, but unique for all instances of specific EventType e.g., RasGenAdapterAbend)
-   EventType            VarChar(10)    NOT NULL,               -- Identifies which type of event occurred, e.g., "0001000001", "0001000005", "0005000007"
+   Id                   BigInt         NOT NULL,               -- Identifier that uniquely identifies a specific instance WITHIN a specific DescriptiveName (it is not unique over all ras events, but unique for all instances of specific DescriptiveName e.g., RasGenAdapterAbend)
+   DescriptiveName      VarChar(65)    NOT NULL,               -- Descriptive name for this type of event, e.g., RasGenAdapterAbend, RasWorkItemFindAndOwnFailed
    Lctn                 VarChar(100),                          -- Location of the hardware that the event occurred on
    Sernum               VarChar(50),                           -- Serial number of the piece of hw the event occurred on
    JobId                VarChar(30),                           -- WLMs job id, external value e.g., 1234567.head-5
@@ -1095,25 +1438,28 @@ CREATE TABLE RasEvent (
                                                                --    Note: value of "?"  indicates that the generator of this RAS Event does not know whether or not any job was effected by the "event" whose occurrence caused the logging of this ras event.
                                                                --    Note: value of JobId that the generator of this RAS Event knows was effected by the "event" whose occurrence caused the logging of this ras event.
    NumberRepeats        Integer        DEFAULT 0 NOT NULL,     -- Number of times this event occurred w/i the interval
-   ControlOperation     VarChar(50),                           -- Control Operation that should be taken as a result of this event occurring - ErrorOnComputeNode, ErrorAndKillJobOnComputeNode, ErrorAndPwrOffComputeNode, ErrorAndKillJobAndPwrOffComputeNode, IncreaseFanSpeed, ... (this value may be overriden from the default in certain instances)
-   ControlOperationDone VarChar(1)     DEFAULT 'N' NOT NULL,   -- Flag indicating whether or not the control operation has been executed - Y (control operation has been executed), N (control operation has not been executed)
-   InstanceData         VarChar(500),                          -- Data specific to this instance of the event, may be appended to the Event message to have the complete information
-   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,               -- Time that this record was recorded in the database.  It is the actual time that the db insert/update occurred.  This is different than Timestamp field.
+   ControlOperation     VarChar(50),                           -- Control Operation that should be taken as a result of this event occurring - ErrorOnComputeNode, ErrorAndKillJobOnComputeNode, ErrorAndPwrOffComputeNode, ErrorAndKillJobAndPwrOffComputeNode, IncreaseFanSpeed, ... (this value may be overridden from the default in certain instances)
+   Done                 VarChar(1)     DEFAULT 'N' NOT NULL,   -- Flag indicating whether or not everything has been "done" for this event - e.g., is the JobId filled in if requested, has the ControlOperation been invoked, etc. - Y (done with this event), N (event still needs RAS adapter to do work for it).
+   InstanceData         VarChar(10000),                        -- Data specific to this instance of the event, may be appended to the Event message to have the complete information
+   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,               -- Time that this record was recorded in the database.  It is the actual time that the db insert/update occurred.  This is different than LastChgTimestamp field.
    LastChgTimestamp     TIMESTAMP      NOT NULL,               -- Time that the event that caused this RAS Event to be generated occurred.  This is NOT the time that the event was put into the data store.  This is different than the DbUpdatedTimestamp field.
    LastChgAdapterType   VarChar(20)    NOT NULL,               -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
    LastChgWorkItemId    BigInt         NOT NULL                -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
 );
-PARTITION TABLE RasEvent ON COLUMN EventType;
-CREATE UNIQUE INDEX RasEventByEventTypeAndId ON RasEvent(EventType, Id);
-CREATE INDEX RasEventByControlOperationDone  ON RasEvent(ControlOperationDone) WHERE ControlOperation IS NOT NULL;
-CREATE INDEX RasEventByLctnAndTime           ON RasEvent(Lctn, LastChgTimestamp) WHERE Lctn IS NOT NULL;
-CREATE INDEX RasEventByDbUpdatedTimestamp    ON RasEvent(DbUpdatedTimestamp);
+PARTITION TABLE RasEvent ON COLUMN DescriptiveName;
+CREATE UNIQUE INDEX RasEventByDescriptiveNameAndId ON RasEvent(DescriptiveName, Id);
+
+CREATE INDEX RasEventsNotDoneByDbUpdatedTimestamp  ON RasEvent(DbUpdatedTimestamp) WHERE Done != 'Y';  -- Note: do NOT change this to "WHERE Done = 'N'" w/o also changing the stored procedure that is using this.
+
+CREATE INDEX RasEventByLctnAndTime                 ON RasEvent(Lctn, LastChgTimestamp) WHERE Lctn IS NOT NULL;
+CREATE INDEX RasEventByDbUpdatedTimestamp          ON RasEvent(DbUpdatedTimestamp);
+
 --------------------------------------------------------------
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
 --------------------------------------------------------------
 CREATE TABLE Tier2_RasEvent (
-   Id                      BigInt         NOT NULL,            -- Identifier that uniquely identifies a specific instance WITHIN a specific EventType (it is not unique over all ras events, but unique for all instances of specific EventType e.g., RasGenAdapterAbend)
-   EventType               VarChar(10)    NOT NULL,            -- Identifies which type of event occurred, e.g., "0001000001", "0001000005", "0005000007"
+   Id                      BigInt         NOT NULL,            -- Identifier that uniquely identifies a specific instance WITHIN a specific DescriptiveName (it is not unique over all ras events, but unique for all instances of specific DescriptiveName e.g., RasGenAdapterAbend)
+   DescriptiveName         VarChar(65)    NOT NULL,            -- Descriptive name for this type of event, e.g., RasGenAdapterAbend, RasWorkItemFindAndOwnFailed
    Lctn                    VarChar(100),                       -- Location of the hardware that the event occurred on
    Sernum                  VarChar(50),                        -- Serial number of the piece of hw the event occurred on
    JobId                   VarChar(30),                        -- WLMs job id, external value e.g., 1234567.head-5
@@ -1121,31 +1467,26 @@ CREATE TABLE Tier2_RasEvent (
                                                                --    Note: value of "?"  indicates that the generator of this RAS Event does not know whether or not any job was effected by the "event" whose occurrence caused the logging of this ras event.
                                                                --    Note: value of JobId that the generator of this RAS Event knows was effected by the "event" whose occurrence caused the logging of this ras event.
    NumberRepeats           Integer        NOT NULL,            -- Number of times this event occurred w/i the interval
-   ControlOperation        VarChar(50),                        -- Control Operation that should be taken as a result of this event occurring - ErrorOnComputeNode, ErrorAndKillJobOnComputeNode, ErrorAndPwrOffComputeNode, ErrorAndKillJobAndPwrOffComputeNode, IncreaseFanSpeed, ... (this value may be overriden from the default in certain instances)
-   ControlOperationDone    VarChar(1)     NOT NULL,            -- Flag indicating whether or not the control operation has been executed - Y (control operation has been executed), N (control operation has not been executed)
-   InstanceData            VarChar(500),                       -- Data specific to this instance of the event, may be appended to the Event message to have the complete information
-   DbUpdatedTimestamp      TIMESTAMP      NOT NULL,            -- Time that this record was recorded in the database.  It is the actual time that the db insert/update occurred.  This is different than Timestamp field.
+   ControlOperation        VarChar(50),                        -- Control Operation that should be taken as a result of this event occurring - ErrorOnComputeNode, ErrorAndKillJobOnComputeNode, ErrorAndPwrOffComputeNode, ErrorAndKillJobAndPwrOffComputeNode, IncreaseFanSpeed, ... (this value may be overridden from the default in certain instances)
+   Done                    VarChar(1)     NOT NULL,            -- Flag indicating whether or not everything has been "done" for this event - e.g., is the JobId filled in if requested, has the ControlOperation been invoked, etc. - Y (done with this event), N (event still needs RAS adapter to do work for it).
+   InstanceData            VarChar(10000),                     -- Data specific to this instance of the event, may be appended to the Event message to have the complete information
+   DbUpdatedTimestamp      TIMESTAMP      NOT NULL,            -- Time that this record was recorded in the database.  It is the actual time that the db insert/update occurred.  This is different than LastChgTimestamp field.
    LastChgTimestamp        TIMESTAMP      NOT NULL,            -- Time that the event that caused this RAS Event to be generated occurred.  This is NOT the time that the event was put into the data store.  This is different than the DbUpdatedTimestamp field.
    LastChgAdapterType      VarChar(20)    NOT NULL,            -- Type of adapter that made the last change to this item - needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
    LastChgWorkItemId       BigInt         NOT NULL,            -- Work item id that "caused" the last change to this item  - needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
    Tier2DbUpdatedTimestamp TIMESTAMP      NOT NULL,            -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt         NOT NULL,            -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
-   PRIMARY KEY (EventType, Id)
+   PRIMARY KEY (DescriptiveName, Id)
 );
-PARTITION TABLE Tier2_RasEvent ON COLUMN EventType;
-CREATE UNIQUE INDEX Tier2_RasEventByEventTypeAndId ON Tier2_RasEvent(EventType, Id);
+PARTITION TABLE Tier2_RasEvent ON COLUMN DescriptiveName;
+CREATE UNIQUE INDEX Tier2_RasEventByDescriptiveNameAndId ON Tier2_RasEvent(DescriptiveName, Id);
 CREATE ASSUMEUNIQUE INDEX Tier2_RasEvent_EntryNum ON Tier2_RasEvent(EntryNumber);
 
 
 --------------------------------------------------------------
--- Meta data for each of the different RAS Event Types (EventType)
--- - Info in this table is filled in either by
---    a)  Install of system software
---    b)  Install team
---    c)  E-fixes
+-- Meta data for each of the different RAS Event Types (DescriptiveName)
 --------------------------------------------------------------
 CREATE TABLE RasMetaData (
-   EventType            VarChar(10)    NOT NULL,               -- Identifies which type of event occurred, e.g., "0001000001", "0001000005", "0005000007"
    DescriptiveName      VarChar(65)    NOT NULL,               -- Descriptive name for this type of event, e.g., RasGenAdapterAbend, RasWorkItemFindAndOwnFailed
    Severity             VarChar(10)    NOT NULL,               -- FATAL, ERROR, WARN, INFO, DEBUG
    Category             VarChar(20)    NOT NULL,               -- Category of RAS event this belongs to - DAI, Adapter, Memory, Processor, Ethernet, Fan, Temp, ...
@@ -1154,16 +1495,15 @@ CREATE TABLE RasMetaData (
    Msg                  VarChar(1000),
    DbUpdatedTimestamp   TIMESTAMP      NOT NULL,               -- Time that this record was recorded in the database.  It is the actual time that the db insert/update occurred.
    GenerateAlert        VarChar(1)     DEFAULT 'N' NOT NULL,   -- Flag indicating whether or not the AlertMgr should automatically generate an alert for this RAS event.
-   PRIMARY KEY (EventType)
+   PRIMARY KEY (DescriptiveName)
 );
-PARTITION TABLE RasMetaData ON COLUMN EventType;
+PARTITION TABLE RasMetaData ON COLUMN DescriptiveName;
 CREATE INDEX RasMetaDataByDbUpdatedTimestamp ON RasMetaData(DbUpdatedTimestamp);
 
 --------------------------------------------------------------
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
 --------------------------------------------------------------
 CREATE TABLE Tier2_RasMetaData (
-   EventType               VarChar(10)    NOT NULL,               -- Identifies which type of event occurred, e.g., "0001000001", "0001000005", "0005000007"
    DescriptiveName         VarChar(65)    NOT NULL,               -- Descriptive name for this type of event, e.g., RasGenAdapterAbend, RasWorkItemFindAndOwnFailed
    Severity                VarChar(10)    NOT NULL,               -- FATAL, ERROR, WARN, INFO, DEBUG
    Category                VarChar(20)    NOT NULL,               -- Category of RAS event this belongs to - DAI, Adapter, Memory, Processor, Ethernet, Fan, Temp, ...
@@ -1175,14 +1515,12 @@ CREATE TABLE Tier2_RasMetaData (
    Tier2DbUpdatedTimestamp TIMESTAMP      NOT NULL,               -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
    EntryNumber             BigInt         NOT NULL,               -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
-PARTITION TABLE Tier2_RasMetaData ON COLUMN EventType;
+PARTITION TABLE Tier2_RasMetaData ON COLUMN DescriptiveName;
 --CREATE ASSUMEUNIQUE INDEX Tier2_RasMetaData_EntryNum ON Tier2_RasMetaData(EntryNumber);
 
 
 --------------------------------------------------------------
 -- WorkItem Table
--- - Info in this table is filled in by
---    a)  Online Data Store adapter
 --------------------------------------------------------------
 CREATE TABLE WorkItem (
    Queue                   VarChar(20),            -- Type of work item this is (what is this item about - e.g., Job, Hardware, RAS, EnvData)
@@ -1204,7 +1542,7 @@ CREATE TABLE WorkItem (
    RequestingAdapterType   VarChar(20) NOT NULL,   -- What type of adapter requested this new work item (aka sender)
    WorkingAdapterId        BigInt,                 -- Which adapter is working on this work item
    WorkingResults          VarChar(15000),         -- Intermediate results that can be used when working on this work item, e.g., the working adapter might want to create addtl work items to accomplish the overarching work item (may be in JSON format)
-   Results                 VarChar(201144),         -- "Final" results for this work item (may be in JSON format)
+   Results                 VarChar(262144),        -- "Final" results for this work item (may be in JSON format)
    StartTimestamp          TIMESTAMP   NOT NULL,   -- Time this WorkItem was created
    DbUpdatedTimestamp      TIMESTAMP   NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
 );
@@ -1214,9 +1552,6 @@ CREATE UNIQUE INDEX WorkItemByAdapterTypeAndId  on WorkItem(WorkingAdapterType, 
 
 --------------------------------------------------------------
 -- WorkItem history Table
--- - Info in this table is filled in either by
---    a)  in parallel with changes going in to the WorkItem table
---    b)  automatically by changes occurring in the WorkItem table (i.e., db trigger or export functionality)
 -- Subscription Routing Key: WorkItem.State (or possibly WorkItem.State.WorkingAdapterType.NotifyWhenFinished)
 --------------------------------------------------------------
 CREATE TABLE WorkItem_History (
@@ -1239,7 +1574,7 @@ CREATE TABLE WorkItem_History (
    RequestingAdapterType   VarChar(20) NOT NULL,   -- What type of adapter requested this new work item (aka sender)
    WorkingAdapterId        BigInt,                 -- Which adapter is working on this work item
    WorkingResults          VarChar(15000),         -- Intermediate results that can be used when working on this work item, e.g., the working adapter might want to create addtl work items to accomplish the overarching work item (may be in JSON format)
-   Results                 VarChar(201144),         -- "Final" results for this work item (may be in JSON format)
+   Results                 VarChar(262144),        -- "Final" results for this work item (may be in JSON format)
    StartTimestamp          TIMESTAMP   NOT NULL,   -- Time this WorkItem was created
    DbUpdatedTimestamp      TIMESTAMP   NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
    EndTimestamp            TIMESTAMP,              -- Time this work item was completely done
@@ -1277,7 +1612,7 @@ CREATE TABLE Tier2_WorkItem_History (
    RequestingAdapterType   VarChar(20) NOT NULL,   -- What type of adapter requested this new work item (aka sender)
    WorkingAdapterId        BigInt,                 -- Which adapter is working on this work item
    WorkingResults          VarChar(15000),         -- Intermediate results that can be used when working on this work item, e.g., the working adapter might want to create addtl work items to accomplish the overarching work item (may be in JSON format)
-   Results                 VarChar(201144),         -- "Final" results for this work item (may be in JSON format)
+   Results                 VarChar(262144),        -- "Final" results for this work item (may be in JSON format)
    StartTimestamp          TIMESTAMP   NOT NULL,   -- Time this WorkItem was created
    DbUpdatedTimestamp      TIMESTAMP   NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
    EndTimestamp            TIMESTAMP,              -- Time this work item was completely done
@@ -1445,23 +1780,23 @@ CREATE ASSUMEUNIQUE INDEX Tier2_BootImage_History_EntryNum ON Tier2_BootImage_Hi
 --    b)  Service Operation post-processing
 --------------------------------------------------------------
 CREATE TABLE Diag (
-   DiagId               BigInt         NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
-   Lctn                 VarChar(20000)    NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
-   ServiceOperationId   BigInt,                    -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
+   DiagId               BigInt          NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
+   Lctn                 VarChar(20000)  NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
+   ServiceOperationId   BigInt,                     -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
    Diag                 VarChar(500)    NOT NULL,   -- Identifies which diagnostic(s) was run, this refers to the  DiagListId in Diag_List table.
-   DiagParameters       VarChar(20000),           -- The Parameters passed to run this diagnostic run
-   State                VarChar(1)     NOT NULL,   -- Actual state that this diagnostic is in
-                                                   -- - 'W' - Working - diagnostic is being worked on
-                                                   -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
-                                                   -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
-                                                   -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
-   StartTimestamp       TIMESTAMP      NOT NULL,   -- Time this particular diagnostic started
-   EndTimestamp         TIMESTAMP,                 -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
-   Results              VarChar(201144),           -- Result string produced by the diagnostic
-   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
-   LastChgTimestamp     TIMESTAMP      NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
-   LastChgAdapterType   VarChar(20)    NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
-   LastChgWorkItemId    BigInt         NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   DiagParameters       VarChar(20000),             -- The Parameters passed to run this diagnostic run
+   State                VarChar(1)      NOT NULL,   -- Actual state that this diagnostic is in
+                                                    -- - 'W' - Working - diagnostic is being worked on
+                                                    -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
+                                                    -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
+                                                    -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
+   StartTimestamp       TIMESTAMP       NOT NULL,   -- Time this particular diagnostic started
+   EndTimestamp         TIMESTAMP,                  -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
+   Results              VarChar(262144),            -- Result string produced by the diagnostic
+   DbUpdatedTimestamp   TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP       NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
+   LastChgAdapterType   VarChar(20)     NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt          NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
    PRIMARY KEY (DiagId)
 );
 PARTITION TABLE Diag ON COLUMN DiagId;
@@ -1474,23 +1809,23 @@ CREATE INDEX DiagByLctn on Diag(Lctn);
 --    b)  automatically by changes occurring in the Diag table (i.e., db trigger or export functionality)
 --------------------------------------------------------------
 CREATE TABLE Diag_History (
-   DiagId               BigInt         NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
-   Lctn                 VarChar(20000)    NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
-   ServiceOperationId   BigInt,                    -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
-   Diag                 VarChar(500)   NOT NULL,   -- Identifies which diagnostic(s) was run, this refers to the  DiagListId in Diag_List table.
-   DiagParameters       VarChar(20000),           -- The Parameters passed to run this diagnostic run
-   State                VarChar(1)     NOT NULL,   -- Actual state that this diagnostic is in
-                                                   -- - 'W' - Working - diagnostic is being worked on
-                                                   -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
-                                                   -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
-                                                   -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
-   StartTimestamp       TIMESTAMP      NOT NULL,   -- Time this particular diagnostic started
-   EndTimestamp         TIMESTAMP,                 -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
-   Results              VarChar(201144),             -- Result string produced by the diagnostic
-   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
-   LastChgTimestamp     TIMESTAMP      NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
-   LastChgAdapterType   VarChar(20)    NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
-   LastChgWorkItemId    BigInt         NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   DiagId               BigInt          NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
+   Lctn                 VarChar(20000)  NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
+   ServiceOperationId   BigInt,                     -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
+   Diag                 VarChar(500)    NOT NULL,   -- Identifies which diagnostic(s) was run, this refers to the  DiagListId in Diag_List table.
+   DiagParameters       VarChar(20000),             -- The Parameters passed to run this diagnostic run
+   State                VarChar(1)      NOT NULL,   -- Actual state that this diagnostic is in
+                                                    -- - 'W' - Working - diagnostic is being worked on
+                                                    -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
+                                                    -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
+                                                    -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
+   StartTimestamp       TIMESTAMP       NOT NULL,   -- Time this particular diagnostic started
+   EndTimestamp         TIMESTAMP,                  -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
+   Results              VarChar(262144),            -- Result string produced by the diagnostic
+   DbUpdatedTimestamp   TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP       NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
+   LastChgAdapterType   VarChar(20)     NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt          NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
 );
 PARTITION TABLE Diag_History ON COLUMN DiagId;
 CREATE INDEX DiagHistoryByDbUpdatedTimestamp ON Diag_History(DbUpdatedTimestamp);
@@ -1498,24 +1833,24 @@ CREATE INDEX DiagHistoryByDbUpdatedTimestamp ON Diag_History(DbUpdatedTimestamp)
 -- Temporary table being used in the prototype (when do not actually have a Tier2)
 --------------------------------------------------------------
 CREATE TABLE Tier2_Diag_History (
-   DiagId               BigInt         NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
-   Lctn                 VarChar(20000)    NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
-   ServiceOperationId   BigInt,                    -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
-   Diag                 VarChar(500)   NOT NULL,   -- Identifies which diagnostic(s) was run, this refers to the  DiagListId in Diag_List table.
-   DiagParameters       VarChar(20000),           -- The Parameters passed to run this diagnostic run
-   State                VarChar(1)     NOT NULL,   -- Actual state that this diagnostic is in
-                                                   -- - 'W' - Working - diagnostic is being worked on
-                                                   -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
-                                                   -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
-                                                   -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
-   StartTimestamp       TIMESTAMP      NOT NULL,   -- Time this particular diagnostic started
-   EndTimestamp         TIMESTAMP,                 -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
-   Results              VarChar(201144),             -- Result string produced by the diagnostic
-   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
-   LastChgTimestamp     TIMESTAMP      NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
-   LastChgAdapterType   VarChar(20)    NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
-   LastChgWorkItemId    BigInt         NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
-   EntryNumber          BigInt         NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+   DiagId               BigInt          NOT NULL,   -- The id that uniquely identifies this specific instance of a diagnostic run (think a monotonically incrementing value)
+   Lctn                 VarChar(20000)  NOT NULL,   -- Hardware location string of the hardware that this diagnostic was running on, a compute node, a whole rack, a cdu, a pdu, a switch, etc.
+   ServiceOperationId   BigInt,                     -- The Service Operation ID that requested this diagnostic be run (NULL indicates that this diagnostic was submitted outside of a Service Operation)
+   Diag                 VarChar(500)    NOT NULL,   -- Identifies which diagnostic(s) was run, this refers to the  DiagListId in Diag_List table.
+   DiagParameters       VarChar(20000),             -- The Parameters passed to run this diagnostic run
+   State                VarChar(1)      NOT NULL,   -- Actual state that this diagnostic is in
+                                                    -- - 'W' - Working - diagnostic is being worked on
+                                                    -- - 'P' - Passed - all processing for this diagnostic has been finished and passed. The Results field contains the results from this work.
+                                                    -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
+                                                    -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
+   StartTimestamp       TIMESTAMP       NOT NULL,   -- Time this particular diagnostic started
+   EndTimestamp         TIMESTAMP,                  -- Time this particular diagnostic ended (would be NULL if the diagnostic has not yet ended)
+   Results              VarChar(262144),            -- Result string produced by the diagnostic
+   DbUpdatedTimestamp   TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
+   LastChgTimestamp     TIMESTAMP       NOT NULL,   -- Time the event occurred that resulted in this entry being changed.
+   LastChgAdapterType   VarChar(20)     NOT NULL,   -- Type of adapter that made the last change to this item - may be needed for work item recovery flows for failed adapters (e.g., WLM, PROVISIONER, RAS, ONLINE_TIER, NEARLINE_TIER, MONITOR, RM_RTE, FM, UI, CONTROL, etc.)
+   LastChgWorkItemId    BigInt          NOT NULL,   -- Work item id that "caused" the last change to this item  - may be needed for work item recovery flows for failed adapters (-1 used when there is no work item yet associated with this change)
+   EntryNumber          BigInt          NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
 PARTITION TABLE Tier2_Diag_History ON COLUMN DiagId;
 --CREATE ASSUMEUNIQUE INDEX Tier2_Diag_History_EntryNum ON Tier2_Diag_History(EntryNumber);
@@ -1536,7 +1871,7 @@ CREATE TABLE DiagResults (
                                                    -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
                                                    -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
                                                    -- - 'U' - UNKNOWN Diagnostics completed and end detected but pass/fail could not be determined. The Results field may contain results if it was partially run.
-   Results              VarChar(201144),           -- Result string produced by the diagnostic
+   Results              VarChar(262144),           -- Result string produced by the diagnostic
    DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    PRIMARY KEY (DiagId,Lctn)
 );
@@ -1559,7 +1894,7 @@ CREATE TABLE Tier2_DiagResults (
                                                    -- - 'F' - Failed - all processing for this diagnostic has been finished but it failed. The Results field contains the results from this work.
                                                    -- - 'E' - ERROR in running or completing the diagnostics (could be due to provisioning issues or timeout due to test hang etc.,). The Results field may contain results if it was partially run.
                                                    -- - 'U' - UNKNOWN Diagnostics completed and end detected but pass/fail could not be determined. The Results field may contain results if it was partially run.
-   Results              VarChar(201144),             -- Result string produced by the diagnostic
+   Results              VarChar(262144),             -- Result string produced by the diagnostic
    DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    PRIMARY KEY (DiagId,Lctn)
 );
@@ -1712,7 +2047,7 @@ CREATE ASSUMEUNIQUE INDEX Tier2_Switch_History_EntryNum ON Tier2_Switch_History(
 
 --------------------------------------------------------------
 -- Non-Node hardware Table
--- (note: compute nodes, service nodes, and switches are in their own table)
+-- (note: compute nodes, service nodes, and switches are in their own tables)
 --------------------------------------------------------------
 CREATE TABLE NonNodeHw (
    Lctn                 VarChar(50)       NOT NULL,
@@ -1883,9 +2218,9 @@ CREATE TABLE Tier2_FabricTopology_History (
 -- Congestion Indicators
 -- Performance Indicators
 -- Type of Fabric
-    DbUpdatedTimestamp      TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
-    Tier2DbUpdatedTimestamp TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
-    EntryNumber             BigInt          NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+   DbUpdatedTimestamp      TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
+   Tier2DbUpdatedTimestamp TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt          NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
 -- PARTITION TABLE Tier2_FabricTopology_History ON COLUMN Xxxxxx;
 --CREATE ASSUMEUNIQUE INDEX Tier2_FabricTopology_History_EntryNum ON Tier2_FabricTopology_History(EntryNumber);
@@ -1931,9 +2266,9 @@ CREATE TABLE Tier2_Lustre_History (
 -- State/Status
 -- Congestion Indicators
 -- Performance Indicators
-    DbUpdatedTimestamp      TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
-    Tier2DbUpdatedTimestamp TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
-    EntryNumber             BigInt          NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
+   DbUpdatedTimestamp      TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
+   Tier2DbUpdatedTimestamp TIMESTAMP       NOT NULL,   -- Time the last change to this record was recorded in the Tier2 database.  It is the actual time that the db update occurred.
+   EntryNumber             BigInt          NOT NULL,   -- Unique entry number which is assigned when the data is inserted into this Tier2 table.  This value is used when paging/windowing through this table.
 );
 -- PARTITION TABLE Tier2_Lustre_History ON COLUMN Xxxxxx;
 --CREATE ASSUMEUNIQUE INDEX Tier2_Lustre_History_EntryNum ON Tier2_Lustre_History(EntryNumber);
@@ -1965,9 +2300,30 @@ PARTITION TABLE Tier2_UniqueValues ON COLUMN Entity;
 
 
 --------------------------------------------------------------
+-- Hardware constraints table
+--------------------------------------------------------------
+CREATE TABLE Constraint (
+   ConstraintId         VarChar(50)    NOT NULL,   -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   Constraints          VarChar(1000),             -- Constraints that need to be enforced for entities with this constraint id.
+   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
+   PRIMARY KEY (ConstraintId)
+);
+PARTITION TABLE Constraint ON COLUMN ConstraintId;
+CREATE INDEX ConstraintByDbUpdatedTimestamp ON UniqueValues(DbUpdatedTimestamp);
+--------------------------------------------------------------
+-- Temporary table being used in the prototype (when do not actually have a Tier2)
+--------------------------------------------------------------
+CREATE TABLE Tier2_Constraint (
+   ConstraintId         VarChar(50)    NOT NULL,   -- Constraint ID - identifies which set of constraints apply to this node (see Constraint table).
+   Constraints          VarChar(1000),             -- Constraints that need to be enforced for entities with this constraint id.
+   DbUpdatedTimestamp   TIMESTAMP      NOT NULL,   -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.
+   PRIMARY KEY (ConstraintId)
+);
+PARTITION TABLE Tier2_Constraint ON COLUMN ConstraintId;
+
+
+--------------------------------------------------------------
 -- Logical groups Table
--- Info in this table is filled by users with system administrator and system operator role
---
 --------------------------------------------------------------
 CREATE TABLE LogicalGroups (
    GroupCreatedTimestamp   TIMESTAMP,
@@ -1984,9 +2340,9 @@ PARTITION TABLE LogicalGroups ON COLUMN GroupName;
 -- Temporary table being used when we do not actually have a Tier2
 --------------------------------------------------------------
 CREATE TABLE Tier2_Config (
-    Key         Varchar(50) NOT NULL,
-    Value       Varchar(50) NOT NULL,
-    Description Varchar(500)
+   Key         Varchar(50) NOT NULL,
+   Value       Varchar(50) NOT NULL,
+   Description Varchar(500)
 );
 
 

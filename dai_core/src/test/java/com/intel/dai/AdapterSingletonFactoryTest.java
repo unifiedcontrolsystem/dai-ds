@@ -14,27 +14,28 @@ public class AdapterSingletonFactoryTest {
 
     @Test
     public void initializeFactory() {
-        AdapterSingletonFactory.initializeFactory("test_type", "test_name", mock(Logger.class));
+        Logger logger = mock(Logger.class);
+        AdapterSingletonFactory.initializeFactory("test_type", "test_name", logger);
         try {
-            AdapterSingletonFactory.initializeFactory(null, "test_name", mock(Logger.class));
+            AdapterSingletonFactory.initializeFactory(null, "test_name", logger);
             fail();
         } catch(IllegalArgumentException e) {
             // Pass
         }
         try {
-            AdapterSingletonFactory.initializeFactory("", "test_name", mock(Logger.class));
+            AdapterSingletonFactory.initializeFactory("", "test_name", logger);
             fail();
         } catch(IllegalArgumentException e) {
             // Pass
         }
         try {
-            AdapterSingletonFactory.initializeFactory("test_type", null, mock(Logger.class));
+            AdapterSingletonFactory.initializeFactory("test_type", null, logger);
             fail();
         } catch(IllegalArgumentException e) {
             // Pass
         }
         try {
-            AdapterSingletonFactory.initializeFactory("test_type", "", mock(Logger.class));
+            AdapterSingletonFactory.initializeFactory("test_type", "", logger);
             fail();
         } catch(IllegalArgumentException e) {
             // Pass
@@ -52,7 +53,7 @@ public class AdapterSingletonFactoryTest {
         } catch(Exception e) {
             // Pass
         }
-        IAdapter adapter = mock(IAdapter.class);
+        IAdapter adapter = new NominalMockAdapter("test_type", "test_name");
         AdapterSingletonFactory.adapter_ = adapter;
         assertEquals(adapter, AdapterSingletonFactory.getAdapter());
     }

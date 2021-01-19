@@ -1,4 +1,4 @@
-// Copyright (C) 2017-2019 Intel Corporation
+// Copyright (C) 2017-2018 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -19,6 +19,7 @@ import java.time.Instant;
 
 public class OnlineTierDataLoader {
     private static final long LOOP_SLEEP = 2000; // 2 seconds in ms.
+    private static final boolean USE_COHERENCY = false;
 
     public OnlineTierDataLoader(DataStoreFactory dsFactory, String servers, String manifestFile,
                                 String machineConfigFile, String rasMetaDataFile, Logger log) {
@@ -28,10 +29,11 @@ public class OnlineTierDataLoader {
         this.machineConfigFile = machineConfigFile;
         this.rasMetaDataFile = rasMetaDataFile;
         this.log = log;
-        defaultLoader = new DefaultOnlineTierDataLoader(log, dsFactory);
+        defaultLoader = new DefaultOnlineTierDataLoader(log);
     }
 
     public int populateOnlineTier() {
+        DataLoaderApi dataLoader = null;
         int returnCode = 0;
 
         long timeouts = Long.parseLong(System.getProperty("com.intel.dai.populate.OnlineTierDataLoader.timeout", "500"));
@@ -40,37 +42,59 @@ public class OnlineTierDataLoader {
             log.error("Failed to connect to voltdb within %d seconds", timeouts);
             return 1;
         }
-        DbStatusApi statusApi = null;
-        try {
-            statusApi = dsFactory.createDbStatusApi(client);
-            if(statusApi.getStatus() == DbStatusEnum.POPULATE_DATA_COMPLETED) {
-                client.close();
-                return 0;
-            }
-        } catch(DataStoreException | InterruptedException e) {
-            log.exception(e, "Unable to initialize Online Data Store API for retrieving DB status");
-            returnCode = 1;
-        }
         long targetTime = Instant.now().getEpochSecond() + timeouts; // 5 minute timeout
         while(!checkInitialStatusOfOnlineTier() && Instant.now().getEpochSecond() < targetTime)
             try { Thread.sleep(LOOP_SLEEP); } catch (InterruptedException e) { /* Ignore */ }
         if(!checkInitialStatusOfOnlineTier())
             return 1;
 
-        if (statusApi != null) {
+        DbStatusApi statusApi = null;
+        try {
+            statusApi = dsFactory.createDbStatusApi(client);
+        } catch(DataStoreException e) {
+            log.exception(e, "Unable to initialize Online Data Store API for retrieving DB status");
+            return 1;
+        }
+        if(USE_COHERENCY) {
             try {
-                statusApi.setDataPopulationStarting();
-                // Load tier 1 from configuration
-                returnCode = populateOnlineTierFromConfig();
-                statusApi.setDataPopulationComplete("OK");
+                dataLoader = dsFactory.createDataLoaderApi();
             } catch (DataStoreException ex) {
-                log.exception(ex, "Unable to check Nearline tier status or set Online tier DB status");
+                log.exception(ex, "Unable to initialize Data Store API");
                 returnCode = 1;
+            }
+
+            if (dataLoader != null && statusApi != null) {
                 try {
-                    statusApi.setDataPopulationFailed(makeExceptionDetailsText(ex));
-                } catch(DataStoreException e) {
-                    log.exception(e, "Failed to set populate data error state");
+                    statusApi.setDataPopulationStarting();
+                    if (dataLoader.isNearlineTierValid()) {
+                        // Load tier 1 from tier 2
+                        returnCode = populateOnlineTierFromNearlineTier(dataLoader);
+                    } else {
+                        // Load tier 1 from configuration
+                        dataLoader.dropSnapshotTablesFromNearlineTier();
+                        returnCode = populateOnlineTierFromConfig();
+                    }
+                    statusApi.setDataPopulationComplete("OK");
+                } catch (DataStoreException ex) {
+                    log.exception(ex, "Unable to check Nearline tier status or set Online tier DB status");
+                    returnCode = 1;
+                    try {
+                        statusApi.setDataPopulationFailed(makeExceptionDetailsText(ex));
+                    } catch (DataStoreException e) {
+                        log.exception(e, "Failed to set populate data error state");
+                    }
                 }
+            }
+        } else {
+            returnCode = populateOnlineTierFromConfig();
+            try {
+                if (returnCode == 0)
+                    statusApi.setDataPopulationComplete("OK");
+                else
+                    statusApi.setDataPopulationFailed("FAILED, see logs.");
+            } catch(DataStoreException e) {
+                log.exception(e, "Unable to update the DbStatus table to a populate schema result!");
+                returnCode = 1;
             }
         }
 
@@ -155,7 +179,7 @@ public class OnlineTierDataLoader {
         }
     }
 
-    static String makeExceptionDetailsText(DataStoreException ex) {
+    private String makeExceptionDetailsText(DataStoreException ex) {
         StringBuilder builder = new StringBuilder();
         builder.append(ex.getMessage()).append("\n");
         Throwable current = ex;
@@ -167,6 +191,17 @@ public class OnlineTierDataLoader {
                 builder.append("Caused By: ").append(current.getMessage()).append("\n");
         }
         return builder.toString();
+    }
+
+    private int populateOnlineTierFromNearlineTier(DataLoaderApi dataLoader) {
+        try {
+            dataLoader.populateOnlineTierFromNearlineTier();
+        } catch (DataStoreException ex) {
+            log.exception(ex, "An error occurred while attempting to populate the Online tier from the Nearline tier");
+            return 1;
+        }
+
+        return 0;
     }
 
     private int populateOnlineTierFromConfig() {

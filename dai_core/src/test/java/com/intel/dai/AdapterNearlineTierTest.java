@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,12 +25,13 @@ public class AdapterNearlineTierTest {
     static class MockAdapterNearlineTier extends AdapterNearlineTier {
         MockAdapterNearlineTier() throws IOException, TimeoutException {
             super(mock(Logger.class));
-            initializeAdapter();
             workQueue_ = mock(WorkQueue.class);
             this.workQueue = workQueue_;
             try {
-                when(adapter.setUpAdapter(anyString(), anyString(), any())).thenReturn(workQueue_);
-            } catch(AdapterException e) { /**/ }
+                when(adapter.setUpAdapter(anyString(), anyString())).thenReturn(workQueue_);
+            } catch(AdapterException e) {
+
+            }
         }
 
         @Override
@@ -40,11 +40,11 @@ public class AdapterNearlineTierTest {
         }
 
         @Override
-        public void initializeAdapter() throws IOException, TimeoutException {
+        protected void initializeAdapter() throws IOException, TimeoutException {
             adapter = mock(IAdapter.class);
         }
 
-        WorkQueue workQueue_;
+        private WorkQueue workQueue_;
     }
 
 
@@ -60,7 +60,7 @@ public class AdapterNearlineTierTest {
     @Test
     public void mainFlow1() throws Exception {
         AdapterNearlineTier nearline = new MockAdapterNearlineTier();
-        when(nearline.adapter.adapterShuttingDown()).thenReturn(false, false, false, false, true);
+        when(nearline.adapter.adapterShuttingDown()).thenReturn(false,false, false, false, true);
         when(nearline.workQueue.grabNextAvailWorkItem()).thenReturn(true, true, false);
         when(nearline.workQueue.workToBeDone()).thenReturn("DataReceiver", "DataReceiver", "");
         when(nearline.workQueue.getClientParameters(ArgumentMatchers.anyString())).thenReturn(new String[] {

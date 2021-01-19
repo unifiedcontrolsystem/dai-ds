@@ -44,9 +44,8 @@ public class VoltDbEventsLogTest {
             _raseventlog = mockrasEventLog;
         }
 
-        void setEventTypeMap(String key, String value) { mEventTypeToRasDescName.put(key, value); }
         void setDscrpNameMap(String key, String value) {
-            mRasDescNameToEventTypeMap.put(key, value);
+            mDescriptiveNames.put(key, value);
         }
     }
 
@@ -91,24 +90,6 @@ public class VoltDbEventsLogTest {
         when(response_.getStatus()).thenReturn(ClientResponse.UNEXPECTED_FAILURE);
         VoltDbEventsLogMock mock = new VoltDbEventsLogMock();
         mock.loadRasEvtTypeDescName();
-    }
-
-    @Test
-    public void checRasEventTypePositive() throws IOException, ProcCallException {
-        when(_voltClient.callProcedure(anyString(), any())).thenReturn(response_);
-        VoltDbEventsLogMock mock = new VoltDbEventsLogMock();
-        mock.setEventTypeMap("test1","value1" );
-        boolean exists = mock.checkRasEventType("test1");
-        assertTrue(exists);
-    }
-
-    @Test
-    public void checRasEventTypeNegative() throws IOException, ProcCallException {
-        when(_voltClient.callProcedure(anyString(), any())).thenReturn(response_);
-        VoltDbEventsLogMock mock = new VoltDbEventsLogMock();
-        mock.setEventTypeMap("test1","value1" );
-        boolean exists = mock.checkRasEventType("test2");
-        assertFalse(exists);
     }
 
     @Test

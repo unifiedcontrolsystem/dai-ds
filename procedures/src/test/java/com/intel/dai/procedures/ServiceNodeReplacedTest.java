@@ -79,7 +79,7 @@ public class ServiceNodeReplacedTest {
         proc.setTable(emptyTable);
 
         // Should throw an exception
-        proc.run("R0-CH0-CN0", "ABCD", "X1", "A", "{}", 1, "Test", 1);
+        proc.run("R0-CH0-CN0", "ABCD", "X1", "A", "{}", "BIOS_STUFF", 1, "Test", 1);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ServiceNodeReplacedTest {
         final String newState = "A";
         final Long reqWorkItemId = 1L;
 
-        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", time, reqAdapterType, reqWorkItemId);
+        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", "BIOS_STUFF", time, reqAdapterType, reqWorkItemId);
 
         // Should invoke 6 queries: retrieve service node data, update active service node record,
         // insert history record, insert replacement record
@@ -116,13 +116,13 @@ public class ServiceNodeReplacedTest {
         final String newState = "A";
         final Long reqWorkItemId = 1L;
 
-        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", time, reqAdapterType, reqWorkItemId);
+        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", "BIOS_STUFF", time, reqAdapterType, reqWorkItemId);
 
-        // Should invoke 6 queries: retrieve service node data, retrieve preceding service node history record,
+        // Should invoke 7 queries: retrieve service node data, retrieve preceding service node history record,
         // insert history record, insert replacement record
-        Assert.assertEquals(6, proc.getQueryCount());
+        Assert.assertEquals(7, proc.getQueryCount());
         // Should indicate change came out of order
-        Assert.assertEquals(1L, retVal);
+        Assert.assertEquals(2L, retVal);
         // TODO: verify query arguments
     }
 
@@ -142,6 +142,7 @@ public class ServiceNodeReplacedTest {
     private static final String OWNER;
     private static final String SER_NUM;
     private static final String AGGREGATOR;
+    private static final String CONSTRAINTS;
 
     static {
         NODE_DATA = new VoltTable(
@@ -160,7 +161,9 @@ public class ServiceNodeReplacedTest {
                 new VoltTable.ColumnInfo("Owner", VoltType.STRING),
                 new VoltTable.ColumnInfo("Sernum", VoltType.STRING),
                 new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
-                new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP)
+                new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
+                new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING),
+                new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
         );
 
         LAST_CHG_TIMESTAMP = new TimestampType(2);
@@ -178,6 +181,7 @@ public class ServiceNodeReplacedTest {
         OWNER = "S";
         SER_NUM = "ABCD";
         AGGREGATOR = "Agg01";
+        CONSTRAINTS = "Constraint01";
 
         NODE_DATA.addRow(
                 LAST_CHG_TIMESTAMP,
@@ -195,6 +199,8 @@ public class ServiceNodeReplacedTest {
                 OWNER,
                 SER_NUM,
                 AGGREGATOR,
+                new TimestampType(Date.from(Instant.ofEpochMilli(40L))),
+                CONSTRAINTS,
                 new TimestampType(Date.from(Instant.ofEpochMilli(40L)))
         );
         NODE_DATA.addRow(
@@ -213,6 +219,8 @@ public class ServiceNodeReplacedTest {
                 OWNER,
                 SER_NUM,
                 AGGREGATOR,
+                new TimestampType(Date.from(Instant.ofEpochMilli(40L))),
+                CONSTRAINTS,
                 new TimestampType(Date.from(Instant.ofEpochMilli(40L)))
         );
     }

@@ -19,7 +19,4 @@ public interface EventsLog {
 
     //To check RasEventDescriptive Name
     boolean checkDescriptiveName(String eventtype);
-
-    //To check Ras event EventType
-    boolean checkRasEventType(String descriptiveName);
 }

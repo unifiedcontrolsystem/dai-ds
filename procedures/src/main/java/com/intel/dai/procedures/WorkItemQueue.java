@@ -86,9 +86,9 @@ public class WorkItemQueue extends VoltProcedure {
             case "POWER_MANAGER":
             case "INITIALIZATION":
             case "ALERT_MGR":
-            case "FABRIC":
-            case "FABRICPERF":
             case "FABRICCRIT":
+            case "FABRICPERF":
+            case "FABRIC":
                 break;
             default:
                 throw new VoltAbortException("WorkItemQueue - can't queue work item (Queue=" + sQueue + ", WorkingAdapterType=" + sWorkingAdapterType + ", WorkToBeDone=" + sWorkToBeDone + "), " +

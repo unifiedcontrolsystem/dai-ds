@@ -41,6 +41,8 @@ public class VoltDbRasEventLog implements RasEventLog {
         put(ClientResponse.UNEXPECTED_FAILURE, "UNEXPECTED_FAILURE");
         put(ClientResponse.SUCCESS, "SUCCESS");
     }};
+    // Map that takes a RAS DescriptiveName and gives you its corresponding MetaData.
+    private Map<String, MetaData> mRasDescNameToMetaDataMap = new HashMap<>();
 
     public VoltDbRasEventLog(String[] servers, IAdapter adapter, Logger logger) throws DataStoreException {
         this(servers, fromOldAdapter(adapter), logger);
@@ -53,7 +55,35 @@ public class VoltDbRasEventLog implements RasEventLog {
         this.logger = logger;
     }
 
+    // RAS event's meta data (this has been copied from com.intel.dai.Adapter)
+    public static class MetaData {
+        // Member data
+        private String  DescriptiveName = "<DescriptiveName>";
+        private String  Severity = "<Severity>";
+        private String  Category = "<Category>";
+        private String  Component = "<Component>";
+        private String  ControlOperation = "<ControlOperation>";
+        private String  Msg = "<Msg>";
+        private boolean GenerateAlert = false;
+        // Methods
+        public String  descriptiveName()          { return DescriptiveName; }
+        public void    descriptiveName(String s)  { DescriptiveName = s; }
+        public String  severity()                 { return Severity; }
+        public void    severity(String s)         { Severity = s; }
+        public String  category()                 { return Category; }
+        public void    category(String s)         { Category = s; }
+        public String  component()                { return Component; }
+        public void    component(String s)        { Component = s; }
+        public String  controlOperation()         { return ControlOperation; }
+        public void    controlOperation(String s) { ControlOperation = s; }
+        public String  msg()                      { return Msg; }
+        public void    msg(String s)              { Msg = s; }
+        public boolean generateAlert()            { return GenerateAlert; }
+        public void    generateAlert(boolean b)   { GenerateAlert = b; }
+    }   // End class MetaData
+
     public VoltDbRasEventLog(String[] servers, String name, String type, Logger logger) {
+        assert servers != null:"servers parameter to VoltDbRasEventLog ctor cannot be null";
         servers_ = servers;
         this.adapterName = name;
         this.adapterType = type;
@@ -65,26 +95,46 @@ public class VoltDbRasEventLog implements RasEventLog {
         loadRasMetadata();
     }
 
-    // This method gets the Ras EventType that corresponds to the specified DescriptiveName.
-    public synchronized String getRasEventType(String sDescriptiveName, long workItemId) throws IOException {
-        String sRasEventType = mRasDescNameToEventTypeMap.get(sDescriptiveName);
-        // Ensure that we got a "valid" EventType back.
-        if (sRasEventType != null && !sRasEventType.isEmpty()) {
-            return sRasEventType;
+    protected Client initializeVoltClient(String[] servers) {
+        VoltDbClient.initializeVoltDbClient(servers);
+        return VoltDbClient.getVoltClientInstance();
+    }
+
+
+    // TODO: duplicate found in com.intel.dai.Adapter
+    @Override
+    public void loadRasMetadata() {
+        ClientResponse response = null;
+        try {
+            response = voltClient.callProcedure("@AdHoc", "SELECT * FROM RasMetaData;");
+        } catch (IOException | ProcCallException ex) {
+            logger.exception(ex, "Unable to retrieve RAS meta data from the data store");
+            throw new RuntimeException("Unable to retrieve RAS meta data from the data store", ex);
         }
-        else {
-            // got an invalid ras EventType.
-            logger.error("Invalid event type: %s", sDescriptiveName);
-            logRasEventNoEffectedJob(NON_DESCRIPTIVE_RAS_EVENT
-                                    ,("AdapterName=" + adapterName + ", DescriptiveName=" + sDescriptiveName)
-                                    ,null                               // lctn
-                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                    ,adapterType                        // type of the adapter that is requesting/issuing this invocation
-                                    ,workItemId                         // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
-                                    );
-            return NON_DESCRIPTIVE_RAS_EVENT;
+
+        VoltTable rasMetaData = response.getResults()[0];
+        if (response.getStatus() != ClientResponse.SUCCESS) {
+            logger.error("Unable to retrieve RAS meta data from the data store. Client response status: " + response.getStatus());
+            throw new RuntimeException("Unable to retrieve RAS meta data from the data store. Client response status: " + response.getStatus());
         }
-    }   // End getRasEventType(String sDescriptiveName)
+
+        while (rasMetaData.advanceRow()) {
+            // Populate the RAS DescriptiveName to the MetaData map.
+            MetaData metaData = new MetaData();
+            metaData.descriptiveName( response.getResults()[0].getString("DescriptiveName") );
+            metaData.severity( response.getResults()[0].getString("Severity") );
+            metaData.category( response.getResults()[0].getString("Category") );
+            metaData.component( response.getResults()[0].getString("Component") );
+            metaData.controlOperation( response.getResults()[0].getString("ControlOperation") );
+            metaData.msg( response.getResults()[0].getString("Msg") );
+            if (response.getResults()[0].getString("GenerateAlert").equals("Y"))
+                metaData.generateAlert(true);
+            else
+                metaData.generateAlert(false);
+            mRasDescNameToMetaDataMap.put(rasMetaData.getString("DescriptiveName"), metaData);
+        }
+    }   // End loadRasMetadata()
+
 
     //--------------------------------------------------------------------------
     // Multiple methods which log RAS Events into the data store.
@@ -206,25 +256,13 @@ public class VoltDbRasEventLog implements RasEventLog {
             logger.exception(e, "logRasEventCheckForEffectedJob");
         }
     }
-    @Override
-    public void markRasEventControlOperationCompleted(String newState, String eventType, String eventID,
-                                                      String adapterType) throws IOException {
-        voltClient.callProcedure(clientResponse -> {
-            if(clientResponse.getStatus() != ClientResponse.SUCCESS) {
-                String message = String.format("Failed to mark the RasEvent completed after the control operation: " +
-                                "newState=%s, type=%s, ID=%s", newState, eventType, eventID);
-                logger.error(message);
-                logRasEventNoEffectedJob(getRasEventType("", -1), message, null, getNsTimestamp(), adapterType, -1);
-            }
-        }, "RasEventUpdateControlOperationDone", newState, eventType, eventID);
-    }
 
     @Override
     public void setRasEventAssociatedJobID(String jobID, String rasEventType, long rasEventID) throws IOException {
         String sTempStoredProcedure = "RasEventUpdateJobId";
         voltClient.callProcedure(clientResponse -> {
             if(clientResponse.getStatus() != ClientResponse.SUCCESS) {
-                String rasType =  getRasEventType("RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed", 0L);
+                String rasType =  "RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed";
                 String error = statusMap_.getOrDefault(clientResponse.getStatus(), "UNKNOWN_ERROR");
                 logRasEventNoEffectedJob(rasType, "AdapterName=" + adapterName + ", SpThisIsCallbackFor=" +
                         sTempStoredProcedure + ", " + "StatusString=" + error, null, System.currentTimeMillis() * 1000L,
@@ -238,37 +276,28 @@ public class VoltDbRasEventLog implements RasEventLog {
         return (point.getEpochSecond() * 1000000000L) + point.getNano();
     }
 
-    protected Client initializeVoltClient(String[] servers) {
-        VoltDbClient.initializeVoltDbClient(servers);
-        return VoltDbClient.getVoltClientInstance();
-    }
-
     private static AdapterInformation fromOldAdapter(IAdapter adapter) throws DataStoreException {
         return VoltDbWorkQueue.fromOldAdapter(adapter);
     }
 
-    private synchronized void loadRasMetadata() {
-        if(mRasDescNameToEventTypeMap == null) {
-            ClientResponse response;
-            try {
-                response = voltClient.callProcedure("@AdHoc", query);
-            } catch (IOException | ProcCallException e) {
-                logger.exception(e, "Unable to retrieve RAS meta data from the data store");
-                throw new RuntimeException("Unable to retrieve RAS meta data from the data store", e);
-            }
-
-            VoltTable table = response.getResults()[0];
-            if (response.getStatus() != ClientResponse.SUCCESS) {
-                logger.error("Unable to retrieve RAS meta data from the data store. Client response status: " +
-                        response.getStatus());
-                throw new RuntimeException("Unable to retrieve RAS meta data from the data store. Client response status: " +
-                        response.getStatus());
-            }
-
-            mRasDescNameToEventTypeMap = new HashMap<>();
-            while (table.advanceRow()) {
-                mRasDescNameToEventTypeMap.put(table.getString("DescriptiveName"), table.getString("EventType"));
-            }
+    // This method ensures that the specified RAS event descriptive name is valid/known.
+    @Override
+    public String ensureRasDescrNameIsValid(String sDescriptiveName, long workItemId) {
+        // Ensure that a known/valid descriptive name was specified.
+        MetaData oMetaData = mRasDescNameToMetaDataMap.get(sDescriptiveName);
+        if (oMetaData != null) {
+            return sDescriptiveName;
         }
-    }
+        else {
+            // got an invalid/unknown RAS descriptive name.
+            logRasEventNoEffectedJob("RasGenAdapterMissingRasEventDescrName"
+                                    ,("AdapterName=" + adapterName + ", DescriptiveName=" + sDescriptiveName)
+                                    ,null                               // lctn
+                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                                    ,adapterType                       // type of the adapter that is requesting/issuing this invocation
+                                    ,workItemId                         // work item id for the work item that is being processed/executing, that is requesting/issuing this invocation
+                                    );
+            return "RasUnknownEvent"; // "RasUnknownEvent" is used as a RAS DescriptiveName indicating that the specified descriptive name was unknown/invalid.
+        }
+    }   // End ensureRasDescrNameIsValid(String sDescriptiveName)
 }

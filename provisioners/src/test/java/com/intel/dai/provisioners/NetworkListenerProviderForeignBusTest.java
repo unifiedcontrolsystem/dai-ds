@@ -11,6 +11,7 @@ import com.intel.networking.restclient.RESTClient;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.properties.PropertyMap;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class NetworkListenerProviderForeignBusTest {
     }
 
     @Test
+    @Ignore
     public void processRawStringData() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(sample1,
                 mock(NetworkListenerConfig.class));
@@ -73,6 +75,7 @@ public class NetworkListenerProviderForeignBusTest {
     }
 
     @Test
+    @Ignore
     public void processRawStringDataNegative1() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(sample4,
                 mock(NetworkListenerConfig.class));
@@ -80,6 +83,7 @@ public class NetworkListenerProviderForeignBusTest {
     }
 
     @Test
+    @Ignore
     public void processRawStringDataNegative2() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample1,
                 mock(NetworkListenerConfig.class));
@@ -87,6 +91,7 @@ public class NetworkListenerProviderForeignBusTest {
     }
 
     @Test
+    @Ignore
     public void processRawStringDataNegative3() throws Exception {
         List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample2,
                 mock(NetworkListenerConfig.class));

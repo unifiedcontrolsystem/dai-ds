@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -81,7 +81,7 @@ def includeDbgSymbols = Boolean.parseBoolean(System.getProperty("includeDebugSym
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-def enforceCodeCoverage = true
+def enforceCodeCoverage = false
 
 
 import java.nio.charset.StandardCharsets
@@ -155,12 +155,10 @@ subprojects {
     dependencies {
         testCompile 'junit:junit:4.12+'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22+'
-        compile group:'org.apache.kafka', name:'kafka-clients', version:kafka_clients_version
-        compile group:'io.confluent', name:'kafka-avro-serializer', version:kafka_avro_serializer
     }
 
-    sourceCompatibility = 8
-    targetCompatibility = 8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     jacoco {
         toolVersion = "0.8.5"
@@ -273,6 +271,7 @@ project(':xdg') {
 
 project(':properties') {
     targetCompatibility = 8
+    sourceCompatibility = 8
 
     jacocoTestCoverageVerification {
         violationRules {
@@ -326,6 +325,8 @@ project(':runtime_utils') {
     dependencies {
         compile project(':properties')
         compile project(':logging')
+        compile project(':config_io')
+        compile project(':xdg')
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
@@ -353,6 +354,7 @@ project(':runtime_utils') {
 
 project(':config_io') {
     targetCompatibility = 8
+    sourceCompatibility = 8
 
     dependencies {
         compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
@@ -422,6 +424,7 @@ project(':procedures') {
     apply plugin: 'groovy'
 
     targetCompatibility = 8
+    sourceCompatibility = 8
 
     dependencies {
         compileOnly group: 'org.voltdb', name: 'voltdb', version: voltdb_version
@@ -496,6 +499,9 @@ project(':networking') {
         compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
         compile group: 'commons-io', name: 'commons-io', version: commonsio_version
         compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponents_version
+        compile group: 'org.zeromq', name: 'jeromq', version: '0.5.1'
+        compile group:'org.apache.kafka', name:'kafka-clients', version:kafka_clients_version
+        compile group:'io.confluent', name:'kafka-avro-serializer', version:kafka_avro_serializer
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
@@ -579,6 +585,32 @@ project(':dai_core') {
     distZip.doLast {
         delete {
             delete "${buildDir}/distributions/${project.name}-${packageVersion}.zip"
+        }
+    }
+}
+
+project(':control') {
+    dependencies {
+        compile project(':logging')
+        compile project(':dai_core')
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.90
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.70
+                }
+            }
         }
     }
 }
@@ -831,6 +863,7 @@ project(":ras") {
 
     dependencies {
         compile project(':logging')
+        compile project(':control')
         compile project(':dai_core')
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
@@ -995,6 +1028,7 @@ project(':eventsim') {
     }
 
     targetCompatibility = 11
+    sourceCompatibility = 11
 
     project.mainClassName = project.hasProperty("main") ? project.getProperty("main") : 'com.intel.dai.EventSimApp'
 
@@ -2026,15 +2060,25 @@ DAI_USE_BENCHMARKING=false"""
 #
 # SPDX-License-Identifier: Apache-2.0
 
+set -x
+
 [[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
 
 MACHINECONFIG=${etc_dir}/MachineConfig.json
-HOSTNAME=\$(cat ${etc_dir}/volt.hostname)
+HOSTNAME=\$(hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
-LOGNAME="AdapterDaiMgr.log"
+LOCATION=\$(/opt/voltdb/bin/sqlcmd --servers="\${VOLTSERVERS}" --output-skip-metadata --query="select lctn from servicenode where hostname='\${HOSTNAME}';" | sed 's/[\\n ]*//g')
+LOGNAME="AdapterDaiMgr-\${LOCATION}.log"
 
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} - \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+if [ -z "\${LOCATION}" ]; then
+  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
+  exit 1
+fi
+
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+
+exit \$?
 """
         new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
 #
@@ -2151,16 +2195,25 @@ DAI_USE_BENCHMARKING=false"""
 #
 # SPDX-License-Identifier: Apache-2.0
 
+set -x
+
 [[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
 
 MACHINECONFIG=${etc_dir}/MachineConfig.json
-HOSTNAME=\$(cat ${etc_dir}/volt.hostname)
+HOSTNAME=\$(hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
-LOCATION=\$(cat ${etc_dir}/daiManager.location)
 CLASS="com.intel.dai.AdapterDaiMgr"
-LOGNAME="AdapterDaiMgr.log"
+LOCATION=\$(/opt/voltdb/bin/sqlcmd --servers="\${VOLTSERVERS}" --output-skip-metadata --query="select lctn from servicenode where hostname='\${HOSTNAME}';" | sed 's/[\\n ]*//g')
+LOGNAME="AdapterDaiMgr-\${LOCATION}.log"
+
+if [ -z "\${LOCATION}" ]; then
+  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
+  exit 1
+fi
 
 java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+
+exit \$?
 """
         new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
 #
@@ -2465,6 +2518,7 @@ TasksMax=8192
 Type=simple
 User=root
 WorkingDirectory=/tmp
+EnvironmentFile=/opt/ucs/etc/dai.environment
 ExecStart=/opt/ucs/bin/eventsim-server
 RestartSec=10
 Restart=always
@@ -2555,6 +2609,7 @@ TasksMax=8192
 Type=simple
 User=root
 WorkingDirectory=/tmp
+EnvironmentFile=/opt/ucs/etc/dai.environment
 ExecStart=/opt/ucs/bin/eventsim-server
 RestartSec=10
 Restart=always
@@ -2756,16 +2811,12 @@ cd ${python_dir}
 
 /usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
 
-[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/ucs ]] && ln -s ${bin_dir}/ucs /usr/bin/ucs
-
 exit \$?
 """
         new File((String)"${buildDir}/tmp/preUninstall-cli.sh").text = """#!/bin/bash
 # Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
-[[ -L /usr/bin/ucs ]] && /bin/rm /usr/bin/ucs
 
 /usr/bin/python3 -m pip uninstall -y ucs-cli
 
@@ -2829,16 +2880,12 @@ cd ${python_dir}
 
 /usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
 
-[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/ucs ]] && ln -s ${bin_dir}/ucs /usr/bin/ucs
-
 exit \$?
 """
         new File((String)"${buildDir}/tmp/preUninstall-cli.sh").text = """#!/bin/bash
 # Copyright (C) ${thisYear} Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
-[[ -L /usr/bin/ucs ]] && /bin/rm /usr/bin/ucs
 
 /usr/bin/python3 -m pip uninstall -y ucs-cli
 
@@ -2908,7 +2955,7 @@ task makeAllArtifacts {
     println("*** BUILING PACKAGES: " + packages)
     finalizedBy packages
 }
-rootProject.build.finalizedBy(makeAllArtifacts)
+rootProject.jar.finalizedBy(makeAllArtifacts)
 
 task dockerBuild(type: Exec) {
     group = 'build'

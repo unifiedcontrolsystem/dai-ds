@@ -19,17 +19,17 @@ import org.voltdb.types.TimestampType;
 public class RasEventListAtTime extends VoltProcedure {
 
     public final SQLStmt selectRasEventsOnlyEndTimeSql = new SQLStmt(
-        "SELECT RasEvent.EventType, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
-            "INNER JOIN RasMetaData on RasEvent.EventType=RasMetaData.EventType " +
+        "SELECT RasEvent.DescriptiveName, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
+            "INNER JOIN RasMetaData on RasEvent.DescriptiveName=RasMetaData.DescriptiveName " +
         "WHERE RasEvent.DbUpdatedTimestamp<=? " +
-        "ORDER BY RasEvent.DbUpdatedTimestamp DESC, EventType, Id LIMIT 10000;"  // ToDo: Horrible hack to limit to 10,000 rows until the UI Adapter available and GUI is switched to use Tier2 for fetching its data (Tier2 RasEvent table will have a unique event counter for paging).
+        "ORDER BY RasEvent.DbUpdatedTimestamp DESC, DescriptiveName, Id LIMIT 10000;"  // ToDo: Horrible hack to limit to 10,000 rows until the UI Adapter available and GUI is switched to use Tier2 for fetching its data (Tier2 RasEvent table will have a unique event counter for paging).
     );
 
     public final SQLStmt selectRasEventsBothEndAndStartTimeSql = new SQLStmt(
-        "SELECT RasEvent.EventType, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
-            "INNER JOIN RasMetaData on RasEvent.EventType=RasMetaData.EventType " +
+        "SELECT RasEvent.DescriptiveName, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
+            "INNER JOIN RasMetaData on RasEvent.DescriptiveName=RasMetaData.DescriptiveName " +
         "WHERE RasEvent.DbUpdatedTimestamp<=? AND RasEvent.DbUpdatedTimestamp>=? " +
-        "ORDER BY RasEvent.DbUpdatedTimestamp DESC, EventType, Id LIMIT 10000;"  // ToDo: Horrible hack to limit to 10,000 rows until the UI Adapter available and GUI is switched to use Tier2 for fetching its data (Tier2 RasEvent table will have a unique event counter for paging).
+        "ORDER BY RasEvent.DbUpdatedTimestamp DESC, DescriptiveName, Id LIMIT 10000;"  // ToDo: Horrible hack to limit to 10,000 rows until the UI Adapter available and GUI is switched to use Tier2 for fetching its data (Tier2 RasEvent table will have a unique event counter for paging).
     );
 
 

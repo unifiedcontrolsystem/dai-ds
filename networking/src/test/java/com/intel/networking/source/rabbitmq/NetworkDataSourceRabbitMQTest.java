@@ -5,14 +5,12 @@
 package com.intel.networking.source.rabbitmq;
 
 import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -113,7 +111,7 @@ public class NetworkDataSourceRabbitMQTest {
     }
 
     @Test
-    public void connectNegative() {
+    public void connectNegative() throws IOException {
         failInitialize = true;
         instance_.connect(null);
     }
@@ -121,6 +119,17 @@ public class NetworkDataSourceRabbitMQTest {
     @Test
     public void getProviderName() {
         assertEquals("rabbitmq", instance_.getProviderName());
+    }
+
+    @Test
+    public void sendMessageNegative() throws IOException {
+        processFail = true;
+        instance_.connect(null);
+        try {
+            instance_.sendMessage("key", "message");
+        } finally {
+            instance_.close();
+        }
     }
 
     @Test
@@ -132,20 +141,12 @@ public class NetworkDataSourceRabbitMQTest {
     }
 
     @Test
-    public void sendMessageNegative() throws IOException {
-        processFail = true;
-        instance_.connect(null);
-        instance_.sendMessage("key", "message");
-        instance_.close();
-    }
-
-    @Test
     public void createNewFactory() throws Exception {
         Map<String, String> sourceArgs = new HashMap<>();
         sourceArgs.put("exchangeName", "testing");
-        NetworkDataSourceRabbitMQ instance = (NetworkDataSourceRabbitMQ)NetworkDataSourceFactory.createInstance(
-                mock(Logger.class), "rabbitmq", sourceArgs);
-        assertNotNull(instance);
+        NetworkDataSourceRabbitMQ instance =
+                (NetworkDataSourceRabbitMQ)NetworkDataSourceFactory.createInstance(mock(Logger.class),
+                        "rabbitmq", sourceArgs);
         assertNotNull(instance.createFactory());
     }
 }

@@ -7,6 +7,7 @@ package com.intel.runtime_utils;
 import com.intel.logging.LoggerFactory;
 import com.intel.logging.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -52,6 +53,7 @@ public class RuntimeCommandTest {
     }
 
     @Test
+    @Ignore
     public void retrievesCommandStdError() throws IOException, InterruptedException {
         setUpRuntimeCommand(ECO_HELLO, "", HELLO_ERR);
 

@@ -10,6 +10,7 @@ import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.rabbitmq.client.*;
 import org.mockito.ArgumentMatchers;
@@ -34,7 +35,6 @@ public class AdapterOnlineTierVoltTest {
     class MockAdapterOnlineTierVolt extends AdapterOnlineTierVolt {
         MockAdapterOnlineTierVolt() throws IOException, TimeoutException {
             super(mock(Logger.class));
-            initializeAdapter();
         }
 
         @Override
@@ -52,6 +52,7 @@ public class AdapterOnlineTierVoltTest {
 
     @Before
     public void setUp() throws Exception {
+        LoggerFactory.getInstance("TEST", "Testing", "console");
     }
 
     private VoltTable[] buildScalarOneTable(long value) {
@@ -85,18 +86,16 @@ public class AdapterOnlineTierVoltTest {
     @Test
     public void handlePurgingData1() throws Exception {
         AdapterOnlineTierVolt online = new MockAdapterOnlineTierVolt();
-        when(online.adapter.getRasEventType(ArgumentMatchers.anyString())).thenReturn("TYPE");
         doAnswer((Answer)invoke -> null).when(online.adapter).logRasEventNoEffectedJob(ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyLong());
-        online.lSavePreviousPurgeTimeInMillis = -1L;
+        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(-1L, 1L);
     }
 
     @Test
     public void handlePurgingData2() throws Exception {
         AdapterOnlineTierVolt online = new MockAdapterOnlineTierVolt();
-        when(online.adapter.getRasEventType(ArgumentMatchers.anyString())).thenReturn("TYPE");
         doAnswer((Answer)invoke -> null).when(online.adapter).logRasEventNoEffectedJob(ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyLong());
@@ -107,16 +106,16 @@ public class AdapterOnlineTierVoltTest {
         Client client = mock(Client.class);
         when(client.callProcedure(ArgumentMatchers.matches("@AdHoc"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(client.callProcedure(ArgumentMatchers.matches("NodePurgeInventory_History"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
+        when(client.callProcedure(ArgumentMatchers.matches("ReservationPurging"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(clientResponse.getResults()).thenReturn(one);
         when(online.adapter.client()).thenReturn(client);
-        online.lSavePreviousPurgeTimeInMillis = -1L;
+        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(5L, 1L);
     }
 
     @Test
     public void handlePurgingData3() throws Exception {
         AdapterOnlineTierVolt online = new MockAdapterOnlineTierVolt();
-        when(online.adapter.getRasEventType(ArgumentMatchers.anyString())).thenReturn("TYPE");
         doAnswer((Answer)invoke -> null).when(online.adapter).logRasEventNoEffectedJob(ArgumentMatchers.anyString(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(),
                 ArgumentMatchers.anyString(), ArgumentMatchers.anyLong());
@@ -127,9 +126,10 @@ public class AdapterOnlineTierVoltTest {
         Client client = mock(Client.class);
         when(client.callProcedure(ArgumentMatchers.matches("@AdHoc"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(client.callProcedure(ArgumentMatchers.matches("NodePurgeInventory_History"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
+        when(client.callProcedure(ArgumentMatchers.matches("ReservationPurging"), ArgumentMatchers.anyString())).thenReturn(clientResponse);
         when(clientResponse.getResults()).thenReturn(one);
         when(online.adapter.client()).thenReturn(client);
-        online.lSavePreviousPurgeTimeInMillis = -1L;
+        AdapterOnlineTierVolt.lSavePreviousPurgeTimeInMillis = -1L;
         online.handlePurgingData(5L, 1L);
     }
 

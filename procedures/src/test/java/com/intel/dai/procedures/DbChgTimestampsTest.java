@@ -27,28 +27,24 @@ public class DbChgTimestampsTest {
         @Override
         public VoltTable[] voltExecuteSQL(boolean value) {
             VoltTable[] result = new VoltTable[5];
-            result[0] = new VoltTable(new VoltTable.ColumnInfo("DbUpdatedTimestamp", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
-            result[1] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
-            result[2] = new VoltTable(new VoltTable.ColumnInfo("Default", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
-            result[3] = new VoltTable(new VoltTable.ColumnInfo("Default", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
-            result[4] = new VoltTable(new VoltTable.ColumnInfo("Default", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
+            result[0] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
+            result[1] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT),
+                                      new VoltTable.ColumnInfo("MaxDbUpdatedTimestamp", VoltType.TIMESTAMP));
+            result[2] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
+            result[3] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
+            result[4] = new VoltTable(new VoltTable.ColumnInfo("Count", VoltType.BIGINT));
             if(doNull) {
-                result[0].addRow(new TimestampType(Date.from(Instant.now())), 9999L);
-                result[1].addRow( 9999L);
-                result[2].addRow((Object)null, 9999L);
-                result[3].addRow((Object)null, 9999L);
-                result[4].addRow((Object)null, 9999L);
-
+                result[0].addRow(9999L);
+                result[1].addRow(9999L, new TimestampType(Date.from(Instant.now())));
+                result[2].addRow(9999L);
+                result[3].addRow(9999L);
+                result[4].addRow(9999L);
             } else {
-                result[0].addRow(new TimestampType(Date.from(Instant.now())), 9999L);
-                result[1].addRow( 9999L);
-                result[2].addRow(new TimestampType(Date.from(Instant.now())), 9999L);
-                result[3].addRow(new TimestampType(Date.from(Instant.now())), 9999L);
-                result[4].addRow(new TimestampType(Date.from(Instant.now())), 9999L);
+                result[0].addRow(9999L);
+                result[1].addRow(9999L, (Object)null);
+                result[2].addRow(9999L);
+                result[3].addRow(9999L);
+                result[4].addRow(9999L);
             }
             return result;
         }

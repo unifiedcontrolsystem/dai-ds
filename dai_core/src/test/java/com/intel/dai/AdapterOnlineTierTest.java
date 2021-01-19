@@ -9,7 +9,6 @@ import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
-import com.intel.perflogging.BenchmarkHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -20,7 +19,6 @@ import java.text.ParseException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,12 +27,13 @@ public class AdapterOnlineTierTest {
     class MockAdapterOnlineTier extends AdapterOnlineTier {
         MockAdapterOnlineTier() throws IOException, TimeoutException {
             super(mock(Logger.class));
-            initializeAdapter();
             workQueue_ = mock(WorkQueue.class);
             this.workQueue = workQueue_;
             try {
-                when(adapter.setUpAdapter(anyString(), anyString(), any())).thenReturn(workQueue);
-            } catch(AdapterException e) { /**/ }
+                when(adapter.setUpAdapter(anyString(), anyString())).thenReturn(workQueue);
+            } catch(AdapterException e) {
+
+            }
         }
 
         @Override
@@ -62,7 +61,7 @@ public class AdapterOnlineTierTest {
     @Test
     public void basicTests() throws Exception {
         AdapterOnlineTier online = new MockAdapterOnlineTier();
-        assertEquals(24, online.setOfTablesToBePurged().size());
+        assertEquals(27, online.setOfTablesToBePurged().size());
         assertEquals(3600000L, online.timeBetweenCheckingForDataToPurgeInMillis());
         assertEquals(86400000L, online.timeToKeepMovedDataBeforePurgingInMillis());
     }
@@ -76,7 +75,7 @@ public class AdapterOnlineTierTest {
         when(online.workQueue.getClientParameters(ArgumentMatchers.anyString())).thenReturn(new String[] {
                 "IntvlBtwnPurgesMs=60", "AddtlTimeToKeepMovedDataBeforePurgeMs=300", "unknown=0"});
         when(online.workQueue.amtTimeToWait()).thenReturn(0, 1);
-        online.mainProcessingFlow(new String[] {"127.0.0.1"}, mock(BenchmarkHelper.class));
+        online.mainProcessingFlow(new String[] {"127.0.0.1"});
     }
 
     @Test
@@ -84,6 +83,6 @@ public class AdapterOnlineTierTest {
         AdapterOnlineTier online = new MockAdapterOnlineTier();
         when(online.adapter.adapterShuttingDown()).thenReturn(false);
         when(online.workQueue.grabNextAvailWorkItem()).thenThrow(new RuntimeException());
-        online.mainProcessingFlow(new String[] {}, mock(BenchmarkHelper.class));
+        online.mainProcessingFlow(new String[] {});
     }
 }

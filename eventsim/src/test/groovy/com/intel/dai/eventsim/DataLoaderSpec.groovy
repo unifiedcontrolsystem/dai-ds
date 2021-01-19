@@ -8,6 +8,7 @@ import com.intel.logging.Logger
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class DataLoaderSpec extends Specification {
@@ -33,6 +34,7 @@ class DataLoaderSpec extends Specification {
         dataLoader.factory_ = factoryMock_
     }
 
+    @Ignore
     def "load foreign server configuration details"() {
         dataLoader.initialize()
         expect:

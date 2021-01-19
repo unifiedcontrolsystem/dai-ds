@@ -1,13 +1,12 @@
 // Copyright (C) 2018 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
-
 package com.intel.networking.source;
 
 import com.intel.logging.Logger;
 import com.intel.networking.source.kafka.NetworkDataSourceKafka;
 import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ;
-import com.intel.networking.source.restsse.NetworkDataSourceSSE;
+import com.intel.networking.source.zmq.NetworkDataSourceZMQ;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,23 +52,6 @@ public final class NetworkDataSourceFactory {
     }
 
     /**
-     * Static factory to create a {@link NetworkDataSource} object from its descriptive name. The name is returned by the
-     * {@link NetworkDataSource}.getProviderName() method of the specific provider.
-     *
-     * @param logger The logger to pass to the implementation.
-     * @param name The provider name to create.
-     * @param args Provider specific arguments defined by the individual provider. See the
-     *             {@link NetworkDataSource}.getProviderName() derived class documentation for the specific information
-     *             on the meaning of the arguments.
-     * @return The created object if successful or null if the object failed to create.
-     * @throws NetworkDataSourceFactory.FactoryException Thrown when a registered implementation cannot be created.
-     */
-    public static NetworkDataSource createInstanceWithLogger(Logger logger, String name, Map<String, String> args)
-            throws FactoryException {
-        return createInstance(logger, name, args);
-    }
-
-    /**
      * Register an new implementation of NetworkDataSource.
      *
      * @param name The name of the implementation. Name "zmq" and "rabbitmq" are reserved.
@@ -97,10 +79,11 @@ public final class NetworkDataSourceFactory {
         return false;
     }
 
+    @SuppressWarnings("serial")
     static Map<String, Class<? extends NetworkDataSource>> registeredImplementations_ =
             new HashMap<String, Class<? extends NetworkDataSource>>() {{
         put("rabbitmq", NetworkDataSourceRabbitMQ.class);
-        put("sse", NetworkDataSourceSSE.class);
         put("kafka", NetworkDataSourceKafka.class);
+        put("zmq", NetworkDataSourceZMQ.class);
     }};
 }

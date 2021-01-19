@@ -53,11 +53,11 @@ public class ServiceNodeHistoryListOfStateAtTime extends VoltProcedure {
     );
 
     public final SQLStmt selectNodeStatesOnlyEndTimeSql = new SQLStmt(
-        "SELECT Lctn, SequenceNumber, State from ServiceNode_History WHERE (DbUpdatedTimestamp<=?) Order By SequenceNumber, DbUpdatedTimestamp DESC;"
+        "SELECT Lctn, SequenceNumber, State from ServiceNode_History WHERE (LastChgTimestamp<=?) Order By SequenceNumber, LastChgTimestamp DESC;"
     );
 
     public final SQLStmt selectNodeStatesBothEndAndStartTimeSql = new SQLStmt(
-        "SELECT Lctn, SequenceNumber, State from ServiceNode_History WHERE (DbUpdatedTimestamp<=? AND DbUpdatedTimestamp>=?) Order By SequenceNumber, DbUpdatedTimestamp DESC;"
+        "SELECT Lctn, SequenceNumber, State from ServiceNode_History WHERE (LastChgTimestamp<=? AND LastChgTimestamp>=?) Order By SequenceNumber, LastChgTimestamp DESC;"
     );
 
 

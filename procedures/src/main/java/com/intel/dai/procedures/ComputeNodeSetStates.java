@@ -28,8 +28,8 @@ public class ComputeNodeSetStates extends ComputeNodeCommon {
 
     public final SQLStmt insertNodeHistory = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateNode = new SQLStmt("UPDATE ComputeNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
@@ -78,14 +78,14 @@ public class ComputeNodeSetStates extends ComputeNodeCommon {
                 voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
                 aNodeData = voltExecuteSQL();
                 aNodeData[0].advanceRow();
-//                System.out.println("ComputeNodeSetStates - " + sNodeLctn + " - OUT OF ORDER" +
-//                                   " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
-//                                   " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+                System.out.println("ComputeNodeSetStates - " + sNodeLctn + " - OUT OF ORDER" +
+                                   " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
+                                   " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
                 // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
                 // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
                 if (aNodeData[0].getRowCount() == 0) {
-//                    System.out.println("ComputeNodeSetStates - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
-//                                      +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
+                    System.out.println("ComputeNodeSetStates - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                      +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
                     // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
                     continue;
                 }
@@ -117,6 +117,7 @@ public class ComputeNodeSetStates extends ComputeNodeCommon {
                         ,sNodeNewState                              // New state
                         ,aNodeData[0].getString("HostName")
                         ,aNodeData[0].getString("BootImageId")
+                        ,aNodeData[0].getString("Environment")
                         ,aNodeData[0].getString("IpAddr")
                         ,aNodeData[0].getString("MacAddr")
                         ,aNodeData[0].getString("BmcIpAddr")
@@ -130,6 +131,8 @@ public class ComputeNodeSetStates extends ComputeNodeCommon {
                         ,aNodeData[0].getString("Aggregator")
                         ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                         ,aNodeData[0].getString("WlmNodeState")
+                        ,aNodeData[0].getString("ConstraintId")
+                        ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                         );
             voltExecuteSQL();
         }

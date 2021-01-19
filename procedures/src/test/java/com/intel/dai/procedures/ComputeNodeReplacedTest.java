@@ -99,7 +99,7 @@ public class ComputeNodeReplacedTest {
         proc.setTable(emptyTable);
 
         // Should throw an exception
-        proc.run("R0-CH0-CN0", "ABCD", "X1", "A", "{}", 1, "Test", 1);
+        proc.run("R0-CH0-CN0", "ABCD", "X1", "A", "{}", "BIOS_STUFF", 1, "Test", 1);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ComputeNodeReplacedTest {
         final String newState = "A";
         final Long reqWorkItemId = 1L;
 
-        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", time, reqAdapterType, reqWorkItemId);
+        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", "BIOS_STUFF", time, reqAdapterType, reqWorkItemId);
 
         // Should invoke 6 queries: retrieve compute node data, update active compute node record,
         // insert history record, insert replacement record
@@ -136,13 +136,13 @@ public class ComputeNodeReplacedTest {
         final String newState = "A";
         final Long reqWorkItemId = 1L;
 
-        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", time, reqAdapterType, reqWorkItemId);
+        long retVal = proc.run(LCTN, newSerNum, fruType, newState, "{}", "BIOS_STUFF", time, reqAdapterType, reqWorkItemId);
 
-        // Should invoke 6 queries: retrieve compute node data, retrieve preceding compute node history record,
+        // Should invoke 7 queries: retrieve compute node data, retrieve preceding compute node history record,
         // insert history record, insert replacement record
-        Assert.assertEquals(6, proc.getQueryCount());
+        Assert.assertEquals(7, proc.getQueryCount());
         // Should indicate change came out of order
-        Assert.assertEquals(1L, retVal);
+        Assert.assertEquals(2L, retVal);
         // TODO: verify query arguments
     }
 
@@ -155,6 +155,9 @@ public class ComputeNodeReplacedTest {
             boolean containsArg = false;
             for (int j = 0; j < actualArgs.length && !containsArg; j++) {
                 containsArg = actualArgs[j].equals(expectedArg);
+            }
+            if (!containsArg) {
+                System.out.println("Not found: " + expectedArg);
             }
             Assert.assertTrue(containsArg);
         }
@@ -177,6 +180,7 @@ public class ComputeNodeReplacedTest {
     private static final String OWNER;
     private static final String SER_NUM;
     private static final String AGGREGATOR;
+    private static final String CONSTRAINTS;
 
     static {
         NODE_DATA = new VoltTable(
@@ -197,7 +201,9 @@ public class ComputeNodeReplacedTest {
                 new VoltTable.ColumnInfo("Sernum", VoltType.STRING),
                 new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
                 new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
-                new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING)
+                new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING),
+                new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING)
+                ,new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
         );
 
         LAST_CHG_TIMESTAMP = new TimestampType(2);
@@ -216,6 +222,7 @@ public class ComputeNodeReplacedTest {
         OWNER = "S";
         SER_NUM = "ABCD";
         AGGREGATOR = "Agg01";
+        CONSTRAINTS = "Constraint01";
 
         NODE_DATA.addRow(
                 LAST_CHG_TIMESTAMP,
@@ -235,7 +242,9 @@ public class ComputeNodeReplacedTest {
                 SER_NUM,
                 AGGREGATOR,
                 new TimestampType(Date.from(Instant.ofEpochMilli(40L))),
-                "A"
+                "A",
+                CONSTRAINTS
+                ,new TimestampType(Date.from(Instant.ofEpochMilli(40L)))
         );
         NODE_DATA.addRow(
                 LAST_CHG_TIMESTAMP,
@@ -255,7 +264,9 @@ public class ComputeNodeReplacedTest {
                 SER_NUM,
                 AGGREGATOR,
                 new TimestampType(Date.from(Instant.ofEpochMilli(40L))),
-                "A"
+                "A",
+                CONSTRAINTS
+                ,new TimestampType(Date.from(Instant.ofEpochMilli(40L)))
         );
     }
 }

@@ -27,26 +27,28 @@ public class ComputeNodeSaveBootImageInfoTest {
         public VoltTable[] voltExecuteSQL(boolean value) {
             VoltTable[] result = new VoltTable[1];
             result[0] = new VoltTable(
-                    new VoltTable.ColumnInfo("LastChgTimestamp", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("State", VoltType.STRING),
-                    new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
-                    new VoltTable.ColumnInfo("SequenceNumber", VoltType.BIGINT),
-                    new VoltTable.ColumnInfo("HostName", VoltType.STRING),
-                    new VoltTable.ColumnInfo("Environment", VoltType.STRING),
-                    new VoltTable.ColumnInfo("IpAddr", VoltType.STRING),
-                    new VoltTable.ColumnInfo("MacAddr", VoltType.STRING),
-                    new VoltTable.ColumnInfo("BmcIpAddr", VoltType.STRING),
-                    new VoltTable.ColumnInfo("BmcMacAddr", VoltType.STRING),
-                    new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING),
-                    new VoltTable.ColumnInfo("Owner", VoltType.STRING),
-                    new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
-                    new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING)
+                new VoltTable.ColumnInfo("LastChgTimestamp", VoltType.TIMESTAMP),
+                new VoltTable.ColumnInfo("State", VoltType.STRING),
+                new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
+                new VoltTable.ColumnInfo("SequenceNumber", VoltType.BIGINT),
+                new VoltTable.ColumnInfo("HostName", VoltType.STRING),
+                new VoltTable.ColumnInfo("Environment", VoltType.STRING),
+                new VoltTable.ColumnInfo("IpAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("MacAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("BmcIpAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("BmcMacAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING),
+                new VoltTable.ColumnInfo("Owner", VoltType.STRING),
+                new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
+                new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
+                new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING),
+                new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING)
+                ,new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
             );
             if(!zeroRows) {
                 result[0].addRow(new TimestampType(5000000L), "Good", "Lctn", 0L, "HostName",
                         "rich", "IpAddr", "macAddr", "BmcIpAddr", "BmcMacAddr", "BmcHostName",
-                        "Owner", "Agg01", new TimestampType(5000000L), "A");
+                        "Owner", "Agg01", new TimestampType(5000000L), "A", "Constraint1", new TimestampType(Date.from(Instant.ofEpochMilli(40L))) );
             }
             return result;
         }

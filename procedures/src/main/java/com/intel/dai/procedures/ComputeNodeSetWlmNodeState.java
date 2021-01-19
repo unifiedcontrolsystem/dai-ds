@@ -29,8 +29,8 @@ public class ComputeNodeSetWlmNodeState extends ComputeNodeCommon {
 
     public final SQLStmt insertNodeHistory = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateNode = new SQLStmt("UPDATE ComputeNode SET WlmNodeState=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
@@ -71,18 +71,19 @@ public class ComputeNodeSetWlmNodeState extends ComputeNodeCommon {
         else {
             // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
             bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
+            String sCurRecordsWlmNodeState = aNodeData[0].getString("WlmNodeState");
             // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
             voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
             aNodeData = voltExecuteSQL();
             aNodeData[0].advanceRow();
-//            System.out.println("ComputeNodeSetWlmNodeState - " + sNodeLctn + " - OUT OF ORDER" +
-//                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsWlmNodeState=" + sNodeNewWlmNodeState +
-//                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecsWlmNodeState="  + sCurRecordsWlmNodeState + "!");
+            System.out.println("ComputeNodeSetWlmNodeState - " + sNodeLctn + " - OUT OF ORDER" +
+                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsWlmNodeState=" + sNodeNewWlmNodeState +
+                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecsWlmNodeState="  + sCurRecordsWlmNodeState + "!");
             // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
             // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
             if (aNodeData[0].getRowCount() == 0) {
-//                System.out.println("ComputeNodeSetWlmNodeState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
-//                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
+                System.out.println("ComputeNodeSetWlmNodeState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
                 // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
                 return 1L;
             }
@@ -109,6 +110,7 @@ public class ComputeNodeSetWlmNodeState extends ComputeNodeCommon {
                         ,aNodeData[0].getString("State")
                         ,aNodeData[0].getString("HostName")
                         ,aNodeData[0].getString("BootImageId")
+                        ,aNodeData[0].getString("Environment")
                         ,aNodeData[0].getString("IpAddr")
                         ,aNodeData[0].getString("MacAddr")
                         ,aNodeData[0].getString("BmcIpAddr")
@@ -122,13 +124,15 @@ public class ComputeNodeSetWlmNodeState extends ComputeNodeCommon {
                         ,aNodeData[0].getString("Aggregator")
                         ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                         ,sNodeNewWlmNodeState                       // New WlmNodeState
+                        ,aNodeData[0].getString("ConstraintId")
+                        ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                         );
             voltExecuteSQL(true);
         }   // this is a state transition, so we need to go ahead and update the appropriate data store rows (we do not want to update the data store if there was no transition).
         else {
             // there was no state transition (the state did not change), so we do not want to do any data store updates.
-//            System.out.println("ComputeNodeSetWlmNodeState - " + sNodeLctn + " - no state transition occurred, so no update to the data store is being done" +
-//                               " - DsWlmNodeState=" + aNodeData[0].getString("WlmNodeState") + ", NewWlmNodeState="  + sNodeNewWlmNodeState);
+            System.out.println("ComputeNodeSetWlmNodeState - " + sNodeLctn + " - no state transition occurred, so no update to the data store is being done" +
+                               " - DsWlmNodeState=" + aNodeData[0].getString("WlmNodeState") + ", NewWlmNodeState="  + sNodeNewWlmNodeState);
         }
 
 

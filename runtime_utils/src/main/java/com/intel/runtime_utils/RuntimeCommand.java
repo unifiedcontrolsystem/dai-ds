@@ -35,7 +35,11 @@ public class RuntimeCommand {
     }
 
     public void execute() throws IOException, InterruptedException {
+        execute(true, false);  // run the command and log any stdout and also log even uninteresting msgs.
+    }
 
+
+    public void execute(boolean bLogStdOut, boolean bDontLogUninterestingMsgs) throws IOException, InterruptedException {
         Process commandProcess = runtime.exec(command);
 
         try (InputStream outStream = commandProcess.getInputStream()) {

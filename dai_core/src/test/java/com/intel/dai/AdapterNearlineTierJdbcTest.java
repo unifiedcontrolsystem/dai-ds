@@ -4,11 +4,9 @@
 
 package com.intel.dai;
 
-import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.DataLoaderApi;
-import com.intel.dai.dsimpl.jdbc.DbConnectionFactoryTest;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
@@ -26,7 +24,6 @@ import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,12 +35,11 @@ public class AdapterNearlineTierJdbcTest {
     class MockAdapterNearlineTierJdbc extends AdapterNearlineTierJdbc {
         MockAdapterNearlineTierJdbc(DataStoreFactory dsFactory)
                 throws TimeoutException, IOException, ClassNotFoundException, DataStoreException {
-            super(mock(Logger.class), dsFactory);
-            initializeAdapter();
+            super(dsFactory, mock(Logger.class));
         }
 
         @Override
-        public void initializeAdapter() {
+        protected void initializeAdapter() {
             adapter = mock(IAdapter.class);
             WorkQueue workQueue = mock(WorkQueue.class);
             try {
@@ -76,6 +72,8 @@ public class AdapterNearlineTierJdbcTest {
         mockDataLoader = mock(DataLoaderApi.class);
         mockDsFactory = mock(DataStoreFactory.class);
         when(mockDsFactory.createDataLoaderApi()).thenReturn(mockDataLoader);
+
+        LoggerFactory.getInstance("TEST", "Testing", "console");
     }
 
     private byte[] makeBody(String tableName) {

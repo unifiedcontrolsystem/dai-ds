@@ -4,14 +4,11 @@
 
 package com.intel.dai;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 import com.intel.logging.*;
 import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.dsapi.WorkQueue;
-import com.intel.perflogging.BenchmarkHelper;
-import org.json_voltpatches.JSONException;
 import org.voltdb.client.*;
 import org.voltdb.VoltTable;
 import java.util.*;
@@ -53,30 +50,23 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
     private Consumer mAmqpDataReceiverMsgConsumer;
 
     // DB connection
+    private java.sql.Connection mConn;
     private NearlineTableUpdater mTableUpdater;
     private DataLoaderApi dataLoader;
 
     private AtomicBoolean receivedEom;
-    private BenchmarkHelper benchmarking_;
 
     // Constructor
-    AdapterNearlineTierJdbc(Logger logger, DataStoreFactory dsFactory)
-            throws TimeoutException, IOException, ClassNotFoundException, DataStoreException {
+    AdapterNearlineTierJdbc(DataStoreFactory dsFactory, Logger logger) throws TimeoutException, IOException, ClassNotFoundException, DataStoreException {
         super(logger);
         mPrevAmqpMessageId = 0L;
         mAmqpDataReceiverMsgConsumer = null;
+        mConn = createConnection();
         receivedEom = new AtomicBoolean(false);
 
-        dataLoader = dsFactory.createDataLoaderApi();
-    }
+        mTableUpdater = new NearlineTableUpdater(mConn, logger);
 
-    @Override
-    public void initializeAdapter() throws IOException, TimeoutException, DataStoreException {
-        super.initializeAdapter();
-        java.sql.Connection mConn = createConnection();
-        benchmarking_ = new BenchmarkHelper("AdapterNearlineTier-Benchmarking.json",
-                "/opt/ucs/log/AdapterNearlineTier-Benchmarking.json", 15);
-        mTableUpdater = new NearlineTableUpdater(mConn, log_, benchmarking_);
+        dataLoader = dsFactory.createDataLoaderApi();
     }
 
     java.sql.Connection createConnection() throws DataStoreException {
@@ -96,7 +86,6 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
             // - We must have received the signal to shut down
             // - We must have finished processing the messages in the queue (i.e. we must have received the data
             // mover's final message)
-            benchmarking_.tick();
         } while (!adapter.adapterShuttingDown() || !receivedEom.get());
         log_.info("Shutdown signal and EOM from data mover received");
     }
@@ -173,7 +162,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
         }   // REQUEUED work item
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2.
-        DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
+        DataReceiverAmqp oDataReceiver = createDataReceiver("localhost");
         mAmqpDataReceiverMsgConsumer = new AmqpDataReceiverMsgConsumer(oDataReceiver, mPrevAmqpMessageId, adapter, log_,
                 mTableUpdater, this);
 
@@ -244,15 +233,11 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
             sdfSqlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             long lAmqpMessageId = -99999L;
 
-            String sAmqpMsg="NotFilledIn";
-            long lIntervalId=-99999;
-            String sTableName="NotFilledIn";
+            String sAmqpMsg="NotFilledIn"; long lIntervalId=-99999; String sTableName="NotFilledIn";
             try {
                 // Grab data out of this message we just received.
                 sAmqpMsg = new String(body, "UTF-8");
-                ConfigIO parser = ConfigIOFactory.getInstance("json");
-                if (parser == null)  throw new RuntimeException("Failed to create a JSON parser!");
-                PropertyMap jsonMsgObject= parser.fromString(sAmqpMsg).getAsMap();
+                PropertyMap jsonMsgObject= adapter.jsonParser().fromString(sAmqpMsg).getAsMap();
 
                 // Grab header information
                 boolean eom = jsonMsgObject.getBoolean("EOM");
@@ -294,7 +279,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 if (lAmqpMessageId != lExpectedAmqpMessageId) {
                     // invalid/unexpected AmqpMessageId!
                     // Cut a ras event to record that we received an unexpected (out of sequence) message id while receiving data from Tier1.
-                    adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntDataReceiverInvalidMsgId"),
+                    adapter.logRasEventNoEffectedJob("RasAntDataReceiverInvalidMsgId",
                                              ("IntervalId=" + lIntervalId
                                               + ", ReceivedAmqpMessageId=" + lAmqpMessageId
                                               + ", ExpectedAmqpMessageId="
@@ -310,7 +295,8 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 }
 
                 String sAmqpRoutingKey = sTableName;  // use the table name as the routing key.
-                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, parser.toString(jsonMsgObject).getBytes(StandardCharsets.UTF_8));
+
+                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, adapter.jsonParser().toString(jsonMsgObject).getBytes());
                 log_.info("Published AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, RoutingKey=%s, TableName=%s, Part %d Of %d",
                           lAmqpMessageId, lIntervalId, sEndIntvlTimeMs, sStartIntvlTimeMs, sAmqpRoutingKey,
                           sTableName, lThisMsgsPartNum, lTotalNumParts);
@@ -319,7 +305,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 VoltTable vtFromMsg = VoltTable.fromJSONString(sAmqpMsg);
 
                 // Update the corresponding table in nearline tier
-                mTableUpdater.update(sTableName, vtFromMsg);
+                mTableUpdater.Update(sTableName, vtFromMsg);
 
                 log_.info("AmqpDataReceiverMsgConsumer - updated nearline table - "
                               + "AmqpMessageId=%d, TableName=%s", lAmqpMessageId, sTableName);
@@ -334,7 +320,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 // Save the AmqpMessageId that we just used (so we have it available for the next
                 // message).
                 mPrevAmqpMessageId = lAmqpMessageId;
-            } catch (JSONException | PropertyNotExpectedType | ConfigIOParseException | DataStoreException e) {
+            } catch (Exception e) {
                 log_.error("AmqpDataReceiverMsgConsumer - Exception occurred (msg will be skipped): %s!", e.getMessage());
                 log_.error("%s", Adapter.stackTraceToString(e));
                 log_.error("Message that incurred the above exception - %s", sAmqpMsg);
@@ -342,7 +328,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
                 mPrevAmqpMessageId = lAmqpMessageId;
                 try {
                     String sTempInstanceData = "IntervalId=" + lIntervalId + ", AmqpMessageId=" + lAmqpMessageId + ", TableName=" + sTableName + "Exception=" + e;
-                    adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntException")
+                    adapter.logRasEventNoEffectedJob("RasAntException"
                             ,sTempInstanceData                  // instanceData
                             ,null                               // lctn
                             ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred
@@ -365,11 +351,10 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
     public static void main(String[] args)
             throws IOException, TimeoutException, SQLException, ConfigIOParseException, FileNotFoundException,
             ClassNotFoundException, DataStoreException {
-        Logger logger = LoggerFactory.getInstance("NEARLINE_TIER", AdapterNearlineTierJdbc.class.getName(), "console");
+        Logger logger = LoggerFactory.getInstance("NEARLINE_TIER", AdapterNearlineTierJdbc.class.getName(), "log4j2");
         AdapterSingletonFactory.initializeFactory("NEARLINE_TIER", AdapterNearlineTierVolt.class.getName(), logger);
         DataStoreFactory dsFactory = new DataStoreFactoryImpl(args, logger);
-        final AdapterNearlineTierJdbc obj = new AdapterNearlineTierJdbc(logger, dsFactory);
-        obj.initializeAdapter();
+        final AdapterNearlineTierJdbc obj = new AdapterNearlineTierJdbc(dsFactory, logger);
 
         // Start up the main processing flow for NearlineTier adapters.
         obj.mainProcessingFlow(args);

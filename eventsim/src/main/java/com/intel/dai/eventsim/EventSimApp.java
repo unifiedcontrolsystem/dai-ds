@@ -6,6 +6,8 @@ import com.intel.logging.LoggerFactory;
 import com.intel.networking.HttpMethod;
 import com.intel.networking.restserver.RESTServerException;
 import com.intel.networking.restserver.RESTServerFactory;
+import com.intel.networking.source.NetworkDataSourceFactory;
+import com.intel.networking.source.restsse.NetworkDataSourceSSE;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
@@ -585,6 +587,7 @@ public class EventSimApp  extends  EventSim {
     }
 
     public static void main(String[] args) throws RESTServerException {
+        NetworkDataSourceFactory.registerNewImplementation("sse", NetworkDataSourceSSE.class);
         RESTServerFactory.addImplementation("jdk11", Java11RESTServer.class);
         if(args.length != 2) {
             log_.error("Wrong number of arguments for EventSim server, use 2 arguments: voltdb_servers and configuration_file");

@@ -24,20 +24,14 @@ import org.voltdb.*;
 
 public class DiagTerminated extends VoltProcedure {
 
-    public final SQLStmt selectDiagSql = new SQLStmt(
-            "SELECT * from Diag where DiagId = ?;"
-    );
+    public final SQLStmt selectDiagSql = new SQLStmt("SELECT * FROM Diag WHERE DiagId=?;");
 
-    public final SQLStmt updateSql = new SQLStmt(
-                    "UPDATE Diag " +
-                    "SET State=?, EndTimestamp=?, Results=?, LastChgAdapterType=?, LastChgWorkItemId=?, DbUpdatedTimestamp=?, LastChgTimestamp=? " +
-                    "WHERE DiagId=?;"
-    );
+    public final SQLStmt deleteDiagSql = new SQLStmt("DELETE FROM Diag WHERE DiagId=?;");
 
     public final SQLStmt insertDiagHistorySql = new SQLStmt(
             "INSERT INTO Diag_History " +
-                    "(DiagId, Lctn, ServiceOperationId, Diag, State, StartTimestamp, EndTimestamp, Results, LastChgAdapterType, LastChgWorkItemId, DbUpdatedTimestamp, LastChgTimestamp) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(DiagId, Lctn, ServiceOperationId, Diag, State, StartTimestamp, EndTimestamp, Results, LastChgAdapterType, LastChgWorkItemId, DbUpdatedTimestamp, LastChgTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public long run(long lDiagId, String sState, String sResults, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException {
@@ -47,39 +41,31 @@ public class DiagTerminated extends VoltProcedure {
         VoltTable diagData = aDiagData[0];
         if (diagData.getRowCount() == 0) {
             throw new VoltAbortException("DiagTerminated - there is no entry in the Diag table for the specified " +
-                    "diagnostic ID (" + lDiagId + ") - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" +
-                    lReqWorkItemId + "!");
+                                         "diagnostic ID (" + lDiagId + ") - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" +
+                                         lReqWorkItemId + "!");
         }
         diagData.advanceRow();
 
-        //---------------------------------------------------------------------
-        // Update this diagnostic's row with the results from the diagnostic.
-        //---------------------------------------------------------------------
+        //--------------------------------------------------
+        // Delete this diag out of the active diag table (we have its data in the diagData structure).
+        //--------------------------------------------------
+        voltQueueSQL(deleteDiagSql, EXPECT_ONE_ROW, lDiagId);
+
+        //--------------------------------------------------
+        // Insert a new row into the history table, indicating that this diag has terminated.
+        //--------------------------------------------------
         Date now = this.getTransactionTime();
-
-        voltQueueSQL(updateSql
-                    ,sState
-                    ,now  // EndTimestamp
-                    ,sResults
-                    ,sReqAdapterType
-                    ,lReqWorkItemId
-                    ,now // DbUpdatedTimestamp
-                    ,now // LastChgTimestamp
-                    ,lDiagId
-                    );
-
-        // Insert a history record for this update
         voltQueueSQL(insertDiagHistorySql
-                    ,lDiagId
+                    ,lDiagId // DiagId
                     ,diagData.getString("Lctn")
                     ,diagData.getLong("ServiceOperationId")
                     ,diagData.getString("Diag")
-                    ,sState
+                    ,sState // State
                     ,diagData.getTimestampAsTimestamp("StartTimestamp").getTime()
-                    ,now
+                    ,now // EndTimestamp
                     ,sResults
-                    ,sReqAdapterType
-                    ,lReqWorkItemId
+                    ,sReqAdapterType // LastChgAdapterType
+                    ,lReqWorkItemId // LastChgWorkItemId
                     ,now // DbUpdatedTimestamp
                     ,now // LastChgTimestamp
         );

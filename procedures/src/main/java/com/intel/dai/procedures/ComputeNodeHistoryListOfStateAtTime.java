@@ -54,17 +54,17 @@ public class ComputeNodeHistoryListOfStateAtTime extends VoltProcedure {
     );
 
     public final SQLStmt selectNodeStatesOnlyEndTimeSql = new SQLStmt(
-        // "SELECT Lctn, State from ComputeNode_History WHERE DbUpdatedTimestamp<=? " + "UNION ALL " +
-        // "SELECT Lctn, State from ComputeNode " +    "WHERE DbUpdatedTimestamp<=? " +
-        // "Order By Lctn, DbUpdatedTimestamp DESC;"
-        "SELECT Lctn, SequenceNumber, State from ComputeNode_History WHERE DbUpdatedTimestamp<=? Order By SequenceNumber, DbUpdatedTimestamp DESC;"
+        // "SELECT Lctn, State from ComputeNode_History WHERE LastChgTimestamp<=? " + "UNION ALL " +
+        // "SELECT Lctn, State from ComputeNode " +    "WHERE LastChgTimestamp<=? " +
+        // "Order By Lctn, LastChgTimestamp DESC;"
+        "SELECT Lctn, SequenceNumber, State from ComputeNode_History WHERE LastChgTimestamp<=? Order By SequenceNumber, LastChgTimestamp DESC;"
     );
 
     public final SQLStmt selectNodeStatesBothEndAndStartTimeSql = new SQLStmt(
-        // "SELECT Lctn, State from ComputeNode_History WHERE DbUpdatedTimestamp<=? AND DbUpdatedTimestamp>=? " + "UNION ALL " +
-        // "SELECT Lctn, State from ComputeNode " +    "WHERE DbUpdatedTimestamp<=? AND DbUpdatedTimestamp>=? " +
-        // "Order By Lctn, DbUpdatedTimestamp DESC;"
-        "SELECT Lctn, SequenceNumber, State from ComputeNode_History WHERE DbUpdatedTimestamp<=? AND DbUpdatedTimestamp>=? Order By SequenceNumber, DbUpdatedTimestamp DESC;"
+        // "SELECT Lctn, State from ComputeNode_History WHERE LastChgTimestamp<=? AND LastChgTimestamp>=? " + "UNION ALL " +
+        // "SELECT Lctn, State from ComputeNode " +    "WHERE LastChgTimestamp<=? AND LastChgTimestamp>=? " +
+        // "Order By Lctn, LastChgTimestamp DESC;"
+        "SELECT Lctn, SequenceNumber, State from ComputeNode_History WHERE LastChgTimestamp<=? AND LastChgTimestamp>=? Order By SequenceNumber, LastChgTimestamp DESC;"
     );
 
 

@@ -62,14 +62,7 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
 
     @Override
     public void storeRasEvent(String eventName, String instanceData, String location, long nsTimestamp) {
-        String type;
-        try {
-            type = eventActions_.getRasEventType(eventName, adapter_.getBaseWorkItemId());
-        } catch(IOException e) {
-            log_.error("Failed to get event type from the event name: %s", eventName);
-            log_.exception(e);
-            return;
-        }
+        String type = eventActions_.ensureRasDescrNameIsValid(eventName, adapter_.getBaseWorkItemId());
         long usTimestamp = nsTimestamp / 1000L;
         try {
             if (location == null || location.trim().isEmpty() || nodeInformation_.isServiceNodeLocation(location))

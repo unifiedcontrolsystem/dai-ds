@@ -35,13 +35,13 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
 
     public final SQLStmt insertComputeNodeHistory = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
     public final SQLStmt insertServiceNodeHistory = new SQLStmt(
             "INSERT INTO ServiceNode_History " +
-            "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt deleteFromCacheMacAddrToLctnTable = new SQLStmt("DELETE FROM CacheMacAddrToLctn WHERE Lctn=?;");
@@ -62,8 +62,8 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
         ///System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - On Entry");
         boolean bPhase2IsBad=true;  long lCntr=0L;
         while (bPhase2IsBad) {
-//            if (lCntr > 0)
-//                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
+            if (lCntr > 0)
+                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
             //--------
             // Phase 1 - make sure that this new timestamp is not the same as the current db value from the ComputeNode table.
             //--------
@@ -72,7 +72,7 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
             {
                 // these 2 records have the same timestamp - bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
+                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
             }
             //--------
             // Phase 2 - make sure that this new timestamp is not the same as an already existing record in the ComputeNode_History table.
@@ -84,7 +84,7 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
                 // there is already an existing record in the ComputeNode_History table for this lctn that has this timestamp.
                 // Bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
+                System.out.println("ensureHaveUniqueComputeNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
             }
             else
                 // there was not a match in the history table for this lctn with this timestamp - good to go.
@@ -111,8 +111,8 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
         ///System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - On Entry");
         boolean bPhase2IsBad=true;  long lCntr=0L;
         while (bPhase2IsBad) {
-//            if (lCntr > 0)
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
+            if (lCntr > 0)
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
             //--------
             // Phase 1 - make sure that this new timestamp is not the same as the current db value from the ServiceNode table.
             //--------
@@ -121,7 +121,7 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
             {
                 // these 2 records have the same timestamp - bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
             }
             //--------
             // Phase 2 - make sure that this new timestamp is not the same as an already existing record in the ServiceNode_History table.
@@ -133,7 +133,7 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
                 // there is already an existing record in the ServiceNode_History table for this lctn that has this timestamp.
                 // Bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
             }
             else
                 // there was not a match in the history table for this lctn with this timestamp - good to go.
@@ -177,13 +177,22 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
             else {
                 // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
                 bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
+                String sCurRecordsState = aNodeData[0].getString("State");
                 // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
                 voltQueueSQL(selectComputeNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
                 aNodeData = voltExecuteSQL();
+                // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
+                // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
+                if (aNodeData[0].getRowCount() == 0) {
+                    System.out.println("TempUpdateNodeMacAddrs - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                      +"ignoring this request!");
+                    // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
+                    return 1L;
+                }
                 aNodeData[0].advanceRow();
-//                System.out.println("TempUpdateNodeMacAddrs - " + sNodeLctn + " - OUT OF ORDER" +
-//                                   " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=I" +
-//                                   " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+                System.out.println("TempUpdateNodeMacAddrs - " + sNodeLctn + " - OUT OF ORDER" +
+                                   " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=I" +
+                                   " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
             }
 
             //----------------------------------------------------------------------
@@ -216,6 +225,8 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
                         ,aNodeData[0].getString("Aggregator")
                         ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                         ,aNodeData[0].getString("WlmNodeState")
+                        ,aNodeData[0].getString("ConstraintId")
+                        ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                         );
         }   // this is a ComputeNode.
         else {
@@ -247,13 +258,22 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
                 else {
                     // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
                     bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
+                    String sCurRecordsState = aNodeData[0].getString("State");
                     // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
                     voltQueueSQL(selectServiceNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
                     aNodeData = voltExecuteSQL();
+                    // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
+                    // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
+                    if (aNodeData[0].getRowCount() == 0) {
+                        System.out.println("TempUpdateNodeMacAddrs - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                          +"ignoring this request!");
+                        // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
+                        return 1L;
+                    }
                     aNodeData[0].advanceRow();
-//                    System.out.println("TempUpdateNodeMacAddrs - " + sNodeLctn + " - OUT OF ORDER" +
-//                                       " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=I" +
-//                                       " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+                    System.out.println("TempUpdateNodeMacAddrs - " + sNodeLctn + " - OUT OF ORDER" +
+                                       " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=I" +
+                                       " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
                 }
 
                 //----------------------------------------------------------------------
@@ -285,6 +305,8 @@ public class TempUpdateNodeMacAddrs extends VoltProcedure {
                             ,aNodeData[0].getString("Owner")
                             ,aNodeData[0].getString("Aggregator")
                             ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
+                            ,aNodeData[0].getString("ConstraintId")
+                            ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                             );
             }
             else {

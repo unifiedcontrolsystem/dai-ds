@@ -24,9 +24,9 @@ public final class AdapterSingletonFactory {
     synchronized public static void initializeFactory(String type, String name, Logger logger) {
         if (type == null || type.trim().equals("")) throw new IllegalArgumentException("type");
         if (name == null || name.trim().equals("")) throw new IllegalArgumentException("name");
-        logger_ = logger;
         type_ = type;
         name_ = name;
+        logger_ = logger;
     }
 
     /**
@@ -43,7 +43,6 @@ public final class AdapterSingletonFactory {
             throw e;
         }
         adapter_ = new Adapter(type_, name_, logger_);
-        adapter_.initialize();
         return adapter_;
     }
 

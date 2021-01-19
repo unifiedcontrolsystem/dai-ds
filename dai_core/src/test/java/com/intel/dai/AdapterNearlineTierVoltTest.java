@@ -35,11 +35,10 @@ public class AdapterNearlineTierVoltTest {
     class MockAdapterNearlineTierVolt extends AdapterNearlineTierVolt {
         MockAdapterNearlineTierVolt() throws IOException, TimeoutException {
             super(mock(Logger.class));
-            initializeAdapter();
         }
 
         @Override
-        public void initializeAdapter() {
+        protected void initializeAdapter() {
             adapter = mock(IAdapter.class);
             WorkQueue workQueue = mock(WorkQueue.class);
             try {
@@ -65,6 +64,7 @@ public class AdapterNearlineTierVoltTest {
     public void setUp() throws Exception {
         client_ = mock(Client.class);
         response_ = mock(ClientResponse.class);
+        LoggerFactory.getInstance("TEST", "Testing", "console");
     }
 
     private VoltTable[] buildScalarOneTable(long value) {

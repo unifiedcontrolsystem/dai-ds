@@ -147,10 +147,6 @@ class ReportJacoco(object):
                     data['line_percent'], data['branch_percent']))
                 final_branch = data['branch_percent']
                 final_method = data['line_percent']
-                if (final_method < 90.0) or (final_branch < 70.0):
-                    print('### FAILED: Must be at least 90%/70%')
-                else:
-                    print('### OK')
                 print('###############################################################################')
         html += '</table>'
         html += '<div><br /><u><b>NOTE:</b></u> Sorted by sum of line and branch percentages.</div></blockquote>'

@@ -5,8 +5,6 @@
 package com.intel.networking.restclient;
 
 import com.intel.networking.HttpMethod;
-import com.intel.properties.PropertyDocument;
-import com.intel.properties.PropertyMap;
 
 import java.net.URI;
 import java.util.HashMap;
