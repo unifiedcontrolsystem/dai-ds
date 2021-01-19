@@ -2130,6 +2130,7 @@ TasksMax=8192
 Type=simple
 User=root
 WorkingDirectory=/tmp
+EnvironmentFile=/opt/ucs/etc/dai.environment
 ExecStart=/opt/ucs/bin/dai-manager
 RestartSec=10
 Restart=always
