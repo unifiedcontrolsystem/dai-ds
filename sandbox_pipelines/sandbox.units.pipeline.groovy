@@ -54,7 +54,7 @@ pipeline {
                 '@eventsim-installation',
                 '@thirdparty-installation',
                 '@ucs-installation',
-                '@fabric-adapter',
+                '@adapter-fabric',
                 '@provisioner-adapter',
                 '@rabbitmq-snooper',
                 'ALL'
