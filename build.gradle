@@ -1170,6 +1170,7 @@ services:
     environment:
       - HTTP_PORT=18080
     volumes:
+      - "/etc/hosts:/etc/hosts"
       - "${etc_dir}:${etc_dir}"
       - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
       - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
@@ -1494,6 +1495,7 @@ services:
     environment:
       - HTTP_PORT=18080
     volumes:
+      - "/etc/hosts:/etc/hosts"
       - "${etc_dir}:${etc_dir}"
       - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
       - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
