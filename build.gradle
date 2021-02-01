@@ -2751,7 +2751,7 @@ cd ${python_dir}
 
 /usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
 
-[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/eventsim ]] && ln -s ${bin_dir}/eventsim /usr/bin/eventsim
+[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/ucs ]] && ln -s ${bin_dir}/ucs /usr/bin/ucs
 
 exit \$?
 """
@@ -2760,9 +2760,9 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-[[ -L /usr/bin/eventsim ]] && /bin/rm /usr/bin/eventsim
+[[ -L /usr/bin/ucs ]] && /bin/rm /usr/bin/ucs
 
-/usr/bin/python3 -m pip uninstall -y eventsim-cli
+/usr/bin/python3 -m pip uninstall -y ucs-cli
 
 exit \$? 
 """
@@ -2776,7 +2776,7 @@ exit \$?
             from("${projectDir}/cli/dist/")
             into("${buildDir}/tmp")
         }
-        delete("${projectDir}/cli/dist", "${projectDir}/cli/eventsim_cli.egg-info",
+        delete("${projectDir}/cli/dist", "${projectDir}/cli/ucs_cli.egg-info",
                 "${projectDir}/cli/build")
     }
     summary = 'The DAI CLI Installer.'
@@ -2824,7 +2824,7 @@ cd ${python_dir}
 
 /usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
 
-[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/eventsim ]] && ln -s ${bin_dir}/eventsim /usr/bin/eventsim
+[[ \$? -eq 0 ]] && [[ ! -f /usr/bin/ucs ]] && ln -s ${bin_dir}/ucs /usr/bin/ucs
 
 exit \$?
 """
@@ -2833,9 +2833,9 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-[[ -L /usr/bin/eventsim ]] && /bin/rm /usr/bin/eventsim
+[[ -L /usr/bin/ucs ]] && /bin/rm /usr/bin/ucs
 
-/usr/bin/python3 -m pip uninstall -y eventsim-cli
+/usr/bin/python3 -m pip uninstall -y ucs-cli
 
 exit \$? 
 """
@@ -2849,7 +2849,7 @@ exit \$?
             from("${projectDir}/cli/dist/")
             into("${buildDir}/tmp")
         }
-        delete("${projectDir}/cli/dist", "${projectDir}/cli/eventsim_cli.egg-info",
+        delete("${projectDir}/cli/dist", "${projectDir}/cli/ucs_cli.egg-info",
                 "${projectDir}/cli/build")
     }
     summary = 'The DAI CLI Installer.'
