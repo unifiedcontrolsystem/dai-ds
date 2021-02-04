@@ -5,6 +5,7 @@ package com.intel.networking.sink;
 
 import com.intel.logging.Logger;
 import com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark;
+import com.intel.networking.sink.kafka.NetworkDataSinkKafka;
 import com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ;
 import com.intel.networking.sink.sse.NetworkDataSinkEventSource;
 
@@ -95,5 +96,6 @@ public final class NetworkDataSinkFactory {
         put("rabbitmq", NetworkDataSinkRabbitMQ.class);
         put("benchmark", NetworkDataSinkBenchmark.class);
         put("eventSource", NetworkDataSinkEventSource.class);
+        put("kafka", NetworkDataSinkKafka.class);
     }};
 }
