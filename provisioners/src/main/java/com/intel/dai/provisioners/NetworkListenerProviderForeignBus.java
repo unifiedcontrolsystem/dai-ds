@@ -22,6 +22,7 @@ import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -76,9 +77,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                                 if(!conversionMap_.containsKey(eventState))
                                     log_.warn("No conversion state, Ignoring sc notification for eventState = %s", eventState);
                                 BootState state = conversionMap_.get(eventState);
-                                Instant now = Instant.now();
-                                long ts = (now.getEpochSecond() * 1_000_000_000L) + now.getNano();
-                                CommonDataFormat common = new CommonDataFormat(ts, location, DataType.StateChangeEvent);
+                                long usTimestamp = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
+                                CommonDataFormat common = new CommonDataFormat(usTimestamp, location, DataType.StateChangeEvent);
                                 common.setStateChangeEvent(state);
                                 common.storeExtraData("Flag", message.getStringOrDefault("Flag", "Unknown"));
                                 common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, locations.getString(i));

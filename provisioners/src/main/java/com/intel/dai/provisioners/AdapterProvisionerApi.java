@@ -10,7 +10,8 @@ import com.intel.dai.dsapi.*;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
-import com.intel.dai.network_listener.*;
+import com.intel.dai.network_listener.CommonDataFormat;
+import com.intel.dai.network_listener.DataType;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.BlockingResult;
 import com.intel.networking.restclient.RESTClient;
@@ -27,7 +28,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -139,9 +139,8 @@ public class AdapterProvisionerApi {
                 String location = CommonFunctions.convertForeignToLocation(foreignLocation);
                 BootState currentState = conversionMap_.get(state);
 
-                Instant now = Instant.now();
-                long nsTimestamp = (now.getEpochSecond() * 1_000_000_000L) + now.getNano();
-                CommonDataFormat common = new CommonDataFormat(nsTimestamp, location, DataType.InitialNodeStateData);
+                long usTimestamp = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
+                CommonDataFormat common = new CommonDataFormat(usTimestamp, location, DataType.InitialNodeStateData);
                 common.setStateChangeEvent(currentState);
                 common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, foreignLocation);
                 results.add(common);
