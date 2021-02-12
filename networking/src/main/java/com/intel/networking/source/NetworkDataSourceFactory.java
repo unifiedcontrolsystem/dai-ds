@@ -5,6 +5,7 @@
 package com.intel.networking.source;
 
 import com.intel.logging.Logger;
+import com.intel.networking.source.kafka.NetworkDataSourceKafka;
 import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ;
 import com.intel.networking.source.restsse.NetworkDataSourceSSE;
 
@@ -100,5 +101,6 @@ public final class NetworkDataSourceFactory {
             new HashMap<String, Class<? extends NetworkDataSource>>() {{
         put("rabbitmq", NetworkDataSourceRabbitMQ.class);
         put("sse", NetworkDataSourceSSE.class);
+        put("kafka", NetworkDataSourceKafka.class);
     }};
 }

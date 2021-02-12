@@ -16,15 +16,6 @@ class NetworkDataSinkKafkaSpec extends Specification {
         @Override void processIncomingData(String subject, String payload) {}
     }
 
-    static def source_
-    def args_ = [
-            "bootstrap_servers": "http://127.0.0.1:12345/api/stream?stream_id=testing",
-            "group_id": "http://127.0.0.1:12345/api/stream?stream_id=testing",
-            "schema_registry_url": "http://127.0.0.1:12345/api/stream?stream_id=testing"
-    ]
-    def callback_ = new Callback()
-
-    NetworkDataSinkKafka underTest_
     void setup() {
         source_ = Mock(KafkaConsumer)
         underTest_ = new MockNetworkDataSinkKafka(Mock(Logger), args_)
@@ -116,4 +107,13 @@ class NetworkDataSinkKafkaSpec extends Specification {
         underTest_.setMonitoringSubject("")
         then: thrown(NetworkException)
     }
+
+    static def source_
+    def callback_ = new Callback()
+    NetworkDataSinkKafka underTest_
+    def args_ = [
+            "bootstrap_servers": "localhost:9092",
+            "group_id": "group_id",
+            "schema_registry_url": "http://localhost:8081"
+    ]
 }

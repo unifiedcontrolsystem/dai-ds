@@ -49,7 +49,7 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
     public void initialize() {
         for(String requiredKafkaProperty : requiredKafkaProperties) {
             if(!args_.containsKey(requiredKafkaProperty))
-                throw new NetworkException("Missing required argument in eventSource stream configuration: '" + requiredKafkaProperty + "'");
+                throw new NetworkException("Missing required argument in kafkaSource configuration: '" + requiredKafkaProperty + "'");
             if(args_.containsValue(null) || args_.containsValue(""))
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
