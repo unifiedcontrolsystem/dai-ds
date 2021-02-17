@@ -103,8 +103,8 @@ class NetworkDataSinkKafkaSpec extends Specification {
 
     def "Test empty kafka topics to start client"() {
         underTest_.initialize()
+        underTest_.clearSubjects()
         when: underTest_.startListening()
-        underTest_.setMonitoringSubject("")
         then: thrown(NetworkException)
     }
 
@@ -112,8 +112,9 @@ class NetworkDataSinkKafkaSpec extends Specification {
     def callback_ = new Callback()
     NetworkDataSinkKafka underTest_
     def args_ = [
-            "bootstrap_servers": "localhost:9092",
-            "group_id": "group_id",
-            "schema_registry_url": "http://localhost:8081"
+            "bootstrap.servers": "localhost:9092",
+            "group.id": "group_id",
+            "schema.registry.url": "http://localhost:8081",
+            "topics": "test"
     ]
 }

@@ -5,14 +5,17 @@ import com.intel.networking.NetworkException;
 import com.intel.networking.sink.NetworkDataSinkDelegate;
 import com.intel.networking.sink.NetworkDataSinkEx;
 import com.intel.networking.sink.StreamLocationHandler;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,17 +56,17 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
             if(args_.containsValue(null) || args_.containsValue(""))
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
+        parseSubjects(args_.getOrDefault(KAFKA_TOPICS, "*"));
+        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER));
+        kafkaProperties.put(KAFKA_GROUP_ID, args_.get(KAFKA_GROUP_ID));
+        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL));
 
-        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(requiredKafkaProperties[0]));
-        kafkaProperties.put(KAFKA_GROUP_ID, args_.get(requiredKafkaProperties[1]));
-        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(requiredKafkaProperties[2]));
-
-        kafkaProperties.put(KAFKA_AUTO_COMMIT, args_.getOrDefault(optionalKafkaProperties[0], "false"));
-        kafkaProperties.put(KAFKA_AUTO_OFFSET, args_.getOrDefault(optionalKafkaProperties[1], "earliest"));
-        kafkaProperties.setProperty(KAFKA_IS_AVRO_FORMAT, args_.getOrDefault(optionalKafkaProperties[2], "true"));
-        kafkaProperties.setProperty(KAFKA_KEY_DESERIALIZER, StringDeserializer.class.getName());
-        kafkaProperties.setProperty(KAFKA_VALUE_DESERIALIZER, KafkaAvroSerializer.class.getName());
-        timeout_ = args_.getOrDefault(KAFKA_TIMEOUT, "60");
+        kafkaProperties.put(KAFKA_AUTO_COMMIT, args_.getOrDefault(KAFKA_AUTO_COMMIT, "false"));
+        kafkaProperties.put(KAFKA_AUTO_OFFSET, args_.getOrDefault(KAFKA_AUTO_OFFSET, "earliest"));
+        kafkaProperties.setProperty(KAFKA_IS_AVRO_FORMAT, args_.getOrDefault(KAFKA_IS_AVRO_FORMAT, "true"));
+        kafkaProperties.setProperty(KAFKA_KEY_DESERIALIZER, args_.getOrDefault(KAFKA_KEY_DESERIALIZER, StringDeserializer.class.getName()));
+        kafkaProperties.setProperty(KAFKA_VALUE_DESERIALIZER, args_.getOrDefault(KAFKA_VALUE_DESERIALIZER, KafkaAvroDeserializer.class.getName()));
+        timeout_ = args_.getOrDefault(KAFKA_TIMEOUT, args_.getOrDefault(KAFKA_TIMEOUT, "60"));
     }
 
     /**
@@ -208,6 +211,14 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
         }
     }
 
+    private void parseSubjects(String subjects) {
+        if(subjects != null) {
+            String[] list = subjects.split(",");
+            for(String subject: list)
+                setMonitoringSubject(subject);
+        }
+    }
+
     protected KafkaConsumer<String, String> createKafkaClient() { // Overridden for testing only.
         return new KafkaConsumer<>(kafkaProperties);
     }
@@ -223,8 +234,7 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
     final AtomicBoolean running_ = new AtomicBoolean(false);
     private final AtomicBoolean signalStop_ = new AtomicBoolean(false);
 
-    private final String[] requiredKafkaProperties = {"bootstrap_servers", "group_id", "schema_registry_url"};
-    private final String[] optionalKafkaProperties = {"enable_auto_commit", "reset_auto_offset", "is_avro"};
+    private final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_GROUP_ID, KAFKA_SCHEMA_REG_URL, KAFKA_TOPICS};
 
     private static final String KAFKA_BOOTSTRAP_SERVER = "bootstrap.servers";
     private static final String KAFKA_GROUP_ID = "group.id";
@@ -235,4 +245,5 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
     private static final String KAFKA_KEY_DESERIALIZER = "key.deserializer";
     private static final String KAFKA_VALUE_DESERIALIZER = "value.deserializer";
     private static final String KAFKA_TIMEOUT = "timeout";
+    private static final String KAFKA_TOPICS = "topics";
 }
