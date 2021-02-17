@@ -24,7 +24,7 @@
         "stateChangeSource"
       ],
       "subjects": [
-        "*"
+        "stateChanges"
       ],
       "adapterProvider": "bootEventData"
     }
