@@ -37,8 +37,8 @@ class DataLoaderSpec extends Specification {
         dataLoader.initialize()
         expect:
         dataLoader.getEventsTemplateConfigurationFile() == "/tmp/template.json"
-        dataLoader.getEventsConfigutaion("count", "-1") == "10"
-        dataLoader.getEventsConfigutaion("unknown", "default-value") == "default-value"
+        dataLoader.getEventsConfiguration("count", "-1") == "10"
+        dataLoader.getEventsConfiguration("unknown", "default-value") == "default-value"
         dataLoader.getNodeLocations().containsAll(locations_)
         dataLoader.getNodeLocationsHostnames().containsAll(hostnames_.values())
         dataLoader.getAllLocations().containsAll(locations_)
@@ -101,8 +101,8 @@ class DataLoaderSpec extends Specification {
             "    \"events-template-config\" : \"/tmp/template.json\",\n" +
             "    \"time-delay-mus\": 1\n" +
             "  },\n" +
-            "  \"network-config\" : {\n" +
-            "      \"network\" : \"sse\",\n" +
+            "  \"server-network-config\" : {\n" +
+            "      \"server-network\" : \"sse\",\n" +
             "      \"sse\": {\n" +
             "          \"server-address\": \"local\" ,\n" +
             "          \"server-port\": \"1235\" ,\n" +

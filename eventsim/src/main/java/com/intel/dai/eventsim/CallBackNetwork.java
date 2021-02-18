@@ -27,8 +27,6 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * expects non null values.
      */
     public PropertyMap getSubscription(final String url, final String subscriber) throws RESTClientException {
-        if (url == null || subscriber == null)
-            throw new RESTClientException("Insufficient details to get subscription: url or subscriber null value(s)");
         return connectionManager_.getSubscription(url, subscriber);
     }
 
@@ -57,8 +55,6 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * expects non null values.
      */
     public void publish(final String url, final String events) throws RESTClientException {
-        if (events == null)
-            throw new RESTClientException("No events to publish to network");
         connectionManager_.publish(events);
     }
 
@@ -73,8 +69,6 @@ public class CallBackNetwork extends NetworkConnectionObject {
      * expects non null values
      */
     public boolean register(final String url, final String subscriber, final Map<String, String> parameters) throws RESTClientException {
-        if (url == null || subscriber == null)
-            throw new RESTClientException("Could not register url or httpmethod : NULL value(s)");
         return connectionManager_.addSubscription(url, subscriber, parameters);
     }
 

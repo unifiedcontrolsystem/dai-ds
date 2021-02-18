@@ -2,7 +2,7 @@ package com.intel.networking.source.kafka;
 
 import com.intel.logging.Logger;
 import com.intel.networking.NetworkException;
-import com.intel.networking.source.NetworkDataSource;
+import com.intel.networking.source.NetworkDataSourceEx;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-public class NetworkDataSourceKafka implements NetworkDataSource {
+public class NetworkDataSourceKafka implements NetworkDataSourceEx {
 
     /**
      * Used by the {@link NetworkDataSourceFactory} to create an instance of the Kafka provider.
@@ -46,10 +46,10 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
 
-        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(requiredKafkaProperties[0]));
-        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(requiredKafkaProperties[1]));
-        kafkaProperties.setProperty(KAFKA_KEY_SERIALIZER, StringSerializer.class.getName());
-        kafkaProperties.setProperty(KAFKA_VALUE_SERIALIZER, KafkaAvroSerializer.class.getName());
+        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER));
+        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL));
+        kafkaProperties.setProperty(KAFKA_KEY_SERIALIZER, args_.getOrDefault(KAFKA_KEY_SERIALIZER, StringSerializer.class.getName()));
+        kafkaProperties.setProperty(KAFKA_VALUE_SERIALIZER, args_.getOrDefault(KAFKA_VALUE_SERIALIZER, KafkaAvroSerializer.class.getName()));
         //optional properties
         kafkaProperties.put(KAFKA_ACK, args_.getOrDefault(KAFKA_ACK, "all"));
         kafkaProperties.put(KAFKA_RETRY, args_.getOrDefault(KAFKA_RETRY, "10"));
@@ -114,10 +114,20 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
         }
     }
 
-    private Logger logger_;
-    private Producer<String, String> kafkaProducer_;
+    @Override
+    public void setPublisherProperty(String property, Object value) {
 
-    private final Map<String,String> args_;
+    }
+
+    @Override
+    public Object getPublisherProperty(String property) {
+        return null;
+    }
+
+    private Logger logger_;
+    private Producer<String, Object> kafkaProducer_;
+
+    private final Map<String, String> args_;
     private final Properties kafkaProperties = new Properties();
 
     private static final String KAFKA_KEY_SERIALIZER = "key.serializer";
@@ -127,5 +137,5 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
     private static final String KAFKA_ACK = "acks";
     private static final String KAFKA_RETRY = "retries";
 
-    private static final String[] requiredKafkaProperties = {"bootstrap_servers", "schema_registry_url"};
+    private static final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_SCHEMA_REG_URL};
 }

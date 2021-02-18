@@ -75,7 +75,7 @@ class NetworkDataSourceKafkaSpec extends Specification {
     private NetworkDataSourceKafka underTest_
     private Logger log_
     def args_ = [
-            "bootstrap_servers": "localhost:9092",
-            "schema_registry_url": "http://localhost:8081"
+            "bootstrap.servers": "localhost:9092",
+            "schema.registry.url": "http://localhost:8081"
     ]
 }

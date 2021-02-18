@@ -4,8 +4,12 @@ import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
 import com.intel.networking.restserver.RESTServerException;
 import com.intel.networking.restserver.RESTServerHandler;
+import com.intel.networking.source.NetworkDataSource;
+import com.intel.networking.source.NetworkDataSourceEx;
+import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyDocument;
 import com.intel.properties.PropertyMap;
+import org.apache.commons.collections4.map.HashedMap;
 
 import java.util.Map;
 
@@ -15,26 +19,51 @@ import java.util.Map;
  */
 public abstract class NetworkConnectionObject {
 
-    private static Logger log_;
+    static NetworkConnectionObject createConnection(String network, Logger log, PropertyMap config) throws SimulatorException {
+        DataValidation.isNullOrEmpty(network, MISSING_SERVER_NETWORK_TYPE);
 
-    static NetworkConnectionObject createConnection(String network, Logger log, PropertyMap config) {
         log_ = log;
-        if (NETWORK_TYPES.valueOf(network.toUpperCase()) == NETWORK_TYPES.SSE) {
-            PropertyMap sseConfig = config.getMapOrDefault("sse", null);
-            sseServer = new SSENetwork(sseConfig, log_);
-            return sseServer;
+
+        NETWORK_TYPES serverNetwork = NETWORK_TYPES.valueOf(network);
+        if (serverNetwork.equals(NETWORK_TYPES.sse)) {
+            return createSSENetwork(config);
         }
 
-        if (NETWORK_TYPES.valueOf(network.toUpperCase()) == NETWORK_TYPES.CALLBACK) {
-            callBack = new CallBackNetwork(log_);
-            return callBack;
-        }
-
-        if (NETWORK_TYPES.valueOf(network.toUpperCase()) == NETWORK_TYPES.RABBITMQ) {
-            return null;
-            //TO-DO Implementation of rabbitmq
+        if (serverNetwork.equals(NETWORK_TYPES.callback)) {
+            return createCallBackNetwork(config);
         }
         return null;
+    }
+
+    public void createNetworkPublisher(String publisherType, PropertyMap publisherConfig) {
+        NETWORK_TYPES publisher = NETWORK_TYPES.valueOf(publisherType);
+
+        if (publisher.equals(NETWORK_TYPES.sse)) {
+            publisher_ = sseServer;
+            return;
+        }
+
+        if (publisher.equals(NETWORK_TYPES.callback)) {
+            publisher_ = callBack;
+            return;
+        }
+
+        Map<String, String> convertedConfig = new HashedMap<>();
+        for(String key : publisherConfig.keySet()) {
+            String value = publisherConfig.getStringOrDefault(key, null);
+            convertedConfig.put(key, value);
+        }
+        try {
+            pubSource_ = NetworkDataSourceFactory.createInstance(log_, publisher.toString(), convertedConfig);
+            if(convertedConfig.containsKey(PUBLISH_PROPERTY) && pubSource_ instanceof NetworkDataSourceEx) {
+                NetworkDataSourceEx ex = (NetworkDataSourceEx)pubSource_;
+                for(Map.Entry<String, Object> property : publisherConfig.getMapOrDefault(PUBLISH_PROPERTY, new PropertyMap()).entrySet())
+                    ex.setPublisherProperty(property.getKey(), property.getKey());
+            }
+            publisher_ = pubSource_;
+        } catch (Exception e) {
+            log_.error("Error while creating publisher to send data");
+        }
     }
 
     /**
@@ -112,7 +141,18 @@ public abstract class NetworkConnectionObject {
      * @throws RESTClientException when null values passed to this method.
      */
     void send(final String subject, final String eventMessages) throws RESTClientException {
+        if(publisher_ instanceof SSENetwork) {
             sseServer.publish(subject, eventMessages);
+            return;
+        }
+        else if(publisher_ instanceof CallBackNetwork) {
+            callBack.publish(subject, eventMessages);
+            return;
+        }
+        else if(publisher_ instanceof NetworkDataSource) {
+            pubSource_.sendMessage(subject, eventMessages);
+            return;
+        }
     }
 
     public abstract void initialize() throws RESTServerException, RESTClientException;
@@ -179,13 +219,30 @@ public abstract class NetworkConnectionObject {
         return callBack.getAllSubscriptions();
     }
 
-    enum NETWORK_TYPES {
-        SSE,
-        RABBITMQ,
-        CALLBACK,
-        OTHER
+    private static NetworkConnectionObject createSSENetwork(PropertyMap sseConfig) throws SimulatorException {
+        sseServer = new SSENetwork(sseConfig, log_);
+        return sseServer;
     }
 
+    private static NetworkConnectionObject createCallBackNetwork(PropertyMap networkConfig) {
+        callBack = new CallBackNetwork(log_);
+        return callBack;
+    }
+
+    enum NETWORK_TYPES {
+        sse,
+        rabbitmq,
+        callback,
+        kafka,
+        other
+    }
+
+    private Object publisher_;
     private static NetworkConnectionObject sseServer;
     private static NetworkConnectionObject callBack;
+    private static Logger log_;
+    private NetworkDataSource pubSource_;
+
+    private final static String PUBLISH_PROPERTY = "publish-property";
+    private final static String MISSING_SERVER_NETWORK_TYPE = "server network type cannot be null/empty";
 }

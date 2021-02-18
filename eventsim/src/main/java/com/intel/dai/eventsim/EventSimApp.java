@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class EventSimApp  extends  EventSim {
 
-    EventSimApp(String voltdbServer, String serverConfig, Logger log) {
+    EventSimApp(String voltdbServer, String serverConfig, Logger log) throws SimulatorException {
         super(voltdbServer, serverConfig, log);
     }
 

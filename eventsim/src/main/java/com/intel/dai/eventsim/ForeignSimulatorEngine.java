@@ -370,20 +370,20 @@ class ForeignSimulatorEngine {
         defaults.clear();
         defaults.putAll(parameters);
         defaults.put("events-template-config",
-                dataLoaderEngine_.getEventsConfigutaion("events-template-config", null));
+                dataLoaderEngine_.getEventsConfiguration("events-template-config", null));
         defaults.put("burst", parameters.getOrDefault("burst",
-                dataLoaderEngine_.getEventsConfigutaion("burst", "true")));
+                dataLoaderEngine_.getEventsConfiguration("burst", "true")));
         defaults.put("count", parameters.getOrDefault("count",
-                dataLoaderEngine_.getEventsConfigutaion("count", "0")));
+                dataLoaderEngine_.getEventsConfiguration("count", "0")));
         defaults.put("seed", parameters.getOrDefault("seed",
-                dataLoaderEngine_.getEventsConfigutaion("seed", String.valueOf(System.nanoTime()))));
+                dataLoaderEngine_.getEventsConfiguration("seed", String.valueOf(System.nanoTime()))));
         defaults.put("time-delay-mus", parameters.getOrDefault("time-delay-mus",
-                dataLoaderEngine_.getEventsConfigutaion("time-delay-mus", "0")));
+                dataLoaderEngine_.getEventsConfiguration("time-delay-mus", "0")));
         defaults.put("boot-failure-prob", parameters.getOrDefault("boot-failure-prob",
-                dataLoaderEngine_.getEventsConfigutaion("boot-failure-prob", "0")));
+                dataLoaderEngine_.getEventsConfiguration("boot-failure-prob", "0")));
         defaults.put("template", parameters.getOrDefault("template", null));
         defaults.put("timezone", parameters.getOrDefault("timezone",
-                dataLoaderEngine_.getEventsConfigutaion("timezone", ZoneId.systemDefault().toString())));
+                dataLoaderEngine_.getEventsConfiguration("timezone", ZoneId.systemDefault().toString())));
 
         STREAM_DATA.put(STREAM_ID, "");
         STREAM_DATA.put(STREAM_MESSAGE, "");
@@ -447,7 +447,7 @@ class ForeignSimulatorEngine {
         LocalDateTime currentTime = ZonedDateTime.now(ZoneId.systemDefault()).toLocalDateTime();
         log_.info("Scenario current-time = " + currentTime);
         Duration diffTime =Duration.between(currentTime, startTimeZ);
-        delayMicroSecond(diffTime.toSeconds() * 1000 * 1000);
+        delayMicroSecond(diffTime.toMillis() * 1000);
     }
 
     /**
@@ -505,6 +505,8 @@ class ForeignSimulatorEngine {
     private static final String STREAM_ID = "STREAM_ID";
     private static final String STREAM_MESSAGE = "STREAM_MESSAGE";
     private static final String MISSING_KEY = "Given key/data is null, key = ";
+    private static final String SIMULATOR_PUBLISHER = "publisher-network";
+    private static final String DEFAULT_SIMULATOR_PUBLISHER = "kafka";
 
     private final PropertyMap STREAM_DATA = new PropertyMap();
 

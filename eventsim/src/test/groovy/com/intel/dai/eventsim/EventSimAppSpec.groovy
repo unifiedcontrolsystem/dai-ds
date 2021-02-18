@@ -102,7 +102,7 @@ class EventSimAppSpec extends Specification {
         locations.add("location-0")
         locations.add("location-1")
         eventSimApp_.foreignSimulatorEngine_.getAllAvailableLocations() >> locations
-        expect :
+        expect :EventSimAppSpec
         eventSimApp_.getAllAvailableLocations(parameters).contains("{\"Status\":\"F\",\"Result\":\"[\\\"location-0\\\",\\\"location-1\\\"]\"}")
     }
 
@@ -120,7 +120,7 @@ class EventSimAppSpec extends Specification {
         eventSimApp_.foreignSimulatorEngine_.generateEventsForScenario(parameters) >>
                 {throw new SimulatorException("test exception")}
 
-        expect:
+        expect:EventSimAppSpec
         eventSimApp_.generateBootEvents(parameters).contains("test exception")
         eventSimApp_.generateRasEvents(parameters).contains("test exception")
         eventSimApp_.generateSensorEvents(parameters).contains("test exception")
@@ -402,7 +402,7 @@ class EventSimAppSpec extends Specification {
     private final String NODE_STATE_CONFIG = "/resources/test-config-files/TestNodeState.json"
 
     private final String NETWORK_CONFIG = "{\n" +
-            "  \"network\" : \"sse\",\n" +
+            "  \"server-network\" : \"sse\",\n" +
             "  \"sse\": {\n" +
             "    \"server-address\": \"local\" ,\n" +
             "    \"server-port\": \"1234\" ,\n" +

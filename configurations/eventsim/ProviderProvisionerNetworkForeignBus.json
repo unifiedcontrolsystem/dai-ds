@@ -6,11 +6,15 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/sma-telemetry/v1/stream/cray-hmsstatechange-notifications?stream_id=dai-provisioner",
-        "inputBufferSize": "4",
-        "connectTimeout": "30"
+        "bootstrap.servers": "admin:9092",
+        "group.id": "boot_states",
+        "schema.registry.url": "http://admin:8081",
+        "auto.commit.enable": false,
+        "auto.offset.reset": "earliest",
+        "specific.avro.reader": "true",
+        "topics": "stateChanges"
       },
-      "name": "eventSource"
+      "name": "kafka"
     }
   },
 

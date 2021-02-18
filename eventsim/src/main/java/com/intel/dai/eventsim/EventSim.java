@@ -11,11 +11,14 @@ import com.intel.properties.PropertyMap;
  */
 class EventSim {
 
-    EventSim(final String voltdbServer, final String serverConfigFile, final Logger log) {
+    EventSim(final String voltdbServer, final String serverConfigFile, final Logger log) throws SimulatorException {
         voltdbServer_ = voltdbServer;
         serverConfigFile_ = serverConfigFile;
         log_ = log;
         parser_ = ConfigIOFactory.getInstance("json");
+
+        DataValidation.isNullOrEmpty(log_, MISSING_LOGGER);
+        DataValidation.isNullOrEmpty(parser_, MISSING_PARSER);
         dataLoader_ = new DataLoader(serverConfigFile_, voltdbServer_, log_);
     }
 
@@ -61,6 +64,7 @@ class EventSim {
      */
     private void loadData() throws SimulatorException {
         dataLoader_.initialize();
+        log_.info("Foreign simulation server configuration details are loaded successfully.");
     }
 
     protected BootParameters bootParamsApi_;
@@ -78,4 +82,7 @@ class EventSim {
     private final String voltdbServer_;
     private final String serverConfigFile_;
     private final Logger log_;
+
+    private final static String MISSING_LOGGER = "logger instance cannot be null.";
+    private final static String MISSING_PARSER = "parser instance cannot be null.";
 }

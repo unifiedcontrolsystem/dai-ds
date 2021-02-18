@@ -1,15 +1,21 @@
 package com.intel.dai.eventsim
 
+
 import com.intel.properties.PropertyMap
 import spock.lang.Specification
 
 class DataValidationSpec extends Specification {
 
     def "Validate keys and key-value data for a given input"() {
-        PropertyMap data = new PropertyMap()
+        PropertyMap data = null
         when:
-        if(key != null || value != null)
+        if(!key.equals("NA") || !value.equals("NA"))
+            data = new PropertyMap()
+
+        if(!key.equals("NA") && !value.equals("NA")) {
+            data = new PropertyMap()
             data.put(key, value)
+        }
 
         DataValidation.validateKeys(data , keys, input_message)
         then:
@@ -17,16 +23,16 @@ class DataValidationSpec extends Specification {
         e.message.equals(output_message)
 
         where:
-        key     |        value      |   keys        |      input_message       |    output_message
-        null    |        null       |   KEYS        |     "error message"      |   "data/keys/message is empty or null"
-        "key-1" |       "value"     |   null        |     "error message"      |   "data/keys/message is empty or null"
-        "key-1" |       "value"     |   EMPTY_KEYS  |     "error message"      |   "data/keys/message is empty or null"
-        "key-1" |       "value"     |   KEYS        |         null             |   "data/keys/message is empty or null"
-        "key-1" |       "value"     |   KEYS        |          ""              |   "data/keys/message is empty or null"
-        null    |       "value"     |   KEYS        |   "missing key, key ="   |   "missing key, key = key-1"
-        "key-1" |        null       |   KEYS        |   "missing value, key =" |   "missing value, key = key-1"
-        "key-1" |        ""         |   KEYS        |   "missing value, key =" |   "missing value, key = key-1"
-        "key-2" |        "value"    |   KEYS        |   "missing value, key =" |   "missing value, key = key-1"
+        key     |  value   | keys       |   input_message       |  output_message
+        "key-1" |  "value" | null       |  "error message"      |  "keys to validate against cannot be null or empty."
+        "key-1" |  "value" | EMPTY_KEYS |  "error message"      |  "keys to validate against cannot be null or empty."
+        "key-1" |  "value" | KEYS       |  ""                   |  "message to display error cannot be null or empty."
+        "key-1" |  "value" | KEYS       |  null                 |  "message to display error cannot be null or empty."
+          "NA"  |  "NA"    | KEYS       |  "error message"      |  "Data to validate cannot be null or empty."
+          "NA"  |  "value" | KEYS       |  "error message"      |  "Data to validate cannot be null or empty."
+        "key-1" |  null    | KEYS       |"missing value, key =" |  "missing value, key = key-1"
+        "key-1" |  ""      | KEYS       |"missing value, key =" |  "missing value, key = key-1"
+        "key-2" |  "value" | KEYS       |"missing key, key ="   |  "missing key, key = key-1"
       }
 
     def "Validate key-value data for a given input"() {

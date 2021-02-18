@@ -6,9 +6,6 @@
     "hw-inventory-path" : "/opt/ucs/etc",
     "hw-inventory-query-path" : "/opt/ucs/etc/HwInvQuery_",
     "hw-inv-discover-status-url" : "/Inventory/DiscoveryStatus",
-    "sensor-metadata": "/resources/ForeignSensorMetaData.json",
-    "ras-metadata": "/resources/ForeignEventMetaData.json",
-    "jobs-metadata" : "/resources/ForeignJobsMetaData.json",
     "node-state" : "/resources/test-config-files/TestNodeState.json"
   },
   "events-simulator-config" : {
@@ -18,8 +15,8 @@
     "time-delay-mus": 1,
     "timezone": "GMT"
   },
-  "network-config" : {
-    "network" : "sse",
+  "server-network-config" : {
+    "server-network" : "sse",
     "sse": {
       "server-address": "localhost" ,
       "server-port": "78965" ,
