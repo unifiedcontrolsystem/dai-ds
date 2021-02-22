@@ -402,7 +402,8 @@ class EventSimAppSpec extends Specification {
     private final String NODE_STATE_CONFIG = "/resources/test-config-files/TestNodeState.json"
 
     private final String NETWORK_CONFIG = "{\n" +
-            "  \"network\" : \"sse\",\n" +
+            "  \"server-network\" : \"sse\",\n" +
+            "  \"publisher-network\" : \"sse\",\n" +
             "  \"sse\": {\n" +
             "    \"server-address\": \"local\" ,\n" +
             "    \"server-port\": \"1234\" ,\n" +

@@ -245,7 +245,7 @@ class ForeignSimulatorEngine {
     }
 
     private PropertyDocument generateEvents(Map<String, String> parameters, String type) throws SimulatorException, PropertyNotExpectedType, IOException, ConfigIOParseException, ConversionException {
-        DataValidation.validateData(parameters, MISSING_KEY);
+        DataValidation.isDataNullOrEmpty(parameters, MISSING_KEY);
 
         String locationsRegex = parameters.getOrDefault("locations", ".*");
         filter_.validateLocations(dataLoaderEngine_.getNodeLocations(), locationsRegex);
@@ -370,20 +370,20 @@ class ForeignSimulatorEngine {
         defaults.clear();
         defaults.putAll(parameters);
         defaults.put("events-template-config",
-                dataLoaderEngine_.getEventsConfigutaion("events-template-config", null));
+                dataLoaderEngine_.getEventsConfiguration("events-template-config", null));
         defaults.put("burst", parameters.getOrDefault("burst",
-                dataLoaderEngine_.getEventsConfigutaion("burst", "true")));
+                dataLoaderEngine_.getEventsConfiguration("burst", "true")));
         defaults.put("count", parameters.getOrDefault("count",
-                dataLoaderEngine_.getEventsConfigutaion("count", "0")));
+                dataLoaderEngine_.getEventsConfiguration("count", "0")));
         defaults.put("seed", parameters.getOrDefault("seed",
-                dataLoaderEngine_.getEventsConfigutaion("seed", String.valueOf(System.nanoTime()))));
+                dataLoaderEngine_.getEventsConfiguration("seed", String.valueOf(System.nanoTime()))));
         defaults.put("time-delay-mus", parameters.getOrDefault("time-delay-mus",
-                dataLoaderEngine_.getEventsConfigutaion("time-delay-mus", "0")));
+                dataLoaderEngine_.getEventsConfiguration("time-delay-mus", "0")));
         defaults.put("boot-failure-prob", parameters.getOrDefault("boot-failure-prob",
-                dataLoaderEngine_.getEventsConfigutaion("boot-failure-prob", "0")));
+                dataLoaderEngine_.getEventsConfiguration("boot-failure-prob", "0")));
         defaults.put("template", parameters.getOrDefault("template", null));
         defaults.put("timezone", parameters.getOrDefault("timezone",
-                dataLoaderEngine_.getEventsConfigutaion("timezone", ZoneId.systemDefault().toString())));
+                dataLoaderEngine_.getEventsConfiguration("timezone", ZoneId.systemDefault().toString())));
 
         STREAM_DATA.put(STREAM_ID, "");
         STREAM_DATA.put(STREAM_MESSAGE, "");
