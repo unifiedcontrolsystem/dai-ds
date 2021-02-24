@@ -2,8 +2,9 @@ package com.intel.networking.source.kafka;
 
 import com.intel.logging.Logger;
 import com.intel.networking.NetworkException;
-import com.intel.networking.source.NetworkDataSource;
+import com.intel.networking.source.NetworkDataSourceEx;
 import com.intel.networking.source.NetworkDataSourceFactory;
+import com.intel.properties.PropertyMap;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -11,10 +12,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
-public class NetworkDataSourceKafka implements NetworkDataSource {
+public class NetworkDataSourceKafka implements NetworkDataSourceEx {
 
     /**
      * Used by the {@link NetworkDataSourceFactory} to create an instance of the Kafka provider.
@@ -42,7 +44,7 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
         for(String requiredKafkaProperty : requiredKafkaProperties) {
             if(!args_.containsKey(requiredKafkaProperty))
                 throw new NetworkException("Missing required argument in kafkaSource configuration: '" + requiredKafkaProperty + "'");
-            if(args_.containsValue(null) || args_.containsValue(""))
+            if(args_.get(requiredKafkaProperty) == null || args_.get(requiredKafkaProperty).isEmpty())
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
 
@@ -95,7 +97,11 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
     @Override
     public boolean sendMessage(String subject, String message) {
         try {
-            kafkaProducer_.send(new ProducerRecord<>(subject, message));
+            boolean isAvro = (boolean) getPublisherProperty(subject);
+            if(isAvro)
+                kafkaProducer_.send(new ProducerRecord<>(subject, message.getBytes(StandardCharsets.UTF_8)));
+            else
+                kafkaProducer_.send(new ProducerRecord<>(subject, message));
             kafkaProducer_.flush();
         } catch (Exception e) {
             logger_.error(e.getMessage());
@@ -114,8 +120,19 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
         }
     }
 
+    @Override
+    public void setPublisherProperty(String property, Object value) {
+        topicsAvroInfo.put(property, value);
+    }
+
+    @Override
+    public Object getPublisherProperty(String property) {
+        return topicsAvroInfo.getBooleanOrDefault(property, false);
+    }
+
     private Logger logger_;
-    private Producer<String, String> kafkaProducer_;
+    private Producer<String, Object> kafkaProducer_;
+    private final static PropertyMap topicsAvroInfo = new PropertyMap();
 
     private final Map<String,String> args_;
     private final Properties kafkaProperties = new Properties();
@@ -127,5 +144,5 @@ public class NetworkDataSourceKafka implements NetworkDataSource {
     private static final String KAFKA_ACK = "acks";
     private static final String KAFKA_RETRY = "retries";
 
-    private static final String[] requiredKafkaProperties = {"bootstrap_servers", "schema_registry_url"};
+    private static final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_SCHEMA_REG_URL};
 }

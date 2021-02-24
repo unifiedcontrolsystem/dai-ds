@@ -28,13 +28,13 @@ class NetworkDataSourceKafkaSpec extends Specification {
     }
 
     def "Test initialize Negative 2"() {
-        args_.put("bootstrap_servers", null)
+        args_.put("bootstrap.servers", null)
         when: underTest_.initialize()
         then: thrown(NetworkException)
     }
 
     def "Test initialize Negative 3"() {
-        args_.put("bootstrap_servers", "")
+        args_.put("bootstrap.servers", "")
         when: underTest_.initialize()
         then: thrown(NetworkException)
     }
@@ -57,10 +57,20 @@ class NetworkDataSourceKafkaSpec extends Specification {
         underTest_ = new NetworkDataSourceKafka(log_, args_)
         underTest_.initialize()
         underTest_.connect() >> {}
+
+        underTest_.setPublisherProperty("subject1", false)
+        underTest_.setPublisherProperty("subject2", true)
+
         underTest_.kafkaProducer_ = source_
         source_.send(any() as ProducerRecord) >> {}
-        when: underTest_.sendMessage("subject", "message")
+        source_.send(new ProducerRecord<>("subject3", "message")) >> {throw new Exception()}
+
+        when: underTest_.sendMessage("subject1", "message")
         then: underTest_.kafkaProducer_ != null
+        when: underTest_.sendMessage("subject2", "message")
+        then: underTest_.kafkaProducer_ != null
+        when: underTest_.sendMessage("subject3", "message")
+        then: thrown(NetworkException.class)
         when: underTest_.close()
         then: underTest_.kafkaProducer_ == null
     }
@@ -75,7 +85,7 @@ class NetworkDataSourceKafkaSpec extends Specification {
     private NetworkDataSourceKafka underTest_
     private Logger log_
     def args_ = [
-            "bootstrap_servers": "localhost:9092",
-            "schema_registry_url": "http://localhost:8081"
+            "bootstrap.servers": "localhost:9092",
+            "schema.registry.url": "http://localhost:8081"
     ]
 }

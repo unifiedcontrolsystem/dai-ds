@@ -20,18 +20,18 @@ public class NetworkObject {
         log_ = log;
         apiReqData_ = apiReqData;
         validateNetworkConfigurations();
-        networkConnectionObject = NetworkConnectionObject.createConnection(getNetworkName(), log_, config_);
     }
 
     /**
      * This method is used to initialse network based on network name.
      */
     public void initialise() throws SimulatorException {
-        if (networkConnectionObject == null)
-            throw new SimulatorException(String.format("Cannot initialise the given network : %s", getNetworkName()));
         try {
+            networkConnectionObject = NetworkConnectionObject.createConnection(getNetworkName(), log_, getNetworkConfiguration(getNetworkName()));
+            DataValidation.isNullOrEmpty(networkConnectionObject, String.format("Cannot initialise the given network : %s", getNetworkName()));
             networkConnectionObject.initialize();
             networkConnectionObject.configureOtherNetworks();
+            networkConnectionObject.createNetworkPublisher(getPublisherName(), getNetworkConfiguration(getPublisherName()));
         } catch (RESTServerException | RESTClientException e) {
             throw new SimulatorException(e.getMessage());
         }
@@ -203,77 +203,45 @@ public class NetworkObject {
      *
      * @return network name
      */
-    private String getNetworkName() {
-        return config_.getStringOrDefault("network", null);
+    String getNetworkName() {
+        return config_.getStringOrDefault(NETWORK_TYPE, null);
     }
 
     /**
-     * This method is used to fetch rabbitmq cofiguration details
+     * This method is used to network name to which server publish data.
      *
-     * @return rabbitmq details
+     * @return network name
      */
-    private PropertyMap getRabbitMQConfiguration() {
-        return config_.getMapOrDefault("rabbitmq", null);
+    private String getPublisherName() {
+        return config_.getStringOrDefault(PUBLISHER_NETWORK_TYPE, null);
     }
 
     /**
-     * This method is used to fetch sse cofiguration details
+     * This method is used to get configuration details for a given network name
      *
-     * @return sse details
+     * @return network config details
      */
-    private PropertyMap getSSEConfiguration() {
-        return config_.getMapOrDefault("sse", null);
+    private PropertyMap getNetworkConfiguration(String networkName) {
+        return config_.getMapOrDefault(networkName, null);
     }
 
     /**
-     * This method is used to validate sse and rabbitmq configuration details.
+     * This method is used to validate server network configuration details.
      *
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateNetworkConfigurations() throws SimulatorException {
-        validateNetworkType();
-        validateSSEConfig();
-        validateRabbitMqConfig();
-    }
-
-    private void validateNetworkType() throws SimulatorException {
-        for(String key : NETWORK_CONFIG_KEYS) {
-            if(!config_.containsKey(key))
-                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
-        }
-    }
-
-    /**
-     * This method is used to validate rabbitmq configuration details.
-     *
-     * @throws SimulatorException when required parameters are missing.
-     */
-    private void validateRabbitMqConfig() throws SimulatorException {
-        PropertyMap config = getRabbitMQConfiguration();
-        for(String key : RABBIT_MQ_CONFIG_KEYS) {
-            if(!config.containsKey(key))
-                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
-        }
-    }
-
-    /**
-     * This method is used to validate sse configuration details.
-     *
-     * @throws SimulatorException when required parameters are missing.
-     */
-    private void validateSSEConfig() throws SimulatorException {
-        PropertyMap config = getSSEConfiguration();
-        for(String key : SSE_CONFIG_KEYS) {
-            if(!config.containsKey(key))
-                throw new SimulatorException("EventSim Configuration file doesn't contain '" + key + "' entry");
-        }
+        DataValidation.validateKeys(config_, NETWORK_CONFIG_KEYS, MISSING_SERVER_CONFIG);
     }
 
     private final PropertyMap config_;
     private final Logger log_;
     private final ApiReqData apiReqData_;
     private NetworkConnectionObject networkConnectionObject;
-    private final String[] SSE_CONFIG_KEYS = new String[]{"server-address", "server-port", "urls"};
-    private final String[] RABBIT_MQ_CONFIG_KEYS = new String[]{"exchangeName", "uri"};
-    private final String[] NETWORK_CONFIG_KEYS = new String[]{"network", "sse", "rabbitmq"};
+
+    private final String[] NETWORK_CONFIG_KEYS = new String[]{NETWORK_TYPE, PUBLISHER_NETWORK_TYPE};
+
+    private final static String NETWORK_TYPE = "server-network";
+    private final static String PUBLISHER_NETWORK_TYPE = "publisher-network";
+    private final static String MISSING_SERVER_CONFIG = "Eventsim config file is missing required entry, entry = ";
 }

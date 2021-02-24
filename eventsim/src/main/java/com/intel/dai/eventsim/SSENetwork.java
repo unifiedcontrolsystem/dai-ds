@@ -22,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SSENetwork extends NetworkConnectionObject {
 
-    public SSENetwork(final PropertyMap config, final Logger log) {
+    public SSENetwork(final PropertyMap config, final Logger log) throws SimulatorException {
+        DataValidation.validateKeys(config, SSE_CONFIG_KEYS, MISSING_SERVER_CONFIG);
         config_ = config;
         log_ = log;
     }
@@ -163,8 +164,8 @@ public class SSENetwork extends NetworkConnectionObject {
      * @throws RESTServerException when unable to fetch rest server address or port data.
      */
     private void configureNetwork() throws RESTServerException {
-        setAddress(config_.getStringOrDefault("server-address", null));
-        setPort(config_.getStringOrDefault("server-port", null));
+        setAddress(config_.getStringOrDefault(SSE_SERVER_ADDR, null));
+        setPort(config_.getStringOrDefault(SSE_SERVER_PORT, null));
     }
 
     /**
@@ -195,7 +196,7 @@ public class SSENetwork extends NetworkConnectionObject {
      * @throws RESTServerException when unable to add url to sse handler.
      */
     private void subscribeUrls() throws RESTServerException {
-        PropertyMap subscribeUrls = config_.getMapOrDefault("urls", null);
+        PropertyMap subscribeUrls = config_.getMapOrDefault(SSE_SERVER_REGISTER_URLS, null);
         log_.debug("*** Registering new SSE URLs...");
         for (Map.Entry<String, Object> subscribeUrl : subscribeUrls.entrySet()) {
             String url = subscribeUrl.getKey();
@@ -212,4 +213,12 @@ public class SSENetwork extends NetworkConnectionObject {
     private final Logger log_;
     private RESTServer server_ = null;
     private PropertyMap subUrls_ = new PropertyMap();
+
+    private final static String SSE_SERVER_ADDR = "server-address";
+    private final static String SSE_SERVER_PORT = "server-port";
+    private final static String SSE_SERVER_REGISTER_URLS = "urls";
+
+    private final String[] SSE_CONFIG_KEYS = new String[]{SSE_SERVER_ADDR, SSE_SERVER_PORT, SSE_SERVER_REGISTER_URLS};
+
+    private final static String MISSING_SERVER_CONFIG = "SSE server configuration is missing required entry, entry = ";
 }

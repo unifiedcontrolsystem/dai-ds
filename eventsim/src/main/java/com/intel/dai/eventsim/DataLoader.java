@@ -48,7 +48,7 @@ class DataLoader {
      * @param defaultValue default value
      * @return if parameters exists return default value, if not default value given by user
      */
-    String getEventsConfigutaion(final String parameter, final String defaultValue) {
+    String getEventsConfiguration(final String parameter, final String defaultValue) {
         return eventsConfiguration_.getStringOrDefault(parameter, defaultValue);
     }
 
@@ -65,40 +65,7 @@ class DataLoader {
      * @return location of events template file absolute path
      */
     String getEventsTemplateConfigurationFile() {
-        return getEventsConfigutaion(FOREIGN_EVENTS_CONFIG_KEYS[1], null);
-    }
-
-    /**
-     * This method is used to return sensor metadata.
-     * @return sensor metadata
-     * @throws IOException unable to read/load sensor metadata
-     * @throws ConfigIOParseException unable to read/load sensor metadata
-     */
-    PropertyMap getSensorMetaData() throws IOException, ConfigIOParseException {
-        PropertyMap data = loadDataFromFile(sensorMetadataFileAbsolutePath_);
-        return data;
-    }
-
-    /**
-     * This method is used to return jobe metadata.
-     * @return jobs metadata
-     * @throws IOException unable to read/load jobs metadata
-     * @throws ConfigIOParseException unable to read/load jobs metadata
-     */
-    PropertyMap getJobsMetaData() throws IOException, ConfigIOParseException {
-        PropertyMap data = loadDataFromFile(jobsMetadataFileAbsolutePath_);
-        return data;
-    }
-
-    /**
-     * This method is used to return ras metadata.
-     * @return ras metadata
-     * @throws IOException unable to read/load ras metadata
-     * @throws ConfigIOParseException unable to read/load ras metadata
-     */
-    List<String> getRasMetaData() throws IOException, ConfigIOParseException {
-        PropertyMap data = loadDataFromFile(rasMetadataFileAbsolutePath_);
-        return new ArrayList<>(data.keySet());
+        return getEventsConfiguration(FOREIGN_EVENTS_TEMPLATE_CONFIG, null);
     }
 
     /**
@@ -109,7 +76,7 @@ class DataLoader {
     private void loadData() throws SimulatorException {
         try {
             loadForeignSimulatorServerConfiguration();
-            loadForeignApiSimulatorConfigution();
+            loadForeignApiSimulatorConfiguration();
             loadForeignEventsSimulatorConfiguration();
             loadNetworkConfiguration();
             loadManifestLocations();
@@ -129,7 +96,7 @@ class DataLoader {
     private void loadForeignSimulatorServerConfiguration() throws IOException, ConfigIOParseException,
             SimulatorException {
         serverConfiguration_ = loadDataFromFile(serverConfigFile_);
-        DataValidation.validateKeys(serverConfiguration_, FOREIGN_SERVER_CONFIG, MISSING_FOREIGN_SERVER_CONFIG);
+        DataValidation.validateKeys(serverConfiguration_, FOREIGN_SERVER_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
     }
 
     /**
@@ -137,19 +104,16 @@ class DataLoader {
      * @throws PropertyNotExpectedType unable to read/load api simulation configuration details
      * @throws SimulatorException unable to read/load api simulation configuration details
      */
-    private void loadForeignApiSimulatorConfigution() throws PropertyNotExpectedType, SimulatorException {
-        PropertyMap apiConfiguration = serverConfiguration_.getMap(FOREIGN_SERVER_CONFIG[0]);
-        DataValidation.validateKeys(apiConfiguration, FOREIGN_API_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
-        bootParamsFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[0]);
-        bootImagesFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[1]);
-        hwInventoryFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[2]);
-        hwInventoryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[3]);
-        hwInventoryQueryFilePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[4]);
-        hwInventoryDiscStatusUrl_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[5]);
-        sensorMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[6]);
-        rasMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[7]);
-        jobsMetadataFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[8]);
-        nodeStateFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_CONFIG_KEYS[9]);
+    private void loadForeignApiSimulatorConfiguration() throws PropertyNotExpectedType, SimulatorException {
+        PropertyMap apiConfiguration = serverConfiguration_.getMap(FS_API_SIMULATOR_CONFIG);
+        DataValidation.validateKeys(apiConfiguration, FS_API_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+        bootParamsFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_BOOT_PARAMETERS);
+        bootImagesFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_BOOT_IMAGES);
+        hwInventoryFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_HW_INVENTORY);
+        hwInventoryFilePath_ = apiConfiguration.getString(FOREIGN_API_HW_INVENTORY_PATH);
+        hwInventoryQueryFilePath_ = apiConfiguration.getString(FOREIGN_API_HW_INV_QUERY_PATH);
+        hwInventoryDiscStatusUrl_ = apiConfiguration.getString(FOREIGN_API_HW_INV_DISC_STATUS_URL);
+        nodeStateFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_NODE_STATE);
     }
 
     /**
@@ -158,18 +122,16 @@ class DataLoader {
      * @throws PropertyNotExpectedType unable to read/load events simulation configuration details
      */
     private void loadForeignEventsSimulatorConfiguration() throws SimulatorException, PropertyNotExpectedType {
-        eventsConfiguration_ = serverConfiguration_.getMap(FOREIGN_SERVER_CONFIG[1]);
-        DataValidation.validateKeys(eventsConfiguration_, FOREIGN_EVENTS_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+        eventsConfiguration_ = serverConfiguration_.getMap(FS_EVENTS_SIMULATOR_CONFIG);
+        DataValidation.validateKeys(eventsConfiguration_, FS_EVENTS_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
     }
 
     /**
      * This method is used to load foreign simulation server network configuration details
-     * @throws SimulatorException unable to read/load network configuration details
      * @throws PropertyNotExpectedType unable to read/load network configuration details
      */
-    private void loadNetworkConfiguration() throws SimulatorException, PropertyNotExpectedType {
-        networkConfiguration_ = serverConfiguration_.getMap(FOREIGN_SERVER_CONFIG[2]);
-        DataValidation.validateKeys(networkConfiguration_, NETWORK_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+    private void loadNetworkConfiguration() throws PropertyNotExpectedType {
+        networkConfiguration_ = serverConfiguration_.getMap(FS_NETWORK_CONFIG);
     }
 
     /**
@@ -290,10 +252,28 @@ class DataLoader {
     private final String serverConfigFile_;
     private final String voltdbServer_;
 
-    private final String[] FOREIGN_API_CONFIG_KEYS = {"boot-parameters", "boot-images", "hw-inventory", "hw-inventory-path", "hw-inventory-query-path",
-            "hw-inv-discover-status-url", "sensor-metadata", "ras-metadata", "jobs-metadata", "node-state"};
-    private final String[] FOREIGN_EVENTS_CONFIG_KEYS = {"count", "events-template-config", "time-delay-mus"};
-    private final String[] NETWORK_CONFIG_KEYS = {"network"};
-    private final String[] FOREIGN_SERVER_CONFIG = {"api-simulator-config", "events-simulator-config", "network-config"};
+    private final static String FS_API_SIMULATOR_CONFIG = "api-simulator-config";
+    private final static String FS_EVENTS_SIMULATOR_CONFIG = "events-simulator-config";
+    private final static String FS_NETWORK_CONFIG = "server-network-config";
+
+    private final static String FOREIGN_API_BOOT_PARAMETERS = "boot-parameters";
+    private final static String FOREIGN_API_BOOT_IMAGES = "boot-images";
+    private final static String FOREIGN_API_HW_INVENTORY = "hw-inventory";
+    private final static String FOREIGN_API_HW_INVENTORY_PATH = "hw-inventory-path";
+    private final static String FOREIGN_API_HW_INV_QUERY_PATH = "hw-inventory-query-path";
+    private final static String FOREIGN_API_HW_INV_DISC_STATUS_URL = "hw-inv-discover-status-url";
+    private final static String FOREIGN_API_NODE_STATE = "node-state";
+
+    private final static String FOREIGN_EVENTS_COUNT = "count";
+    private final static String FOREIGN_EVENTS_TEMPLATE_CONFIG = "events-template-config";
+    private final static String FOREIGN_EVENTS_TIME_DELAY_MUS = "time-delay-mus";
+
+
+    private final String[] FOREIGN_SERVER_CONFIG_KEYS = {FS_API_SIMULATOR_CONFIG, FS_EVENTS_SIMULATOR_CONFIG, FS_NETWORK_CONFIG};
+
+    private final String[] FS_API_CONFIG_KEYS = {FOREIGN_API_BOOT_PARAMETERS, FOREIGN_API_BOOT_IMAGES, FOREIGN_API_HW_INVENTORY,
+            FOREIGN_API_HW_INVENTORY_PATH, FOREIGN_API_HW_INV_QUERY_PATH, FOREIGN_API_HW_INV_DISC_STATUS_URL, FOREIGN_API_NODE_STATE};
+    private final String[] FS_EVENTS_CONFIG_KEYS = {FOREIGN_EVENTS_COUNT, FOREIGN_EVENTS_TEMPLATE_CONFIG, FOREIGN_EVENTS_TIME_DELAY_MUS};
+
     private final String MISSING_FOREIGN_SERVER_CONFIG = "Eventsim config file is missing required entry, entry = ";
 }
