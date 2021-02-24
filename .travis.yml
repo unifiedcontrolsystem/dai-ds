@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2020 Intel Corporation
+# Copyright (C) 2019-2021 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -27,5 +27,5 @@ before_install:
   - "echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-"
   - "sudo apt update"
   - "sudo apt install -y python3-pip python3-setuptools python3-wheel"
-  - "sudo pip3 install pytest pytest-cov mock texttable pylint"
+  - "sudo pip3 install requests clustershell python-dateutil progress texttable pytest pytest-cov pylint mock timeout-decorator"
 script: 'if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./gradlew check ; fi'

@@ -14,17 +14,18 @@ import org.voltdb.*;
  *  Rather it finished due to an error, or possibly finished with an error...
  *
  *  Input parameter:
- *     String sWorkingAdapterType = The type of adapter that handles this type of work item.
- *     long   lWorkItemId         = The work item id that identifes the work item that is finished.
- *     string sWorkItemResults    = The results for this work item, may consist of JSON data.
- *
+ *     String sWorkingAdapterType            = The type of adapter that handles this type of work item.
+ *     long   lWorkItemId                    = The work item id that identifes the work item that is finished.
+ *     String sWorkItemResults               = The results for this work item, may consist of JSON data.
+ *     String sAllowNonWorkingWiToBeFinished = "T"  - special flag used when need to "finish a work item due to error" when the work item is not in a "Working" state.  This option will very rarely be set to "T"!
+ *                                             !"T" - e.g., "F" is normal flag used when want to check the work item's state for expected value.
  *
  */
 
 public class WorkItemFinishedDueToError extends VoltProcedure {
 
 
-    static final String selectWorkItem = "SELECT " +
+    final String selectWorkItem = "SELECT " +
         "Queue, WorkToBeDone, Parameters, NotifyWhenFinished, State, RequestingWorkItemId, RequestingAdapterType, WorkingAdapterId, WorkingResults, Results, StartTimestamp, DbUpdatedTimestamp " +
         "FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ? Order By WorkingAdapterType, Id;";
     public final SQLStmt selectWorkItemSql = new SQLStmt(selectWorkItem);
@@ -43,7 +44,7 @@ public class WorkItemFinishedDueToError extends VoltProcedure {
     );
 
 
-    static final String deleteWorkItem = "DELETE FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ?;";
+    final String deleteWorkItem = "DELETE FROM WorkItem WHERE WorkingAdapterType = ? AND Id = ?;";
     public final SQLStmt deleteWorkItemSql = new SQLStmt(deleteWorkItem);
 
 
@@ -51,7 +52,7 @@ public class WorkItemFinishedDueToError extends VoltProcedure {
 
 
 
-    public long run(String sWorkingAdapterType, long lWorkItemId, String sWorkItemResults) throws VoltAbortException {
+    public long run(String sWorkingAdapterType, long lWorkItemId, String sWorkItemResults, String sAllowNonWorkingWiToBeFinished) throws VoltAbortException {
         //--------------------------------------------------
         // Grab the object's pre-change values so they are available for use creating the history record.
         //--------------------------------------------------
@@ -59,9 +60,13 @@ public class WorkItemFinishedDueToError extends VoltProcedure {
         VoltTable[] aWorkItemData = voltExecuteSQL();
         aWorkItemData[0].advanceRow();
 
-        // Ensure that this WorkItem is currently in Working state (can only transition into Finished state from Working state).
-        if (!aWorkItemData[0].getString("State").equals("W")) {
-            throw new VoltAbortException("WorkItemFinishedDueToError - unable to change WorkItem " + lWorkItemId + " to FinishedDueToError state due to incompatible State value (" + aWorkItemData[0].getString("State") + ")");
+        // Ensure that the specified work item is in a "Working" state (when appropriate).
+        if (!sAllowNonWorkingWiToBeFinished.equals("T")) {
+            // caller did not override the check to ensure that the work item is being worked on.
+            // Ensure that this WorkItem is currently in Working state (can only transition into Finished state from Working state).
+            if (!aWorkItemData[0].getString("State").equals("W")) {
+                throw new VoltAbortException("WorkItemFinishedDueToError - unable to change WorkItem " + lWorkItemId + " to FinishedDueToError state due to incompatible State value (" + aWorkItemData[0].getString("State") + ")");
+            }
         }
 
         //---------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// Copyright (C) 2017-2019 Intel Corporation
+// Copyright (C) 2017-2018 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,23 +7,23 @@ package com.intel.dai.populate;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.dsapi.DataStoreFactory;
-import com.intel.dai.dsapi.LegacyVoltDbDirectAccess;
 import com.intel.logging.Logger;
+import com.intel.logging.LoggerFactory;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.dai.transforms.DefaultLocations;
 import org.voltdb.VoltTable;
 import org.voltdb.client.*;
 import org.voltdb.types.TimestampType;
 
 import java.lang.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.text.SimpleDateFormat;
 
 /**
  * Populates the VoltDB database schema for UCS.
@@ -39,11 +39,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public class DefaultOnlineTierDataLoader {
-    private Map<String, MachineConfigEntry> lctnToMchCfgMap_ = new HashMap<>();
+    private Map<String, MachineConfigEntry> lctnToMchCfgMap_ = new HashMap<String, MachineConfigEntry>();
 
-    protected DefaultOnlineTierDataLoader(Logger log, DataStoreFactory factory) {
+    // Constructor
+    protected DefaultOnlineTierDataLoader(Logger log) {
         log_ = log;
-        factory_ = factory;
         jsonParser_ = ConfigIOFactory.getInstance("json");
         if (jsonParser_ == null)  throw new RuntimeException("Failed to create a JSON parser!");
     }   // ctor
@@ -53,26 +53,26 @@ public class DefaultOnlineTierDataLoader {
     private Integer iNextNonNodeHwSeqNum   = 0;
     private Integer mNumberOfErrors = 0;
 
-    private static int compareManifest(ManifestContent a, ManifestContent b) {
-        String sTempKeyA = a.name();
-        String sTempKeyB = b.name();
-        return sTempKeyA.compareTo(sTempKeyB);  // to change sort order use "return -sTempKeyA.compareTo(sTempKeyB);"
-    }
 
 
     static class MachineConfigEntry {
         MachineConfigEntry(String sBmcAddr, String sIpAddr, String sBmcMacAddr, String sMacAddr, String sBmcHostName,
-                           String sHostName, String sBootImageId, String environment, String sAggregator)
+                           String sHostName, String sBootImageId, String environment, String sAggregator,
+                           String sBankLocator, String sModuleLocator, String sSocketDesignation, String sSlot)
         {
-            mBmcAddr        = sBmcAddr;
-            mIpAddr         = sIpAddr;
-            mBmcMacAddr     = sBmcMacAddr;
-            mMacAddr        = sMacAddr;
-            mBmcHostName    = sBmcHostName;
-            mHostName       = sHostName;
-            mBootImageId    = sBootImageId;
-            this.environment = environment;
-            mAggregator     = sAggregator.toUpperCase();
+            mBmcAddr           = sBmcAddr;
+            mIpAddr            = sIpAddr;
+            mBmcMacAddr        = sBmcMacAddr;
+            mMacAddr           = sMacAddr;
+            mBmcHostName       = sBmcHostName;
+            mHostName          = sHostName;
+            mBootImageId       = sBootImageId;
+            this.environment   = environment;
+            mAggregator        = sAggregator;
+            mBankLocator       = sBankLocator;
+            mModuleLocator     = sModuleLocator;
+            mSocketDesignation = sSocketDesignation;
+            mSlot              = sSlot;
         }
         String mBmcAddr;
         String mIpAddr;
@@ -83,13 +83,17 @@ public class DefaultOnlineTierDataLoader {
         String mBootImageId;
         String environment;
         String mAggregator;
+        String mBankLocator;
+        String mModuleLocator;
+        String mSocketDesignation;
+        String mSlot;
     };  // End class MachineConfigEntry
 
     static class MachineConfigWiInfo {
         MachineConfigWiInfo(String sQueue, String sTypeOfAdapter, String sWorkToBeDone, String sParms,
                             String sNotifyWhenFinished)
         {
-            mQueue              = sQueue.toUpperCase();
+            mQueue              = sQueue;
             mTypeOfAdapter      = sTypeOfAdapter;
             mWorkToBeDone       = sWorkToBeDone;
             mParms              = sParms;
@@ -109,7 +113,7 @@ public class DefaultOnlineTierDataLoader {
     };  // End class MachineConfigWiInfo
 
     static class ManifestContent {
-        ManifestContent(String sName, String sDefinition)  { mName=sName.toUpperCase(); mDefinition=sDefinition; }
+        ManifestContent(String sName, String sDefinition)  { mName=sName; mDefinition=sDefinition; }
         String name()        { return mName; }
         String definition()  { return mDefinition; }
         String mName;
@@ -258,38 +262,40 @@ public class DefaultOnlineTierDataLoader {
             case "ServiceNode":
                 {
                     // Explicitly handle this node's configuration information based on the specified configuration file.
-                    String sBmcAddr     = null;
-                    String sIpAddr      = null;
-                    String sBmcMacAddr  = null;
-                    String sMacAddr     = null;
-                    String sBmcHostName = null;
-                    String sHostName    = null;
-                    String sBootImageId = null;
-                    String sAggregator  = null;
+                    String sBmcAddr              = null;
+                    String sIpAddr               = null;
+                    String sBmcMacAddr           = null;
+                    String sMacAddr              = null;
+                    String sBmcHostName          = null;
+                    String sHostName             = null;
+                    String sBootImageId          = null;
+                    String sAggregator           = null;
+                    String sConstraintId         = null;
+                    Long   lProofOfLifeTimestamp = null;
                     MachineConfigEntry sMapEntry = lctnToMchCfgMap_.get(sTempLctn);
                     if (sMapEntry == null)
                         throw new RuntimeException("Unable to load the MachineConfigEntry information for ServiceNode " + sTempLctn + "!");
-                    sBmcAddr     = sMapEntry.mBmcAddr;
-                    sIpAddr      = sMapEntry.mIpAddr;
-                    sBmcMacAddr  = sMapEntry.mBmcMacAddr;
-                    sMacAddr     = sMapEntry.mMacAddr;
-                    sBmcHostName = sMapEntry.mBmcHostName;
-                    sHostName    = sMapEntry.mHostName;
-                    sBootImageId = sMapEntry.mBootImageId;
-                    sAggregator  = sMapEntry.mAggregator;
+                    sBmcAddr            = sMapEntry.mBmcAddr;
+                    sIpAddr             = sMapEntry.mIpAddr;
+                    sBmcMacAddr         = sMapEntry.mBmcMacAddr;
+                    sMacAddr            = sMapEntry.mMacAddr;
+                    sBmcHostName        = sMapEntry.mBmcHostName;
+                    sHostName           = sMapEntry.mHostName;
+                    sBootImageId        = sMapEntry.mBootImageId;
+                    sAggregator         = sMapEntry.mAggregator;
                     // Insert this object into the table.
                     sTempStoredProcedure = "SERVICENODE.insert";
                     sPertinentInfo = "Inserting ServiceNode - Lctn=" + sTempLctn;
                     client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo),  // asynchronously invoke the procedure
                                           sTempStoredProcedure, sTempLctn, iNextServiceNodeSeqNum, sHostName, "M", sBootImageId, sIpAddr, sMacAddr.toLowerCase(),
                                           sBmcAddr, sBmcMacAddr.toLowerCase(), sBmcHostName, System.currentTimeMillis() * 1000L, System.currentTimeMillis() * 1000L, "POPULATE", -1,
-                                          "G", sAggregator, null);
+                                          "G", sAggregator, null, sConstraintId, lProofOfLifeTimestamp);
                     sTempStoredProcedure = "SERVICENODE_HISTORY.insert";
                     sPertinentInfo = "Inserting ServiceNode_History - Lctn=" + sTempLctn;
                     client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo),  // asynchronously invoke the procedure
                                           sTempStoredProcedure, sTempLctn, iNextServiceNodeSeqNum, sHostName, "M", sBootImageId, sIpAddr, sMacAddr.toLowerCase(),
                                           sBmcAddr, sBmcMacAddr.toLowerCase(), sBmcHostName, System.currentTimeMillis() * 1000L, System.currentTimeMillis() * 1000L, "POPULATE", -1,
-                                          "G", sAggregator, null);
+                                          "G", sAggregator, null, sConstraintId, lProofOfLifeTimestamp);
                     ++iNextServiceNodeSeqNum;
                     // Insert the cache info into the CacheMacAddrToLctn table.
                     sTempStoredProcedure = "CACHEMACADDRTOLCTN.insert";
@@ -306,40 +312,42 @@ public class DefaultOnlineTierDataLoader {
             case "ComputeNode":
                 {
                     // Explicitly handle this node's configuration information based on the specified configuration file.
-                    String sBmcAddr     = null;
-                    String sIpAddr      = null;
-                    String sBmcMacAddr  = null;
-                    String sMacAddr     = null;
-                    String sBmcHostName = null;
-                    String sHostName    = null;
-                    String sBootImageId = null;
-                    String environment  = null;
-                    String sAggregator  = null;
+                    String sBmcAddr              = null;
+                    String sIpAddr               = null;
+                    String sBmcMacAddr           = null;
+                    String sMacAddr              = null;
+                    String sBmcHostName          = null;
+                    String sHostName             = null;
+                    String sBootImageId          = null;
+                    String environment           = null;
+                    String sAggregator           = null;
+                    String sConstraintId         = null;
+                    Long   lProofOfLifeTimestamp = null;
                     MachineConfigEntry sMapEntry = lctnToMchCfgMap_.get(sTempLctn);
                     if (sMapEntry == null)
                         throw new RuntimeException("Unable to load the MachineConfigEntry information for ComputeNode " + sTempLctn + "!");
-                    sBmcAddr     = sMapEntry.mBmcAddr;
-                    sIpAddr      = sMapEntry.mIpAddr;
-                    sBmcMacAddr  = sMapEntry.mBmcMacAddr;
-                    sMacAddr     = sMapEntry.mMacAddr;
-                    sBmcHostName = sMapEntry.mBmcHostName;
-                    sHostName    = sMapEntry.mHostName;
-                    sBootImageId = sMapEntry.mBootImageId;
-                    environment  = sMapEntry.environment;
-                    sAggregator  = sMapEntry.mAggregator;
+                    sBmcAddr            = sMapEntry.mBmcAddr;
+                    sIpAddr             = sMapEntry.mIpAddr;
+                    sBmcMacAddr         = sMapEntry.mBmcMacAddr;
+                    sMacAddr            = sMapEntry.mMacAddr;
+                    sBmcHostName        = sMapEntry.mBmcHostName;
+                    sHostName           = sMapEntry.mHostName;
+                    sBootImageId        = sMapEntry.mBootImageId;
+                    environment         = sMapEntry.environment;
+                    sAggregator         = sMapEntry.mAggregator;
                     // Insert this object into the ComputeNode table.
                     sTempStoredProcedure = "COMPUTENODE.insert";
                     sPertinentInfo = "Inserting ComputeNode - Lctn=" + sTempLctn;
                     client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo),  // asynchronously invoke the procedure
                                           sTempStoredProcedure, sTempLctn, iNextComputeNodeSeqNum, "M", sHostName, sBootImageId, environment, sIpAddr, sMacAddr.toLowerCase(),
                                           sBmcAddr, sBmcMacAddr.toLowerCase(), sBmcHostName, System.currentTimeMillis() * 1000L, System.currentTimeMillis() * 1000L, "POPULATE", -1,
-                                          "W", sAggregator, null, "U");
+                                          "W", sAggregator, null, "U", sConstraintId, lProofOfLifeTimestamp);
                     sTempStoredProcedure = "COMPUTENODE_HISTORY.insert";
                     sPertinentInfo = "Inserting ComputeNode_History - Lctn=" + sTempLctn;
                     client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo),  // asynchronously invoke the procedure
                                           sTempStoredProcedure, sTempLctn, iNextComputeNodeSeqNum, "M", sHostName, sBootImageId, environment, sIpAddr, sMacAddr.toLowerCase(),
                                           sBmcAddr, sBmcMacAddr.toLowerCase(), sBmcHostName, System.currentTimeMillis() * 1000L, System.currentTimeMillis() * 1000L, "POPULATE", -1,
-                                          "W", sAggregator, null, "U");
+                                          "W", sAggregator, null, "U", sConstraintId, lProofOfLifeTimestamp);
                     ++iNextComputeNodeSeqNum;
                     // Insert the cache info into the CacheMacAddrToLctn table.
                     sTempStoredProcedure = "CACHEMACADDRTOLCTN.insert";
@@ -421,11 +429,153 @@ public class DefaultOnlineTierDataLoader {
                 break;
 
 
+            case "Dimm":
+                {
+                    // Explicitly handle this node's configuration information based on the specified configuration file.
+                    String sTypeOfHw = (String)jsonDefObj.get("type");
+                    MachineConfigEntry sMapEntry = lctnToMchCfgMap_.get(sTempLctn);
+                    if (sMapEntry == null)
+                        throw new RuntimeException("Unable to load the MachineConfigEntry information for " + sTypeOfHw + " " + sTempLctn + "!");
+                    String sBankLocator   = sMapEntry.mBankLocator;
+                    String sModuleLocator = sMapEntry.mModuleLocator;
+                    // Determine the number of levels in this sub-fru's fru lctn (the node board).
+                    String[] aTemp = sTempLctn.split("-");
+                    int iNumLevelInNodeLctn = aTemp.length - 1;
+                    // Insert this object into the table.
+                    sTempStoredProcedure = "DIMM.insert";
+                    sPertinentInfo = "Inserting " + sTypeOfHw + " value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,0L                                    // SizeMB - size of this dimm in MBs
+                                         ,sModuleLocator                        // ModuleLocator
+                                         ,sBankLocator                          // BankLocator
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                    sTempStoredProcedure = "DIMM_HISTORY.insert";
+                    sPertinentInfo = "Inserting " + sTypeOfHw + "_History value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,0L                                    // SizeMB - size of this dimm in MBs
+                                         ,sModuleLocator                        // ModuleLocator
+                                         ,sBankLocator                          // BankLocator
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                }
+                break;
+
+
+            case "Processor":
+                {
+                    // Explicitly handle this node's configuration information based on the specified configuration file.
+                    String sTypeOfHw = (String)jsonDefObj.get("type");
+                    MachineConfigEntry sMapEntry = lctnToMchCfgMap_.get(sTempLctn);
+                    if (sMapEntry == null)
+                        throw new RuntimeException("Unable to load the MachineConfigEntry information for " + sTypeOfHw + " " + sTempLctn + "!");
+                    String sSocketDesignation = sMapEntry.mSocketDesignation;
+                    // Determine the number of levels in this sub-fru's fru lctn (the node board).
+                    String[] aTemp = sTempLctn.split("-");
+                    int iNumLevelInNodeLctn = aTemp.length - 1;
+                    // Insert this object into the table.
+                    sTempStoredProcedure = "PROCESSOR.insert";
+                    sPertinentInfo = "Inserting " + sTypeOfHw + " value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,sSocketDesignation                    // SocketDesignation
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                    sTempStoredProcedure = "PROCESSOR_HISTORY.insert";
+                    sPertinentInfo = "Inserting " + sTypeOfHw + "_History value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,sSocketDesignation                    // SocketDesignation
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                }
+                break;
+
+
+            case "Accelerator":
+            case "Hfi":
+                {
+                    // Explicitly handle this node's configuration information based on the specified configuration file.
+                    String sTypeOfHw = (String)jsonDefObj.get("type");
+                    if (sTypeOfHw == null)
+                        throw new RuntimeException("Unable to determine what type of pcie hw this is for " + sTempLctn + ", missing type designation in json!");
+                    MachineConfigEntry sMapEntry = lctnToMchCfgMap_.get(sTempLctn);
+                    if (sMapEntry == null)
+                        throw new RuntimeException("Unable to load the MachineConfigEntry information for " + sTypeOfHw + " " + sTempLctn + "!");
+                    String sSlot = sMapEntry.mSlot;
+                    // Determine the number of levels in this sub-fru's fru lctn (the node board).
+                    String[] aTemp = sTempLctn.split("-");
+                    int iNumLevelInNodeLctn = aTemp.length - 1;
+                    // Insert this object into the table.
+                    String sTempHistoryStoredProcedure;
+                    if (sTypeOfHw.equals("Accelerator")) {
+                        sTempStoredProcedure = "ACCELERATOR.insert";
+                        sTempHistoryStoredProcedure = "ACCELERATOR_HISTORY.insert";
+                    }
+                    else {
+                        sTempStoredProcedure = "HFI.insert";
+                        sTempHistoryStoredProcedure = "HFI_HISTORY.insert";
+                    }
+                    sPertinentInfo = "Inserting " + sTypeOfHw + " value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,null                                  // BusAddr
+                                         ,sSlot                                 // Slot
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                    sTempStoredProcedure = sTempHistoryStoredProcedure;
+                    sPertinentInfo = "Inserting " + sTypeOfHw + "_History value - Lctn=" + sTempLctn;
+                    client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                         ,sTempStoredProcedure
+                                         ,DefaultLocations.extractFruLocation(sTempLctn, iNumLevelInNodeLctn)
+                                         ,sTempLctn
+                                         ,"U"                                   // State - unknown
+                                         ,null                                  // BusAddr
+                                         ,sSlot                                 // Slot
+                                         ,System.currentTimeMillis() * 1000L    // DbUpdatedTimestamp
+                                         ,System.currentTimeMillis() * 1000L    // LastChgTimestamp
+                                         ,"POPULATE"                            // LastChgAdapterType
+                                         ,-1                                    // LastChgWorkItemId
+                                         );
+                }
+                break;
 
 
             default:
                 log_.info("traverseToJsonDefinitionAndProcessItsContents - unhandled definition type of " +
-                        "%s - Lctn=%s!!!", jsonDefObj.getStringOrDefault("type", null), sTempLctn);
+                          "%s - Lctn=%s!!!", jsonDefObj.getStringOrDefault("type", null), sTempLctn);
                 break;
         }
 
@@ -447,28 +597,27 @@ public class DefaultOnlineTierDataLoader {
         }
 
         // Actually sort the collection of child property maps.
-        alChildPropMapObjects.sort(new PropertyMapComparator());
+        alChildPropMapObjects.sort(new Comparator<PropertyMap>() {
+            private static final String KEY = "name";
+            @Override
+            public int compare(PropertyMap a, PropertyMap b) {
+                String sTempKeyA = a.getStringOrDefault(KEY, "");
+                String sTempKeyB = b.getStringOrDefault(KEY, "");
+                return sTempKeyA.compareTo(sTempKeyB);  // to change sort order just change to use
+                                                        // "return -sTempKeyA.compareTo(sTempKeyB);"
+            }
+        });
 
         // Loop through the now sorted list of children.
         for(PropertyMap pmChild : alChildPropMapObjects) {
             //System.out.println("PopulateSchema - Definition=" + sDef + ", Type=" + jsonDefObj.get("type") + ", Name=" + pmChild.getStringOrDefault("name", "") + ", Definition=" + pmChild.getStringOrDefault("definition", ""));
             // Recursively call this same method to handle this child definition!
-            traverseToJsonDefinitionAndProcessItsContents(jsonDefinitionsObj, sTempLctn.toUpperCase(),
-                    pmChild.getStringOrDefault("name", "").toUpperCase(),
+            traverseToJsonDefinitionAndProcessItsContents(jsonDefinitionsObj, sTempLctn,
+                    pmChild.getStringOrDefault("name", ""),
                     pmChild.getStringOrDefault("definition", ""));
         }
     }   // End traverseToJsonDefinitionAndProcessItsContents(JSONObject jsonDefinitionsObj, String sPrevLctn, String sLctnSuffix, String sDef)
 
-    static class PropertyMapComparator implements Comparator<PropertyMap> {
-        private static final String KEY = "name";
-        @Override
-        public int compare(PropertyMap a, PropertyMap b) {
-            String sTempKeyA = a.getStringOrDefault(KEY, "");
-            String sTempKeyB = b.getStringOrDefault(KEY, "");
-            return sTempKeyA.compareTo(sTempKeyB);  // to change sort order just change to use
-            // "return -sTempKeyA.compareTo(sTempKeyB);"
-        }
-    }
 
     static class MyClientStatusListenerExt extends ClientStatusListenerExt {
         MyClientStatusListenerExt(Logger log, AtomicBoolean shuttingDown) { log_ = log; shuttingDown_ = shuttingDown; }
@@ -494,8 +643,25 @@ public class DefaultOnlineTierDataLoader {
 
 
     Client connectToVoltDB(String servers) throws IOException {
-        LegacyVoltDbDirectAccess legacy = factory_.createVoltDbLegacyAccess();
-        return legacy.getVoltDbClient();
+        ClientConfig config = new ClientConfig("", "", new MyClientStatusListenerExt(log_, shuttingDown_));
+        config.setReconnectOnConnectionLoss(true);
+        config.setInitialConnectionRetryInterval(500);
+        config.setConnectionResponseTimeout(5000);
+        config.setProcedureCallTimeout(15000);
+        Client client = ClientFactory.createClient(config);
+
+        // Connect to all the VoltDB servers
+        for (String server: servers.split(",")) {
+            try {
+                client.createConnection(server, Client.VOLTDB_SERVER_PORT);
+            }
+            catch (Exception uhe) {
+                log_.exception(uhe, "connectToDataStore - unable to connect to the database server on %s!",
+                        server);
+                throw uhe;
+            }
+        }
+        return client;
     }
 
 
@@ -518,17 +684,15 @@ public class DefaultOnlineTierDataLoader {
     }   // End keywordSubstitutions(String sTempStr, String sUcsLogfileDirectory)
 
 
-    static class MyCallbackForHouseKeepingNoRtrnValue implements ProcedureCallback {
+    class MyCallbackForHouseKeepingNoRtrnValue implements ProcedureCallback {
         // Class constructor
-        MyCallbackForHouseKeepingNoRtrnValue(DefaultOnlineTierDataLoader parent, String sSpThisIsCallbackFor, String sPertinentInfo) {
+        MyCallbackForHouseKeepingNoRtrnValue(String sSpThisIsCallbackFor, String sPertinentInfo) {
             mSpThisIsCallbackFor = sSpThisIsCallbackFor;
             mPertinentInfo  = sPertinentInfo;
-            mParent = parent;
         }
         // Member data
         String mSpThisIsCallbackFor;    // stored procedure that this is a callback for (which stored procedure was being done by this callback)
         String mPertinentInfo;          // info that might be pertinent (included in log_ messages)
-        DefaultOnlineTierDataLoader mParent;
 
 
         String statusByteAsString(byte bStatus) {
@@ -550,13 +714,13 @@ public class DefaultOnlineTierDataLoader {
             // Ensure that the stored procedure was successful.
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 // stored procedure failed.
-                mParent.mNumberOfErrors++;
-                mParent.log_.error("MyCallbackForHouseKeepingNoRtrnValue - %s callback FAILED - Status=%s, StatusString='%s', PertinentInfo=%s!!!",
+                ++mNumberOfErrors;
+                log_.error("MyCallbackForHouseKeepingNoRtrnValue - %s callback FAILED - Status=%s, StatusString='%s', PertinentInfo=%s!!!",
                            mSpThisIsCallbackFor, statusByteAsString(response.getStatus()), response.getStatusString(), mPertinentInfo);
             }
             else {
                 // stored procedure was successful.
-                mParent.log_.info("MyCallbackForHouseKeepingNoRtrnValue - %s was successful, PertinentInfo=%s", mSpThisIsCallbackFor, mPertinentInfo);
+                log_.info("MyCallbackForHouseKeepingNoRtrnValue - %s was successful, PertinentInfo=%s", mSpThisIsCallbackFor, mPertinentInfo);
                 // Note: there is no additional processing needed here in this callback, anybody using this callback does not need/want anything else (except that the function that was invoked completed successfully)
             }
         }
@@ -564,13 +728,13 @@ public class DefaultOnlineTierDataLoader {
 
 
     public ProcedureCallback createHouseKeepingCallbackNoRtrnValue(String sSpThisIsCallbackFor, String sPertinentInfo) {
-        return new MyCallbackForHouseKeepingNoRtrnValue(this, sSpThisIsCallbackFor, sPertinentInfo);
+        return new MyCallbackForHouseKeepingNoRtrnValue(sSpThisIsCallbackFor, sPertinentInfo);
     }
 
     public void populateRasEventMetaData(String sRasEventMetaDataFileName)
             throws ProcCallException, PropertyNotExpectedType, IOException {
         PropertyMap pmRasMetaData;
-        try (FileReader configReader = new FileReader(sRasEventMetaDataFileName, StandardCharsets.UTF_8)) {
+        try (FileReader configReader = new FileReader(sRasEventMetaDataFileName)) {
             pmRasMetaData = jsonParser_.readConfig(configReader).getAsMap();
         } catch (ConfigIOParseException | IOException e) {
             pmRasMetaData = null;
@@ -589,12 +753,11 @@ public class DefaultOnlineTierDataLoader {
             // Check & see if the ControlOperation field is really null (note: this is different than a string value of "null").
             String operation = event.getStringOrDefault("ControlOperation", null);
             String sTempStoredProcedure = "RASMETADATA.insert";
-            String sPertinentInfo = "Inserting RAS Event Meta Data - EventType=" + event.getString("EventType");
+            String sPertinentInfo = "Inserting RAS Event Meta Data - DescriptiveName=" + event.getString("DescriptiveName");
 
             if (operation == null) {
                 client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)
                                      ,sTempStoredProcedure
-                                     ,event.getString("EventType")
                                      ,event.getString("DescriptiveName")
                                      ,event.getString("Severity")
                                      ,event.getString("Category")
@@ -608,7 +771,6 @@ public class DefaultOnlineTierDataLoader {
             else {
                 client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)
                                      ,sTempStoredProcedure
-                                     ,event.getString("EventType")
                                      ,event.getString("DescriptiveName")
                                      ,event.getString("Severity")
                                      ,event.getString("Category")
@@ -627,9 +789,12 @@ public class DefaultOnlineTierDataLoader {
         String sTempStoredProcedure;
         int result = 0;
         String sPertinentInfo = null;
+        final long TimeDbPopulateStartedMilliSecs = System.currentTimeMillis();
         try {
             log_.info("this adapter instance is using VoltServers=%s, Manifest='%s', MachineConfig='%s'",
                       DbServers, sMnfstFileName, sMachineConfig);
+            SimpleDateFormat sdfSqlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            sdfSqlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));  // this line cause timestamps formatted by this SimpleDateFormat to be converted into UTC time zone
 
             // Connect to the VoltDB servers/nodes - args[0] is a comma separated list of VoltDb servers
             // (e.g., voltdbserver1,voltdbserver2,10.11.12.13 )
@@ -644,6 +809,11 @@ public class DefaultOnlineTierDataLoader {
                 throw new RuntimeException("there is already data in the schema, since the schema is NOT empty we " +
                                            "do not want to proceed with this flow!");
 
+            //----------------------------------------------------------------------
+            // Populate RAS event meta data from configuration file.
+            //----------------------------------------------------------------------
+            populateRasEventMetaData(sRasEventMetaDataFileName);
+
             //---------------------------------------------------------------------
             // Log RAS event to indicate that the Tier1 data store is really being "populated" (this is a synchronous call, want to ensure that it is indeed logged in the data store).
             //---------------------------------------------------------------------
@@ -651,13 +821,13 @@ public class DefaultOnlineTierDataLoader {
             String sInstanceData = "Using Manifest=" + sMnfstFileName + ", MachineConfig=" + sMachineConfig;
             client_.callProcedure(sTempStoredProcedure
                                  ,1
-                                 ,"0000000001"          // RasDbSchemaPopulateFillingInTier1
+                                 ,"RasDbSchemaPopulateFillingInTier1"
                                  ,null
                                  ,null
                                  ,null
                                  ,0
                                  ,null
-                                 ,"N"                   // ControlOperationDone
+                                 ,"Y"                   // Done
                                  ,sInstanceData         // InstanceData
                                  ,new TimestampType()
                                  ,new TimestampType()
@@ -669,7 +839,7 @@ public class DefaultOnlineTierDataLoader {
             // Open up the machine configuration file.
             //------------------------------------------------------------------
             PropertyMap pmMachCfg;
-            try (FileReader configReader = new FileReader(sMachineConfig, StandardCharsets.UTF_8)) {
+            try (FileReader configReader = new FileReader(sMachineConfig)) {
                 pmMachCfg = jsonParser_.readConfig(configReader).getAsMap();
             }
             catch(ConfigIOParseException | IOException e) {
@@ -687,10 +857,10 @@ public class DefaultOnlineTierDataLoader {
                 log_.fatal("Unable to load the MachineConfig file!");
                 return -3;
             }
+            sTempStoredProcedure = "UCSCONFIGVALUE.insert";
             for (Object oUcsCfgEntry : paUcsCfgEntries) {
                 PropertyMap pmUcsCfgEntry = (PropertyMap)oUcsCfgEntry;
                 // Actually insert this config value into the UcsConfigValue table.
-                sTempStoredProcedure = "UCSCONFIGVALUE.insert";
                 sPertinentInfo = "Inserting UCS config value - " + pmUcsCfgEntry.getStringOrDefault("Key", "");
                 client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
                                      ,sTempStoredProcedure
@@ -699,9 +869,19 @@ public class DefaultOnlineTierDataLoader {
                                      ,new TimestampType()
                                      );
             }
-            // Sleep for a little bit to ensure that the UCS configuration values are all up to date.
-            Thread.sleep(1 * 5);  // half a second.
+            // Save away the time that this dbPopulate started in the UcsConfigValue table!
+            String sTempKey = "UcsDbPopulateSchemaStartTsMs";
+            sPertinentInfo = "Inserting UCS config value - " + sTempKey;
+            client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                 ,sTempStoredProcedure
+                                 ,sTempKey
+                                 ,TimeDbPopulateStartedMilliSecs
+                                 ,new TimestampType()
+                                 );
 
+            log_.info("Put a value of %d millisecs into %s - corresponds to %s", TimeDbPopulateStartedMilliSecs, sTempKey, sdfSqlDateFormat.format(new Date(TimeDbPopulateStartedMilliSecs)));
+            // Sleep for a little bit to ensure that the UCS configuration values are all up to date.
+            Thread.sleep(500);  // half a second.
             // Grab the UCS log file directory out of this machine's configuration table (that was just populated above).
             String sUcsLogfileDir = client_.callProcedure("UCSCONFIGVALUE.select", "UcsLogfileDirectory").getResults()[0].fetchRow(0).getString("Value");
             if (sUcsLogfileDir == null)  throw new RuntimeException("Unable to get the UcsLogFileDirectory!");
@@ -713,6 +893,10 @@ public class DefaultOnlineTierDataLoader {
             fillInMachineCfgEntries(pmMachCfg, "ChilledDoors", LogWarnMsgIfSctnMissing);  // do not want to terminate if this section is not present in machine config.
             fillInMachineCfgEntries(pmMachCfg, "CDUS", LogWarnMsgIfSctnMissing);  // do not want to terminate if this section is not present in machine config.
             fillInMachineCfgEntries(pmMachCfg, "PDUS", LogWarnMsgIfSctnMissing);  // do not want to terminate if this section is not present in machine config.
+            fillInMachineCfgEntries(pmMachCfg, "Dimms", LogWarnMsgIfSctnMissing); // do not want to terminate if this section is not present in machine config.
+            fillInMachineCfgEntries(pmMachCfg, "Processors", LogWarnMsgIfSctnMissing); // do not want to terminate if this section is not present in machine config.
+            fillInMachineCfgEntries(pmMachCfg, "Accelerators", LogWarnMsgIfSctnMissing); // do not want to terminate if this section is not present in machine config.
+            fillInMachineCfgEntries(pmMachCfg, "Hfis", LogWarnMsgIfSctnMissing); // do not want to terminate if this section is not present in machine config.
 
             // Fill in the initial list of work items.
             PropertyArray paWorkItemEntries = pmMachCfg.getArrayOrDefault("InitialWorkItems", null);
@@ -778,14 +962,10 @@ public class DefaultOnlineTierDataLoader {
             //------------------------------------------------------------------
             // Read the system manifest file into a string - so we can save its content in the Machine table
             // (so available for later reference).
-            ;
+            String sEntireManifestFile = new Scanner(new File(sMnfstFileName)).useDelimiter("\\A").next();
             // Process the manifest's contents.
             PropertyMap oJsonMnfstObj = null;
-            String sEntireManifestFile = null;
-            try (Scanner scanner = new Scanner(new File(sMnfstFileName), StandardCharsets.UTF_8)) {
-                sEntireManifestFile = scanner.useDelimiter("\\A").next();
-                oJsonMnfstObj = jsonParser_.fromString(sEntireManifestFile).getAsMap();
-            }
+            try { oJsonMnfstObj = jsonParser_.fromString(sEntireManifestFile).getAsMap(); }
             catch(ConfigIOParseException e) { /* Defaults to null */ }
             if (oJsonMnfstObj == null)  throw new RuntimeException("Failed to parse the System Manifest file!");
 
@@ -817,20 +997,17 @@ public class DefaultOnlineTierDataLoader {
             if (paManifestContentObjects == null)
                 throw new ConfigIOParseException("Missing 'content' in System Manifest!");
             for (Object listOfObject : paManifestContentObjects) {
-                if(listOfObject instanceof PropertyMap) {
-                    PropertyMap object = (PropertyMap) listOfObject;
-                    String name = object.getStringOrDefault("name", null);
-                    String definition = object.getStringOrDefault("definition", null);
-                    assert name != null && !name.trim().isEmpty():"System Manifest has a null or empty name!";
-                    assert definition != null && !definition.trim().isEmpty():"System Manifest has a null or empty definition!";
-                    alFloorManifestContentObjects.add(new ManifestContent(name, definition));
-                } else
-                    log_.warn("Skipping a paManifestContentObjects value due to a unexpected null or non map value");
+                PropertyMap object = (PropertyMap)listOfObject;
+                alFloorManifestContentObjects.add(new ManifestContent(object.getStringOrDefault("name", null),
+                                                  object.getStringOrDefault("definition", null)));
             }
             // Sort the list of racks (floor manifest content entities) by their name field (so that they will
             // be looped through in order).
-            alFloorManifestContentObjects.sort(// to change sort order use "return -sTempKeyA.compareTo(sTempKeyB);"
-                    DefaultOnlineTierDataLoader::compareManifest);
+            alFloorManifestContentObjects.sort((a, b) -> {
+                String sTempKeyA = a.name();
+                String sTempKeyB = b.name();
+                return sTempKeyA.compareTo(sTempKeyB);  // to change sort order use "return -sTempKeyA.compareTo(sTempKeyB);"
+            });
 
             // Loop through the sorted list of racks (manifest content entries in the floor section of the file).
             for(ManifestContent oManifestContent:alFloorManifestContentObjects) {
@@ -838,7 +1015,7 @@ public class DefaultOnlineTierDataLoader {
                 String sDef  = oManifestContent.definition();
                 // Traverse to this child definition and process its contents.
                 // Note: this method will also recurse to handle any children of this child!
-                traverseToJsonDefinitionAndProcessItsContents(jsonDefinitionsObj, "", sName.toUpperCase(), sDef);
+                traverseToJsonDefinitionAndProcessItsContents(jsonDefinitionsObj, "", sName, sDef);
             }
 
 
@@ -945,61 +1122,55 @@ public class DefaultOnlineTierDataLoader {
             //          1bb2e59d7700c86f8b1b87574acb8af0
             // - sudo wwsh provision print
             //----------------------------------------------------------------------
-//            PropertyMap jsonBootImagesObj = jsonFullObj.getMapOrDefault("boot-images", null);
-//            if (jsonBootImagesObj == null)
-//                throw new ConfigIOParseException("Missing 'boot-images' in System Manifest!");
-//            PropertyArray listOfBootImages = jsonBootImagesObj.getArrayOrDefault("content", null);
-//            if (listOfBootImages == null)
-//                throw new ConfigIOParseException("Missing 'content' in System Manifest!");
-//            // Loop through the list of boot-images.
-//            for (Object listOfBootImage : listOfBootImages) {
-//                PropertyMap bootImg = (PropertyMap)listOfBootImage;
-//                // Insert these boot images into the BootImage and BootImage_History table.
-//                sTempStoredProcedure = "BOOTIMAGE.insert";
-//                sPertinentInfo = "Inserting BootImage info - ID=" + (String) bootImg.get("id") + ",Description=" + (String) bootImg.get("description");
-//                client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
-//                                     ,sTempStoredProcedure
-//                                     ,(String) bootImg.get("id")
-//                                     ,(String) bootImg.get("description")
-//                                     ,(String) bootImg.get("BootImageFile")
-//                                     ,(String) bootImg.get("BootImageChecksum")
-//                                     ,(String) bootImg.get("BootOptions")
-//                                     ,(String) bootImg.get("BootStrapImageFile")
-//                                     ,(String) bootImg.get("BootStrapImageChecksum")
-//                                     ,"A"
-//                                     ,(System.currentTimeMillis() * 1000L)
-//                                     ,(System.currentTimeMillis() * 1000L)
-//                                     ,"POPULATE"
-//                                     ,-1
-//                                     ,bootImg.getStringOrDefault("KernelArgs", "")
-//                                     ,""
-//                                     );
-//                sTempStoredProcedure = "BOOTIMAGE_HISTORY.insert";
-//                sPertinentInfo = "Inserting BootImage_History info - ID=" + (String) bootImg.get("id") + ",Description=" + (String) bootImg.get("description");
-//                client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
-//                                     ,sTempStoredProcedure
-//                                     ,(String) bootImg.get("id")
-//                                     ,(String) bootImg.get("description")
-//                                     ,(String) bootImg.get("BootImageFile")
-//                                     ,(String) bootImg.get("BootImageChecksum")
-//                                     ,(String) bootImg.get("BootOptions")
-//                                     ,(String) bootImg.get("BootStrapImageFile")
-//                                     ,(String) bootImg.get("BootStrapImageChecksum")
-//                                     ,"A"
-//                                     ,(System.currentTimeMillis() * 1000L)
-//                                     ,(System.currentTimeMillis() * 1000L)
-//                                     ,"POPULATE"
-//                                     ,-1
-//                                     ,bootImg.getStringOrDefault("KernelArgs", "")
-//                                     , ""
-//                                     );
-//            }
-
-
-            //----------------------------------------------------------------------
-            // Populate RAS event meta data from configuration file.
-            //----------------------------------------------------------------------
-            populateRasEventMetaData(sRasEventMetaDataFileName);
+            PropertyMap jsonBootImagesObj = jsonFullObj.getMapOrDefault("boot-images", null);
+            if (jsonBootImagesObj == null)
+                throw new ConfigIOParseException("Missing 'boot-images' in System Manifest!");
+            PropertyArray listOfBootImages = jsonBootImagesObj.getArrayOrDefault("content", null);
+            if (listOfBootImages == null)
+                throw new ConfigIOParseException("Missing 'content' in System Manifest!");
+            // Loop through the list of boot-images.
+            for (Object listOfBootImage : listOfBootImages) {
+                PropertyMap bootImg = (PropertyMap)listOfBootImage;
+                // Insert these boot images into the BootImage and BootImage_History table.
+                sTempStoredProcedure = "BOOTIMAGE.insert";
+                sPertinentInfo = "Inserting BootImage info - ID=" + (String) bootImg.get("id") + ",Description=" + (String) bootImg.get("description");
+                client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                     ,sTempStoredProcedure
+                                     ,(String) bootImg.get("id")
+                                     ,(String) bootImg.get("description")
+                                     ,(String) bootImg.get("BootImageFile")
+                                     ,(String) bootImg.get("BootImageChecksum")
+                                     ,(String) bootImg.get("BootOptions")
+                                     ,(String) bootImg.get("BootStrapImageFile")
+                                     ,(String) bootImg.get("BootStrapImageChecksum")
+                                     ,"A"
+                                     ,(System.currentTimeMillis() * 1000L)
+                                     ,(System.currentTimeMillis() * 1000L)
+                                     ,"POPULATE"
+                                     ,-1
+                                     ,bootImg.getStringOrDefault("KernelArgs", "")
+                                     ,""
+                                     );
+                sTempStoredProcedure = "BOOTIMAGE_HISTORY.insert";
+                sPertinentInfo = "Inserting BootImage_History info - ID=" + (String) bootImg.get("id") + ",Description=" + (String) bootImg.get("description");
+                client_.callProcedure(createHouseKeepingCallbackNoRtrnValue(sTempStoredProcedure, sPertinentInfo)  // asynchronously invoke the procedure
+                                     ,sTempStoredProcedure
+                                     ,(String) bootImg.get("id")
+                                     ,(String) bootImg.get("description")
+                                     ,(String) bootImg.get("BootImageFile")
+                                     ,(String) bootImg.get("BootImageChecksum")
+                                     ,(String) bootImg.get("BootOptions")
+                                     ,(String) bootImg.get("BootStrapImageFile")
+                                     ,(String) bootImg.get("BootStrapImageChecksum")
+                                     ,"A"
+                                     ,(System.currentTimeMillis() * 1000L)
+                                     ,(System.currentTimeMillis() * 1000L)
+                                     ,"POPULATE"
+                                     ,-1
+                                     ,bootImg.getStringOrDefault("KernelArgs", "")
+                                     , ""
+                                     );
+            }
 
 
             //------------------------------------------------------------------
@@ -1053,6 +1224,22 @@ public class DefaultOnlineTierDataLoader {
             sTempSql = "SELECT COUNT(*) FROM NonNodeHw WHERE Type='PDU';";
             log_.info("Total number of PDUs              populated = %d",
                       callProcedure("@AdHoc", sTempSql)[0].asScalarLong());
+
+            sTempSql = "SELECT COUNT(*) FROM Dimm;";
+            log_.info("Total number of Dimms             populated = %d",
+                      callProcedure("@AdHoc", sTempSql)[0].asScalarLong());
+
+            sTempSql = "SELECT COUNT(*) FROM Processor;";
+            log_.info("Total number of Processors        populated = %d",
+                      callProcedure("@AdHoc", sTempSql)[0].asScalarLong());
+
+            sTempSql = "SELECT COUNT(*) FROM Accelerator;";
+            log_.info("Total number of Accelerators      populated = %d",
+                      callProcedure("@AdHoc", sTempSql)[0].asScalarLong());
+
+            sTempSql = "SELECT COUNT(*) FROM Hfi;";
+            log_.info("Total number of Hfis              populated = %d",
+                      callProcedure("@AdHoc", sTempSql)[0].asScalarLong());
         }   // End try
         catch (Exception e) {
             log_.exception(e);
@@ -1085,16 +1272,34 @@ public class DefaultOnlineTierDataLoader {
                                                                            ,pm.getStringOrDefault("HostName", "")
                                                                            ,pm.getStringOrDefault("BootImageId", "")
                                                                            ,pm.getStringOrDefault("Environment", null)
-                                                                           ,pm.getStringOrDefault("Aggregator", "").toUpperCase()
+                                                                           ,pm.getStringOrDefault("Aggregator", "")
+                                                                           ,pm.getStringOrDefault("BankLocator", null)
+                                                                           ,pm.getStringOrDefault("ModuleLocator", null)
+                                                                           ,pm.getStringOrDefault("SocketDesignation", null)
+                                                                           ,pm.getStringOrDefault("Slot", null)
                                                                            );
-                lctnToMchCfgMap_.put(pm.getStringOrDefault("Lctn", "").toUpperCase(), tempNewCfgEntry);
+                lctnToMchCfgMap_.put(pm.getStringOrDefault("Lctn", ""), tempNewCfgEntry);
             }
         }
     }
 
+
+    public static void main(String[] args) {
+        Logger log = LoggerFactory.getInstance("INITIALIZATION", DefaultOnlineTierDataLoader.class.getName(),
+                "log4j2");
+        if(args.length != 4) {
+            log.error("starting - Invalid set of arguments were specified, first arg needs to be the " +
+                    "VoltDB server, second arg needs to be the System Manifest file name, third arg needs to be " +
+                    "the Machine Configuration file name!");
+            System.exit(1);
+        }
+        final DefaultOnlineTierDataLoader obj = new DefaultOnlineTierDataLoader(log);
+        // Start up the main processing flow for OnlineTier adapters.
+        System.exit(obj.doPopulate(args[0], args[1], args[2], args[3]));
+    }   // End main(String[] args)
+
     private AtomicBoolean shuttingDown_ = new AtomicBoolean(false);
     private Client client_;
-    private DataStoreFactory factory_;
     private Logger log_;
     private ConfigIO jsonParser_;
     private ArrayList<MachineConfigWiInfo> alWorkItems_ = new ArrayList<>();

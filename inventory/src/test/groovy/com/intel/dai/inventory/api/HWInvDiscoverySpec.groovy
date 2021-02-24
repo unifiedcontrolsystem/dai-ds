@@ -11,6 +11,7 @@ import com.intel.networking.restclient.RESTClient
 import com.intel.networking.restclient.RequestInfo
 import com.intel.networking.restclient.ResponseCallback
 import com.intel.networking.restclient.SSEEvent
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class FakeRestClient extends RESTClient {
@@ -66,12 +67,14 @@ class HWInvDiscoverySpec extends Specification {
         expect: hwInvDiscovery.queryHWInvTree(null).left == 1
     }
 
+    @Ignore
     def "createRestClient()"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         when: hwInvDiscovery.createRestClient()
         then: thrown Exception
     }
-    
+
+    @Ignore
     def "initialize()"() {
         HWInvDiscovery hwInvDiscovery = new HWInvDiscovery(Mock(Logger))
         when: hwInvDiscovery.initialize()

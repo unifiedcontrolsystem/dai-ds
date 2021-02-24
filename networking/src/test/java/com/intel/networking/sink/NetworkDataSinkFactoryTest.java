@@ -9,6 +9,8 @@ import com.intel.networking.sink.for_benchmarking.NetworkDataSinkBenchmark;
 import com.intel.networking.sink.kafka.NetworkDataSinkKafka;
 import com.intel.networking.sink.rabbitmq.NetworkDataSinkRabbitMQ;
 import com.intel.networking.sink.sse.NetworkDataSinkEventSource;
+import com.intel.networking.sink.zmq.NetworkDataSinkZMQ;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,14 +52,23 @@ public class NetworkDataSinkFactoryTest {
         @Override public String getProviderName() { return null; }
     }
 
+    private static void resetFactory() {
+        NetworkDataSinkFactory.registeredImplementations_.clear();
+        NetworkDataSinkFactory.registerNewImplementation("benchmark", NetworkDataSinkBenchmark.class);
+        NetworkDataSinkFactory.registerNewImplementation("zmq", NetworkDataSinkZMQ.class);
+        NetworkDataSinkFactory.registerNewImplementation("rabbitmq", NetworkDataSinkRabbitMQ.class);
+        NetworkDataSinkFactory.registerNewImplementation("eventSource", NetworkDataSinkEventSource.class);
+        NetworkDataSinkFactory.registerNewImplementation("kafka", NetworkDataSinkKafka.class);
+    }
+
     @Before
     public void setUp() {
-        NetworkDataSinkFactory.registeredImplementations_ = new HashMap<String, Class<? extends NetworkDataSink>>() {{
-            put("rabbitmq", NetworkDataSinkRabbitMQ.class);
-            put("eventSource", NetworkDataSinkEventSource.class);
-            put("benchmark", NetworkDataSinkBenchmark.class);
-            put("kafka", NetworkDataSinkKafka.class);
-        }};
+        resetFactory();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        resetFactory();
     }
 
     @Test
@@ -76,9 +87,19 @@ public class NetworkDataSinkFactoryTest {
     }
 
     @Test
+    public void factoryZMQ() throws Exception {
+        Map<String,String> args = new HashMap<>();
+        args.put("uri", "tcp://127.0.0.1:5401");
+        args.put("subjects","env,evt,avg");
+        NetworkDataSink sink = NetworkDataSinkFactory.createInstance(mock(Logger.class), "zmq", args);
+        assertNotNull(sink);
+    }
+
+    @Test
     public void registerAndUnregister() {
         assertFalse(NetworkDataSinkFactory.registerNewImplementation(null, TestImpl.class));
         assertFalse(NetworkDataSinkFactory.registerNewImplementation("test", null));
+        assertFalse(NetworkDataSinkFactory.registerNewImplementation("zmq", TestImpl.class));
         assertFalse(NetworkDataSinkFactory.registerNewImplementation("rabbitmq", TestImpl.class));
         assertTrue(NetworkDataSinkFactory.registerNewImplementation("test", TestImpl.class));
         assertFalse(NetworkDataSinkFactory.registerNewImplementation("test", TestImpl.class));

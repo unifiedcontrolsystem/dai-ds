@@ -245,7 +245,7 @@
         "Msg":"The automated purge of Tier1 historical data completed:"
     },
     {
-        "DescriptiveName":"RasAotAutoPurgeOfTier1HistoricalDataFinished",
+        "DescriptiveName":"RasAotAutoPurgeOfTier1HistoricalDataDidNotAdvance",
         "EventType":"0002000005",
         "Severity":"WARN",
         "Category":"Adapter",

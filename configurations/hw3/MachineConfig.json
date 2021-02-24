@@ -37,11 +37,11 @@
       "NumberOfInstances": 1
     },
     {
-      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRasForeignBus-$LCTN-$INSTANCE.log",
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM3",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRasForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRas $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "RAS",
-      "NumberOfInstances": 2
+      "NumberOfInstances": 1
     },
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
@@ -109,18 +109,11 @@
       "Queue": "X3001-AM3"
     },
     {
-      "Parms": null,
-      "TypeOfAdapter": "RAS",
-      "NotifyWhenFinished": "F",
-      "WorkToBeDone": "HandleFillingInJobIdOnly",
-      "Queue": ""
-    },
-    {
-      "Parms": null,
-      "TypeOfAdapter": "RAS",
-      "NotifyWhenFinished": "F",
-      "WorkToBeDone": "HandleControlOpsOnly",
-      "Queue": ""
+      "Queue":"",
+      "TypeOfAdapter":"RAS",
+      "WorkToBeDone":"HandleFillingInJobIdsAndControlOps",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
     },
     {
       "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=am03-nmn.local",

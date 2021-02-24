@@ -27,7 +27,7 @@ import org.voltdb.*;
 public class DiagGetDiagToolId extends VoltProcedure {
 
 
-    static final String selectDiagToolId = "SELECT " +
+    final String selectDiagToolId = "SELECT " +
         "DiagListId, DiagToolId " +
         "FROM Diag_List WHERE DiagListId=? " +
         "Order By DiagListId ;";

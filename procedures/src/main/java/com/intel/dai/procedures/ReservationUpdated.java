@@ -31,33 +31,10 @@ public class ReservationUpdated extends VoltProcedure {
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
-    public final SQLStmt selectReservationSql = new SQLStmt("SELECT * FROM WlmReservation_History WHERE ReservationName=? AND LastChgTimestamp<=? Order By LastChgTimestamp DESC Limit 1;");
+
 
     public long run(String sReservationName, String sUsers, String sNodes, long lStartTsInMicroSecs, long lEndTsInMicroSecs, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
     {
-        //--------------------------------------------------
-        // Grab the current reservation's information for the reservation table so they are available for use creating the new history record.
-        //--------------------------------------------------
-        voltQueueSQL(selectReservationSql, sReservationName, lTsInMicroSecs);
-        VoltTable[] aReservationData = voltExecuteSQL();
-
-        // Ensure that we found the rest of the reservation's data.
-        if (aReservationData[0].getRowCount() == 0) {
-            throw new VoltAbortException("ReservationUpdated - could not find a corresponding reservation for the 'update this reservation', the query returned no rows - "
-                    +"ReservationName='" + sReservationName + "', lTsInMicroSecs=" + lTsInMicroSecs + "!");
-        }
-
-        aReservationData[0].advanceRow();
-
-        if (sUsers == null)
-            sUsers = aReservationData[0].getString("Users");
-
-        if (sNodes == null)
-            sNodes = aReservationData[0].getString("Nodes");
-
-        if (lStartTsInMicroSecs == 0L)
-            lStartTsInMicroSecs = aReservationData[0].getTimestampAsLong("StartTimestamp");
-
         //---------------------------------------------------------------------
         // Insert this information into the WlmReservation_History table.
         //---------------------------------------------------------------------
@@ -66,7 +43,7 @@ public class ReservationUpdated extends VoltProcedure {
                     ,sUsers
                     ,sNodes
                     ,lStartTsInMicroSecs        // StartTimestamp
-                    ,aReservationData[0].getTimestampAsLong("EndTimestamp")          // EndTimestamp
+                    ,lEndTsInMicroSecs          // EndTimestamp
                     ,null                       // DeletedTimestamp
                     ,lTsInMicroSecs             // LastChgTimestamp
                     ,this.getTransactionTime()  // DbUpdatedTimestamp

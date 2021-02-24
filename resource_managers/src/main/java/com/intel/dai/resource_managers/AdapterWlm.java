@@ -126,7 +126,7 @@ public class AdapterWlm {
     }
 
 
-    private void finishedWorkingOnWorkItem(Result resultObj) throws IOException {
+    private void finishedWorkingOnWorkItem(Result<String> resultObj) throws IOException {
         if(resultObj.getReturnCode() != 0) {
             workQueue.finishedWorkItemDueToError(workQueue.workToBeDone(), workQueue.workItemId(),
                     resultObj.getMessage());
@@ -169,7 +169,7 @@ public class AdapterWlm {
                     log.warn("cleanupAnyStaleDataInTables - %s", sTempMsg);
                     Map<String, String> parameters = new HashMap<String, String>();
                     parameters.put("instancedata", "AdapterName=" + baseAdapter.getName() + ", " + sTempMsg);
-                    parameters.put("eventtype", raseventlog.getRasEventType("RasWlmStaleDataEntries", workQueue.workItemId()));
+                    parameters.put("eventtype", "RasWlmStaleDataEntries");
                     eventlog.createRasEvent(parameters);
 
                     ++lNumStaleDataEntries;

@@ -11,11 +11,11 @@ import org.voltdb.*;
  * Handle the database processing that is necessary when a node needs its state changed.
  *
  *  Input parameter:
- *      String  sNodeLctn               = string containing the Lctn of the node
- *      String  sNodeNewState           = string containing the new state value for the above node location
- *      long    lTsInMicroSecs          = Time that this node state changed
- *      String  sReqAdapterType         = Type of adapter that requested this stored procedure (PROVISIONER)
- *      long    lReqWorkItemId          = Work Item Id that the requesting adapter was performing when it requested this stored procedure (-1 is used when there is no work item yet associated with this change)
+ *      String  sNodeLctn       = string containing the Lctn of the node
+ *      String  sNodeNewState   = string containing the new state value for the above node location
+ *      long    lTsInMicroSecs  = Time that this node state changed
+ *      String  sReqAdapterType = Type of adapter that requested this stored procedure (PROVISIONER)
+ *      long    lReqWorkItemId  = Work Item Id that the requesting adapter was performing when it requested this stored procedure (-1 is used when there is no work item yet associated with this change)
  *
  *  Return value:
  *      0L = Everything completed fine, and this record did occur in timestamp order.
@@ -29,14 +29,15 @@ public class ComputeNodeSetState extends ComputeNodeCommon {
 
     public final SQLStmt insertNodeHistory = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateNode = new SQLStmt("UPDATE ComputeNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
 
-    public long run(String sNodeLctn, String sNodeNewState, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException {
 
+
+    public long run(String sNodeLctn, String sNodeNewState, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException {
         //----------------------------------------------------------------------
         // Grab the current record for this Lctn out of the "active" table (ComputeNode table).
         //      This information is used for determining whether the "new" record is indeed more recent than the record already in the table,
@@ -71,18 +72,19 @@ public class ComputeNodeSetState extends ComputeNodeCommon {
         else {
             // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
             bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
+            String sCurRecordsState = aNodeData[0].getString("State");
             // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
             voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
             aNodeData = voltExecuteSQL();
             aNodeData[0].advanceRow();
-//            System.out.println("ComputeNodeSetState - " + sNodeLctn + " - OUT OF ORDER" +
-//                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
-//                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+            System.out.println("ComputeNodeSetState - " + sNodeLctn + " - OUT OF ORDER" +
+                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
+                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
             // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
             // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
             if (aNodeData[0].getRowCount() == 0) {
-//                System.out.println("ComputeNodeSetState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
-//                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
+                System.out.println("ComputeNodeSetState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
                 // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
                 return 1L;
             }
@@ -114,6 +116,7 @@ public class ComputeNodeSetState extends ComputeNodeCommon {
                     ,sNodeNewState                              // New state
                     ,aNodeData[0].getString("HostName")
                     ,aNodeData[0].getString("BootImageId")
+                    ,aNodeData[0].getString("Environment")
                     ,aNodeData[0].getString("IpAddr")
                     ,aNodeData[0].getString("MacAddr")
                     ,aNodeData[0].getString("BmcIpAddr")
@@ -127,6 +130,8 @@ public class ComputeNodeSetState extends ComputeNodeCommon {
                     ,aNodeData[0].getString("Aggregator")
                     ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                     ,aNodeData[0].getString("WlmNodeState")
+                    ,aNodeData[0].getString("ConstraintId")
+                    ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                     );
 
         voltExecuteSQL(true);

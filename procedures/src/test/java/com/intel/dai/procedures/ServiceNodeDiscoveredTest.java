@@ -38,12 +38,14 @@ public class ServiceNodeDiscoveredTest {
                     new VoltTable.ColumnInfo("State", VoltType.STRING),
                     new VoltTable.ColumnInfo("BootImageId", VoltType.STRING),
                     new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
-                    new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP)
+                    new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
+                    new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING),
+                    new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
             );
             if(!doZeroRows)
                 result[0].addRow(new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "Lctn", 9999L, "HostName",
                         "IpAddr", "MacAddr", "BmcIpAddr", "BmcMacAddr", "BmcHostName", "Owner",
-                        "State", "BootImageId", "Agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))));
+                        "State", "BootImageId", "Agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "ConstraintId", new TimestampType(Date.from(Instant.ofEpochMilli(40L))));
             return result;
         }
 

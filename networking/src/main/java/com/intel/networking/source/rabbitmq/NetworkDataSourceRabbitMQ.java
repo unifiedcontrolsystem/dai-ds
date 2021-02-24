@@ -15,6 +15,9 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,6 +28,7 @@ public class NetworkDataSourceRabbitMQ implements NetworkDataSource, Runnable {
     /**
      * Used by the {@link NetworkDataSourceFactory} to create an instance of the RabbitMQ provider.
      *
+     * @param logger The logger to use in the instance.
      * @param args A Map<String,String> where the following values are recognized:
      *
      * exchangeName - (required) The required exchangeName for RabbitMQ.

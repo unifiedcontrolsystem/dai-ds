@@ -20,9 +20,9 @@ import org.voltdb.types.TimestampType;
 public class RasEventListByLimit extends VoltProcedure {
 
     public final SQLStmt selectRasEvents = new SQLStmt(
-        "SELECT RasEvent.EventType, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
-            "INNER JOIN RasMetaData on RasEvent.EventType=RasMetaData.EventType " +
-        "ORDER BY RasEvent.DbUpdatedTimestamp ASC, EventType, Id " +
+        "SELECT RasEvent.DescriptiveName, RasEvent.LastChgTimestamp, RasEvent.DbUpdatedTimestamp, RasMetaData.Severity, RasEvent.Lctn, RasEvent.JobId, RasEvent.ControlOperation, RasMetaData.Msg, RasEvent.InstanceData FROM RasEvent " +
+            "INNER JOIN RasMetaData on RasEvent.DescriptiveName=RasMetaData.DescriptiveName " +
+        "ORDER BY RasEvent.DbUpdatedTimestamp ASC, DescriptiveName, Id " +
         "LIMIT ? OFFSET ?;"
     );
 

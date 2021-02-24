@@ -47,7 +47,7 @@ public class WorkItemSaveRestartData extends VoltProcedure {
     public final SQLStmt updateWorkItemHistorySql = new SQLStmt(
         "UPDATE WorkItem_History " +
         "SET WorkingResults=?, DbUpdatedTimestamp=?, RowInsertedIntoHistory='F' " +
-        "WHERE WorkingAdapterType=? AND Id=? AND WorkingAdapterId=? AND State='W';"
+        "WHERE WorkingAdapterType=? AND Id=? AND WorkingAdapterId=? AND State='W' AND WorkingResults IS NOT NULL;"
     );
 
     public long run(String sWorkingAdapterType, long lWorkItemId, String sWorkingResults, byte flagInsertRowIntoHistory, long lTsInMicroSecs) throws VoltAbortException {
@@ -102,12 +102,39 @@ public class WorkItemSaveRestartData extends VoltProcedure {
         }   // insert workitem history record - this is the typical flow.
         else {
             // update workitem history record - this is the "unusual" flow.
-            //----------------------------------------------------------------------
-            // Update the existing work item "history" record with the new WorkingResults value (and the DbUpdatedTimestamp value), rather than inserting a new work item history record into the table.
-            //----------------------------------------------------------------------
-            voltQueueSQL(updateWorkItemHistorySql, EXPECT_ONE_ROW,
-                         sWorkingResults, lTsInMicroSecs,
-                         sWorkingAdapterType, lWorkItemId, aWorkItemData[0].getLong("WorkingAdapterId"));
+            String sCurRecsWorkingResults = aWorkItemData[0].getString("WorkingResults");
+            if ((sCurRecsWorkingResults == null) || (aWorkItemData[0].wasNull())) {
+                // since no proof of life has been put into working results yet, we want to insert a record into history this time anyway
+                // as otherwise there is a chance that the workitem history record that transitioned from queued to working may not be moved to
+                // Tier2 (depending on the timing of the DataMover cycle) - this should only occur once per work item so it is not a big impact to data move.
+                voltQueueSQL(insertWorkItemHistorySql
+                            ,aWorkItemData[0].getString("Queue")
+                            ,sWorkingAdapterType                                        // WorkingAdapterType
+                            ,lWorkItemId                                                // Id
+                            ,aWorkItemData[0].getString("WorkToBeDone")
+                            ,aWorkItemData[0].getString("Parameters")
+                            ,aWorkItemData[0].getString("NotifyWhenFinished")
+                            ,aWorkItemData[0].getString("State")
+                            ,aWorkItemData[0].getLong("RequestingWorkItemId")
+                            ,aWorkItemData[0].getString("RequestingAdapterType")
+                            ,aWorkItemData[0].getLong("WorkingAdapterId")
+                            ,sWorkingResults                                            // WorkingResults
+                            ,aWorkItemData[0].getString("Results")
+                            ,aWorkItemData[0].getTimestampAsTimestamp("StartTimestamp")
+                            ,lTsInMicroSecs                                             // DbUpdatedTimestamp
+                            );
+            }
+            else {
+                // the currently active work item record already has a filled in WorkingResults field so it is ok to just update the workitem's history record.
+                //----------------------------------------------------------------------
+                // Update the existing work item "history" record with the new WorkingResults value (and the DbUpdatedTimestamp value), rather than inserting a new work item history record into the table.
+                //----------------------------------------------------------------------
+                voltQueueSQL(updateWorkItemHistorySql, EXPECT_ONE_ROW,
+                             sWorkingResults, lTsInMicroSecs,
+                             sWorkingAdapterType, lWorkItemId, aWorkItemData[0].getLong("WorkingAdapterId"));
+            }
+
+
         }   // update workitem history record - this is the "unusual" flow.
 
         voltExecuteSQL(true);

@@ -19,20 +19,13 @@ public class RasEventApi {
 
     public void createRasEvent(Map<String, String> param) throws ProviderException {
         String eventtype = param.getOrDefault("eventtype", null);
-        validateRasEventType(eventtype);
+        validateRasDescriptiveName(eventtype);
         generateRasEvent(param);
     }
 
-    private void validateRasEventType(String eventtype) throws ProviderException {
-        boolean eventTypeExists = _eventLog.checkRasEventType(eventtype);
-        boolean descriptiveNameExists = _eventLog.checkDescriptiveName(eventtype);
-
-        if (descriptiveNameExists || eventTypeExists) {
-            return;
-        }
-        else {
-            throw new ProviderException("Error: Invalid descriptive name and eventtype");
-        }
+    private void validateRasDescriptiveName(String name) throws ProviderException {
+        if (!_eventLog.checkDescriptiveName(name))
+            throw new ProviderException("Error: Invalid descriptive name: " + name);
     }
 
     private void generateRasEvent(Map<String, String> param) throws ProviderException {

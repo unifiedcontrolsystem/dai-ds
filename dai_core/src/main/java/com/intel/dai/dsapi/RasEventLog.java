@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public interface RasEventLog {
 
-    String getRasEventType(String sDescriptiveName, long workItemId) throws IOException;
+    String ensureRasDescrNameIsValid(String sDescriptiveName, long workItemId);
 
     void logRasEventNoEffectedJob(String sEventType, String sInstanceData, String sLctn, long lTsInMicroSecs,
                                   String sReqAdapterType, long lReqWorkItemId);
@@ -20,8 +20,7 @@ public interface RasEventLog {
                                     long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId);
     void logRasEventCheckForEffectedJob(String sEventType, String sInstanceData, String sLctn, long lTsInMicroSecs,
                                         String sReqAdapterType, long lReqWorkItemId);
-    void markRasEventControlOperationCompleted(String newState, String eventType, String eventID, String adapterType)
-            throws IOException;
     void setRasEventAssociatedJobID(String jobID, String rasEventType, long rasEventID)
             throws IOException;
+    void loadRasMetadata();
 }

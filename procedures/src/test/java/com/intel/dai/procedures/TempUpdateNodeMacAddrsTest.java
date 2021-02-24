@@ -78,12 +78,14 @@ public class TempUpdateNodeMacAddrsTest {
                 new VoltTable.ColumnInfo("BootImageId", VoltType.STRING),
                 new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
                 new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
-                new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING)
+                new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING),
+                new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING)
+                ,new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
         );
         if(!noRows)
             result[0].addRow(new TimestampType(Date.from(Instant.ofEpochMilli(milliSec))), "Lctn", 999L,
                     "HostName", "IpAddr", "MacAddr", "BmcIpAddr", "BmcMacAddr", "BmcHostName", "Owner",
-                    "State", "BootImageId", "Agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A");
+                    "State", "BootImageId", "Agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A", "Constraint1", new TimestampType(Date.from(Instant.ofEpochMilli(40L))) );
         return result;
     }
 

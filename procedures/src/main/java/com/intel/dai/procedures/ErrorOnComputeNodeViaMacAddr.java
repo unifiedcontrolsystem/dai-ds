@@ -24,8 +24,8 @@ public class ErrorOnComputeNodeViaMacAddr extends VoltProcedure {
 
     public final SQLStmt insertComputeNodeHistorySql = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateComputeNodeSql = new SQLStmt("UPDATE ComputeNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE MacAddr=?;");
@@ -53,6 +53,7 @@ public class ErrorOnComputeNodeViaMacAddr extends VoltProcedure {
                     ,"E"                                            // State = Error
                     ,aComputeNodeData[0].getString("HostName")
                     ,aComputeNodeData[0].getString("BootImageId")
+                    ,aComputeNodeData[0].getString("Environment")
                     ,aComputeNodeData[0].getString("IpAddr")
                     ,aComputeNodeData[0].getString("MacAddr")
                     ,aComputeNodeData[0].getString("BmcIpAddr")
@@ -66,6 +67,8 @@ public class ErrorOnComputeNodeViaMacAddr extends VoltProcedure {
                     ,aComputeNodeData[0].getString("Aggregator")
                     ,aComputeNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                     ,aComputeNodeData[0].getString("WlmNodeState")
+                    ,aComputeNodeData[0].getString("ConstraintId")
+                    ,aComputeNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                     );
 
         //--------------------------------------------------

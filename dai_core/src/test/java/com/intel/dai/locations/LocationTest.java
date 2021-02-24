@@ -43,16 +43,16 @@ public class LocationTest {
         NodeLocation.getLocation();
     }
 
-    @Test
-    public void getLocationMapCompNodeHostNameToLctnthrowsException() throws BadInputException, IOException, ProcCallException
-    {
-        IAdapter adapter = mock(IAdapter.class);
-        Set<String> nodes = new HashSet<>();
-        nodes.add("test_node1");
-        when(adapter.mapCompNodeHostNameToLctn()).thenThrow(IOException.class);
-        Location NodeLocation = new Location(adapter, nodes, log);
-        NodeLocation.getLocation();
-    }
+//    @Test
+//    public void getLocationMapCompNodeHostNameToLctnthrowsException() throws BadInputException, IOException, ProcCallException
+//    {
+//        IAdapter adapter = mock(IAdapter.class);
+//        Set<String> nodes = new HashSet<>();
+//        nodes.add("test_node1");
+//        when(adapter.mapCompNodeHostNameToLctn()).thenThrow(IOException.class);
+//        Location NodeLocation = new Location(adapter, nodes, log);
+//        NodeLocation.getLocation();
+//    }
 
     @Test
     public void getLocationForOneNode() throws BadInputException, IOException, ProcCallException
@@ -115,16 +115,16 @@ public class LocationTest {
         NodeLocation.getHostname();
     }
 
-    @Test
-    public void getHostnameMapCompNodeHostNameToLctnthrowsException() throws BadInputException, IOException, ProcCallException
-    {
-        IAdapter adapter = mock(IAdapter.class);
-        Set<String> nodes = new HashSet<>();
-        nodes.add("test_node1");
-        when(adapter.mapCompNodeLctnToHostName()).thenThrow(IOException.class);
-        Location NodeLocation = new Location(adapter, nodes, log);
-        NodeLocation.getHostname();
-    }
+//    @Test
+//    public void getHostnameMapCompNodeHostNameToLctnthrowsException() throws BadInputException, IOException, ProcCallException
+//    {
+//        IAdapter adapter = mock(IAdapter.class);
+//        Set<String> nodes = new HashSet<>();
+//        nodes.add("test_node1");
+//        when(adapter.mapCompNodeLctnToHostName()).thenThrow(IOException.class);
+//        Location NodeLocation = new Location(adapter, nodes, log);
+//        NodeLocation.getHostname();
+//    }
 
     @Test
     public void getHostnameForOneNode() throws BadInputException, IOException, ProcCallException

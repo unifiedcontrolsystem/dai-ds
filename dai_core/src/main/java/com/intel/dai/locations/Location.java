@@ -31,23 +31,13 @@ public class Location {
 
     public Map<String, String> getLocation() throws BadInputException {
         Map<String, String> allNodeLocations;
-        try {
-            allNodeLocations = adapter.mapCompNodeHostNameToLctn();
-        } catch (IOException | ProcCallException e) {
-            log.exception(e);
-            return new HashMap<>();
-        }
+        allNodeLocations = adapter.mapCompNodeHostNameToLctn();
         return commonCode(allNodeLocations);
     }
 
     public Map<String, String> getHostname() throws BadInputException {
         Map<String, String> allNodehostnames;
-        try {
-            allNodehostnames = adapter.mapCompNodeLctnToHostName();
-        } catch (IOException | ProcCallException e) {
-            log.exception(e);
-            return new HashMap<>();
-        }
+        allNodehostnames = adapter.mapCompNodeLctnToHostName();
         return commonCode(allNodehostnames);
     }
 

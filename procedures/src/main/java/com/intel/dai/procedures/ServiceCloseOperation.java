@@ -40,24 +40,23 @@ public class ServiceCloseOperation extends VoltProcedure {
         aServiceData[0].advanceRow();
 
         //--------------------------------------------------------------------------------------
-        // Update the ServiceOperation_History to indicate Completion of this serviceoperation.
+        // Insert a new row into the history table, indicating that this ServiceOperation has completed.
         //--------------------------------------------------------------------------------------
         voltQueueSQL(insertServiceToHistorySql
-                        ,aServiceData[0].getLong("ServiceOperationId")
-                        ,aServiceData[0].getString("Lctn")
-                        ,aServiceData[0].getString("TypeOfServiceOperation")
-                        ,aServiceData[0].getString("UserStartedService")
-                        ,aServiceData[0].getString("UserStoppedService")
-                        ,"C"
-                        ,"C"
-                        ,aServiceData[0].getTimestampAsTimestamp("StartTimestamp")
-                        ,aServiceData[0].getTimestampAsTimestamp("StopTimestamp")
-                        ,aServiceData[0].getString("StartRemarks")
-                        ,aServiceData[0].getString("StopRemarks")
-                        ,this.getTransactionTime()
-                        ,aServiceData[0].getString("LogFile")
-                        );
-
+                    ,aServiceData[0].getLong("ServiceOperationId")
+                    ,aServiceData[0].getString("Lctn")
+                    ,aServiceData[0].getString("TypeOfServiceOperation")
+                    ,aServiceData[0].getString("UserStartedService")
+                    ,aServiceData[0].getString("UserStoppedService")
+                    ,"C"
+                    ,"C"
+                    ,aServiceData[0].getTimestampAsTimestamp("StartTimestamp")
+                    ,this.getTransactionTime()
+                    ,aServiceData[0].getString("StartRemarks")
+                    ,aServiceData[0].getString("StopRemarks")
+                    ,this.getTransactionTime()
+                    ,aServiceData[0].getString("LogFile")
+                    );
 
         //---------------------------------------------------------------------
         // Remove the ServiceOperation entry from the ServiceOperation table

@@ -5,8 +5,6 @@
 package com.intel.dai.procedures;
 
 import java.lang.*;
-import java.time.Instant;
-
 import org.voltdb.*;
 
 /**
@@ -30,8 +28,8 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
 
     public final SQLStmt insertComputeNodeHistory = new SQLStmt(
             "INSERT INTO ComputeNode_History " +
-            "(Lctn, SequenceNumber, State, HostName, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, State, HostName, BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateComputeNode = new SQLStmt("UPDATE ComputeNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
@@ -50,11 +48,10 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
         }
         // Get the current record in the "active" table's LastChgTimestamp (in micro-seconds since epoch).
         aComputeNodeData[0].advanceRow();
-        long lCurRecsLastChgTimestampTsInMicroSecs = aComputeNodeData[0].getTimestampAsLong("LastChgTimestamp");
+        long lCurRecsLastChgTimestampTsInMicroSecs = aComputeNodeData[0].getTimestampAsTimestamp("LastChgTimestamp").getTime();
 
         // Get this transactions timestamp in microsecs.
-        Instant ts = Instant.now();
-        long lThisTransactionsTsInMicrosecs = (ts.getEpochSecond() * 1_000_000) + (ts.getNano() / 1_000);
+        long lThisTransactionsTsInMicrosecs = this.getTransactionTime().getTime() * 1000;
 
         //----------------------------------------------------------------------
         // Ensure that we aren't updating this row with the exact same LastChgTimestamp as currently exists in the table.
@@ -75,6 +72,7 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
                     ,"E"                                            // State = Error
                     ,aComputeNodeData[0].getString("HostName")
                     ,aComputeNodeData[0].getString("BootImageId")
+                    ,aComputeNodeData[0].getString("Environment")
                     ,aComputeNodeData[0].getString("IpAddr")
                     ,aComputeNodeData[0].getString("MacAddr")
                     ,aComputeNodeData[0].getString("BmcIpAddr")
@@ -88,6 +86,8 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
                     ,aComputeNodeData[0].getString("Aggregator")
                     ,aComputeNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
                     ,aComputeNodeData[0].getString("WlmNodeState")
+                    ,aComputeNodeData[0].getString("ConstraintId")
+                    ,aComputeNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                     );
 
         //--------------------------------------------------
@@ -127,6 +127,7 @@ public class ErrorOnComputeNode extends ComputeNodeCommon {
         //                                      "ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
         // }
 
-        return putSingleComputeNodeIntoError(sLctn, sReqAdapterType, lReqWorkItemId);
+        putSingleComputeNodeIntoError(sLctn, sReqAdapterType, lReqWorkItemId);
+        return 0;
     }
 }

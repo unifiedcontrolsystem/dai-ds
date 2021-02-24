@@ -64,6 +64,7 @@ public class NetworkDataSourceSSETest {
 
     @BeforeClass
     public static void setUpClass() throws RESTServerException, NetworkDataSourceFactory.FactoryException {
+        NetworkDataSourceFactory.registerNewImplementation("sse", NetworkDataSourceSSE.class);
         LoggerFactory.getInstance("TEST", "TEST", "console");
         RESTServerFactory.addImplementation("test", MockRESTServer.class);
         source_ = NetworkDataSourceFactory.createInstance(mock(Logger.class), "sse", args_);
@@ -73,6 +74,7 @@ public class NetworkDataSourceSSETest {
     public static void tearDownClass() throws IOException {
         source_.close();
         RESTServerFactory.removeImplementation("test");
+        NetworkDataSourceFactory.unregisterImplementation("sse");
     }
 
     @Before

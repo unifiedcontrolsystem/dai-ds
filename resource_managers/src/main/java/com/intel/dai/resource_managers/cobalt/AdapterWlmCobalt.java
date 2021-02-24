@@ -93,18 +93,11 @@ public class AdapterWlmCobalt implements WlmProvider {
 
         }
         catch (InterruptedException | NetworkDataSinkFactory.FactoryException e) {
-            try {
-                String eventtype = raseventlog.getRasEventType("RasGenAdapterUnableToConnectToAmqp", workQueue.workItemId());
-                String instancedata = "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm";
-                raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
-                log_.error("Unable to connect to network sink");
-                rc = 1;
-            }
-            catch (IOException ex){
-                log_.exception(ex, "Unable to log RAS EVENT");
-                shutDown();
-                rc = 1;
-            }
+            String eventtype = "RasGenAdapterUnableToConnectToAmqp";
+            String instancedata = "AdapterName=" + adapter.getName() + ", QueueName=InputFromLogstashForAdapterWlm";
+            raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
+            log_.error("Unable to connect to network sink");
+            rc = 1;
         }
         finally {
             shutDown();
@@ -145,7 +138,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 // Log the exception, generate a RAS event and continue parsing the console and varlog messages
                 e.printStackTrace();
                 log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
-                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String eventtype = "RasProvException";
                 String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
                 raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
@@ -154,7 +147,7 @@ public class AdapterWlmCobalt implements WlmProvider {
             // Log the exception, generate a RAS event and continue parsing the console and varlog messages
             try {
                 log_.exception(e, "handleDelivery - Exception occurred!");
-                String eventtype = raseventlog.getRasEventType("RasProvException", workQueue.workItemId());
+                String eventtype = "RasProvException";
                 String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
                 raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }
@@ -207,7 +200,7 @@ public class AdapterWlmCobalt implements WlmProvider {
                 // unable to find the node's lctn.
                 log_.error("getBitSetOfCobaltNodes - JobId=%s - unexpected Node (%s), could not find it in the map of compute node names to node lctns!", sJobId, sNode);
                 // Cut RAS event indicating that the job has been killed - we do know which job was effected by this occurrence.
-                String eventtype = raseventlog.getRasEventType("RasWlmInvalidHostname", workQueue.workItemId());
+                String eventtype = "RasWlmInvalidHostname";
                 String instancedata = "JobId=" + sJobId + ", Hostname=" + sNode + ",AdapterName=" + adapter.getName();
                 raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             }

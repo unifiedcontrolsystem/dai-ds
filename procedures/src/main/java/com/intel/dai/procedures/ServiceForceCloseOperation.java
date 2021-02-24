@@ -51,7 +51,7 @@ public class ServiceForceCloseOperation extends VoltProcedure {
                         ,"C"        //Closed
                         ,"F"        //ForceClosed
                         ,aServiceData[0].getTimestampAsTimestamp("StartTimestamp")
-                        ,aServiceData[0].getTimestampAsTimestamp("StopTimestamp")
+                        ,this.getTransactionTime()
                         ,aServiceData[0].getString("StartRemarks")
                         ,aServiceData[0].getString("StopRemarks")
                         ,this.getTransactionTime()

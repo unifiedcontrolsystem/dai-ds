@@ -41,8 +41,8 @@ public class ServiceNodeCommon extends VoltProcedure {
         ///System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - On Entry");
         boolean bPhase2IsBad=true;  long lCntr=0L;
         while (bPhase2IsBad) {
-//            if (lCntr > 0)
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
+            if (lCntr > 0)
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Doing a Recheck!");
             //--------
             // Phase 1 - make sure that this new timestamp is not the same as the current db value from the ServiceNode table.
             //--------
@@ -51,7 +51,7 @@ public class ServiceNodeCommon extends VoltProcedure {
             {
                 // these 2 records have the same timestamp - bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase1!");
             }
             //--------
             // Phase 2 - make sure that this new timestamp is not the same as an already existing record in the ServiceNode_History table.
@@ -63,7 +63,7 @@ public class ServiceNodeCommon extends VoltProcedure {
                 // there is already an existing record in the ServiceNode_History table for this lctn that has this timestamp.
                 // Bump the number of microseconds for this new record.
                 ++lNewRecordsTsInMicroSecs;  // bump by 1 microsecond.
-//                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
+                System.out.println("ensureHaveUniqueServiceNodeLastChgTimestamp - " + sNodeLctn + " - lNewRecordsTsInMicroSecs=" + lNewRecordsTsInMicroSecs + " - LastChgTimestamp=" + lCurRecordsTsInMicroSecs + " - Bumped in Phase2!");
             }
             else
                 // there was not a match in the history table for this lctn with this timestamp - good to go.

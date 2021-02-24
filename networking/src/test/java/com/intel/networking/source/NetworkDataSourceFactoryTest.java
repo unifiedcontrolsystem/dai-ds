@@ -5,9 +5,9 @@
 package com.intel.networking.source;
 
 import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import com.intel.networking.source.rabbitmq.NetworkDataSourceRabbitMQ;
-import com.intel.networking.source.restsse.NetworkDataSourceSSE;
+import com.intel.networking.source.zmq.NetworkDataSourceZMQ;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 public class NetworkDataSourceFactoryTest {
     public static class TestImpl implements NetworkDataSource {
         public TestImpl(Logger logger, Map<String,String> args) {}
-
         @Override public void initialize() {}
         @Override public void connect(String info) {}
         @Override public void setLogger(Logger logger) {}
@@ -42,11 +41,16 @@ public class NetworkDataSourceFactoryTest {
 
     @Before
     public void setUp() {
-        NetworkDataSourceFactory.registeredImplementations_ =
-                new HashMap<String, Class<? extends NetworkDataSource>>() {{
-            put("rabbitmq", NetworkDataSourceRabbitMQ.class);
-            put("sse", NetworkDataSourceSSE.class);
-        }};
+        NetworkDataSourceFactory.registeredImplementations_.clear();
+        NetworkDataSourceFactory.registerNewImplementation("rabbitmq", NetworkDataSourceRabbitMQ.class);
+        NetworkDataSourceFactory.registerNewImplementation("zmq", NetworkDataSourceZMQ.class);
+    }
+
+    @AfterClass
+    public static void setUpClass() {
+        NetworkDataSourceFactory.registeredImplementations_.clear();
+        NetworkDataSourceFactory.registerNewImplementation("rabbitmq", NetworkDataSourceRabbitMQ.class);
+        NetworkDataSourceFactory.registerNewImplementation("zmq", NetworkDataSourceZMQ.class);
     }
 
     @Test
@@ -58,9 +62,19 @@ public class NetworkDataSourceFactoryTest {
     }
 
     @Test
+    public void createInstanceZMQ() throws Exception {
+        Map<String, String> args = new HashMap<>();
+        args.put("uri", "tcp://127.0.0.1:5401");
+        Logger logger = mock(Logger.class);
+        assertNotNull(NetworkDataSourceFactory.createInstance(logger, "zmq", args));
+        assertNull(NetworkDataSourceFactory.createInstance(logger, "unknown", args));
+    }
+
+    @Test
     public void registerAndUnregister() {
         assertFalse(NetworkDataSourceFactory.registerNewImplementation(null, TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("test", null));
+        assertFalse(NetworkDataSourceFactory.registerNewImplementation("zmq", TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("rabbitmq", TestImpl.class));
         assertTrue(NetworkDataSourceFactory.registerNewImplementation("test", TestImpl.class));
         assertFalse(NetworkDataSourceFactory.registerNewImplementation("test", TestImpl.class));

@@ -171,10 +171,11 @@ public abstract class FabricAdapter {
      * @param msg The logged message string.
      * @param data Specific data to make the logged RAS event more useful.
      */
-    final protected void logBenignSoftwareRasEvent(String msg, String data) { // Logs RasGenAdapterException
+    final protected void logBenignSoftwareRasEvent(String msg, String data) {
         log_.error(msg);
-        rasEventLogging_.logRasEventNoEffectedJob("0001000014", makeInstanceData(msg, data),
-                adapter_.snLctn(), usTimestamp(), adapterType(), workQueue_.baseWorkItemId());
+        rasEventLogging_.logRasEventSyncNoEffectedJob("RasGenAdapterException",
+                makeInstanceData(msg, data), adapter_.snLctn(), usTimestamp(), adapterType(),
+                workQueue_.baseWorkItemId());
     }
 
     /**
@@ -335,7 +336,7 @@ public abstract class FabricAdapter {
     private void processWorkItemHandleInputFromExternalComponent() throws AdapterException {
         try {
             log_.info("Creating NetworkDataSink...");
-            NetworkDataSink listener = NetworkDataSinkFactory.createInstanceWithLogger(log_, networkSinkType_, config_);
+            NetworkDataSink listener = NetworkDataSinkFactory.createInstance(log_, networkSinkType_, config_);
             if(listener == null)
                 throw new NullPointerException("Failed to get a '" + networkSinkType_ +
                         "' based NetworkDataSink instance");
@@ -381,7 +382,7 @@ public abstract class FabricAdapter {
         boolean doPublishing = !Boolean.parseBoolean(config_.getOrDefault("disablePublishing", "false"));
         if(publisher_ == null && doPublishing) {
             try {
-                publisher_ = NetworkDataSourceFactory.createInstanceWithLogger(log_, "rabbitmq", config_);
+                publisher_ = NetworkDataSourceFactory.createInstance(log_, "rabbitmq", config_);
                 if (publisher_ == null)
                     throw new AdapterException("Failed to create the data publisher from a factory");
                 publisher_.setLogger(log_);

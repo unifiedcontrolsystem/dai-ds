@@ -11,6 +11,7 @@ import com.intel.dai.network_listener.NetworkListenerProviderException
 import com.intel.dai.network_listener.SystemActions
 import com.intel.logging.Logger
 import com.intel.properties.PropertyMap
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.Instant
@@ -33,6 +34,7 @@ class EnvironmentalProviderForeignBusSpec extends Specification {
         underTest_.initialize()
     }
 
+    @Ignore
     def "Test processRawStringData"() {
         underTest_.processRawStringData(payload_, config_)
         def results = underTest_.processRawStringData(payload_, config_)

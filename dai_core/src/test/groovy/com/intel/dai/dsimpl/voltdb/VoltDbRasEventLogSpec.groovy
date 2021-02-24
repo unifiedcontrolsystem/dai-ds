@@ -22,17 +22,6 @@ class VoltDbRasEventLogSpec extends Specification {
         expect: underTest_.getNsTimestamp() > 0L
     }
 
-    def "Test markRasEventControlOperationCompleted"() {
-// TODO: Testing the Lambda does not work???
-//        def response = Mock(ClientResponse)
-//        response.getStatus() >> ClientResponse.SUCCESS
-//        client_.callProcedure(_ as ProcedureCallback,_,_,_,_ as String) >> {
-//            ProcedureCallback callback -> callback.clientCallback(response)
-//        }
-        underTest_.markRasEventControlOperationCompleted("Y", "", "", "")
-        expect: true
-    }
-
     def "Test setRasEventAssociatedJobID"() {
 // TODO: Testing the Lambda does not work???
 //        def response = Mock(ClientResponse)

@@ -17,6 +17,7 @@ import org.voltdb.*;
  *      long    lReqWorkItemId      = Work Item Id that the requesting adapter was performing when it requested this stored procedure (-1 is used when there is no work item yet associated with this change)
  *
  *  Return value:
+ *     -1L = This DHCPDISCOVER message occurred outside of the normal boot flow, so no database state changes were performed (it was ignored from a db pov).
  *      0L = Everything completed fine, and this record did occur in timestamp order.
  *      1L = Everything completed fine, but as an FYI this record did occur OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
  */
@@ -28,16 +29,16 @@ public class ServiceNodeDiscovered extends ServiceNodeCommon {
 
     public final SQLStmt insertNodeHistory = new SQLStmt(
             "INSERT INTO ServiceNode_History " +
-            "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+            "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, ConstraintId, ProofOfLifeTimestamp) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
-    public final SQLStmt updateNode = new SQLStmt("UPDATE ServiceNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
+    public final SQLStmt updateNode = new SQLStmt("UPDATE ServiceNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=?, ProofOfLifeTimestamp=NULL WHERE Lctn=?;");
 
 
 
-    public long run(String sNodeLctn, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException {
-
+    public long run(String sNodeLctn, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
+    {
         //----------------------------------------------------------------------
         // Grab the current record for this Lctn out of the "active" table (ServiceNode table).
         //      This information is used for determining whether the "new" record is indeed more recent than the record already in the table,
@@ -52,6 +53,16 @@ public class ServiceNodeDiscovered extends ServiceNodeCommon {
         // Get the current record in the "active" table's LastChgTimestamp (in micro-seconds since epoch).
         aNodeData[0].advanceRow();
         long lCurRecordsTsInMicroSecs = aNodeData[0].getTimestampAsTimestamp("LastChgTimestamp").getTime();
+
+        //----------------------------------------------------------------------
+        // Short-circuit if this DHCPDISCOVER message occurred outside of the normal boot flow
+        // (this can happen if OS or user decides to reset the NIC).
+        //----------------------------------------------------------------------
+        String sCurRecordsState = aNodeData[0].getString("State");
+        if (sCurRecordsState.equals("K") || sCurRecordsState.equals("A")) {
+            // this DHCPDISCOVER did occur outside normal boot flow - essentially ignore this request (don't change anything in the database).
+            return -1L;  // -1 indicates that this occurred outside normal boot flow and it was "ignored" from a db pov.
+        }
 
         //----------------------------------------------------------------------
         // Ensure that we aren't inserting multiple records into history with the same timestamp.
@@ -76,14 +87,14 @@ public class ServiceNodeDiscovered extends ServiceNodeCommon {
             voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
             aNodeData = voltExecuteSQL();
             aNodeData[0].advanceRow();
-//            System.out.println("ServiceNodeDiscovered - " + sNodeLctn + " - OUT OF ORDER" +
-//                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=D" +
-//                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+            System.out.println("ServiceNodeDiscovered - " + sNodeLctn + " - OUT OF ORDER" +
+                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState=D" +
+                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
             // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
             // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
             if (aNodeData[0].getRowCount() == 0) {
-//                System.out.println("ServiceNodeDiscovered - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
-//                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
+                System.out.println("ServiceNodeDiscovered - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
                 // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
                 return 1L;
             }
@@ -113,11 +124,13 @@ public class ServiceNodeDiscovered extends ServiceNodeCommon {
                     ,aNodeData[0].getString("BmcHostName")
                     ,this.getTransactionTime()                      // DbUpdatedTimestamp
                     ,lTsInMicroSecs                                 // LastChgTimestamp
-                    ,sReqAdapterType
-                    ,lReqWorkItemId
+                    ,sReqAdapterType                                // LastChgAdapterType
+                    ,lReqWorkItemId                                 // LastChgWorkItemId
                     ,aNodeData[0].getString("Owner")
                     ,aNodeData[0].getString("Aggregator")
                     ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
+                    ,aNodeData[0].getString("ConstraintId")
+                    ,null                                           // ProofOfLifeTimestamp reset
                     );
 
         voltExecuteSQL(true);

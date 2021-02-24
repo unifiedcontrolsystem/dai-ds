@@ -4,29 +4,18 @@
 
 package com.intel.dai;
 
-import com.intel.config_io.ConfigIO;
-import com.intel.config_io.ConfigIOFactory;
-import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
-import com.intel.properties.PropertyMap;
-import com.intel.properties.PropertyNotExpectedType;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-import org.json_voltpatches.JSONException;
+import org.voltdb.client.*;
 import org.voltdb.VoltTable;
-import org.voltdb.client.ProcCallException;
-
+import java.lang.*;
+import java.util.*;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.TimeZone;
+import com.intel.properties.*;
+import com.intel.config_io.*;
 import java.util.concurrent.TimeoutException;
+import com.rabbitmq.client.*;
 
 /**
  * AdapterNearlineTierVolt for the VoltDB database.
@@ -49,12 +38,19 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         super(logger);
         mPrevAmqpMessageId = 0L;
         mAmqpDataReceiverMsgConsumer = null;
+        mEntryNumber_ACCELERATOR_HISTORY            = -99999L;
         mEntryNumber_ADAPTER_HISTORY                = -99999L;
         mEntryNumber_BOOTIMAGE_HISTORY              = -99999L;
         mEntryNumber_CHASSIS_HISTORY                = -99999L;
         mEntryNumber_COMPUTENODE_HISTORY            = -99999L;
+      /*mEntryNumber_CONSTRAINT                     = -99999L;*/  // Note: The Constraint table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mEntryNumber_DIAG_HISTORY                   = -99999L;
+      /*mEntryNumber_DIAG_LIST                      = -99999L;*/  // Note: The Diag_List table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+      /*mEntryNumber_DIAGRESULTS                    = -99999L;*/  // Note: The DiagResults table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+      /*mEntryNumber_DIAG_TOOLS                     = -99999L;*/  // Note: The Diag_Tools table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        mEntryNumber_DIMM_HISTORY                   = -99999L;
         mEntryNumber_FABRICTOPOLOGY_HISTORY         = -99999L;
+        mEntryNumber_HFI_HISTORY                    = -99999L;
         mEntryNumber_JOB_HISTORY                    = -99999L;
         mEntryNumber_JOBSTEP_HISTORY                = -99999L;
         mEntryNumber_LUSTRE_HISTORY                 = -99999L;
@@ -63,6 +59,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_NODEINVENTORY_HISTORY          = -99999L;
         mEntryNumber_NONNODEHW_HISTORY              = -99999L;
         mEntryNumber_NONNODEHWINVENTORY_HISTORY     = -99999L;
+        mEntryNumber_PROCESSOR_HISTORY              = -99999L;
         mEntryNumber_RACK_HISTORY                   = -99999L;
         mEntryNumber_RASEVENT                       = -99999L;
         mEntryNumber_RASMETADATA                    = -99999L;
@@ -70,9 +67,10 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_SERVICEOPERATION_HISTORY       = -99999L;
         mEntryNumber_SERVICENODE_HISTORY            = -99999L;
         mEntryNumber_SWITCH_HISTORY                 = -99999L;
+      /*mEntryNumber_UCSCONFIGVALUE                 = -99999L;*/  // Note: The UcsConfigValue table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+      /*mEntryNumber_UNIQUEVALUES                   = -99999L;*/  // Note: The UniqueValues table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mEntryNumber_WLMRESERVATION_HISTORY         = -99999L;
         mEntryNumber_WORKITEM_HISTORY               = -99999L;
-        mEntryNumber_RAWHWINVENTORY_HISTORY         = -99999L;
     }   // ctor
 
 
@@ -83,12 +81,15 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     // Member Data
     private long        mPrevAmqpMessageId;
     private Consumer    mAmqpDataReceiverMsgConsumer;                // logic that is invoked for each message that comes in from the DataMover.
+    private long        mEntryNumber_ACCELERATOR_HISTORY;            // the last used entry number for the Tier2_ACCELERATOR_HISTORY table.
     private long        mEntryNumber_ADAPTER_HISTORY;                // the last used entry number for the Tier2_ADAPTER_HISTORY table.
     private long        mEntryNumber_BOOTIMAGE_HISTORY;              // the last used entry number for the Tier2_BOOTIMAGE_HISTORY table.
     private long        mEntryNumber_CHASSIS_HISTORY;                // the last used entry number for the Tier2_CHASSIS_HISTORY table.
     private long        mEntryNumber_COMPUTENODE_HISTORY;            // the last used entry number for the Tier2_COMPUTENODE_HISTORY table.
     private long        mEntryNumber_DIAG_HISTORY;                   // the last used entry number for the Tier2_DIAG_HISTORY table.
+    private long        mEntryNumber_DIMM_HISTORY;                   // the last used entry number for the Tier2_DIMM_HISTORY table.
     private long        mEntryNumber_FABRICTOPOLOGY_HISTORY;         // the last used entry number for the Tier2_FABRICTOPOLOGY_HISTORY table.
+    private long        mEntryNumber_HFI_HISTORY;                    // the last used entry number for the Tier2_HFI_HISTORY table.
     private long        mEntryNumber_JOB_HISTORY;                    // the last used entry number for the Tier2_JOB_HISTORY table.
     private long        mEntryNumber_JOBSTEP_HISTORY;                // the last used entry number for the Tier2_JOBSTEP_HISTORY table.
     private long        mEntryNumber_LUSTRE_HISTORY;                 // the last used entry number for the Tier2_LUSTRE_HISTORY table.
@@ -97,6 +98,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_NODEINVENTORY_HISTORY;          // the last used entry number for the Tier2_NODEINVENTORY_HISTORY table.
     private long        mEntryNumber_NONNODEHW_HISTORY;              // the last used entry number for the Tier2_NonNodeHw_History table.
     private long        mEntryNumber_NONNODEHWINVENTORY_HISTORY;     // the last used entry number for the Tier2_NonNodeHwInventory_History table.
+    private long        mEntryNumber_PROCESSOR_HISTORY;              // the last used entry number for the Tier2_PROCESSOR_HISTORY table.
     private long        mEntryNumber_RACK_HISTORY;                   // the last used entry number for the Tier2_RACK_HISTORY table.
     private long        mEntryNumber_RASEVENT;                       // the last used entry number for the Tier2_RASEVENT table.
     private long        mEntryNumber_RASMETADATA;                    // the last used entry number for the Tier2_RASMETADATA table.
@@ -106,7 +108,6 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_SWITCH_HISTORY;                 // the last used entry number for the Tier2_SWITCH_HISTORY table.
     private long        mEntryNumber_WLMRESERVATION_HISTORY;         // the last used entry number for the Tier2_WLMRESERVATION_HISTORY table.
     private long        mEntryNumber_WORKITEM_HISTORY;               // the last used entry number for the Tier2_WORKITEM_HISTORY table.
-    private long        mEntryNumber_RAWHWINVENTORY_HISTORY;         // the last used entry number for the tier2_RawHWInventory_History table.
 
 
     long getTablesMaxEntryNum(String sTableName) throws IOException, ProcCallException {
@@ -154,12 +155,15 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         }   // REQUEUED work item
 
         // Get the last used unique entry number for each of the subject tables.
+        mEntryNumber_ACCELERATOR_HISTORY            = getTablesMaxEntryNum("Tier2_ACCELERATOR_HISTORY;");
         mEntryNumber_ADAPTER_HISTORY                = getTablesMaxEntryNum("Tier2_ADAPTER_HISTORY;");
         mEntryNumber_BOOTIMAGE_HISTORY              = getTablesMaxEntryNum("Tier2_BOOTIMAGE_HISTORY;");
         mEntryNumber_CHASSIS_HISTORY                = getTablesMaxEntryNum("Tier2_CHASSIS_HISTORY;");
         mEntryNumber_COMPUTENODE_HISTORY            = getTablesMaxEntryNum("Tier2_COMPUTENODE_HISTORY;");
         mEntryNumber_DIAG_HISTORY                   = getTablesMaxEntryNum("Tier2_DIAG_HISTORY;");
+        mEntryNumber_DIMM_HISTORY                   = getTablesMaxEntryNum("Tier2_DIMM_HISTORY;");
         mEntryNumber_FABRICTOPOLOGY_HISTORY         = getTablesMaxEntryNum("Tier2_FABRICTOPOLOGY_HISTORY;");
+        mEntryNumber_HFI_HISTORY                    = getTablesMaxEntryNum("Tier2_HFI_HISTORY;");
         mEntryNumber_JOB_HISTORY                    = getTablesMaxEntryNum("Tier2_JOB_HISTORY;");
         mEntryNumber_JOBSTEP_HISTORY                = getTablesMaxEntryNum("Tier2_JOBSTEP_HISTORY;");
         mEntryNumber_LUSTRE_HISTORY                 = getTablesMaxEntryNum("Tier2_LUSTRE_HISTORY;");
@@ -168,6 +172,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_NODEINVENTORY_HISTORY          = getTablesMaxEntryNum("Tier2_NODEINVENTORY_HISTORY;");
         mEntryNumber_NONNODEHW_HISTORY              = getTablesMaxEntryNum("Tier2_NonNodeHw_History;");
         mEntryNumber_NONNODEHWINVENTORY_HISTORY     = getTablesMaxEntryNum("Tier2_NonNodeHwInventory_History;");
+        mEntryNumber_PROCESSOR_HISTORY              = getTablesMaxEntryNum("Tier2_PROCESSOR_History;");
         mEntryNumber_RACK_HISTORY                   = getTablesMaxEntryNum("Tier2_RACK_HISTORY;");
         mEntryNumber_RASEVENT                       = getTablesMaxEntryNum("Tier2_RASEVENT;");
         mEntryNumber_RASMETADATA                    = getTablesMaxEntryNum("Tier2_RASMETADATA;");
@@ -177,10 +182,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_SWITCH_HISTORY                 = getTablesMaxEntryNum("Tier2_SWITCH_HISTORY;");
         mEntryNumber_WLMRESERVATION_HISTORY         = getTablesMaxEntryNum("Tier2_WLMRESERVATION_HISTORY;");
         mEntryNumber_WORKITEM_HISTORY               = getTablesMaxEntryNum("Tier2_WORKITEM_HISTORY;");
-        mEntryNumber_RAWHWINVENTORY_HISTORY         = getTablesMaxEntryNum("Tier2_RawHWInventory_History;");
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2 (via the DataMover queue) AND for publishing that data for any components that subscribe for it (via the DataMoverExchange).
-        DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
+        DataReceiverAmqp oDataReceiver = createDataReceiver("localhost");
         mAmqpDataReceiverMsgConsumer = new AmqpDataReceiverMsgConsumer(oDataReceiver);
         // Start to consume messages from the DataMover queue that contains data store data that is being moving from Tier1 to Tier2 (DataMover -> DataReceiver)
         // (it will push us messages asynchronously, using the sub-class amqpDataReceiverMsgConsumer as a callback object).
@@ -266,7 +270,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
             vtFromMsg.advanceRow();
             long lExistingRowsEntryNum = -99999;
             // Check & see if the row already exists (have to do an update) or should be inserted.
-            VoltTable vtRowAlreadyExists = adapter.client().callProcedure("@AdHoc", ("SELECT EntryNumber FROM Tier2_RASEVENT WHERE EventType='" + vtFromMsg.getString("EventType") + "' AND Id=" + vtFromMsg.getLong("Id") + " ORDER By EntryNumber DESC Limit 1;")).getResults()[0];
+            VoltTable vtRowAlreadyExists = adapter.client().callProcedure("@AdHoc", ("SELECT EntryNumber FROM Tier2_RASEVENT WHERE DescriptiveName='" + vtFromMsg.getString("DescriptiveName") + "' AND Id=" + vtFromMsg.getLong("Id") + " ORDER By EntryNumber DESC Limit 1;")).getResults()[0];
             if ((vtRowAlreadyExists.wasNull()) || (vtRowAlreadyExists.getRowCount() == 0)) {
                 // the row does not exist.
                 lExistingRowsEntryNum = ++lTempCurrentTableEntryNum;
@@ -317,15 +321,11 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
             sdfSqlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));  // this line cause timestamps formatted by this SimpleDateFormat to be converted into UTC time zone
             long lAmqpMessageId = -99999L;
 
-            String sAmqpMsg="NotFilledIn";
-            long lIntervalId=-99999;
-            String sTableName="NotFilledIn";
+            String sAmqpMsg="NotFilledIn"; long lIntervalId=-99999; String sTableName="NotFilledIn";
             try {
                 // Grab the data out of this message we just received.
                 sAmqpMsg = new String(body, "UTF-8");
-                ConfigIO parser = ConfigIOFactory.getInstance("json");
-                if (parser == null)  throw new ConfigIOParseException("handleDelivery - Failed to create a JSON parser!");
-                PropertyMap jsonMsgObject = parser.fromString(sAmqpMsg).getAsMap();
+                PropertyMap jsonMsgObject = adapter.jsonParser().fromString(sAmqpMsg).getAsMap();
                 if (jsonMsgObject == null)  throw new RuntimeException("handleDelivery - Received a bad message from RabbitMQ: " + sAmqpMsg);
 
                 // Grab message's header information and check for EOM message.
@@ -359,7 +359,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 if (lAmqpMessageId != lExpectedAmqpMessageId) {
                     // invalid/unexpected AmqpMessageId!
                     // Cut a ras event to record that we received an unexpected (out of sequence) message id while receiving data from Tier1.
-                    adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntDataReceiverInvalidMsgId")
+                    adapter.logRasEventNoEffectedJob("RasAntDataReceiverInvalidMsgId"
                             ,("IntervalId=" + lIntervalId + ", ReceivedAmqpMessageId=" + lAmqpMessageId + ", ExpectedAmqpMessageId=" + lExpectedAmqpMessageId)
                             ,null                                // Lctn associated with this ras event
                             ,System.currentTimeMillis() * 1000L  // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -393,7 +393,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 // Publish this message on the pub-sub bus.
                 //--------------------------------------------------------------
                 String sAmqpRoutingKey = sTableName;  // use the table name as the routing key.
-                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, jsonMsgObject.toString().getBytes(StandardCharsets.UTF_8));
+                mDataReceiver.getChannel().basicPublish(Adapter.DataMoverExchangeName, sAmqpRoutingKey, null, jsonMsgObject.toString().getBytes());
                 log_.info("Published AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, RoutingKey=%s, TableName=%s, Part %d Of %d",
                           lAmqpMessageId, lIntervalId, sEndIntvlTimeMs, sStartIntvlTimeMs, sAmqpRoutingKey,
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable);
@@ -408,6 +408,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable, vtFromMsg.getRowCount());
                 // Determine which stored procedure that we need to use for this table.
                 switch(sTableName) {
+                    case "Accelerator":
+                        mEntryNumber_ACCELERATOR_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_ACCELERATOR_HISTORY.insert", lAmqpMessageId, mEntryNumber_ACCELERATOR_HISTORY);
+                        break;
                     case "Adapter":
                         mEntryNumber_ADAPTER_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_ADAPTER_HISTORY.insert", lAmqpMessageId, mEntryNumber_ADAPTER_HISTORY);
                         break;
@@ -420,17 +423,29 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                     case "ComputeNode":
                         mEntryNumber_COMPUTENODE_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_COMPUTENODE_HISTORY.insert", lAmqpMessageId, mEntryNumber_COMPUTENODE_HISTORY);
                         break;
+                    case "Constraint":
+                        upsertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_Constraint.upsert", lAmqpMessageId);
+                        break;
                     case "Diag":
                         mEntryNumber_DIAG_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_DIAG_HISTORY.insert", lAmqpMessageId, mEntryNumber_DIAG_HISTORY);
                         break;
                     case "Diag_List":
                         upsertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_DIAG_LIST.upsert", lAmqpMessageId);
                         break;
+                    case "DiagResults":
+                        upsertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_DIAGRESULTS.upsert", lAmqpMessageId);
+                        break;
                     case "Diag_Tools":
                         upsertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_DIAG_TOOLS.upsert", lAmqpMessageId);
                         break;
+                    case "Dimm":
+                        mEntryNumber_DIMM_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_DIMM_HISTORY.insert", lAmqpMessageId, mEntryNumber_DIMM_HISTORY);
+                        break;
                     case "FabricTopology":
                         mEntryNumber_FABRICTOPOLOGY_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_FABRICTOPOLOGY_HISTORY.insert", lAmqpMessageId, mEntryNumber_FABRICTOPOLOGY_HISTORY);
+                        break;
+                    case "Hfi":
+                        mEntryNumber_HFI_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_HFI_HISTORY.insert", lAmqpMessageId, mEntryNumber_HFI_HISTORY);
                         break;
                     case "Job":
                         mEntryNumber_JOB_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_JOB_HISTORY.insert", lAmqpMessageId, mEntryNumber_JOB_HISTORY);
@@ -455,6 +470,9 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                         break;
                     case "NonNodeHwInventory_History":
                         mEntryNumber_NONNODEHWINVENTORY_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_NONNODEHWINVENTORY_HISTORY.insert", lAmqpMessageId, mEntryNumber_NONNODEHWINVENTORY_HISTORY);
+                        break;
+                    case "Processor":
+                        mEntryNumber_PROCESSOR_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_PROCESSOR_HISTORY.insert", lAmqpMessageId, mEntryNumber_PROCESSOR_HISTORY);
                         break;
                     case "Rack":
                         mEntryNumber_RACK_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_RACK_HISTORY.insert", lAmqpMessageId, mEntryNumber_RACK_HISTORY);
@@ -485,9 +503,6 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                         break;
                     case "WlmReservation_History":
                         mEntryNumber_WLMRESERVATION_HISTORY = insertThisInfoIntoTier2Table(sTableName, vtFromMsg, "TIER2_WLMRESERVATION_HISTORY.insert", lAmqpMessageId, mEntryNumber_WLMRESERVATION_HISTORY);
-                        break;
-                    case "RawHWInventory_History":
-                        mEntryNumber_RAWHWINVENTORY_HISTORY = updateOrInsertThisInfoIntoTier2TableHasEntryNumber(sTableName, vtFromMsg, "Tier2_RawHWInventory_History.insert", lAmqpMessageId, mEntryNumber_RAWHWINVENTORY_HISTORY);
                         break;
                     case "WorkItem":
                         // Loop through each of the entries in the VoltTable.
@@ -554,7 +569,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                     default:
                         log_.error("AmqpDataReceiverMsgConsumer - unable to handle this table %s as we have not defined the switch case for it - IntervalId=%d, EndInterval=%s, StartInterval=%s, TableName=%s, Part %d Of %d!",
                                    sTableName, lIntervalId, sEndIntvlTimeMs, sStartIntvlTimeMs, sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable);
-                        adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntMissingCaseStmt")
+                        adapter.logRasEventNoEffectedJob("RasAntMissingCaseStmt"
                                                         ,("TableName=" + sTableName)        // instanceData
                                                         ,null                               // lctn
                                                         ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -575,7 +590,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 // Save the AmqpMessageId that we just used (so we have it available for the next message).
                 mPrevAmqpMessageId = lAmqpMessageId;
             }
-            catch (ProcCallException | ConfigIOParseException | JSONException | PropertyNotExpectedType e) {
+            catch (Exception e) {
                 log_.error("AmqpDataReceiverMsgConsumer - Exception occurred (msg will be skipped): %s!", e.getMessage());
                 log_.error("%s", Adapter.stackTraceToString(e));
                 log_.error("Message that incurred the above exception - %s", sAmqpMsg);
@@ -583,7 +598,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
                 mPrevAmqpMessageId = lAmqpMessageId;
                 try {
                     String sTempInstanceData = "IntervalId=" + lIntervalId + ", AmqpMessageId=" + lAmqpMessageId + ", TableName=" + sTableName + "Exception=" + e;
-                    adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAntException")
+                    adapter.logRasEventNoEffectedJob("RasAntException"
                             ,sTempInstanceData                  // instanceData
                             ,null                               // lctn
                             ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred
@@ -605,11 +620,10 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
 
 
 
-    public static void main(String[] args) throws IOException, TimeoutException, DataStoreException {
-        Logger logger = LoggerFactory.getInstance("NEARLINE_TIER", AdapterNearlineTierVolt.class.getName(), "console");
+    public static void main(String[] args) throws IOException, TimeoutException {
+        Logger logger = LoggerFactory.getInstance("NEARLINE_TIER", AdapterNearlineTierVolt.class.getName(), "log4j2");
         AdapterSingletonFactory.initializeFactory("NEARLINE_TIER", AdapterNearlineTierVolt.class.getName(), logger);
         final AdapterNearlineTierVolt obj = new AdapterNearlineTierVolt(logger);
-        obj.initializeAdapter();
         // Start up the main processing flow for NearlineTier adapters.
         obj.mainProcessingFlow(args);
     }   // End main(String[] args)

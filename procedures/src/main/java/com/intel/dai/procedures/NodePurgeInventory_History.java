@@ -38,7 +38,7 @@ public class NodePurgeInventory_History extends VoltProcedure {
         String sPrevLctn = "";
         for (int iRowCntr = 0; iRowCntr < aListOfRecs[0].getRowCount(); ++iRowCntr) {
             aListOfRecs[0].advanceRow();
-            String sLctn    = aListOfRecs[0].getString("Lctn");
+            String sLctn = aListOfRecs[0].getString("Lctn");
             // Check & see if this is a new node lctn.
             if (sPrevLctn.equals(sLctn) == false) {
                 // this is the first record for a new lctn string - so this is the record that we need to keep (so we don't purge the active inv info for this lctn).

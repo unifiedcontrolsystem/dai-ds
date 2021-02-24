@@ -63,8 +63,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
             switch(spThisIsCallbackFor) {
                 case "ComputeNodeDiscovered":
                     if (response.getStatusString().contains("no entry in the ComputeNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvCompNodeDiscFailedInvalidMacAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvCompNodeDiscFailedInvalidMacAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", "
                                         + "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 ,null                                  // Lctn associated with this ras event
@@ -77,8 +76,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ServiceNodeDiscovered":
                     if (response.getStatusString().contains("no entry in the ServiceNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvServiceNodeDiscFailedInvalidMacAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvServiceNodeDiscFailedInvalidMacAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", "
                                         + "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 ,null                                  // Lctn associated with this ras event
@@ -91,8 +89,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ComputeNodeSaveIpAddr":
                     if (response.getStatusString().contains("no entry in the ComputeNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvCompNodeSaveIpAddrFailedInvalidMacAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvCompNodeSaveIpAddrFailedInvalidMacAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn
@@ -102,8 +99,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                         );
                         bLoggedRasEvent = true;
                     } else if (response.getStatusString().contains("not the same as the expected IP address")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvCompNodeSaveIpAddrFailedInvalidIpAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvCompNodeSaveIpAddrFailedInvalidIpAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn
@@ -116,8 +112,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ServiceNodeSaveIpAddr":
                     if (response.getStatusString().contains("no entry in the ServiceNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvServiceNodeSaveIpAddrFailedInvalidMacAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvServiceNodeSaveIpAddrFailedInvalidMacAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn
@@ -127,8 +122,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                         );
                         bLoggedRasEvent = true;
                     } else if (response.getStatusString().contains("not the same as the expected IP address")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvServiceNodeSaveIpAddrFailedInvalidIpAddr",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvServiceNodeSaveIpAddrFailedInvalidIpAddr"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn
@@ -141,7 +135,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ComputeNodeSetState":
                     if (response.getStatusString().contains("no entry in the ComputeNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvCompNodeSetStateFailedInvalidNode", workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvCompNodeSetStateFailedInvalidNode"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " + "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 ,pertinentInfo                        // Lctn associated with this ras event
                                 ,System.currentTimeMillis() * 1000L   // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -161,8 +155,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ServiceNodeSetState":
                     if (response.getStatusString().contains("no entry in the ServiceNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvServiceNodeSetStateFailedInvalidNode",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvServiceNodeSetStateFailedInvalidNode"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn associated with this ras event
@@ -175,8 +168,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                     break;
                 case "ComputeNodeSaveBootImageInfo":
                     if (response.getStatusString().contains("no entry in the ComputeNode table")) {
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvCompNodeSaveBootImageFailedInvalidNode",
-                                workItemId)
+                        obj.logRasEventNoEffectedJob("RasProvCompNodeSaveBootImageFailedInvalidNode"
                                 ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                         "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                                 , pertinentInfo                        // Lctn associated with this ras event
@@ -193,8 +185,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
 
             // IFF another RAS event has not been logged, log the generic callback failed RAS event.
             if (bLoggedRasEvent == false) {
-                obj.logRasEventNoEffectedJob(obj.getRasEventType("RasGenAdapterVoltDbCallBackForHouseKeepingFailed" ,
-                        workItemId)
+                obj.logRasEventNoEffectedJob("RasGenAdapterVoltDbCallBackForHouseKeepingFailed"
                         ,("AdapterName=" + adapterName + ", SpThisIsCallbackFor=" + spThisIsCallbackFor + ", " +
                                 "PertinentInfo=" + pertinentInfo + ", StatusString=" + response.getStatusString())
                         ,null                                  // Lctn
@@ -228,7 +219,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                                 }
                             }
                         }
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasGenAdapterDetectedOutOfTsOrderItem", workItemId)
+                        obj.logRasEventNoEffectedJob("RasGenAdapterDetectedOutOfTsOrderItem"
                                 ,("AdapterName=" + adapterName + ", StoredProcedure=" + spThisIsCallbackFor + ", PertinentInfo=" + pertinentInfo)
                                 ,sTempLctn                            // Lctn
                                 ,System.currentTimeMillis() * 1000L   // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -256,7 +247,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                                 }
                             }
                         }
-                        obj.logRasEventNoEffectedJob(obj.getRasEventType("RasGenAdapterDetectedOutOfTsOrderItem", workItemId)
+                        obj.logRasEventNoEffectedJob("RasGenAdapterDetectedOutOfTsOrderItem"
                              ,("AdapterName=" + adapterName + ", StoredProcedure=" + spThisIsCallbackFor + ", " + "PertinentInfo=" + pertinentInfo)
                              ,sTempLctn                           // Lctn
                              ,System.currentTimeMillis() * 1000L  // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -297,7 +288,7 @@ class VoltDbCallBackForHouseKeeping implements ProcedureCallback {
                         }
                         if (!pertinentInfo.contains(KeyForUsingSynthData)) {
                             // normal flow - we are NOT using synthesized data - go ahead and cut the ras event.
-                            obj.logRasEventNoEffectedJob(obj.getRasEventType("RasProvNodeActive", workItemId)
+                            obj.logRasEventNoEffectedJob("RasProvNodeActive"
                                  ,("AdapterName=" + adapterName + ", Lctn=" + sTempLctn)
                                  ,sTempLctn                            // lctn
                                  ,Long.parseLong(sTempTimeInMicroSecs) // time this occurred, in micro-seconds since epoch

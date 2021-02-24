@@ -4,9 +4,6 @@
 //
 package com.intel.networking.restserver;
 
-import com.intel.config_io.ConfigIOParseException;
-import com.intel.properties.PropertyNotExpectedType;
-
 /**
  * Description of interface RESTServerHandler.
  */

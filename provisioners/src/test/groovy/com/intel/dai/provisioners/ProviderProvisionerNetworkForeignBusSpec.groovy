@@ -1,5 +1,6 @@
 package com.intel.dai.provisioners
 
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class ProviderProvisionerNetworkForeignBusSpec extends Specification {
@@ -31,6 +32,7 @@ class ProviderProvisionerNetworkForeignBusSpec extends Specification {
         then: thrown(RuntimeException)
     }
 
+    @Ignore
     def "Test Main with no config file"() {
         ProviderProvisionerNetworkForeignBus.main(args_)
         expect: true

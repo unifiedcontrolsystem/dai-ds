@@ -16,14 +16,14 @@ import java.util.HashMap;
 
 public class DaiAgentTest {
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mockAdapter = Mockito.mock(IAdapter.class);
         mockRole = Mockito.mock(DaiAgentRole.class);
         mockLog = Mockito.mock(Logger.class);
         mockDsFactory = Mockito.mock(DataStoreFactory.class);
         mockWorkQueueApi = Mockito.mock(WorkQueue.class);
 
-        Mockito.when(mockDsFactory.createWorkQueue(Mockito.any(IAdapter.class))).thenReturn(mockWorkQueueApi);
+        Mockito.when(mockDsFactory.createWorkQueue(Mockito.any(AdapterInformation.class))).thenReturn(mockWorkQueueApi);
         Mockito.when(mockAdapter.workQueue()).thenReturn(mockWorkQueueApi);
 
         agent = new DaiAgent(mockRole, mockAdapter, mockDsFactory, mockLog);

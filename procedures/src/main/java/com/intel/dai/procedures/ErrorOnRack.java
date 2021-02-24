@@ -23,16 +23,16 @@ import org.voltdb.*;
  */
 public class ErrorOnRack extends VoltProcedure {
 
-    static final String selectRack = "SELECT * FROM Rack WHERE Lctn = ? Order By Lctn;";
+    final String selectRack = "SELECT * FROM Rack WHERE Lctn = ? Order By Lctn;";
     public final SQLStmt selectRackSql = new SQLStmt(selectRack);
 
     // final String selectChildRacksThatAreActive = "SELECT Lctn, State FROM Rack WHERE Lctn LIKE ? AND State = 'A' Order By Lctn;";
     // public final SQLStmt selectChildRacksThatAreActiveSql = new SQLStmt(selectChildRacksThatAreActive);
 
-    static final String insertRackHistory = "INSERT INTO Rack_History (Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, LastChgTimestamp, Owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    final String insertRackHistory = "INSERT INTO Rack_History (Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, LastChgTimestamp, Owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     public final SQLStmt insertRackHistorySql = new SQLStmt(insertRackHistory);
 
-    static final String updateRack = "UPDATE Rack SET State = ?, LastChgTimestamp = CURRENT_TIMESTAMP WHERE Lctn = ?;";
+    final String updateRack = "UPDATE Rack SET State = ?, LastChgTimestamp = CURRENT_TIMESTAMP WHERE Lctn = ?;";
     public final SQLStmt updateRackSql = new SQLStmt(updateRack);
 
 

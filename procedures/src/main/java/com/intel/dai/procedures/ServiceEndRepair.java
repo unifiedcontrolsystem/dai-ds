@@ -24,7 +24,7 @@ import org.voltdb.*;
 public class ServiceEndRepair extends VoltProcedure {
 
     public final SQLStmt updateServiceSql = new SQLStmt(
-                    "UPDATE ServiceOperation SET UserStoppedService = ?, State = ?, Status = ?, StopTimestamp = ?, StopRemarks = ?, DbUpdatedTimeStamp = CURRENT_TIMESTAMP WHERE ServiceOperationId = ? AND LCTN = ?;" );
+                    "UPDATE ServiceOperation SET UserStoppedService = ?, State = ?, Status = ?, StopRemarks = ?, DbUpdatedTimeStamp = CURRENT_TIMESTAMP WHERE ServiceOperationId = ? AND LCTN = ?;" );
 
 
     public final SQLStmt selectServiceOperationSql = new SQLStmt(
@@ -35,12 +35,11 @@ public class ServiceEndRepair extends VoltProcedure {
     public final SQLStmt insertServiceToHistorySql = new SQLStmt(
                     "INSERT INTO ServiceOperation_History " +
                     "(ServiceOperationId, Lctn, TypeOfServiceOperation, UserStartedService, UserStoppedService, State, Status, StartTimestamp, StopTimestamp, StartRemarks, StopRemarks, DbUpdatedTimeStamp,LogFile) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" );
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?);" );
 
 
     public long run(long lServiceId, String sLctn, String sUser, String sRemarks) throws VoltAbortException {
 
-        Date dStopTime = this.getTransactionTime();
         //--------------------------------------------------
         // Grab the ServiceOperation values and create the history record.
         //--------------------------------------------------
@@ -54,7 +53,6 @@ public class ServiceEndRepair extends VoltProcedure {
                         ,sUser
                         ,"E"                        // State - E = End
                         ,"A"                        // Status - A = Active
-                        ,dStopTime
                         ,sRemarks
                         ,lServiceId
                         ,sLctn
@@ -72,7 +70,6 @@ public class ServiceEndRepair extends VoltProcedure {
                         ,"E"
                         ,"A"
                         ,aServiceData[0].getTimestampAsTimestamp("StartTimestamp")
-                        ,dStopTime
                         ,aServiceData[0].getString("StartRemarks")
                         ,sRemarks
                         ,this.getTransactionTime()

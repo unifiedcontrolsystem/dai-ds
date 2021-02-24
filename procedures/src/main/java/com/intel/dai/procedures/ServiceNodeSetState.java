@@ -29,8 +29,8 @@ public class ServiceNodeSetState extends ServiceNodeCommon {
 
     public final SQLStmt insertNodeHistory = new SQLStmt(
                     "INSERT INTO ServiceNode_History " +
-                    "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                    "(Lctn, SequenceNumber, HostName, State, BootImageId, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, ConstraintId, ProofOfLifeTimestamp) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public final SQLStmt updateNode = new SQLStmt("UPDATE ServiceNode SET State=?, DbUpdatedTimestamp=?, LastChgTimestamp=?, LastChgAdapterType=?, LastChgWorkItemId=? WHERE Lctn=?;");
@@ -73,18 +73,19 @@ public class ServiceNodeSetState extends ServiceNodeCommon {
         else {
             // this new record has a timestamp that is OLDER than the current record for this Lctn in the "active" table (it has appeared OUT OF timestamp order).
             bUpdateCurrentlyActiveRow = false;  // indicate that we do NOT want to update the record in the currently active row (only want to insert into the history table).
+            String sCurRecordsState = aNodeData[0].getString("State");
             // Get the appropriate record out of the history table that we should use for "filling in" any record data that we want copied from the preceding record.
             voltQueueSQL(selectNodeHistoryWithPreceedingTs, sNodeLctn, lTsInMicroSecs);
             aNodeData = voltExecuteSQL();
             aNodeData[0].advanceRow();
-//            System.out.println("ServiceNodeSetState - " + sNodeLctn + " - OUT OF ORDER" +
-//                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
-//                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
+            System.out.println("ServiceNodeSetState - " + sNodeLctn + " - OUT OF ORDER" +
+                               " - ThisRecsTsInMicroSecs="   + lTsInMicroSecs           + ", ThisRecsState="   + sNodeNewState +
+                               " - CurRecordsTsInMicroSecs=" + lCurRecordsTsInMicroSecs + ", CurRecordsState=" + sCurRecordsState + "!");
             // Short-circuit if there are no rows in the history table (for this lctn) which are older than the time specified on this request
             // (since there are no entries we are unable to fill in any data in order to complete the row to be inserted).
             if (aNodeData[0].getRowCount() == 0) {
-//                System.out.println("ServiceNodeSetState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
-//                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
+                System.out.println("ServiceNodeSetState - there is no row in the history table for this lctn (" + sNodeLctn + ") that is older than the time specified on this request, "
+                                  +"ignoring this request - ReqAdapterType=" + sReqAdapterType + ", ReqWorkItemId=" + lReqWorkItemId + "!");
                 // this new record appeared OUT OF timestamp order (at least 1 record has already appeared with a more recent timestamp, i.e., newer than the timestamp for this record).
                 return 1L;
             }
@@ -119,6 +120,8 @@ public class ServiceNodeSetState extends ServiceNodeCommon {
                     ,aNodeData[0].getString("Owner")
                     ,aNodeData[0].getString("Aggregator")
                     ,aNodeData[0].getTimestampAsTimestamp("InventoryTimestamp")
+                    ,aNodeData[0].getString("ConstraintId")
+                    ,aNodeData[0].getTimestampAsTimestamp("ProofOfLifeTimestamp")
                     );
 
         voltExecuteSQL(true);

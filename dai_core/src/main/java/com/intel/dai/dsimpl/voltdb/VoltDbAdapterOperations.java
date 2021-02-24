@@ -103,7 +103,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
         if(cause != null) {
             try {
                 ras_.logRasEventNoEffectedJob(
-                        ras_.getRasEventType("RasGenAdapterException", adapter_.getBaseWorkItemId())
+                        "RasGenAdapterException"
                         ,("Exception=" + cause)             // instance data
                         ,null                               // Lctn
                         ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event
@@ -111,8 +111,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                         ,adapter_.getType()                 // type of adapter that is requesting this
                         ,adapter_.getBaseWorkItemId()       // requesting work item
                 );
-                ras_.logRasEventNoEffectedJob(ras_.getRasEventType("RasGenAdapterAbend"
-                        ,adapter_.getBaseWorkItemId())
+                ras_.logRasEventNoEffectedJob("RasGenAdapterAbend"
                         ,("AdapterName=" + adapter_.getName() + ", Reason=exception")
                         ,null                               // lctn
                         ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event
@@ -207,21 +206,14 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                 .append(storedProcedureName).append(", PertinentInfo=").append(location);
         if(response != null)
             builder.append(", StatusString=").append(response.getStatusString());
-        try {
             ras_.logRasEventNoEffectedJob(
-                    ras_.getRasEventType("RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed",
-                            workQueue_.workItemId())
+                    "RasGenAdapterMyCallbackForHouseKeepingNoRtrnValueFailed"
                     , builder.toString()
                     , null
                     , System.currentTimeMillis() * 1000L
                     , adapter_.getType()
                     , workQueue_.workItemId()
             );
-        } catch(IOException e) {
-            log_.exception(e, "Could not even log the RAS event for a failure to set the node state for location: %s",
-                    location);
-
-        }
     }
 
 
@@ -271,21 +263,15 @@ public class VoltDbAdapterOperations implements AdapterOperations {
         log_.error("Cannot tell WLM to begin using this node because the specified node " +
                 "is NOT a compute node - Node=%s!", location);
         // Cut a RAS event to capture this occurrence.
-        try {
-            ras_.logRasEventNoEffectedJob(ras_.getRasEventType("RasWlmCantTellWlmToUseNonComputeNode",
-                    adapter_.getBaseWorkItemId())
-                    , null                               // instance data
-                    , location                           // Lctn
-                    , System.currentTimeMillis() * 1000L // time that the event that triggered this ras event
-                    // occurred, in micro-seconds since epoch
-                    , adapter_.getType()                 // the type of adapter that ran this diagnostic
-                    , adapter_.getBaseWorkItemId()       // the work item id that the adapter was doing when this
-                    // diagnostic ended
-            );
-        } catch(IOException e) {
-            log_.exception(e, "Failed to log the RAS event about the failure to tell the WLM about the " +
-                    "node availability at location %s", location);
-        }
+        ras_.logRasEventNoEffectedJob("RasWlmCantTellWlmToUseNonComputeNode"
+                , null                               // instance data
+                , location                           // Lctn
+                , System.currentTimeMillis() * 1000L // time that the event that triggered this ras event
+                // occurred, in micro-seconds since epoch
+                , adapter_.getType()                 // the type of adapter that ran this diagnostic
+                , adapter_.getBaseWorkItemId()       // the work item id that the adapter was doing when this
+                // diagnostic ended
+        );
     }
 
     private void createWorkItemForWlmForNode(String location, boolean active) {
@@ -431,8 +417,7 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                     String instanceData = "AdapterName=" + adapter_.getName() + ", SpThisIsCallbackFor=" +
                             procedureName_ + ", " + "PertinentInfo=" + location_ + ", StatusString=" +
                             response.getStatusString();
-                    ras_.logRasEventNoEffectedJob(ras_.getRasEventType("RasProvCompNodeSetStateFailedInvalidNode",
-                            adapter_.getBaseWorkItemId()),
+                    ras_.logRasEventNoEffectedJob("RasProvCompNodeSetStateFailedInvalidNode",
                             instanceData, location_, System.currentTimeMillis() * 1000L, adapter_.getType(),
                             adapter_.getBaseWorkItemId());
                 }

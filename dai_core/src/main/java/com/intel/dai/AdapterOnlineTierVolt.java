@@ -4,27 +4,19 @@
 
 package com.intel.dai;
 
-import com.intel.config_io.ConfigIO;
-import com.intel.config_io.ConfigIOFactory;
-import com.intel.config_io.ConfigIOParseException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
-import com.intel.perflogging.BenchmarkHelper;
-import com.intel.properties.PropertyArray;
-import com.intel.properties.PropertyMap;
-import com.rabbitmq.client.MessageProperties;
+import org.voltdb.client.*;
 import org.voltdb.VoltTable;
-import org.voltdb.client.ClientResponse;
-import org.voltdb.client.ProcCallException;
-
+import java.lang.*;
+import java.util.*;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.TimeZone;
+import com.intel.config_io.*;
+import com.intel.properties.*;
 import java.util.concurrent.TimeoutException;
+import com.rabbitmq.client.*;
 
 /**
  * AdapterOnlineTierVolt for the VoltDB database.
@@ -48,8 +40,6 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         mDataMoverIntervalId            = -99999L;
         mDataMoverPrevProcessedTimeMs   = 0L;
         mLastIntvlWasOnlyDataMoverWIs   = false;  // flag that records whether or not the last interval consisted only of either a DataMover WorkItem workitem, a DataReceiver WorkItem, or 1 of each.
-        mParser = ConfigIOFactory.getInstance("json");
-        assert mParser != null : "sendThisTablesChangesToTier2 - Failed to create a JSON parser!";
     }   // ctor
     // Member Data
     private long    mDataMoverAmqpMessageId;        // this identifies a specific message that was sent over the AMQP bus (can detect "lost" messages).
@@ -59,7 +49,6 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
     // (we are tracking this so that we do not end up with a constant stream consisting simply of DataMover/DataReceiver work items, that "recurse" because
     //  we can't update the DataMover/DataReceiver work items WorkingResults info until after that DataMover interval has finished, so then the next interval it would send the DataMover update, which results in an update, which would then be sent, on, on, on).
     private boolean mLastIntvlWasOnlyDataMoverWIs;
-    private ConfigIO mParser;
 
 
     //---------------------------------------------------------
@@ -70,7 +59,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
     //---------------------------------------------------------
     public final long sendDataMoverData() throws IOException, TimeoutException, InterruptedException, ProcCallException, java.text.ParseException, ConfigIOParseException {
         // Set previous timestamp to zeros (so we process all data, don't skip over any of the data).
-        String sTempTimestamp = "2000-01-01 00:00:00.000000"; // note: using sql format!
+        String sTempTimestamp = "1970-01-01 00:00:00.000000"; // note: using sql format!
         // Set the IntervalId to 0 - this identifies the sequence of times through this while loop.
         mDataMoverIntervalId = 0L;
         // Initialize the AmqpMessageId to 0 - this identifies a specific message that was sent over the AMQP bus (can identify any "lost" messages).
@@ -109,7 +98,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         mDataMoverPrevProcessedTimeMs = sdfSqlDateFormat.parse(sTempTimestamp).getTime();  // the timestamp (in millisecs since epoch) of the already handled data, used to determine the starting time of this interval.
 
         // Set up AMQP for directly moving data from Tier1 to Tier2 (via a queue, not pub-sub).
-        DataMoverAmqp oDataMover = new DataMoverAmqp(rabbitMQHost, adapter, log_, workQueue.workItemId());
+        DataMoverAmqp oDataMover = new DataMoverAmqp("localhost", adapter, log_, workQueue.workItemId());
 
         //----------------------------------------------------------------------
         // Loop forever moving data from Tier1 to Tier2 (each iteration through this loop is referred to as an interval).
@@ -133,7 +122,6 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
                 // Save current timestamp so we know when we last checked to see if there is any data to be purged.
                 lLastTimePurgeDataChkInMillis = System.currentTimeMillis();
             }
-            benchmarking_.tick();
 
             // Sleep for 1 second between iterations.
             //      Optimization would be to keep a summary indicating which tables had updates for this interval, and how many updates have shown up this interval.
@@ -155,7 +143,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         jsonAmqpObj.put("EOM", true);
         jsonAmqpObj.put("IntervalId", -1);
         jsonAmqpObj.put("AmqpMessageId", -1);
-        oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes(StandardCharsets.UTF_8));
+        oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, adapter.jsonParser().toString(jsonAmqpObj).getBytes());
         log_.info("DataMover sent final message");
     }
 
@@ -169,7 +157,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
     //      long lTimeOfLastMovedTier1DataInMillis          - the timestamp (in number of millisecs) of the last historical data that has been moved to Tier2.
     //      long lTimeToKeepMovedDataBeforePurgingInMillis  - the number of millisecs that we want to also retain the data in Tier1 even AFTER it has been moved to Tier2.
     //---------------------------------------------------------
-    long lSavePreviousPurgeTimeInMillis = -1L;
+    static long lSavePreviousPurgeTimeInMillis = -1L;
     final public long handlePurgingData(long lTimeOfLastMovedTier1DataInMillis, long lTimeToKeepMovedDataBeforePurgingInMillis) throws InterruptedException, IOException, ProcCallException {
         // Calculate the timestamp of data that we want to purge (any record with a DbUpdatedTimestamp earlier than this value will be deleted)
         // Note: take the earlier of these 2 values:
@@ -190,42 +178,51 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
             String sPreviousPurgeTimestamp = sdfSqlDateFormat.format(new Date(lSavePreviousPurgeTimeInMillis));
             log_.warn("handlePurgingData - no advancement in data purging since the last purging interval - CurrentPurgeTime='%s', PreviousPurgeTime='%s'",
                     sCurrentPurgeTimestamp, sPreviousPurgeTimestamp);
-            adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAotAutoPurgeOfTier1HistoricalDataFinished")
-                                    ,("CurrentPurgeTimestamp='" + sCurrentPurgeTimestamp + "', PreviousPurgeTimestamp='" + sPreviousPurgeTimestamp + "'") // Instance data
-                                    ,null                               // lctn associated with this ras event
-                                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                    ,adapter.adapterType()              // type of adapter that is generating this ras event
-                                    ,workQueue.workItemId()             // work item that is being worked on that resulted in the generation of this ras event
-                                    );
+            adapter.logRasEventNoEffectedJob("RasAotAutoPurgeOfTier1HistoricalDataDidNotAdvance"
+                    ,("CurrentPurgeTimestamp='" + sCurrentPurgeTimestamp + "', PreviousPurgeTimestamp='" + sPreviousPurgeTimestamp + "'")
+                    ,null                               // lctn associated with this ras event
+                    ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                    ,adapter.adapterType()              // type of adapter that is generating this ras event
+                    ,workQueue.workItemId()             // work item that is being worked on that resulted in the generation of this ras event
+                    );
             return -1L;
         }
 
         // Loop through each of the tables and delete the pertinent info.
+        String sTempStoredProcedure = null;
         long lTotalNumRowsPurged = 0L;
         for(String sTableName : setOfTablesToBePurged()) {
             long lTempNumRowsDeleted = 0L;
-            // Ensure that we don't purge data out of the RasMetaData table.
-            if (sTableName.equals("RasMetaData")) {
-                // this is a very special "historical table", its changes are indeed "moved" to Tier2 by DataMover BUT we don't ever want to purge from this table!!!
-                log_.warn("handlePurgingData - attempted to purge data from the %s table, but that is not allowed - skipping this table!", sTableName);
-                continue;  // skip to the next table.
+            switch(sTableName) {
+                case "RasMetaData":
+                    // Ensure that we don't purge data out of the RasMetaData table (this is a very special "historical" table),
+                    // its changes are indeed "moved" to Tier2 by DataMover BUT we don't ever want to purge from this table!!!
+                    log_.warn("handlePurgingData - attempted to purge data from the %s table, but that is not allowed - skipping this table!", sTableName);
+                    continue;  // skip to the next table.
+                case "NodeInventory_History":
+                    // Don't purge the CURRENT inventory info for a node.
+                    sTempStoredProcedure = "NodePurgeInventory_History";
+                    log_.debug("handlePurgingData - purging data from the %s table that is older than %s (except for newest rec per lctn) - stored procedure %s",
+                               sTableName, sCurrentPurgeTimestamp, sTempStoredProcedure);
+                    lTempNumRowsDeleted = adapter.client().callProcedure(sTempStoredProcedure, sCurrentPurgeTimestamp).getResults()[0].asScalarLong();
+                    break;
+                case "WlmReservation_History":
+                    // Don't purge the newest reservation info for each reservation name when
+                    // the reservation is still "in effect" (has not yet ended and has not been deleted).
+                    sTempStoredProcedure = "ReservationPurging";
+                    log_.info("handlePurgingData - purging data from the %s table that is older than %s (except for reservations that are still in effect) - stored procedure %s",
+                              sTableName, sCurrentPurgeTimestamp, sTempStoredProcedure);
+                    lTempNumRowsDeleted = adapter.client().callProcedure(sTempStoredProcedure, sCurrentPurgeTimestamp).getResults()[0].asScalarLong();
+                    log_.info("handlePurgingData - purged %d rows of data from the %s table", lTempNumRowsDeleted, sTableName);
+                    break;
+                default:
+                    // Handle all the rest of the tables that do not need any special purge processing.
+                    String sTempDeleteSql = "DELETE FROM " + sTableName + " WHERE DbUpdatedTimestamp <= '" + sCurrentPurgeTimestamp + "'";
+                    log_.debug("handlePurgingData - purging data from the %s table that is older than %s - %s",
+                               sTableName, sCurrentPurgeTimestamp, sTempDeleteSql);
+                    lTempNumRowsDeleted = adapter.client().callProcedure("@AdHoc", sTempDeleteSql).getResults()[0].asScalarLong();
+                    break;
             }
-            else if (sTableName.equals("NodeInventory_History")) {
-                // this table needs special processing as we do not want to purge the current inventory info for a node.
-                String sTempStoredProcedure = "NodePurgeInventory_History";
-                log_.debug("handlePurgingData - purging data from the %s table that is older than %s (except for newest rec per lctn) - stored procedure %s", sTableName, sCurrentPurgeTimestamp, sTempStoredProcedure);
-                // Call a stored procedure to handle the deletion of this table's "old" data.
-                lTempNumRowsDeleted = adapter.client().callProcedure(sTempStoredProcedure, sCurrentPurgeTimestamp).getResults()[0].asScalarLong();
-            }
-            else {
-                // handle all of the tables that do NOT need special purge processing.
-                // Build up the sql statement that we are going to use to purge the data from this table.
-                String sTempDeleteSql = "DELETE FROM " + sTableName + " WHERE DbUpdatedTimestamp <= '" + sCurrentPurgeTimestamp + "'";
-                // Actually delete this "old" data.
-                log_.debug("handlePurgingData - purging data from the %s table that is older than %s - %s", sTableName, sCurrentPurgeTimestamp, sTempDeleteSql);
-                lTempNumRowsDeleted = adapter.client().callProcedure("@AdHoc", sTempDeleteSql).getResults()[0].asScalarLong();
-            }
-
             // Log the number of rows that were deleted from this table.
             if (lTempNumRowsDeleted > 0)
                 log_.info("handlePurgingData - purged %d rows of data from the %s table", lTempNumRowsDeleted, sTableName);
@@ -237,7 +234,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
         // Log an event indicating the total number of rows of data were purged during this purge invocation.
         if (lTotalNumRowsPurged > 0L) {
-            adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAotAutoPurgeOfTier1HistoricalDataFinished")
+            adapter.logRasEventNoEffectedJob("RasAotAutoPurgeOfTier1HistoricalDataFinished"
                     ,("PurgedDataEarlierThan=" + sCurrentPurgeTimestamp + ", TotalNumberOfRowsPurged=" + lTotalNumRowsPurged) // Instance data
                     ,null                               // lctn associated with this ras event
                     ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -254,42 +251,52 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
 
     private final void handleDataNeedingToMoveFromTier1ToTier2(DataMoverAmqp oDataMover) throws IOException, ProcCallException, InterruptedException, ConfigIOParseException {
+        final long MaxTimeInIntervalMs = (15 * 1000L);  // Don't calculate an interval that is too long (want to avoid org.voltcore.network.VoltProtocolHandler$BadMessageLength).
         DecimalFormat decimalFormatter = new DecimalFormat("#,###,###");  // pretty formatting
-        // Take the current time and subtract a little bit of time from it, so that we do not need to be concerned about possibly only getting part of the records for that time in case there are still records in flight!
-        // - Subtracting 25 millisecond to back up so we can be certain that we have included all of the data for the entire current millisecond, as opposed to possibly a partial millisecond (if events currently being inserted in same millisecond).
-        long lEndIntvlTimeMs = System.currentTimeMillis() - 25L;
         SimpleDateFormat sdfSqlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         sdfSqlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));  // this line cause timestamps formatted by this SimpleDateFormat to be converted into UTC time zone
+
+        //----------------------------------------------------------------------
+        // Calculate the ending timestamp to use for this interval.
+        //----------------------------------------------------------------------
+        // Take the current time and subtract a little bit of time from it, so that we do not need to be concerned about possibly only getting part of the records for that time in case there are still records in flight!
+        // - Subtracting 25 millisecond to back up so we can be certain that we have included all of the data for the entire current millisecond, as opposed to possibly a partial millisecond (if events currently being inserted in same millisecond).
+        long lCurEndingTimeMs = System.currentTimeMillis() - 25L;
+        // Calculate the maximum ending timestamp, we don't want to use an interval longer than 60 seconds.
+        long lMaxEndingTimeMs = -99999L;
+        if (mDataMoverPrevProcessedTimeMs > 0L) {
+            // normal path - we do have a previously processed time.
+            lMaxEndingTimeMs = mDataMoverPrevProcessedTimeMs + MaxTimeInIntervalMs;  // we don't want to use an interval that is more than xx seconds long.
+        }
+        else {
+            // initial startup flow - special calculation, used only very first time through this flow.
+            long lDbPopulateStartTsMs = Long.parseLong( adapter.client().callProcedure("UCSCONFIGVALUE.select", "UcsDbPopulateSchemaStartTsMs").getResults()[0].fetchRow(0).getString("Value") );
+            lMaxEndingTimeMs = lDbPopulateStartTsMs + MaxTimeInIntervalMs;  // we don't want to use an interval that is more than xx seconds long.
+            log_.info("Special initial startup flow, doing special calculation of MaxEndingTimeMs - lDbPopulateStartTsMs=%d, lMaxEndingTimeMs=%d", lDbPopulateStartTsMs, lMaxEndingTimeMs);
+        }
+        // Use the smaller of the two values - one being value based on the current timestamp and the other based on 60 secs more than starting time.
+        long lEndIntvlTimeMs = Math.min( lCurEndingTimeMs, lMaxEndingTimeMs );
+        if (lEndIntvlTimeMs == lMaxEndingTimeMs) {
+            log_.warn("Used the MaxEndingTimeMs value for interval's ending timestamp, rather than time based on current time - " +
+                      "MaxEndingTimeMs=%d, CurEndingTimeMs=%d, MaxEndingTime=%s, CurEndingTime=%s",
+                      lMaxEndingTimeMs, lCurEndingTimeMs,
+                      sdfSqlDateFormat.format(new Date(lMaxEndingTimeMs)), sdfSqlDateFormat.format(new Date(lCurEndingTimeMs)));
+        }
         String sEndIntvlTimestamp   = sdfSqlDateFormat.format(new Date(lEndIntvlTimeMs));
         String sStartIntvlTimestamp = sdfSqlDateFormat.format(new Date(mDataMoverPrevProcessedTimeMs));
-
+        //----------------------------------------------------------------------
         // Do a "big" query to Volt w/i a single stored procedure to get any changes to the specified historical tables for THIS interval
         // (want to do this all in a single stored procedure as I think that will minimize the amount of time that the db will be locked, as this is not a partitioned procedure).
         // NOTE: The records that are "harvested" should be based on the DbUpdatedTimestamp field in each table, so we are getting a known quantity (don't need to worry about records showing up out of order)!!!
+        //----------------------------------------------------------------------
         String sTempStoredProcedure = "DataMoverGetListOfRecsToMove";
-        ClientResponse response = adapter.client().callProcedure(sTempStoredProcedure, lEndIntvlTimeMs*1000L, ((mDataMoverPrevProcessedTimeMs*1000L) + 1L)); // note: adding 1 microsecond to the prev timestamp so we don't "regrab" records that we already handled!
-        if (response.getStatus() != ClientResponse.SUCCESS) {
-            // stored procedure failed.
-            // Cut a ras event to record that a fatal event occurred
-            // while moving data from Tier1 to Tier2 - I know that no job is effected by this RAS event.
-            adapter.logRasEventNoEffectedJob(adapter.getRasEventType("RasAotDataMoverQueryFailed")
-                                    ,("StoredProcedure=" + sTempStoredProcedure + ", Status=" + IAdapter.statusByteAsString(response.getStatus()) + ", StatusString=" + response.getStatusString())
-                                    ,null                               // Lctn associated with this ras event
-                                    ,System.currentTimeMillis() * 1000L // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
-                                    ,adapter.adapterType()              // type of adapter that is generating this ras event
-                                    ,workQueue.workItemId()             // work item that is being worked on that resulted in the generation of this ras event
-                                    );
-            log_.fatal("DataMover query FAILED - Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
-                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(), adapter.adapterType(), adapter.adapterId());
-            throw new RuntimeException(response.getStatusString());
-        }
-
         // Create an array of JSON strings, each string contains the json formatted data for one table (a json string has the information that is being moved for a single tier1 table).
+        ClientResponse response = getListOfDbRecsToMove(sTempStoredProcedure, lEndIntvlTimeMs, mDataMoverPrevProcessedTimeMs);
+        // Save away the volt table results.
         VoltTable[] aVt = response.getResults();
         String[] aVtJson = new String[aVt.length];  // VoltTables in form of JSON-formatted strings, one json string per table.
         int iNumRecsBeingMoved = 0;  // initialize the total number of db rows being moved from Tier1 to Tier2 this interval.
         for (int iVtCntr=0; iVtCntr < aVt.length; ++iVtCntr) {
-            aVt[iVtCntr].advanceRow();
             // Add the number of rows being moved for this table to the total number being moved this interval.
             iNumRecsBeingMoved += aVt[iVtCntr].getRowCount();
             // Get the Json-formatted string for this table (if appropriate).
@@ -301,7 +308,8 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         // Check & see if there were any records to move this interval, if no records to move then short-circuit this flow.
         if (iNumRecsBeingMoved == 0) {
             log_.debug("DataMover - recurse check - there aren't any rows of data moving this interval, so no recurse is occurring");
-            // Do NOT move this data (short-circuit because there is no data to move).
+            // Set the "next" value that will be used as the previously processed timestamp (indicates which data has already been moved).
+            mDataMoverPrevProcessedTimeMs = lEndIntvlTimeMs;
             return;  // there aren't any records to move this interval, short-circuit and return to caller.
         }
 
@@ -310,8 +318,9 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         // until AFTER that DataMover interval has finished, which means that in the next interval it would then send the DataMover update, which results in an update, which would then be sent, on, on, on).
         //----------------------------------------------------------------------
         long lRc = seeIfInDataMoverRecursion(iNumRecsBeingMoved, aVt, decimalFormatter);
-        if (lRc < 0L)
+        if (lRc < 0L) {
             return;  // recursion was detected, we should suppress it (i.e., do not move this data to Tier2)
+        }
 
         //----------------------------------------------
         // There is data to be moved.
@@ -348,6 +357,33 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
     }   // End handleDataNeedingToMoveFromTier1ToTier2(DataMoverAmqp oDataMover)
 
 
+    private final ClientResponse getListOfDbRecsToMove(String sStoredProcedure, long lEndIntvlTimeMs, long lStartIntvlTimeMs)
+                                 throws IOException, ProcCallException
+    {
+        ClientResponse response = adapter.client().callProcedure(sStoredProcedure
+                                                                ,lEndIntvlTimeMs*1000L
+                                                                ,((lStartIntvlTimeMs*1000L) + 1L)  // note: adding 1 microsecond to the start timestamp so we don't "regrab" records that we already handled!
+                                                                );
+        if (response.getStatus() != ClientResponse.SUCCESS) {
+            // stored procedure failed.
+            // Cut a ras event to record that a fatal event occurred
+            // while moving data from Tier1 to Tier2 - I know that no job is effected by this RAS event.
+            adapter.logRasEventNoEffectedJob("RasAotDataMoverQueryFailed"
+                    ,("StoredProcedure=" + sStoredProcedure + ", Status=" + IAdapter.statusByteAsString(response.getStatus()) + ", StatusString=" + response.getStatusString())
+                    ,null                               // Lctn associated with this ras event
+                    ,System.currentTimeMillis() * 1000L // Time that the event that triggered this ras event occurred, in micro-seconds since epoch
+                    ,adapter.adapterType()              // type of adapter that is generating this ras event
+                    ,workQueue.workItemId()             // work item that is being worked on that resulted in the generation of this ras event
+                    );
+            log_.fatal("DataMover query FAILED - Status=%s, StatusString=%s, AdapterType=%s, ThisAdapterId=%d!",
+                       IAdapter.statusByteAsString(response.getStatus()), response.getStatusString(),
+                       adapter.adapterType(), adapter.adapterId());
+            throw new RuntimeException(response.getStatusString());
+        }
+        return response;
+    }   // End getListOfDbRecsToMove(String sStoredProcedure, long lEndIntvlTimeMs)
+
+
     @SuppressWarnings("unchecked") /*To temporarily suppress unchecked warnings when using JSONObject*/
     private final void sendThisTablesChangesToTier2(long lEndIntvlTimeMs, String sEndIntvlTimestamp, String sStartIntvlTimestamp,
                                                     String sTableName, long lNumRowsOfDataInThisTable, String sThisTablesInfoAsJson,
@@ -358,13 +394,12 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
         // Check & see if there is any data to be sent for this table.
         if (sThisTablesInfoAsJson != null) {
-            boolean isRasEvents = sTableName.equalsIgnoreCase("RasEvent");
             //logger().info(" aVtJson[%02d] = %s", iVtCntr, sThisTablesInfoAsJson);  // display the json-formatted string for this table.
 
             // Get the information out of the table's results.
-            PropertyMap  jsonTableObject         = mParser.fromString(sThisTablesInfoAsJson).getAsMap();
-            PropertyArray   listOfSchemaEntries     = jsonTableObject.getArrayOrDefault("schema", null);
-            PropertyArray   listOfTableDataEntries  = jsonTableObject.getArrayOrDefault("data", null);
+            PropertyMap   jsonTableObject        = adapter.jsonParser().fromString(sThisTablesInfoAsJson).getAsMap();
+            PropertyArray listOfSchemaEntries    = jsonTableObject.getArrayOrDefault("schema", null);
+            PropertyArray listOfTableDataEntries = jsonTableObject.getArrayOrDefault("data", null);
             String oStatus = jsonTableObject.getStringOrDefault("status", null);
 
             if (listOfSchemaEntries == null || listOfTableDataEntries == null || oStatus == null) {
@@ -388,9 +423,6 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
             // Add the schema information to only the first "part" of the table's info.
             jsonAmqpObj.put("schema", listOfSchemaEntries);
 
-            if(isRasEvents)
-                benchmarking_.addNamedValue("ras_before_send", lNumRowsOfDataInThisTable);
-
             // Include the rows of "data" from the table (up to the number allowed per amqp message).
             Iterator<?> itTableDataEntries = listOfTableDataEntries.iterator();
             for (int lThisMsgsPartNum=1; lThisMsgsPartNum <= lTotalNumPartsForThisTable; ++lThisMsgsPartNum) {
@@ -407,13 +439,11 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
                 }
                 jsonAmqpObj.put("data", jaDataRows);
                 // Put this message onto the DataMover queue (MessageProperties.PERSISTENT_BASIC says to mark this message as persistent, i.e. save the message to disk).
-                oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, mParser.toString(jsonAmqpObj).getBytes(StandardCharsets.UTF_8));
+                oDataMover.getChannel().basicPublish("", Adapter.DataMoverQueueName, MessageProperties.PERSISTENT_BASIC, adapter.jsonParser().toString(jsonAmqpObj).getBytes());
                 log_.info("DataMover sent AmqpMessageId=%d - IntervalId=%d, EndIntervalTs=%s, StartIntervalTs=%s, AmqpQueue=%s, TableName=%s, Part %d Of %d, NumDataRows=%s",
                           mDataMoverAmqpMessageId, mDataMoverIntervalId, sEndIntvlTimestamp, sStartIntvlTimestamp, Adapter.DataMoverQueueName,
                           sTableName, lThisMsgsPartNum, lTotalNumPartsForThisTable, decimalFormatter.format(iNumRowsAddedToAmqpMsg));
             }   // build json messages containing the changes to this table and put them onto the DataMover queue.
-            if(isRasEvents)
-                benchmarking_.addNamedValue("ras_after_send", lNumRowsOfDataInThisTable);
         }   // there is data to be sent for this table.
     }   // End sendThisTablesChangesToTier2(...)
 
@@ -510,15 +540,11 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
-        Logger logger = LoggerFactory.getInstance("ONLINE_TIER", AdapterOnlineTierVolt.class.getName(), "console");
-        for (String arg : args) logger.info("arg: %s", arg);
-
+        Logger logger = LoggerFactory.getInstance("ONLINE_TIER", AdapterOnlineTierVolt.class.getName(), "log4j2");
         AdapterSingletonFactory.initializeFactory("ONLINE_TIER", AdapterOnlineTierVolt.class.getName(), logger);
         final AdapterOnlineTierVolt obj = new AdapterOnlineTierVolt(logger);
-        obj.initializeAdapter();
         // Start up the main processing flow for OnlineTier adapters.
-        obj.mainProcessingFlow(args, new BenchmarkHelper("ONLINE",
-                "/opt/ucs/log/AdapterOnlineTierVolt-Benchmarking.json", 5));
+        obj.mainProcessingFlow(args);
     }   // End main(String[] args)
 
 }   // End class AdapterOnlineTierVolt

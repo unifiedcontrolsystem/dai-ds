@@ -731,11 +731,13 @@ public class AdapterDaiMgr {
             if (vtDataMoverWi.getRowCount() > 0) {
                 vtDataMoverWi.advanceRow();
                 sDataMoverWrkResults = vtDataMoverWi.getString("WorkingResults");
-                //--------------------------------------------------------------
-                // Extract pertinent info from the working results field.
-                //--------------------------------------------------------------
-                String sDataMoverTs = workQueue.getTsFromWorkingResults(sDataMoverWrkResults);
-                lDataMoverMillisecs = sdfSqlDateFormat.parse(sDataMoverTs).getTime();  // get millisecs since epoch for this timestamp.
+                if (sDataMoverWrkResults != null) {
+                    //----------------------------------------------------------
+                    // Extract pertinent info from the working results field.
+                    //----------------------------------------------------------
+                    String sDataMoverTs = workQueue.getTsFromWorkingResults(sDataMoverWrkResults);
+                    lDataMoverMillisecs = sdfSqlDateFormat.parse(sDataMoverTs).getTime();  // get millisecs since epoch for this timestamp.
+                }
             }
 
             //------------------------------------------------------------------
@@ -759,11 +761,13 @@ public class AdapterDaiMgr {
             if (vtDataRcvrWi.getRowCount() > 0) {
                 vtDataRcvrWi.advanceRow();
                 sDataRcvrWrkResults = vtDataRcvrWi.getString("WorkingResults");
-                //--------------------------------------------------------------
-                // Extract pertinent info from the working results field.
-                //--------------------------------------------------------------
-                String sDataRcvrTs = workQueue.getTsFromWorkingResults(sDataRcvrWrkResults);
-                lDataRcvrMillisecs = sdfSqlDateFormat.parse(sDataRcvrTs).getTime();  // get millisecs since epoch for this timestamp.
+                if (sDataMoverWrkResults != null) {
+                    //----------------------------------------------------------
+                    // Extract pertinent info from the working results field.
+                    //----------------------------------------------------------
+                    String sDataRcvrTs = workQueue.getTsFromWorkingResults(sDataRcvrWrkResults);
+                    lDataRcvrMillisecs = sdfSqlDateFormat.parse(sDataRcvrTs).getTime();  // get millisecs since epoch for this timestamp.
+                }
             }
 
             //------------------------------------------------------------------
@@ -1681,7 +1685,7 @@ public class AdapterDaiMgr {
 
                 // Detect and handle any nodes that are "stuck" shutting down / halting
                 // (checks for nodes that have been in halting state for NodeMaxShuttingDownInterval or more minutes and handles any outliers).
-//                checkNodesStuckShuttingDown();    //TODO: Revisit after the current milestone
+                checkNodesStuckShuttingDown();
 
                 // Periodically log a "DaiMgr Proof of Life" operation so that the Mother Superior (MoS) DAI Manager's backup instance knows this MoS DAI Mgr instance is still alive.
                 logDaimgrProofOfLife();
@@ -1857,7 +1861,7 @@ public class AdapterDaiMgr {
      */
     private String getLocation(String argLocation, String hostname) throws IOException, ProcCallException {
         if(argLocation.equals("-")) {
-            String location = adapter.mapCompNodeHostNameToLctn().getOrDefault(hostname, null);
+            String location = adapter.mapServNodeHostNameToLctn().getOrDefault(hostname, null);
             if(location == null)
                 throw new RuntimeException(String.format("Failed to get the location from the hostname (%s) at startup!",
                         hostname));

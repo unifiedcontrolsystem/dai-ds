@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 
 /**
  * The tables need to be returned in the following order in order for the DataMover and DataReceiver to correctly interpret these results.
- * Note: when changing, also change in the constructor for Adapter in Adapter.java and ALSO the constructor in AdapterOnlineTier (list of tables that should be purged from)!!!
+ * Note: when changing, also change in the constructor for Adapter in Adapter.java and ALSO in the AdapterOnlineTier constructor (the list of tables that should be purged from)!!!
  *      mDataMoverResultTblIndxToTableNameMap.put( 0, "Machine");
  *      mDataMoverResultTblIndxToTableNameMap.put( 1, "Job");
  *      mDataMoverResultTblIndxToTableNameMap.put( 2, "JobStep");
@@ -44,7 +44,11 @@ import java.text.SimpleDateFormat;
  *      mDataMoverResultTblIndxToTableNameMap.put(25, "DiagResults");
  *      mDataMoverResultTblIndxToTableNameMap.put(26, "NodeInventory_History");
  *      mDataMoverResultTblIndxToTableNameMap.put(27, "NonNodeHwInventory_History");
- *      mDataMoverResultTblIndxToTableNameMap.put(28, "RawHWInventory_History");
+ *      mDataMoverResultTblIndxToTableNameMap.put(28, "Constraint");
+ *      mDataMoverResultTblIndxToTableNameMap.put(29, "Dimm");
+ *      mDataMoverResultTblIndxToTableNameMap.put(30, "Processor");
+ *      mDataMoverResultTblIndxToTableNameMap.put(31, "Accelerator");
+ *      mDataMoverResultTblIndxToTableNameMap.put(32, "Hfi");
  */
 
 public class DataMoverGetListOfRecsToMove extends VoltProcedure {
@@ -61,7 +65,7 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectNonNodeHw_HistoryToBeMovedSql            = new SQLStmt("SELECT * FROM NonNodeHw_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
 
     // Note: we are intentionally "ignoring" RAS events that have a JobId = "?", as that ras event will be updated with the appropriate JobId value and we will move it to Tier2 at that time.
-    public final SQLStmt selectRasEventsToBeMovedSql                    = new SQLStmt("SELECT * FROM RasEvent WHERE (DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?)) AND (JobId IS DISTINCT FROM '?') ORDER BY DbUpdatedTimestamp ASC, EventType, Id;");
+    public final SQLStmt selectRasEventsToBeMovedSql                    = new SQLStmt("SELECT * FROM RasEvent WHERE (DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?)) AND (JobId IS DISTINCT FROM '?') ORDER BY DbUpdatedTimestamp ASC, DescriptiveName, Id;");
 
     public final SQLStmt selectWorkItemsToBeMovedSql                    = new SQLStmt("SELECT * FROM WorkItem_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, WorkingAdapterType, Id;");
     public final SQLStmt selectAdaptersToBeMovedSql                     = new SQLStmt("SELECT * FROM Adapter_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, AdapterType, Id;");
@@ -80,11 +84,15 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectDiagResultsToBeMovedSql                  = new SQLStmt("SELECT * FROM DiagResults WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectNodeInventory_HistoryToBeMovedSql        = new SQLStmt("SELECT * FROM NodeInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
     public final SQLStmt selectNonNodeHwInventory_HistoryToBeMovedSql   = new SQLStmt("SELECT * FROM NonNodeHwInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC, Lctn;");
-    public final SQLStmt selectRawHWInventory_HistoryToBeMovedSql       = new SQLStmt("SELECT * FROM RawHWInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectConstraintToBeMovedSql                   = new SQLStmt("SELECT * FROM Constraint WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectDimmToBeMovedSql                         = new SQLStmt("SELECT * FROM Dimm WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectProcessorToBeMovedSql                    = new SQLStmt("SELECT * FROM Processor WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectAcceleratorToBeMovedSql                  = new SQLStmt("SELECT * FROM Accelerator WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectHfiToBeMovedSql                          = new SQLStmt("SELECT * FROM Hfi WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+
 
     public VoltTable[] run(long lEndTsInMicroSecs, long lStartTsInMicroSecs) throws VoltAbortException {
         // Get the appropriate data out of the history tables that need to be moved to Tier2.
-        // Note: when changing, also change in the constructor for Adapter in Adapter.java!!!
         voltQueueSQL(selectMachinesToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectJobsToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectJobStepsToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
@@ -113,7 +121,11 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
         voltQueueSQL(selectDiagResultsToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectNodeInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectNonNodeHwInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
-        voltQueueSQL(selectRawHWInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectConstraintToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectDimmToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectProcessorToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectAcceleratorToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectHfiToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
 
         // Actually get the results for each of the tables.
         VoltTable[] aVt = voltExecuteSQL(true);

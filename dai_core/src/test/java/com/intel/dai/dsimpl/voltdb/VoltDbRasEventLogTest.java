@@ -40,11 +40,17 @@ public class VoltDbRasEventLogTest {
         when(response_.getStatus()).thenReturn(ClientResponse.SUCCESS);
         VoltTable table = new VoltTable(
                 new VoltTable.ColumnInfo("EventType", VoltType.STRING),
-                new VoltTable.ColumnInfo("DescriptiveName", VoltType.STRING));
-        table.addRow("0000000000", "RasTestEvent");
-        table.addRow(null, "RasTestEventNull");
-        table.addRow("", "RasTestEventEmpty");
-        table.addRow("0001000013", "");
+                new VoltTable.ColumnInfo("DescriptiveName", VoltType.STRING),
+                new VoltTable.ColumnInfo("Severity", VoltType.STRING),
+                new VoltTable.ColumnInfo("Category", VoltType.STRING),
+                new VoltTable.ColumnInfo("Component", VoltType.STRING),
+                new VoltTable.ColumnInfo("ControlOperation", VoltType.STRING),
+                new VoltTable.ColumnInfo("Msg", VoltType.STRING),
+                new VoltTable.ColumnInfo("GenerateAlert", VoltType.STRING));
+        table.addRow("0000000000", "RasTestEvent", "INFO", "Adapter", "AdapterTest", null, "", "N");
+        table.addRow(null, "RasTestEventNull", "INFO", "Adapter", "AdapterTest", null, "", "N");
+        table.addRow("", "RasTestEventEmpty", "INFO", "Adapter", "AdapterTest", null, "", "N");
+        table.addRow("0001000013", "", "INFO", "Adapter", "AdapterTest", null, "", "N");
         when(response_.getResults()).thenReturn(new VoltTable[] { table });
         when(client_.callProcedure(eq("@AdHoc"), anyString())).thenReturn(response_);
     }
@@ -73,35 +79,17 @@ public class VoltDbRasEventLogTest {
     }
 
     @Test
-    public void getRasEventType() throws Exception {
-        VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        assertEquals("0000000000", eventLog.getRasEventType("RasTestEvent", 9999L));
-    }
-
-    @Test
-    public void getRasEventTypeNegative1() throws Exception {
-        VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        assertEquals("0001000013", eventLog.getRasEventType("RasTestEventNull", 9999L));
-    }
-
-    @Test
-    public void getRasEventTypeNegative2() throws Exception {
-        VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        assertEquals("0001000013", eventLog.getRasEventType("RasTestEventEmpty", 9999L));
-    }
-
-    @Test
     public void logRasEventNoEffectedJobNegative() throws Exception {
         doThrow(IOException.class).when(client_).callProcedure(any(ProcedureCallback.class),
                 anyString(), anyString(), anyString(), anyString(), eq(null), anyLong(), anyString(), anyLong());
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventNoEffectedJob("0001000013", "InstanceData", "Location", 0L, adapter_.adapterType(), 9999L);
+        eventLog.logRasEventNoEffectedJob("", "InstanceData", "Location", 0L, adapter_.adapterType(), 9999L);
     }
 
     @Test
     public void logRasEventSyncNoEffectedJob() throws Exception {
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventSyncNoEffectedJob("0001000013", "InstanceData", "Location", 0L, adapter_.adapterType(),
+        eventLog.logRasEventSyncNoEffectedJob("", "InstanceData", "Location", 0L, adapter_.adapterType(),
                 9999L);
     }
 
@@ -110,13 +98,13 @@ public class VoltDbRasEventLogTest {
         doThrow(IOException.class).when(client_).callProcedure(anyString(), anyString(), anyString(), anyString(),
                 eq(null), anyLong(), anyString(), anyLong());
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventSyncNoEffectedJob("0001000013", "InstanceData", "Location", 0L, adapter_.adapterType(), 9999L);
+        eventLog.logRasEventSyncNoEffectedJob("", "InstanceData", "Location", 0L, adapter_.adapterType(), 9999L);
     }
 
     @Test
     public void logRasEventWithEffectedJob() throws Exception {
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventWithEffectedJob("0001000013", "InstanceData", "Location", "JobId", 0L, adapter_.adapterType(),
+        eventLog.logRasEventWithEffectedJob("", "InstanceData", "Location", "JobId", 0L, adapter_.adapterType(),
                 9999L);
     }
 
@@ -125,14 +113,14 @@ public class VoltDbRasEventLogTest {
         doThrow(IOException.class).when(client_).callProcedure(any(ProcedureCallback.class), anyString(), anyString(),
                 anyString(), anyString(), anyString(), anyLong(), anyString(), anyLong());
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventWithEffectedJob("0001000013", "InstanceData", "Location", "JobId", 0L,
+        eventLog.logRasEventWithEffectedJob("", "InstanceData", "Location", "JobId", 0L,
                 adapter_.adapterType(), 9999L);
     }
 
     @Test
     public void logRasEventCheckForEffectedJob() throws Exception {
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventCheckForEffectedJob("0001000013", "InstanceData", "Location", 0L, adapter_.adapterType(),
+        eventLog.logRasEventCheckForEffectedJob("", "InstanceData", "Location", 0L, adapter_.adapterType(),
                 9999L);
     }
 
@@ -141,21 +129,21 @@ public class VoltDbRasEventLogTest {
         doThrow(IOException.class).when(client_).callProcedure(any(ProcedureCallback.class), anyString(), anyString(),
                 anyString(), anyString(), eq("?"), anyLong(), anyString(), anyLong());
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventCheckForEffectedJob("0001000013", "InstanceData", "Location", 0L, adapter_.adapterType(),
+        eventLog.logRasEventCheckForEffectedJob("", "InstanceData", "Location", 0L, adapter_.adapterType(),
                 9999L);
     }
 
     @Test
     public void logRasEventCheckForEffectedJobNegative2() throws Exception {
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventCheckForEffectedJob("0001000013", "InstanceData", "", 0L, adapter_.adapterType(),
+        eventLog.logRasEventCheckForEffectedJob("", "InstanceData", "", 0L, adapter_.adapterType(),
                 9999L);
     }
 
     @Test
     public void logRasEventCheckForEffectedJobNegative3() throws Exception {
         VoltDbRasEventLog eventLog = new VoltDbRasEventLogMock();
-        eventLog.logRasEventCheckForEffectedJob("0001000013", "InstanceData", null, 0L, adapter_.adapterType(),
+        eventLog.logRasEventCheckForEffectedJob("", "InstanceData", null, 0L, adapter_.adapterType(),
                 9999L);
     }
 

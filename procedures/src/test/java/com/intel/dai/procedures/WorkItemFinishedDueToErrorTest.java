@@ -66,7 +66,7 @@ public class WorkItemFinishedDueToErrorTest {
         MockWorkItemFinishedDueToError proc = new MockWorkItemFinishedDueToError();
         proc.tables_.add(buildTable());
         proc.tables_.add(buildTable());
-        proc.run("RAS", 9998L, "some error results");
+        proc.run("RAS", 9998L, "some error results", "F");
     }
 
     @Test(expected = VoltProcedure.VoltAbortException.class)
@@ -74,7 +74,7 @@ public class WorkItemFinishedDueToErrorTest {
         MockWorkItemFinishedDueToError proc = new MockWorkItemFinishedDueToError();
         proc.tables_.add(buildTable(false, "F", "F"));
         proc.tables_.add(buildTable());
-        proc.run("RAS", 9998L, "some error results");
+        proc.run("RAS", 9998L, "some error results", "F");
     }
 
     @Test
@@ -82,6 +82,6 @@ public class WorkItemFinishedDueToErrorTest {
         MockWorkItemFinishedDueToError proc = new MockWorkItemFinishedDueToError();
         proc.tables_.add(buildTable(false, "W", "T"));
         proc.tables_.add(buildTable());
-        proc.run("RAS", 9998L, "some error results");
+        proc.run("RAS", 9998L, "some error results", "F");
     }
 }

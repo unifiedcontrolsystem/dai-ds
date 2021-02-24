@@ -1,7 +1,6 @@
 package com.intel.networking.restserver;
 
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 public class RequestExceptionTest {

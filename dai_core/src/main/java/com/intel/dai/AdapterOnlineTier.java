@@ -5,17 +5,12 @@
 package com.intel.dai;
 
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
-import com.intel.dai.dsapi.DataStoreFactory;
-import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.dsapi.WorkQueue;
 
-import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.client.*;
 import java.lang.*;
-import java.text.ParseException;
 import java.util.*;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -36,16 +31,16 @@ public abstract class AdapterOnlineTier {
     WorkQueue workQueue;
     SyncAdapterShutdownHandler shutdownHandler;
     String rabbitMQHost = "localhost";
-    BenchmarkHelper benchmarking_;
 
     // Constructor
     AdapterOnlineTier(Logger logger) throws IOException, TimeoutException {
         log_ = logger;
         shutdownHandler = new SyncAdapterShutdownHandler(log_);
+        initializeAdapter();
         mAmtTimeBetweenCheckingForDataToPurgeInMillis =  3600000L;  // check once an hour.
         mAmtTimeToKeepMovedDataBeforePurgingInMillis  = 86400000L;  // keep data for one day even after the data has been moved to Tier2.
         // Set up the list of tables that we will be purging from.
-        // (when changing this list be sure to check the constructor for Adapter in Adapter.java and ALSO the method DataMoverGetListOfRecsToMove.java!!!)
+        // (when changing this list be sure to check the constructor for Adapter objects in Adapter.java and ALSO the method DataMoverGetListOfRecsToMove.java!!!)
         mTablesToBePurgedSet = new HashSet<String>();
         mTablesToBePurgedSet.add("Machine_History");            // Index 0
         mTablesToBePurgedSet.add("Job_History");
@@ -64,18 +59,22 @@ public abstract class AdapterOnlineTier {
         mTablesToBePurgedSet.add("Switch_History");
         mTablesToBePurgedSet.add("FabricTopology_History");
         mTablesToBePurgedSet.add("Lustre_History");
-        /*mTablesToBePurgedSet.add("RasMetaData");*/     // Note: The RasMetaData table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        /*mTablesToBePurgedSet.add("RasMetaData");*/    // Note: The RasMetaData table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mTablesToBePurgedSet.add("WlmReservation_History");
         mTablesToBePurgedSet.add("Diag_History");
         mTablesToBePurgedSet.add("MachineAdapterInstance_History");
-        /*mTablesToBePurgedSet.add("UcsConfigValue");*/  // Note: The UcsConfigValue table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
-        /*mTablesToBePurgedSet.add("UniqueValues");*/    // Note: The UniqueValues table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
-        /*mTablesToBePurgedSet.add("Diag_Tools");*/      // Note: The Diag_Tools table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
-        /*mTablesToBePurgedSet.add("Diag_List");*/       // Note: The Diag_List table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        /*mTablesToBePurgedSet.add("UcsConfigValue");*/ // Note: The UcsConfigValue table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        /*mTablesToBePurgedSet.add("UniqueValues");*/   // Note: The UniqueValues table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        /*mTablesToBePurgedSet.add("Diag_Tools");*/     // Note: The Diag_Tools table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        /*mTablesToBePurgedSet.add("Diag_List");*/      // Note: The Diag_List table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mTablesToBePurgedSet.add("DiagResults");
         mTablesToBePurgedSet.add("NodeInventory_History");      // Index 26
         mTablesToBePurgedSet.add("NonNodeHwInventory_History"); // Index 27
-        mTablesToBePurgedSet.add("RawHWInventory_History"); // Index 28
+        /*mTablesToBePurgedSet.add("Constraint");*/     // Note: The Constraint table should never be purged, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
+        mTablesToBePurgedSet.add("Dimm_History");               // Index 29
+        mTablesToBePurgedSet.add("Processor_History");          // Index 30
+        mTablesToBePurgedSet.add("Accelerator_History");        // Index 31
+        mTablesToBePurgedSet.add("Hfi_History");                // Index 32
     }   // ctor
 
     void initializeAdapter() throws IOException, TimeoutException {
@@ -115,9 +114,8 @@ public abstract class AdapterOnlineTier {
     //--------------------------------------------------------------------------
     // This method handles the general processing flow for NearlineTier adapters (regardless of specific implementation, e.g. VoltDB).
     //--------------------------------------------------------------------------
-    public void mainProcessingFlow(String[] args, BenchmarkHelper benchmarking) throws IOException, TimeoutException {
+    public void mainProcessingFlow(String[] args) throws IOException, TimeoutException {
         try {
-            benchmarking_ = benchmarking;
             log_.info("starting");
 
             // Get list of VoltDb servers, location of service node this adapter is running on, and service node's hostname.
@@ -155,7 +153,6 @@ public abstract class AdapterOnlineTier {
                     }   // end of switch - workToBeDone()
                 }   // did get a work item
 
-
                 // Sleep for a little bit if no work items are queued for this adapter type.
                 if (workQueue.amtTimeToWait() > 0 && !adapter.adapterShuttingDown())
                     Thread.sleep( Math.min(workQueue.amtTimeToWait(), 5) * 100);
@@ -163,10 +160,14 @@ public abstract class AdapterOnlineTier {
 
             // Complete the shutdown process and allow the Adapter teardown to complete...
             shutdownHandler.signalShutdownComplete();
+
+            //-----------------------------------------------------------------
+            // Clean up adapter table, base work item, and close connections to db.
+            //-----------------------------------------------------------------
+            adapter.handleMainlineAdapterCleanup(adapter.adapterAbnormalShutdown());
             return;
         }   // End try
-        catch (RuntimeException | InterruptedException | ParseException | ConfigIOParseException | ProcCallException |
-                AdapterException e) {
+        catch (Exception e) {
             adapter.handleMainlineAdapterException(e);
         }
     }   // End mainProcessingFlow(String[] args)

@@ -15,7 +15,9 @@ import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcCallException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VoltDbEventsLog implements EventsLog {
@@ -24,8 +26,7 @@ public class VoltDbEventsLog implements EventsLog {
         servers_ = servers;
         adapterName_ = adapterName;
         adapterType_ = adapterType;
-        mRasDescNameToEventTypeMap = new HashMap<>();
-        mEventTypeToRasDescName = new HashMap<>();
+        mDescriptiveNames = new HashMap<>();
         this.logger = logger;
     }
 
@@ -41,7 +42,7 @@ public class VoltDbEventsLog implements EventsLog {
 
     void loadRasEvtTypeDescName() {
         try {
-            response = voltClient.callProcedure("@AdHoc", "select EventType, DescriptiveName from RasMetaData;");
+            response = voltClient.callProcedure("@AdHoc", "select DescriptiveName from RasMetaData;");
         } catch (IOException | ProcCallException ex) {
             logger.exception(ex, "Unable to retrieve RAS meta data from the data store");
             throw new RuntimeException("Unable to retrieve RAS meta data from the data store", ex);
@@ -55,14 +56,9 @@ public class VoltDbEventsLog implements EventsLog {
                     response.getStatus());
         }
 
-        Map<String, String> tempDescToEventType = new HashMap<>();
-        Map<String, String> tempEventTypeToDesc = new HashMap<>();
         while (rasMetaData.advanceRow()) {
-            tempEventTypeToDesc.put(rasMetaData.getString("EventType"), rasMetaData.getString("DescriptiveName"));
-            tempDescToEventType.put(rasMetaData.getString("DescriptiveName"), rasMetaData.getString("EventType"));
+            mDescriptiveNames.put(rasMetaData.getString("DescriptiveName"), null);
         }
-        mEventTypeToRasDescName = tempEventTypeToDesc;
-        mRasDescNameToEventTypeMap = tempDescToEventType;
     }
 
     void initializeVoltClient(String[] servers) {
@@ -129,19 +125,7 @@ public class VoltDbEventsLog implements EventsLog {
 
     @Override
     public boolean checkDescriptiveName(String descriptiveName) {
-        String RasDescName = mRasDescNameToEventTypeMap.get(descriptiveName);
-        if (RasDescName != null)
-            return true;
-        return false;
-    }
-
-    @Override
-    public boolean checkRasEventType(String eventType) {
-        String RasEventType = mEventTypeToRasDescName.get(eventType);
-        if (RasEventType != null) {
-            return true;
-        }
-        return  false;
+        return mDescriptiveNames.getOrDefault(descriptiveName, null) != null;
     }
 
     private static PropertyArray convertToJSON(VoltTable resultData) {
@@ -176,7 +160,6 @@ public class VoltDbEventsLog implements EventsLog {
     private ClientResponse response;
     Client voltClient;
     private Logger logger;
-    Map<String, String> mEventTypeToRasDescName;
-    Map<String, String> mRasDescNameToEventTypeMap;
+    Map<String, Object> mDescriptiveNames;
     private static String GET_RASEVENT_TYPES = "getAllEventMetaData";
 }

@@ -4,10 +4,7 @@
 
 package com.intel.dai;
 
-import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.*;
-import com.intel.dai.dsapi.DataStoreFactory;
-import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.dsapi.WorkQueue;
 import org.voltdb.client.*;
@@ -39,9 +36,10 @@ public abstract class AdapterNearlineTier {
     AdapterNearlineTier(Logger logger) throws IOException, TimeoutException {
         log_ = logger;
         shutdownHandler = new SyncAdapterShutdownHandler(log_, MAX_SHUTDOWN_TIME_SEC);
+        initializeAdapter();
     }   // ctor
 
-    public void initializeAdapter() throws IOException, TimeoutException, DataStoreException {
+    protected void initializeAdapter() throws IOException, TimeoutException {
         adapter = AdapterSingletonFactory.getAdapter();
     }
 
@@ -69,10 +67,10 @@ public abstract class AdapterNearlineTier {
             //-----------------------------------------------------------------
             // Main processing loop
             //-----------------------------------------------------------------
-            while(!adapter.adapterShuttingDown()) {
+            while(adapter.adapterShuttingDown() == false) {
                 // Handle any work items that have been queued for this type of adapter.
                 boolean bGotWorkItem = workQueue.grabNextAvailWorkItem();
-                if (bGotWorkItem) {
+                if (bGotWorkItem == true) {
                     // did get a work item
                     processClientParams(workQueue.getClientParameters(","));
                     switch(workQueue.workToBeDone()) {
@@ -101,7 +99,7 @@ public abstract class AdapterNearlineTier {
             //-----------------------------------------------------------------
             adapter.handleMainlineAdapterCleanup(adapter.adapterAbnormalShutdown());
         }   // End try
-        catch (RuntimeException | InterruptedException | AdapterException | ProcCallException | DataStoreException e) {
+        catch (Exception e) {
             adapter.handleMainlineAdapterException(e);
         }
     }   // End mainProcessingFlow(String[] args)

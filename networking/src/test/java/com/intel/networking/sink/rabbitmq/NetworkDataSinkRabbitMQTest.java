@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NetworkDataSinkRabbitMQTest implements Logger, NetworkDataSinkDelegate {
+public class NetworkDataSinkRabbitMQTest implements NetworkDataSinkDelegate {
     private boolean listenException_;
     private MockNetworkDataSinkRabbitMQ instance_;
     private ConnectionFactory factory_;
@@ -42,63 +42,6 @@ public class NetworkDataSinkRabbitMQTest implements Logger, NetworkDataSinkDeleg
             if (listenException_)
                 throw new IOException("Test exception!");
         }
-    }
-
-    @Override
-    public void initialize() {
-    }
-
-    @Override
-    public void fatal(String fmt, Object... args) {
-    }
-
-    @Override
-    public void error(String msg) {
-    }
-
-    @Override
-    public void error(String fmt, Object... args) {
-    }
-
-    @Override
-    public void warn(String msg) {
-    }
-
-    @Override
-    public void warn(String fmt, Object... args) {
-    }
-
-    @Override
-    public void info(String msg) {
-    }
-
-    @Override
-    public void info(String fmt, Object... args) {
-    }
-
-    @Override
-    public void debug(String msg) {
-    }
-
-    @Override
-    public void debug(String fmt, Object... args) {
-    }
-
-    @Override
-    public void exception(Throwable e, String msg) {
-        error(String.format("%s: %s", msg, e.getMessage()));
-        for(StackTraceElement element: e.getStackTrace())
-            debug(element.toString());
-    }
-
-    @Override
-    public void exception(Throwable e, String fmt, Object... args) {
-        exception(e, String.format(fmt, args));
-    }
-
-    @Override
-    public void exception(Throwable e) {
-        error(e.getMessage());
     }
 
     @Override
@@ -132,12 +75,13 @@ public class NetworkDataSinkRabbitMQTest implements Logger, NetworkDataSinkDeleg
         Map<String,String> sinkArgs = new HashMap<>();
         sinkArgs.put("exchangeName", "exchange");
         sinkArgs.put("subjects", "env");
-        sinkArgs.put("uri", "amqp://127.0.0.1");
         MockNetworkDataSinkRabbitMQ sink = new MockNetworkDataSinkRabbitMQ(sinkArgs);
+        sinkArgs.put("uri", "amqp://127.0.0.1");
+        sink = new MockNetworkDataSinkRabbitMQ(sinkArgs);
         sink.setCallbackDelegate(this);
         sink.setConnectionInfo("amqp://127.0.0.1");
         sink.error(new RuntimeException("Some exception!"));
-        sink.setLogger(this);
+        sink.setLogger(mock(Logger.class));
         sink.setMonitoringSubject("env");
         sink.setMonitoringSubjects(new ArrayList<>());
         assertFalse(sink.isListening());

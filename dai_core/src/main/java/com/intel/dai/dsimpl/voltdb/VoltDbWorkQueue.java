@@ -95,15 +95,11 @@ public class VoltDbWorkQueue implements WorkQueue {
     }
 
     static AdapterInformation fromOldAdapter(IAdapter adapter) throws DataStoreException {
-        try {
-            AdapterInformation result = new AdapterInformation(adapter.adapterType(), adapter.adapterName(),
-                    adapter.snLctn(), adapter.mapServNodeLctnToHostName().get(adapter.snLctn()), adapter.adapterId());
-            if (adapter.adapterAbnormalShutdown() || adapter.adapterShuttingDown())
-                result.signalToShutdown();
-            return result;
-        } catch(IOException | ProcCallException e) {
-            throw new DataStoreException("Failed to get the service node hostname from the service node location", e);
-        }
+        AdapterInformation result = new AdapterInformation(adapter.adapterType(), adapter.adapterName(),
+                adapter.snLctn(), adapter.mapServNodeLctnToHostName().get(adapter.snLctn()), adapter.adapterId());
+        if (adapter.adapterAbnormalShutdown() || adapter.adapterShuttingDown())
+            result.signalToShutdown();
+        return result;
     }
 
     private void initializeVoltClient(String[] servers) {
@@ -226,7 +222,7 @@ public class VoltDbWorkQueue implements WorkQueue {
         if (workItemResponse.getStatus() != ClientResponse.SUCCESS) {
             logger.error("grabNextAvailWorkItem - WorkItemFindAndOwn of a new WorkItem failed - Queue=%s - %s!", sQueueName, workItemResponse.getStatusString());
             logRasEvent.logRasEventNoEffectedJob(
-                    logRasEvent.getRasEventType("RasGenWorkItemFindAndOwnFailed", baseWorkItemId)
+                    "RasGenWorkItemFindAndOwnFailed"
                     ,("AdapterName=" + adapterName + ", StatusString=" + workItemResponse.getStatusString() + ", Queue=" + sQueueName)
                     ,null                               // lctn
                     ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch
@@ -283,8 +279,7 @@ public class VoltDbWorkQueue implements WorkQueue {
     {
         logger.error("unable to handle this work item %s as we have not defined the switch case for it - need to " +
                 "add a case statement!", workToBeDone);
-        logRasEvent.logRasEventNoEffectedJob(logRasEvent.getRasEventType("RasGenAdapterMissingCaseStmt",
-                workItemId)
+        logRasEvent.logRasEventNoEffectedJob("RasGenAdapterMissingCaseStmt"
                 ,("WorkToBeDone=" + workToBeDone)   // instanceData
                 ,null                               // lctn
                 ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred,
@@ -560,8 +555,7 @@ public class VoltDbWorkQueue implements WorkQueue {
                     logger.error("waitForWorkItemToFinishAndMarkDone - work item %s FAILED - %s, FinishedWorkItemId=%d!", sCmdForMsg,
                             sa[1], lWaitingForWorkItemId);
                     logRasEvent.logRasEventNoEffectedJob(
-                            logRasEvent.getRasEventType("RasGenAdapterWaitForWorkItemToFinishAndMarkDoneFailed",
-                                    lReqWorkItemId)
+                            "RasGenAdapterWaitForWorkItemToFinishAndMarkDoneFailed"
                             ,("AdapterName=" + adapterName + ", WorkToBeDone=" + sCmdForMsg + ", " + "WorkItem=" +
                                     Long.toString(lWaitingForWorkItemId) + ", Results=" + sa[1])
                             ,null                               // lctn
@@ -685,7 +679,7 @@ public class VoltDbWorkQueue implements WorkQueue {
             logger.error("saveWorkItemsRestartData - WorkItemSaveRestartData FAILED - Status=%s, StatusString=%s, AdapterType=%s, WorkItem=%d!",
                     VoltDbClient.statusByteAsString(response.getStatus()), response.getStatusString(), adapterType, lWorkItemId);
             logRasEvent.logRasEventNoEffectedJob(
-                    logRasEvent.getRasEventType("RasGenAdapterWiSaveRestartDataFailed", lWorkItemId)
+                    "RasGenAdapterWiSaveRestartDataFailed"
                     , ("AdapterName=" + adapterName + ", WorkItemId=" + Long.toString(lWorkItemId))
                     , null                               // lctn
                     , System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred,
@@ -768,8 +762,7 @@ public class VoltDbWorkQueue implements WorkQueue {
                 // the work item's state is not "F" (the work item did NOT finish successfully)
                 logger.error("getWorkItemStatus - work item FAILED - %s, AdapterType=%s, WorkItemId=%d!", sa[1], sWaitingForAdapterType, lWaitingForWorkItemId);
                 logRasEvent.logRasEventNoEffectedJob(
-                        logRasEvent.getRasEventType("RasGenAdapterWaitForWorkItemToFinishAndMarkDoneFailed",
-                                lWaitingForWorkItemId)
+                        "RasGenAdapterWaitForWorkItemToFinishAndMarkDoneFailed"
                         ,("AdapterName=" + adapterName + ", AdapterType=" + sWaitingForAdapterType + ", WorkItem=" + Long.toString(lWaitingForWorkItemId) + ", Results=" + sa[1])
                         ,null                               // lctn
                         ,System.currentTimeMillis() * 1000L // time that the event that triggered this ras event occurred, in micro-seconds since epoch

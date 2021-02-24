@@ -42,15 +42,17 @@ public class ComputeNodeDiscoveredTest {
                     new VoltTable.ColumnInfo("Owner", VoltType.STRING),
                     new VoltTable.ColumnInfo("Aggregator", VoltType.STRING),
                     new VoltTable.ColumnInfo("InventoryTimestamp", VoltType.TIMESTAMP),
-                    new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING)
+                    new VoltTable.ColumnInfo("WlmNodeState", VoltType.STRING),
+                    new VoltTable.ColumnInfo("ConstraintId", VoltType.STRING)
+                    ,new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP)
             );
             if(!zeroRows) {
                 result[0].addRow(new TimestampType(Date.from(Instant.now())), "State", "Lctn", 0L, "HostName",
                         "BootImageId", "rich", "IpAddr", "MacAddr", "BmcIpAddr", "BmcMacAddr", "BmcHostName",
-                        "Owner", "agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A");
+                        "Owner", "agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A", "Constraint1", new TimestampType(Date.from(Instant.ofEpochMilli(40L))));
                 result[0].addRow(new TimestampType(Date.from(Instant.now())), "State", "Lctn", 0L, "HostName",
                         "BootImageId", "lean", "IpAddr", "MacAddr", "BmcIpAddr", "BmcMacAddr", "BmcHostName",
-                        "Owner", "agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A");
+                        "Owner", "agg01", new TimestampType(Date.from(Instant.ofEpochMilli(40L))), "A", "Constraint1", new TimestampType(Date.from(Instant.ofEpochMilli(40L))));
             }
             return result;
         }

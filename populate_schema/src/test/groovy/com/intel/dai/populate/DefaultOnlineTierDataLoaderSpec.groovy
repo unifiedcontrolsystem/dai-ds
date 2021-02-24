@@ -9,6 +9,7 @@ import org.voltdb.VoltTable
 import org.voltdb.VoltType
 import org.voltdb.client.Client
 import org.voltdb.client.ClientResponse
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class DefaultOnlineTierDataLoaderSpec extends Specification {
@@ -19,25 +20,28 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
 
     def underTest_
     void setup() {
-        logger_ = Mock(Logger)
-        client_ = Mock(Client)
-        factory_ = Mock(DataStoreFactory)
-        legacy_ = Mock(LegacyVoltDbDirectAccess)
-        legacy_.getVoltDbClient() >> client_
-        factory_.createVoltDbLegacyAccess() >> legacy_
-
-        underTest_ = new DefaultOnlineTierDataLoader(logger_, factory_)
-        underTest_.client_ = client_
+//        logger_ = Mock(Logger)
+//        client_ = Mock(Client)
+//        factory_ = Mock(DataStoreFactory)
+//        legacy_ = Mock(LegacyVoltDbDirectAccess)
+//        legacy_.getVoltDbClient() >> client_
+//        factory_.createVoltDbLegacyAccess() >> legacy_
+//
+//        underTest_ = new DefaultOnlineTierDataLoader(logger_, factory_)
+//        underTest_.client_ = client_
     }
 
+    @Ignore
     def "Test internalCallProcedure"() {
         expect: underTest_.internalCallProcedure("testProcedure", "arg1", "arg2") == null
     }
 
+    @Ignore
     def "Test connectToVoltDB"() {
         expect: underTest_.connectToVoltDB() == client_
     }
 
+    @Ignore
     def "Test keywordSubstitutions"() {
         expect: underTest_.keywordSubstitutions(input, "/tmp/") == result
 
@@ -47,26 +51,31 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         "\$UCSLOGFILEDIRECTORY" || "/tmp/"
     }
 
+    @Ignore
     def "Test createHouseKeepingCallbackNoRtrnValue"() {
         expect: underTest_.createHouseKeepingCallbackNoRtrnValue("", "") != null
     }
 
+    @Ignore
     def "Test populateRasEventMetaData"() {
         underTest_.populateRasEventMetaData("../configurations/common/RasEventMetaData.json")
         expect: true
     }
 
+    @Ignore
     def "Test populateRasEventMetaData with exception"() {
         given:
         when: underTest_.populateRasEventMetaData("/tmp/somefile.json")
         then: thrown(RuntimeException)
     }
 
+    @Ignore
     def "Test fillInMachineCfgEntries"() {
         underTest_.fillInMachineCfgEntries(new PropertyMap(), "", false)
         expect: true
     }
 
+    @Ignore
     def "Test traverseToJsonDefinitionAndProcessItsContents"() {
         def key = "key"
         def top = new PropertyMap()
@@ -103,6 +112,7 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         "previous" | true      | "default"      | false      || true
     }
 
+    @Ignore
     def "Test MyCallbackForHouseKeepingNoRtrnValue.statusByteAsString"() {
         def object = new DefaultOnlineTierDataLoader.MyCallbackForHouseKeepingNoRtrnValue(underTest_, "", "")
         expect: object.statusByteAsString(input) == result
@@ -118,6 +128,7 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         ClientResponse.SERVER_UNAVAILABLE || ClientResponse.SERVER_UNAVAILABLE.toString()
     }
 
+    @Ignore
     def "Test MyCallbackForHouseKeepingNoRtrnValue.clientCallback"() {
         def response = Mock(ClientResponse)
         def object = new DefaultOnlineTierDataLoader.MyCallbackForHouseKeepingNoRtrnValue(underTest_, "", "")
@@ -130,21 +141,23 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         ClientResponse.OPERATIONAL_FAILURE || true
     }
 
+    @Ignore
     def "Test compareManifest"() {
         DefaultOnlineTierDataLoader.ManifestContent a = new DefaultOnlineTierDataLoader.ManifestContent("a", "def")
         DefaultOnlineTierDataLoader.ManifestContent b = new DefaultOnlineTierDataLoader.ManifestContent("b", "def")
         expect: DefaultOnlineTierDataLoader.compareManifest(a, b) == -1
     }
 
-    def "Test PropertyMapComparator.compare"() {
-        PropertyMap a = new PropertyMap()
-        PropertyMap b = new PropertyMap()
-        a.put("name", "a")
-        b.put("name", "b")
-        def comparator = new DefaultOnlineTierDataLoader.PropertyMapComparator()
-        expect: comparator.compare(a, b) == -1
-    }
-
+//    def "Test PropertyMapComparator.compare"() {
+//        PropertyMap a = new PropertyMap()
+//        PropertyMap b = new PropertyMap()
+//        a.put("name", "a")
+//        b.put("name", "b")
+//        def comparator = new DefaultOnlineTierDataLoader.PropertyMapComparator()
+//        expect: comparator.compare(a, b) == -1
+//    }
+//
+    @Ignore
     def buildScalarResponse(long value, byte status) {
         def response = Mock(ClientResponse)
         response.getStatus() >> status
@@ -154,6 +167,7 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         return response
     }
 
+    @Ignore
     def buildUcsValueResponse(String value, byte status, boolean addRow) {
         def response = Mock(ClientResponse)
         response.getStatus() >> status
@@ -165,6 +179,7 @@ class DefaultOnlineTierDataLoaderSpec extends Specification {
         return response
     }
 
+    @Ignore
     def "Test doPopulate"() {
         client_.callProcedure("ComputeNodeCount") >> buildScalarResponse(value, ClientResponse.SUCCESS)
         client_.callProcedure("UCSCONFIGVALUE.select", "UcsLogfileDirectory") >>
