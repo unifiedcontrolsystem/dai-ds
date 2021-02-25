@@ -137,7 +137,7 @@ public class GenerateRasEvents {
         System.out.println(String.format("*** Event Count                     = %d",   options_.get("count")));
         System.out.println(String.format("*** Percent Events With Job Assoc   = %d%%", options_.get("percent-jobs")));
         System.out.println(String.format("*** Percent Events With Control Ops = %d%%", options_.get("percent-ctrl")));
-        long iterations = options_.get("count");
+        long iterations = options_.getOrDefault("count", 1L);
         doEventCreationLoop(iterations);
         if(errors_ > 0)
             System.out.println(String.format("%n--- Failed Writes Count             = %d", errors_));
