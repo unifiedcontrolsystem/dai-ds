@@ -1954,28 +1954,28 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_replacement_history
+CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_RawHWInventory_History
     LANGUAGE plpgsql
     AS $$
     DECLARE
-        p_sernum character varying;
+         p_fruid character varying;
     BEGIN
-        p_sernum := (select distinct on (newsernum) newsernum from tier2_replacement_history where newsernum = p_lctn);
-        if (p_sernum is not null) then
+        p_fruid := (select distinct on (fruid) fruid from tier2_RawHWInventory_History where fruid = p_lctn);
+        if (p_fruid is not null) then   -- p_lctn is really a fruid ...
         return query
-            select * from  tier2_replacement_history
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
-                newsernum like (p_sernum || '%')
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+            select * from  tier2_RawHWInventory_History
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+                dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+                fruid like (p_fruid || '%')
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
 
         else
         return query
-            select * from  tier2_replacement_history
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
-                (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
-            order by lctn, dbupdatedtimestamp desc limit p_limit;
+            select * from  tier2_RawHWInventory_History
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+                dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+                (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
         end if;
         return;
     END
@@ -2003,6 +2003,41 @@ CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character v
         order by IH.InventoryTimestamp desc limit p_limit;
 $$;
 
+--
+-- Name: getinventoryhistoryforlctn(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryhistoryforlctn(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), fruid character varying(80))
+    LANGUAGE sql
+    AS $$
+       select id, fruid from  tier2_RawHWInventory_History
+       where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
+            dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
+            (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
+       order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
+$$;
+
+--
+-- Name: getinventoryinfoforlctn(tcharacter varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer)
+ RETURNS TABLE(lctn character varying
+              , dbupdatedtimestamp timestamp without time zone
+              , inventorytimestamp timestamp without time zone
+              , inventoryinfo character varying
+              , sernum character varying)
+LANGUAGE sql
+AS $$
+select HI.Lctn
+    , HI.dbupdatedtimestamp
+    , HI.InventoryTimestamp
+    , InventoryInfo::varchar
+    , HI.Sernum
+from tier2_nodeinventory_history HI
+where HI.Lctn = p_lctn
+order by HI.InventoryTimestamp desc, HI.Lctn asc LIMIT p_limit;
+$$;
 
 --
 -- Name: getinventorydataforlctn(timestamp without time zone, timestamp without time zone, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
@@ -2911,7 +2946,7 @@ BEGIN
                 RE.DeletedTimestamp,
                 RE.LastChgTimestamp
             from Tier2_WlmReservation_History RE
-            where coalesce(RE.EndTimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            where RE.EndTimestamp <= coalesce(p_end_time, RE.EndTimestamp)
             and RE.ReservationName = coalesce(p_reservation_name, RE.ReservationName)
             and RE.Users LIKE '%' || coalesce(p_user, RE.Users) || '%'
             order by RE.DbUpdatedTimestamp desc, RE.ReservationName, RE.Users LIMIT p_limit;
@@ -2925,7 +2960,7 @@ BEGIN
                 RE.DeletedTimestamp,
                 RE.LastChgTimestamp
             from Tier2_WlmReservation_History RE
-            where coalesce(RE.EndTimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
+            where RE.EndTimestamp <= coalesce(p_end_time, RE.EndTimestamp)
             and RE.StartTimestamp >= p_start_time
             and RE.ReservationName = coalesce(p_reservation_name, RE.ReservationName)
             and RE.Users LIKE '%' || coalesce(p_user, RE.Users) || '%'
