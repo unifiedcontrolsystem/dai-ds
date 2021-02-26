@@ -77,8 +77,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                                 if(!conversionMap_.containsKey(eventState))
                                     log_.warn("No conversion state, Ignoring sc notification for eventState = %s", eventState);
                                 BootState state = conversionMap_.get(eventState);
-                                long usTimestamp = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
-                                CommonDataFormat common = new CommonDataFormat(usTimestamp, location, DataType.StateChangeEvent);
+                                long nsTimestamp = TimeUtils.getNsTimestamp();
+                                CommonDataFormat common = new CommonDataFormat(nsTimestamp, location, DataType.StateChangeEvent);
                                 common.setStateChangeEvent(state);
                                 common.storeExtraData("Flag", message.getStringOrDefault("Flag", "Unknown"));
                                 common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, locations.getString(i));

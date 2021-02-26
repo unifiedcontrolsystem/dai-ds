@@ -76,7 +76,7 @@ public class AdapterProvisionerApi {
             for (CommonDataFormat data : dataList) {
                 long dataTimestamp = data.getNanoSecondTimestamp();
                 if(nodeLocations_.contains(data.getLocation()) && data.getStateEvent() != null)
-                    operations_.markNodeState(data.getStateEvent(), data.getLocation(), dataTimestamp, informWlm_);
+                    operations_.markNodeState(data.getStateEvent(), data.getLocation(), dataTimestamp/1000, informWlm_);
             }
         }
     }
@@ -139,8 +139,8 @@ public class AdapterProvisionerApi {
                 String location = CommonFunctions.convertForeignToLocation(foreignLocation);
                 BootState currentState = conversionMap_.get(state);
 
-                long usTimestamp = TimeUtils.nanosecondsToMicroseconds(TimeUtils.getNsTimestamp());
-                CommonDataFormat common = new CommonDataFormat(usTimestamp, location, DataType.InitialNodeStateData);
+                long nsTimestamp = TimeUtils.getNsTimestamp();
+                CommonDataFormat common = new CommonDataFormat(nsTimestamp, location, DataType.InitialNodeStateData);
                 common.setStateChangeEvent(currentState);
                 common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, foreignLocation);
                 results.add(common);
