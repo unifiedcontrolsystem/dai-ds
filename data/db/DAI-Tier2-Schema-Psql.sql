@@ -190,13 +190,6 @@ CREATE TYPE public.alert_rasevent AS (
     timestamp timestamp without time zone
 );
 
-CREATE TYPE public.cnos_container AS ENUM ('rich', 'lean');
-
-CREATE TYPE public.system_summary_count AS (
-    state character varying(1),
-    count bigint
-);
-
 
 
 SET default_tablespace = '';
@@ -247,53 +240,6 @@ CREATE TABLE public.tier2_computenode_history (
     entrynumber bigint NOT NULL,
     ProofOfLifeTimestamp timestamp without time zone
 );
-
-
---
--- Name: tier2_diag_history; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_diag_history (
-    diagid bigint NOT NULL,
-    lctn character varying(20000) NOT NULL,
-    serviceoperationid bigint,
-    diag character varying(500) NOT NULL,
-    diagparameters character varying(20000),
-    state character varying(1) NOT NULL,
-    starttimestamp timestamp without time zone NOT NULL,
-    endtimestamp timestamp without time zone,
-    results character varying(262144),
-    dbupdatedtimestamp timestamp without time zone NOT NULL,
-    lastchgtimestamp timestamp without time zone NOT NULL,
-    lastchgadaptertype character varying(20) NOT NULL,
-    lastchgworkitemid bigint NOT NULL
-);
-
---
--- Name: tier2_diag_history; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_diagresults
-(
-    diagid bigint NOT NULL,
-    lctn character varying(50) NOT NULL,
-    state character varying(1) NOT NULL,
-    results character varying(262144),
-    dbupdatedtimestamp timestamp without time zone NOT NULL
-);
-
---
--- Name: tier2_diag_list; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_diag_list (
-    diaglistid character varying(40) NOT NULL,
-    diagtoolid character varying(40) NOT NULL,
-    description character varying(240) NOT NULL,
-    defaultparameters character varying(240),
-    dbupdatedtimestamp timestamp without time zone NOT NULL
-);
-
 
 --
 -- Name: tier2_adapter_history; Type: TABLE; Schema: public; Owner: -
@@ -490,27 +436,6 @@ CREATE TABLE public.tier2_servicenode_history (
 );
 
 --
--- Name: tier2_serviceoperation_history; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_serviceoperation_history (
-    serviceoperationid bigint NOT NULL,
-    lctn character varying(32) NOT NULL,
-    typeofserviceoperation character varying(32) NOT NULL,
-    userstartedservice character varying(32) NOT NULL,
-    userstoppedservice character varying(32),
-    state character varying(1) NOT NULL,
-    status character varying(1) NOT NULL,
-    starttimestamp timestamp without time zone NOT NULL,
-    stoptimestamp timestamp without time zone,
-    startremarks character varying(256),
-    stopremarks character varying(256),
-    dbupdatedtimestamp timestamp without time zone NOT NULL,
-    logfile character varying(256) NOT NULL,
-    entrynumber bigint NOT NULL
-);
-
---
 -- Name: tier2_switch_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -674,21 +599,6 @@ CREATE TABLE public.tier2_alert_rasevent (
     PRIMARY KEY(internalid)
 );
 
-CREATE TABLE public.tier2_alert_has_ras (
-    alertid bigint NOT NULL,
-    eventid bigint NOT NULL,
-    PRIMARY KEY(alertid, eventid)
-);
-
-
-CREATE TABLE public.tier2_cnos_config (
-    name varchar(100) NOT NULL,
-    container public.cnos_container NOT NULL,
-    partition text,
-    PRIMARY KEY(name)
-);
-
-
 --
 -- Name: tier2_config; Type: TABLE; Schema: public; Owner: -
 --
@@ -706,22 +616,6 @@ CREATE TABLE public.tier2_config (
 
 CREATE TABLE public.tier2_fabrictopology_history (
     dbupdatedtimestamp timestamp without time zone NOT NULL,
-    entrynumber bigint NOT NULL
-);
-
-
---
--- Name: tier2_job_power; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_job_power (
-    jobid character varying(30) NOT NULL,
-    lctn character varying(100) NOT NULL,
-    jobpowertimestamp timestamp without time zone DEFAULT now() NOT NULL,
-    profile character varying(50) NOT NULL,
-    totalruntime double precision NOT NULL,
-    totalpackageenergy double precision NOT NULL,
-    totaldramenergy double precision NOT NULL,
     entrynumber bigint NOT NULL
 );
 
@@ -936,37 +830,6 @@ CREATE TABLE public.tier2_rasmetadata_ss (
     dbupdatedtimestamp timestamp without time zone,
     entrynumber bigint,
     generatealert character varying(1)
-);
-
-
---
--- Name: tier2_diag_tools; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.tier2_diag_tools (
-    diagtoolid character varying(40) NOT NULL,
-    description character varying(240) NOT NULL,
-    unittype character varying(25) NOT NULL,
-    unitsize integer NOT NULL,
-    provisionreqd character varying(1) NOT NULL,
-    rebootbeforereqd character varying(1) NOT NULL,
-    rebootafterreqd character varying(1) NOT NULL,
-    dbupdatedtimestamp timestamp without time zone NOT NULL
-);
-
---
--- Name: tier2_diag_tools_ss; Type: TABLE; Schema: public; Owner:
---
-
-CREATE TABLE public.tier2_diag_tools_ss (
-    diagtoolid character varying(40) NOT NULL,
-    description character varying(240),
-    unittype character varying(25),
-    unitsize integer,
-    provisionreqd character varying(1),
-    rebootbeforereqd character varying(1),
-    rebootafterreqd character varying(1),
-    dbupdatedtimestamp timestamp without time zone
 );
 
 CREATE TABLE public.tier2_rack_ss (
@@ -1529,19 +1392,9 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
           from Tier2_inventorysnapshot;
 
       return query
-          select 'Diags_Max_Timestamp'::varchar,
-            max(starttimestamp)
-          from Tier2_Diag_History;
-
-      return query
           select 'Replacement_Max_Timestamp'::varchar,
             max(dbupdatedtimestamp)
           from Tier2_replacement_history;
-
-      return query
-          select 'Service_Operation_Max_Timestamp'::varchar,
-            max(dbupdatedtimestamp)
-          from Tier2_serviceoperation_history;
 
       return query
           select 'Service_Node_LastChg_Timestamp'::varchar,
@@ -1556,70 +1409,6 @@ CREATE OR REPLACE FUNCTION public.dbchgtimestamps() RETURNS TABLE(key character 
       return;
     END
 $$;
-
-
---
--- Name: diaglistofactivediagsattime(timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.diaglistofactivediagsattime(p_end_time timestamp without time zone) RETURNS SETOF public.tier2_diag_history
-    LANGUAGE sql
-    AS $$
-    select D1.* from Tier2_Diag_History D1
-    where D1.StartTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-        (D1.EndTimestamp is null or
-        D1.EndTimestamp > coalesce(p_end_time, current_timestamp at time zone 'UTC')) and
-        D1.LastChgTimestamp = (select max(D2.LastChgTimestamp) from Tier2_Diag_History D2 where D2.DiagId = D1.DiagId)
-    order by DiagId desc;
-$$;
-
-
---
--- Name: diaglistofnonactivediagsattime(timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.diaglistofnonactivediagsattime(p_end_time timestamp without time zone) RETURNS SETOF public.tier2_diag_history
-    LANGUAGE sql
-    AS $$
-    select D1.* from Tier2_Diag_History D1
-    where D1.EndTimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-        D1.LastChgTimestamp = (select max(D2.LastChgTimestamp) from Tier2_Diag_History D2 where D2.DiagId = D1.DiagId)
-    order by DiagId desc;
-$$;
-
---
--- Name:getdiagdata(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-CREATE OR REPLACE FUNCTION public.getdiagdata(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_diagid character varying, p_limit integer) RETURNS SETOF public.tier2_diagresults
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-v_diagids int[];
-BEGIN
-    if p_diagid != '%' then
-    v_diagids := (string_to_array(p_diagid, ',') ::int[]);
-    return query
-            select * from  tier2_diagresults
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and diagid = ANY(v_diagids) and
-                case
-                   when p_lctn ='%' then (lctn ~ '.*' or lctn is null)
-                    when p_lctn != '%' then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))))
-                end
-            order by dbupdatedtimestamp DESC LIMIT p_limit;
-    else
-    return query
-    select * from  tier2_diagresults
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
-            case
-               when p_lctn ='%' then (lctn ~ '.*' or lctn is null)
-                when p_lctn != '%' then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))))
-            end
-    order by dbupdatedtimestamp DESC LIMIT p_limit;
-    end if;
-    return;
-END $$;
 
 --
 -- Name: get_cacheipaddrtolctn_records(); Type: FUNCTION; Schema: public; Owner: -
@@ -1655,35 +1444,6 @@ return query
         from Tier2_ComputeNode_SS H;
 END
 $$;
-
-
-
-
---
--- Name: get_diag_list_records(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.get_diag_list_records() RETURNS SETOF public.tier2_diag_list
-    LANGUAGE sql
-    AS $$
-    select *
-    from Tier2_Diag_list;
-$$;
-
-
-
-
---
--- Name: get_diag_tools_records(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.get_diag_tools_records() RETURNS SETOF public.tier2_diag_tools_ss
-    LANGUAGE sql
-    AS $$
-    select *
-    from Tier2_Diag_Tools_ss;
-$$;
-
 
 --
 -- Name: get_latest_adapter_records(); Type: FUNCTION; Schema: public; Owner: -
@@ -1730,24 +1490,6 @@ CREATE OR REPLACE FUNCTION public.get_latest_computenode_records() RETURNS SETOF
     select *
     from Tier2_ComputeNode_SS;
 $$;
-
-
---
--- Name: get_latest_diag_records(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.get_latest_diag_records() RETURNS SETOF public.tier2_diag_history
-    LANGUAGE sql
-    AS $$
-    select H.*
-    from Tier2_Diag_History H
-    inner join
-        (select DiagId, max(LastChgTimestamp) as max_date
-         from Tier2_Diag_History
-         group by DiagId) D
-    on H.DiagId = D.DiagId and H.LastChgTimestamp = D.max_date;
-$$;
-
 
 --
 -- Name: get_latest_job_records(); Type: FUNCTION; Schema: public; Owner: -
@@ -1822,43 +1564,11 @@ $$;
 -- Name: get_latest_servicenode_records(); Type: FUNCTION; Schema: public; Owner: -
 --
 CREATE OR REPLACE FUNCTION public.get_latest_servicenode_records() RETURNS SETOF public.tier2_servicenode_ss
-    LANGUAGE sql
-    AS $$
-    select *
-    from Tier2_ServiceNode_ss;
+LANGUAGE sql
+AS $$
+select *
+from Tier2_ServiceNode_ss;
 $$;
-
-
-
---
--- Name: get_latest_serviceoperation_records(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.get_latest_serviceoperation_records() RETURNS SETOF public.tier2_serviceoperation_history
-    LANGUAGE sql
-    AS $$
-    select H.*
-    from Tier2_ServiceOperation_History H
-    inner join
-        (select Lctn, max(DbUpdatedTimestamp) as max_date
-         from Tier2_ServiceOperation_History
-         group by Lctn) D
-    on H.Lctn = D.Lctn and
-        H.DbUpdatedTimestamp = D.max_date;
-$$;
-
---
--- Name: get_latest_serviceoperation_records(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.ServiceOperationAtTime(p_end_time timestamp without time zone) RETURNS SETOF public.tier2_serviceoperation_history
-    LANGUAGE sql
-    AS $$
-    select H.*
-    from Tier2_ServiceOperation_History H
-    where H.dbupdatedtimestamp = (select max(H2.dbupdatedtimestamp) from tier2_serviceoperation_history H2 where H2.serviceoperationid = H.serviceoperationid);
-$$;
-
 
 --
 -- Name: get_latest_workitem_records(); Type: FUNCTION; Schema: public; Owner: -
@@ -2089,39 +1799,6 @@ BEGIN
 END;
 
 $$;
-
-
---
--- Name: getjobpowerdata(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.getjobpowerdata(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_jobid character varying, p_limit integer) RETURNS TABLE(jobid character varying, lctn character varying, jobpowertimestamp timestamp without time zone, totalruntime double precision, totalpackageenergy double precision, totaldramenergy double precision)
-    LANGUAGE plpgsql
-    AS $$
-    BEGIN
-        if p_lctn != '%' and p_lctn != '' then
-        return query
-            select JP.jobid, JP.lctn, JP.jobpowertimestamp, JP.totalruntime, JP.totalpackageenergy, JP.totaldramenergy from  tier2_job_power JP
-            where JP.jobpowertimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                JP.jobpowertimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0') and
-                (JP.lctn not like '') and ((select string_to_array(JP.lctn, ' ')) <@  (select string_to_array(p_lctn, ','))) and
-                JP.jobid like p_jobid
-            order by JP.lctn, JP.jobid desc limit p_limit;
-
-        else
-        return query
-            select JP.jobid, JP.lctn, JP.jobpowertimestamp, JP.totalruntime, JP.totalpackageenergy, JP.totaldramenergy from  tier2_job_power JP
-            where JP.jobpowertimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                JP.jobpowertimestamp >= coalesce(p_start_time, '1970-01-01 0:0:0') and
-                JP.lctn like (p_lctn || '%') and
-                JP.jobid like p_jobid
-            order by JP.lctn, JP.jobid desc limit p_limit;
-        end if;
-        return;
-    END
-
-$$;
-
 
 --
 -- Name: getlistnodelctns(bytea); Type: FUNCTION; Schema: public; Owner: -
@@ -2371,68 +2048,6 @@ BEGIN
     end if;
     return;
 END
-$$;
-
-
---
--- Name: insertorupdatediaglist(character varying, character varying, character varying, character varying, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.insertorupdatediaglist(p_diaglistid character varying, p_diagtoolid character varying, p_description character varying, p_defaultparameters character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
-    LANGUAGE sql
-    AS $$
-    insert into Tier2_Diag_List(
-        DiagListId,
-        DiagToolId,
-        Description,
-        DefaultParameters,
-        DbUpdatedTimestamp)
-    values(
-        p_diaglistid,
-        p_diagtoolid,
-        p_description,
-        p_defaultparameters,
-        p_dbupdatedtimestamp)
-    on conflict(DiagListId) do update set
-        Description = p_description,
-        DefaultParameters = p_defaultparameters,
-        DbUpdatedTimestamp = p_dbupdatedtimestamp;
-$$;
-
-
---
--- Name: insertorupdatediagtools(character varying, character varying, character varying, integer, character varying, character varying, character varying, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.insertorupdatediagtools(p_diagtoolid character varying, p_description character varying, p_unittype character varying, p_unitsize integer, p_provisionreqd character varying, p_rebootbeforereqd character varying, p_rebootafterreqd character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
-    LANGUAGE sql
-    AS $$
-    insert into Tier2_Diag_Tools(
-        DiagToolId,
-        Description,
-        UnitType,
-        UnitSize,
-        ProvisionReqd,
-        RebootBeforeReqd,
-        RebootAfterReqd,
-        DbUpdatedTimestamp)
-    values(
-        p_diagtoolid,
-        p_description,
-        p_unittype,
-        p_unitsize,
-        p_provisionreqd,
-        p_rebootbeforereqd,
-        p_rebootafterreqd,
-        p_dbupdatedtimestamp)
-    on conflict(DiagToolId) do update set
-        Description = p_description,
-        UnitType = p_unittype,
-        UnitSize = p_unitsize,
-        ProvisionReqd = p_provisionreqd,
-        RebootBeforeReqd = p_rebootbeforereqd,
-        RebootAfterReqd = p_rebootafterreqd,
-        DbUpdatedTimestamp = p_dbupdatedtimestamp;
 $$;
 
 
@@ -2974,62 +2589,6 @@ $$;
 -- Name: getServiceInfo Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getServiceInfo(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_service_id character varying, p_lctn character varying, p_type character varying, p_open character varying, p_limit integer) RETURNS SETOF public.tier2_serviceoperation_history
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    if p_open = 'True' then
-        return query
-                select *
-                from tier2_serviceoperation_history s1
-                where s1.stoptimestamp IS null
-                and s1.serviceoperationid = coalesce(CAST(p_service_id AS int), s1.serviceoperationid)
-                and
-                case
-                    when p_lctn = '%' then (s1.lctn ~ '.*' or s1.lctn is null)
-                    else (s1.lctn not like '') and ((select string_to_array(s1.lctn, '')) <@ (select string_to_array(p_lctn, ',')))
-                end
-                and s1.typeofserviceoperation = coalesce(p_type, s1.typeofserviceoperation)
-                and s1.dbupdatedtimestamp = (select MAX(dbupdatedtimestamp) from tier2_serviceoperation_history s2 where s2.serviceoperationid = s1.serviceoperationid)
-                order by s1.dbupdatedtimestamp desc, s1.serviceoperationid LIMIT p_limit;
-    else
-        if p_start_time is null then
-            return query
-                select *
-                from tier2_serviceoperation_history s1
-                where coalesce(stoptimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-                and serviceoperationid = coalesce(CAST(p_service_id AS int), serviceoperationid)
-                and
-                case
-                    when p_lctn = '%' then (s1.lctn ~ '.*' or s1.lctn is null)
-                    else (s1.lctn not like '') and ((select string_to_array(s1.lctn, '')) <@ (select string_to_array(p_lctn, ',')))
-                end
-                and typeofserviceoperation = coalesce(p_type, typeofserviceoperation)
-                order by dbupdatedtimestamp desc, serviceoperationid LIMIT p_limit;
-        else
-            return query
-                select *
-                from tier2_serviceoperation_history s1
-                where coalesce(stoptimestamp, current_timestamp at time zone 'UTC') <= coalesce(p_end_time, current_timestamp at time zone 'UTC')
-                and starttimestamp >= p_start_time
-                and serviceoperationid = coalesce(CAST(p_service_id AS int), serviceoperationid)
-                and
-                case
-                    when p_lctn = '%' then (s1.lctn ~ '.*' or s1.lctn is null)
-                    else (s1.lctn not like '') and ((select string_to_array(s1.lctn, '')) <@ (select string_to_array(p_lctn, ',')))
-                end
-                and typeofserviceoperation = coalesce(p_type, typeofserviceoperation)
-                order by dbupdatedtimestamp desc, serviceoperationid LIMIT p_limit;
-        end if;
-    end if;
-    return;
-END
-$$;
-
---
--- Name: getServiceInfo Type: FUNCTION; Schema: public; Owner: -
---
-
 CREATE OR REPLACE FUNCTION public.GetSubfruState(p_lctn character varying, p_subfru character varying) RETURNS TABLE(NodeLctn VarChar(25), SubFruLctn VarChar(30), State VarChar(1))
     LANGUAGE plpgsql
     AS $$
@@ -3290,37 +2849,6 @@ Aggregator=p_Aggregator, Inventorytimestamp=p_Inventorytimestamp,  Wlmnodestate=
 ;
 $$;
 
-CREATE OR REPLACE FUNCTION public.insertorupdatediagtools_ss(p_diagtoolid character varying, p_description character varying, p_unittype character varying, p_unitsize integer, p_provisionreqd character varying, p_rebootbeforereqd character varying, p_rebootafterreqd character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
-    LANGUAGE sql
-    AS $$
-    insert into Tier2_Diag_Tools_SS(
-        DiagToolId,
-        Description,
-        UnitType,
-        UnitSize,
-        ProvisionReqd,
-        RebootBeforeReqd,
-        RebootAfterReqd,
-        DbUpdatedTimestamp)
-    values(
-        p_diagtoolid,
-        p_description,
-        p_unittype,
-        p_unitsize,
-        p_provisionreqd,
-        p_rebootbeforereqd,
-        p_rebootafterreqd,
-        p_dbupdatedtimestamp)
-    on conflict(DiagToolId) do update set
-        Description = p_description,
-        UnitType = p_unittype,
-        UnitSize = p_unitsize,
-        ProvisionReqd = p_provisionreqd,
-        RebootBeforeReqd = p_rebootbeforereqd,
-        RebootAfterReqd = p_rebootafterreqd,
-        DbUpdatedTimestamp = p_dbupdatedtimestamp;
-$$;
-
 CREATE OR REPLACE FUNCTION public.insertorupdatemachineadapterinstancedata(p_snlctn character varying, p_adaptertype character varying, p_numinitialinstances bigint, p_numstartedinstances bigint, p_invocation character varying, p_logfile character varying, p_dbupdatedtimestamp timestamp without time zone) RETURNS void
     LANGUAGE sql
     AS $$
@@ -3497,7 +3025,7 @@ CREATE OR REPLACE FUNCTION public.truncatesnapshottablerecords()
  RETURNS void
  LANGUAGE sql
 AS $$
-       truncate table tier2_adapter_ss, tier2_bootimage_ss, tier2_chassis_ss, tier2_computenode_ss, tier2_diag_tools_ss,
+       truncate table tier2_adapter_ss, tier2_bootimage_ss, tier2_chassis_ss, tier2_computenode_ss,
        tier2_machineadapterinstance_ss, tier2_machine_ss, tier2_rack_ss, tier2_servicenode_ss, tier2_rasmetadata,
        tier2_ucsconfigvalue_ss, tier2_uniquevalues_ss, tier2_workitem_ss, tier2_rasevent_ss;
 $$;
@@ -3555,211 +3083,6 @@ CREATE OR REPLACE FUNCTION public.insertorupdatenodeinventorydata(p_Lctn VarChar
     values(p_Lctn, p_DbUpdatedTimestamp, p_InventoryTimestamp, p_InventoryInfo, p_Sernum, p_BiosInfo, current_timestamp at time zone 'UTC')
     on conflict(Lctn, InventoryTimestamp) do update set DbUpdatedTimestamp=p_DbUpdatedTimestamp, InventoryInfo=p_InventoryInfo,
     Sernum= p_Sernum, BiosInfo=p_BiosInfo, Tier2DbUpdatedTimestamp = current_timestamp at time zone 'UTC';
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_cnos_cfg() RETURNS SETOF public.tier2_cnos_config
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT * FROM public.tier2_cnos_config;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_cnos_cfg(_name varchar) RETURNS SETOF public.tier2_cnos_config
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT * FROM public.tier2_cnos_config WHERE name=_name;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.create_cnos_cfg(_name varchar, _cont varchar, _part varchar)
-RETURNS SETOF public.tier2_cnos_config
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    INSERT INTO public.tier2_cnos_config (name, container, partition)
-        VALUES (_name, public.cnos_container(_cont), _part);
-    RETURN QUERY SELECT * FROM public.tier2_cnos_config WHERE name=_name;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.update_cnos_cfg(_name varchar, _cont varchar, _part varchar)
-RETURNS SETOF public.tier2_cnos_config
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    INSERT INTO public.tier2_cnos_config (name, container, partition)
-        VALUES (_name, public.cnos_container(_cont), _part)
-        ON CONFLICT (name) DO UPDATE
-            SET name=_name, container=public.cnos_container(_cont), partition=_part;
-    RETURN QUERY SELECT * FROM public.tier2_cnos_config WHERE name=_name;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.delete_cnos_cfg(_name varchar) RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    DELETE FROM public.tier2_cnos_config WHERE name=_name;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.create_alert(alert_type varchar, description varchar,
-    kind varchar, locations varchar, events public.alert_rasevent[]) RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    i BIGINT;
-    alertid BIGINT;
-    eventid BIGINT;
-BEGIN
-    INSERT INTO public.tier2_alert (alert_type, description, kind, locations)
-        VALUES (alert_type, description, public.alert_kind(kind), locations) RETURNING id INTO alertid;
-    FOR i IN 1..array_length(events, 1) LOOP
-        INSERT INTO public.tier2_alert_rasevent(id, descriptivename, lctn, instancedata, jobid, lastchgtimestamp)
-            VALUES (events[i].id, events[i].name, events[i].lctn,
-                    events[i].data, events[i].jobid, events[i].timestamp) RETURNING internalid INTO eventid;
-        INSERT INTO public.tier2_alert_has_ras (alertid, eventid)
-            VALUES (alertid, eventid);
-    END LOOP;
-    RETURN QUERY SELECT * FROM public.get_open_alerts() WHERE id=alertid;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.close_alert(alertids BIGINT[]) RETURNS void
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    alert_count BIGINT;
-    alertid BIGINT;
-BEGIN
-    FOREACH alertid IN ARRAY alertids LOOP
-        INSERT INTO public.tier2_alert_history(id, alert_type, description, kind, created, locations)
-            SELECT * FROM public.tier2_alert WHERE id=alertid;
-        DELETE FROM public.tier2_alert WHERE id=alertid;
-    END LOOP;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_open_alerts() RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT
-        a.id,
-        a.alert_type,
-        a.description,
-        a.kind,
-        a.created,
-        null::timestamp,
-        a.locations,
-        'OPEN'::public.alert_state
-    FROM public.tier2_alert AS a
-    ORDER BY a.created DESC;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_open_alerts(lim BIGINT) RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT
-        a.id,
-        a.alert_type,
-        a.description,
-        a.kind,
-        a.created,
-        null::timestamp,
-        a.locations,
-        'OPEN'::public.alert_state
-    FROM public.tier2_alert AS a
-    ORDER BY a.created DESC
-    LIMIT lim;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_closed_alerts() RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT
-        a.id,
-        a.alert_type,
-        a.description,
-        a.kind,
-        a.created,
-        a.closed,
-        a.locations,
-        'CLOSED'::public.alert_state
-    FROM public.tier2_alert_history AS a
-    ORDER BY a.closed DESC;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_closed_alerts(lim BIGINT) RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT
-        a.id,
-        a.alert_type,
-        a.description,
-        a.kind,
-        a.created,
-        a.closed,
-        a.locations,
-        'CLOSED'::public.alert_state
-    FROM public.tier2_alert_history AS a
-    ORDER BY a.closed DESC
-    LIMIT lim;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_alert(alert BIGINT) RETURNS SETOF public.alert_full
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT * FROM public.get_open_alerts() WHERE id=alert
-        UNION SELECT * FROM public.get_closed_alerts() WHERE id=alert;
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.get_alert_events(alert BIGINT) RETURNS TABLE(
-    id bigint,
-    lctn varchar(100),
-    jobid varchar(30),
-    instancedata varchar(10000),
-    lastchgtimestamp timestamp with time zone,
-    descriptivename varchar(65),
-    severity varchar(10),
-    msg varchar(1000),
-    generatealert varchar(1)
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY SELECT
-        ras.id, ras.lctn, ras.jobid, ras.instancedata, timezone('utc', ras.lastchgtimestamp),
-        ras.descriptivename, meta.severity, meta.msg, meta.generatealert
-    FROM public.tier2_alert_rasevent AS ras
-    LEFT JOIN public.tier2_rasmetadata AS meta ON ras.descriptivename=meta.descriptivename
-    LEFT JOIN public.tier2_alert_has_ras AS h ON h.eventid=ras.internalid
-    WHERE h.alertid=alert;
-END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.generate_partition_purge_rules(table_name text, timestamp_column_name text, retention_policy integer DEFAULT 6, fromscript boolean DEFAULT true)
@@ -3897,65 +3220,6 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION public.insertorupdateserviceoperation(p_serviceoperationid bigint,
-                                                                 p_lctn character varying,
-                                                                 p_typeofserviceoperation character varying,
-                                                                 p_userstartedservice character varying,
-                                                                 p_userstoppedservice character varying,
-                                                                 p_state character varying,
-                                                                 p_status character varying,
-                                                                 p_starttimestamp timestamp without time zone,
-                                                                 p_stoptimestamp timestamp without time zone,
-                                                                 p_startremarks character varying,
-                                                                 p_stopremarks character varying,
-                                                                 p_dbupdatedtimestamp timestamp without time zone,
-                                                                 p_logfile character varying) RETURNS void
-    LANGUAGE sql
-    AS $$
-    insert into Tier2_ServiceOperation_History(serviceoperationid,
-        lctn,
-        typeofserviceoperation,
-        userstartedservice,
-        userstoppedservice,
-        state,
-        status,
-        starttimestamp,
-        stoptimestamp,
-        startremarks,
-        stopremarks,
-        dbupdatedtimestamp,
-        logfile)
-    values(
-        p_serviceoperationid,
-        p_lctn,
-        p_typeofserviceoperation,
-        p_userstartedservice,
-        p_userstoppedservice,
-        p_state,
-        p_status,
-        p_starttimestamp,
-        p_stoptimestamp,
-        p_startremarks,
-        p_stopremarks,
-        p_dbupdatedtimestamp,
-        p_logfile)
-    on conflict(lctn, dbupdatedtimestamp) do update set
-        serviceoperationid = p_serviceoperationid,
-        typeofserviceoperation = p_typeofserviceoperation,
-        userstartedservice = p_userstartedservice,
-        userstoppedservice = p_userstoppedservice,
-        state = p_state,
-        status = p_status,
-        starttimestamp = p_starttimestamp,
-        stoptimestamp = p_stoptimestamp,
-        startremarks = p_startremarks,
-        stopremarks = p_stopremarks,
-        dbupdatedtimestamp = p_dbupdatedtimestamp,
-        logfile = p_logfile;
-$$;
-
-
-
 CREATE OR REPLACE FUNCTION public.get_latest_switch_records() RETURNS SETOF public.tier2_switch_ss
 LANGUAGE sql
 AS $$
@@ -4055,55 +3319,6 @@ State = p_State, SizeMB=p_Sizemb, ModuleLocator= p_ModuleLocator, BankLocator = 
 DbUpdatedTimestamp = p_DbUpdatedTimestamp, LastChgAdapterType = p_LastChgAdapterType,
 LastChgWorkItemId = p_LastChgWorkItemId, LastChgTimestamp=p_LastChgTimestamp;
 $$;
-
---CREATE OR REPLACE FUNCTION public.insertorupdatediaghistory(diagid bigint,
---                                                            lctn character varying,
---                                                            serviceoperationid bigint,
---                                                            diag character varying,
---                                                            diagparameters character varying,
---                                                            state character varying(1),
---                                                            starttimestamp timestamp without time zone,
---                                                            endtimestamp timestamp without time zone,
---                                                            results character varying,
---                                                            dbupdatedtimestamp timestamp without time zone,
---                                                            lastchgtimestamp timestamp without time zone,
---                                                            lastchgadaptertype character varying,
---                                                            lastchgworkitemid bigint) RETURNS void
---    LANGUAGE sql
---    AS $$
---    insert into Tier2_Diag_History(
---        diagid,
---        lctn,
---        serviceoperationid,
---        diag,
---        diagparameters,
---        state,
---        starttimestamp,
---        endtimestamp,
---        results,
---        dbupdatedtimestamp,
---        lastchgtimestamp,
---        lastchgadaptertype,
---        lastchgworkitemid)
---    values(
---        p_diagid,
---        p_lctn,
---        p_serviceoperationid,
---        p_diag,
---        p_diagparameters,
---        p_state,
---        p_starttimestamp,
---        p_endtimestamp,
---        p_results,
---        p_dbupdatedtimestamp,
---        p_lastchgtimestamp,
---        p_lastchgadaptertype,
---        p_lastchgworkitemid)
---    on conflict(DiagListId) do update set
---        Description = p_description,
---        DefaultParameters = p_defaultparameters,
---        DbUpdatedTimestamp = p_dbupdatedtimestamp;
---$$;
 
 
 ----- ALTER TABLE SQLS START HERE ------
@@ -4265,26 +3480,6 @@ CREATE SEQUENCE public.tier2_job_history_entrynumber_seq
 --
 
 ALTER SEQUENCE public.tier2_job_history_entrynumber_seq OWNED BY public.tier2_job_history.entrynumber;
-
-
---
--- Name: tier2_job_power_entrynumber_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.tier2_job_power_entrynumber_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: tier2_job_power_entrynumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.tier2_job_power_entrynumber_seq OWNED BY public.tier2_job_power.entrynumber;
-
 
 --
 -- Name: tier2_jobstep_history_entrynumber_seq; Type: SEQUENCE; Schema: public; Owner: -
@@ -4452,26 +3647,6 @@ CREATE SEQUENCE public.tier2_servicenode_history_entrynumber_seq
 
 ALTER SEQUENCE public.tier2_servicenode_history_entrynumber_seq OWNED BY public.tier2_servicenode_history.entrynumber;
 
-
---
--- Name: tier2_serviceoperation_history_entrynumber_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.tier2_serviceoperation_history_entrynumber_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: tier2_serviceoperation_history_entrynumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.tier2_serviceoperation_history_entrynumber_seq OWNED BY public.tier2_serviceoperation_history.entrynumber;
-
-
 --
 -- Name: tier2_switch_history_entrynumber_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
@@ -4608,14 +3783,6 @@ ALTER TABLE ONLY public.tier2_inventorysnapshot ALTER COLUMN id SET DEFAULT next
 
 ALTER TABLE ONLY public.tier2_job_history ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_job_history_entrynumber_seq'::regclass);
 
-
---
--- Name: tier2_job_power entrynumber; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tier2_job_power ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_job_power_entrynumber_seq'::regclass);
-
-
 --
 -- Name: tier2_jobstep_history entrynumber; Type: DEFAULT; Schema: public; Owner: -
 --
@@ -4671,14 +3838,6 @@ ALTER TABLE ONLY public.tier2_replacement_history ALTER COLUMN entrynumber SET D
 --
 
 ALTER TABLE ONLY public.tier2_servicenode_history ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_servicenode_history_entrynumber_seq'::regclass);
-
-
---
--- Name: tier2_serviceoperation_history entrynumber; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tier2_serviceoperation_history ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_serviceoperation_history_entrynumber_seq'::regclass);
-
 
 --
 -- Name: tier2_switch_history entrynumber; Type: DEFAULT; Schema: public; Owner: -
@@ -4785,31 +3944,6 @@ schema_version	1.0	Current schema version in the following format: <major>.<mino
 tier2_valid	false	Indicates whether the state of this tier 2 database is valid to use for initializing tier 1
 \.
 
-
---
--- Data for Name: tier2_diag_history; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.tier2_diag_history (diagid, lctn, serviceoperationid, diag, diagparameters, state, starttimestamp, endtimestamp, results, dbupdatedtimestamp, lastchgtimestamp, lastchgadaptertype, lastchgworkitemid) FROM stdin;
-\.
-
-
---
--- Data for Name: tier2_diag_list; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.tier2_diag_list (diaglistid, diagtoolid, description, defaultparameters, dbupdatedtimestamp) FROM stdin;
-\.
-
-
---
--- Data for Name: tier2_diag_tools; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.tier2_diag_tools (diagtoolid, description, unittype, unitsize, provisionreqd, rebootbeforereqd, rebootafterreqd, dbupdatedtimestamp) FROM stdin;
-\.
-
-
 --
 -- Data for Name: tier2_fabrictopology_history; Type: TABLE DATA; Schema: public; Owner: -
 --
@@ -4853,21 +3987,6 @@ COPY public.tier2_job_history (jobid, jobname, state, bsn, numnodes, nodes, powe
 --
 
 SELECT pg_catalog.setval('public.tier2_job_history_entrynumber_seq', 1, false);
-
-
---
--- Data for Name: tier2_job_power; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.tier2_job_power (jobid, lctn, jobpowertimestamp, profile, totalruntime, totalpackageenergy, totaldramenergy, entrynumber) FROM stdin;
-\.
-
-
---
--- Name: tier2_job_power_entrynumber_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.tier2_job_power_entrynumber_seq', 1, false);
 
 
 --
@@ -4984,21 +4103,6 @@ SELECT pg_catalog.setval('public.tier2_servicenode_history_entrynumber_seq', 1, 
 
 
 --
--- Data for Name: tier2_serviceoperation_history; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.tier2_serviceoperation_history (serviceoperationid, lctn, typeofserviceoperation, userstartedservice, userstoppedservice, state, status, starttimestamp, stoptimestamp, startremarks, stopremarks, dbupdatedtimestamp, logfile, entrynumber) FROM stdin;
-\.
-
-
---
--- Name: tier2_serviceoperation_history_entrynumber_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.tier2_serviceoperation_history_entrynumber_seq', 1, false);
-
-
---
 -- Data for Name: tier2_switch_history; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -5057,23 +4161,6 @@ COPY public.tier2_workitem_history (queue, workingadaptertype, id, worktobedone,
 --
 
 SELECT pg_catalog.setval('public.tier2_workitem_history_entrynumber_seq', 1, false);
-
-
---
--- Name: tier2_diag_list diag_list_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tier2_diag_list
-    ADD CONSTRAINT diag_list_pkey PRIMARY KEY (diaglistid);
-
-
---
--- Name: tier2_diag_tools diag_tools_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tier2_diag_tools
-    ADD CONSTRAINT diag_tools_pkey PRIMARY KEY (diagtoolid);
-
 
 --
 -- Name: tier2_aggregatedenvdata tier2_aggregatedenvdata_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -5156,21 +4243,6 @@ CREATE INDEX computenode_lastchgtimelctn ON public.tier2_computenode_history USI
 --
 
 CREATE INDEX computenode_seqnumdbupdatedtime ON public.tier2_computenode_history USING btree (sequencenumber, dbupdatedtimestamp);
-
-
---
--- Name: diag_endtimediagid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX diag_endtimediagid ON public.tier2_diag_history USING btree (endtimestamp, diagid);
-
-
---
--- Name: diag_startendtimediagid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX diag_startendtimediagid ON public.tier2_diag_history USING btree (starttimestamp, endtimestamp, diagid);
-
 
 --
 -- Name: jobhistory_dbupdatedtime; Type: INDEX; Schema: public; Owner: -
@@ -5261,20 +4333,6 @@ ALTER TABLE ONLY public.tier2_rack_ss
 
 ALTER TABLE ONLY public.tier2_servicenode_ss
     ADD CONSTRAINT tier2_servicenode_ss_pkey PRIMARY KEY (lctn);
-
-
---
--- Name: tier2_uniquevalues_ss uniquevalues_ss_pkey; Type: CONSTRAINT; Schema: public; Owner:
---
-
-
-ALTER TABLE ONLY public.tier2_diag_tools_ss
-    ADD CONSTRAINT diag_tools_ss_pkey PRIMARY KEY (diagtoolid);
-
-
-ALTER TABLE ONLY public.tier2_serviceoperation_history
-    ADD CONSTRAINT serviceoperation_history_pkey PRIMARY KEY (lctn,dbupdatedtimestamp);
-
 
 --
 -- Name: adapterssbyadaptertypeandid; Type: INDEX; Schema: public; Owner:
@@ -5735,9 +4793,6 @@ END
 $$ LANGUAGE plpgsql;
 
 --------- New Inventory Stored Procedures End
-
-
-call public.create_first_partition();
 
 --
 -- PostgreSQL database dump complete
