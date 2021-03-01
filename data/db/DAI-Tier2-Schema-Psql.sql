@@ -5736,9 +5736,6 @@ $$ LANGUAGE plpgsql;
 
 --------- New Inventory Stored Procedures End
 
-
-call public.create_first_partition();
-
 --
 -- PostgreSQL database dump complete
 --
