@@ -9,6 +9,8 @@ import java.nio.charset.Charset;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import java.util.*;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import com.intel.properties.*;
 import com.intel.config_io.*;
@@ -36,8 +38,8 @@ public class AdapterUIRest extends AdapterUI {
     private Map<String,String> AdapterMap;
     ResponseCreator responseCreator;
 
-    AdapterUIRest(String[] args, Logger logger) {
-        super(logger);
+    AdapterUIRest(String[] args, Logger logger) throws ProviderException, IOException, TimeoutException {
+        super(args, logger);
         AdapterMap = new HashMap<>();
         AdapterMap.put("ctrl", "CONTROL");
         AdapterMap.put("diagnostics", "DIAGNOSTICS");
@@ -45,20 +47,18 @@ public class AdapterUIRest extends AdapterUI {
         rabbitMQHost = (args.length >= 4) ? args[3] : "localhost";
     }
 
-    public static void main(String[] cmd_args) {
+    public static void main(String[] cmd_args) throws ProviderException, IOException, TimeoutException {
         Logger logger = LoggerFactory.getInstance("UI", AdapterUIRest.class.getName(), "console");
         AdapterSingletonFactory.initializeFactory("UI", AdapterUIRest.class.getName(), logger);
-        ConfigIO parser = ConfigIOFactory.getInstance("json");
-        assert parser != null : "Failed to create a JSON parser!";
-        staticFiles.location("/demo-v2/");
+
         final AdapterUIRest uiRest = new AdapterUIRest(cmd_args, logger);
-        uiRest.setParser(parser);
-        uiRest.initialize("UI", AdapterUIRest.class.getName(), cmd_args);
-        execute_routes(uiRest);
+        uiRest.mainProcessingFlow(cmd_args);
     }
 
-    void setParser(ConfigIO parser) {
-        responseCreator.setParser(parser);
+    @Override
+    public void receiveDataFromUsers() {
+        staticFiles.location("/demo-v2/");
+        execute_routes(this);
     }
 
     static void execute_routes(AdapterUIRest uiRest) {
@@ -247,7 +247,7 @@ public class AdapterUIRest extends AdapterUI {
 
     @Override
     public String canned_cmds(String cmd, Map<String, String> params) {
-        CannedAPI mCLI_Updater = new CannedAPI(log_);
+        CannedAPI mCLI_Updater = new CannedAPI(log_, locationApi);
         String[] results_array = new String[2];
         try {
             String lctn_param = params.getOrDefault("Lctn", "");
@@ -263,9 +263,9 @@ public class AdapterUIRest extends AdapterUI {
                     params.put("Lctn", lctn_param);
                 }
             }
-            String return_result = mCLI_Updater.getData(cmd, params);
+            PropertyMap return_result = mCLI_Updater.getData(cmd, params);
             results_array[0] = "F";
-            results_array[1] = return_result;
+            results_array[1] = responseCreator.toString(mapLocationstoHostnames(return_result));
         } catch (SQLException | DataStoreException | ProviderException e) {
             log_.exception(e, "[CannedAPI]");
             results_array[0] = "FE";
@@ -275,6 +275,65 @@ public class AdapterUIRest extends AdapterUI {
         return responseCreator.createJsonResult(results_array);
     }
 
+    private PropertyMap mapLocationstoHostnames(PropertyMap jsonResult)  {
+        try {
+            Integer lctn_pos = null;
+            boolean foundLctn = false;
+            boolean foundHostName = false;
+
+            PropertyArray schema = jsonResult.getArray("schema");
+
+            if(schema != null) {
+                for (int i = 0; i < schema.size(); i++) {
+                    PropertyMap m = schema.getMap(i);
+                    if (m.getString("data").equals("lctn") || m.getString("data").equals("location")) {
+                        foundLctn = true;
+                        lctn_pos = i;
+                    }
+                    if (m.getString("data").equals("hostname")) {
+                        foundHostName = true;
+                    }
+                }
+
+                if (!foundHostName && foundLctn) {
+                    PropertyArray data = jsonResult.getArray("data");
+
+                    for (int i = 0; i < data.size(); i++) {
+                        PropertyArray items = data.getArray(i);
+                        if (lctn_pos != null) {
+                            HashMap<String,String> hm = new HashMap<String,String>();
+                            hm.put("unit","string");
+                            hm.put("data","hostname");
+                            hm.put("heading","hostname");
+                            PropertyMap newMap = new PropertyMap(hm);
+                            schema.add(newMap);
+                            String lctn = items.getString(lctn_pos.intValue());
+
+                            if(lctn == null || lctn.isEmpty()){
+                                items.add("");
+                            }
+                            else {
+                                try {
+                                    items.add(String.join(" ", locationApi.convertLocationsToHostnames(lctn)));
+                                }
+                                catch (BadInputException e) {
+                                    items.add("");
+                                }
+                            }
+                        }
+                    }
+
+                    jsonResult.put("result-data-columns",jsonResult.getInt("result-data-columns")+1);
+                }
+            }
+        }
+        catch(PropertyNotExpectedType e){
+            log_.info(e.getMessage());
+            return jsonResult;
+        }
+
+        return jsonResult;
+    }
     String retrieveSystemInformation(AdapterUIRest uiRest) {
         try {
             SystemInfo systemInfo = new SystemInfo(uiRest.configMgr);

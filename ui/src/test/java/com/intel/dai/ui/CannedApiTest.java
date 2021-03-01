@@ -24,7 +24,7 @@ public class CannedApiTest {
 
     class MockCannedApi extends CannedAPI {
         MockCannedApi() {
-            super(mock(Logger.class));
+            super(mock(Logger.class), mock(LocationApi.class));
             jsonConverter = new MockJsonConverter();
         }
 
@@ -59,7 +59,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getraswithfilters", input_map);
+        PropertyMap result = canned.getData("getraswithfilters", input_map);
         assertNotNull(result);
     }
 
@@ -68,7 +68,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getenvwithfilters", input_map);
+        PropertyMap result = canned.getData("getenvwithfilters", input_map);
         assertNotNull(result);
     }
 
@@ -79,7 +79,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getinvspecificlctn", input_map);
+        PropertyMap result = canned.getData("getinvspecificlctn", input_map);
         assertNotNull(result);
     }
 
@@ -88,7 +88,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("default", input_map);
+        PropertyMap result = canned.getData("default", input_map);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getjobinfo", input_map);
+        PropertyMap result = canned.getData("getjobinfo", input_map);
         assertNotNull(result);
     }
 
@@ -109,7 +109,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getreservationinfo", input_map);
+        PropertyMap result = canned.getData("getreservationinfo", input_map);
         assertNotNull(result);
     }
 
@@ -118,7 +118,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("system_summary", input_map);
+        PropertyMap result = canned.getData("system_summary", input_map);
         assertNotNull(result);
     }
 
@@ -127,7 +127,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getinvchanges", input_map);
+        PropertyMap result = canned.getData("getinvchanges", input_map);
         assertNotNull(result);
     }
 
@@ -136,7 +136,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getinvhislctn", input_map);
+        PropertyMap result = canned.getData("getinvhislctn", input_map);
         assertNotNull(result);
     }
 
@@ -145,7 +145,7 @@ public class CannedApiTest {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("getnodeinvinfo", input_map);
+        PropertyMap result = canned.getData("getnodeinvinfo", input_map);
         assertNotNull(result);
     }
 }

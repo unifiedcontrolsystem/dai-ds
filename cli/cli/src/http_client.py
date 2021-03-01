@@ -42,10 +42,7 @@ class HttpClient(object):
 
     def send_get_request(self, request_string, tval):
         try:
-            response = requests.get(request_string, timeout=tval)
-            if self.check_response(response):
-                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
-                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
+            response = requests.get(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -63,10 +60,7 @@ class HttpClient(object):
 
     def send_put_request(self, request_string, data, tval):
         try:
-            response = requests.put(request_string, data, timeout=tval)
-            if self.check_response(response):
-                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
-                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
+            response = requests.put(request_string, data, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -84,10 +78,7 @@ class HttpClient(object):
 
     def send_post_request(self, request_string, data, tval):
         try:
-            response = requests.post(request_string, data, timeout=tval)
-            if self.check_response(response):
-                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
-                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
+            response = requests.post(request_string, data, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -105,10 +96,7 @@ class HttpClient(object):
 
     def send_delete_request(self, request_string, tval):
         try:
-            response = requests.delete(request_string, timeout=tval)
-            if self.check_response(response):
-                sys.stderr.write("Could not connect to server. Retrying by bypassing proxy env variables...\n")
-                response = requests.get(request_string, timeout=tval, proxies=self.proxies)
+            response = requests.delete(request_string, timeout=tval, proxies=self.proxies)
         except requests.exceptions.ConnectionError:
             msg = "Could not connect to server. Is the server running at {0}?".format(self._base_url)
             raise RuntimeError(msg)
@@ -123,10 +111,6 @@ class HttpClient(object):
         if status == 'FE':
             return 1, rs_response
         return 0, rs_response
-
-    @staticmethod
-    def check_response(response):
-        return (not response.ok) and response.status_code != 400 and response.status_code < 500
 
     @staticmethod
     def append_params(params):
@@ -148,4 +132,3 @@ class HttpClient(object):
         except Exception:
             # Unable to parse it as JSON
             return "E", response
-        

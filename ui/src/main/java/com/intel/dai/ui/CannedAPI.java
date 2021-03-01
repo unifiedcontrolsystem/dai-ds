@@ -13,15 +13,15 @@ import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.dai.exceptions.BadInputException;
 
 import java.sql.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class CannedAPI {
     private Connection conn = null;
+    public LocationApi locationApi_;
     JsonConverter jsonConverter = new JsonConverter();
     private static ConfigIO jsonParser = ConfigIOFactory.getInstance("json");
     private final Logger log_;
@@ -46,6 +46,9 @@ public class CannedAPI {
                 put("E", "Error");
                 put("U", "Unknown");
                 put("H", "Halting/Shutting Down");
+                put("R", "Bios Starting due to Reset");
+                put("S", "Selecting Boot Device");
+                put("P", "PXE Downloading NBP file");
             }});
 
     private static final Map<String, String> wlmstate_map = Collections.unmodifiableMap(
@@ -62,101 +65,132 @@ public class CannedAPI {
                 put("S", "Started");
             }});
 
-    CannedAPI(Logger logger) {
+    CannedAPI(Logger logger, LocationApi locationApi) {
         assert jsonParser != null: "Failed to get a JSON parser!";
         assert logger != null: "Passed a null logger to the ctor!";
         log_ = logger;
+        locationApi_ = locationApi;
     }
 
     public Connection get_connection() throws DataStoreException {
         return DbConnectionFactory.createDefaultConnection();
     }
 
-    public synchronized String getData(String requestKey, Map<String, String> params_map)
+    public synchronized PropertyMap getData(String requestKey, Map<String, String> params_map)
             throws SQLException, DataStoreException, ProviderException {
         assert params_map != null : "Input parameters should be provided";
-        log_.info("Establishing DB connection");
-        if(conn == null)
-            conn = get_connection();
+        conn = get_connection();
         try {
-            Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
-            Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
+            Timestamp[] times = new Timestamp[2];
+            times[0] = getTimestamp(getStartEndTime(params_map, "StartTime"));
+            times[1] = getTimestamp(getStartEndTime(params_map, "EndTime"));
+            String[] vars;
             String limit = params_map.getOrDefault("Limit", null);
 
             PropertyMap jsonResult;
             switch (requestKey) {
                 case "getraswithfilters": {
-                    String lctn = params_map.getOrDefault("Lctn", null);
-                    String event_type = params_map.getOrDefault("EventType", "%");
-                    String severity = params_map.getOrDefault("Severity", "%");
-                    String jobIdValue = params_map.getOrDefault("JobId", null);
-                    String exclude = params_map.getOrDefault("Exclude", "%");
-                    jsonResult = executeProcedureFiveVariableFilter("{call GetRasEventsWithFilters(?, ?, ?, ?, ?, ?, ?, ?)}", starttime, endtime, lctn, event_type, severity, jobIdValue, limit, exclude);
+                    vars = new String[5];
+                    vars[0] = params_map.getOrDefault("Lctn", null);
+                    vars[1] = params_map.getOrDefault("EventType", "%");
+                    vars[2] = params_map.getOrDefault("Severity", "%");
+                    vars[3] = params_map.getOrDefault("JobId", null);
+                    vars[4] = params_map.getOrDefault("Exclude", "%");
+                    jsonResult = executeProcedure("{call GetRasEventsWithFilters(?, ?, ?, ?, ?, ?, ?, ?)}", times, vars, limit);
                     break;
                 }
                 case "getenvwithfilters": {
-                    String lctn = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedureOneVariableFilter("{call GetAggregatedEvnDataWithFilters(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedure("{call GetAggregatedEvnDataWithFilters(?, ?, ?, ?)}", times, vars, limit);
                     break;
                 }
                 case "getinvspecificlctn": {
-                    String lctn = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryDataForLctn(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
-                    jsonResult = map_state_values(jsonResult);
+                    jsonResult = new PropertyMap();
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    if (params_map.getOrDefault("subfru", null) == null) {
+                        jsonResult = executeProcedure("{call GetInventoryDataForLctn(?, ?, ?, ?)}", times, vars, limit);
+                        jsonResult = map_state_values(jsonResult);
+                    }
+                    else {
+                        jsonResult.put("state", map_state_values(executeProcedure("{call GetInventoryDataForLctn(?, ?, ?, ?)}", times, vars, limit)));
+                        times = new Timestamp[0];
+                        vars = new String[2];
+                        vars[0] = params_map.getOrDefault("Lctn", "%");
+                        vars[1] = params_map.getOrDefault("subfru", null);
+                        limit = "";
+                        log_.info("GetSubfruState procedure called with Lctn = %s and subfru = %s", vars[0], vars[1]);
+                        jsonResult.put("subfru_state", map_state_values(executeProcedure("{call GetSubfruState(?, ?)}", times, vars, limit)));
+                    }
                     break;
                 }
                 case "getjobinfo": {
-                    String username = params_map.getOrDefault("Username", "%");
-                    String jobid = params_map.getOrDefault("Jobid", "%");
-                    String state = params_map.getOrDefault("State", "%");
-                    String locations = params_map.getOrDefault("Lctn", "%");
-                    Timestamp atTime = getTimestamp(getStartEndTime(params_map, "AtTime"));
-                    log_.info("GetJobInfo procedure called with Jobid = %s and Username = %s", jobid, username);
-                    jsonResult = executeProcedureAtTimeFourVariableFilter("{call GetJobInfo(?, ?, ?, ?, ?, ?, ?, ?)}", starttime, endtime, atTime, jobid, username, state, locations, limit);
+                    vars = new String[4];
+                    vars[0] = params_map.getOrDefault("Jobid", "%");
+                    vars[1] = params_map.getOrDefault("Username", "%");
+                    vars[2] = params_map.getOrDefault("State", "%");
+                    vars[3] = params_map.getOrDefault("Lctn", "%");
+                    times = new Timestamp[3];
+                    times[0] = getTimestamp(getStartEndTime(params_map, "StartTime"));
+                    times[1] = getTimestamp(getStartEndTime(params_map, "EndTime"));
+                    times[2] = getTimestamp(getStartEndTime(params_map, "AtTime"));
+                    log_.info("GetJobInfo procedure called with Jobid = %s and Username = %s", vars[0], vars[1]);
+                    jsonResult = executeProcedure("{call GetJobInfo(?, ?, ?, ?, ?, ?, ?, ?)}", times, vars, limit);
                     jsonResult = map_job_values(jsonResult);
                     break;
                 }
                 case "getreservationinfo": {
-                    String username = params_map.getOrDefault("Username", null);
-                    String reservation = params_map.getOrDefault("Name", null);
-                    log_.info("GetReservationInfo procedure called with Reservation Name = %s and Username = %s", reservation, username);
-                    jsonResult = executeProcedureTwoVariableFilter("{call GetReservationInfo(?, ?, ?, ?, ?)}", starttime, endtime, reservation, username, limit);
+                    vars = new String[2];
+                    vars[0] = params_map.getOrDefault("Name", null);
+                    vars[1] = params_map.getOrDefault("Username", null);
+                    log_.info("GetReservationInfo procedure called with Reservation Name = %s and Username = %s", vars[0], vars[1]);
+                    jsonResult = executeProcedure("{call GetReservationInfo(?, ?, ?, ?, ?)}", times, vars, limit);
+                    String lctn = params_map.getOrDefault("Lctn", null);
+                    jsonResult = filterLocations(jsonResult, lctn);
                     break;
                 }
                 case "system_summary": {
                     jsonResult = new PropertyMap();
+                    times = new Timestamp[0];
+                    vars = new String[0];
+                    limit = "";
                     log_.info("GetComputeNodeSummary procedure called");
-                    jsonResult.put("compute", map_state_values(executeProcedure("{call GetComputeNodeSummary()}")));
+                    jsonResult.put("compute", map_state_values(executeProcedure("{call GetComputeNodeSummary()}", times, vars, limit)));
 
                     log_.info("GetServiceNodeSummary procedure called");
-                    jsonResult.put("service", map_state_values(executeProcedure("{call GetServiceNodeSummary()}")));
+                    jsonResult.put("service", map_state_values(executeProcedure("{call GetServiceNodeSummary()}", times, vars, limit)));
                     break;
                 }
                 case "getfrumigrationhistory": {
-                    String lctn = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedureOneVariableFilter("{call MigrationHistoryOfFru(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedure("{call MigrationHistoryOfFru(?, ?, ?, ?)}", times, vars, limit);
                     break;
                 }
                 case "getinvchanges": {
-                    String lctn = params_map.getOrDefault("Lctn", null);
-                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryChange(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", null);
+                    jsonResult = executeProcedure("{call GetInventoryChange(?, ?, ?, ?)}", times, vars, limit);
                     break;
                 }
                 case "getinvhislctn": {
-                    String lctn = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryHistoryForLctn(?, ?, ?, ?)}", starttime, endtime, lctn, limit);
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedure("{call GetInventoryHistoryForLctn(?, ?, ?, ?)}", times, vars, limit);
                     jsonResult = map_state_values(jsonResult);
                     break;
                 }
                 case "getnodeinvinfo": {
-                    String lctn = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedureOneVariableFilter("{call GetInventoryInfoForLctn(?, ?)}", lctn, limit);
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedure("{call GetInventoryInfoForLctn(?, ?)}", times, vars, limit);
                     break;
                 }
                 default:
                     throw new ProviderException("Invalid request, request key: '" + requestKey + "' : Not Found");
             }
-            return jsonParser.toString(jsonResult);
+            return jsonResult;
         } finally {
             conn.close();
         }
@@ -238,6 +272,66 @@ public class CannedAPI {
         return jsonResult;
     }
 
+private PropertyMap filterLocations(PropertyMap jsonResult, String lctn)
+    {
+        if (lctn != null) {
+            try {
+                Integer node_pos = null;
+
+                PropertyArray schema = jsonResult.getArray("schema");
+
+                if(schema != null){
+                    for(int i = 0; i < schema.size(); i++){
+                        PropertyMap m = schema.getMap(i);
+                        if (m.getString("data").equals("nodes"))
+                            node_pos = i;
+                    }
+
+                    PropertyArray data = jsonResult.getArray("data");
+                    String nodes;
+                    int filtered = 0;
+                    ArrayList<Integer> removed = new ArrayList<Integer>();
+
+                    for (int i = 0; i < data.size(); i++){
+                        PropertyArray items = data.getArray(i);
+                        if (node_pos != null) {
+                            nodes = rangeToLocations(items.getString(node_pos));
+                            try {
+                                Set<String> locations = locationApi_.convertHostnamesToLocations(new HashSet<String>(Arrays.asList(nodes.split(" "))));
+                                String[] location = locations.toArray(new String[0]);
+                                boolean found = false;
+
+                                for(int j=0; j < location.length; j++){
+                                    found = found || lctn.indexOf(location[j]) != -1;
+                                }
+
+                                if (!found) {
+                                    removed.add(i);
+                                    filtered++;
+                                }
+                            }
+                            catch (BadInputException e) {
+                                log_.info("Skipping filter for nodes: " + nodes);
+                            }
+                        }
+                    }
+
+                    for(int i = removed.size() - 1; i >= 0; i--) {
+                        data.remove(removed.get(i).intValue());
+                    }
+
+                    jsonResult.put("data", data);
+                    jsonResult.put("result-data-lines",jsonResult.getInt("result-data-lines")-filtered);
+                }
+            }
+            catch(PropertyNotExpectedType e){
+                return jsonResult;
+            }
+        }
+
+        return jsonResult;
+    }
+
     private String getStartEndTime(Map<String, String> params_map, String key)
     {
         String val_time;
@@ -255,98 +349,23 @@ public class CannedAPI {
         return new_time;
     }
 
-    private PropertyMap executeProcedure(String prepProcedure)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
+    private PropertyMap executeProcedure(String prepProcedure, Timestamp[] times, String[] vars, String Limit) throws SQLException {
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
+        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
+            int pos = 1;
+            for(int i = 0; i < times.length; i++) {
+                stmt.setTimestamp(pos, times[i]);
+                pos += 1;
             }
-        }
-    }
 
-    private PropertyMap executeProcedureOneVariableFilter(String prepProcedure, Timestamp StartTime,
-                                                          Timestamp EndTime, String FilterVariableOne, String Limit)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setTimestamp(1, StartTime);
-            stmt.setTimestamp(2, EndTime);
-            stmt.setString(3, FilterVariableOne);
-            handleLimit(Limit, stmt, 4);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
+            for(int i = 0; i < vars.length; i++) {
+                stmt.setString(pos, vars[i]);
+                pos += 1;
             }
-        }
-    }
 
-    private PropertyMap executeProcedureOneVariableFilter(String prepProcedure, String FilterVariableOne, String Limit)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setString(1, FilterVariableOne);
-            handleLimit(Limit, stmt, 2);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
+            if (!"".equals(Limit)) {
+                handleLimit(Limit, stmt, pos);
             }
-        }
-    }
-
-    private PropertyMap executeProcedureTwoVariableFilter(String prepProcedure, Timestamp StartTime,
-                                                          Timestamp EndTime, String FilterVariableOne,
-                                                          String FilterVariableTwo ,String Limit)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setTimestamp(1, StartTime);
-            stmt.setTimestamp(2, EndTime);
-            stmt.setString(3, FilterVariableOne);
-            stmt.setString(4, FilterVariableTwo);
-            handleLimit(Limit, stmt, 5);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
-            }
-        }
-    }
-    
-    private PropertyMap executeProcedureAtTimeFourVariableFilter(String prepProcedure, Timestamp StartTime,
-                                                            Timestamp EndTime, Timestamp AtTime, String FilterVariableOne,
-                                                            String FilterVariableTwo, String FilterVariableThree, String FilterVariableFour, String Limit)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setTimestamp(1, StartTime);
-            stmt.setTimestamp(2, EndTime);
-            stmt.setTimestamp(3, AtTime);
-            stmt.setString(4, FilterVariableOne);
-            stmt.setString(5, FilterVariableTwo);
-            stmt.setString(6, FilterVariableThree);
-            stmt.setString(7, FilterVariableFour);
-            handleLimit(Limit, stmt, 8);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return jsonConverter.convertToJsonResultSet(rs);
-            }
-        }
-    }
-
-    private PropertyMap executeProcedureFiveVariableFilter(String prepProcedure, Timestamp StartTime,
-                                                           Timestamp EndTime, String FilterVariableOne, String FilterVariableTwo, String FilterVariableThree, String  FilterVariableFour, String Limit, String FilterVariableFive)
-            throws SQLException
-    {
-        try (CallableStatement stmt = conn.prepareCall(prepProcedure)) {
-            stmt.setTimestamp(1, StartTime);
-            stmt.setTimestamp(2, EndTime);
-            stmt.setString(3, FilterVariableOne);
-            stmt.setString(4, FilterVariableTwo);
-            stmt.setString(5, FilterVariableThree);
-            stmt.setString(6, FilterVariableFour);
-            handleLimit(Limit, stmt, 7);
-            stmt.setString(8, FilterVariableFive);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 return jsonConverter.convertToJsonResultSet(rs);
@@ -359,5 +378,90 @@ public class CannedAPI {
             stmt.setInt(value, Integer.parseInt(Limit));
         else
             stmt.setNull(value, Types.INTEGER);
+    }
+
+    private String rangeToLocations(String range) {
+        StringBuilder builder = new StringBuilder();
+        StringBuilder prefix = new StringBuilder();
+        StringBuilder postfix = new StringBuilder();
+        boolean afterBracket = false;
+        boolean afterDash = false;
+        int pad= 0;
+        int first = 0;
+        int last = 0;
+        String padded = "";
+
+        for(int i = 0; i < range.length(); i++){
+            char c = range.charAt(i);
+            if(c == '[') {
+                afterBracket = true;
+            }
+            else if(c == ']') {
+                afterBracket = false;
+
+                if (afterDash) {
+                    last = Integer.parseInt(postfix.toString());
+                    for(int j = first + 1; j <= last; j++) {
+                        padded = String.format("%0"+pad+"d" , j);
+                        builder.append(prefix.toString()+ padded + " ");
+                    }
+                    afterDash = false;
+                    postfix = new StringBuilder();
+                    prefix = new StringBuilder();
+                }
+                else {
+                    builder.append(prefix.toString()+postfix.toString() + " ");
+                    postfix = new StringBuilder();
+                    prefix = new StringBuilder();
+                }
+
+            }
+            else if(c == '-') {
+                afterDash = true;
+                builder.append(prefix.toString()+postfix.toString() + " ");
+                pad = postfix.toString().length();
+                first = Integer.parseInt(postfix.toString());
+                postfix = new StringBuilder();
+            }
+            else if(c == ',') {
+                if (afterBracket) {
+
+                    if (afterDash) {
+                        last = Integer.parseInt(postfix.toString());
+                        for(int j = first + 1; j <= last; j++) {
+                            padded = String.format("%0"+pad+"d" , j);
+                            builder.append(prefix.toString()+ padded + " ");
+                        }
+                        afterDash = false;
+                        postfix = new StringBuilder();
+                    }
+                    else {
+                        builder.append(prefix.toString()+postfix.toString() + " ");
+                        postfix = new StringBuilder();
+                    }
+
+                }
+                else {
+                    builder.append(prefix.toString() + " ");
+                    prefix = new StringBuilder();
+                }
+
+            }
+            else {
+                if (afterBracket) {
+                    postfix.append(c);
+                }
+                else {
+                    prefix.append(c);
+                }
+
+            }
+        }
+
+        if(prefix.toString() != null){
+            builder.append(prefix.toString() + " ");
+        }
+
+        return builder.toString();
     }
 }
