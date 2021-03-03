@@ -192,6 +192,13 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "X0-CH0-SN0"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"UI",
+      "WorkToBeDone":"HandleInputFromUsers",
+      "Parms":"",
+      "NotifyWhenFinished":"F"
     }
   ],
   "Nodes": [

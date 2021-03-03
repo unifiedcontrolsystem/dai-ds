@@ -20,9 +20,10 @@ class CannedAPISpec extends Specification {
 
         def jsonParser = Mock(ConfigIO)
         def logger = Mock(Logger)
+        def locationAPI = Mock(LocationApi)
         ConfigIOFactory.getInstance(_) >> jsonParser
 
-        underTest_ = new CannedAPI(logger)
+        underTest_ = new CannedAPI(logger, locationAPI)
         underTest_.conn = Mock(Connection)
         CallableStatement stmt = Mock(CallableStatement)
         underTest_.conn.prepareCall(_) >> stmt

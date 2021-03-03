@@ -28,6 +28,14 @@ class LocationApi {
         return locationMgr_.getNodesFromLocations(nodes);
     }
 
+    Set<String> convertHostnamesToLocations(Set<String> nodes) throws BadInputException {
+        return locationMgr_.getLocationsFromNodes(nodes);
+    }
+
+    Set<String> convertLocationsToHostnames(Set<String> nodes) throws BadInputException {
+        return locationMgr_.getNodesFromLocations(nodes);
+    }
+
     Set <String> convertGroupsToNodes(String devices) {
         /* Here the devices will be a comma seperated mix of hostname, location, group and mix of all
          * Convert all groups to hostnames or locations (However they are stored in the database) */

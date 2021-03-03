@@ -206,6 +206,13 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "X3001-AM2"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"UI",
+      "WorkToBeDone":"HandleInputFromUsers",
+      "Parms":"",
+      "NotifyWhenFinished":"F"
     }
   ],
   "Nodes": [
