@@ -182,6 +182,7 @@ public class CannedAPI {
                     break;
                 }
                 case "getnodeinvinfo": {
+                    times = new Timestamp[0];
                     vars = new String[1];
                     vars[0] = params_map.getOrDefault("Lctn", "%");
                     jsonResult = executeProcedure("{call GetInventoryInfoForLctn(?, ?)}", times, vars, limit);

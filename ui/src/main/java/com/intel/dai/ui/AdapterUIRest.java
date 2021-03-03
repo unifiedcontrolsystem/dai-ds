@@ -35,14 +35,10 @@ public class AdapterUIRest extends AdapterUI {
      * Determine what REST Java framework this will use.
      */
     private String rabbitMQHost;
-    private Map<String,String> AdapterMap;
     ResponseCreator responseCreator;
 
     AdapterUIRest(String[] args, Logger logger) throws ProviderException, IOException, TimeoutException {
         super(args, logger);
-        AdapterMap = new HashMap<>();
-        AdapterMap.put("ctrl", "CONTROL");
-        AdapterMap.put("diagnostics", "DIAGNOSTICS");
         responseCreator = new ResponseCreator();
         rabbitMQHost = (args.length >= 4) ? args[3] : "localhost";
     }
