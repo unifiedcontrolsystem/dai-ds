@@ -19,6 +19,14 @@
     {
       "Value": "/opt/voltdb/voltdb/*:/opt/ucs/lib/*",
       "Key": "UcsClasspath"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnCompNodeNumLevels"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnServiceNodeNumLevels"
     }
   ],
   "AdapterInstances": [
