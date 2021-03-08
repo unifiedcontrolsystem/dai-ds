@@ -162,8 +162,8 @@ public class VoltDbAdapterOperations implements AdapterOperations {
                     , adapter_.getBaseWorkItemId()); // work item id for the work item that is being
                                                      // processed/executing, that is requesting/issuing this stored
                                                      // procedure
-            log_.info("markNode(%s) - called stored procedure %s - Lctn=%s, NewState=%s", newState.toString(),
-                    storedProcedureName, location, sTempNewState);
+            log_.info("markNode(%s) - called stored procedure %s - Lctn=%s, NewState=%s, timestamp=%s",
+                    newState.toString(), storedProcedureName, location, sTempNewState, timestamp);
         } catch (IOException e) {
             log_.exception(e, "markNode(%s) - failed to update node state at location: %s", newState.toString(),
                     location);

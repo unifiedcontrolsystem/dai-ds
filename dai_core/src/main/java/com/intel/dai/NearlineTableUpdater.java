@@ -17,6 +17,7 @@ import java.util.TimeZone;
 
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
+import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
 
@@ -31,6 +32,7 @@ public class NearlineTableUpdater {
         boolean isProcedure;
     }
     private Logger log;
+    private BenchmarkHelper benchmarker;
 
     NearlineTableUpdater(Connection tier2DbConn, Logger logger) {
         log = logger;
@@ -48,12 +50,14 @@ public class NearlineTableUpdater {
         }
         if (snapshotStmt != null && USE_SNAPSHOTS) {
             try {
+
                 // Store all the data for this table
                 while (tableData.advanceRow()) {
                     dbUpdateHelper(snapshotStmt, tableName, tableData);
                     dbUpdateHelper(stmt, tableName, tableData);
                 }
                 mConn.commit();
+
             } catch (SQLException ex) {
                 try {
                     mConn.rollback();
@@ -63,11 +67,17 @@ public class NearlineTableUpdater {
 
         } else {
             try {
+                if(tableName.equals("RasEvent"))	                // Store all the data for this table
+                    benchmarker.addNamedValue("BeforeRasDataWrite", tableData.getRowCount());
+
                 // Store all the data for this table
                 while (tableData.advanceRow()) {
                     dbUpdateHelper(stmt, tableName, tableData);
                 }
                 mConn.commit();
+
+                if(tableName.equals("RasEvent"))
+                    benchmarker.addNamedValue("WroteRasData", tableData.getRowCount());
             } catch (SQLException ex) {
                 try {
                     mConn.rollback();
@@ -75,6 +85,10 @@ public class NearlineTableUpdater {
                 throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
             }
         }
+    }
+
+    public void setBenchmarker(BenchmarkHelper benchmarker) {
+        this.benchmarker = benchmarker;
     }
 
     private void dbUpdateHelper (PreparedStatement stmt, String tableName, VoltTable tableData) throws SQLException{
