@@ -43,7 +43,3 @@ sudo rm -rf /opt/dai-docker
 sudo rm -rf /opt/ucs
 
 sudo hostname am01-nmn.local
-
-# Setup huge pages correctly for volt in case of a reboot...
-sudo echo never >/sys/kernel/mm/transparent_hugepage/enabled
-sudo echo never >/sys/kernel/mm/transparent_hugepage/defrag
