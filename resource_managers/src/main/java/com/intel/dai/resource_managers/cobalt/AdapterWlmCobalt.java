@@ -110,53 +110,37 @@ public class AdapterWlmCobalt implements WlmProvider {
 
     private void processSinkMessage(String subject, String message) {
         log_.info("Received message for subject: %s", subject);
+        //--------------------------------------------------------------
+        // Process the message that just came in.
+        //--------------------------------------------------------------
         try {
-            //--------------------------------------------------------------
-            // Process the message that just came in.
-            //--------------------------------------------------------------
-            try {
-                //----------------------------------------------------------
-                // Determine what type of record this is.
-                message = message.trim();
+            //----------------------------------------------------------
+            // Determine what type of record this is.
+            message = message.trim();
 
-                String[] aLineCols = message.split(" ");
+            String[] aLineCols = message.split(" ");
 
-                // This record came in via bgsched log.
-                if (subject.equals("InputFromLogstashForReservationData")) {
-                    handleCobaltReservationMessages(message, aLineCols);
-                }
-                // This record came in via cqm log.
-                else if (subject.equals("InputFromLogstashForJobData")) {
-                    handleCobaltJobMessages(message, aLineCols);
-                }
-                else {
-                    log_.error("Could not determine message origin: " + message);
-                }
-
+            // This record came in via bgsched log.
+            if (subject.equals("InputFromLogstashForReservationData")) {
+                handleCobaltReservationMessages(message, aLineCols);
             }
-            catch (Exception e) {
-                // Log the exception, generate a RAS event and continue parsing the console and varlog messages
-                e.printStackTrace();
-                log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
-                String eventtype = "RasProvException";
-                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
-                raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
+            // This record came in via cqm log.
+            else if (subject.equals("InputFromLogstashForJobData")) {
+                handleCobaltJobMessages(message, aLineCols);
             }
+            else {
+                log_.error("Could not determine message origin: " + message);
+            }
+
         }
         catch (Exception e) {
             // Log the exception, generate a RAS event and continue parsing the console and varlog messages
-            try {
-                log_.exception(e, "handleDelivery - Exception occurred!");
-                String eventtype = "RasProvException";
-                String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
-                raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
-            }
-            catch (Exception ex) {
-                log_.exception(ex, "Unable to log RAS EVENT");
-            }
-
+            e.printStackTrace();
+            log_.exception(e, "handleDelivery - Exception occurred while processing an individual message - '" + message + "'!");
+            String eventtype = "RasProvException";
+            String instancedata = "AdapterName=" + adapter.getName() + ", Exception=" + e.toString();
+            raseventlog.logRasEventNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
         }
-
     }
 
     void waitUntilFinishedProcessingMessages() throws InterruptedException {
