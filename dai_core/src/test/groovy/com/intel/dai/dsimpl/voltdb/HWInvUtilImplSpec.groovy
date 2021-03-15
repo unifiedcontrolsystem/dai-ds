@@ -34,12 +34,6 @@ class HWInvUtilImplSpec extends spock.lang.Specification {
         when: util.toFile("Ming", "build/tmp/somefile.json")
         then: notThrown IOException
     }
-    def "fromStringToFile - cannot write to read only file"() {
-        "touch build/tmp/readOnly.json".execute().text
-        "chmod -w build/tmp/readOnly.json".execute().text
-        when: util.toFile("Merciless", "build/tmp/readOnly.json")
-        then: thrown IOException
-    }
     def "fromFile - negative"() {
         when: util.fromFile(Paths.get("noSuchFile"))
         then: thrown IOException

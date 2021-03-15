@@ -4,22 +4,17 @@
 
 package com.intel.dai;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Types;
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
+
+import java.sql.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class NearlineTableUpdater {
     private static final boolean USE_SNAPSHOTS = false;
@@ -42,6 +37,9 @@ public class NearlineTableUpdater {
 
     public void Update(String tableName, VoltTable tableData) throws DataStoreException {
         PreparedStatement stmt = getStmt(tableName);
+        if (stmt == null) {
+            log.debug("Non-SS PreparedStatement for %s is null", tableName);
+        }
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
         if (stmt == null) {
@@ -50,7 +48,7 @@ public class NearlineTableUpdater {
         }
         if (snapshotStmt != null && USE_SNAPSHOTS) {
             try {
-
+                log.debug("Using SS PreparedStatement");
                 // Store all the data for this table
                 while (tableData.advanceRow()) {
                     dbUpdateHelper(snapshotStmt, tableName, tableData);
@@ -66,8 +64,9 @@ public class NearlineTableUpdater {
             }
 
         } else {
+            log.debug("Not using SS PreparedStatement");
             try {
-                if(tableName.equals("RasEvent"))	                // Store all the data for this table
+                if(tableName.equals("RasEvent"))
                     benchmarker.addNamedValue("BeforeRasDataWrite", tableData.getRowCount());
 
                 // Store all the data for this table
@@ -79,6 +78,7 @@ public class NearlineTableUpdater {
                 if(tableName.equals("RasEvent"))
                     benchmarker.addNamedValue("WroteRasData", tableData.getRowCount());
             } catch (SQLException ex) {
+                log.error("Failed to store %s into %s", tableData, tableName);
                 try {
                     mConn.rollback();
                 } catch(SQLException e) { /* Do Nothing on failure */ }
@@ -338,6 +338,10 @@ public class NearlineTableUpdater {
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
                                 "values (?,?,?,?,?,?,?,?,?,?)",
                         false));
+        SQL_STMTS.put("RawHWInventory_History",
+                new DataUpdateStmt(
+                        "{call insertorupdaterawhwinventorydata(?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("ComputeNode_SS",
                 new DataUpdateStmt(
                         "{call InsertOrUpdateComputeNodeData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
@@ -414,6 +418,5 @@ public class NearlineTableUpdater {
                 new DataUpdateStmt(
                         "{call insertorupdatedimmdata_ss(?,?,?,?,?,?,?,?,?,?)}",
                         true));
-
     }
 }

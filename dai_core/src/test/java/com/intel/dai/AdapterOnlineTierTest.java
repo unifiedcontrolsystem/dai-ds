@@ -8,7 +8,6 @@ import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -18,7 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,7 +60,7 @@ public class AdapterOnlineTierTest {
     @Test
     public void basicTests() throws Exception {
         AdapterOnlineTier online = new MockAdapterOnlineTier();
-        assertEquals(27, online.setOfTablesToBePurged().size());
+        assertEquals(28, online.setOfTablesToBePurged().size());
         assertEquals(3600000L, online.timeBetweenCheckingForDataToPurgeInMillis());
         assertEquals(86400000L, online.timeToKeepMovedDataBeforePurgingInMillis());
     }

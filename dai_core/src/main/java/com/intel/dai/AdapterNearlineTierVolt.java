@@ -71,6 +71,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
       /*mEntryNumber_UNIQUEVALUES                   = -99999L;*/  // Note: The UniqueValues table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mEntryNumber_WLMRESERVATION_HISTORY         = -99999L;
         mEntryNumber_WORKITEM_HISTORY               = -99999L;
+        mEntryNumber_RAWHWINVENTORY_HISTORY         = -99999L;
     }   // ctor
 
 
@@ -108,6 +109,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_SWITCH_HISTORY;                 // the last used entry number for the Tier2_SWITCH_HISTORY table.
     private long        mEntryNumber_WLMRESERVATION_HISTORY;         // the last used entry number for the Tier2_WLMRESERVATION_HISTORY table.
     private long        mEntryNumber_WORKITEM_HISTORY;               // the last used entry number for the Tier2_WORKITEM_HISTORY table.
+    private long        mEntryNumber_RAWHWINVENTORY_HISTORY;         // the last used entry number for the tier2_RawHWInventory_History table.
 
 
     long getTablesMaxEntryNum(String sTableName) throws IOException, ProcCallException {

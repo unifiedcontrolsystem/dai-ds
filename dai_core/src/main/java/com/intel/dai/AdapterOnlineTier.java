@@ -5,14 +5,12 @@
 package com.intel.dai;
 
 import com.intel.config_io.ConfigIOParseException;
-import com.intel.logging.Logger;
-import com.intel.logging.LoggerFactory;
 import com.intel.dai.dsapi.WorkQueue;
+import com.intel.logging.Logger;
+import org.voltdb.client.ProcCallException;
 
-import org.voltdb.client.*;
-import java.lang.*;
-import java.util.*;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -75,6 +73,7 @@ public abstract class AdapterOnlineTier {
         mTablesToBePurgedSet.add("Processor_History");          // Index 30
         mTablesToBePurgedSet.add("Accelerator_History");        // Index 31
         mTablesToBePurgedSet.add("Hfi_History");                // Index 32
+        mTablesToBePurgedSet.add("RawHWInventory_History");     // Index 33
     }   // ctor
 
     void initializeAdapter() throws IOException, TimeoutException {
