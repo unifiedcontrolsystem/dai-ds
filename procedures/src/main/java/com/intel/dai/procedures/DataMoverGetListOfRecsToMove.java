@@ -49,6 +49,7 @@ import java.text.SimpleDateFormat;
  *      mDataMoverResultTblIndxToTableNameMap.put(30, "Processor");
  *      mDataMoverResultTblIndxToTableNameMap.put(31, "Accelerator");
  *      mDataMoverResultTblIndxToTableNameMap.put(32, "Hfi");
+ *      mDataMoverResultTblIndxToTableNameMap.put(33, "RawHWInventory_History");
  */
 
 public class DataMoverGetListOfRecsToMove extends VoltProcedure {
@@ -89,6 +90,7 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectProcessorToBeMovedSql                    = new SQLStmt("SELECT * FROM Processor WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectAcceleratorToBeMovedSql                  = new SQLStmt("SELECT * FROM Accelerator WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectHfiToBeMovedSql                          = new SQLStmt("SELECT * FROM Hfi WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectRawHWInventory_HistoryToBeMovedSql       = new SQLStmt("SELECT * FROM RawHWInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
 
 
     public VoltTable[] run(long lEndTsInMicroSecs, long lStartTsInMicroSecs) throws VoltAbortException {
@@ -126,6 +128,7 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
         voltQueueSQL(selectProcessorToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectAcceleratorToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectHfiToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectRawHWInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
 
         // Actually get the results for each of the tables.
         VoltTable[] aVt = voltExecuteSQL(true);

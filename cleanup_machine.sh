@@ -42,4 +42,6 @@ echo "*** Delete UCS directories"
 sudo rm -rf /opt/dai-docker
 sudo rm -rf /opt/ucs
 
-sudo hostname am01-nmn.local
+if [ `hostname` != "am01-nmn.local" ]; then
+  sudo hostname am01-nmn.local
+fi
