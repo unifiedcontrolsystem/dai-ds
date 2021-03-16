@@ -6,16 +6,20 @@ package com.intel.dai;
 
 import com.intel.logging.Logger;
 import com.intel.logging.LoggerFactory;
-import org.voltdb.client.*;
+import com.intel.properties.PropertyMap;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import org.voltdb.VoltTable;
-import java.lang.*;
-import java.util.*;
+import org.voltdb.client.ProcCallException;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import com.intel.properties.*;
-import com.intel.config_io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
-import com.rabbitmq.client.*;
 
 /**
  * AdapterNearlineTierVolt for the VoltDB database.
@@ -71,7 +75,6 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
       /*mEntryNumber_UNIQUEVALUES                   = -99999L;*/  // Note: The UniqueValues table does not need a entry number field, it is being included here (commented out) for completeness, so it matches DataMoverGetListOfRecsToMove, etc.
         mEntryNumber_WLMRESERVATION_HISTORY         = -99999L;
         mEntryNumber_WORKITEM_HISTORY               = -99999L;
-        mEntryNumber_RAWHWINVENTORY_HISTORY         = -99999L;
     }   // ctor
 
 

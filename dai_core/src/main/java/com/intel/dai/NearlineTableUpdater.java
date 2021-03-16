@@ -37,9 +37,6 @@ public class NearlineTableUpdater {
 
     public void Update(String tableName, VoltTable tableData) throws DataStoreException {
         PreparedStatement stmt = getStmt(tableName);
-        if (stmt == null) {
-            log.debug("Non-SS PreparedStatement for %s is null", tableName);
-        }
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
         if (stmt == null) {
@@ -48,7 +45,7 @@ public class NearlineTableUpdater {
         }
         if (snapshotStmt != null && USE_SNAPSHOTS) {
             try {
-                log.debug("Using SS PreparedStatement");
+
                 // Store all the data for this table
                 while (tableData.advanceRow()) {
                     dbUpdateHelper(snapshotStmt, tableName, tableData);
@@ -64,9 +61,8 @@ public class NearlineTableUpdater {
             }
 
         } else {
-            log.debug("Not using SS PreparedStatement");
             try {
-                if(tableName.equals("RasEvent"))
+                if(tableName.equals("RasEvent"))	                // Store all the data for this table
                     benchmarker.addNamedValue("BeforeRasDataWrite", tableData.getRowCount());
 
                 // Store all the data for this table
@@ -78,7 +74,6 @@ public class NearlineTableUpdater {
                 if(tableName.equals("RasEvent"))
                     benchmarker.addNamedValue("WroteRasData", tableData.getRowCount());
             } catch (SQLException ex) {
-                log.error("Failed to store %s into %s", tableData, tableName);
                 try {
                     mConn.rollback();
                 } catch(SQLException e) { /* Do Nothing on failure */ }
@@ -156,160 +151,160 @@ public class NearlineTableUpdater {
         SQL_STMTS = new HashMap<>();
 
         SQL_STMTS.put("Adapter",
-            new DataUpdateStmt(
-                "insert into Tier2_Adapter_History(Id, AdapterType, SconRank, State, "
-                + "DbUpdatedTimestamp, LastChgAdapterType, LastChgWorkItemId, Lctn, Pid) values(?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Adapter_History(Id, AdapterType, SconRank, State, "
+                                + "DbUpdatedTimestamp, LastChgAdapterType, LastChgWorkItemId, Lctn, Pid) values(?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("BootImage",
-            new DataUpdateStmt(
-                "insert into Tier2_BootImage_History(Id, Description, BootImageFile, "
-                + "BootImageChecksum, BootOptions, BootStrapImageFile, BootStrapImageChecksum, State, "
-                + "DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, KernelArgs, Files) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_BootImage_History(Id, Description, BootImageFile, "
+                                + "BootImageChecksum, BootOptions, BootStrapImageFile, BootStrapImageChecksum, State, "
+                                + "DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, KernelArgs, Files) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Chassis",
-            new DataUpdateStmt(
-                "insert into Tier2_Chassis_History(Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, "
-                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Chassis_History(Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, "
+                                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("ComputeNode",
-            new DataUpdateStmt(
-                "insert into Tier2_ComputeNode_History(Lctn, SequenceNumber, State, HostName, "
-                + "BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, "
-                + "DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, "
-                + "Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
-                        "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_ComputeNode_History(Lctn, SequenceNumber, State, HostName, "
+                                + "BootImageId, Environment, IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, "
+                                + "DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, "
+                                + "Aggregator, InventoryTimestamp, WlmNodeState, ConstraintId, ProofOfLifeTimestamp) " +
+                                "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("FabricTopology",
-            new DataUpdateStmt(
-                "insert into Tier2_FabricTopology_History(DbUpdatedTimestamp) values(?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_FabricTopology_History(DbUpdatedTimestamp) values(?)",
+                        false));
         SQL_STMTS.put("Job",
-            new DataUpdateStmt(
-                "insert into Tier2_Job_History(JobId, JobName, State, Bsn, NumNodes, Nodes, PowerCap, "
-                + "UserName, Executable, InitialWorkingDir, Arguments, EnvironmentVars, "
-                + "StartTimestamp, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, "
-                + "LastChgWorkItemId, EndTimestamp, ExitStatus, JobAcctInfo, PowerUsed, WlmJobState) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Job_History(JobId, JobName, State, Bsn, NumNodes, Nodes, PowerCap, "
+                                + "UserName, Executable, InitialWorkingDir, Arguments, EnvironmentVars, "
+                                + "StartTimestamp, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, "
+                                + "LastChgWorkItemId, EndTimestamp, ExitStatus, JobAcctInfo, PowerUsed, WlmJobState) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("JobStep",
-            new DataUpdateStmt(
-                "insert into Tier2_JobStep_History(JobId, JobStepId, State, NumNodes, Nodes, "
-                + "NumProcessesPerNode, Executable, InitialWorkingDir, Arguments, EnvironmentVars, "
-                + "MpiMapping, StartTimestamp, DbUpdatedTimestamp, LastChgTimestamp, "
-                + "LastChgAdapterType, LastChgWorkItemId, EndTimestamp, ExitStatus, WlmJobStepState) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_JobStep_History(JobId, JobStepId, State, NumNodes, Nodes, "
+                                + "NumProcessesPerNode, Executable, InitialWorkingDir, Arguments, EnvironmentVars, "
+                                + "MpiMapping, StartTimestamp, DbUpdatedTimestamp, LastChgTimestamp, "
+                                + "LastChgAdapterType, LastChgWorkItemId, EndTimestamp, ExitStatus, WlmJobStepState) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Lustre",
-            new DataUpdateStmt(
-                "insert into Tier2_Lustre_History(DbUpdatedTimestamp) values(?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Lustre_History(DbUpdatedTimestamp) values(?)",
+                        false));
         SQL_STMTS.put("Machine",
-            new DataUpdateStmt(
-                "insert into Tier2_Machine_History(Sernum, Description, Type, NumRows, NumColsInRow, "
-                + "NumChassisInRack, State, ClockFreq, ManifestLctn, ManifestContent, "
-                + "DbUpdatedTimestamp, UsingSynthesizedData) values(?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Machine_History(Sernum, Description, Type, NumRows, NumColsInRow, "
+                                + "NumChassisInRack, State, ClockFreq, ManifestLctn, ManifestContent, "
+                                + "DbUpdatedTimestamp, UsingSynthesizedData) values(?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Rack",
-            new DataUpdateStmt(
-                "insert into Tier2_Rack_History(Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, "
-                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Rack_History(Lctn, State, Sernum, Type, Vpd, DbUpdatedTimestamp, "
+                                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("RasEvent",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateRasEvent(?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateRasEvent(?,?,?,?,?,?,?,?,?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("Replacement_History",
-            new DataUpdateStmt(
-                "insert into Tier2_Replacement_History(Lctn, FruType, ServiceOperationId, OldSernum, NewSernum, OldState, "
-                + "NewState, DbUpdatedTimestamp, LastChgTimestamp) values(?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Replacement_History(Lctn, FruType, ServiceOperationId, OldSernum, NewSernum, OldState, "
+                                + "NewState, DbUpdatedTimestamp, LastChgTimestamp) values(?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("ServiceOperation",
-            new DataUpdateStmt(
-                "insert into Tier2_ServiceOperation_History(ServiceOperationId, Lctn, TypeOfServiceOperation, "
-                + "UserStartedService, UserStoppedService, State, Status, StartTimestamp, StopTimestamp, StartRemarks, "
-                + "StopRemarks, DbUpdatedTimestamp, LogFile) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_ServiceOperation_History(ServiceOperationId, Lctn, TypeOfServiceOperation, "
+                                + "UserStartedService, UserStoppedService, State, Status, StartTimestamp, StopTimestamp, StartRemarks, "
+                                + "StopRemarks, DbUpdatedTimestamp, LogFile) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("ServiceNode",
-            new DataUpdateStmt(
-                "insert into Tier2_ServiceNode_History(Lctn, SequenceNumber, HostName, State, BootImageId, "
-                + "IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, "
-                + "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, ConstraintId, ProofOfLifeTimestamp) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_ServiceNode_History(Lctn, SequenceNumber, HostName, State, BootImageId, "
+                                + "IpAddr, MacAddr, BmcIpAddr, BmcMacAddr, BmcHostName, DbUpdatedTimestamp, "
+                                + "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, ConstraintId, ProofOfLifeTimestamp) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("NonNodeHw_History",
                 new DataUpdateStmt(
-                "insert into Tier2_NonNodeHw_History(Lctn, SequenceNumber, Type, State, HostName, "
-                + "IpAddr, MacAddr, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType,"
-                + "LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, Tier2DbUpdatedTimestamp)"
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?, current_timestamp)",
-                false));
+                        "insert into Tier2_NonNodeHw_History(Lctn, SequenceNumber, Type, State, HostName, "
+                                + "IpAddr, MacAddr, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType,"
+                                + "LastChgWorkItemId, Owner, Aggregator, InventoryTimestamp, Tier2DbUpdatedTimestamp)"
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?, current_timestamp)",
+                        false));
         SQL_STMTS.put("NodeInventory_History",
                 new DataUpdateStmt(
                         "{call insertorupdatenodeinventorydata(?,?,?,?,?,?)}",
                         true));
         SQL_STMTS.put("NonNodeHwInventory",
                 new DataUpdateStmt(
-                "insert into Tier2_NonNodeHwInventory_History(Lctn, DbUpdatedTimestamp, InventoryTimestamp, "
-                + "InventoryInfo, Sernum, Tier2DbUpdatedTimestamp, EntryNumber ) values(?,?,?,?,?,?,?)",
-                false));
+                        "insert into Tier2_NonNodeHwInventory_History(Lctn, DbUpdatedTimestamp, InventoryTimestamp, "
+                                + "InventoryInfo, Sernum, Tier2DbUpdatedTimestamp, EntryNumber ) values(?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Switch",
-            new DataUpdateStmt(
-                "insert into Tier2_Switch_History(Lctn, State, Sernum, Type, DbUpdatedTimestamp, "
-                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Switch_History(Lctn, State, Sernum, Type, DbUpdatedTimestamp, "
+                                + "LastChgTimestamp, Owner) values(?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("WorkItem",
-            new DataUpdateStmt(
-                "insert into Tier2_WorkItem_History(Queue, WorkingAdapterType, Id, WorkToBeDone, "
-                + "Parameters, NotifyWhenFinished, State, RequestingWorkItemId, "
-                + "RequestingAdapterType, WorkingAdapterId, WorkingResults, Results, StartTimestamp, "
-                + "DbUpdatedTimestamp, EndTimestamp, RowInsertedIntoHistory) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_WorkItem_History(Queue, WorkingAdapterType, Id, WorkToBeDone, "
+                                + "Parameters, NotifyWhenFinished, State, RequestingWorkItemId, "
+                                + "RequestingAdapterType, WorkingAdapterId, WorkingResults, Results, StartTimestamp, "
+                                + "DbUpdatedTimestamp, EndTimestamp, RowInsertedIntoHistory) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("RasMetaData",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateRasMetaData(?,?,?,?,?,?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateRasMetaData(?,?,?,?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("WlmReservation_History",
-            new DataUpdateStmt(
-                "insert into Tier2_WlmReservation_History(ReservationName, Users, Nodes, StartTimestamp, "
-                + "EndTimestamp, DeletedTimestamp, LastChgTimestamp, DbUpdatedTimestamp, LastChgAdapterType, "
-                + "LastChgWorkItemId) values(?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_WlmReservation_History(ReservationName, Users, Nodes, StartTimestamp, "
+                                + "EndTimestamp, DeletedTimestamp, LastChgTimestamp, DbUpdatedTimestamp, LastChgAdapterType, "
+                                + "LastChgWorkItemId) values(?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Diag",
-            new DataUpdateStmt(
-                "insert into Tier2_Diag_History(DiagId, Lctn, ServiceOperationId, Diag, DiagParameters, State, StartTimestamp, "
-                + "EndTimestamp, Results, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_Diag_History(DiagId, Lctn, ServiceOperationId, Diag, DiagParameters, State, StartTimestamp, "
+                                + "EndTimestamp, Results, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) "
+                                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("MachineAdapterInstance",
-            new DataUpdateStmt(
-                "insert into Tier2_MachineAdapterInstance_History(SnLctn, AdapterType, NumInitialInstances, "
-                + "NumStartedInstances, Invocation, LogFile, DbUpdatedTimestamp)"
-                + "values(?,?,?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_MachineAdapterInstance_History(SnLctn, AdapterType, NumInitialInstances, "
+                                + "NumStartedInstances, Invocation, LogFile, DbUpdatedTimestamp)"
+                                + "values(?,?,?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("UcsConfigValue",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateUcsConfigValue(?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateUcsConfigValue(?,?,?)}",
+                        true));
         SQL_STMTS.put("UniqueValues",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateUniqueValues(?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateUniqueValues(?,?,?)}",
+                        true));
         SQL_STMTS.put("Diag_Tools",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateDiagTools(?,?,?,?,?,?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateDiagTools(?,?,?,?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("Diag_List",
-            new DataUpdateStmt(
-                "{call InsertOrUpdateDiagList(?,?,?,?,?)}",
-                true));
+                new DataUpdateStmt(
+                        "{call InsertOrUpdateDiagList(?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("DiagResults",
-            new DataUpdateStmt(
-                "insert into Tier2_DiagResults(DiagId, Lctn, State, "
-                + "Results, DbUpdatedTimestamp)"
-                + "values(?,?,?,?,?)",
-                false));
+                new DataUpdateStmt(
+                        "insert into Tier2_DiagResults(DiagId, Lctn, State, "
+                                + "Results, DbUpdatedTimestamp)"
+                                + "values(?,?,?,?,?)",
+                        false));
         SQL_STMTS.put("Processor",
                 new DataUpdateStmt(
                         "insert into Tier2_Processor_history(NodeLctn , Lctn,"  +
@@ -418,5 +413,6 @@ public class NearlineTableUpdater {
                 new DataUpdateStmt(
                         "{call insertorupdatedimmdata_ss(?,?,?,?,?,?,?,?,?,?)}",
                         true));
+
     }
 }
