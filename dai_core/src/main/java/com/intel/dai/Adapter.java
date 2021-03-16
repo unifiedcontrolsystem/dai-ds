@@ -699,6 +699,7 @@ public class Adapter implements IAdapter {
         mDataMoverResultTblIndxToTableNameMap.put(30, "Processor");
         mDataMoverResultTblIndxToTableNameMap.put(31, "Accelerator");
         mDataMoverResultTblIndxToTableNameMap.put(32, "Hfi");
+        mDataMoverResultTblIndxToTableNameMap.put(33, "RawHWInventory_History");
     }   // End Adapter(String sThisAdaptersAdapterType, String sAdapterName)
 
     void initializeSignalHandler() {

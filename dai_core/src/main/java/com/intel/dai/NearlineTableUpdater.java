@@ -338,6 +338,10 @@ public class NearlineTableUpdater {
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
                                 "values (?,?,?,?,?,?,?,?,?,?)",
                         false));
+        SQL_STMTS.put("RawHWInventory_History",
+                new DataUpdateStmt(
+                        "{call insertorupdaterawhwinventorydata(?,?,?,?,?)}",
+                        true));
         SQL_STMTS.put("ComputeNode_SS",
                 new DataUpdateStmt(
                         "{call InsertOrUpdateComputeNodeData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
