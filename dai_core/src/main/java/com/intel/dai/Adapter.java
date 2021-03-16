@@ -486,8 +486,10 @@ public class Adapter implements IAdapter {
         // Check & see if we were able to get the fully qualified fru's lctn string.
         if (sFullyQualifiedFruLctn == null) {
             // we did not find the fully qualified FruLctn for the specified NodeLctn + BusAddr combination.
-            mLogger.info("Unable to find the fully qualified FruLctn for the specified NodeLctn and BusAddr - NodeLctn=%s, Busaddr=%s, MapKey=%s!",
+            mLogger.warn("Unable to find the fully qualified FruLctn for the specified NodeLctn and BusAddr - NodeLctn=%s, Busaddr=%s, MapKey=%s!",
                          sNodeLctn, sBusAddr, sMapKey);
+            if (mapNodelctnAndBusaddrToLctn().size() == 0)
+                mLogger.error("Map of node lctn and bus address to device lctn is completely empty!");
             // Cut a RAS event to capture this occurrence.
             String sPertinentInfo = "NodeLctn=" + sNodeLctn + ", BusAddr=" + sBusAddr + ", MapKey=" + sMapKey;
             logRasEventCheckForEffectedJob("RasGenAdapterUnableFindPcieFrusLctn"
