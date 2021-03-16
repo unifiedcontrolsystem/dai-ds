@@ -31,6 +31,10 @@ public class InternalJobInfoJobCompleted extends VoltProcedure {
                     "SELECT * FROM InternalJobInfo WHERE JobId=? AND WlmJobStartTime=?;"
     );
 
+    public final SQLStmt selectJobInfoNoTime = new SQLStmt(
+            "SELECT * FROM InternalJobInfo WHERE JobId=?;"
+    );
+
     public final SQLStmt insertJobInfo = new SQLStmt(
                     "INSERT INTO InternalJobInfo " +
                     "(JobId, WlmJobStarted, WlmJobStartTime, WlmJobEndTime, WlmJobWorkDir, WlmJobCompleted, WlmJobState) " +
@@ -50,7 +54,13 @@ public class InternalJobInfoJobCompleted extends VoltProcedure {
         long lSearchForTsEndBoundInMicroSecs = lStartTsInMicroSecs + (1500 * 1000L);
 
         // Check & see if there is already a row containing the JobInfo for the specified job.
-        voltQueueSQL(selectJobInfoBetween, EXPECT_ZERO_OR_ONE_ROW, sJobId, lStartTsInMicroSecs, lSearchForTsEndBoundInMicroSecs);
+        if (lStartTsInMicroSecs == -1L) {
+            voltQueueSQL(selectJobInfoNoTime, EXPECT_ZERO_OR_ONE_ROW, sJobId);
+        }
+        else {
+            voltQueueSQL(selectJobInfoBetween, EXPECT_ZERO_OR_ONE_ROW, sJobId, lStartTsInMicroSecs, lSearchForTsEndBoundInMicroSecs);
+        }
+
         VoltTable[] aJobInfo = voltExecuteSQL();
 
         long lJobsStartTsInMicroSecs = -1L;

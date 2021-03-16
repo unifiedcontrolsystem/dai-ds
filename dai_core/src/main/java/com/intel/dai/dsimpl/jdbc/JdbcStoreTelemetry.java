@@ -32,7 +32,7 @@ public class JdbcStoreTelemetry implements StoreTelemetry {
             throws DataStoreException {
         createConnection();
         createlogEnvDataAggregatedPreparedCall();
-        log_.debug("\n\n*** UNIQUE TUPLE: TYPE='%s'; LOCATION='%s'; TS='%d'\n", sTypeOfData, sLctn, lTsInMicroSecs);
+//        log_.debug("\n\n*** UNIQUE TUPLE: TYPE='%s'; LOCATION='%s'; TS='%d'\n", sTypeOfData, sLctn, lTsInMicroSecs);
         try {
             telemetryAggregatedData_.setString(1, sLctn);
             Timestamp jts = new Timestamp(lTsInMicroSecs / 1_000_000L * 1_000L); // Set in truncated Milliseconds

@@ -1,0 +1,9 @@
+{
+    "bootstrap.servers": "admin:9092",
+    "group.id": "pbs_runjobs",
+    "schema.registry.url": "http://admin:8081",
+    "auto.commit.enable": "true",
+    "auto.offset.reset": "earliest",
+    "specific.avro.reader": "true",
+    "topics": "pbs_runjobs"
+}
