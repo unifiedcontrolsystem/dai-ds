@@ -271,7 +271,7 @@ public class AdapterUIRest extends AdapterUI {
         return responseCreator.createJsonResult(results_array);
     }
 
-    private PropertyMap mapLocationstoHostnames(PropertyMap jsonResult)  {
+    public PropertyMap mapLocationstoHostnames(PropertyMap jsonResult)  {
         try {
             Integer lctn_pos = null;
             boolean foundLctn = false;

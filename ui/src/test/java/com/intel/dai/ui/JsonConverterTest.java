@@ -36,7 +36,7 @@ public class JsonConverterTest {
     public void convertToJsonResultSetReturnsFullResultSet() throws SQLException {
         when(resultSet.next()).thenReturn(true, false);
 
-        when(metaData.getColumnCount()).thenReturn(10);
+        when(metaData.getColumnCount()).thenReturn(13);
 
         when(metaData.getColumnName(1)).thenReturn("EntryNumber");
         when(metaData.getColumnType(1)).thenReturn(Types.BIGINT);
@@ -78,6 +78,19 @@ public class JsonConverterTest {
         when(metaData.getColumnName(10)).thenReturn("ValidSensor");
         when(metaData.getColumnType(10)).thenReturn(Types.BOOLEAN);
         when(resultSet.getBoolean(10)).thenReturn(true);
+
+        when(metaData.getColumnName(11)).thenReturn("AdapterString");
+        when(metaData.getColumnType(11)).thenReturn(Types.NVARCHAR);
+        when(resultSet.getNString(11)).thenReturn("Monitor");
+
+        when(metaData.getColumnName(12)).thenReturn("ManifestContent");
+        when(metaData.getColumnType(12)).thenReturn(Types.VARCHAR);
+        when(resultSet.getString(12)).thenReturn("Manifest");
+
+        when(metaData.getColumnName(13)).thenReturn("NullTimestamp");
+        when(metaData.getColumnType(13)).thenReturn(Types.TIMESTAMP);
+        when(resultSet.getTimestamp("NullTimestamp")).thenReturn(null);
+        when(resultSet.getTimestamp(13)).thenReturn(null);
 
         JsonConverter jsonConverter = new JsonConverter();
         PropertyMap jsonMap = jsonConverter.convertToJsonResultSet(resultSet);
