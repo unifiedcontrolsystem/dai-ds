@@ -2,10 +2,6 @@
 set -ex
 
 voltadmin shutdown --force || true
-
-sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
-sudo bash -c "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
-
 voltdb init --force
 
 # JENKINS_NODE_COOKIE=dontKillMe nohup voltdb start --http 8081 &
