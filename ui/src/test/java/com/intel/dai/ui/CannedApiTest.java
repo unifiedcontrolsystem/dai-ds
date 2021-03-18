@@ -83,6 +83,18 @@ public class CannedApiTest {
         assertNotNull(result);
     }
 
+    @Test
+    public void invspecificSubfru() throws Exception {
+        input_map.put("StartTime", "null");
+        input_map.put("EndTime","null");
+        input_map.put("subfru","all");
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        PropertyMap result = canned.getData("getinvspecificlctn", input_map);
+        assertNotNull(result);
+    }
+
     @Test(expected = ProviderException.class)
     public void defaultoption() throws Exception {
         MockCannedApi canned = new MockCannedApi();
@@ -110,6 +122,15 @@ public class CannedApiTest {
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
         PropertyMap result = canned.getData("getreservationinfo", input_map);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getFruMigration() throws Exception {
+        MockCannedApi canned = new MockCannedApi();
+        when(mockstmt.executeQuery()).thenReturn(mockrs);
+        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
+        PropertyMap result = canned.getData("getfrumigrationhistory", input_map);
         assertNotNull(result);
     }
 

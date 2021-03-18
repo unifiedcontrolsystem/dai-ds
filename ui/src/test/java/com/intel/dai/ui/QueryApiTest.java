@@ -72,13 +72,15 @@ public class QueryApiTest {
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
         String result = canned.getData("diagsact", input_map);
         assertNotNull(result);
-        result = canned.getData("diagsnact", input_map);
+        result = canned.getData("diagsnonact", input_map);
         assertNotNull(result);
         result = canned.getData("jobsact", input_map);
         assertNotNull(result);
         result = canned.getData("jobsnonact", input_map);
         assertNotNull(result);
         result = canned.getData("computeinv", input_map);
+        assertNotNull(result);
+        result = canned.getData("serviceadapterdata", input_map);
         assertNotNull(result);
     }
 
@@ -89,7 +91,9 @@ public class QueryApiTest {
         MockQueryApi canned = new MockQueryApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        String result = canned.getData("nodestatehistory", input_map);
+        String result = canned.getData("computenodestatehistory", input_map);
+        assertNotNull(result);
+        result = canned.getData("servicenodestatehistory", input_map);
         assertNotNull(result);
         result = canned.getData("rasevent", input_map);
         assertNotNull(result);
@@ -104,6 +108,10 @@ public class QueryApiTest {
         result = canned.getData("inventoryss", input_map);
         assertNotNull(result);
         result = canned.getData("reservationlist", input_map);
+        assertNotNull(result);
+        result = canned.getData("inventoryinfo", input_map);
+        assertNotNull(result);
+        result = canned.getData("replacementhistory", input_map);
         assertNotNull(result);
     }
 
