@@ -82,7 +82,7 @@
     {
       "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log",
       "ServiceNode": "X3001-AM3",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.pbs.AdapterWlmPBS $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "WLM",
       "NumberOfInstances": 1
     },
