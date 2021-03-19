@@ -114,18 +114,13 @@ public class AdapterWlmPBS implements WlmProvider {
 
         log_.info("Received message for subject: %s", subject);
         try {
-            //----------------------------------------------------------
-            // Determine what type of record this is.
-            PropertyMap jsonMessage = jsonParser.fromString(message).getAsMap();
-
-            // This record came in via cqm log.
             if (subject.equals("pbs_runjobs")) {
+                PropertyMap jsonMessage = jsonParser.fromString(message).getAsMap();
                 handlePBSJobMessages(message, jsonMessage);
             }
             else {
                 log_.error("Could not determine message origin: " + message);
             }
-
         }
         catch (Exception e) {
             // Log the exception, generate a RAS event and continue parsing the console and varlog messages
