@@ -173,6 +173,22 @@ The name field of this type is always `rabbitmq`.
 }
 ...
 ```
+#### 6.3.2 Kafka client
+The name field of this type is always `kafka`.
+```json
+...
+"name": "kafka",
+"arguments": {
+   "bootstrap.servers": "kafka_hosted_machine:9092",
+   "group.id": "boot_states",
+   "schema.registry.url": "http://kafka_hosted_machine:8081",
+   "auto.commit.enable": false,
+   "auto.offset.reset": "earliest",
+   "specific.avro.reader": "true",
+   "topics": "stateChanges"
+}
+...
+```
 ## 7 Adapter Profiles (adapterProfiles)
 This section defines all of the possible profiles that can be used by the specific provider's implementation using the *dai_network_listener* component.  Each profile describes a single data transformer and action provider, subject(s) provided, and the network stream(s) used to gather the data. Example:
 ```json
