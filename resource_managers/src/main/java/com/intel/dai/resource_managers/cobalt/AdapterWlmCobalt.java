@@ -419,7 +419,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         //------------------------------------------------------
         // Update the reservation information for this reservation in the table.
         //------------------------------------------------------
-        reservations.updateReservation(sReservationName, sUsers, sNodes, lReservationsStartTsInMicroSecs, dLineTimestamp.getTime() * 1000L, adapter.getType(), workQueue.workItemId());
+        reservations.updateReservation(sReservationName, sUsers, sNodes, lReservationsStartTsInMicroSecs, 0L, dLineTimestamp.getTime() * 1000L, adapter.getType(), workQueue.workItemId());
 
     }   // End handleReservationUpdatedMsg(String[] aLineCols, SimpleDateFormat oldDateFormat, SimpleDateFormat sqlDateFormat)
 

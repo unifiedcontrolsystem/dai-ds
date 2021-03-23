@@ -25,6 +25,8 @@ import org.voltdb.*;
 
 public class ReservationUpdated extends VoltProcedure {
 
+    public final SQLStmt selectReservationSql = new SQLStmt("SELECT * FROM WlmReservation_History WHERE ReservationName=? Order By LastChgTimestamp DESC Limit 1;");
+
     public final SQLStmt insertHistorySql = new SQLStmt(
                     "INSERT INTO WlmReservation_History " +
                     "(ReservationName, Users, Nodes, StartTimestamp, EndTimestamp, DeletedTimestamp, LastChgTimestamp, DbUpdatedTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
@@ -35,15 +37,30 @@ public class ReservationUpdated extends VoltProcedure {
 
     public long run(String sReservationName, String sUsers, String sNodes, long lStartTsInMicroSecs, long lEndTsInMicroSecs, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
     {
+
+        //--------------------------------------------------
+        // Grab the current reservation's information for the reservation table so they are available for use creating the new history record.
+        //--------------------------------------------------
+        voltQueueSQL(selectReservationSql, sReservationName);
+        VoltTable[] aReservationData = voltExecuteSQL();
+
+        // Ensure that we found the rest of the reservation's data.
+        if (aReservationData[0].getRowCount() == 0) {
+            throw new VoltAbortException("ReservationUpdated - could not find a corresponding reservation for the 'update this reservation', the query returned no rows - "
+                    +"ReservationName='" + sReservationName + "!");
+        }
+
+        aReservationData[0].advanceRow();
+
         //---------------------------------------------------------------------
         // Insert this information into the WlmReservation_History table.
         //---------------------------------------------------------------------
         voltQueueSQL(insertHistorySql
                     ,sReservationName
-                    ,sUsers
-                    ,sNodes
-                    ,lStartTsInMicroSecs        // StartTimestamp
-                    ,lEndTsInMicroSecs          // EndTimestamp
+                    ,sUsers != null ? sUsers : aReservationData[0].getString("Users")
+                    ,sNodes != null ? sNodes : aReservationData[0].getString("Nodes")
+                    ,lStartTsInMicroSecs != 0L ? lStartTsInMicroSecs : aReservationData[0].getTimestampAsLong("StartTimestamp")
+                    ,lEndTsInMicroSecs != 0L ? lEndTsInMicroSecs : aReservationData[0].getTimestampAsLong("EndTimestamp")
                     ,null                       // DeletedTimestamp
                     ,lTsInMicroSecs             // LastChgTimestamp
                     ,this.getTransactionTime()  // DbUpdatedTimestamp
