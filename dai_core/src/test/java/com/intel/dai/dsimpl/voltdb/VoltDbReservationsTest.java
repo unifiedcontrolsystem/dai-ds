@@ -53,7 +53,7 @@ public class VoltDbReservationsTest {
         when(client_.callProcedure(anyString(), any())).thenReturn(response_);
 
         VoltDbReservations reservations = new VoltDbReservationsMock(log_, null);
-        reservations.updateReservation("res1", "user", "c01",  5500000L, 5500000L, "WLM", 0);
+        reservations.updateReservation("res1", "user", "c01",  5500000L, 0L, 5500000L, "WLM", 0);
     }
 
     @Test
