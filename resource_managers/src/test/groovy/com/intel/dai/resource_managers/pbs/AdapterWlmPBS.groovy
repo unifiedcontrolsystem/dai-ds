@@ -8,6 +8,7 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIO;
 import spock.lang.Specification;
 import com.intel.properties.PropertyDocument;
+import com.intel.xdg.XdgConfigFile;
 
 class AdapterWlmPBSSpec extends Specification {
 
@@ -169,6 +170,10 @@ class AdapterWlmPBSSpec extends Specification {
             put("topics","pbs_runjobs")}}
         jsonparser_.readConfig(_) >> configJson
         underTest_.jsonParser = jsonparser_
+        def stream = Mock(InputStream)
+        def xdg_ = Mock(XdgConfigFile)
+        xdg_.Open(_) >> stream
+        underTest_.xdg = xdg_
 
         expect: underTest_.handleInputFromExternalComponent(args) == 0
     }

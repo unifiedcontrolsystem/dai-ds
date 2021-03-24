@@ -21,6 +21,7 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.xdg.XdgConfigFile;
 
 import java.io.*;
 import java.lang.*;
@@ -48,6 +49,7 @@ public class AdapterWlmPBS implements WlmProvider {
     public RasEventLog raseventlog;
     public NodeInformation nodeinfo;
     public ConfigIO jsonParser;
+    public XdgConfigFile xdg;
 
     // Constructor
     public AdapterWlmPBS(Logger log, AdapterInformation iadapter, DataStoreFactory factory) {
@@ -76,7 +78,10 @@ public class AdapterWlmPBS implements WlmProvider {
             HashMap<String, String> args = new HashMap<String, String>();
 
             String configName = AdapterWlmPBS.class.getSimpleName() + ".json";
-            PropertyMap configJson = jsonParser.readConfig(configName).getAsMap();
+            xdg = new XdgConfigFile("ucs");
+            InputStream result = xdg.Open(configName);
+            
+            PropertyMap configJson = jsonParser.readConfig(result).getAsMap();
             args.put("bootstrap.servers", configJson.getString("bootstrap.servers"));
             args.put("group.id", configJson.getString("group.id"));
             args.put("schema.registry.url", configJson.getString("schema.registry.url"));
@@ -99,6 +104,7 @@ public class AdapterWlmPBS implements WlmProvider {
             String instancedata = "AdapterName=" + adapter.getName();
             raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
             log_.error("Unable to connect to network sink");
+            log_.exception(e);
             rc = 1;
         }
         finally {
