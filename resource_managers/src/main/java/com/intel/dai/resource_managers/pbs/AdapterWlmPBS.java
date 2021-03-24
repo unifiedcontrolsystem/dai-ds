@@ -80,7 +80,9 @@ public class AdapterWlmPBS implements WlmProvider {
             String configName = AdapterWlmPBS.class.getSimpleName() + ".json";
             xdg = new XdgConfigFile("ucs");
             InputStream result = xdg.Open(configName);
-            
+            if(result == null)
+                throw new FileNotFoundException("Failed to locate or open '" + configName + "'");
+
             PropertyMap configJson = jsonParser.readConfig(result).getAsMap();
             args.put("bootstrap.servers", configJson.getString("bootstrap.servers"));
             args.put("group.id", configJson.getString("group.id"));
@@ -103,8 +105,7 @@ public class AdapterWlmPBS implements WlmProvider {
             String eventtype = "RasGenAdapterUnableToConnectToAmqp";
             String instancedata = "AdapterName=" + adapter.getName();
             raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
-            log_.error("Unable to connect to network sink");
-            log_.exception(e);
+            log_.exception(e, "Unable to connect to network sink");
             rc = 1;
         }
         finally {

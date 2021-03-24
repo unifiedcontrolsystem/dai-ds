@@ -172,10 +172,10 @@ class AdapterWlmPBSSpec extends Specification {
         underTest_.jsonParser = jsonparser_
         def stream = Mock(InputStream)
         def xdg_ = Mock(XdgConfigFile)
-        xdg_.Open(_) >> stream
+        xdg_.Open(_ as String) >> stream
         underTest_.xdg = xdg_
 
-        expect: underTest_.handleInputFromExternalComponent(args) == 0
+        expect: underTest_.handleInputFromExternalComponent(args)
     }
 
     def "Test handleInputFromExternalComponent PropertyNotExpectedType"() {

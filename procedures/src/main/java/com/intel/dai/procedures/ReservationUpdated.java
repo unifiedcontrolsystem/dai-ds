@@ -58,7 +58,7 @@ public class ReservationUpdated extends VoltProcedure {
         voltQueueSQL(insertHistorySql
                     ,sReservationName
                     ,sUsers != null ? sUsers : aReservationData[0].getString("Users")
-                    ,sNodes != null ? sUsers : aReservationData[0].getString("Nodes")
+                    ,sNodes != null ? sNodes : aReservationData[0].getString("Nodes")
                     ,lStartTsInMicroSecs != 0L ? lStartTsInMicroSecs : aReservationData[0].getTimestampAsLong("StartTimestamp")
                     ,lEndTsInMicroSecs != 0L ? lEndTsInMicroSecs : aReservationData[0].getTimestampAsLong("EndTimestamp")
                     ,null                       // DeletedTimestamp
