@@ -84,13 +84,10 @@ public class AdapterWlmPBS implements WlmProvider {
                 throw new FileNotFoundException("Failed to locate or open '" + configName + "'");
 
             PropertyMap configJson = jsonParser.readConfig(result).getAsMap();
-            args.put("bootstrap.servers", configJson.getString("bootstrap.servers"));
-            args.put("group.id", configJson.getString("group.id"));
-            args.put("schema.registry.url", configJson.getString("schema.registry.url"));
-            args.put("topics", configJson.getString("topics"));
-            args.put("auto.commit.enable", configJson.getString("auto.commit.enable"));
-            args.put("specific.avro.reader", configJson.getString("specific.avro.reader"));
-            args.put("auto.offset.reset", configJson.getString("auto.offset.reset"));
+
+            for (String key : configJson.keySet()) {
+                args.put(key, configJson.getString(key));
+            }
 
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "kafka", args);
             sink.setLogger(log_);
@@ -207,7 +204,7 @@ public class AdapterWlmPBS implements WlmProvider {
     private void handleJobStartedMsg(PropertyMap jsonMessage) throws PropertyNotExpectedType, InterruptedException, IOException, DataStoreException
     {
 
-        long lStartTsInMicroSecs = jsonMessage.getLong("timestamp") *1000000L;
+        long lStartTsInMicroSecs = jsonMessage.getLong("timestamp") *1000L;
 
         String sJobId = jsonMessage.getString("job_id");
         String sNodeList = jsonMessage.getString("host");
@@ -254,7 +251,7 @@ public class AdapterWlmPBS implements WlmProvider {
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
-        long lEndTsInMicroSecs = jsonMessage.getLong("timestamp") *1000000L;
+        long lEndTsInMicroSecs = jsonMessage.getLong("timestamp") *1000L;
         HashMap<String, Object> jobinfo = jobs.completeJobInternal(sJobId, workDir, sWlmJobState, lEndTsInMicroSecs, -1L);
 
         //--------------------------------------------------------------
