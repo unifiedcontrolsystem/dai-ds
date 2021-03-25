@@ -20,16 +20,28 @@ class TimeUtilsSpec extends Specification {
     def "Test Simple Conversions"() {
         expect: TimeUtils.nanosecondsToMicroseconds(INPUT) == RESULT1
         and:    TimeUtils.nanosecondsToMilliseconds(INPUT) == RESULT2
+        and:    TimeUtils.nanosecondsToSeconds(INPUT)      == RESULT3
         where:
-        INPUT            || RESULT1     || RESULT2
-        10_000_000_000L  || 10_000_000L || 10_000L
-        10_000_000L      || 10_000L     || 10L
-        10_000L          || 10L         || 0L
+        INPUT                || RESULT1         || RESULT2     || RESULT3
+        10_000_000_000_000L  || 10_000_000_000L || 10_000_000L || 10_000L
+        10_000_000_000L      || 10_000_000L     || 10_000L     || 10L
+        10_000_000L          || 10_000L         || 10L         || 0L
+    }
+
+    def "Test Reverse Simple Conversions"() {
+        expect: TimeUtils.microsecondsToNanoseconds(INPUT) == RESULT1
+        and:    TimeUtils.millisecondsToNanoseconds(INPUT) == RESULT2
+        and:    TimeUtils.secondsToNanoseconds(INPUT)      == RESULT3
+        where:
+        INPUT    || RESULT1     || RESULT2         || RESULT3
+        10_000L  || 10_000_000L || 10_000_000_000L || 10_000_000_000_000L
+        10L      || 10_000L     || 10_000_000L     || 10_000_000_000L
+        1L       || 1_000L      || 1_000_000L      || 1_000_000_000L
     }
 
     def "Test NSFromIso8601 and Back"() {
         expect: TimeUtils.nSFromIso8601(TS) == RESULT
-        and:    TimeUtils.iso8601toNs(RESULT) == RESULT2
+        and:    TimeUtils.nsToIso8601(RESULT) == RESULT2
         where: // Check all allowed formats...
         TS                                || RESULT               || RESULT2
         "2020-03-27 12:00:00.001Z"        || 1585310400001000000L || "2020-03-27T12:00:00.001Z"

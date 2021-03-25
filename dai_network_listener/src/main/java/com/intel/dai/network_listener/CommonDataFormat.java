@@ -64,7 +64,7 @@ public final class CommonDataFormat {
         build.append(spaces).append("Description   = ").append(description_).append("\n");
         build.append(spaces).append("TelemetryType = ").append(telemetryDataType_).append("\n");
         build.append(spaces).append("Location      = ").append(location_).append("\n");
-        build.append(spaces).append("Timestamp     = ").append(TimeUtils.iso8601toNs(nsTimestamp_)).append("\n");
+        build.append(spaces).append("Timestamp     = ").append(TimeUtils.nsToIso8601(nsTimestamp_)).append("\n");
         build.append(spaces).append("Minimum       = ").append(min_).append("\n");
         build.append(spaces).append("Average       = ").append(average_).append("\n");
         build.append(spaces).append("Maximum       = ").append(max_).append("\n");

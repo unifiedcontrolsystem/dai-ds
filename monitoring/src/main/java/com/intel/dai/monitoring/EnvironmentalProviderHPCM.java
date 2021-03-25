@@ -14,6 +14,7 @@ import com.intel.logging.Logger;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.runtime_utils.TimeUtils;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -26,12 +27,16 @@ import java.util.Map;
  */
 public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initializer {
     static class EnvelopeData {
-        EnvelopeData(long nsTimestamp, String location, String prefixName) {
+        EnvelopeData(String context, long nsTimestamp, String location, String prefixName) {
+            this.context = context;
             this.nsTimestamp = nsTimestamp;
             this.location = location;
             this.prefixName = prefixName;
         }
-        EnvelopeData(long nsTimestamp, String location) { this(nsTimestamp, location, null); }
+        EnvelopeData(String context, long nsTimestamp, String location) {
+            this(context, nsTimestamp, location, null);
+        }
+        final String context;
         final long nsTimestamp;
         final String location;
               String prefixName;
@@ -51,11 +56,15 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initi
 
     @Override
     public void initialize() {
-        // Setup supported @odata.context values and handler methods.
+        // Setup supported odata_context values and handler methods.
         dispatchMap_.put("/redfish/v1/$metadata#ProcessorMetrics.ProcessorMetrics", this::processProcessorMetrics);
         dispatchMap_.put("/redfish/v1/$metadata#Thermal.Thermal", this::processThermals);
+        dispatchMap_.put("/redfish/v1/$metadata#Power.Power", this::processPower);
     }
 
+    ////////////////////////
+    // Parse Data Section //
+    ////////////////////////
     @Override
     public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
@@ -78,7 +87,7 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initi
     }
 
     private void dispatchProcessing(List<CommonDataFormat> results, PropertyMap item) {
-        String itemContext = item.getStringOrDefault("@odata.context", null);
+        String itemContext = item.getStringOrDefault("odata_context", null);
         if(itemContext != null) {
             ContextHandler dispatch = dispatchMap_.getOrDefault(itemContext, null);
             if(dispatch != null) {
@@ -95,16 +104,19 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initi
                             item.getStringOrDefault("location", "<MISSING>"));
                 }
             } else
-                log_.warn("Missing parsing dispatch handler for @odata.context='%s'! Skipping data!", itemContext);
+                log_.warn("Missing parsing dispatch handler for odata_context='%s'! Skipping data!", itemContext);
         } else
-            log_.warn("Missing '@odata.context' key in incoming JSON! Skipping data!");
+            log_.warn("Missing 'odata_context' key in incoming JSON! Skipping data!");
     }
 
     private EnvelopeData getLocationAndTimestamp(PropertyMap item)
             throws PropertyNotExpectedType, ParseException, ConversionException {
-        long ts = CommonFunctions.convertISOToLongTimestamp(item.getString("timestamp"));
+        String context = item.get("odata_context").toString(); // Cannot be null returned here, see dispatchProcessing()
+        // TODO: Unclear how the timestamp will be delivered, long ms from epoch or ISO8601 format...
+        long ts = TimeUtils.nSFromIso8601(item.getString("timestamp"));
+//        long ts = TimeUtils.millisecondsToNanoseconds(item.getLong("timestamp"));
         String location = CommonFunctions.convertForeignToLocation(item.getString("location"));
-        return new EnvelopeData(ts, location);
+        return new EnvelopeData(context, ts, location);
     }
 
     private void addToResults(String name, double value, String units, String type, EnvelopeData data,
@@ -118,16 +130,16 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initi
     private void processProcessorMetrics(PropertyMap item, EnvelopeData data, List<CommonDataFormat> results) {
         String name = item.getStringOrDefault("Name", null);
         if(name == null) {
-            log_.warn("JSON for '@odata.context'='%s' is missing a 'Name' entry!",
-                    item.getStringOrDefault("@odata.context", "Unknown Context"));
+            log_.warn("JSON for 'odata_context'='%s' is missing a 'Name' entry!",
+                    item.getStringOrDefault("odata_context", "Unknown Context"));
             name = "<MISSING>";
         }
         if(item.containsKey("TemperatureCelsius") && item.get("TemperatureCelsius") != null) {
             double value = item.getDoubleOrDefault("TemperatureCelsius", -9999.99);
             addToResults(name, value, "C", "Thermal", data, results);
         } else {
-            log_.warn("JSON for '@odata.context'='%s' has a missing or 'null' key for 'TemperatureCelsius'! " +
-                            "Skipping data!", item.getStringOrDefault("@odata.context", "Unknown Context"));
+            log_.warn("JSON for 'odata_context'='%s' has a missing or 'null' key for 'TemperatureCelsius'! " +
+                            "Skipping data!", item.getStringOrDefault("odata_context", "Unknown Context"));
         }
     }
 
@@ -154,38 +166,83 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProvider, Initi
     }
 
     private void processThermalFan(PropertyMap fan, EnvelopeData data, List<CommonDataFormat> results) {
-        String name = fan.getStringOrDefault("Name", null);
-        if(name == null) {
-            log_.warn("JSON for '@odata.context'='%s' is missing a 'Name' entry!",
-                    fan.getStringOrDefault("@odata.context", "Unknown Context"));
-            name = "<MISSING>";
-        }
+        String name = checkNameInJson(data, fan.getStringOrDefault("Name", null));
         if(fan.containsKey("Reading") && fan.get("Reading") != null) {
             double value = fan.getDoubleOrDefault("Reading", -9999.99);
             addToResults(name, value, fan.getStringOrDefault("ReadingUnits", "RPM"), "Thermal",
                     data, results);
         } else {
-            log_.warn("JSON for '@odata.context'='%s' has a missing or 'null' key for 'Reading'! " +
-                    "Skipping data!", fan.getStringOrDefault("@odata.context", "Unknown Context"));
+            log_.warn("JSON for 'odata_context'='%s' has a missing or 'null' key for 'Reading'! " +
+                    "Skipping data!", data.context);
         }
     }
 
     private void processThermalTemperature(PropertyMap temperature, EnvelopeData data, List<CommonDataFormat> results) {
-        String name = temperature.getStringOrDefault("Name", null);
-        if(name == null) {
-            log_.warn("JSON for '@odata.context'='%s' is missing a 'Name' entry!",
-                    temperature.getStringOrDefault("@odata.context", "Unknown Context"));
-            name = "<MISSING>";
-        }
+        String name = checkNameInJson(data, temperature.getStringOrDefault("Name", null));
         if(temperature.containsKey("ReadingCelsius") && temperature.get("ReadingCelsius") != null) {
             double value = temperature.getDoubleOrDefault("ReadingCelsius", -9999.99);
             addToResults(name, value, "C", "Thermal", data, results);
         } else {
-            log_.warn("JSON for '@odata.context'='%s' has a missing or 'null' key for 'ReadingCelsius'! " +
-                    "Skipping data!", temperature.getStringOrDefault("@odata.context", "Unknown Context"));
+            log_.warn("JSON for 'odata_context'='%s' has a missing or 'null' key for 'ReadingCelsius'! " +
+                    "Skipping data!", data.context);
         }
     }
 
+    private void processPower(PropertyMap item, EnvelopeData data, List<CommonDataFormat> results) {
+        PropertyArray powerControl = item.getArrayOrDefault("PowerControl", new PropertyArray());
+        PropertyArray voltages = item.getArrayOrDefault("Voltages", new PropertyArray());
+        data.prefixName = item.getStringOrDefault("Name", null);
+        for(Object o: powerControl) {
+            if(o instanceof PropertyMap) {
+                PropertyMap powerControlObject = (PropertyMap) o;
+                processPowerControl(powerControlObject, data, results);
+            } else {
+                log_.warn("Unknown array or primitive type in 'PowerControl' array JSON!");
+            }
+        }
+        for(Object o: voltages) {
+            if(o instanceof PropertyMap) {
+                PropertyMap voltagesObject = (PropertyMap) o;
+                processVoltages(voltagesObject, data, results);
+            } else {
+                log_.warn("Unknown array or primitive type in 'Voltages' array JSON!");
+            }
+        }
+    }
+
+    private void processPowerControl(PropertyMap item, EnvelopeData data, List<CommonDataFormat> results) {
+        String name = checkNameInJson(data, item.getStringOrDefault("Name", null));
+        if(item.containsKey("PowerConsumedWatts") && item.get("PowerConsumedWatts") != null) {
+            double value = item.getDoubleOrDefault("PowerConsumedWatts", -9999.99);
+            addToResults(name, value, "W", "Power", data, results);
+        } else {
+            log_.warn("JSON for 'odata_context'='%s' has a missing or 'null' key for 'PowerConsumedWatts'! " +
+                    "Skipping data!", data.context);
+        }
+    }
+
+    private void processVoltages(PropertyMap item, EnvelopeData data, List<CommonDataFormat> results) {
+        String name = checkNameInJson(data, item.getStringOrDefault("Name", null));
+        if(item.containsKey("ReadingVolts") && item.get("ReadingVolts") != null) {
+            double value = item.getDoubleOrDefault("ReadingVolts", -9999.99);
+            addToResults(name, value, "V", "Voltage", data, results);
+        } else {
+            log_.warn("JSON for 'odata_context'='%s' has a missing or 'null' key for 'ReadingVolts'! " +
+                    "Skipping data!", data.context);
+        }
+    }
+
+    private String checkNameInJson(EnvelopeData data, String name) {
+        if (name == null) {
+            log_.warn("JSON for 'odata_context'='%s' is missing a 'Name' entry!", data.context);
+            name = "<MISSING>";
+        }
+        return name;
+    }
+
+    /////////////////////////
+    // Act on Data Section //
+    /////////////////////////
     @Override
     public void actOnData(CommonDataFormat data, NetworkListenerConfig config, SystemActions systemActions) {
         setUpConfig(config);

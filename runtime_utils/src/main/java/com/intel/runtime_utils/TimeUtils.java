@@ -63,7 +63,7 @@ public final class TimeUtils {
      * @param nsTimestamp The nanosecond timestamp to convert.
      * @return The ISO 8601 date-time string.
      */
-    public static String iso8601toNs(long nsTimestamp) {
+    public static String nsToIso8601(long nsTimestamp) {
         return ISO_INSTANT.format(Instant.ofEpochSecond(nsTimestamp / NANO_FACTOR, nsTimestamp % NANO_FACTOR)).replace("GMT", "Z");
     }
 
@@ -78,6 +78,16 @@ public final class TimeUtils {
     }
 
     /**
+     * Convert long nanoseconds to seconds.
+     *
+     * @param ns The nanoseconds to convert to seconds.
+     * @return The seconds from the nanoseconds.
+     */
+    public static long nanosecondsToSeconds(long ns) {
+        return ns /NANO_FACTOR;
+    }
+
+    /**
      * Convert long nanoseconds to milliseconds.
      *
      * @param ns The nanoseconds to convert to milliseconds.
@@ -85,6 +95,36 @@ public final class TimeUtils {
      */
     public static long nanosecondsToMilliseconds(long ns) {
         return ns / MICRO_FACTOR;
+    }
+
+    /**
+     * Convert long microseconds to nanoseconds.
+     *
+     * @param ns The microseconds to convert to nanoseconds.
+     * @return The nanoseconds from the microseconds.
+     */
+    public static long microsecondsToNanoseconds(long ns) {
+        return ns * MILLI_FACTOR;
+    }
+
+    /**
+     * Convert long milliseconds to nanoseconds.
+     *
+     * @param ns The milliseconds to convert to nanoseconds.
+     * @return The nanoseconds from the milliseconds.
+     */
+    public static long millisecondsToNanoseconds(long ns) {
+        return ns * MICRO_FACTOR;
+    }
+
+    /**
+     * Convert long seconds to nanoseconds.
+     *
+     * @param ns The seconds to convert to nanoseconds.
+     * @return The nanoseconds from the seconds.
+     */
+    public static long secondsToNanoseconds(long ns) {
+        return ns * NANO_FACTOR;
     }
 
     private static final long NANO_FACTOR = 1_000_000_000L;

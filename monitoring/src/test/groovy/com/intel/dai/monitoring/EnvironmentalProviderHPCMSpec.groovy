@@ -45,7 +45,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
     }
 
     def "Test Initialize"() {
-        expect: underTest_.dispatchMap_.size() == 2
+        expect: underTest_.dispatchMap_.size() == 3
     }
 
     def "Test ProcessRawStringData Thermal"() {
@@ -55,7 +55,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
 
     def "Test ProcessRawStringData Bad Thermal 1"() {
         PropertyMap map = underTest_.parser_.fromString(rawThermal).getAsMap()
-        map.remove("@odata.context")
+        map.remove("odata_context")
         String modified = underTest_.parser_.toString(map)
         def list = underTest_.processRawStringData(modified, networkConfig_)
         expect: list.size() == 0
@@ -121,14 +121,14 @@ class EnvironmentalProviderHPCMSpec extends Specification {
     }
 
     String rawThermal = """{
-  "@odata.context": "/redfish/v1/\$metadata#Thermal.Thermal",
-  "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal",
-  "@odata.type": "#Thermal.v1_5_2.Thermal",
+  "odata_context": "/redfish/v1/\$metadata#Thermal.Thermal",
+  "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal",
+  "odata_type": "#Thermal.v1_5_2.Thermal",
   "timestamp": "2021-03-04 16:45:00.000000000Z",
   "location": "x0c0s36b0n0",
   "Fans": [
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/0",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/0",
       "LowerThresholdCritical": 1710,
       "LowerThresholdNonCritical": 1980,
       "MaxReadingRange": 22950,
@@ -139,7 +139,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       "ReadingUnits": "RPM",
       "Redundancy": [
         {
-          "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
+          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
         }
       ],
       "Status": {
@@ -149,7 +149,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       }
     },
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/1",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/1",
       "LowerThresholdCritical": 1710,
       "LowerThresholdNonCritical": 1980,
       "MaxReadingRange": 22950,
@@ -160,7 +160,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       "ReadingUnits": "RPM",
       "Redundancy": [
         {
-          "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
+          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
         }
       ],
       "Status": {
@@ -170,7 +170,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       }
     },
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/2",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/2",
       "LowerThresholdCritical": 1710,
       "LowerThresholdNonCritical": 1980,
       "MaxReadingRange": 22950,
@@ -181,7 +181,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       "ReadingUnits": "RPM",
       "Redundancy": [
         {
-          "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
+          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
         }
       ],
       "Status": {
@@ -193,7 +193,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
   ],
   "Temperatures": [
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/0",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/0",
       "LowerThresholdCritical": 0,
       "LowerThresholdNonCritical": 5,
       "MemberId": "0",
@@ -209,7 +209,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       "UpperThresholdNonCritical": 110
     },
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/1",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/1",
       "LowerThresholdCritical": 0,
       "LowerThresholdNonCritical": 5,
       "MemberId": "1",
@@ -225,7 +225,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
       "UpperThresholdNonCritical": 50
     },
     {
-      "@odata.id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/2",
+      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/2",
       "LowerThresholdCritical": 0,
       "LowerThresholdNonCritical": 5,
       "MemberId": "2",
@@ -244,9 +244,9 @@ class EnvironmentalProviderHPCMSpec extends Specification {
 }
 """
     String rawProcessorMetrics = """{
-  "@odata.context": "/redfish/v1/\$metadata#ProcessorMetrics.ProcessorMetrics",
-  "@odata.id": "/redfish/v1/Systems/LUC301700005/Processors/CPU1/ProcessorMetrics",
-  "@odata.type": "#ProcessorMetrics.v1_0_0.ProcessorMetrics",
+  "odata_context": "/redfish/v1/\$metadata#ProcessorMetrics.ProcessorMetrics",
+  "odata_id": "/redfish/v1/Systems/LUC301700005/Processors/CPU1/ProcessorMetrics",
+  "odata_type": "#ProcessorMetrics.v1_0_0.ProcessorMetrics",
   "timestamp": "2021-03-04 16:45:00.000000005Z",
   "location": "x0c0s36b0n0",
   "AverageFrequencyMHz": null,
