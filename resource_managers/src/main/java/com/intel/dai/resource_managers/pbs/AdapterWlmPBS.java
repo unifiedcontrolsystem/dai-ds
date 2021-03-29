@@ -18,7 +18,6 @@ import com.intel.networking.sink.NetworkDataSink;
 import com.intel.networking.sink.NetworkDataSinkFactory;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
-import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 import com.intel.xdg.XdgConfigFile;
@@ -27,7 +26,6 @@ import java.io.*;
 import java.lang.*;
 import java.util.*;
 import static java.lang.Math.toIntExact;
-import java.text.ParseException;
 
 /**
  * AdapterWlmPBS for the VoltDB database - specific instance of a WLM adapter that handles the PBS job scheduler.
@@ -90,11 +88,11 @@ public class AdapterWlmPBS implements WlmProvider {
             }
 
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "kafka", args);
-            sink.setLogger(log_);
             sink.setCallbackDelegate(this::processSinkMessage);
             sink.startListening();
             // Keep this "thread" active (processing messages off the queue) until we want the adapter to go away.
             waitUntilFinishedProcessingMessages();
+            sink.stopListening();
             log_.info("handleInputFromExternalComponent - exiting");
 
         }
