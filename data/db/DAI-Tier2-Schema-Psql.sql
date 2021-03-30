@@ -1063,16 +1063,6 @@ CREATE TABLE PUBLIC.tier2_authorized_user (
 );
 
 
-CREATE TABLE public.tier2_RawHWInventory_History (
-    Action VARCHAR(16) NOT NULL,                -- Added/Removed
-    ID VARCHAR(64) NOT NULL,                    -- perhaps xname (path); as is from JSON
-    FRUID VARCHAR(80) NOT NULL,                 -- perhaps <manufacturer>-<serial#>
-    ForeignTimestamp VARCHAR(32) NOT NULL,      -- Foreign server timestamp string in RFC-3339 format
-    DbUpdatedTimestamp TIMESTAMP NOT NULL,
-    EntryNumber bigint NOT NULL,
-    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
-);
-
 CREATE TABLE public.tier2_NonNodeHwInventory_History (
    Lctn                    VarChar(50)       NOT NULL,
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,
@@ -1948,6 +1938,42 @@ CREATE OR REPLACE FUNCTION public.getaggregatedevndatawithfilters(p_start_time t
                 when p_lctn is not null then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@ (select string_to_array(p_lctn, ','))))
             end
         order by timestamp DESC LIMIT p_limit; $$;
+
+
+CREATE TABLE public.tier2_RawHWInventory_History (
+                                                     Action VARCHAR(16) NOT NULL,                -- Added/Removed
+                                                     ID VARCHAR(64) NOT NULL,                    -- perhaps xname (path); as is from JSON
+                                                     FRUID VARCHAR(80) NOT NULL,                 -- perhaps <manufacturer>-<serial#>
+                                                     ForeignTimestamp VARCHAR(32) NOT NULL,      -- Foreign server timestamp string in RFC-3339 format
+                                                     DbUpdatedTimestamp TIMESTAMP NOT NULL,
+                                                     EntryNumber bigint NOT NULL,
+    PRIMARY KEY (Action, ID, ForeignTimestamp)  -- allows the use of upsert to eliminate duplicates
+);
+
+
+CREATE SEQUENCE public.tier2_RawHWInventory_History_entrynumber_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tier2_RawHWInventory_History_entrynumber_seq OWNED BY public.tier2_RawHWInventory_History.entrynumber;
+ALTER TABLE ONLY public.tier2_RawHWInventory_History ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_RawHWInventory_History_entrynumber_seq'::regclass);
+SELECT pg_catalog.setval('public.tier2_RawHWInventory_History_entrynumber_seq', 1, false);
+
+
+CREATE OR REPLACE FUNCTION public.insertorupdaterawhwinventorydata(
+    p_action VarChar, p_id VarChar, p_fruid VarChar,  p_ForeignTimestamp VarChar, p_DbUpdatedTimestamp TIMESTAMP) RETURNS void
+    LANGUAGE sql
+AS $$
+insert into tier2_RawHWInventory_History(action, id, fruid, ForeignTimestamp, DbUpdatedTimestamp)
+values(p_action, p_id, p_fruid, p_ForeignTimestamp, p_DbUpdatedTimestamp)
+on conflict(Action, ID, ForeignTimestamp) do update set action=p_action, id=p_id,
+                                                        ForeignTimestamp= p_ForeignTimestamp, DbUpdatedTimestamp=p_DbUpdatedTimestamp
+    ;
+$$;
 
 
 --

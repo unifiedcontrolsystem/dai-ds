@@ -167,9 +167,8 @@ class ViewCli(object):
         state_parser.add_argument('locations',
                                   help='Location that you want to get the state info for. Partial locations'
                                        ' are accepted')
-        state_parser.add_argument('--limit', default=100, type=int,
-                                  help='Provide a limit to the number of records of data being retrieved. The default '
-                                       'value is 100')
+        state_parser.add_argument('--subfru', choices=['all', 'cpu','dimm','gpu','hfi'], default=None,
+                                          help='Display subfru data for location. Options include cpu, dimm, gpu, hfi or all')
         state_parser.add_argument('--format', choices=['json', 'table'], default='table',
                                   help='Display data either in JSON or table format. '
                                        'Default will be to display data in tabular format')
@@ -184,9 +183,6 @@ class ViewCli(object):
                                             help='Filter all network config data for given locations. '
                                                  'Provide comma separated location list or '
                                                  'location group. Example: R2-CH0[1-4]-N[1-4]')
-        network_config__parser.add_argument('--limit', default=100, type=int,
-                                            help='Provide a limit to the number of records of data being retrieved. '
-                                                 'The default value is 100')
         network_config__parser.add_argument('--format', choices=['json', 'table'], default='table',
                                             help='Display data either in JSON or table format. Default will be to '
                                                  'display data in tabular format')
@@ -258,6 +254,7 @@ class ViewCli(object):
                                            ' "YYYY-MM-DD HH:MM:SS.[f]" to ensure higher precision')
         reservation_parser.add_argument('--name', help='Filter all reservation data for a given reservation name.')
         reservation_parser.add_argument('--user', dest="username", help='Filter all reservation data for a given username')
+        reservation_parser.add_argument('--locations', help='Filter all reservation data for given locations')
         reservation_parser.add_argument('--limit', default=100, type=int,
                                                   help='Provide a limit to the number of records of data being retrieved. '
                                                        'The default value is 100')
@@ -420,10 +417,10 @@ class ViewCli(object):
                 data_to_display = json_display.display_raw_json()
             else:
                 if args.all:
-                    columns_order = ["time", "lctn", "type", "severity", "controloperation", "detail",
+                    columns_order = ["time", "lctn", "hostname", "type", "severity", "controloperation", "detail",
                                      "jobid", "dbupdatedtimestamp"]
                 else:
-                    columns_order = ["time", "lctn", "type", "severity", "jobid", "controloperation", "detail"]
+                    columns_order = ["time", "lctn", "hostname", "type", "severity", "jobid", "controloperation", "detail"]
                 data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
 
         return CommandResult(response_code, data_to_display)
@@ -455,10 +452,10 @@ class ViewCli(object):
             data_to_display = json_display.display_raw_json()
         else:
             if args.all:
-                columns_order = ["lctn", "type", "minimumvalue", "maximumvalue", "averagevalue", "timestamp",
+                columns_order = ["lctn", "hostname", "type", "minimumvalue", "maximumvalue", "averagevalue", "timestamp",
                                  "adaptertype", "entrynumber", "workitemid"]
             else:
-                columns_order = ["lctn", "type", "minimumvalue", "maximumvalue", "averagevalue", "timestamp"]
+                columns_order = ["lctn", "hostname", "type", "minimumvalue", "maximumvalue", "averagevalue", "timestamp"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
 
         return CommandResult(response_code, data_to_display)
@@ -515,7 +512,7 @@ class ViewCli(object):
         if display_format == 'json':
             data_to_display = json_display.display_raw_json()
         else:
-            columns_order = ["lctn", "inventorytimestamp", "sernum"]
+            columns_order = ["lctn", "hostname", "inventorytimestamp", "sernum"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 
@@ -662,23 +659,47 @@ class ViewCli(object):
 
     def _view_state_execute(self, args):
         client = HttpClient()
+        args.limit = 100
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
         user = 'user=' + self.user
-        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
+
+        if args.subfru is not None:
+            subfru = 'subfru=' + args.subfru
+        else:
+            subfru = ''
+
+        url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user, subfru] if x != ""])
         self.lgr.debug("_view_state_execute: URL for request is {0}".format(url))
         response_code, response = client.send_get_request(url, time_out)
 
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
+        if subfru == '':
+            json_display = JsonDisplay(response)
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                columns_order = ["lctn", "hostname", "type", "state", "wlmnodestate", "owner", "environment", "bootimageid"]
+                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         else:
-            columns_order = ["lctn", "type", "hostname", "state", "wlmnodestate", "owner", "environment", "bootimageid"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+            json_display = JsonDisplay(response)
+            json_result = json.loads(response)
+            if display_format == 'json':
+                data_to_display = json_display.display_raw_json()
+            else:
+                for data_type, data in json_result.items():
+                    json_display = JsonDisplay(json.dumps(data))
+                    if data_type == 'state':
+                        columns_order = ["lctn", "hostname", "type", "state", "wlmnodestate", "owner", "environment", "bootimageid"]
+                        state = '\n' + json_display.display_json_in_tabular_format(columns_order)
+                    if data_type == 'subfru_state':
+                        columns_order = ["nodelctn", "subfrulctn", "state"]
+                        subfru = '\n' + json_display.display_json_in_tabular_format(columns_order)
+                data_to_display = state + subfru
+
         return CommandResult(response_code, data_to_display)
 
     def _view_network_config_execute(self, args):
         client = HttpClient()
+        args.limit = 100
         limit, lctn, display_format, time_out = self._retrieve_from_args(args)
         user = 'user=' + self.user
         url = client.get_base_url() + 'cli/getinvspecificlctn?' + "&".join([x for x in [limit, lctn, user] if x != ""])
@@ -734,7 +755,6 @@ class ViewCli(object):
             return CommandResult(response_code, data_to_display)
 
     def _view_reservation_info_execute(self, args):
-            args.locations = None
             client = HttpClient()
             starttime, endtime = self._retrieve_time_from_args(args)
             limit, lctn, display_format, time_out = self._retrieve_from_args(args)
@@ -750,7 +770,7 @@ class ViewCli(object):
             else:
                 name = ''
             url = client.get_base_url() + 'cli/getreservationinfo?' + "&".join(
-                [x for x in [starttime, endtime, limit, user, username, name] if x != ""])
+                [x for x in [starttime, endtime, limit, user, username, name, lctn] if x != ""])
             self.lgr.debug("_view_reservation_info_execute: URL for request is {0}".format(url))
             response_code, response = client.send_get_request(url, time_out)
 

@@ -19,6 +19,14 @@
     {
       "Value": "/opt/voltdb/voltdb/*:/opt/ucs/lib/*",
       "Key": "UcsClasspath"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnCompNodeNumLevels"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnServiceNodeNumLevels"
     }
   ],
   "AdapterInstances": [
@@ -198,6 +206,13 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": "X3001-AM2"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"UI",
+      "WorkToBeDone":"HandleInputFromUsers",
+      "Parms":"",
+      "NotifyWhenFinished":"F"
     }
   ],
   "Nodes": [

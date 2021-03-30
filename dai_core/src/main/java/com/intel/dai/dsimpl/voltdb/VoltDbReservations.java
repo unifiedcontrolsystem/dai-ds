@@ -71,10 +71,10 @@ public class VoltDbReservations implements Reservations {
      *
      */
     @Override
-    public void updateReservation(String sReservationName, String sUsers, String sNodes, long lStartTimeInMicrosecs, long lUpdatedTimeInMicrosecs, String sAdapterType, long lWorkItem) throws DataStoreException {
+    public void updateReservation(String sReservationName, String sUsers, String sNodes, long lStartTimeInMicrosecs, long lEndTimeInMicrosecs, long lUpdatedTimeInMicrosecs, String sAdapterType, long lWorkItem) throws DataStoreException {
 
         try {
-            ClientResponse response = voltDb_.callProcedure("ReservationUpdated", sReservationName, sUsers, sNodes, lStartTimeInMicrosecs, null, lUpdatedTimeInMicrosecs, sAdapterType, lWorkItem);
+            ClientResponse response = voltDb_.callProcedure("ReservationUpdated", sReservationName, sUsers, sNodes, lStartTimeInMicrosecs, lEndTimeInMicrosecs, lUpdatedTimeInMicrosecs, sAdapterType, lWorkItem);
             log_.info("called stored procedure %s - Reservation Name=%s, Users=%s, Nodes=%s", "ReservationUpdated", sReservationName, sUsers, sNodes);
         } catch(IOException | ProcCallException e) {
             throw new DataStoreException("Retrieving node state failed", e);

@@ -187,7 +187,7 @@ public class EventSimEnvironmentalProviderForeignBus implements NetworkListenerP
             log_.debug("Generating aggregated data...");
             double sum = 0.0;
             double min = Double.MAX_VALUE;
-            double max = Double.MIN_VALUE;
+            double max = -Double.MAX_VALUE;
             for(double value: values_) {
                 sum += value;
                 max = Double.max(value, max);

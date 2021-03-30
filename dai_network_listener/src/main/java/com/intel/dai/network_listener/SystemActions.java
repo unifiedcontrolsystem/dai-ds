@@ -29,12 +29,12 @@ public interface SystemActions extends AutoCloseable, Closeable {
      *
      * @param dataType The type of data to store.
      * @param location The DAI-DS location of the data to store.
-     * @param microSecondsTimeStamp The microsecond timestamp for the data.
+     * @param nanoSecondsTimeStamp The microsecond timestamp for the data.
      * @param min The minimum value for the window of the data.
      * @param max The maximum value for the window of the data.
      * @param average The average value for the window of data.
      */
-    void storeAggregatedData(String dataType, String location, long microSecondsTimeStamp, double min, double max,
+    void storeAggregatedData(String dataType, String location, long nanoSecondsTimeStamp, double min, double max,
                              double average);
 
     /**

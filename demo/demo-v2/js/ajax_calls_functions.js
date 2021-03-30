@@ -459,7 +459,7 @@ function updateRasResult(data){
     }
     // removes all rows
     for (var i=0; i < resp.length; i++) {
-        var eventtype = resp[i].eventtype;
+        var type = resp[i].type;
         var timestamp = resp[i].lastchgtimestamp;
         var severity = resp[i].severity;
         var location = resp[i].lctn;
@@ -468,7 +468,7 @@ function updateRasResult(data){
         var message = resp[i].msg;
         var rasdate = timestamp;
         var instance_data = resp[i].instancedata;
-        rastable.row.add([eventtype, rasdate, severity, location, dashifnull(job), controlaction, message, instance_data]);
+        rastable.row.add([type, rasdate, severity, location, dashifnull(job), controlaction, message, instance_data]);
     }
     rastable.draw(false)
 }
