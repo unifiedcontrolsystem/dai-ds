@@ -32,6 +32,7 @@ public class QueryAPI {
         try {
             Timestamp endtime = getTimestamp(getStartEndTime(params_map, "EndTime"));
             Timestamp starttime = getTimestamp(getStartEndTime(params_map, "StartTime"));
+            int seq_num = Integer.parseInt(params_map.getOrDefault("SeqNum", "-1"));
             PropertyArray jsonResult;
             switch (requestKey) {
                 case "filedata":

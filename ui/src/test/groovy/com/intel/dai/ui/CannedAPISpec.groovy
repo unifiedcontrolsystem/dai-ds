@@ -10,6 +10,7 @@ import com.intel.logging.Logger
 import java.sql.CallableStatement
 import java.sql.Connection
 import java.sql.ResultSet
+import java.util.HashSet
 
 
 class CannedAPISpec extends Specification {
@@ -20,9 +21,14 @@ class CannedAPISpec extends Specification {
 
         def jsonParser = Mock(ConfigIO)
         def logger = Mock(Logger)
+        def locationAPI = Mock(LocationApi)
+        def locations = new HashSet()
+        locations.add("node1");
+        locations.add("node2");
+        locationAPI.convertHostnamesToLocations(_) >> locations
         ConfigIOFactory.getInstance(_) >> jsonParser
 
-        underTest_ = new CannedAPI(logger)
+        underTest_ = new CannedAPI(logger, locationAPI)
         underTest_.conn = Mock(Connection)
         CallableStatement stmt = Mock(CallableStatement)
         underTest_.conn.prepareCall(_) >> stmt
@@ -147,5 +153,103 @@ class CannedAPISpec extends Specification {
 
         expect:
         underTest_.map_job_values(jsonResultMap)
+    }
+
+    def "Filter locations"() {
+
+        def nodemap = new HashMap<String, String>()
+        nodemap.put("data","nodes")
+        def nodepmap = new PropertyMap(nodemap)
+
+        def schemaarray = new ArrayList()
+        schemaarray.add(nodepmap)
+        def schema = new PropertyArray(schemaarray)
+
+        def nodemapdata = new ArrayList()
+        nodemapdata.add("node1")
+        def nodepmapdata = new PropertyArray(nodemapdata)
+
+        def dataarray = new ArrayList()
+        dataarray.add(nodepmapdata)
+        def datap = new PropertyArray(dataarray)
+
+        def jsonResult = new HashMap<String, Object>()
+        jsonResult.put("schema", schema)
+        jsonResult.put("data", datap)
+        jsonResult.put("result-data-lines",1);
+        def jsonResultMap = new PropertyMap(jsonResult)
+
+        def log = Mock(Logger)
+        LoggerFactory.getInstance(_, _, _) >> log
+
+        expect:
+        underTest_.filterLocations(jsonResultMap, "node1")
+    }
+
+    def "Filter locations not found"() {
+
+        def nodemap = new HashMap<String, String>()
+        nodemap.put("data","nodes")
+        def nodepmap = new PropertyMap(nodemap)
+
+        def schemaarray = new ArrayList()
+        schemaarray.add(nodepmap)
+        def schema = new PropertyArray(schemaarray)
+
+        def nodemapdata = new ArrayList()
+        nodemapdata.add("node1")
+        def nodepmapdata = new PropertyArray(nodemapdata)
+
+        def dataarray = new ArrayList()
+        dataarray.add(nodepmapdata)
+        def datap = new PropertyArray(dataarray)
+
+        def jsonResult = new HashMap<String, Object>()
+        jsonResult.put("schema", schema)
+        jsonResult.put("data", datap)
+        jsonResult.put("result-data-lines",1);
+        def jsonResultMap = new PropertyMap(jsonResult)
+
+        def log = Mock(Logger)
+        LoggerFactory.getInstance(_, _, _) >> log
+
+        expect:
+        underTest_.filterLocations(jsonResultMap, "node3")
+    }
+
+    def "Range to Locations No Range"() {
+
+        expect:
+        underTest_.rangeToLocations("node1")
+    }
+
+    def "Range to Locations Range"() {
+
+        expect:
+        underTest_.rangeToLocations("node[1-2]")
+    }
+
+    def "Range to Locations No Range Comma"() {
+
+        expect:
+        underTest_.rangeToLocations("node1,node3")
+    }
+
+    def "Range to Locations Range Comma"() {
+
+        expect:
+        underTest_.rangeToLocations("node[10-12],node4")
+    }
+
+    def "Range to Locations Range Comma Inside"() {
+
+        expect:
+        underTest_.rangeToLocations("node4,node[10-12,14]")
+    }
+
+    def "Range to Locations Range No Dash"() {
+
+        expect:
+        underTest_.rangeToLocations("node4,node[12,14]")
     }
 }

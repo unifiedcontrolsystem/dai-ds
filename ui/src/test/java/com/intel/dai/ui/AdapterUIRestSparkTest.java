@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -8,9 +8,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +24,10 @@ import com.despegar.http.client.*;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.dsapi.Location;
+import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.exceptions.ProviderException;
+import com.intel.dai.exceptions.BadInputException;
+import com.intel.logging.LoggerFactory;
 import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import org.junit.*;
@@ -34,15 +44,17 @@ public class AdapterUIRestSparkTest {
     public static class TestContollerTestSparkApplication implements SparkApplication {
         @Override
         public void init() {
+            LoggerFactory.getInstance("TEST", "Testing", "console");
             try {
-                obj = new AdapterUIRestMock(new String[] {"testhost"});
-                obj.initialize("test", "test", new String[] {"testhost"});
+                obj = new AdapterUIRestMock();
                 AdapterUIRest.execute_routes(obj);
-            } catch(IOException e) {
+            } catch(ProviderException | DataStoreException | IOException | TimeoutException | BadInputException e) {
 
             }
         }
+
     }
+
 
     @ClassRule
     public static SparkServer<TestContollerTestSparkApplication> testServer =
@@ -82,7 +94,12 @@ public class AdapterUIRestSparkTest {
     @Before
     public void setup() {
         ConfigIO jsonParser_ = ConfigIOFactory.getInstance("json");
-        obj.setParser(jsonParser_);
+        obj.responseCreator.setParser(jsonParser_);
+        //load systemroles
+        Map<String, String> data = new HashMap<>();
+        data.put("ucs-read-only", "1");
+        data.put("ucs-service-operator", "2");
+        data.put("ucs-admin", "3");
     }
 
     @Test
@@ -120,16 +137,16 @@ public class AdapterUIRestSparkTest {
 
     @Test
     public void testLambdaGroupsDeleteDevices() throws Exception {
-        when(obj.groupsMgr.deleteDevicesFromGroup(any(), any())).thenReturn("success");
+        when(obj.groupsMgr.deleteDevicesFromGroup(anyObject(), anyObject())).thenReturn("success");
         DeleteMethod delete = testServer.delete("/groups/g01?devices=node00", false);
         HttpResponse httpResponse = testServer.execute(delete);
         assertEquals(200, httpResponse.code());
-
+        
     }
 
     @Test
     public void testLambdaGroupsPutDevices() throws Exception {
-        when(obj.groupsMgr.addDevicesToGroup(any(), any())).thenReturn("success");
+        when(obj.groupsMgr.addDevicesToGroup(anyObject(), anyObject())).thenReturn("success");
         PutMethod put = testServer.put("/groups/g01", "{'devices':node00}", false);
         HttpResponse httpResponse = testServer.execute(put);
     }
@@ -154,7 +171,7 @@ public class AdapterUIRestSparkTest {
 
     @Test
     public void testLambdaCliCannedCommands() throws Exception {
-        GetMethod get  = testServer.get("/cli/test_cmd", false);
+        GetMethod get  = testServer.get("/cli/test_cmd?Lctn=node1", false);
         HttpResponse httpResponse = testServer.execute(get);
     }
 
@@ -173,7 +190,7 @@ public class AdapterUIRestSparkTest {
     public void testLocations() throws Exception {
         GetMethod get = testServer.get("/locations", false);
         HttpResponse httpResponse = testServer.execute(get);
+        assertEquals(200, httpResponse.code());
     }
-
 
 }
