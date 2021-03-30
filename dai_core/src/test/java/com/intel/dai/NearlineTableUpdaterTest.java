@@ -21,10 +21,29 @@ import static org.mockito.Mockito.when;
 public class NearlineTableUpdaterTest {
     Logger log_ = mock(Logger.class);
 
+    class MockNearlineTableUpdater extends NearlineTableUpdater {
+        MockNearlineTableUpdater(Logger log) throws Exception {
+            super(log);
+        }
+
+        @Override
+        public Connection get_connection()  {
+            Connection connection = mock(Connection.class);
+            try {
+                when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
+                when(connection.prepareCall(ArgumentMatchers.anyString())).thenReturn(mock(CallableStatement.class));
+            } catch (Exception e) {
+                return connection;
+            }
+            return connection;
+        }
+
+    }
+
     @Test
     public void update1() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
+        NearlineTableUpdater updater = new MockNearlineTableUpdater(connection, log_);
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
         updater.Update("Adapter", makeTable());
         updater.Update("Adapter", makeTable());
@@ -33,7 +52,7 @@ public class NearlineTableUpdaterTest {
     @Test
     public void update2() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
+        NearlineTableUpdater updater = new MockNearlineTableUpdater(connection, log_);
         when(connection.prepareCall(ArgumentMatchers.anyString())).thenReturn(mock(CallableStatement.class));
         updater.Update("RasMetaData", makeTable());
         updater.Update("RasMetaData", makeTable());
@@ -42,7 +61,7 @@ public class NearlineTableUpdaterTest {
     @Test
     public void update_error() throws Exception {
         Connection connection = mock(Connection.class);
-        NearlineTableUpdater updater = new NearlineTableUpdater(connection, log_);
+        NearlineTableUpdater updater = new MockNearlineTableUpdater(connection, log_);
         when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(mock(PreparedStatement.class));
         try {
             updater.Update("Adapter_TEST", makeTable());

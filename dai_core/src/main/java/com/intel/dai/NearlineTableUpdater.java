@@ -18,6 +18,7 @@ import java.util.TimeZone;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.perflogging.BenchmarkHelper;
+import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
 
@@ -34,13 +35,18 @@ public class NearlineTableUpdater {
     private Logger log;
     private BenchmarkHelper benchmarker;
 
-    NearlineTableUpdater(Connection tier2DbConn, Logger logger) {
+    NearlineTableUpdater(Logger logger) throws DataStoreException {
         log = logger;
         mCachedStmts = new HashMap<>();
-        mConn = tier2DbConn;
+        mConn = get_connection();
     }
 
-    public void Update(String tableName, VoltTable tableData) throws DataStoreException {
+    public Connection get_connection() throws DataStoreException {
+        return DbConnectionFactory.createDefaultConnection();
+    }
+
+    public void Update(String tableName, VoltTable tableData) throws DataStoreException, SQLException  {
+        mConn = get_connection();
         PreparedStatement stmt = getStmt(tableName);
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
@@ -59,10 +65,8 @@ public class NearlineTableUpdater {
                 mConn.commit();
 
             } catch (SQLException ex) {
-                try {
-                    mConn.rollback();
-                } catch(SQLException e) { /* Do Nothing on failure */ }
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
+                mConn.close();
+                mConn = get_connection();
             }
 
         } else {
@@ -79,11 +83,8 @@ public class NearlineTableUpdater {
                 if(tableName.equals("RasEvent"))
                     benchmarker.addNamedValue("WroteRasData", tableData.getRowCount());
             } catch (SQLException ex) {
-                try {
-                    mConn.rollback();
-                } catch(SQLException e) { /* Do Nothing on failure */ }
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
-            }
+                mConn.close();
+                mConn = get_connection();
         }
     }
 
