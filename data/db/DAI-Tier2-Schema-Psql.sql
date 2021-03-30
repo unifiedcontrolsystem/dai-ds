@@ -3837,10 +3837,14 @@ ddl_script := ddl_script ||
                                                 dates text[];
                                                 i text;
                                                 BEGIN
-                                                        select max(' ||timestamp_column_name ||')-INTERVAL '''|| retention_policy + 1  ||' MONTHS'' from public.' || table_name || ' into endDate;
-                                                        select  min(' || timestamp_column_name || ') from public.' || table_name ||' into startDate;
-                                                        select array(select partition || ''_'' || to_char(GENERATE_SERIES( startDate::DATE,endDate::DATE, ''1 month'' ), ''YYYYMM'')) into dates;
-                                                        IF array_length(dates,1) > 0 THEN
+                                                    select date_part(''day'',current_timestamp) INTO cur_date;
+                                                     if cur_date < 5 THEN
+                                                                select dbupdatedtimestamp from ''' || table_name || ''' order by desc limit 1 into endDate;
+                                                                select dbupdatedtimestamp from ''' || table_name || ''' limit 1 into startDate;
+                                                                endDate := endDate - INTERVAL ''7 MONTHS'';
+                                                                select array(select partition || ''_'' || to_char(GENERATE_SERIES( startDate::DATE,endDate::DATE, ''1 month'' ), ''YYYYMM'')) into dates;
+                                                                END IF;
+                                                           IF array_length(dates,1) > 0 THEN
                                                         select array_to_string(dates, '','') into tableNames;
                                                         execute(dropScript || tableNames|| '';'');
                                                         END IF;
@@ -3890,7 +3894,9 @@ AS $$
 declare monthStart date := date_trunc('MONTH', current_timestamp);
 declare monthEndExclusive date := monthStart + interval '1 MONTH';
 declare tablepostfix text := to_char(current_timestamp, 'YYYYmm');
+declare dates text[];
 BEGIN
+    --select array(select '_' || to_char(GENERATE_SERIES( startDate::DATE,endDate::DATE, '1 month' ), 'YYYYMM')) into dates;
     execute format('create table %s partition of public.tier2_rasevent for values from (%L) to (%L)', 'public.tier2_rasevent_' || tablepostfix, monthStart, monthEndExclusive);
     execute format('create table %s partition of public.tier2_aggregatedenvdata for values from (%L) to (%L)', 'public.tier2_aggregatedenvdata_'|| tablepostfix, monthStart, monthEndExclusive);
 END;
