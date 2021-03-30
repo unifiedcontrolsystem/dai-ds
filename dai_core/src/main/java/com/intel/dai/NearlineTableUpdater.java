@@ -85,6 +85,7 @@ public class NearlineTableUpdater {
             } catch (SQLException ex) {
                 mConn.close();
                 mConn = get_connection();
+            }
         }
     }
 
