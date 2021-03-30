@@ -21,6 +21,7 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
+import com.intel.xdg.XdgConfigFile;
 
 import java.io.*;
 import java.lang.*;
@@ -48,6 +49,7 @@ public class AdapterWlmPBS implements WlmProvider {
     public RasEventLog raseventlog;
     public NodeInformation nodeinfo;
     public ConfigIO jsonParser;
+    public XdgConfigFile xdg;
 
     // Constructor
     public AdapterWlmPBS(Logger log, AdapterInformation iadapter, DataStoreFactory factory) {
@@ -76,14 +78,16 @@ public class AdapterWlmPBS implements WlmProvider {
             HashMap<String, String> args = new HashMap<String, String>();
 
             String configName = AdapterWlmPBS.class.getSimpleName() + ".json";
-            PropertyMap configJson = jsonParser.readConfig(configName).getAsMap();
-            args.put("bootstrap.servers", configJson.getString("bootstrap.servers"));
-            args.put("group.id", configJson.getString("group.id"));
-            args.put("schema.registry.url", configJson.getString("schema.registry.url"));
-            args.put("topics", configJson.getString("topics"));
-            args.put("auto.commit.enable", configJson.getString("auto.commit.enable"));
-            args.put("specific.avro.reader", configJson.getString("specific.avro.reader"));
-            args.put("auto.offset.reset", configJson.getString("auto.offset.reset"));
+            xdg = new XdgConfigFile("ucs");
+            InputStream result = xdg.Open(configName);
+            if(result == null)
+                throw new FileNotFoundException("Failed to locate or open '" + configName + "'");
+
+            PropertyMap configJson = jsonParser.readConfig(result).getAsMap();
+
+            for (String key : configJson.keySet()) {
+                args.put(key, configJson.getString(key));
+            }
 
             NetworkDataSink sink = NetworkDataSinkFactory.createInstance(log_, "kafka", args);
             sink.setLogger(log_);
@@ -98,7 +102,7 @@ public class AdapterWlmPBS implements WlmProvider {
             String eventtype = "RasGenAdapterUnableToConnectToAmqp";
             String instancedata = "AdapterName=" + adapter.getName();
             raseventlog.logRasEventSyncNoEffectedJob(eventtype, instancedata, null, System.currentTimeMillis() * 1000L, adapter.getType(), workQueue.workItemId());
-            log_.error("Unable to connect to network sink");
+            log_.exception(e, "Unable to connect to network sink");
             rc = 1;
         }
         finally {
@@ -200,7 +204,7 @@ public class AdapterWlmPBS implements WlmProvider {
     private void handleJobStartedMsg(PropertyMap jsonMessage) throws PropertyNotExpectedType, InterruptedException, IOException, DataStoreException
     {
 
-        long lStartTsInMicroSecs = jsonMessage.getLong("timestamp") *1000000L;
+        long lStartTsInMicroSecs = jsonMessage.getLong("timestamp") *1000L;
 
         String sJobId = jsonMessage.getString("job_id");
         String sNodeList = jsonMessage.getString("host");
@@ -247,7 +251,7 @@ public class AdapterWlmPBS implements WlmProvider {
         //--------------------------------------------------------------
         // Update the JobInfo with the data from this log entry AND get all of the JobInfo for this job.
         //--------------------------------------------------------------
-        long lEndTsInMicroSecs = jsonMessage.getLong("timestamp") *1000000L;
+        long lEndTsInMicroSecs = jsonMessage.getLong("timestamp") *1000L;
         HashMap<String, Object> jobinfo = jobs.completeJobInternal(sJobId, workDir, sWlmJobState, lEndTsInMicroSecs, -1L);
 
         //--------------------------------------------------------------
