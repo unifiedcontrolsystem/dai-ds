@@ -48,5 +48,33 @@ public class RasEventApiTest {
         eventApi.createRasEvent(data);
     }
 
+    @Test
+    public void createRasEvent() throws ProviderException {
+        EventsLog eventsLog = Mockito.mock(EventsLog.class);
+        when(eventsLog.checkDescriptiveName(anyString())).thenReturn(true);
+        RasEventApi eventApi = new RasEventApi(eventsLog);
+        eventApi.createRasEvent(data);
+    }
+
+    @Test
+    public void getRasEventTypes() throws ProviderException {
+        PropertyMap map = new PropertyMap();
+        map.put("event","rasevent");
+        PropertyArray result = new PropertyArray();
+        result.add(0,map);
+        EventsLog eventsLog = Mockito.mock(EventsLog.class);
+        when(eventsLog.listAllRasEventTypes(anyObject())).thenReturn(result);
+        RasEventApi eventApi = new RasEventApi(eventsLog);
+        eventApi.getRasEventTypes(new HashMap());
+    }
+
+    @Test(expected = ProviderException.class)
+    public void getRasEventTypesNull() throws ProviderException {
+        EventsLog eventsLog = Mockito.mock(EventsLog.class);
+        when(eventsLog.listAllRasEventTypes(anyObject())).thenReturn(null);
+        RasEventApi eventApi = new RasEventApi(eventsLog);
+        eventApi.getRasEventTypes(null);
+    }
+
     private Map<String, String> data = new HashMap<>();
 }

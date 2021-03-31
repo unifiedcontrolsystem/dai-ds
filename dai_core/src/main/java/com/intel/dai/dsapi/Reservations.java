@@ -37,7 +37,7 @@ public interface Reservations {
      * @param lUpdatedTimeInMicrosecs long with update time of reservation in microseconds
      *
      */
-    public void updateReservation(String sReservationName, String sUsers, String sNodes, long lStartTimeInMicrosecs, long lUpdatedTimeInMicrosecs, String sAdapterType, long lWorkItem) throws DataStoreException;
+    public void updateReservation(String sReservationName, String sUsers, String sNodes, long lStartTimeInMicrosecs, long lEndTimeInMicrosecs, long lUpdatedTimeInMicrosecs, String sAdapterType, long lWorkItem) throws DataStoreException;
 
     /**
      * Delete reservation from reservation table

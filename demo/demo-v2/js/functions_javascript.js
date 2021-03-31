@@ -819,14 +819,6 @@ function changeContext(context)
     }
     addContextHistory(context);
     $('#contextselector').val(context);
-    if (contexttime) {
-        $('#wayback').css("display", "block");	// Show Mister Peabody
-        $('body').addClass("wayback-mode");
-    } else {
-        $('#contextselector').val("Now");
-        $('#wayback').css("display", "none");	// Hide Mister Peabody
-        $('body').removeClass("wayback-mode");
-    }
     updateComputeNodeStatesFromDB(dbNodeStatesResponse);
     updateServiceNodeStatesFromDB(dbNodeStatesResponse);
     updateAdapterStats();

@@ -329,3 +329,20 @@ Notes When Using Docker Containers:
 * If you start all services together with one command, expect errors and
   restarts of the dai-manager service until all other services are running and setup.
 
+Notes About VoltDB and Huge Memory Pages:
+------------------------------------------
+* If VoltDB fails to start with an error message about improper setting for huge pages in the kernel then do the following to fix the issue:
+    + To fix the immediate problem, as root enter the following 2 commands (will not survive a reboot):
+        ```bash
+        # echo never >/sys/kernel/mm/transparent_hugepage/enabled
+        # echo never >/sys/kernel/mm/transparent_hugepage/defrag
+        ```
+    + To make these changes permanent:
+        1. Make sure that the sysfsutils package is installed on your system (the host if using VoltDB in a container).
+        2. Edit ___/etc/sysfs.conf___ and add the following 2 lines to the end of the file:
+        ```bash
+            kernel/mm/transparent_hugepage/enabled = never
+            kernel/mm/transparent_hugepage/defrag = never
+        ```
+        3. Now on reboot, the kernel values will be set correctly for VoltDB.
+

@@ -127,6 +127,34 @@ public class LocationApiTest {
         assertEquals(deviceSet, locationApi_.convertLocationsToHostnames(locationName));
     }
 
+    @Test
+    public void convertHostnamesToLocationsSet() throws BadInputException {
+        String deviceName = "c01";
+
+        String locationName="R0-CH0-N0";
+        Set<String> deviceSet = new HashSet<>();
+        deviceSet.add(deviceName);
+        Set<String> locationSet = new HashSet<>();
+        locationSet.add(locationName);
+        when(locationMgr_.getLocationsFromNodes(deviceSet)).thenReturn(locationSet);
+
+        assertEquals(locationSet, locationApi_.convertHostnamesToLocations(deviceSet));
+    }
+
+    @Test
+    public void convertLocationsToHostnamesSet() throws BadInputException {
+        String locationName="R0-CH0-N0";
+
+        String deviceName = "c01";
+        Set<String> deviceSet = new HashSet<>();
+        deviceSet.add(deviceName);
+        Set<String> locationSet = new HashSet<>();
+        locationSet.add(locationName);
+        when(locationMgr_.getNodesFromLocations(locationSet)).thenReturn(deviceSet);
+
+        assertEquals(deviceSet, locationApi_.convertLocationsToHostnames(locationSet));
+    }
+
     private Groups groupsMgr_;
     private Location locationMgr_;
     private LocationApi locationApi_;

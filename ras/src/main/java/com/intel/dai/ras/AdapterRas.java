@@ -198,7 +198,7 @@ public class AdapterRas {
         }   // the specified RAS event's lctn is null, so no don't try to run any control operation.
 
         // Do NOT run any ControlOperations if the RAS event's hardware lctn is currently being serviced.
-        else if (mNodesInServiceArraylist.contains(event.sRasEventLctn)) {
+        else if ((mNodesInServiceArraylist.contains(event.sRasEventLctn)) && (!event.sRasEventControlOperation.equals("NodeIsPoweredOff"))) {
             // this node is owned by the Service subsystem (i.e., this hardware is being serviced).
             log_.warn("Did NOT run this RAS event's ControlOperation (%s) because the hardware lctn is currently being Serviced, ignoring this ControlOperation - DescrName=%s, EventId=%s, Lctn=%s, JobId=%s!",
                       event.sRasEventControlOperation, event.sRasEventDescrName, event.sRasEventId, event.sRasEventLctn, event.sRasEventJobid);

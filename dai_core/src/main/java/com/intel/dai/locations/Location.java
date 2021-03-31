@@ -54,7 +54,7 @@ public class Location {
                 }
                 else {
                     log.error(node+ " is not a valid location or hostname of a node");
-                    throw new BadInputException(node + " is a Bad input. It isn't a location or hostname of a node");
+                    throw new BadInputException("Invalid location, try again with a valid location");
                 }
             } else {
                 hostnameLocationMap.put(node, device);

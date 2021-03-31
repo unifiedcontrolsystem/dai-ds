@@ -108,6 +108,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
     private long        mEntryNumber_SWITCH_HISTORY;                 // the last used entry number for the Tier2_SWITCH_HISTORY table.
     private long        mEntryNumber_WLMRESERVATION_HISTORY;         // the last used entry number for the Tier2_WLMRESERVATION_HISTORY table.
     private long        mEntryNumber_WORKITEM_HISTORY;               // the last used entry number for the Tier2_WORKITEM_HISTORY table.
+    private long        mEntryNumber_RAWHWINVENTORY_HISTORY;         // the last used entry number for the tier2_RawHWInventory_History table.
 
 
     long getTablesMaxEntryNum(String sTableName) throws IOException, ProcCallException {
