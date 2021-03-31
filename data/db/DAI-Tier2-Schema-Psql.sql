@@ -3835,12 +3835,13 @@ ddl_script := ddl_script ||
                                                 dropScript text := ''DROP TABLE IF EXISTS '';
                                                 partition text := '''|| table_name ||''';
                                                 dates text[];
+                                                cur_date int;
                                                 i text;
                                                 BEGIN
                                                     select date_part(''day'',current_timestamp) INTO cur_date;
                                                      if cur_date < 5 THEN
-                                                                select dbupdatedtimestamp from ''' || table_name || ''' order by desc limit 1 into endDate;
-                                                                select dbupdatedtimestamp from ''' || table_name || ''' limit 1 into startDate;
+                                                                select ' || timestamp_column_name || ' from ' || table_name || ' order by '|| timestamp_column_name || ' desc limit 1 into endDate;
+                                                                select ' || timestamp_column_name || ' from ' || table_name || ' limit 1 into startDate;
                                                                 endDate := endDate - INTERVAL ''7 MONTHS'';
                                                                 select array(select partition || ''_'' || to_char(GENERATE_SERIES( startDate::DATE,endDate::DATE, ''1 month'' ), ''YYYYMM'')) into dates;
                                                                 END IF;
