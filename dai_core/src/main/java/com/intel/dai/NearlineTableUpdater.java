@@ -67,7 +67,7 @@ public class NearlineTableUpdater {
                 mConn.close();
                 mConn = get_connection();
                 mCachedStmts = new HashMap<>();
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex)
+                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
             }
 
         } else {
@@ -87,7 +87,7 @@ public class NearlineTableUpdater {
                 mConn.close();
                 mConn = get_connection();
                 mCachedStmts = new HashMap<>();
-                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex)
+                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex);
             }
         }
     }
