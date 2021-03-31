@@ -46,7 +46,6 @@ public class NearlineTableUpdater {
     }
 
     public void Update(String tableName, VoltTable tableData) throws DataStoreException, SQLException  {
-        mConn = get_connection();
         PreparedStatement stmt = getStmt(tableName);
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
@@ -67,6 +66,8 @@ public class NearlineTableUpdater {
             } catch (SQLException ex) {
                 mConn.close();
                 mConn = get_connection();
+                mCachedStmts = new HashMap<>();
+                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex)
             }
 
         } else {
@@ -85,6 +86,8 @@ public class NearlineTableUpdater {
             } catch (SQLException ex) {
                 mConn.close();
                 mConn = get_connection();
+                mCachedStmts = new HashMap<>();
+                throw new DataStoreException("Unable to update nearline tier table: " + tableName, ex)
             }
         }
     }
