@@ -51,6 +51,11 @@ public class AdapterNearlineTierJdbcTest {
         }
 
         @Override
+        NearlineTableUpdater createNearlineTableUpdater(Logger logger) throws DataStoreException {
+            return mock(NearlineTableUpdater.class);
+        }
+
+        @Override
         DataReceiverAmqp createDataReceiver(String host)
                 throws IOException, TimeoutException {
             return mover;
@@ -58,11 +63,6 @@ public class AdapterNearlineTierJdbcTest {
 
         @Override
         void waitUntilFinishedProcessingMessages() {
-        }
-
-        @Override
-        Connection createConnection() {
-            return mock(Connection.class);
         }
 
     }
