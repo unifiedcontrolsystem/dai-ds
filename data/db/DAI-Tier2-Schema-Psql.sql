@@ -5249,10 +5249,10 @@ CREATE INDEX rasevent_dbupdatedtimedescriptivenameid ON public.tier2_rasevent US
 
 CREATE INDEX rasmetadata_descriptivename ON public.tier2_rasmetadata USING btree (DescriptiveName);
 
-CREATE INDEX Processor_History_DbUpdatedTimestamp ON Tier2_Processor_History USING btree (DbUpdatedTimestamp);
-CREATE INDEX Accelerator_History_DbUpdatedTimestamp ON Tier2_Accelerator_History USING btree (DbUpdatedTimestamp);
-CREATE INDEX Hfi_History_DbUpdatedTimestamp ON Tier2_Hfi_History USING btree (DbUpdatedTimestamp);
-CREATE INDEX Dimm_History_DbUpdatedTimestamp ON Tier2_Dimm_History USING btree (DbUpdatedTimestamp);
+CREATE INDEX Processor_History_DbUpdatedTimestamp ON public.Tier2_Processor_History USING btree (DbUpdatedTimestamp);
+CREATE INDEX Accelerator_History_DbUpdatedTimestamp ON public.Tier2_Accelerator_History USING btree (DbUpdatedTimestamp);
+CREATE INDEX Hfi_History_DbUpdatedTimestamp ON public.Tier2_Hfi_History USING btree (DbUpdatedTimestamp);
+CREATE INDEX Dimm_History_DbUpdatedTimestamp ON public.Tier2_Dimm_History USING btree (DbUpdatedTimestamp);
 
 --
 -- Name: tier2_bootimage_ss bootimage_ss_pkey; Type: CONSTRAINT; Schema: public; Owner:
