@@ -12,10 +12,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -30,13 +27,14 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
      *   bootstrap.servers    - (req)     To establish an initial connection to the Kafka cluster.
      *   group.id             - (req)     Identifies the consumer group of a given consumer.     *
      *   schema.registry.url  - (req)     Registered schema URL the consumer is expecting message to conform to.
-     *             
-     *   auto.commit.enable   - (def: false)  Consumer's offset will be periodically committed in the background.
-     *   auto.offset.reset    - (def: earliest)  Offset from which next new record will be fetched
-     *                                       Used ONLY if consumer don't have a valid offset committed.(earliest/latest)
-     *   specific.avro.reader - (def: true)  Consumer expects avro type messages.
-     *   key.deserializer     - (def: StringDeserializer)  To deserialize received key messages of any Avro/json type from Kafka.
-     *   value.deserializer   - (def: KafkaAvroSerializer) To deserialize received value messages of any Avro/json type from Kafka.
+     *   key.deserializer     - (def: StringDeserializer) To deserialize received key messages of any Avro/string type
+     *                          from Kafka.
+     *   value.deserializer   - (def: StringDeserializer) To deserialize received value messages of any Avro/json type
+     *                          from Kafka. All topics in the single instance MUST use the same value deserializer.
+     *   topics               - (req) Comma separated list of kafka topics to subscribe to.
+     *   timeout              - (def: 60) Timeout in seconds for kafka connections.
+     *
+     *   NOTE: Any other Kafka consumer properties are allowed here as well.
      */
     public NetworkDataSinkKafka(Logger logger, Map<String,String> args) {
         assert logger != null;
@@ -56,17 +54,14 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
             if(args_.containsValue(null) || args_.containsValue(""))
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
-        parseSubjects(args_.getOrDefault(KAFKA_TOPICS, "*"));
-        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER));
-        kafkaProperties.put(KAFKA_GROUP_ID, args_.get(KAFKA_GROUP_ID));
-        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL));
-
-        kafkaProperties.put(KAFKA_AUTO_COMMIT, args_.getOrDefault(KAFKA_AUTO_COMMIT, "false"));
-        kafkaProperties.put(KAFKA_AUTO_OFFSET, args_.getOrDefault(KAFKA_AUTO_OFFSET, "earliest"));
-        kafkaProperties.setProperty(KAFKA_IS_AVRO_FORMAT, args_.getOrDefault(KAFKA_IS_AVRO_FORMAT, "true"));
-        kafkaProperties.setProperty(KAFKA_KEY_DESERIALIZER, args_.getOrDefault(KAFKA_KEY_DESERIALIZER, StringDeserializer.class.getName()));
-        kafkaProperties.setProperty(KAFKA_VALUE_DESERIALIZER, args_.getOrDefault(KAFKA_VALUE_DESERIALIZER, KafkaAvroDeserializer.class.getName()));
+        setMonitoringSubjects(Arrays.asList(args_.get(KAFKA_TOPICS).split(",")));
+        args_.remove(KAFKA_TOPICS);
         timeout_ = args_.getOrDefault(KAFKA_TIMEOUT, args_.getOrDefault(KAFKA_TIMEOUT, "60"));
+        args_.remove(KAFKA_TIMEOUT);
+        args_.put(KAFKA_SPECIFIC_AVRO_READER, "false");
+        args_.putIfAbsent(KAFKA_KEY_DESERIALIZER, "org.apache.kafka.common.serialization.StringDeserializer");
+        args_.putIfAbsent(KAFKA_VALUE_DESERIALIZER, "org.apache.kafka.common.serialization.StringDeserializer");
+        kafkaProperties.putAll(args_);
     }
 
     /**
@@ -184,42 +179,42 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
 
     @Override
     public void run() {
-        logger_.info("Connecting to bootstrap.servers='%s', group.id='%s', schema.registry.url='%s', kafka-topic='%s'",
-                args_.get("bootstrap_servers"), args_.get("group_id"), args_.get("schema_registry_url"), subjects_);
         Duration duration = Duration.ofSeconds(Long.parseLong(timeout_));
-        try (KafkaConsumer<String, String> kafkaClient = createKafkaClient()) {
-            kafkaClient.subscribe(subjects_);
-            running_.set(true);
-            logger_.info("KafkaClient connected.");
-            while(!signalStop_.get()) {
-                ConsumerRecords<String, String> receivedRecords = kafkaClient.poll(duration);
-                for (ConsumerRecord<String, String> receivedRecord : receivedRecords) {
-                    String topic = receivedRecord.topic();
-                    String receivedData = receivedRecord.value();
-                    logger_.debug("\n\n*** TOPIC='%s'; MESSAGE='%s'\n", receivedRecord.topic(), receivedData);
-                    if (callback_ != null) {
-                        callback_.processIncomingData(topic, receivedData);
+        KafkaConsumer<String, Object> kafkaClient = null;
+        while(!signalStop_.get()) {
+            logger_.info("%sonnecting to %s='%s', %s='%s', %s='%s', topics='%s'", kafkaClient==null?"C":"Re-c",
+                    KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER), KAFKA_GROUP_ID,
+                    args_.get(KAFKA_GROUP_ID), KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL), subjects_);
+            try {
+                kafkaClient = createKafkaClient();
+                kafkaClient.subscribe(subjects_);
+                running_.set(true);
+                logger_.info("KafkaClient connected.");
+                while (!signalStop_.get()) {
+                    ConsumerRecords<String, Object> receivedRecords = kafkaClient.poll(duration);
+                    for (ConsumerRecord<String, Object> receivedRecord : receivedRecords) {
+                        String topic = receivedRecord.topic();
+                        Object receivedData = receivedRecord.value();
+                        logger_.debug("\n\n*** TOPIC='%s'; MESSAGE='%s'\n", receivedRecord.topic(),
+                                receivedData.toString());
+                        if (callback_ != null)
+                            callback_.processIncomingData(topic, receivedData.toString());
                     }
+                    kafkaClient.commitAsync();
                 }
-                kafkaClient.commitAsync();
+            } catch (Exception e) {
+                logger_.exception(e, "Error while reading Kafka bus data");
+            } finally {
+                if(kafkaClient != null) {
+                    kafkaClient.close();
+                    logger_.info("KafkaClient closed.");
+                }
             }
-        } catch (Exception e) {
-            logger_.error("Error while reading Kafka bus data: " + e.getMessage());
-        } finally {
-            running_.set(false);
-            logger_.info("KafkaClient closed.");
         }
+        running_.set(false);
     }
 
-    private void parseSubjects(String subjects) {
-        if(subjects != null) {
-            String[] list = subjects.split(",");
-            for(String subject: list)
-                setMonitoringSubject(subject);
-        }
-    }
-
-    protected KafkaConsumer<String, String> createKafkaClient() { // Overridden for testing only.
+    protected KafkaConsumer<String, Object> createKafkaClient() { // Overridden for testing only.
         return new KafkaConsumer<>(kafkaProperties);
     }
 
@@ -227,23 +222,21 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
     private Thread thread_;
     private Logger logger_;
     private String timeout_;
-    private HashSet<String> subjects_ = new HashSet<>();
+    private final HashSet<String> subjects_ = new HashSet<>();
 
     private final Map<String, String> args_;
     private final Properties kafkaProperties = new Properties();
     final AtomicBoolean running_ = new AtomicBoolean(false);
     private final AtomicBoolean signalStop_ = new AtomicBoolean(false);
 
-    private final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_GROUP_ID, KAFKA_SCHEMA_REG_URL, KAFKA_TOPICS};
-
     private static final String KAFKA_BOOTSTRAP_SERVER = "bootstrap.servers";
     private static final String KAFKA_GROUP_ID = "group.id";
     private static final String KAFKA_SCHEMA_REG_URL = "schema.registry.url";
-    private static final String KAFKA_AUTO_COMMIT = "auto.commit.enable";
-    private static final String KAFKA_AUTO_OFFSET = "auto.offset.reset";
-    private static final String KAFKA_IS_AVRO_FORMAT = "specific.avro.reader";
     private static final String KAFKA_KEY_DESERIALIZER = "key.deserializer";
     private static final String KAFKA_VALUE_DESERIALIZER = "value.deserializer";
     private static final String KAFKA_TIMEOUT = "timeout";
     private static final String KAFKA_TOPICS = "topics";
+    private static final String KAFKA_SPECIFIC_AVRO_READER = "specific.avro.reader";
+    private static final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_GROUP_ID,
+            KAFKA_SCHEMA_REG_URL, KAFKA_TOPICS};
 }
