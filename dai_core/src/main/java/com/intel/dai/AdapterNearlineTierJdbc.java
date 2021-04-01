@@ -7,7 +7,6 @@ package com.intel.dai;
 import java.sql.SQLException;
 
 import com.intel.logging.*;
-import com.intel.dai.dsimpl.jdbc.DbConnectionFactory;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.perflogging.BenchmarkHelper;
 import org.voltdb.client.*;
@@ -63,10 +62,9 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
         super(logger);
         mPrevAmqpMessageId = 0L;
         mAmqpDataReceiverMsgConsumer = null;
-        mConn = createConnection();
         receivedEom = new AtomicBoolean(false);
 
-        mTableUpdater = new NearlineTableUpdater(mConn, logger);
+        mTableUpdater = createNearlineTableUpdater(logger);
 
         dataLoader = dsFactory.createDataLoaderApi();
 
@@ -76,8 +74,8 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
 
     }
 
-    java.sql.Connection createConnection() throws DataStoreException {
-        return DbConnectionFactory.createDefaultConnection();
+    NearlineTableUpdater createNearlineTableUpdater(Logger logger) throws DataStoreException {
+        return new NearlineTableUpdater(logger);
     }
 
     DataReceiverAmqp createDataReceiver(String host) throws IOException, TimeoutException {
