@@ -9,9 +9,8 @@
         "bootstrap.servers": "admin:9092",
         "group.id": "boot_states",
         "schema.registry.url": "http://admin:8081",
-        "auto.commit.enable": false,
+        "enable.auto.commit": "false",
         "auto.offset.reset": "earliest",
-        "specific.avro.reader": "true",
         "topics": "stateChanges"
       },
       "name": "kafka"
