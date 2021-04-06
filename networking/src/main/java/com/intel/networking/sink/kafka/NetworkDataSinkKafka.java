@@ -5,15 +5,18 @@ import com.intel.networking.NetworkException;
 import com.intel.networking.sink.NetworkDataSinkDelegate;
 import com.intel.networking.sink.NetworkDataSinkEx;
 import com.intel.networking.sink.StreamLocationHandler;
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.SerializationException;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A Kafka client implementation of a {@link NetworkDataSinkEx} providers. Subject refers to the Kafka client consuming topics.
@@ -181,14 +184,16 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
     public void run() {
         Duration duration = Duration.ofSeconds(Long.parseLong(timeout_));
         KafkaConsumer<String, Object> kafkaClient = null;
+        running_.set(true);
         while(!signalStop_.get()) {
             logger_.info("%sonnecting to %s='%s', %s='%s', %s='%s', topics='%s'", kafkaClient==null?"C":"Re-c",
                     KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER), KAFKA_GROUP_ID,
                     args_.get(KAFKA_GROUP_ID), KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL), subjects_);
             try {
-                kafkaClient = createKafkaClient();
-                kafkaClient.subscribe(subjects_);
-                running_.set(true);
+                if(kafkaClient == null) {
+                    kafkaClient = createKafkaClient();
+                    kafkaClient.subscribe(subjects_);
+                }
                 logger_.info("KafkaClient connected.");
                 while (!signalStop_.get()) {
                     ConsumerRecords<String, Object> receivedRecords = kafkaClient.poll(duration);
@@ -200,18 +205,44 @@ public class NetworkDataSinkKafka implements NetworkDataSinkEx, Runnable {
                         if (callback_ != null)
                             callback_.processIncomingData(topic, receivedData.toString());
                     }
-                    kafkaClient.commitAsync();
+                    kafkaClient.commitAsync(this::commitCallback);
                 }
+            } catch (SerializationException e) {
+                logger_.exception(e);
+                skipRecord(e.getMessage(), kafkaClient);
             } catch (Exception e) {
                 logger_.exception(e, "Error while reading Kafka bus data");
-            } finally {
                 if(kafkaClient != null) {
                     kafkaClient.close();
                     logger_.info("KafkaClient closed.");
+                    kafkaClient = null;
                 }
             }
         }
+        if(kafkaClient != null)
+            kafkaClient.close();
         running_.set(false);
+    }
+
+    private void commitCallback(Map<TopicPartition, OffsetAndMetadata> var1, Exception var2) {
+        if(var2 != null)
+            logger_.exception(var2);
+        else
+            logger_.debug("Committed new offset on server");
+    }
+
+    private void skipRecord(String text, KafkaConsumer<String, Object> client) {
+        Matcher partitionMatcher = Pattern.compile("\\w*[a-zA-Z][-_a-zA-Z0-9]*\\w[-]\\d+").matcher(text);
+        Matcher offsetMatcher = Pattern.compile("\\w*offset*\\w[ ]\\d+").matcher(text);
+        partitionMatcher.find();
+        String[] parts = partitionMatcher.group().split("-");
+        String topic = parts[0];
+        int partition = Integer.parseInt(parts[1]);
+        offsetMatcher.find();
+        long offset = Long.parseLong(offsetMatcher.group().replace("offset ", ""));
+        logger_.error("'Poison pill' message or key found at topic %s, partition %d, offset %d" +
+                "...skipping message", topic, partition, offset);
+        client.seek(new TopicPartition(topic, partition), offset + 1);
     }
 
     protected KafkaConsumer<String, Object> createKafkaClient() { // Overridden for testing only.
