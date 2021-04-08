@@ -49,24 +49,24 @@ if(packageVersion.split('-').length > 1)
     packageRelease = packageVersion.split('-')[1]
 def pythonVersion = pythonVersionString(packageVersion)
 
-// Dependent Package Versions (latest as of 12/5/2019)
-def voltdb_version = '9.1.1'
-def apache_version = '2.12.1'
-def httpcomponents_version = '4.5.12'
-def cliftonjson_version = '3.1.0'
-def rabbitmq_version = '5.7.3'
-def picocli_version = '4.1.1'
-def commonsio_version = '2.6'
+// Dependent Package Versions (latest as of 4/6/2021)
+def voltdb_version = '9.3.2'
+def apache_version = '2.14.1'
+def httpcomponents_version = '4.5.13'
+def cliftonjson_version = '3.1.1'
+def rabbitmq_version = '5.11.0'
+def picocli_version = '4.6.1'
+def commonsio_version = '2.8.0'
 def gson_version = '2.8.6'
-def spark_version = '2.9.1'
-def postgres_jdbc_version = '42.2.8'
-def slf4j_version = '1.7.29'
-def commonslang3_version = '3.9'
-def lombok_version = '1.18.16'
-def spock_core_version = '1.3-groovy-2.4'
+def spark_version = '2.9.3'
+def postgres_jdbc_version = '42.2.19'
+def slf4j_version = '1.7.30'
+def commonslang3_version = '3.12.0'
+def lombok_version = '1.18.20'
+def spock_core_version = '1.3-groovy-2.4' // Latest WORKING version
 def cglib_nodep_version = '3.3.0'
 def kafka_clients_version = '2.7.0'
-def kafka_avro_serializer = '6.0.1'
+def kafka_avro_serializer = '6.1.1'
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Developers and the CI must define the System property 'includeDebugSymbols' as      //
@@ -270,9 +270,6 @@ project(':xdg') {
 }
 
 project(':properties') {
-    targetCompatibility = 8
-    sourceCompatibility = 8
-
     jacocoTestCoverageVerification {
         violationRules {
             rule {
@@ -353,9 +350,6 @@ project(':runtime_utils') {
 }
 
 project(':config_io') {
-    targetCompatibility = 8
-    sourceCompatibility = 8
-
     dependencies {
         compile group: 'com.github.cliftonlabs', name: 'json-simple', version: cliftonjson_version
         compile project(':properties')
@@ -428,8 +422,6 @@ project(':procedures') {
 
     dependencies {
         compileOnly group: 'org.voltdb', name: 'voltdb', version: voltdb_version
-        compile project(':properties')
-        compile project(':config_io')
 
         testCompile "org.spockframework:spock-core:${spock_core_version}"
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
@@ -1384,18 +1376,6 @@ exit \$?
         into("opt/ucs/docker/tier1/init.d")
         fileMode(0700)
     }
-    from("${buildDir}/jars/json-simple-3.1.0.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
-    }
-    from("${buildDir}/libs/properties.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("properties.jar", "20-properties.jar")
-    }
-    from("${buildDir}/libs/config_io.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("config_io.jar", "50-config_io.jar")
-    }
     from("${buildDir}/libs/procedures.jar") {
         into("opt/ucs/docker/tier1/init.d")
         rename("procedures.jar", "99-procedures.jar")
@@ -1709,18 +1689,6 @@ exit \$?
         into("opt/ucs/docker/tier1/init.d")
         fileMode(0700)
     }
-    from("${buildDir}/jars/json-simple-3.1.0.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("json-simple-3.1.0.jar", "01-json-simple-3.1.0.jar")
-    }
-    from("${buildDir}/libs/properties.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("properties.jar", "20-properties.jar")
-    }
-    from("${buildDir}/libs/config_io.jar") {
-        into("opt/ucs/docker/tier1/init.d")
-        rename("config_io.jar", "50-config_io.jar")
-    }
     from("${buildDir}/libs/procedures.jar") {
         into("opt/ucs/docker/tier1/init.d")
         rename("procedures.jar", "99-procedures.jar")
@@ -1817,18 +1785,6 @@ exit \$?
         into("${share_dir}/for_voltdb")
         rename("DAI-Volt-Procedures.sql","40-DAI-Volt-Procedures.sql")
     }
-    from("${buildDir}/jars/json-simple-3.1.0.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("json-simple-3.1.0.jar", "00-json-simple-3.1.0.jar")
-    }
-    from("${buildDir}/libs/properties.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("properties.jar", "20-properties.jar")
-    }
-    from("${buildDir}/libs/config_io.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("config_io.jar", "60-config_io.jar")
-    }
     from("${buildDir}/libs/procedures.jar") {
         into("${share_dir}/for_voltdb")
         rename("procedures.jar", "99-procedures.jar")
@@ -1898,18 +1854,6 @@ exit \$?
     from("${projectDir}/data/db/DAI-Volt-Procedures.sql") {
         into("${share_dir}/for_voltdb")
         rename("DAI-Volt-Procedures.sql","40-DAI-Volt-Procedures.sql")
-    }
-    from("${buildDir}/jars/json-simple-3.1.0.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("json-simple-3.1.0.jar", "00-json-simple-3.1.0.jar")
-    }
-    from("${buildDir}/libs/properties.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("properties.jar", "20-properties.jar")
-    }
-    from("${buildDir}/libs/config_io.jar") {
-        into("${share_dir}/for_voltdb")
-        rename("config_io.jar", "60-config_io.jar")
     }
     from("${buildDir}/libs/procedures.jar") {
         into("${share_dir}/for_voltdb")
@@ -2679,7 +2623,7 @@ task makeEventSimCliDeb(type: Deb) {
 
 cd ${python_dir}
 
-/usr/bin/python3 -m pip install eventsim_cli-install-py3-none-any.whl
+/usr/bin/python3 -m pip install -U eventsim_cli-install-py3-none-any.whl
 
 exit \$?
 """
@@ -2690,7 +2634,7 @@ exit \$?
 
 /usr/bin/python3 -m pip uninstall -y eventsim-cli
 
-exit \$? 
+exit 0 
 """
         exec {
             workingDir = "${projectDir}/cli_eventsim"
@@ -2744,7 +2688,7 @@ task makeEventSimCliRpm(type: Rpm) {
 
 cd ${python_dir}
 
-/usr/bin/python3 -m pip install eventsim_cli-install-py3-none-any.whl
+/usr/bin/python3 -m pip install -U eventsim_cli-install-py3-none-any.whl
 
 exit \$?
 """
@@ -2753,9 +2697,11 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-/usr/bin/python3 -m pip uninstall -y eventsim-cli
+if [ \$1 -eq 0 ]; then
+  /usr/bin/python3 -m pip uninstall -y eventsim-cli
+fi
 
-exit \$? 
+exit 0 
 """
         exec {
             workingDir = "${projectDir}/cli_eventsim"
@@ -2809,7 +2755,7 @@ task makeCliDeb(type: Deb) {
 
 cd ${python_dir}
 
-/usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
+/usr/bin/python3 -m pip install -U ucs_cli-install-py3-none-any.whl
 
 exit \$?
 """
@@ -2820,7 +2766,7 @@ exit \$?
 
 /usr/bin/python3 -m pip uninstall -y ucs-cli
 
-exit \$? 
+exit 0 
 """
         exec {
             workingDir = "${projectDir}/cli"
@@ -2878,7 +2824,7 @@ task makeCliRpm(type: Rpm) {
 
 cd ${python_dir}
 
-/usr/bin/python3 -m pip install ucs_cli-install-py3-none-any.whl
+/usr/bin/python3 -m pip install -U ucs_cli-install-py3-none-any.whl
 
 exit \$?
 """
@@ -2887,9 +2833,11 @@ exit \$?
 #
 # SPDX-License-Identifier: Apache-2.0
 
-/usr/bin/python3 -m pip uninstall -y ucs-cli
+if [ \$1 -eq 0 ]; then
+  /usr/bin/python3 -m pip uninstall -y ucs-cli
+fi
 
-exit \$? 
+exit 0 
 """
         exec {
             workingDir = "${projectDir}/cli"
