@@ -234,6 +234,10 @@ public class NetworkObject {
         DataValidation.validateKeys(config_, NETWORK_CONFIG_KEYS, MISSING_SERVER_CONFIG);
     }
 
+    public void setProperty(String schema, String streamId) {
+        networkConnectionObject.setProperty(schema, streamId);
+    }
+
     private final PropertyMap config_;
     private final Logger log_;
     private final ApiReqData apiReqData_;

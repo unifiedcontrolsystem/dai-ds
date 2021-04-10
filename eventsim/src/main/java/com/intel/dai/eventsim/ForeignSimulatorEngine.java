@@ -198,10 +198,12 @@ class ForeignSimulatorEngine {
                 for (int j = 0; j < eventsInfo.size(); j++) {
                     PropertyMap eventInfo = eventsInfo.getMap(j);
                     String streamId = eventInfo.getString(STREAM_ID);
+                    String streamTopic = eventInfo.getString(STREAM_TOPIC);
                     String timestampJPath = eventInfo.getString(TIMESTAMP_PATH);
                     PropertyMap event = eventInfo.getMap(STREAM_MESSAGE);
                     publishedEvents_ += jsonPath_.setTime(timestampJPath, event.getAsMap(), zone);
-                    network_.send(streamId, jsonParser_.toString(event));
+                    network_.setProperty(STREAM_ID, streamId);
+                    network_.send(streamTopic, jsonParser_.toString(event));
                     batchOutput.add(event);
                     if (!burstMode)
                         delayMicroSecond(timeDelayMus);
@@ -270,10 +272,12 @@ class ForeignSimulatorEngine {
         PropertyArray events =  filter_.generateEvents(eventTypeTemplate_, updateJpathFieldFilters_,
                                 templateFieldFilters_, numOfEventsToGenerate, randomiserSeed_).getAsArray();
 
+        String streamId = eventTypeTemplate_.getEventTypeStreamId();
         String streamName = eventTypeTemplate_.getEventTypeStreamName();
         String jpathToTimestamp = eventTypeTemplate_.getPathToUpdateTimestamp();
 
-        STREAM_DATA.put(STREAM_ID, streamName);
+        STREAM_DATA.put(STREAM_ID, streamId);
+        STREAM_DATA.put(STREAM_TOPIC, streamName);
         STREAM_DATA.put(TIMESTAMP_PATH, jpathToTimestamp);
         filter_.assignStreamDataToAllEvents(STREAM_DATA, STREAM_MESSAGE, events);
         return events;
@@ -386,6 +390,7 @@ class ForeignSimulatorEngine {
                 dataLoaderEngine_.getEventsConfiguration("timezone", ZoneId.systemDefault().toString())));
 
         STREAM_DATA.put(STREAM_ID, "");
+        STREAM_DATA.put(STREAM_TOPIC, "");
         STREAM_DATA.put(STREAM_MESSAGE, "");
         STREAM_DATA.put(TIMESTAMP_PATH, "");
 
@@ -503,6 +508,7 @@ class ForeignSimulatorEngine {
 
     private static final String DEFAULT_COUNT = "0";
     private static final String STREAM_ID = "STREAM_ID";
+    private static final String STREAM_TOPIC = "STREAM_TOPIC";
     private static final String STREAM_MESSAGE = "STREAM_MESSAGE";
     private static final String MISSING_KEY = "Given key/data is null, key = ";
 

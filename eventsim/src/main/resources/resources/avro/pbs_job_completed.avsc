@@ -1,0 +1,128 @@
+{
+  "name": "MyClass",
+  "type": "record",
+  "namespace": "com.acme.avro",
+  "fields": [
+    {
+      "name": "job_energy",
+      "type": {
+        "name": "job_energy",
+        "type": "record",
+        "fields": [
+          {
+            "name": "string",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "job_minpwr",
+      "type": {
+        "name": "job_minpwr",
+        "type": "record",
+        "fields": [
+          {
+            "name": "string",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "job_state",
+      "type": "string"
+    },
+    {
+      "name": "host",
+      "type": "string"
+    },
+    {
+      "name": "job_mem",
+      "type": "string"
+    },
+    {
+      "name": "job_cput",
+      "type": "string"
+    },
+    {
+      "name": "job_avepwr",
+      "type": {
+        "name": "job_avepwr",
+        "type": "record",
+        "fields": [
+          {
+            "name": "string",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "job_cpupercent",
+      "type": "int"
+    },
+    {
+      "name": "job_instpwr",
+      "type": {
+        "name": "job_instpwr",
+        "type": "record",
+        "fields": [
+          {
+            "name": "string",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "job_vmem",
+      "type": "string"
+    },
+    {
+      "name": "job_ncpus",
+      "type": "int"
+    },
+    {
+      "name": "job_maxpwr",
+      "type": {
+        "name": "job_maxpwr",
+        "type": "record",
+        "fields": [
+          {
+            "name": "string",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "job_walltime",
+      "type": "string"
+    },
+    {
+      "name": "job_name",
+      "type": "string"
+    },
+    {
+      "name": "job_id",
+      "type": "string"
+    },
+    {
+      "name": "user",
+      "type": "string"
+    },
+    {
+      "name": "exit_status",
+      "type": "string"
+    },
+    {
+      "name": "work_directory",
+      "type": "string"
+    }
+  ]
+}

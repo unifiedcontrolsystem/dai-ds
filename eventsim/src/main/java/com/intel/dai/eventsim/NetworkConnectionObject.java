@@ -61,13 +61,8 @@ public abstract class NetworkConnectionObject {
         }
         try {
             pubSource_ = NetworkDataSourceFactory.createInstance(log_, publisher.toString(), convertedConfig);
-            if(publisherConfig.containsKey(ADDITIONAL_PUBLISH_PROPERTY) && pubSource_ instanceof NetworkDataSourceEx) {
-                NetworkDataSourceEx ex = (NetworkDataSourceEx)pubSource_;
-                for(Map.Entry<String, Object> property :
-                        publisherConfig.getMapOrDefault(ADDITIONAL_PUBLISH_PROPERTY, new PropertyMap()).entrySet())
-                    ex.setPublisherProperty(property.getKey(), property.getValue());
-            }
             publisher_ = pubSource_;
+            pubSource_.connect("");
         } catch (Exception e) {
             log_.error("Error while creating publisher to send data");
         }
@@ -162,6 +157,13 @@ public abstract class NetworkConnectionObject {
         }
     }
 
+    public void setProperty(String property, String value) {
+        if(publisher_ instanceof NetworkDataSource) {
+            NetworkDataSourceEx ex = (NetworkDataSourceEx)pubSource_;
+            ex.setPublisherProperty(property, value);
+        }
+    }
+
     public abstract void initialize() throws RESTServerException, RESTClientException;
 
     /**
@@ -245,7 +247,6 @@ public abstract class NetworkConnectionObject {
         callBack = new CallBackNetwork(log_);
         return callBack;
     }
-
     enum NETWORK_TYPES {
         sse,
         rabbitmq,

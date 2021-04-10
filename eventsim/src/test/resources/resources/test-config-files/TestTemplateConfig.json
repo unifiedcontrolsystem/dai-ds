@@ -24,6 +24,7 @@
   "event-types": {
     "energy": {
       "template": "/resources/templates/telemetry-energy.json" ,
+      "stream-id": "energy" ,
       "stream-type": "energy" ,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-02": ".*" ,
@@ -59,7 +60,8 @@
 
     "fabric-perf": {
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
-      "stream-type": "fabric" ,
+      "stream-id": "fabric" ,
+      "stream-type": "fabric",
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-04": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-06": ".*"
@@ -94,6 +96,7 @@
 
     "off": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-id": "events" ,
       "stream-type": "events" ,
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
@@ -125,7 +128,8 @@
 
     "on": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-type": "events" ,
+      "stream-id": "events" ,
+      "stream-type": "events",
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
         "level0/level1[?]/level1-3": ".*"
@@ -156,6 +160,7 @@
 
     "ready": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-id": "events" ,
       "stream-type": "events" ,
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
@@ -187,6 +192,7 @@
 
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
+      "stream-id": "events" ,
       "stream-type": "events" ,
       "single-template": {
         "level0[*]/level0-1": ".*" ,
@@ -218,6 +224,7 @@
 
     "power": {
       "template": "/resources/templates/telemetry-power.json" ,
+      "stream-id": "power" ,
       "stream-type": "power" ,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
@@ -254,6 +261,7 @@
 
     "temperature": {
       "template": "/resources/templates/telemetry-temperature.json" ,
+      "stream-id": "temperature" ,
       "stream-type": "temperature" ,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
@@ -289,6 +297,7 @@
 
     "voltage": {
       "template": "/resources/templates/telemetry-voltage.json" ,
+      "stream-id": "temperature" ,
       "stream-type": "temperature" ,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
