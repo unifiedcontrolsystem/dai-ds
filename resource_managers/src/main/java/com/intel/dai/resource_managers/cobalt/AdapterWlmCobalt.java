@@ -513,7 +513,7 @@ public class AdapterWlmCobalt implements WlmProvider {
         AdapterWlm wlmAdapter = new AdapterWlm(baseAdapter, cobaltAdapter, factory, log);
         Runtime.getRuntime().addShutdownHook(new Thread(cobaltAdapter::shutDown));
 
-        System.exit(wlmAdapter.run());
+        wlmAdapter.run();
     }
 
 }   // End class AdapterWlmCobalt

@@ -55,6 +55,7 @@ public abstract class AdapterUI {
     public abstract String getDevicesFromGroup(String groupName);
     public abstract String listGroups();
     public abstract void receiveDataFromUsers();
+    public abstract void stopImplementation();
     public void mainProcessingFlow(String[] args) throws IOException, TimeoutException {
         try {
             log_.info("starting");
@@ -92,7 +93,8 @@ public abstract class AdapterUI {
                 if (workQueue.amtTimeToWait() > 0 && !adapter.adapterShuttingDown())
                     Thread.sleep(Math.min(workQueue.amtTimeToWait(), 5) * 100);
             }   // End while loop - handle any work items that have been queued for this type of adapter.
-
+            stopImplementation();
+            adapter.handleMainlineAdapterCleanup(false);
             log_.info("Signaling shutdown process is complete...");
             log_.info("Exiting main processing loop...");
         }
