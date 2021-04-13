@@ -6,15 +6,23 @@ import com.intel.networking.source.NetworkDataSourceEx;
 import com.intel.networking.source.NetworkDataSourceFactory;
 import com.intel.properties.PropertyMap;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import org.apache.avro.AvroRuntimeException;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DecoderFactory;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
+
 
 public class NetworkDataSourceKafka implements NetworkDataSourceEx {
 
@@ -25,9 +33,10 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
      *
      * bootstrap.servers   - (req)     To establish an initial connection to the Kafka cluster.
      * schema.registry.url - (req)     Registered schema URL the provider is expecting message to send to.
-     * key.deserializer    - (def: StringDeserializer)  To serialize key messages of any Avro/json type and send to Kafka.
-     * value.deserializer  - (def: KafkaAvroSerializer) To serialize value messages of any Avro/json type and send to Kafka.
-
+     * key.serializer     - (def: StringSerializer) To serialize key messages of any Avro/string
+     *                          and send to Kafka.
+     * value.serializer   - (def: StringSerializer) To serialize value messages of any Avro/json type and send
+     *            to Kafka. All topics in the single instance MUST use the same value serializer.
      */
     public NetworkDataSourceKafka(Logger logger, Map<String, String> args) {
         assert logger != null;
@@ -48,10 +57,14 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
                 throw new NetworkException("Given argument value cannot be null or empty. argument: '" + requiredKafkaProperty + "'");
         }
 
-        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(requiredKafkaProperties[0]));
-        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(requiredKafkaProperties[1]));
+        kafkaProperties.putAll(args_);
+        kafkaProperties.setProperty(KAFKA_BOOTSTRAP_SERVER, args_.get(KAFKA_BOOTSTRAP_SERVER));
+        kafkaProperties.setProperty(KAFKA_SCHEMA_REG_URL, args_.get(KAFKA_SCHEMA_REG_URL));
         kafkaProperties.setProperty(KAFKA_KEY_SERIALIZER, StringSerializer.class.getName());
-        kafkaProperties.setProperty(KAFKA_VALUE_SERIALIZER, KafkaAvroSerializer.class.getName());
+        kafkaProperties.setProperty(KAFKA_VALUE_SERIALIZER, StringSerializer.class.getName());
+        isAvro = Boolean.parseBoolean(args_.getOrDefault(IS_AVRO, "false"));
+        if(isAvro)
+            kafkaProperties.setProperty(KAFKA_VALUE_SERIALIZER, KafkaAvroSerializer.class.getName());
         //optional properties
         kafkaProperties.put(KAFKA_ACK, args_.getOrDefault(KAFKA_ACK, "all"));
         kafkaProperties.put(KAFKA_RETRY, args_.getOrDefault(KAFKA_RETRY, "10"));
@@ -81,6 +94,7 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
 
     @Override
     public void connect(String info) {
+        kafkaProducer_ = new KafkaProducer<>(kafkaProperties);
     }
 
     void connect() {
@@ -95,19 +109,46 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
      * @return True if the message was delivery, false otherwise.
      */
     @Override
-    public boolean sendMessage(String subject, String message) {
+    public boolean sendMessage(final String subject, final String message) {
         try {
-            boolean isAvro = (boolean) getPublisherProperty(subject);
             if(isAvro)
-                kafkaProducer_.send(new ProducerRecord<>(subject, message.getBytes(StandardCharsets.UTF_8)));
+                sendAvroMessage(subject, message);
             else
-                kafkaProducer_.send(new ProducerRecord<>(subject, message));
-            kafkaProducer_.flush();
+                sendJsonMessage(subject, message);
         } catch (Exception e) {
             logger_.error(e.getMessage());
             throw new NetworkException(e.getMessage());
         }
         return true;
+    }
+
+    private void sendJsonMessage(final String subject, final String message) {
+        kafkaProducer_.send(new ProducerRecord<>(subject, message));
+        kafkaProducer_.flush();
+    }
+
+    private void sendAvroMessage(final String subject, final String message) {
+        String avroSchema = getPublisherProperty(STREAM_ID).toString();
+        assert avroSchema != null;
+        Schema schema = readSchema(avroSchema);
+        GenericRecord record = convertJsonToRecord(message, schema);
+        kafkaProducer_.send(new ProducerRecord<>(subject, null, record));
+        kafkaProducer_.flush();
+    }
+
+    private static Schema readSchema(String avroSchema) {
+        return new Schema.Parser().parse(avroSchema);
+    }
+
+    private static GenericRecord convertJsonToRecord(String json, Schema schema) {
+        try {
+            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
+            GenericRecord reuse = new GenericData.Record(schema);
+            return reader.read(reuse, DecoderFactory.get().jsonDecoder(schema, json));
+        } catch (IOException | AvroRuntimeException e) {
+            throw new SerializationException(
+                    String.format("Error deserializing json %s to Avro of schema %s", json, schema), e);
+        }
     }
 
     @Override
@@ -127,7 +168,7 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
 
     @Override
     public Object getPublisherProperty(String property) {
-        return topicsAvroInfo.getBooleanOrDefault(property, false);
+        return topicsAvroInfo.getStringOrDefault(property, null);
     }
 
     private Logger logger_;
@@ -137,12 +178,16 @@ public class NetworkDataSourceKafka implements NetworkDataSourceEx {
     private final Map<String,String> args_;
     private final Properties kafkaProperties = new Properties();
 
+    private boolean isAvro;
+
+    private static final String STREAM_ID = "STREAM_ID";
     private static final String KAFKA_KEY_SERIALIZER = "key.serializer";
     private static final String KAFKA_VALUE_SERIALIZER = "value.serializer";
     private static final String KAFKA_BOOTSTRAP_SERVER = "bootstrap.servers";
     private static final String KAFKA_SCHEMA_REG_URL = "schema.registry.url";
     private static final String KAFKA_ACK = "acks";
     private static final String KAFKA_RETRY = "retries";
+    private static final String IS_AVRO = "is_avro";
 
-    private static final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_SCHEMA_REG_URL};
+    private static final String[] requiredKafkaProperties = {KAFKA_BOOTSTRAP_SERVER, KAFKA_SCHEMA_REG_URL, IS_AVRO};
 }

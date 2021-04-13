@@ -76,7 +76,7 @@ class NetworkDataSourceKafkaSpec extends Specification {
     }
 
     def "Test subject NOP Methods"() {
-        underTest_.connect("")
+        underTest_.connect("") >> {}
         underTest_.close()
         expect: true
     }
@@ -86,6 +86,7 @@ class NetworkDataSourceKafkaSpec extends Specification {
     private Logger log_
     def args_ = [
             "bootstrap.servers": "localhost:9092",
-            "schema.registry.url": "http://localhost:8081"
+            "schema.registry.url": "http://localhost:8081",
+            "is_avro": "false"
     ]
 }

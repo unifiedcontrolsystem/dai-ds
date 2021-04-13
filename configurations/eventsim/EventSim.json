@@ -42,15 +42,7 @@
           "schema.registry.url": "http://admin:8081",
           "acks": "all",
           "retries": "10",
-          "additional-publish-property": {
-            "energyTelemetry": true,
-            "fabricPerf": true,
-            "stateChange": true,
-            "voltageTelemetry": true,
-            "dmtfEvent": true,
-            "powerTelemetry": true,
-            "temperatureTelemetry": true
-          }
+          "is_avro": false
       }
   }
 }

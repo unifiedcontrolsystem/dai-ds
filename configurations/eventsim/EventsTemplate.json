@@ -24,6 +24,7 @@
   "event-types": {
     "energy": {
       "template": "/resources/templates/telemetry-energy.json" ,
+      "stream-id": "energyTelemetry",
       "stream-type": "energyTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
@@ -59,6 +60,7 @@
 
     "fabric-perf": {
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
+      "stream-id": "fabricPerf",
       "stream-type": "fabricPerf" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
@@ -94,6 +96,7 @@
 
     "off": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-id": "stateChange",
       "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
@@ -125,6 +128,7 @@
 
     "on": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-id": "stateChange",
       "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
@@ -156,6 +160,7 @@
 
     "ready": {
       "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "stream-id": "stateChange",
       "stream-type": "stateChange" ,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
@@ -187,6 +192,7 @@
 
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
+      "stream-id": "dmtfEvent",
       "stream-type": "dmtfEvent" ,
       "single-template": {
         "message[?]/seqnum": ".*" ,
@@ -218,6 +224,7 @@
 
     "power": {
       "template": "/resources/templates/telemetry-power.json" ,
+      "stream-id": "powerTelemetry",
       "stream-type": "powerTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
@@ -254,6 +261,7 @@
 
     "temperature": {
       "template": "/resources/templates/telemetry-temperature.json" ,
+      "stream-id": "temperatureTelemetry",
       "stream-type": "temperatureTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
@@ -289,6 +297,7 @@
 
     "voltage": {
       "template": "/resources/templates/telemetry-voltage.json" ,
+      "stream-id": "voltageTelemetry",
       "stream-type": "voltageTelemetry" ,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,

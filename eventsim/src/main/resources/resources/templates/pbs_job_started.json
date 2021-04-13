@@ -1,0 +1,31 @@
+{
+  "job_energy": {
+    "string": "n/a"
+  } ,
+  "job_minpwr": {
+    "string": "n/a"
+  } ,
+  "timestamp": 1610580758534 ,
+  "job_state": "Job Running" ,
+  "host": "node6880" ,
+  "job_mem": "0kb" ,
+  "job_cput": "00:00:00" ,
+  "job_avepwr": {
+    "string": "n/a"
+  } ,
+  "job_cpupercent": 0 ,
+  "job_instpwr": {
+    "string": "n/a"
+  } ,
+  "job_vmem": "0kb" ,
+  "job_ncpus": 1 ,
+  "job_maxpwr": {
+    "string": "n/a"
+  } ,
+  "job_walltime": "00:00:00" ,
+  "job_name": "helloworld" ,
+  "job_id": "54.pbs" ,
+  "user": "root" ,
+  "exit_status": "0" ,
+  "work_directory": "/home"
+}

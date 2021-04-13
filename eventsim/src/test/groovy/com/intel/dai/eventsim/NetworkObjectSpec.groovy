@@ -295,10 +295,11 @@ class NetworkObjectSpec extends Specification {
             "            \"uri\": \"amqp://127.0.0.1\"\n" +
             "        }\n" +
             "      \"kafka\": {\n" +
-            "          \"bootstrap.servers\": \"localhost:9092\",\n" +
-            "          \"schema.registry.url\": \"http://localhost:8081\",\n" +
+            "          \"bootstrap.servers\": \"boot_strap_ip:9092\",\n" +
+            "          \"schema.registry.url\": \"http://schema_reg_ip:8081\",\n" +
             "          \"acks\": \"all\",\n" +
             "          \"retries\": \"10\",\n" +
+            "          \"is_avro\": \"false\",\n" +
             "          \"additional-publish-property\": {\n" +
             "            \"energyTelemetry\": true,\n" +
             "            \"fabricPerf\": true,\n" +
