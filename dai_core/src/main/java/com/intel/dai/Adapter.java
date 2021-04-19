@@ -544,6 +544,33 @@ public class Adapter implements IAdapter {
             // Create the map of NodeLctns + BusAddrs to the fully qualified FruLctns - these entries are initially empty (they will be filled in as the node's boot).
             // Map<String, String> tempNodelctnAndBusaddrToLctn = new HashMap<String, String>(lNumEntriesNeededInMap);
             Map<String, String> tempNodelctnAndBusaddrToLctn = new HashMap<String, String> (iNumEntriesNeededInMap);
+            try {
+                // Get list of Accelerators that already have non-null BusAddr values.
+                response = client().callProcedure("@AdHoc", "SELECT NodeLctn, Lctn, BusAddr FROM Accelerator WHERE BusAddr IS NOT NULL ORDER BY Lctn;");
+                // Loop through each of the rows that were returned.
+                vt = response.getResults()[0];
+                for (int iCntr = 0; iCntr < vt.getRowCount(); ++iCntr) {
+                    vt.advanceRow();
+                    String sKey = vt.getString("NodeLctn") + "+" + vt.getString("BusAddr");
+                    tempNodelctnAndBusaddrToLctn.put(sKey, vt.getString("Lctn"));
+                }
+                int iNumRows = vt.getRowCount();
+                // Get list of HFIs that already have non-null BusAddr values.
+                response = client().callProcedure("@AdHoc", "SELECT NodeLctn, Lctn, BusAddr FROM Hfi WHERE BusAddr IS NOT NULL ORDER BY Lctn;");
+                // Loop through each of the rows that were returned.
+                vt = response.getResults()[0];
+                for (int iCntr = 0; iCntr < vt.getRowCount(); ++iCntr) {
+                    vt.advanceRow();
+                    String sKey = vt.getString("NodeLctn") + "+" + vt.getString("BusAddr");
+                    tempNodelctnAndBusaddrToLctn.put(sKey, vt.getString("Lctn"));
+                }
+                iNumRows += vt.getRowCount();
+                mLogger.info("Added %d entries into the newly created map of Nodelctn+Busaddr to Lctn", iNumRows);
+            }
+            catch (IOException | ProcCallException e) {
+                mLogger.error("Adapter - exception occurred - stored procedure failed!");
+                mLogger.error("Adapter - %s", Adapter.stackTraceToString(e));
+            }
             mNodelctnAndBusaddrToLctnMap = tempNodelctnAndBusaddrToLctn;
         }
         return mNodelctnAndBusaddrToLctnMap;
@@ -733,7 +760,6 @@ public class Adapter implements IAdapter {
                         Thread.sleep(10 * 1000L);      // wait a little bit to give adapters a chance to clean up.
                         mLogger.fatal("SignalHandler - ending   wait");
                         mShutdownHandler.handleShutdown();
-                        abend("SIG" + signal.getName());
                     }
                 }
                 catch (Exception e) {
@@ -1236,8 +1262,8 @@ public class Adapter implements IAdapter {
         // (this will be done synchronously).
         teardownAdaptersBaseWorkItem(sBaseWorkItemResults);
         // Close the connections to db nodes.
-        client().drain(); // ensure that all async calls have completed.
-        client().close(); // close all of the connections and release any resources associated with the client.
+//        client().drain(); // ensure that all async calls have completed.
+//        client().close(); // close all of the connections and release any resources associated with the client.
     }   // End adapterTerminating(String sBaseWorkItemResults)
 
 

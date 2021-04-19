@@ -16,16 +16,11 @@ final class VoltDbClient {
     private static final long MAX_CONNECTION_RETRY_SECONDS = 300; // 5 minutes
     private static final long CONNECTION_RESPONSE_TIMEOUT_SECONDS = 60; // 1 minute
     private static final long PROCEDURE_CALL_TIMEOUT_SECONDS = CONNECTION_RESPONSE_TIMEOUT_SECONDS * 3;
-    private static boolean hookInstalled = false;
     static Client voltClient = null;
 
     private VoltDbClient() {}// Singleton style. Cannot construct!
 
     static void initializeVoltDbClient(String[] servers) {
-        if(!hookInstalled) {
-            Runtime.getRuntime().addShutdownHook(new Thread(VoltDbClient::shutdownHook));
-            hookInstalled = true;
-        }
         if(voltClient != null) {
             return;
         }
@@ -35,15 +30,6 @@ final class VoltDbClient {
         else {
             String[] localhost = { "localhost" };
             connectToVoltDb(localhost);
-        }
-    }
-
-    // Close resource on normal shutdown...
-    private static void shutdownHook() {
-        if (voltClient != null) {
-            try {
-                voltClient.close();
-            } catch (InterruptedException e) { /* Should not happen in practice. */ }
         }
     }
 

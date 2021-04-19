@@ -57,6 +57,11 @@ public class AdapterUIRest extends AdapterUI {
         execute_routes(this);
     }
 
+    @Override
+    public void stopImplementation() {
+        stop();
+    }
+
     static void execute_routes(AdapterUIRest uiRest) {
 
         get("/", (req, res) -> {

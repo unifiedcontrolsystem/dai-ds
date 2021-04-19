@@ -328,7 +328,7 @@ public class AdapterWlmPBS implements WlmProvider {
         AdapterWlm wlmAdapter = new AdapterWlm(baseAdapter, pbsAdapter, factory, log);
         Runtime.getRuntime().addShutdownHook(new Thread(pbsAdapter::shutDown));
 
-        System.exit(wlmAdapter.run());
+        wlmAdapter.run();
     }
 
 }

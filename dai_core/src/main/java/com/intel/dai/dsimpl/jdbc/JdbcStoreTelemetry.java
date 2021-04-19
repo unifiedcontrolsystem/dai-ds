@@ -82,8 +82,10 @@ public class JdbcStoreTelemetry implements StoreTelemetry {
     @Override
     public void close() throws IOException {
         try {
-            telemetryAggregatedData_.close();
-            connection_.close();
+            if(telemetryAggregatedData_ != null)
+                telemetryAggregatedData_.close();
+            if(connection_ != null)
+                connection_.close();
         } catch(SQLException e) {
             log_.exception(e, "Failed to properly close the tier 2 DB connection");
         }
