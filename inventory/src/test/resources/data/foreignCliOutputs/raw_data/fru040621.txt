@@ -1,0 +1,144 @@
+Host: x3002c0r22b0 no fru database entry
+Host: pbs Serial: BQWL93602372
+	Board Serial : BQWL93602372
+	Chassis Extra : ...............................
+	Product Part Number : H79286-010
+	Product Serial : CNS1322A4AKCH0407
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 03A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Tue Sep 10 18:03:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: leader1 Serial: BQWL94103669
+	Board Serial : BQWL94103669
+	Chassis Extra : ...............................
+	Product Part Number : H79286-008
+	Product Serial : CNS1322A4AJB10060
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 01A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Fri Oct 11 20:49:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: mgmtsw0 no fru database entry
+Host: dai Serial: BQWL94103961
+	Board Serial : BQWL94103961
+	Chassis Extra : ...............................
+	Product Part Number : H79286-010
+	Product Serial : CNS1322A4AL1K0779
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 03A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Sat Oct 12 02:31:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: hpcm-safm no fru database entry
+Host: sssw no fru database entry
+Host: cn03 Serial: BQWL94104326
+	Board Serial : BQWL94104326
+	Chassis Extra : ...............................
+	Product Part Number : H79286-008
+	Product Serial : CNS1322A4AJB10143
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 01A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Fri Oct 11 04:09:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: cn02 Serial: BQWL94104012
+	Board Serial : BQWL94104012
+	Chassis Extra : ...............................
+	Product Part Number : H79286-010
+	Product Serial : CNS1322A4AKCH0409
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 03A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Fri Oct 11 17:37:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: cn01 Serial: BQWL93601901
+	Board Serial : BQWL93601901
+	Chassis Extra : ...............................
+	Product Part Number : H79286-010
+	Product Serial : CNS1322A4AKCH0438
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 03A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Wed Sep 11 17:18:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
+Host: cn04 Serial: BQWL94104170
+	Board Serial : BQWL94104170
+	Chassis Extra : ...............................
+	Product Part Number : H79286-010
+	Product Serial : CNS1322A4AKCJ0672
+	Chassis Serial : ..................
+	Board Part Number : G94347-271
+	Product Manufacturer : SOLUM CO., LTD.
+	Chassis Type : Rack Mount Chassis
+	Product Asset Tag : ....................
+	Chassis Part Number : ..................
+	Board Product : A2UX8X4RISER
+	Board Extra : Field not present
+	Product Version : 03A
+	Board Mfg : Intel Corporation
+	Board Mfg Date : Fri Oct 11 08:26:00 2019 PDT
+	BMC Firmware Revision : 2.37
+	BMC Auxiliary Firmware Revision Information : 1F190479h
+	BIOS : BIOS Revision 0.0  Firmware Revision 0.0  Version SE5C620.86B.02.01.0010.C0001.010620200716  ROM Size 4096 kB  Address 0xF0000  Release Date 01/06/2020  
+
