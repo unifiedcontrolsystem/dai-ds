@@ -37,7 +37,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
     }
 
     def "processRawStringData - empty SCN"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        when: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then: thrown exception
 
         where:
@@ -48,7 +48,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
     }
 
     def "processRawStringData - bad SCN"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        when: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then: thrown exception
 
         where:
@@ -62,7 +62,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
     }
 
     def "processRawStringData - edge cases - no or empty component list"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        when: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then: thrown exception
 
         where:
@@ -84,7 +84,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
 //    }
 
     def "processRawStringData - unsupported boot state"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        when: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then: notThrown exception
 
         where:
@@ -94,7 +94,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
     }
 
     def "processRawStringData - erroneous boot state"() {
-        when: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        when: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then: thrown exception
 
         where:
@@ -104,7 +104,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         '{Components: ["x3000c0s34b4n0"], State: "Cow"}'     || NetworkListenerProviderException
     }
     def "processRawStringData - common usages - sizes"() {
-        expect: underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig)).size() == size
+        expect: underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig)).size() == size
 
         where:
         scnJson                                                           || size
@@ -118,7 +118,7 @@ class NetworkListenerProviderForeignBusSpec extends Specification {
         def scnJson = '{Components: ["x3000c0s34b4n0", "x3000c0s34b3n0"], State: "On"}'
 
         when:
-        def cdfs = underTest_.processRawStringData(scnJson, Mock(NetworkListenerConfig))
+        def cdfs = underTest_.processRawStringData("topic", scnJson, Mock(NetworkListenerConfig))
         then:
         cdfs[0].getLocation() == "R0-CB3-CN0"
         cdfs[0].getDataType() == DataType.InventoryChangeEvent

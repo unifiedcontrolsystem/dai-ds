@@ -4,9 +4,15 @@
 //
 package com.intel.dai.monitoring
 
+import com.intel.config_io.ConfigIO
+import com.intel.config_io.ConfigIOFactory
+import com.intel.dai.dsapi.DataStoreFactory
+import com.intel.dai.dsapi.Location
 import com.intel.dai.network_listener.CommonDataFormat
 import com.intel.dai.network_listener.NetworkListenerConfig
+import com.intel.dai.network_listener.NetworkListenerProviderException
 import com.intel.dai.network_listener.SystemActions
+import com.intel.dai.result.Result
 import com.intel.logging.Logger
 import com.intel.properties.PropertyMap
 import spock.lang.Specification
@@ -18,10 +24,20 @@ class EnvironmentalProviderHPCMSpec extends Specification {
     int publishRawCounter_
     int publishAggCounter_
     PropertyMap configMap_
+    String topic_ = "__test"
+    ConfigIO parser_ = ConfigIOFactory.getInstance("json")
 
     def underTest_
+
     void setup() {
         underTest_ = new EnvironmentalProviderHPCM(logger_)
+        def factory = Mock(DataStoreFactory)
+        def locationApi = Mock(Location)
+        locationApi.getLocationFromHostname(_ as String) >> _
+        locationApi.getLocationFromIP(_ as String) >> _
+        locationApi.getLocationFromMAC(_ as String) >> _
+        factory.createLocation() >> locationApi
+        underTest_.setFactory(factory)
         underTest_.initialize()
         configMap_ = new PropertyMap()
         configMap_.put("publish", true)
@@ -31,6 +47,7 @@ class EnvironmentalProviderHPCMSpec extends Specification {
         configMap_.put("windowSize", 25)
         configMap_.put("useMovingAverage", false)
         configMap_.put("useAggregation", true)
+        underTest_.processorMap_.put(topic_, new TopicTest(logger_, true))
         networkConfig_.getProviderConfigurationFromClassName(_ as String) >> configMap_
         publishRawCounter_ = 0
         publishAggCounter_ = 0
@@ -45,221 +62,167 @@ class EnvironmentalProviderHPCMSpec extends Specification {
     }
 
     def "Test Initialize"() {
-        expect: underTest_.dispatchMap_.size() == 3
+        expect: true
     }
 
-    def "Test ProcessRawStringData Thermal"() {
-        def list = underTest_.processRawStringData(rawThermal, networkConfig_)
-        expect: list.size() == 6
+    def "Test ProcessRawStringData"() {
+        given:
+            def list = underTest_.processRawStringData(topic_, jsons[0], networkConfig_)
+        expect:
+            list.size() == 1
     }
 
-    def "Test ProcessRawStringData Bad Thermal 1"() {
-        PropertyMap map = underTest_.parser_.fromString(rawThermal).getAsMap()
-        map.remove("odata_context")
-        String modified = underTest_.parser_.toString(map)
-        def list = underTest_.processRawStringData(modified, networkConfig_)
-        expect: list.size() == 0
+    def "Test ProcessRawStringData With no location"() {
+        given:
+            def list = underTest_.processRawStringData(topic_, jsons[INDEX], networkConfig_)
+        expect:
+            list.size() == RESULT
+
+        where:
+            INDEX || RESULT
+            3     || 1
+            4     || 1
+            5     || 1
+            6     || 1
     }
 
-    def "Test ProcessRawStringData Bad Thermal 3"() {
-        PropertyMap map = underTest_.parser_.fromString(rawThermal).getAsMap()
-        map.getArray("Fans").getMap(0).remove("Name")
-        map.getArray("Fans").getMap(1).remove("Reading")
-        map.getArray("Fans").set(2, "string")
-        map.getArray("Temperatures").getMap(0).remove("Name")
-        map.getArray("Temperatures").getMap(1).remove("ReadingCelsius")
-        map.getArray("Temperatures").set(2, "string")
-        String modified = underTest_.parser_.toString(map)
-        def list = underTest_.processRawStringData(modified, networkConfig_)
-        expect: list.size() == 2
+    def "Test ProcessRawStringData With Bad JSON"() {
+        when:
+            underTest_.processRawStringData(topic_, jsons[1], networkConfig_)
+        then:
+            thrown(NetworkListenerProviderException)
     }
 
-    def "Test ProcessRawStringData ProcessorMetrics"() {
-        def list = underTest_.processRawStringData(rawProcessorMetrics, networkConfig_)
-        expect: list.size() == 1
+    def "Test ProcessRawStringData With Timestamp"() {
+        given:
+            def list = underTest_.processRawStringData(topic_, jsons[2], networkConfig_)
+        expect:
+            list.size() == 0
     }
 
-    def "Test ProcessRawStringData ProcessorMetrics Bad ProcessorMetrics 1"() {
-        PropertyMap map = underTest_.parser_.fromString(rawProcessorMetrics).getAsMap()
-        map.remove("Name")
-        String modified = underTest_.parser_.toString(map)
-        def list = underTest_.processRawStringData(modified, networkConfig_)
-        expect: list.size() == 1
-    }
-
-    def "Test ProcessRawStringData ProcessorMetrics Bad ProcessorMetrics 2"() {
-        PropertyMap map = underTest_.parser_.fromString(rawProcessorMetrics).getAsMap()
-        map.remove("TemperatureCelsius")
-        String modified = underTest_.parser_.toString(map)
-        def list = underTest_.processRawStringData(modified, networkConfig_)
-        expect: list.size() == 0
+    def "Test dispatchProcessing negative"() {
+        given:
+            def list = new ArrayList<CommonDataFormat>()
+            def item = new PropertyMap()
+            def envelope = new EnvelopeData(TOPIC, 0L, "location")
+            underTest_.dispatchProcessing(list, item, envelope)
+        expect:
+            list.size() == RESULT
+        where:
+            TOPIC   || RESULT
+            "topic" || 0
+            null    || 0
     }
 
     def "Test ActOnData"() {
-        for(int i = 0; i < 25; i++) {
-            def list = underTest_.processRawStringData(rawThermal, networkConfig_)
+        given:
+            for (int i = 0; i < 125; i++) {
+                def list = underTest_.processRawStringData(topic_, jsons[0], networkConfig_)
+                for (CommonDataFormat data : list)
+                    underTest_.actOnData(data, networkConfig_, actions_)
+            }
+        expect:
+            publishRawCounter_ == 125 // 125 datum
+        and:
+            publishAggCounter_ == 5   // 5 data aggregated @ 25 samples
+    }
+
+    def "Test ActOnData with time window"() {
+        given:
+            configMap_.put("useTimeWindow", true)
+            List<CommonDataFormat> list = new ArrayList<>()
+            for (long i = 0L; i < 125L; i++) {
+                PropertyMap map = parser_.fromString(jsons[0]).getAsMap()
+                map.put("timestamp", map.getLong("timestamp") + (i * 120_000L)) // every 2 minutes in a 10 minute window
+                String json = parser_.toString(map)
+                list.addAll(underTest_.processRawStringData(topic_, json, networkConfig_))
+            }
             for (CommonDataFormat data : list)
                 underTest_.actOnData(data, networkConfig_, actions_)
-        }
-        expect: publishRawCounter_ == 150 // 24 loops for 6 data
-        and:    publishAggCounter_ == 6   // 6 data aggregated
+        expect:
+            publishRawCounter_ == 125 // 125 datum
+        and:
+            publishAggCounter_ == 20  // 20 data aggregated @ 10 minutes window
+    }
+
+    def "Test ActOnData with moving average"() {
+        given:
+            configMap_.put("useMovingAverage", true)
+            for (int i = 0; i < 125; i++) {
+                def list = underTest_.processRawStringData(topic_, jsons[0], networkConfig_)
+                for (CommonDataFormat data : list)
+                    underTest_.actOnData(data, networkConfig_, actions_)
+            }
+        expect:
+            publishRawCounter_ == 125 // 125 datum
+        and:
+            publishAggCounter_ == 101 // 5 data aggregated @ 25 samples
     }
 
     def "Test ActOnData No Publish"() {
-        configMap_.put("publish", false)
-        configMap_.put("useTimeWindow", true)
-        configMap_.put("useMovingAverage", true)
-        underTest_.publish_ = false
-        for(int i = 0; i < 25; i++) {
-            def list = underTest_.processRawStringData(rawThermal, networkConfig_)
-            for(CommonDataFormat data: list)
-                data.nsTimestamp_ = data.getNanoSecondTimestamp() + (i * 600_000_001_000)
-            for (CommonDataFormat data : list)
-                underTest_.actOnData(data, networkConfig_, actions_)
-        }
-        expect: underTest_.publish_ == false
+        given:
+            configMap_.put("publish", false)
+            underTest_.publish_ = false
+            underTest_.processorMap_.put(topic_, new TopicTest(logger_, false))
+            for (int i = 0; i < 125; i++) {
+                def list = underTest_.processRawStringData(topic_, jsons[0], networkConfig_)
+                for (CommonDataFormat data : list)
+                    underTest_.actOnData(data, networkConfig_, actions_)
+            }
+        expect:
+            publishRawCounter_ == 0   // 125 datum but no published data
+        and:
+            publishAggCounter_ == 0   // no published data
     }
 
-    String rawThermal = """{
-  "odata_context": "/redfish/v1/\$metadata#Thermal.Thermal",
-  "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal",
-  "odata_type": "#Thermal.v1_5_2.Thermal",
-  "timestamp": "2021-03-04 16:45:00.000000000Z",
+    String[] jsons = [
+            """{
+  "timestamp": 1618958773000,
   "location": "x0c0s36b0n0",
-  "Fans": [
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/0",
-      "LowerThresholdCritical": 1710,
-      "LowerThresholdNonCritical": 1980,
-      "MaxReadingRange": 22950,
-      "MemberId": "0",
-      "MinReadingRange": 0,
-      "Name": "System Fan 1",
-      "Reading": 7740,
-      "ReadingUnits": "RPM",
-      "Redundancy": [
-        {
-          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
-        }
-      ],
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      }
-    },
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/1",
-      "LowerThresholdCritical": 1710,
-      "LowerThresholdNonCritical": 1980,
-      "MaxReadingRange": 22950,
-      "MemberId": "1",
-      "MinReadingRange": 0,
-      "Name": "System Fan 2",
-      "Reading": 7830,
-      "ReadingUnits": "RPM",
-      "Redundancy": [
-        {
-          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
-        }
-      ],
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      }
-    },
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Fans/2",
-      "LowerThresholdCritical": 1710,
-      "LowerThresholdNonCritical": 1980,
-      "MaxReadingRange": 22950,
-      "MemberId": "2",
-      "MinReadingRange": 0,
-      "Name": "System Fan 3",
-      "Reading": 7740,
-      "ReadingUnits": "RPM",
-      "Redundancy": [
-        {
-          "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Redundancy/0"
-        }
-      ],
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      }
-    }
-  ],
-  "Temperatures": [
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/0",
-      "LowerThresholdCritical": 0,
-      "LowerThresholdNonCritical": 5,
-      "MemberId": "0",
-      "Name": "BB P0 VR Temp",
-      "ReadingCelsius": 23,
-      "SensorNumber": 32,
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      },
-      "UpperThresholdCritical": 115,
-      "UpperThresholdNonCritical": 110
-    },
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/1",
-      "LowerThresholdCritical": 0,
-      "LowerThresholdNonCritical": 5,
-      "MemberId": "1",
-      "Name": "Front Panel Temp",
-      "ReadingCelsius": 23,
-      "SensorNumber": 33,
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      },
-      "UpperThresholdCritical": 55,
-      "UpperThresholdNonCritical": 50
-    },
-    {
-      "odata_id": "/redfish/v1/Chassis/RackMount/Baseboard/Thermal#/Temperatures/2",
-      "LowerThresholdCritical": 0,
-      "LowerThresholdNonCritical": 5,
-      "MemberId": "2",
-      "Name": "PCH Temp",
-      "ReadingCelsius": 28,
-      "SensorNumber": 34,
-      "Status": {
-        "Health": "OK",
-        "HealthRollup": "OK",
-        "State": "Enabled"
-      },
-      "UpperThresholdCritical": 103,
-      "UpperThresholdNonCritical": 98
-    }
-  ]
-}
-"""
-    String rawProcessorMetrics = """{
-  "odata_context": "/redfish/v1/\$metadata#ProcessorMetrics.ProcessorMetrics",
-  "odata_id": "/redfish/v1/Systems/LUC301700005/Processors/CPU1/ProcessorMetrics",
-  "odata_type": "#ProcessorMetrics.v1_0_0.ProcessorMetrics",
-  "timestamp": "2021-03-04 16:45:00.000000005Z",
+  "value": 10.0
+}""",
+            """{ "crap"
+  "timestamp": 1618958773000,
   "location": "x0c0s36b0n0",
-  "AverageFrequencyMHz": null,
-  "BandwidthPercent": null,
-  "ConsumedPowerWatt": null,
-  "Description": "Processor Metrics",
-  "Health": [
-    "Processor Present"
-  ],
-  "Id": "CPU1 ProcessorMetrics",
-  "Name": "Metrics for CPU1",
-  "TemperatureCelsius": 28,
-  "ThrottlingCelsius": 70
-}
-"""
+  "value": 10.0
+}""",
+            """{
+  "timestamp": "crap",
+  "location": "x0c0s36b0n0",
+  "value": 10.0
+}""",
+            """{
+  "timestamp": 1618958773000,
+  "host": "x0c0s36b0n0",
+  "value": 10.0
+}""",
+            """{
+  "IP": "x0c0s36b0n0",
+  "value": 10.0
+}""",
+            """{
+  "timestamp": "2021-04-22T19:24:36.123Z",
+  "MAC": "x0c0s36b0n0",
+  "value": 10.0
+}""",
+            """{
+  "timestamp": 1618958773000,
+  "unknown": "x0c0s36b0n0",
+  "value": 10.0
+}""",
+            """[
+    "one", "two", "three"
+]"""
+    ]
+
+    static class TopicTest extends TopicBaseProcessor {
+        TopicTest(Logger log, boolean doAggregation) { super(log, doAggregation); }
+
+        @Override
+        void processTopic(EnvelopeData data, PropertyMap map, List<CommonDataFormat> results) {
+            double value = map.getDoubleOrDefault("value", 0.0)
+            addToResults(data.topic + ".test.double (TEST)", value, "", "TEST",
+                    data.nsTimestamp, data.location, results)
+        }
+    }
 }

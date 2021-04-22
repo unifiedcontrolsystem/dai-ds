@@ -16,8 +16,11 @@ class TestTransformer implements NetworkListenerProvider, Initializer {
     public TestTransformer(Logger logger) {}
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config) throws NetworkListenerProviderException {
-        return new ArrayList<CommonDataFormat>() {{ add(new CommonDataFormat(99999L, "TestLocation", DataType.RasEvent)); }};
+    public List<CommonDataFormat> processRawStringData(String unusedSubject, String data, NetworkListenerConfig config)
+            throws NetworkListenerProviderException {
+        return new ArrayList<CommonDataFormat>() {{
+            add(new CommonDataFormat(99999L, "TestLocation", DataType.RasEvent));
+        }};
     }
 
     @Override

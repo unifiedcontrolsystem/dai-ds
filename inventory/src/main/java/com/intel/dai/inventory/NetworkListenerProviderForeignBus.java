@@ -33,13 +33,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
      * that shares a common state update.  This translate into an array of CommonDataFormat entries, each
      * describing a single component. </p>
      *
+     * @param subject The subject or topic associated with this message.
      * @param scnJson state change notification as a json string
      * @param config network listener configuration
      * @return an array of CommonDataFormat entries equivalent to scnJson
      * @throws NetworkListenerProviderException network listener provider exception
      */
     @Override
-    public List<CommonDataFormat> processRawStringData(String scnJson, NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(String subject, String scnJson, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
 
         long currentTimestamp = currentUTCInNanoseconds();

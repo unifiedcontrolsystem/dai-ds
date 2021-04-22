@@ -33,15 +33,14 @@ class RasEventProviderForeignBusSpec extends Specification {
         underTest_.initialize()
     }
 
-    @Ignore
     def "Test processRawStringData"() {
-        underTest_.processRawStringData(payload_, config_)
-        def results = underTest_.processRawStringData(payload_, config_)
+        underTest_.processRawStringData("subject", payload_, config_)
+        def results = underTest_.processRawStringData("topic", payload_, config_)
         expect: results.size() == 2
     }
 
     def "Test processRawStringData Negative"() {
-        when: underTest_.processRawStringData(badJson_, config_)
+        when: underTest_.processRawStringData("topic", badJson_, config_)
         then: thrown(NetworkListenerProviderException)
     }
 
@@ -81,7 +80,7 @@ class RasEventProviderForeignBusSpec extends Specification {
                 {
                   "DeviceSpecificContext": "edge",
                   "Index": 9,
-                  "Location": "x3000c0s34b4n0",
+                  "Location": "x0c0s36b0n0",
                   "ParentalIndex": 1,
                   "PhysicalContext": "IfOutOctets",
                   "SubIndex": 0,
@@ -109,7 +108,7 @@ class RasEventProviderForeignBusSpec extends Specification {
                 {
                   "DeviceSpecificContext": "edge",
                   "Index": 9,
-                  "Location": "x3000c0s34b4n0",
+                  "Location": "x0c0s34b0n0",
                   "ParentalIndex": 1,
                   "PhysicalContext": "IfOutOctets",
                   "SubIndex": 0,
