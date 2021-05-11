@@ -41,6 +41,10 @@ class ForeignFilter {
         log_.info("Available locations matching given regex is filtered, location-regex = ", locationsRegex);
     }
 
+    PropertyArray getFilteredLocations() {
+        return filteredLocations_;
+    }
+
     /**
      * This method is used to assign stream data to all generated events using template.
      * @param streamData contains id and path to update timestamp
@@ -74,9 +78,26 @@ class ForeignFilter {
      */
     PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyArray updateJpathFieldFilter_, PropertyArray templateFieldFilters_,
                                     long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
+        boolean updateTemplate = eventTypeTemplate.isUpdateTemplateRequired();
+        if(updateTemplate)
+            return generateEventsWithUpdate(eventTypeTemplate, updateJpathFieldFilter_, templateFieldFilters_, count,
+                    seed);
+        return generateEvents(eventTypeTemplate, count, seed);
+    }
+
+    private PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException {
+        PropertyMap templateData = eventTypeTemplate.getEventTypeSingleTemplateData();
+        PropertyArray data = new PropertyArray();
+        for(int eventsCount = 0; eventsCount < count; eventsCount++)
+            data.add(templateData);
+        return data;
+    }
+
+    private PropertyDocument generateEventsWithUpdate(EventTypeTemplate eventTypeTemplate, PropertyArray updateJpathFieldFilter_, PropertyArray templateFieldFilters_,
+                                                      long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
         PropertyMap updateJPathField = eventTypeTemplate.getUpdateFieldsInfoWithMetada();
-        PropertyMap updateJPathWithMetadata = new PropertyMap();
         updateJPathFieldInfo(updateJPathField, updateJpathFieldFilter_);
+        PropertyMap updateJPathWithMetadata = new PropertyMap();
         loadMetadataToUpdateJPathFields(updateJPathField, updateJPathWithMetadata);
 
         PropertyMap templateData = eventTypeTemplate.getEventTypeSingleTemplateData();
@@ -160,16 +181,23 @@ class ForeignFilter {
             PropertyMap fieldsMetadataInfo = (PropertyMap) jpath.getValue();
 
             PropertyMap pathAndValue = new PropertyMap();
-            for(Map.Entry<String, Object> field : fieldsMetadataInfo.entrySet()) {
-                String fieldName = field.getKey();
-                PropertyMap metadataInfo = (PropertyMap) field.getValue();
-                DataValidation.validateKeys(metadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
+            if(!fieldsMetadataInfo.containsKey(METADATA)) {
+                for(Map.Entry<String, Object> field : fieldsMetadataInfo.entrySet()) {
+                    String fieldName = field.getKey();
+                    PropertyMap metadataInfo = (PropertyMap) field.getValue();
+                    DataValidation.validateKeys(metadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
 
-                String metadataFile = metadataInfo.getString(METADATA_KEYS[0]);
-                Object metadataFilter = metadataInfo.get(METADATA_KEYS[1]);
+                    String metadataFile = metadataInfo.getString(METADATA_KEYS[0]);
+                    Object metadataFilter = metadataInfo.get(METADATA_KEYS[1]);
+                    PropertyArray metadata = filterDataWithValue(metadataFile, metadataFilter);
+                    pathAndValue.put(fieldName, metadata);
+                }
+            } else {
+                DataValidation.validateKeys(fieldsMetadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
+                String metadataFile = fieldsMetadataInfo.getString(METADATA_KEYS[0]);
+                Object metadataFilter = fieldsMetadataInfo.get(METADATA_KEYS[1]);
                 PropertyArray metadata = filterDataWithValue(metadataFile, metadataFilter);
-
-                pathAndValue.put(fieldName, metadata);
+                pathAndValue.put(path, metadata);
             }
 
             updateJPathWithMetadata.put(path, pathAndValue);
@@ -231,19 +259,34 @@ class ForeignFilter {
         for(Map.Entry<String, Object> item :  updateJPathField.entrySet()) {
             String jpath = item.getKey();
             PropertyMap fieldsInfo = (PropertyMap) item.getValue();
-            for(Map.Entry<String, Object> fieldInfo : fieldsInfo.entrySet()) {
-                String path = jpath + "/" + fieldInfo.getKey();
-                PropertyMap metadataInfo = (PropertyMap) fieldInfo.getValue();
+            if(!fieldsInfo.containsKey(METADATA)) {
+                for(Map.Entry<String, Object> fieldInfo : fieldsInfo.entrySet()) {
+                    String path = jpath + "/" + fieldInfo.getKey();
+                    PropertyMap metadataInfo = (PropertyMap) fieldInfo.getValue();
+                    for(int index = 0; index < updateJpathFieldFilters_.size(); index++) {
+                        PropertyMap updateJpathFieldFilter_ = updateJpathFieldFilters_.getMap(index);
+                        if(updateJpathFieldFilter_.containsValue(path)) {
+                            String metadataSource = updateJpathFieldFilter_.getString(METADATA);
+                            if(metadataSource != null)
+                                metadataInfo.put(METADATA, metadataSource);
+
+                            String metadataFilter= updateJpathFieldFilter_.getString(METADATA_FILTER);
+                            if(metadataFilter != null)
+                                metadataInfo.put(METADATA_FILTER, metadataFilter);
+                        }
+                    }
+                }
+            } else {
                 for(int index = 0; index < updateJpathFieldFilters_.size(); index++) {
                     PropertyMap updateJpathFieldFilter_ = updateJpathFieldFilters_.getMap(index);
-                    if(updateJpathFieldFilter_.containsValue(path)) {
-                        String metadataSource = updateJpathFieldFilter_.getString(METADATA_KEYS[0]);
+                    if(updateJpathFieldFilter_.containsValue(jpath)) {
+                        String metadataSource = updateJpathFieldFilter_.getString(METADATA);
                         if(metadataSource != null)
-                            metadataInfo.put(METADATA_KEYS[0], metadataSource);
+                            fieldsInfo.put(METADATA, metadataSource);
 
-                        String metadataFilter= updateJpathFieldFilter_.getString(METADATA_KEYS[1]);
+                        String metadataFilter= updateJpathFieldFilter_.getString(METADATA_FILTER);
                         if(metadataFilter != null)
-                            metadataInfo.put(METADATA_KEYS[1], metadataFilter);
+                            fieldsInfo.put(METADATA_FILTER, metadataFilter);
                     }
                 }
             }
@@ -260,11 +303,14 @@ class ForeignFilter {
         }
     }
 
-    private PropertyArray filteredLocations_ = new PropertyArray();
+    PropertyArray filteredLocations_ = new PropertyArray();
 
     private final JsonPath jsonPath_;
     private final Logger log_;
     private final ForeignDataGenerator generator_;
-    private final String[] METADATA_KEYS = {"metadata", "metadata-filter"};
+
+    private static final String METADATA = "metadata";
+    private static final String METADATA_FILTER = "metadata-filter";
+    private static final String[] METADATA_KEYS = {METADATA, METADATA_FILTER};
     private final String MISSING_METADATA_KEYS = "All event types configuration file is missing required key, key = ";
 }

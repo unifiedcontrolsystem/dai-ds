@@ -93,6 +93,10 @@ class EventTypeTemplate {
         return eventTypeTemplate_.getMap(UPDATE_FIELDS);
     }
 
+    boolean isUpdateTemplateRequired() throws PropertyNotExpectedType {
+        return eventTypeTemplate_.getBoolean(UPDATE_TEMPLATE);
+    }
+
     /**
      * This method is used to load final path where to generate data and its respective overflow path
      * for single sample event
@@ -170,6 +174,7 @@ class EventTypeTemplate {
     private static final String SINGLE_MESSAGE_TEMPLATE = "single-template";
     private static final String SINGLE_MESSAGE_TEMP_COUNT = "single-template-count";
     private static final String UPDATE_FIELDS = "update-fields";
+    private static final String UPDATE_TEMPLATE = "update-template";
     private static final String PATH_COUNT = "path-count";
     private static final String GEN_DATA_OVERFLOW_PATH = "generate-data-and-overflow-path";
     private static final String TIMESTAMP_PATH = "timestamp";

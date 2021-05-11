@@ -26,6 +26,7 @@
       "template": "/resources/templates/telemetry-energy.json" ,
       "stream-id": "energyTelemetry",
       "stream-type": "energyTelemetry" ,
+      "update-template": true,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -62,6 +63,7 @@
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
       "stream-id": "fabricPerf",
       "stream-type": "fabricPerf" ,
+      "update-template": true,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/DeviceSpecificContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -95,9 +97,10 @@
     },
 
     "off": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-id": "stateChange",
-      "stream-type": "stateChange" ,
+      "template": "/resources/templates/boot_state_off.json" ,
+      "stream-id": "console-logs",
+      "stream-type": "console-logs" ,
+      "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -123,13 +126,14 @@
       "generate-data-and-overflow-path" : {
         "metrics/messages[*]" : "new"
       },
-      "timestamp" : "metrics/messages[?]/timestamp"
+      "timestamp" : "@timestamp"
     },
 
     "on": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-id": "stateChange",
-      "stream-type": "stateChange" ,
+      "template": "/resources/templates/boot_state_on.json" ,
+      "stream-id": "console-logs",
+      "stream-type": "console-logs" ,
+      "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -155,13 +159,14 @@
       "generate-data-and-overflow-path" : {
         "metrics/messages[*]" : "new"
       },
-      "timestamp" : "metrics/messages[?]/timestamp"
+      "timestamp" : "@timestamp"
     },
 
     "ready": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
-      "stream-id": "stateChange",
-      "stream-type": "stateChange" ,
+      "template": "/resources/templates/boot_state_ready.json" ,
+      "stream-id": "console-logs",
+      "stream-type": "console-logs" ,
+      "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
         "metrics/messages[?]/State": ".*"
@@ -187,13 +192,14 @@
       "generate-data-and-overflow-path" : {
         "metrics/messages[*]" : "new"
       },
-      "timestamp" : "metrics/messages[?]/timestamp"
+      "timestamp" : "@timestamp"
     },
 
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
       "stream-id": "dmtfEvent",
       "stream-type": "dmtfEvent" ,
+      "update-template": true,
       "single-template": {
         "message[?]/seqnum": ".*" ,
         "message[?]/pri": ".*"
@@ -226,6 +232,7 @@
       "template": "/resources/templates/telemetry-power.json" ,
       "stream-id": "powerTelemetry",
       "stream-type": "powerTelemetry" ,
+      "update-template": true,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -263,6 +270,7 @@
       "template": "/resources/templates/telemetry-temperature.json" ,
       "stream-id": "temperatureTelemetry",
       "stream-type": "temperatureTelemetry" ,
+      "update-template": true,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"
@@ -299,6 +307,7 @@
       "template": "/resources/templates/telemetry-voltage.json" ,
       "stream-id": "voltageTelemetry",
       "stream-type": "voltageTelemetry" ,
+      "update-template": true,
       "single-template": {
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/PhysicalContext": ".*" ,
         "metrics/messages[*]/Events[*]/Oem/Sensors[?]/Location": ".*"

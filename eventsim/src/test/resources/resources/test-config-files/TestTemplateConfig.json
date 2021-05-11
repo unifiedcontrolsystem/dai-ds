@@ -26,6 +26,7 @@
       "template": "/resources/templates/telemetry-energy.json" ,
       "stream-id": "energy" ,
       "stream-type": "energy" ,
+      "update-template": true,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-02": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-03": ".*"
@@ -62,6 +63,7 @@
       "template": "/resources/templates/fabric-perf-telemetry.json" ,
       "stream-id": "fabric" ,
       "stream-type": "fabric",
+      "update-template": true,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-04": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-06": ".*"
@@ -95,9 +97,10 @@
     },
 
     "off": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "template": "/resources/templates/boot_state_off.json" ,
       "stream-id": "events" ,
       "stream-type": "events" ,
+      "update-template": false,
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
         "level0/level1[?]/level1-3": ".*"
@@ -123,13 +126,14 @@
       "generate-data-and-overflow-path" : {
         "level0/level1[*]" : "new"
       },
-      "timestamp" : "level0/level1[?]/level1-4"
+      "timestamp" : "@timestamp"
     },
 
     "on": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "template": "/resources/templates/boot_state_on.json" ,
       "stream-id": "events" ,
       "stream-type": "events",
+      "update-template": false,
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
         "level0/level1[?]/level1-3": ".*"
@@ -155,13 +159,14 @@
       "generate-data-and-overflow-path" : {
         "level0/level1[*]" : "new"
       },
-      "timestamp" : "level0/level1[?]/level1-4"
+      "timestamp" : "@timestamp"
     },
 
     "ready": {
-      "template": "/resources/templates/hmsstatechange-notifications.json" ,
+      "template": "/resources/templates/boot_state_ready.json" ,
       "stream-id": "events" ,
       "stream-type": "events" ,
+      "update-template": false,
       "single-template": {
         "level0/level1[?]/level1-2": ".*" ,
         "level0/level1[?]/level1-3": ".*"
@@ -187,13 +192,14 @@
       "generate-data-and-overflow-path" : {
         "level0/level1[*]" : "new"
       },
-      "timestamp" : "level0/level1[?]/level1-4"
+      "timestamp" : "@timestamp"
     },
 
     "old-ras": {
       "template": "/resources/templates/old-ras.json" ,
       "stream-id": "events" ,
       "stream-type": "events" ,
+      "update-template": true,
       "single-template": {
         "level0[*]/level0-1": ".*" ,
         "level0[*]/level0-2": ".*"
@@ -226,6 +232,7 @@
       "template": "/resources/templates/telemetry-power.json" ,
       "stream-id": "power" ,
       "stream-type": "power" ,
+      "update-template": true,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"
@@ -263,6 +270,7 @@
       "template": "/resources/templates/telemetry-temperature.json" ,
       "stream-id": "temperature" ,
       "stream-type": "temperature" ,
+      "update-template": true,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"
@@ -299,6 +307,7 @@
       "template": "/resources/templates/telemetry-voltage.json" ,
       "stream-id": "temperature" ,
       "stream-type": "temperature" ,
+      "update-template": true,
       "single-template": {
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-2": ".*" ,
         "level0/level1[*]/level2[*]/level3/level4[?]/level4-3": ".*"

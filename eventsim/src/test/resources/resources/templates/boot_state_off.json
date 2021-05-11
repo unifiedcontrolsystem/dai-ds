@@ -1,0 +1,17 @@
+{
+  "@timestamp": "2021-04-30T17:32:47.596Z",
+  "@metadata": {
+    "beat": "filebeat",
+    "type": "doc",
+    "version": "6.8.1",
+    "topic": "HPCMLOG"
+  },
+  "host": {
+    "name": "aus-admin1"
+  },
+  "source": "/var/log/heartbeat",
+  "message": " EVENT:HEARTBEAT APP:clmgr-power SEV:LOG_INFO TEXT:Heartbeat sends SIGTERM, shutdown",
+  "fields": {
+    "log_type": "heartbeat"
+  }
+}

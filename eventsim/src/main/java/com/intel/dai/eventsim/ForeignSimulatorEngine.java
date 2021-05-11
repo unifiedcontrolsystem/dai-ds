@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,20 +47,38 @@ class ForeignSimulatorEngine {
         systemHierarchy();
     }
 
+    /**
+     * This method is used to generate boot events
+     * @param parameters data needed to generate boot events
+     * @throws SimulatorException unable to generate boot events
+     */
     void generateBootEvents(Map<String, String> parameters) throws SimulatorException {
-        PropertyArray events = new PropertyArray();
+        parameters.put("count", "1"); //1 boot-event of specified type is generated always
+
         try {
-            parameters.put("count", "1");
+            PropertyArray events = new PropertyArray();
             String state = parameters.getOrDefault("type", BOOT_STATES.all.toString());
             if(BOOT_STATES.valueOf(state).equals(BOOT_STATES.all)) {
                 parameters.put("type", BOOT_STATES.off.toString());
-                events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+                events.addAll(generateEvents(parameters, EVENT_TYPE.boot.toString()).getAsArray());
                 parameters.put("type", BOOT_STATES.on.toString());
-                events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
+                events.addAll(generateEvents(parameters, EVENT_TYPE.boot.toString()).getAsArray());
                 parameters.put("type", BOOT_STATES.ready.toString());
             }
-            events.addAll(generateEvents(parameters, EVENT_TYPE.BOOT.toString().toLowerCase()).getAsArray());
-
+            events.addAll(generateEvents(parameters, EVENT_TYPE.boot.toString()).getAsArray());
+            PropertyArray locations_ = filter_.getFilteredLocations();
+            for(int index = 0; index < events.size(); index++) {
+                PropertyMap event = events.getMap(index).getMap("STREAM_MESSAGE");
+                String message = event.getStringOrDefault("message", "");
+                Random random = new Random();
+                random.setSeed(randomiserSeed_);
+                int randomIndex = (int) ((random.nextDouble() * (locations_.size() - 0)) + 0);
+                String timestamp = ZonedDateTime.now(ZoneId.of(zone_)).toInstant().toString() + " ";
+                String location = locations_.getString(randomIndex);
+                String updatedMessage =timestamp + "aus-admin1 twistd: clmgr-power:" +
+                        dataLoaderEngine_.getHostname(location) + message;
+                event.put("message", updatedMessage);
+            }
             PropertyArray publishEvents = new PropertyArray();
             publishEvents.add(events);
             publishEvents(publishEvents, burst_, timeDelay_, output_, zone_);
@@ -517,7 +536,7 @@ class ForeignSimulatorEngine {
     private enum EVENT_TYPE {
         RAS,
         SENSOR,
-        BOOT
+        boot
     }
     private enum BOOT_STATES {
         off,

@@ -18,8 +18,8 @@
     "x0c0s1b0n0": "R0-CH0-CN1",
     "x0c0s2b0n0": "R0-CH0-CN2",
     "x0c0s3b0n0": "R0-CH0-CN3",
-    "test01":     "TEST-01",
-    "test02":     "TEST-02"
+    "TEST-01":     "TEST-01",
+    "TEST-02":     "TEST-02"
   },
   "sensor_embedded_cpu_pattern": "_CPU[0-9]+",
   "sensor_embedded_channel_pattern": "_CH[0-9]+",

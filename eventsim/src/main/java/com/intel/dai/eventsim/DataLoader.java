@@ -13,9 +13,7 @@ import com.intel.properties.PropertyNotExpectedType;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Description of class DataLoader.
@@ -143,6 +141,7 @@ class DataLoader {
         loadNodeLocations();
         loadNonNodeLocations();
         loadHostnames();
+        loadHostnameFromLocation();
     }
 
     /**
@@ -151,6 +150,10 @@ class DataLoader {
      */
     private void loadNodeLocations() throws DataStoreException {
         nodeLocations_ = nodeInfo_.getNodeLocations();
+    }
+
+    private void loadHostnameFromLocation() throws DataStoreException {
+        hostnameLctnMap_ = nodeInfo_.getComputeHostnameFromLocationMap();
     }
 
     /**
@@ -213,6 +216,11 @@ class DataLoader {
     List<String> getNonNodeLocations() { return nonNodeLocations_; }
     List<String> getNodeLocationsHostnames() { return nodeHostnames_; }
     List<String> getAllLocations() { return allLocations_ ; }
+    String getHostname(String location) throws SimulatorException {
+        if(!hostnameLctnMap_.containsKey(location))
+            throw new SimulatorException("Location is missing: location=" + location);
+        return hostnameLctnMap_.get(location);
+    }
 
     public String getBootParamsFileLocation() { return bootParamsFileAbsolutePath_; }
     public String getNodeStateFileLocation() { return nodeStateFileAbsolutePath_; }
@@ -225,6 +233,8 @@ class DataLoader {
     private Collection<Object> foreignLocations_;
 
     DataStoreFactory factory_;
+
+    private Map<String, String> hostnameLctnMap_ = new HashMap<>();
 
     private List<String> nodeLocations_;
     private List<String> nonNodeLocations_;

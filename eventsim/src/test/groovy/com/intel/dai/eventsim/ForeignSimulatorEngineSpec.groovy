@@ -6,10 +6,12 @@ import com.intel.logging.Logger
 import groovy.json.JsonSlurper
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Ignore
 import spock.lang.Specification
 
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class ForeignSimulatorEngineSpec extends Specification {
 
@@ -283,6 +285,8 @@ class ForeignSimulatorEngineSpec extends Specification {
     def loadHostnames() {
         Map<String, String> hostnames = new HashMap<>()
         hostnames.put("test-location", "test-hostname")
+        hostnames.put("TEST-01", "TEST-01")
+        hostnames.put("TEST-02", "TEST-02")
         return hostnames
     }
 

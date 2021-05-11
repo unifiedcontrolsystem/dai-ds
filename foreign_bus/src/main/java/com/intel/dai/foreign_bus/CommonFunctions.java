@@ -231,6 +231,15 @@ final public class CommonFunctions {
         return jsonMessages;
     }
 
+    public static boolean isJson(String data) {
+        try {
+            parser_.fromString(data);
+        } catch (ConfigIOParseException e) {
+            return false;
+        }
+        return true;
+    }
+
     private static boolean toggleQuote(String data, int index, boolean inQuote) {
         if(inQuote && data.charAt(index - 1) == '\\')
             return inQuote;
