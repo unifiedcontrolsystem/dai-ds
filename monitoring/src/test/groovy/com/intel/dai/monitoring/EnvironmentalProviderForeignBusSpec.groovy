@@ -42,7 +42,7 @@ class EnvironmentalProviderForeignBusSpec extends Specification {
     }
 
     def "Test processRawStringData Negative"() {
-        when: underTest_.processRawStringData(badJson_, config_)
+        when: underTest_.processRawStringData("topic", badJson_, config_)
         then: thrown(NetworkListenerProviderException)
     }
 

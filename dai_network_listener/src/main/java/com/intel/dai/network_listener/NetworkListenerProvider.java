@@ -9,13 +9,14 @@ public interface NetworkListenerProvider {
     /**
      * A implementation class must convert the incoming data to a list of zero or more CommonDataFormat objects.
      *
+     * @param subject The subject or topic associated with this message.
      * @param data The string message from the network.
      * @param config The configuration used for the provider implementation.
      * @return The list of zero or more CommonDataFormat objects. Cannot return null but the list can be empty.
      *
      * @throws NetworkListenerProviderException When the provider implementation cannot decode the incoming network message.
      */
-    List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
+    List<CommonDataFormat> processRawStringData(String subject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException;
 
     /**

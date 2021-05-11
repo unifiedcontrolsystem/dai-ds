@@ -33,6 +33,22 @@ public interface Location {
     String getHostnameFromLocation(String lctn);
 
     /**
+     * Get the location from the IP address specified.
+     *
+     * @param ip The IPv4 address to lookup.
+     * @return String with the location or null if not found.
+     */
+    String getLocationFromIP(String ip);
+
+    /**
+     * Get the location from the MAC address specified.
+     *
+     * @param mac The MAC address to lookup.
+     * @return String with the location or null if not found.
+     */
+    String getLocationFromMAC(String mac);
+
+    /**
      * Get the system label string
      * @return String with the system label
      */

@@ -46,7 +46,7 @@ public class RasEventProviderForeignBus implements NetworkListenerProvider, Init
     }
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(String subject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         List<CommonDataFormat> results = new ArrayList<>();
         try {

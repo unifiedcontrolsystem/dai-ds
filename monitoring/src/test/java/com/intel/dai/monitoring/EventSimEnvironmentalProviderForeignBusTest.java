@@ -121,20 +121,20 @@ public class EventSimEnvironmentalProviderForeignBusTest {
 
     @Test
     public void processRawStringData() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(sample1, config_);
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", sample1, config_);
         CommonDataFormat data = dataList.get(0);
         assertEquals(2.0, data.getValue(), 0.0001);
-        dataList = transformer_.processRawStringData(sample1, config_);
+        dataList = transformer_.processRawStringData("topic", sample1, config_);
         data =  dataList.get(0);
         assertEquals(2.0, data.getValue(), 0.0001);
         transformer_.configDone_ = false;
         classConfig_.put("useAnalytics", false);
-        dataList = transformer_.processRawStringData(sample2, config_);
+        dataList = transformer_.processRawStringData("topic", sample2, config_);
         data =  dataList.get(0);
         assertEquals(2.1, data.getValue(), 0.0001);
         transformer_.configDone_ = false;
         when(config_.getProviderConfigurationFromClassName(anyString())).thenReturn(null);
-        dataList = transformer_.processRawStringData(sample3, config_);
+        dataList = transformer_.processRawStringData("topic", sample3, config_);
         data = dataList.get(0);
         assertEquals(1.9, data.getValue(), 0.0001);
     }
@@ -147,23 +147,23 @@ public class EventSimEnvironmentalProviderForeignBusTest {
 
     @Test(expected = NetworkListenerProviderException.class)
     public void processRawStringDataMissingSensor() throws Exception {
-        transformer_.processRawStringData(bad1, config_);
+        transformer_.processRawStringData("topic", bad1, config_);
     }
 
     @Test
     public void processRawStringDataBadSensor() throws Exception {
-        List<CommonDataFormat> result = transformer_.processRawStringData(bad2, config_);
+        List<CommonDataFormat> result = transformer_.processRawStringData("topic", bad2, config_);
         assertEquals(0, result.size());
     }
 
     @Test(expected = NetworkListenerProviderException.class)
     public void processRawStringDataBadJson() throws Exception {
-        transformer_.processRawStringData(bad3, config_);
+        transformer_.processRawStringData("topic", bad3, config_);
     }
 
     @Test(expected = NetworkListenerProviderException.class)
     public void processRawStringDataBadValue() throws Exception {
-        transformer_.processRawStringData(bad4, config_);
+        transformer_.processRawStringData("topic", bad4, config_);
     }
 
     @Test

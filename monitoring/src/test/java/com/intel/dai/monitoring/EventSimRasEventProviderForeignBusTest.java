@@ -57,18 +57,18 @@ public class EventSimRasEventProviderForeignBusTest {
 
     @Test
     public void processRawStringData() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(sample1, config_);
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", sample1, config_);
         assertEquals(1, dataList.size());
-        dataList = transformer_.processRawStringData(sample1, config_);
+        dataList = transformer_.processRawStringData("topic", sample1, config_);
         assertEquals(0, dataList.size());
-        dataList = transformer_.processRawStringData(sample1, config_);
+        dataList = transformer_.processRawStringData("topic", sample1, config_);
         assertEquals(1, dataList.size());
         transformer_.doSuppression_ = false;
-        dataList = transformer_.processRawStringData(sample2, config_);
+        dataList = transformer_.processRawStringData("topic", sample2, config_);
         assertEquals(1, dataList.size());
-        dataList = transformer_.processRawStringData(sample3, config_);
+        dataList = transformer_.processRawStringData("topic", sample3, config_);
         assertEquals(1, dataList.size());
-        dataList = transformer_.processRawStringData(sample4, config_);
+        dataList = transformer_.processRawStringData("topic", sample4, config_);
         assertEquals(1, dataList.size());
     }
 
@@ -86,18 +86,18 @@ public class EventSimRasEventProviderForeignBusTest {
 
     @Test
     public void processRawStringDataMissingEventType() throws Exception {
-        List<CommonDataFormat> result = transformer_.processRawStringData(badSample1, config_);
+        List<CommonDataFormat> result = transformer_.processRawStringData("topic", badSample1, config_);
         assertEquals(0, result.size());
     }
 
     @Test // Cannot retrieve value, no assert is possible.
     public void processRawStringDataBadEventType() throws Exception {
-        transformer_.processRawStringData(badSample2, config_);
+        transformer_.processRawStringData("topic", badSample2, config_);
     }
 
     @Test
     public void processRawStringDataBadJson() throws Exception {
-        transformer_.processRawStringData(badSample3, config_);
+        transformer_.processRawStringData("topic", badSample3, config_);
     }
 
     @Test

@@ -16,7 +16,7 @@ class Tranformer implements NetworkListenerProvider, Initializer {
     public Tranformer(Logger logger) {}
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(String unusedSubject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         return new ArrayList<CommonDataFormat>() {{
             add(new CommonDataFormat(100000L, "location", DataType.EnvironmentalData));

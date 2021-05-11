@@ -65,19 +65,19 @@ public class NetworkListenerProviderForeignBusTest {
     @Test
     @Ignore
     public void processRawStringData() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(sample1,
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", sample1,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
-        dataList = transformer_.processRawStringData(sample2, mock(NetworkListenerConfig.class));
+        dataList = transformer_.processRawStringData("topic", sample2, mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
-        dataList = transformer_.processRawStringData(sample3, mock(NetworkListenerConfig.class));
+        dataList = transformer_.processRawStringData("topic", sample3, mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
 
     @Test
     @Ignore
     public void processRawStringDataNegative1() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(sample4,
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", sample4,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
@@ -85,7 +85,7 @@ public class NetworkListenerProviderForeignBusTest {
     @Test
     @Ignore
     public void processRawStringDataNegative2() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample1,
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", badSample1,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
@@ -93,7 +93,7 @@ public class NetworkListenerProviderForeignBusTest {
     @Test
     @Ignore
     public void processRawStringDataNegative3() throws Exception {
-        List<CommonDataFormat> dataList = transformer_.processRawStringData(badSample2,
+        List<CommonDataFormat> dataList = transformer_.processRawStringData("topic", badSample2,
                 mock(NetworkListenerConfig.class));
         assertEquals(1, dataList.size());
     }
