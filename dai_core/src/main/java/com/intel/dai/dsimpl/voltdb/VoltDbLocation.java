@@ -35,6 +35,8 @@ public class VoltDbLocation implements Location {
         log_ = log;
         locationMap_ = new HashMap<String,String>();
         hostMap_ = new HashMap<String,String>();
+        ipMap_ = new HashMap<String,String>();
+        macMap_ = new HashMap<String,String>();
         servers_ = servers;
     }
 
@@ -63,11 +65,33 @@ public class VoltDbLocation implements Location {
         return locationMap_.getOrDefault(lctn, "");
     }
 
+    /**
+     * Get the location from the IP address specified.
+     *
+     * @param ip The IPv4 address to lookup.
+     * @return String with the location or null if not found.
+     */
+    @Override
+    public String getLocationFromIP(String ip) {
+        return ipMap_.get(ip);
+    }
+
+    /**
+     * Get the location from the MAC address specified.
+     *
+     * @param mac The MAC address to lookup.
+     * @return String with the location or null if not found.
+     */
+    @Override
+    public String getLocationFromMAC(String mac) {
+        return macMap_.get(mac);
+    }
+
     @Override
     public void reloadCache() throws DataStoreException {
         try {
-            updateFromProcedure("ComputeNodeListLctnHostnameAndBmcHostname");
-            updateFromProcedure("ServiceNodeListLctnHostnameAndBmcHostname");
+            updateFromProcedure("ComputeNodeLocationInformation");
+            updateFromProcedure("ServiceNodeLocationInformation");
             updateSystemLabel();
         }
         catch (IOException | ProcCallException  e) {
@@ -123,6 +147,8 @@ public class VoltDbLocation implements Location {
             locationMap_.put(vt.getString("Lctn") + "-BMC", vt.getString("BmcHostName"));
             hostMap_.put(vt.getString("HostName"), vt.getString("Lctn"));
             hostMap_.put(vt.getString("BmcHostName"), vt.getString("Lctn") + "-BMC");
+            ipMap_.put(vt.getString("IpAddr"), vt.getString("Lctn"));
+            macMap_.put(vt.getString("MacAddr"), vt.getString("Lctn"));
         }
     }
 
@@ -168,6 +194,8 @@ public class VoltDbLocation implements Location {
     private Logger log_;
     private Map<String, String> locationMap_;
     private Map<String, String> hostMap_;
+    private Map<String, String> ipMap_;
+    private Map<String, String> macMap_;
     private Pattern bmcPattern_;
     private String system_;
     private String[] servers_;

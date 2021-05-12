@@ -48,9 +48,11 @@ public class VoltDbLocationTest {
         VoltTable computeNodesTable = new VoltTable(
                 new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
                 new VoltTable.ColumnInfo("HostName", VoltType.STRING),
-                new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING));
-        computeNodesTable.addRow("location_c01", "c01", "c01_bmc");
-        computeNodesTable.addRow("location_c02", "c02", "c02_bmc");
+                new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING),
+                new VoltTable.ColumnInfo("IpAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("MacAddr", VoltType.STRING));
+        computeNodesTable.addRow("location_c01", "c01", "c01_bmc", "192.168.100.1", "00:11:22:33:44:55");
+        computeNodesTable.addRow("location_c02", "c02", "c02_bmc", "192.168.100.2", "00:11:22:33:44:56");
         voltArrayCompute[0] = computeNodesTable;
         when(computeNodesResponse_.getResults()).thenReturn(voltArrayCompute);
         when(computeNodesResponse_.getStatus()).thenReturn(ClientResponse.SUCCESS);
@@ -58,9 +60,11 @@ public class VoltDbLocationTest {
         VoltTable serviceNodesTable = new VoltTable(
                 new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
                 new VoltTable.ColumnInfo("HostName", VoltType.STRING),
-                new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING));
-        serviceNodesTable.addRow("location_s01", "s01", "s01_bmc");
-        serviceNodesTable.addRow("location_s02", "s02", "s02_bmc");
+                new VoltTable.ColumnInfo("BmcHostName", VoltType.STRING),
+                new VoltTable.ColumnInfo("IpAddr", VoltType.STRING),
+                new VoltTable.ColumnInfo("MacAddr", VoltType.STRING));
+        serviceNodesTable.addRow("location_s01", "s01", "s01_bmc", "192.168.200.1", "00:11:22:33:44:a5");
+        serviceNodesTable.addRow("location_s02", "s02", "s02_bmc", "192.168.200.2", "00:11:22:33:44:a6");
         voltArrayService[0] = serviceNodesTable;
         when(serviceNodesResponse_.getResults()).thenReturn(voltArrayService);
         when(serviceNodesResponse_.getStatus()).thenReturn(ClientResponse.SUCCESS);
@@ -77,8 +81,8 @@ public class VoltDbLocationTest {
 
     @Test
     public void getHostnameAndLocation() throws IOException, ProcCallException {
-        when(client_.callProcedure(eq("ComputeNodeListLctnHostnameAndBmcHostname"))).thenReturn(computeNodesResponse_);
-        when(client_.callProcedure(eq("ServiceNodeListLctnHostnameAndBmcHostname"))).thenReturn(serviceNodesResponse_);
+        when(client_.callProcedure(eq("ComputeNodeLocationInformation"))).thenReturn(computeNodesResponse_);
+        when(client_.callProcedure(eq("ServiceNodeLocationInformation"))).thenReturn(serviceNodesResponse_);
         ClientResponse machineResponse = mock(ClientResponse.class);
         when(client_.callProcedure(eq("MachineDescription"))).thenReturn(machineResponse);
         when(machineResponse.getStatus()).thenReturn(ClientResponse.SUCCESS);
@@ -90,6 +94,10 @@ public class VoltDbLocationTest {
         assertEquals("location_c02", lctn.getLocationFromHostname("c02bmc"));
         assertEquals("location_s01", lctn.getLocationFromHostname("s01"));
         assertEquals("location_s02", lctn.getLocationFromHostname("s02bmc"));
+        assertEquals("location_c01", lctn.getLocationFromIP("192.168.100.1"));
+        assertEquals("location_s01", lctn.getLocationFromIP("192.168.200.1"));
+        assertEquals("location_c01", lctn.getLocationFromMAC("00:11:22:33:44:55"));
+        assertEquals("location_s01", lctn.getLocationFromMAC("00:11:22:33:44:a5"));
         assertEquals("", lctn.getLocationFromHostname("nonExistent"));
 
         assertEquals("c01", lctn.getHostnameFromLocation("location_c01"));

@@ -173,6 +173,8 @@ public class NetworkListenerCore {
     // Create all dynamically create the provider class.
     private void createTransformAndActionProviders() throws ProviderException {
         provider_ = createNetworkListenerProvider(config_.getProviderName());
+        if(provider_ instanceof NetworkListenerProviderEx)
+            ((NetworkListenerProviderEx)provider_).setFactory(factory_);
     }
 
     // Start all connections; SSE, HTTP Callback, RabbitMQ, etc...
@@ -318,7 +320,7 @@ public class NetworkListenerCore {
             try {
                 benchmarking_.addNamedValue(subject + "_messages", 1);
                 log_.debug("Transforming data for subject '%s'...", subject);
-                List<CommonDataFormat> dataList = provider_.processRawStringData(message, config_);
+                List<CommonDataFormat> dataList = provider_.processRawStringData(subject, message, config_);
                 if(dataList != null) {
                     log_.debug("Performing actions...");
                     for (CommonDataFormat data : dataList)

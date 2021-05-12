@@ -48,7 +48,7 @@ public class EventSimRasEventProviderForeignBus implements NetworkListenerProvid
     }
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(String subject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         if(!configDone_)
             setUpConfig(config);

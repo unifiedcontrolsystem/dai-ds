@@ -51,7 +51,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     public void initialize() { /* Not used but is required */ }
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String data, NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(String subject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         try {
             if(keywordToNodeStates_ == null)
