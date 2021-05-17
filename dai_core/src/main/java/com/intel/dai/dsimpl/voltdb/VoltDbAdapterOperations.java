@@ -395,10 +395,18 @@ public class VoltDbAdapterOperations implements AdapterOperations {
     private Map<String,BasicNodeInfo> nodes_ = null;
 
     @SuppressWarnings("serial")
-    private static Map<BootState,String> states_ = new HashMap<BootState,String>() {{
+    private static Map<BootState,String> states_ = new HashMap<>() {{
         put(BootState.NODE_BOOTING, "B");
         put(BootState.NODE_OFFLINE, "M");
         put(BootState.NODE_ONLINE, "A");
+        put(BootState.ACTIVE, "A");
+        put(BootState.BIOS_STARTED_DUE_TO_RESET, "R");
+        put(BootState.SELECTING_BOOT_DEVICE, "S");
+        put(BootState.PXE_DOWNLOAD_NBP_FILE, "P");
+        put(BootState.DHCP_DISCOVERED, "D");
+        put(BootState.IP_ADDRESS_ASSIGNED, "I");
+        put(BootState.KERNEL_BOOT_STARTED, "K");
+        put(BootState.SHUTDOWN, "H");
     }};
 
     static class CallbackForNodeStateChange implements ProcedureCallback {

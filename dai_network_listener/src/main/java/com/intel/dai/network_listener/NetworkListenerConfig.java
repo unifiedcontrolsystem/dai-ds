@@ -120,6 +120,9 @@ public class NetworkListenerConfig {
     public PropertyMap getProviderConfigurationFromClassName(String className) {
         return providerConfigs_.getMapOrDefault(className, null);
     }
+    public PropertyMap getSubjectMap() {
+        return subjectMap_;
+    }
 
     private void checkProfile() {
         assert currentProfile_ != null:"Current profile not currently set!";

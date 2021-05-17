@@ -185,8 +185,18 @@ public class VoltDbNodeInformation implements NodeInformation {
     }
 
     @Override
+    public synchronized boolean isComputeNodeHostname(String location) throws DataStoreException {
+        return getComputeNodeLocationFromHostnameMap().containsKey(location);
+    }
+
+    @Override
     public synchronized boolean isServiceNodeLocation(String location) throws DataStoreException {
         return getServiceHostnameFromLocationMap().containsKey(location);
+    }
+
+    @Override
+    public synchronized boolean isServiceNodeHostname(String location) throws DataStoreException {
+        return getServiceNodeLocationFromHostnameMap().containsKey(location);
     }
 
     @Override
@@ -197,6 +207,16 @@ public class VoltDbNodeInformation implements NodeInformation {
     @Override
     public synchronized String getNodesIpAddress(String location) throws DataStoreException {
         return getNodeAndBmcIPsFromLocationMap().get(location).nodeIpAddress;
+    }
+
+    @Override
+    public synchronized String getComputeNodeLocationFromHostname(String hostname) throws DataStoreException {
+        return getComputeNodeLocationFromHostnameMap().get(hostname);
+    }
+
+    @Override
+    public synchronized String getServiceNodeLocationFromHostname(String hostname) throws DataStoreException {
+        return getServiceNodeLocationFromHostnameMap().get(hostname);
     }
 
     @Override

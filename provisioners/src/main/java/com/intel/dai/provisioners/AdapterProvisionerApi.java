@@ -290,10 +290,18 @@ public class AdapterProvisionerApi {
     private final AdapterOperations operations_;
     private final RasEventLog eventActions_;
 
-    private final static Map<String, BootState> conversionMap_ = new HashMap<String, BootState>() {{
+    private final static Map<String, BootState> conversionMap_ = new HashMap<>() {{
         put("Ready", BootState.NODE_ONLINE);
         put("Off", BootState.NODE_OFFLINE);
-        put("Empty", BootState.EMPTY);
         put("On", BootState.NODE_BOOTING);
+        put("DHCPDiscovered", BootState.DHCP_DISCOVERED);
+        put("IPAddressAssigned", BootState.IP_ADDRESS_ASSIGNED);
+        put("BiosStartedDueToReset", BootState.BIOS_STARTED_DUE_TO_RESET);
+        put("SelectBootDevice", BootState.SELECTING_BOOT_DEVICE);
+        put("PxeDownloadingNbpFile", BootState.PXE_DOWNLOAD_NBP_FILE);
+        put("StartingKernelBoot", BootState.KERNEL_BOOT_STARTED);
+        put("Active", BootState.ACTIVE);
+        put("Shutdown", BootState.SHUTDOWN);
+        put("Unknown", BootState.UNKNOWN);
     }};
 }

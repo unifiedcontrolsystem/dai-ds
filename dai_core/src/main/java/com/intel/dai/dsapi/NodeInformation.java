@@ -4,13 +4,10 @@
 //
 package com.intel.dai.dsapi;
 
-import java.io.Closeable;
-import java.io.IOException;
+import com.intel.dai.exceptions.DataStoreException;
+
 import java.util.List;
 import java.util.Map;
-
-import com.intel.dai.exceptions.DataStoreException;
-import org.voltdb.client.ProcCallException;
 
 /**
  * Description of interface DbStatusApi.
@@ -35,9 +32,13 @@ public interface NodeInformation {
     Map<String, NodeIpAndBmcIp> getComputeNodeAndBmcIPsFromLocationMap() throws DataStoreException;
 
     boolean isComputeNodeLocation(String location) throws DataStoreException;
+    boolean isComputeNodeHostname(String location) throws DataStoreException;
     boolean isServiceNodeLocation(String location) throws DataStoreException;
+    boolean isServiceNodeHostname(String location) throws DataStoreException;
     String getNodesBmcIpAddress(String location) throws DataStoreException;
     String getNodesIpAddress(String location) throws DataStoreException;
+    String getComputeNodeLocationFromHostname(String location) throws DataStoreException;
+    String getServiceNodeLocationFromHostname(String location) throws DataStoreException;
 
     List<String> getComputeNodeLocations() throws DataStoreException;
     List<String> getServiceNodeLocations() throws DataStoreException;

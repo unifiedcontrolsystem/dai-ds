@@ -11,7 +11,6 @@ import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.dai.dsapi.BootState;
 import com.intel.dai.foreign_bus.CommonFunctions;
-import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.BlockingResult;
@@ -29,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,47 +54,34 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     public List<CommonDataFormat> processRawStringData(String subject, String data, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         try {
+            if(keywordToNodeStates_ == null)
+                mapKeywordToNodeStates(config);
+
             List<CommonDataFormat> results = new ArrayList<>();
             log_.debug("*** Message: %s", data);
-            for(String json: CommonFunctions.breakupStreamedJSONMessages(data)) {
-                PropertyMap document = parser_.fromString(json).getAsMap();
-                if(!document.containsKey("metrics"))
-                    log_.warn("Message is missing 'metrics': %s", json);
-                PropertyMap metrics = document.getMapOrDefault("metrics", new PropertyMap());
-                if(!metrics.containsKey("messages"))
-                    log_.warn("Message is missing 'metrics.messages': %s", json);
-                PropertyArray messages = metrics.getArrayOrDefault("messages", new PropertyArray());
-                for (Object o : messages) {
-                    if (o instanceof PropertyMap) {
-                        PropertyMap message = (PropertyMap) o;
-                        if(!message.containsKey("Components"))
-                            log_.warn("Message is missing 'metrics.messages[Components]': %s", json);
-                        PropertyArray locations = message.getArrayOrDefault("Components", new PropertyArray());
-                        for (int i = 0; i < locations.size(); i++) {
-                            try {
-                                String location = CommonFunctions.convertForeignToLocation(locations.getString(i));
-                                String eventState = message.getString("State");
-                                if(!conversionMap_.containsKey(eventState))
-                                    log_.warn("No conversion state, Ignoring sc notification for eventState = %s", eventState);
-                                BootState state = conversionMap_.get(eventState);
-                                long nsTimestamp = TimeUtils.getNsTimestamp();
-                                CommonDataFormat common = new CommonDataFormat(nsTimestamp, location, DataType.StateChangeEvent);
-                                common.setStateChangeEvent(state);
-                                common.storeExtraData("Flag", message.getStringOrDefault("Flag", "Unknown"));
-                                common.storeExtraData(ORIG_FOREIGN_LOCATION_KEY, locations.getString(i));
-                                results.add(common);
-                            } catch (ConversionException | PropertyNotExpectedType e) {
-                                log_.warn("Single location state message failed so skipping it: %s", e.getMessage());
-                            }
-                        }
-                    } else {
-                        log_.warn("A message is expected to be an map object but was not: %s",
-                                o.getClass().getCanonicalName());
-                    }
+            final boolean isJson = CommonFunctions.isJson(data);
+            if(isJson) {
+                for(String json: CommonFunctions.breakupStreamedJSONMessages(data)) {
+                    PropertyMap document = parser_.fromString(json).getAsMap();
+                    final PropertyMap metadata = document.getMapOrDefault("@metadata", null);
+                    if (metadata == null)
+                        log_.warn("Received data is missing '@metadata' %s", data);
+                    final String topic = metadata.getStringOrDefault("topic", null);
+                    if (topic == null)
+                        log_.warn("Received data is missing 'topic' %s", data);
+                    final String coversionTopic = subjectMap_.getStringOrDefault(topic, "");
+                    final PROVISIONER_TOPICS provisionerTopic = PROVISIONER_TOPICS.valueOf(coversionTopic);
+                    if(provisionerTopic == PROVISIONER_TOPICS.DhcpLogData)
+                        results.add(processDhcpMessage(document));
+                    if(provisionerTopic == PROVISIONER_TOPICS.PowerLogData)
+                        results.add(processNodePowerMessage(document));
                 }
+            } else {
+               //TO-DO for topic non-json format
             }
+
             return results;
-        } catch(ConfigIOParseException e) {
+        } catch(Exception e) {
             throw new NetworkListenerProviderException("Failed to parse the event from the component");
         }
     }
@@ -126,6 +113,83 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             actions_.publishBootEvent(topic_, data.getStateEvent(), data.getLocation(), dataTimestamp);
     }
 
+    private CommonDataFormat processNodePowerMessage(PropertyMap hpcmlogData) throws ParseException {
+        //message: "2021-04-30T10:32:21.167651-07:00 aus-admin1 twistd: clmgr-power:am01-nmn.local EVENT:HEARTBEAT
+        // APP:clmgr-power SEV:LOG_INFO TEXT:Heartbeat sends SIGTERM, shutdown"
+        String message = hpcmlogData.getStringOrDefault("message", null);
+        if(message == null)
+            log_.warn("Received data is missing 'message' %s", hpcmlogData);
+
+        final String[] msgLineColumns = message.split(" ");
+
+        final String timestamp = msgLineColumns[0];
+        if(timestamp == null)
+            log_.warn("Received message do not contain timestamp data or incorrect format");
+        final long nsTimestamp = TimeUtils.nSFromIso8601(timestamp);
+
+        final String powerNodeInfo = msgLineColumns[3];
+        if(powerNodeInfo == null)
+            log_.warn("Received message do not contain timestamp data or incorrect format");
+        final String hostname = grabLctnFromHPCMLogMsg(powerNodeInfo);
+
+        final BootState bootState = getNodeState(message);
+        CommonDataFormat common = new CommonDataFormat(nsTimestamp, hostname, DataType.StateChangeEvent);
+        common.setStateChangeEvent(bootState);
+        return common;
+    }
+
+    private CommonDataFormat processDhcpMessage(PropertyMap syslogData) throws ParseException {
+        final String timestamp = syslogData.getStringOrDefault("@timestamp", null);
+        if(timestamp == null)
+            log_.warn("Received message do not contain timestamp data or incorrect format");
+        final long nsTimestamp = TimeUtils.nSFromIso8601(timestamp);
+
+        final PropertyMap hostInfo = syslogData.getMapOrDefault("host", null);
+        if(hostInfo == null)
+            log_.warn("Received data is missing 'host' %s", syslogData);
+        final String hostname = hostInfo.getStringOrDefault("name", null);
+        if(hostname == null)
+            log_.warn("Received data is missing 'name' %s", syslogData);
+
+        final String message = syslogData.getStringOrDefault("message", null);
+        if(message == null)
+            log_.warn("Received data is missing 'message' %s", syslogData);
+
+        final BootState bootState = getNodeState(message);
+        CommonDataFormat common = new CommonDataFormat(nsTimestamp, hostname, DataType.StateChangeEvent);
+        common.setStateChangeEvent(bootState);
+        return common;
+    }
+
+    private BootState getNodeState(String message) {
+        String nodeState = "Unknown";
+        for(String nodeStateMsg : keywordToNodeStates_.keySet()) {
+            if(message.contains(nodeStateMsg))
+                nodeState = keywordToNodeStates_.getStringOrDefault(nodeStateMsg, "U");
+        }
+        return conversionMap_.get(nodeState);
+    }
+
+    // Helper method that returns the hardware lctn string based on the specified console message log filename.
+    private String grabLctnFromHPCMLogMsg(String lctnInfo) {
+        int indexStartLctn = lctnInfo.lastIndexOf(":") + 1;        // find the start of the node's location string.
+        return lctnInfo.substring(indexStartLctn, lctnInfo.length());  // return the hardware lctn string.
+    }
+
+    private void mapKeywordToNodeStates(NetworkListenerConfig config) {
+        keywordToNodeStates_ = new PropertyMap();
+        PropertyMap map = config.getProviderConfigurationFromClassName(getClass().getCanonicalName());
+        PropertyMap nodeStatesConfig = map.getMapOrDefault(NODE_STATES, new PropertyMap());
+        for(String nodestate : nodeStatesConfig.keySet()) {
+            PropertyArray keywords = nodeStatesConfig.getArrayOrDefault(nodestate, new PropertyArray());
+            for(int index = 0; index < keywords.size(); index++) {
+                String keyword = keywords.get(index).toString();
+                keywordToNodeStates_.putIfAbsent(keyword, nodestate);
+            }
+        }
+        subjectMap_ = config.getSubjectMap();
+    }
+
     private void getConfig(NetworkListenerConfig config, SystemActions systemActions) {
         config_ = config;
         actions_ = systemActions;
@@ -138,6 +202,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             bootImageForImageIdInfoUrl_ = map.getStringOrDefault("bootImageForImageIdInfoUrl", bootImageForImageIdInfoUrl_);
             informWlm_ = map.getBooleanOrDefault("informWorkLoadManager", informWlm_);
             topic_ = map.getStringOrDefault("publishTopic", topic_);
+            nodeStates_ = map.getArrayOrDefault("nodeStates", new PropertyArray());
         }
     }
 
@@ -434,6 +499,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private final ConcurrentMap<String, Object> knownIds_ = new ConcurrentHashMap<>(); // Used as a ConcurrentHashSet...
     private RESTClient client_ = null;
     final AtomicBoolean updating_ = new AtomicBoolean(false);
+    PropertyArray nodeStates_ = new PropertyArray();
+    private PropertyMap keywordToNodeStates_;
+    private PropertyMap subjectMap_;
 
     private final static String FOREIGN_IMAGE_ID_KEY = "bootImageId";
     private final long DELTA_UPDATE_MS = Long.parseLong(System.getProperty("daiBootImagePollingMs",
@@ -441,14 +509,27 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private static final Object OBJECT = new Object();
 
     private final ConfigIO parser_;
-    private final static Map<String, BootState> conversionMap_ = new HashMap<String, BootState>() {{
+    private final static String ORIG_FOREIGN_LOCATION_KEY = "foreignLocation";
+    private TokenAuthentication tokenProvider_ = null;
+    private PropertyArray bootImagesInfo_ = new PropertyArray();
+    private final static String NODE_STATES = "nodeStates";
+    
+    private final static Map<String, BootState> conversionMap_ = new HashMap<>() {{
         put("Ready", BootState.NODE_ONLINE);
         put("Off", BootState.NODE_OFFLINE);
-        put("Empty", BootState.EMPTY);
         put("On", BootState.NODE_BOOTING);
+        put("DHCPDiscovered", BootState.DHCP_DISCOVERED);
+        put("IPAddressAssigned", BootState.IP_ADDRESS_ASSIGNED);
+        put("BiosStartedDueToReset", BootState.BIOS_STARTED_DUE_TO_RESET);
+        put("SelectBootDevice", BootState.SELECTING_BOOT_DEVICE);
+        put("PxeDownloadingNbpFile", BootState.PXE_DOWNLOAD_NBP_FILE);
+        put("StartingKernelBoot", BootState.KERNEL_BOOT_STARTED);
+        put("Active", BootState.ACTIVE);
+        put("Shutdown", BootState.SHUTDOWN);
+        put("Unknown", BootState.UNKNOWN);
     }};
 
-    private final Map<String, String> bootImageInfo_ = new HashMap<String, String>() {{
+    private final Map<String, String> bootImageInfo_ = new HashMap<>() {{
                 put("id", "");
                 put("description", "");
                 put("bootimagefile", "");
@@ -461,7 +542,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                 put("files", "");
             }};
 
-    private final static String ORIG_FOREIGN_LOCATION_KEY = "foreignLocation";
-    private TokenAuthentication tokenProvider_ = null;
-    private PropertyArray bootImagesInfo_ = new PropertyArray();
+    private enum PROVISIONER_TOPICS {
+        PowerLogData,
+        DhcpLogData,
+        ConsoleLogData
+    }
 }

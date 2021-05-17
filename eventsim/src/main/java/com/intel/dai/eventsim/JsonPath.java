@@ -79,10 +79,18 @@ class JsonPath {
         String[] pathAndField = getPathAndField(jsonPath);
 
         String level_0_jPath = pathAndField[0];
+        boolean isString = data.get(level_0_jPath) instanceof String;
+        timeModifiedItems_ = 0;
+
+        if(isString) {
+            timeModifiedItems_++;
+            data.put(level_0_jPath, ZonedDateTime.now(ZoneId.of(zone)).toInstant().toString());
+            return timeModifiedItems_;
+        }
+
         PropertyDocument arrayData = getPathData(level_0_jPath, data);
         PropertyArray pathData = arrayData.getAsArray();
 
-        timeModifiedItems_ = 0;
         getFieldAndUpdateTime(1, pathData, pathAndField, zone);
         return timeModifiedItems_;
     }
@@ -282,14 +290,17 @@ class JsonPath {
                 data = data.getArray(level).getMap(0);
         }
         String level = levels[numOfLevels - 1];
-        boolean isMap = !level.endsWith(IS_ARRAY);
+        boolean isArray = level.endsWith(IS_ARRAY);
+        boolean isMap = !isArray;
         level = level.replaceAll("[(?,*)]", "*").replaceAll(ARRAY_ALL_SEARCH, "");
 
-        PropertyDocument fdata;
+        PropertyDocument fdata = null;
         if(isMap)
             fdata = data.getMap(level);
-        else
+        else if(isArray)
             fdata = data.getArray(level);
+/*        else if(isString)
+            fdata = new PropertyArray(level)*/
         return fdata;
     }
 
@@ -306,5 +317,7 @@ class JsonPath {
     private final String SPECIFIC = "?";
     private final String SPECIFIC_SEARCH = "\\?/";
     private final String IS_ARRAY = "]";
+    private final String IS_MAP = "}";
+    private final String IS_STRING = "\"";
     private final Random randomNumber = new Random();
 }
