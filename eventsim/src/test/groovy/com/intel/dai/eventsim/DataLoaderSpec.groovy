@@ -27,6 +27,7 @@ class DataLoaderSpec extends Specification {
 
         nodeInfoMock_.getNodeLocations() >> locations_
         nodeInfoMock_.getComputeHostnameFromLocationMap() >> hostnames_
+        nodeInfoMock_.getServiceHostnameFromLocationMap() >> hostnames_
 
         File foreignServerConfigFile = create_and_load_data_to_file("Test.json", FOREIGN_SIM_CONFIG)
         dataLoader = new DataLoader(foreignServerConfigFile.getAbsolutePath(), "voltdb-server", logMock_)

@@ -98,8 +98,8 @@
 
     "off": {
       "template": "/resources/templates/boot_state_off.json" ,
-      "stream-id": "console-logs",
-      "stream-type": "console-logs" ,
+      "stream-id": "stateChange",
+      "stream-type": "stateChange" ,
       "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
@@ -131,8 +131,8 @@
 
     "on": {
       "template": "/resources/templates/boot_state_on.json" ,
-      "stream-id": "console-logs",
-      "stream-type": "console-logs" ,
+      "stream-id": "stateChange",
+      "stream-type": "stateChange" ,
       "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,
@@ -164,8 +164,8 @@
 
     "ready": {
       "template": "/resources/templates/boot_state_ready.json" ,
-      "stream-id": "console-logs",
-      "stream-type": "console-logs" ,
+      "stream-id": "stateChange",
+      "stream-type": "stateChange" ,
       "update-template": false,
       "single-template": {
         "metrics/messages[?]/Flag": ".*" ,

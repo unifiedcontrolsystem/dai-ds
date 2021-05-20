@@ -33,6 +33,7 @@ class ForeignSimulatorEngineSpec extends Specification {
 
         nodeInfoMock_.getNodeLocations() >> locations_
         nodeInfoMock_.getComputeHostnameFromLocationMap() >> hostnames_
+        nodeInfoMock_.getServiceHostnameFromLocationMap() >> hostnames_
 
         dataLoader_.initialize()
     }
