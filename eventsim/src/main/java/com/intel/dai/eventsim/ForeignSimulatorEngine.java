@@ -3,6 +3,7 @@ package com.intel.dai.eventsim;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.config_io.ConfigIOParseException;
+import com.intel.dai.foreign_bus.CommonFunctions;
 import com.intel.dai.foreign_bus.ConversionException;
 import com.intel.logging.Logger;
 import com.intel.networking.restclient.RESTClientException;
@@ -66,17 +67,17 @@ class ForeignSimulatorEngine {
                 parameters.put("type", BOOT_STATES.ready.toString());
             }
             events.addAll(generateEvents(parameters, EVENT_TYPE.boot.toString()).getAsArray());
-            PropertyArray locations_ = filter_.getFilteredLocations();
+            PropertyArray xnameLocations_ = filter_.getFilteredLocations();
             for(int index = 0; index < events.size(); index++) {
                 PropertyMap event = events.getMap(index).getMap("STREAM_MESSAGE");
                 String message = event.getStringOrDefault("message", "");
                 Random random = new Random();
                 random.setSeed(randomiserSeed_);
-                int randomIndex = (int) ((random.nextDouble() * (locations_.size() - 0)) + 0);
+                int randomIndex = (int) ((random.nextDouble() * (xnameLocations_.size() - 0)) + 0);
                 String timestamp = ZonedDateTime.now(ZoneId.of(zone_)).toInstant().toString() + " ";
-                String location = locations_.getString(randomIndex);
+                String xnameLocation = xnameLocations_.getString(randomIndex);
                 String updatedMessage =timestamp + "aus-admin1 twistd: clmgr-power:" +
-                        dataLoaderEngine_.getHostname(location) + message;
+                        dataLoaderEngine_.getHostname(CommonFunctions.convertForeignToLocation(xnameLocation)) + message;
                 event.put("message", updatedMessage);
             }
             PropertyArray publishEvents = new PropertyArray();

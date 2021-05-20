@@ -154,6 +154,7 @@ class DataLoader {
 
     private void loadHostnameFromLocation() throws DataStoreException {
         hostnameLctnMap_ = nodeInfo_.getComputeHostnameFromLocationMap();
+        hostnameLctnMap_.putAll(nodeInfo_.getServiceHostnameFromLocationMap());
     }
 
     /**
