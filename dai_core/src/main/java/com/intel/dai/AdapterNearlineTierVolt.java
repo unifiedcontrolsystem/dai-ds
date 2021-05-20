@@ -185,7 +185,7 @@ public class AdapterNearlineTierVolt extends AdapterNearlineTier {
         mEntryNumber_WORKITEM_HISTORY               = getTablesMaxEntryNum("Tier2_WORKITEM_HISTORY;");
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2 (via the DataMover queue) AND for publishing that data for any components that subscribe for it (via the DataMoverExchange).
-        DataReceiverAmqp oDataReceiver = createDataReceiver("localhost");
+        DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
         mAmqpDataReceiverMsgConsumer = new AmqpDataReceiverMsgConsumer(oDataReceiver);
         // Start to consume messages from the DataMover queue that contains data store data that is being moving from Tier1 to Tier2 (DataMover -> DataReceiver)
         // (it will push us messages asynchronously, using the sub-class amqpDataReceiverMsgConsumer as a callback object).
