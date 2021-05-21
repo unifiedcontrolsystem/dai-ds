@@ -1958,6 +1958,26 @@
         "GenerateAlert":"N",
         "Msg":"Correctable PCIE IEH error, error type of CorrectableError:"
     },
+    {
+        "DescriptiveName":"RasProvMoveGpuCrashDumpFailed",
+        "EventType":"0004000132",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Copy of GPU Crash Dump Failed"
+    },
+    {
+        "DescriptiveName":"RasProvMoveGpuCrashDump",
+        "EventType":"0004000133",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Copy of GPU Crash Dump Succeeded"
+    },
 
     {
         "DescriptiveName":"RasWlmMissingCaseStmt",

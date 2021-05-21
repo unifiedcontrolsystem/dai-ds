@@ -28,7 +28,7 @@ public class ReservationUpdated extends VoltProcedure {
     public final SQLStmt selectReservationSql = new SQLStmt("SELECT * FROM WlmReservation_History WHERE ReservationName=? Order By LastChgTimestamp DESC Limit 1;");
 
     public final SQLStmt insertHistorySql = new SQLStmt(
-                    "INSERT INTO WlmReservation_History " +
+            "INSERT INTO WlmReservation_History " +
                     "(ReservationName, Users, Nodes, StartTimestamp, EndTimestamp, DeletedTimestamp, LastChgTimestamp, DbUpdatedTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
@@ -56,17 +56,17 @@ public class ReservationUpdated extends VoltProcedure {
         // Insert this information into the WlmReservation_History table.
         //---------------------------------------------------------------------
         voltQueueSQL(insertHistorySql
-                    ,sReservationName
-                    ,sUsers != null ? sUsers : aReservationData[0].getString("Users")
-                    ,sNodes != null ? sNodes : aReservationData[0].getString("Nodes")
-                    ,lStartTsInMicroSecs != 0L ? lStartTsInMicroSecs : aReservationData[0].getTimestampAsLong("StartTimestamp")
-                    ,lEndTsInMicroSecs != 0L ? lEndTsInMicroSecs : aReservationData[0].getTimestampAsLong("EndTimestamp")
-                    ,null                       // DeletedTimestamp
-                    ,lTsInMicroSecs             // LastChgTimestamp
-                    ,this.getTransactionTime()  // DbUpdatedTimestamp
-                    ,sReqAdapterType            // LastChgAdapterType
-                    ,lReqWorkItemId             // LastChgWorkItemId
-                    );
+                ,sReservationName
+                ,sUsers != null ? sUsers : aReservationData[0].getString("Users")
+                ,sNodes != null ? sNodes : aReservationData[0].getString("Nodes")
+                ,lStartTsInMicroSecs != 0L ? lStartTsInMicroSecs : aReservationData[0].getTimestampAsLong("StartTimestamp")
+                ,lEndTsInMicroSecs != 0L ? lEndTsInMicroSecs : aReservationData[0].getTimestampAsLong("EndTimestamp")
+                ,null                       // DeletedTimestamp
+                ,lTsInMicroSecs             // LastChgTimestamp
+                ,this.getTransactionTime()  // DbUpdatedTimestamp
+                ,sReqAdapterType            // LastChgAdapterType
+                ,lReqWorkItemId             // LastChgWorkItemId
+        );
         voltExecuteSQL(true);
         return 0;
     }

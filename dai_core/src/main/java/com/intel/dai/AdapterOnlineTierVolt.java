@@ -307,7 +307,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
 
         // Check & see if there were any records to move this interval, if no records to move then short-circuit this flow.
         if (iNumRecsBeingMoved == 0) {
-            log_.debug("DataMover - recurse check - there aren't any rows of data moving this interval, so no recurse is occurring");
+            log_.debug("DataMover - there are not any rows of data to move for this time frame");
             // Set the "next" value that will be used as the previously processed timestamp (indicates which data has already been moved).
             mDataMoverPrevProcessedTimeMs = lEndIntvlTimeMs;
             return;  // there aren't any records to move this interval, short-circuit and return to caller.
@@ -319,6 +319,9 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         //----------------------------------------------------------------------
         long lRc = seeIfInDataMoverRecursion(iNumRecsBeingMoved, aVt, decimalFormatter);
         if (lRc < 0L) {
+            log_.info("DataMover - recursion detected, suppressing the recursion");
+            // Set the "next" value that will be used as the previously processed timestamp (indicates which data has already been moved).
+            mDataMoverPrevProcessedTimeMs = lEndIntvlTimeMs;
             return;  // recursion was detected, we should suppress it (i.e., do not move this data to Tier2)
         }
 
