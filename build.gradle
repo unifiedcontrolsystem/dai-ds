@@ -519,6 +519,53 @@ project(':networking') {
     }
 }
 
+project(':volt_init') {
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile project(':xdg')
+        compile project(':properties')
+        compile project(':config_io')
+        compile project(':logging')
+        compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
+
+        testCompile "org.spockframework:spock-core:${spock_core_version}"
+    }
+
+    project.mainClassName = 'com.intel.dai.volt.Tool'
+
+    jar {
+        from {
+            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+        manifest {
+            attributes(
+                    "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                    'Main-Class': project.mainClassName)
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'METHOD'
+                    minimum = 0.79
+                }
+            }
+            rule {
+                enabled = enforceCodeCoverage
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.50
+                }
+            }
+        }
+    }
+}
+
 project(':dai_core') {
     apply plugin: 'application'
     apply plugin: 'groovy'
@@ -531,6 +578,7 @@ project(':dai_core') {
         compile project(':networking')
         compile project(':perflogging')
         compile project(':runtime_utils')
+        compile project(':volt_init')
         compile group: 'org.voltdb', name: 'voltdbclient', version: voltdb_version
         compile "com.rabbitmq:amqp-client:${rabbitmq_version}"
         compile group: 'info.picocli', name: 'picocli', version: picocli_version
@@ -2059,6 +2107,15 @@ java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
 exit \$?
 """
+        new File((String)"${buildDir}/tmp/initialize-voltdb").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+servers=\$(cat ${etc_dir}/volt.ip)
+
+java -jar ${lib_dir}/volt_init.jar \${servers}
+exit \$?
+"""
     }
     summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
     release = "${packageRelease}"
@@ -2101,6 +2158,10 @@ exit \$?
     // For VoltDB
     from("${buildDir}/tmp/loadVoltDbInitialData.sh") {
         into("${share_dir}/for_voltdb")
+        fileMode = 0700
+    }
+    from("${buildDir}/tmp/initialize-voltdb") {
+        into("${bin_dir}")
         fileMode = 0700
     }
     // Misc.
@@ -2194,6 +2255,15 @@ java \${PROPS} -jar \${JAR} \${ARGS} 2>&1 | tee \${LOG}
 
 exit \$?
 """
+        new File((String)"${buildDir}/tmp/initialize-voltdb").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+servers=\$(cat ${etc_dir}/volt.ip)
+
+java -jar ${lib_dir}/volt_init.jar \${servers}
+exit \$?
+"""
     }
     summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
     release = "${packageRelease}"
@@ -2238,10 +2308,294 @@ exit \$?
         into("${share_dir}/for_voltdb")
         fileMode = 0700
     }
+    from("${buildDir}/tmp/initialize-voltdb") {
+        into("${bin_dir}")
+        fileMode = 0700
+    }
     // Misc.
     from("${buildDir}/tmp/show-adapters") {
         into(bin_dir)
         fileMode = 0755
+    }
+
+    link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
+}
+
+task makeAuroraDaiDeb(type: Deb) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dai-manager.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI Manager Service
+[Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+EnvironmentFile=/opt/ucs/etc/dai.environment
+ExecStart=/opt/ucs/bin/dai-manager
+RestartSec=10
+Restart=always
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/dai.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+DAI_USE_BENCHMARKING=false"""
+        new File((String)"${buildDir}/tmp/dai-manager").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -x
+
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
+
+MACHINECONFIG=${etc_dir}/MachineConfig.json
+HOSTNAME=\$(hostname)
+VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
+CLASS="com.intel.dai.AdapterDaiMgr"
+LOCATION="-"
+LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+
+if [ -z "\${LOCATION}" ]; then
+  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
+  exit 1
+fi
+
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-manager.service
+/bin/systemctl disable dai-manager.service
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+jps -l | grep "com.intel.dai."
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/initialize-voltdb").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+servers=\$(cat ${etc_dir}/volt.ip)
+
+java -jar ${lib_dir}/volt_init.jar \${servers}
+exit \$?
+"""
+    }
+    summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-aurora"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    directory(log_dir, 0700)
+
+    into("/")
+
+    // Service
+    from("${buildDir}/tmp/dai-manager.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai-manager") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+    // DAI Jars
+    from ("${buildDir}/jars") {
+        into(lib_dir)
+        exclude "**/eventsim.jar"
+    }
+    // For VoltDB
+    from("${buildDir}/tmp/initialize-voltdb") {
+        into("${bin_dir}")
+        fileMode = 0700
+    }
+    // Misc.
+    from("${buildDir}/tmp/show-adapters") {
+        into(bin_dir)
+        fileMode = 0755
+    }
+    // Configuration
+    from("${projectDir}/configurations/aurora") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+    from("${projectDir}/data/db/Combined_VoltDB.sql") {
+        into(etc_dir)
+    }
+
+    link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
+}
+
+task makeAuroraDaiRpm(type: Rpm) {
+    doFirst {
+        new File((String)"${buildDir}/tmp").mkdirs()
+        new File((String)"${buildDir}/tmp/dai-manager.service").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=DAI Manager Service
+[Service]
+TasksMax=8192
+Type=simple
+User=root
+WorkingDirectory=/tmp
+EnvironmentFile=/opt/ucs/etc/dai.environment
+ExecStart=/opt/ucs/bin/dai-manager
+RestartSec=10
+Restart=always
+[Install]
+WantedBy=multi-user.target
+"""
+        new File((String)"${buildDir}/tmp/dai.environment").text = """DAI_LOGGING_LEVEL=DEBUG
+DAI_USE_BENCHMARKING=false"""
+        new File((String)"${buildDir}/tmp/dai-manager").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -x
+
+[[ -z "\${DAI_LOGGING_LEVEL}" ]] && DAI_LOGGING_LEVEL=DEBUG
+
+MACHINECONFIG=${etc_dir}/MachineConfig.json
+HOSTNAME=\$(hostname)
+VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
+CLASS="com.intel.dai.AdapterDaiMgr"
+LOCATION="-"
+LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+
+if [ -z "\${LOCATION}" ]; then
+  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
+  exit 1
+fi
+
+java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/daemon-reload.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl daemon-reload
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/preUninstall-dai.sh").text = """# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+/bin/systemctl stop dai-manager.service
+/bin/systemctl disable dai-manager.service
+exit \$?
+"""
+        new File((String)"${buildDir}/tmp/show-adapters").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+jps -l | grep "com.intel.dai."
+exit 0
+"""
+        new File((String)"${buildDir}/tmp/initialize-voltdb").text = """#!/usr/bin/env bash
+# Copyright (C) ${thisYear} Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+servers=\$(cat ${etc_dir}/volt.ip)
+
+java -jar ${lib_dir}/volt_init.jar \${servers}
+exit \$?
+"""
+    }
+    summary = 'The DAI (Data Access Interface) for HPC or Cloud Clusters.'
+    release = "${packageRelease}"
+    version = "${packageVersion}".split("-")[0]
+
+    os = 'LINUX'
+    type = 'BINARY'
+    user = 'root'
+    fileMode = 0600
+    dirMode = 0700
+
+    packageName = "dai-aurora"
+
+    preUninstall  file("${buildDir}/tmp/preUninstall-dai.sh")
+    postUninstall file("${buildDir}/tmp/daemon-reload.sh")
+    postInstall   file("${buildDir}/tmp/daemon-reload.sh")
+
+    directory(log_dir, 0700)
+
+    into("/")
+
+    // Service
+    from("${buildDir}/tmp/dai-manager.service") {
+        into("/etc/systemd/system")
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai.environment") {
+        into(etc_dir)
+        fileMode = 0644
+    }
+    from("${buildDir}/tmp/dai-manager") {
+        into(bin_dir)
+        fileMode = 0700
+    }
+    // DAI Jars
+    from ("${buildDir}/jars") {
+        into(lib_dir)
+        exclude "**/eventsim.jar"
+    }
+    // For VoltDB
+    from("${buildDir}/tmp/initialize-voltdb") {
+        into("${bin_dir}")
+        fileMode = 0700
+    }
+    // Misc.
+    from("${buildDir}/tmp/show-adapters") {
+        into(bin_dir)
+        fileMode = 0755
+    }
+    // Configuration
+    from("${projectDir}/configurations/aurora") {
+        into(etc_dir)
+    }
+    from("${projectDir}/configurations/common") {
+        into(etc_dir)
+    }
+    from("${projectDir}/data/db/Combined_VoltDB.sql") {
+        into(etc_dir)
     }
 
     link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
@@ -2265,6 +2619,9 @@ task makeEventSimConfigDeb(type: Deb) {
     from("${projectDir}/configurations/eventsim") {
         into(etc_dir)
     }
+    from("${projectDir}/data/db/Combined_VoltDB.sql") {
+        into(etc_dir)
+    }
     from("${projectDir}/configurations/common") {
         into(etc_dir)
     }
@@ -2286,6 +2643,9 @@ task makeEventSimConfigRpm(type: Rpm) {
     into("/")
 
     from("${projectDir}/configurations/eventsim") {
+        into(etc_dir)
+    }
+    from("${projectDir}/data/db/Combined_VoltDB.sql") {
         into(etc_dir)
     }
     from("${projectDir}/configurations/common") {
@@ -2886,16 +3246,17 @@ exit 0
 }
 
 task makeAllArtifacts {
+    group = 'build'
     doFirst {
         file("${buildDir}/distributions").mkdirs()
     }
     dependsOn subprojects.jar
     def rpms = [ "make3rdPartyRpm", "makeVoltDBSchemaSetupRpm", "makePostgresSchemaSetupRpm", "makeDaiRpm",
-                 "makeEventSimConfigRpm", "makeHw1ConfigRpm", "makeHw2ConfigRpm", "makeHw3ConfigRpm",
-                 "makeEventSimServerRpm", "makeEventSimCliRpm", "makeCliRpm" ]
+                 "makeAuroraDaiRpm", "makeEventSimConfigRpm", "makeHw1ConfigRpm", "makeHw2ConfigRpm",
+                 "makeHw3ConfigRpm", "makeEventSimServerRpm", "makeEventSimCliRpm", "makeCliRpm" ]
     def debs = [ "make3rdPartyDeb", "makeVoltDBSchemaSetupDeb", "makePostgresSchemaSetupDeb", "makeDaiDeb",
-                 "makeEventSimConfigDeb", "makeHw1ConfigDeb", "makeHw2ConfigDeb", "makeHw3ConfigDeb",
-                 "makeEventSimServerDeb", "makeEventSimCliDeb", "makeCliDeb" ]
+                 "makeAuroraDaiDeb", "makeEventSimConfigDeb", "makeHw1ConfigDeb", "makeHw2ConfigDeb",
+                 "makeHw3ConfigDeb", "makeEventSimServerDeb", "makeEventSimCliDeb", "makeCliDeb" ]
     def cleanup = [ "cleanupDeb" ]
     def packages = rpms
     if(INCLUDE_DEBIAN)

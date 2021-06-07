@@ -6,6 +6,7 @@ import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.dsapi.WorkQueue;
 import com.intel.dai.exceptions.AdapterException;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.volt.VoltDBSetup;
 import com.intel.logging.*;
 
 import org.voltdb.client.*;
@@ -1897,6 +1898,9 @@ public class AdapterDaiMgr {
             adapter.connectToDataStore(DbServers);
             adapter.loadRasMetadata();
 
+            if(args[1].equals("-")) // substitute a passed '-' for location to a real location.
+                args[1] = adapter.getLctnFromHostname(args[2]);
+
             // Get the Lctn and Hostname of the Service Node that this adapter is running on - args[1] and args[2]
             final String SnHostname = args[2];
             mSnLctn = getLocation(args[1], SnHostname);
@@ -2073,6 +2077,13 @@ public class AdapterDaiMgr {
             logger.error("Wrong number of parameters specified. Must have 3 parameters in order: " +
                     "'voltdb_servers location hostname'");
             return; // Bail here quickly with bad number of arguments.
+        }
+        if(!VoltDBSetup.setupVoltDBOrWait(args[0], 300L, logger)) { // This block is for OSS only!!!
+            logger.error("Either the VoltDB is in a bad state or VoltDB is not up and this adapter timed out " +
+                    "trying to connect.");
+            logger.error("Check the VoltDB status with 'select Status from DBStatus;' using the web interface " +
+                    "or the 'sqlcmd' tool.");
+            return;
         }
         AdapterSingletonFactory.initializeFactory(type, AdapterDaiMgr.class.getName(), logger);
         final IAdapter adapter = AdapterSingletonFactory.getAdapter();

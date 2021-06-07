@@ -1,0 +1,508 @@
+{
+  "UcsConfigValues": [
+    {
+      "Value": "/opt/ucs/log",
+      "Key": "UcsLogfileDirectory"
+    },
+    {
+      "Value": "/opt/ucs/etc/log4j2.xml",
+      "Key": "UcsLog4jConfigurationFile"
+    },
+    {
+      "Value": "/opt/ucs/etc",
+      "Key": "UcsConfigDirectory"
+    },
+    {
+      "Value": "am02-nmn.local",
+      "Key": "SmwHostname"
+    },
+    {
+      "Value": "/opt/voltdb/voltdb/*:/opt/ucs/lib/*",
+      "Key": "UcsClasspath"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnCompNodeNumLevels"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnServiceNodeNumLevels"
+    }
+  ],
+  "AdapterInstances": [
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterOnlineTierVolt $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ui.AdapterUIRest $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "UI",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRas $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "RAS",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterNearlineTierJdbc $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "PROVISIONER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderInventoryNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.inventory.ProviderInventoryNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "INVENTORY",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "MONITOR",
+      "NumberOfInstances": 2
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "WLM",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabric-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "FABRIC",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricPerf-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricPerfTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "FABRICPERF",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricCrit-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM2",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricCritTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "FABRICCRIT",
+      "NumberOfInstances": 1
+    }
+  ],
+  "InitialWorkItems": [
+    {
+      "Parms": null,
+      "TypeOfAdapter": "DAI_MGR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "MotherSuperiorDaiMgr",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"RAS",
+      "WorkToBeDone":"HandleFillingInJobIdsAndControlOps",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleFillingInJobIdOnly",
+      "Queue": ""
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleControlOpsOnly",
+      "Queue": ""
+    },
+    {
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=am02-nmn.local",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataMover",
+      "Queue": ""
+    },
+    {
+      "Parms": "RabbitMQHost=am02-nmn.local",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataReceiver",
+      "Queue": ""
+    },
+    {
+      "Parms": "$Profile#environmental",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": "$Profile#ras_events",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "PROVISIONER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "INVENTORY",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": "RabbitMQHost=am02-nmn.local",
+      "TypeOfAdapter": "WLM",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": ""
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRIC",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRICPERF",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Parms": "",
+      "TypeOfAdapter": "FABRICCRIT",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM2"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"UI",
+      "WorkToBeDone":"HandleInputFromUsers",
+      "Parms":"",
+      "NotifyWhenFinished":"F"
+    }
+  ],
+  "Nodes": [
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.13",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000001-nmn.local",
+      "MacAddr": "a4:bf:01:5e:b0:43",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.14",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000002-nmn.local",
+      "MacAddr": "a4:bf:01:5e:94:96",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.15",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000003-nmn.local",
+      "MacAddr": "a4:bf:01:5e:b1:2e",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN3"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.16",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000004-nmn.local",
+      "MacAddr": "a4:bf:01:5e:ae:4a",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN4"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.24",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000005-nmn.local",
+      "MacAddr": "a4:bf:01:5e:a9:95",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3002-CH1-CN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.25",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000006-nmn.local",
+      "MacAddr": "a4:bf:01:5e:98:65",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3002-CH1-CN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.26",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000007-nmn.local",
+      "MacAddr": "a4:bf:01:5e:ae:54",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3002-CH1-CN3"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.27",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "nid000008-nmn.local",
+      "MacAddr": "a4:bf:01:5e:af:94",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3002-CH1-CN4"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.22",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "uan01-nmn.local",
+      "MacAddr": "a4:bf:01:70:a3:a7",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-UAN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.23",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "uan02-nmn.local",
+      "MacAddr": "a4:bf:01:70:a7:9e",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-UAN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.19",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "am01-nmn.local",
+      "MacAddr": "a4:bf:01:70:9e:f3",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.20",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "am02-nmn.local",
+      "MacAddr": "a4:bf:01:70:a7:ba",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.21",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "am03-nmn.local",
+      "MacAddr": "a4:bf:01:6f:da:99",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM3"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.17",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "gn01-nmn.local",
+      "MacAddr": "a4:bf:01:6f:da:99",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-GWN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.18",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "gn02-nmn.local",
+      "MacAddr": "a4:bf:01:70:ac:13",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-GWN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.4",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-w001.local",
+      "MacAddr": "unknown",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-WN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.5",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-w002.local",
+      "MacAddr": "a4:bf:01:70:ab:4f",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-WN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.6",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-w003.local",
+      "MacAddr": "a4:bf:01:70:ad:a9",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-WN3"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.7",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-s001.local",
+      "MacAddr": "a4:bf:01:6f:d8:31",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-SN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.8",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-s002.local",
+      "MacAddr": "a4:bf:01:70:a9:0a",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-SN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.9",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-s003.local",
+      "MacAddr": "a4:bf:01:70:37:fc",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-SN3"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.10",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-m001.local",
+      "MacAddr": "a4:bf:01:70:a7:f2",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-MN1"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.11",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-m002.local",
+      "MacAddr": "a4:bf:01:6f:d8:f5",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-MN2"
+    },
+    {
+      "Aggregator": "X3001-AM2",
+      "BmcHostName": "unknown",
+      "IpAddr": "10.252.0.12",
+      "BmcAddr": "unknown",
+      "BootImageId": null,
+      "HostName": "ncn-m003.local",
+      "MacAddr": "a4:bf:01:70:a0:90",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-MN3"
+    }
+  ]
+}

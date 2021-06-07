@@ -25,5 +25,6 @@ include 'ras'
 include 'eventsim'
 include 'fabric'
 include 'control'
+include 'volt_init'
 
 rootProject.name = 'dai'

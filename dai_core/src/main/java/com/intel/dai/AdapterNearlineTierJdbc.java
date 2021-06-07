@@ -168,7 +168,7 @@ public class AdapterNearlineTierJdbc extends AdapterNearlineTier {
         }   // REQUEUED work item
 
         // Setup AMQP for receiving data being moved from Tier1 to Tier2.
-        DataReceiverAmqp oDataReceiver = createDataReceiver("localhost");
+        DataReceiverAmqp oDataReceiver = createDataReceiver(rabbitMQ);
         mAmqpDataReceiverMsgConsumer = new AmqpDataReceiverMsgConsumer(oDataReceiver, mPrevAmqpMessageId, adapter, log_,
                 mTableUpdater, this);
 

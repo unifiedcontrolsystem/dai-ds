@@ -1,0 +1,131 @@
+{
+  "providerClassMap": {
+    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
+    "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
+  },
+
+  "networkStreams": {
+    "fanTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-fan?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
+    "energyTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
+    "powerTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-power?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
+    "temperatureTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-temperature?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
+    "voltageTelemetry": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-voltage?stream_id=dai-telemtry",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    },
+    "events": {
+      "arguments": {
+        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-dmtf-resource-event?stream_id=dai-events",
+        "connectTimeout": "30",
+        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
+        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
+        "clientId": "admin-client",
+        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
+        "realm": "shasta"
+      },
+      "name": "eventSource"
+    }
+  },
+
+  "adapterProfiles": {
+    "environmental": {
+      "networkStreamsRef": [
+        "fanTelemetry",
+        "energyTelemetry",
+        "powerTelemetry",
+        "temperatureTelemetry",
+        "voltageTelemetry"
+      ],
+      "subjects": [
+        "*"
+      ],
+      "adapterProvider": "environmentalData"
+    },
+    "ras_events": {
+      "networkStreamsRef": [
+        "events"
+      ],
+      "subjects": [
+        "*"
+      ],
+      "adapterProvider": "rasData"
+    }
+  },
+
+  "providerConfigurations": {
+    "com.intel.dai.network_listener.NetworkListenerSystemActions": {
+      "sourceType": "rabbitmq",
+      "exchangeName": "ucs",
+      "uri": "amqp://am02-nmn.local"
+    },
+    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+      "publishRawTopic": "ucs_raw_data",
+      "publishAggregatedTopic": "ucs_aggregated_data",
+      "publish": true
+    },
+    "com.intel.dai.monitoring.RasEventProviderForeignBus": {
+      "publishTopic": "ucs_ras_event",
+      "publish": true
+    }
+  },
+
+  "subjectMap": {
+    "telemetry": "EnvironmentalData",
+    "inventoryChanges": "InventoryChangeEvent",
+    "logs": "LogData",
+    "events": "RasEvent",
+    "stateChanges": "StateChangeEvent"
+  }
+}

@@ -98,7 +98,7 @@ public class AdapterOnlineTierVolt extends AdapterOnlineTier {
         mDataMoverPrevProcessedTimeMs = sdfSqlDateFormat.parse(sTempTimestamp).getTime();  // the timestamp (in millisecs since epoch) of the already handled data, used to determine the starting time of this interval.
 
         // Set up AMQP for directly moving data from Tier1 to Tier2 (via a queue, not pub-sub).
-        DataMoverAmqp oDataMover = new DataMoverAmqp("localhost", adapter, log_, workQueue.workItemId());
+        DataMoverAmqp oDataMover = new DataMoverAmqp(rabbitMQHost, adapter, log_, workQueue.workItemId());
 
         //----------------------------------------------------------------------
         // Loop forever moving data from Tier1 to Tier2 (each iteration through this loop is referred to as an interval).
