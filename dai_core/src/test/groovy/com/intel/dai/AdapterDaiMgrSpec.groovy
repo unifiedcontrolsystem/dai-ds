@@ -2,7 +2,6 @@ package com.intel.dai
 
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.DbStatusApi
-import com.intel.dai.dsapi.LegacyVoltDbDirectAccess
 import com.intel.dai.dsapi.Location
 import com.intel.dai.dsapi.WorkQueue
 import com.intel.dai.exceptions.DataStoreException
@@ -16,16 +15,17 @@ import spock.lang.Specification
 import java.util.concurrent.TimeoutException
 
 class AdapterDaiMgrSpec extends Specification {
+    def client_
     def baseAdapter_
     def logger_
     def factory_
-    def client_
     def location_ = "location"
+    static def workQueue
 
     def underTest_
     def setup() {
-        baseAdapter_ = Mock(IAdapter)
         client_ = Mock(Client)
+        baseAdapter_ = Mock(IAdapter)
         baseAdapter_.client() >> client_
         baseAdapter_.adapterType() >> "TYPE"
         baseAdapter_.snLctn() >> { return location_ }
@@ -33,10 +33,12 @@ class AdapterDaiMgrSpec extends Specification {
         logger_ = Mock(Logger)
         factory_ = Mock(DataStoreFactory)
 
+        workQueue = Mock(WorkQueue)
+        workQueue.workItemId() >> 42L
+        workQueue.getTsFromWorkingResults(_ as String) >> "2019-09-30 13:00:00.0000"
         underTest_ = new AdapterDaiMgr(baseAdapter_, logger_, factory_)
-        underTest_.workQueue = Mock(WorkQueue)
-        underTest_.workQueue.workItemId() >> 42L
-        underTest_.workQueue.getTsFromWorkingResults(_ as String) >> "2019-09-30 13:00:00.0000"
+        underTest_.workQueue = workQueue
+        underTest_.quickClient_ = client_
     }
 
     def buildUcsVarResult(String value) {
@@ -83,14 +85,19 @@ class AdapterDaiMgrSpec extends Specification {
         return response
     }
 
+    def "Test sub-class AdapterInstanceInfo"() {
+        def value = new AdapterDaiMgr.AdapterInstanceInfo("TEST", 0L, "command", "logfile", null, "lctn", 0L)
+        expect: value != null
+    }
+
     def "Test sub-class MonitorAdapterInstance"() {
         given:
         AdapterDaiMgr.AdapterInstanceInfo info = new AdapterDaiMgr.AdapterInstanceInfo("", 0L, "", "",
                 Mock(Process), "", 0L)
-        AdapterDaiMgr.MonitorAdapterInstance instance = new AdapterDaiMgr.MonitorAdapterInstance(info, 0L,
-                logger_, baseAdapter_)
         baseAdapter_.getAdapterInstancesAdapterId(_,_,_) >> instanceId
         baseAdapter_.getAdapterInstancesBaseWorkItemId(_,_) >> baseId
+        AdapterDaiMgr.MonitorAdapterInstance instance = new AdapterDaiMgr.MonitorAdapterInstance(info, 0L,
+                logger_, baseAdapter_)
         instance.run()
 
         expect: true
@@ -135,7 +142,7 @@ class AdapterDaiMgrSpec extends Specification {
         status                 | row   | queue           | time    || result
         ClientResponse.SUCCESS | false | null            |      0L || -1L
         ClientResponse.SUCCESS | false | null            | 121000L ||  0L
-        ClientResponse.SUCCESS | true  | Mock(WorkQueue) | 121000L ||  1L
+        ClientResponse.SUCCESS | true  | workQueue       | 121000L ||  1L
     }
 
     def "Test requeueAnyZombieWorkItems bad db status"() {
@@ -324,24 +331,10 @@ class AdapterDaiMgrSpec extends Specification {
         Long.MIN_VALUE | true  ||  1
     }
 
-    def "Test performAdapterInstanceLoadBalancing bad db status"() {
-        given:
-        def response = Mock(ClientResponse)
-        underTest_.mTimeLastCheckedBacklog = System.currentTimeMillis() - 60_000
-        response.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
-        response.getStatusString() >> "ClientResponse.OPERATIONAL_FAILURE"
-        client_.callProcedure("WorkItemBackLog", _ as Long) >> response
-
-        when: underTest_.performAdapterInstanceLoadBalancing()
-
-        then: thrown(RuntimeException)
-    }
-
     def "Test ensureChildWrkItemsMakingProgress bad db status"() {
         given:
         def response = Mock(ClientResponse)
         response.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
-        response.getStatusString() >> "ClientResponse.OPERATIONAL_FAILURE"
         underTest_.mProgChkIntrvlDataReceiver = 0L
         client_.callProcedure("WorkItemInfoWrkadaptrtypeQueueWorktobddone", _, _, _) >> response
 
@@ -489,41 +482,27 @@ class AdapterDaiMgrSpec extends Specification {
 
     def "Test connectRetryPhase with exception"() {
         given:
-        def legacy = Mock(LegacyVoltDbDirectAccess)
-        def status = Mock(DbStatusApi)
-        status.waitForDataPopulated(_) >> true
-        factory_.createVoltDbLegacyAccess() >> legacy
-        factory_.createDbStatusApi(_) >> status
-        legacy.getVoltDbClient() >> client_
-        underTest_.quickClient_ = client_
-
+        underTest_.quickClient_ = Mock(Client)
         when: underTest_.connectRetryPhase(new String[1], 0L, 0L)
 
         then: thrown(TimeoutException)
     }
 
     def "Test waitForVoltDB"() {
-        def legacy = Mock(LegacyVoltDbDirectAccess)
+        underTest_.quickClient_ = client_
         def status = Mock(DbStatusApi)
         status.waitForDataPopulated(_) >> true
-        factory_.createVoltDbLegacyAccess() >> legacy
-        factory_.createDbStatusApi(_) >> status
-        legacy.getVoltDbClient() >> client_
+        factory_.createDbStatusApi(_ as Client) >> status
         underTest_.quickClient_ = client_
-
-        underTest_.waitForVoltDB("localhost", 300_000L, 15_000L)
+        underTest_.waitForVoltDB("localhost", 1000L, 100L)
         expect: true
     }
 
     def "Test waitForVoltDB with exception"() {
         given:
-        def legacy = Mock(LegacyVoltDbDirectAccess)
         def status = Mock(DbStatusApi)
         status.waitForDataPopulated(_) >> false
-        factory_.createVoltDbLegacyAccess() >> legacy
         factory_.createDbStatusApi(_) >> status
-        legacy.getVoltDbClient() >> client_
-        underTest_.quickClient_ = client_
 
         when: underTest_.waitForVoltDB("localhost", 0L, 0L)
 
@@ -532,12 +511,10 @@ class AdapterDaiMgrSpec extends Specification {
 
     def "Test waitForVoltDB with exception 2"() {
         given:
-        def legacy = Mock(LegacyVoltDbDirectAccess)
+        underTest_.quickClient_ = client_
         def status = Mock(DbStatusApi)
         status.waitForDataPopulated(_) >> false
-        factory_.createVoltDbLegacyAccess() >> legacy
         factory_.createDbStatusApi(_) >> { throw new DataStoreException("TEST") }
-        legacy.getVoltDbClient() >> client_
 
         when: underTest_.waitForVoltDB("localhost", 0L, 0L)
 
@@ -550,17 +527,14 @@ class AdapterDaiMgrSpec extends Specification {
     }
 
     def "Test mainProcessingFlow"() {
-        def legacy = Mock(LegacyVoltDbDirectAccess)
         def status = Mock(DbStatusApi)
         def locationApi = Mock(Location)
         def workQueue = Mock(WorkQueue)
         locationApi.getLocationFromHostname(_) >> location
         factory_.createLocation(_) >> locationApi
         status.waitForDataPopulated(_) >> true
-        factory_.createVoltDbLegacyAccess() >> legacy
         factory_.createDbStatusApi(_) >> status
         factory_.createWorkQueue(_) >> workQueue
-        legacy.getVoltDbClient() >> client_
         underTest_.quickClient_ = client_
         workQueue.grabNextAvailWorkItem(_) >>> [ true, true, true, true, false ]
         workQueue.workToBeDone() >> work
@@ -600,43 +574,70 @@ class AdapterDaiMgrSpec extends Specification {
         false   | null       | 0L     | "N"  | "other"                               || true
     }
 
-    def "Test startupAdapterInstanceOnThisSn"() {
-        def response = Mock(ClientResponse)
-        def columns = new VoltTable.ColumnInfo[1]
-        columns[0] = new VoltTable.ColumnInfo("State", VoltType.BIGINT)
-        def table = new VoltTable(columns)
-        table.addRow(0L)
-        response.getResults() >> [table]
-        client_.callProcedure("MachineAdapterInstanceBumpNextInstanceNumAndReturn", _ as String, _ as String) >> response
-        when: underTest_.startupAdapterInstanceOnThisSn("lctn", "host", "MONITOR", "invocation", "/dev/null", 0L)
-        then: thrown IOException
-    }
-
-    def "Test logDaimgrProofOfLife"() {
-        underTest_.mTimeLastProvedAlive = 0L
-        def response1 = Mock(ClientResponse)
+    def "Test ensureNotZombie"() {
+        ClientResponse response1 = Mock(ClientResponse)
         response1.getStatus() >> ClientResponse.SUCCESS
-        def columns1 = new VoltTable.ColumnInfo[1]
-        columns1[0] = new VoltTable.ColumnInfo("State", VoltType.STRING)
-        def table1 = new VoltTable(columns1)
-        if(ROW1)
-            table1.addRow("R")
-        response1.getResults() >> [table1]
-        client_.callProcedure("AdapterInstanceInfoUsingTypeId", _ as String, _ as Long) >> response1
-        def response2 = Mock(ClientResponse)
-        response2.getStatus() >> ClientResponse.OPERATIONAL_FAILURE
-        when: underTest_.logDaimgrProofOfLife()
-        then: thrown RuntimeException
-
-        where:
-        ROW1  | TS    || RESULT
-        true  | false || true
-        false | true  || true
+        VoltTable vt = new VoltTable(new VoltTable.ColumnInfo("State", VoltType.STRING),
+                new VoltTable.ColumnInfo("WorkingAdapterId", VoltType.BIGINT))
+        vt.addRow("A", 0L)
+        response1.getResults() >> [ vt ]
+        client_.callProcedure(_ as String, _ as String, _ as Long) >> response1
+        when: underTest_.ensureNotZombie()
+        then: thrown(RuntimeException)
     }
 
-    def "Test logDaimgrProofOfLife 2"() {
-        underTest_.mTimeLastProvedAlive = System.currentTimeMillis()
-        underTest_.logDaimgrProofOfLife()
-        expect: true
+    def "Test checkNodesStuckShuttingDown"() {
+        ClientResponse response1 = Mock(ClientResponse)
+        response1.getStatus() >> ClientResponse.SUCCESS
+        VoltTable vt = new VoltTable(new VoltTable.ColumnInfo("WorkingAdapterId", VoltType.BIGINT),
+                new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
+                new VoltTable.ColumnInfo("State", VoltType.STRING),
+                new VoltTable.ColumnInfo("DbUpdatedTimestamp", VoltType.TIMESTAMP)
+        )
+        vt.addRow(0L, "location", "A", 0L)
+        response1.getResults() >> [ vt ]
+        client_.callProcedure(_ as String, _ as String) >> response1
+        underTest_.mTimeLastCheckedNodesStuckShuttingDown = 0L
+        expect: underTest_.checkNodesStuckShuttingDown() == 0L
+    }
+
+    def "Test cleanupAdapterInstancesWithoutActivePidOnThisServiceNode"() {
+        ClientResponse response1 = Mock(ClientResponse)
+        response1.getStatus() >> ClientResponse.SUCCESS
+        VoltTable vt = new VoltTable(new VoltTable.ColumnInfo("AdapterType", VoltType.STRING),
+                new VoltTable.ColumnInfo("Id", VoltType.BIGINT),
+                new VoltTable.ColumnInfo("Pid", VoltType.BIGINT)
+        )
+        vt.addRow("location", 0L, 0L)
+        response1.getResults() >> [ vt ]
+        client_.callProcedure(_ as String, _ as String) >> response1
+        expect: underTest_.cleanupAdapterInstancesWithoutActivePidOnThisServiceNode("location") == 1L
+    }
+
+    def "Test ensureNodeConsoleMsgsFlowingIntoDai"() {
+        ClientResponse response1 = Mock(ClientResponse)
+        response1.getStatus() >> ClientResponse.SUCCESS
+        VoltTable vt = new VoltTable(new VoltTable.ColumnInfo("ProofOfLifeTimestamp", VoltType.TIMESTAMP),
+                new VoltTable.ColumnInfo("Lctn", VoltType.STRING),
+                new VoltTable.ColumnInfo("State", VoltType.STRING)
+        )
+        vt.addRow(0L, "location", "A")
+        response1.getResults() >> [ vt ]
+        client_.callProcedure(_ as String, _ as String) >> response1
+        underTest_.mTimeLastCheckedNodesMissingConsoleMsgs = 0L
+        expect: underTest_.ensureNodeConsoleMsgsFlowingIntoDai() == 0L
+    }
+
+    def "Test cleanupStaleAdapterInstancesOnThisServiceNode"() {
+        ClientResponse response1 = Mock(ClientResponse)
+        response1.getStatus() >> ClientResponse.SUCCESS
+        VoltTable vt = new VoltTable(new VoltTable.ColumnInfo("AdapterType", VoltType.STRING),
+                new VoltTable.ColumnInfo("Id", VoltType.BIGINT),
+                new VoltTable.ColumnInfo("Pid", VoltType.BIGINT)
+        )
+        vt.addRow("location", 0L, 0L)
+        response1.getResults() >> [ vt ]
+        client_.callProcedure(_ as String, _ as String) >> response1
+        expect: underTest_.cleanupStaleAdapterInstancesOnThisServiceNode("location") == 1L
     }
 }

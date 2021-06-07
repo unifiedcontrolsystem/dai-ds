@@ -157,13 +157,11 @@ CREATE PROCEDURE ComputeNodeListOfMissingProofOfLifeMsgs
 CREATE PROCEDURE ComputeNodeListOfNodesStuckHalting
    AS SELECT Lctn, State, DbUpdatedTimestamp FROM ComputeNode WHERE (State='H'  AND  DbUpdatedTimestamp<?);
 
-
 -- New location mapping queries.
 CREATE PROCEDURE ComputeNodeLocationInformation
    AS SELECT Lctn, HostName, IpAddr, MacAddr, BmcHostName FROM ComputeNode;
 CREATE PROCEDURE ServiceNodeLocationInformation
    AS SELECT Lctn, HostName, IpAddr, MacAddr, BmcHostName FROM ServiceNode;
-
 
 -- This stored procedure returns a single VoltTable:
 --    - that contains the Lctn, State, and BootImageId information for each of the nodes in the specified node list that are NOT booted with the specified BootImageId

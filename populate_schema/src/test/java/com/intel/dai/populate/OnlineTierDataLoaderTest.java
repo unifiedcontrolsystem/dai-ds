@@ -86,7 +86,6 @@ public class OnlineTierDataLoaderTest {
     }
 
     @Test
-    @Ignore // In this repo this test will fail
     public void handlesDataLoaderPopulateException() throws Exception {
         Mockito.when(mockDsFactory.createDataLoaderApi()).thenReturn(mockApi);
         Mockito.when(mockApi.isNearlineTierValid()).thenReturn(true); // Load from Nearline tier
@@ -101,7 +100,6 @@ public class OnlineTierDataLoaderTest {
     }
 
     @Test
-    @Ignore // In this repo this test will fail
     public void handlesDataLoaderNearlineCheckException() throws Exception {
         Mockito.when(mockDsFactory.createDataLoaderApi()).thenReturn(mockApi);
         Mockito.when(mockApi.isNearlineTierValid()).thenThrow(new DataStoreException("Ooops!"));
@@ -196,14 +194,12 @@ public class OnlineTierDataLoaderTest {
     }
 
     @Test
-    @Ignore // In this repo this test will fail
     public void populateOnlineTierNegativeTest3() throws Exception {
         Mockito.when(mockDsFactory.createDataLoaderApi()).thenThrow(DataStoreException.class);
         Assert.assertEquals(1, dataLoader.populateOnlineTier());
     }
 
     @Test
-    @Ignore // In this repo this test will fail
     public void populateOnlineTierNegativeTest4() throws Exception {
         Mockito.when(mockDsFactory.createDataLoaderApi()).thenReturn(mockApi);
         Mockito.doThrow(DataStoreException.class).when(mockStatusApi).setDataPopulationStarting();
