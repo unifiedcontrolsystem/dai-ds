@@ -1241,35 +1241,22 @@ WantedBy=multi-user.target
 version: '2'
 services:
   dai-voltdb:
-    network_mode: host
     image: voltdb/voltdb-community:9.2.1
-    entrypoint: /opt/voltdb/schema/voltdb-entrypoint.sh
     container_name: dai-voltdb
     hostname: am01-nmn.local
+    ports:
+      - "21212:21212"
+      - "21211:21211"
+      - "18080:8080"
+      - "3021:3021"
+      - "5555:5555"
+      - "7181:7181"
     environment:
-      - HTTP_PORT=18080
+      - HOST_COUNT=1
+      - HOSTS=am01-nmn.local
     volumes:
-      - "/etc/hosts:/etc/hosts"
-      - "${etc_dir}:${etc_dir}"
-      - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
-      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+      - "./voltdb/log:/var/voltdb/voltdbroot/log"
     restart: always
-
-  dai-populate-schema:
-    network_mode: host
-    depends_on:
-      - dai-voltdb
-    image: openjdk:11.0.5-jdk
-    entrypoint: /opt/voltdb/schema/populateSchema.sh
-    container_name: dai-populate-schema
-    environment:
-      - DAI_LOGGING_LEVEL=DEBUG
-    volumes:
-      - "/opt/ucs/docker/tier1/log:/opt/ucs/log"
-      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
-      - "/opt/ucs/etc:/opt/ucs/etc"
-      - "/opt/ucs/lib:/opt/ucs/lib"
-    restart: 'no'
 """
         new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
@@ -1555,34 +1542,22 @@ WantedBy=multi-user.target
 version: '2'
 services:
   dai-voltdb:
-    network_mode: host
     image: voltdb/voltdb-community:9.2.1
-    entrypoint: /opt/voltdb/schema/voltdb-entrypoint.sh
     container_name: dai-voltdb
+    hostname: am01-nmn.local
+    ports:
+      - "21212:21212"
+      - "21211:21211"
+      - "18080:8080"
+      - "3021:3021"
+      - "5555:5555"
+      - "7181:7181"
     environment:
-      - HTTP_PORT=18080
+      - HOST_COUNT=1
+      - HOSTS=am01-nmn.local
     volumes:
-      - "/etc/hosts:/etc/hosts"
-      - "${etc_dir}:${etc_dir}"
-      - "/opt/ucs/docker/tier1/log:/var/voltdb/voltdbroot/log"
-      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
+      - "./voltdb/log:/var/voltdb/voltdbroot/log"
     restart: always
-
-  dai-populate-schema:
-    network_mode: host
-    depends_on:
-      - dai-voltdb
-    image: openjdk:11.0.5-jdk
-    entrypoint: /opt/voltdb/schema/populateSchema.sh
-    container_name: dai-populate-schema
-    environment:
-      - DAI_LOGGING_LEVEL=DEBUG
-    volumes:
-      - "/opt/ucs/docker/tier1/log:/opt/ucs/log"
-      - "/opt/ucs/docker/tier1/init.d:/opt/voltdb/schema"
-      - "/opt/ucs/etc:/opt/ucs/etc"
-      - "/opt/ucs/lib:/opt/ucs/lib"
-    restart: 'no'
 """
         new File((String)"${buildDir}/tmp/populateSchema.sh").text = """#!/usr/bin/env bash
 # Copyright (C) ${thisYear} Intel Corporation
@@ -2060,15 +2035,12 @@ MACHINECONFIG=${etc_dir}/MachineConfig.json
 HOSTNAME=\$(hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
-LOCATION=\$(/opt/voltdb/bin/sqlcmd --servers="\${VOLTSERVERS}" --output-skip-metadata --query="select lctn from servicenode where hostname='\${HOSTNAME}';" | sed 's/[\\n ]*//g')
-LOGNAME="AdapterDaiMgr-\${LOCATION}.log"
+LOCATION="-"
+LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+# DO NOT REMOVE OR CHANGE THE FOLLOWING LINE!!!
+COV=
 
-if [ -z "\${LOCATION}" ]; then
-  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
-  exit 1
-fi
-
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java \${COV} -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 
 exit \$?
 """
@@ -2153,7 +2125,7 @@ exit \$?
     // DAI Jars
     from ("${buildDir}/jars") {
         into(lib_dir)
-        exclude "**/procedures.jar", "**/eventsim.jar"
+        exclude "**/eventsim.jar"
     }
     // For VoltDB
     from("${buildDir}/tmp/loadVoltDbInitialData.sh") {
@@ -2208,15 +2180,12 @@ MACHINECONFIG=${etc_dir}/MachineConfig.json
 HOSTNAME=\$(hostname)
 VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
-LOCATION=\$(/opt/voltdb/bin/sqlcmd --servers="\${VOLTSERVERS}" --output-skip-metadata --query="select lctn from servicenode where hostname='\${HOSTNAME}';" | sed 's/[\\n ]*//g')
-LOGNAME="AdapterDaiMgr-\${LOCATION}.log"
+LOCATION="-"
+LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+# DO NOT REMOVE OR CHANGE THE FOLLOWING LINE!!!
+COV=
 
-if [ -z "\${LOCATION}" ]; then
-  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
-  exit 1
-fi
-
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java \${COV} -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 
 exit \$?
 """
@@ -2301,7 +2270,7 @@ exit \$?
     // DAI Jars
     from ("${buildDir}/jars") {
         into(lib_dir)
-        exclude "**/procedures.jar", "**/eventsim.jar"
+        exclude "**/eventsim.jar"
     }
     // For VoltDB
     from("${buildDir}/tmp/loadVoltDbInitialData.sh") {
@@ -2358,13 +2327,10 @@ VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
 LOCATION="-"
 LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+# DO NOT REMOVE OR CHANGE THE FOLLOWING LINE!!!
+COV=
 
-if [ -z "\${LOCATION}" ]; then
-  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
-  exit 1
-fi
-
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java \${COV} -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 
 exit \$?
 """
@@ -2498,13 +2464,10 @@ VOLTSERVERS=\$(cat ${etc_dir}/volt.ip)
 CLASS="com.intel.dai.AdapterDaiMgr"
 LOCATION="-"
 LOGNAME="AdapterDaiMgr-\${HOSTNAME}.log"
+# DO NOT REMOVE OR CHANGE THE FOLLOWING LINE!!!
+COV=
 
-if [ -z "\${LOCATION}" ]; then
-  echo "ERROR: failed to get a valid location from the hostname: \${HOSTNAME}" >${log_dir}/\${LOGNAME} 2>&1
-  exit 1
-fi
-
-java -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
+java \${COV} -DdaiLoggingLevel="\${DAI_LOGGING_LEVEL}" -cp '${lib_dir}/*' \${CLASS} \${VOLTSERVERS} \${LOCATION} \${HOSTNAME} >${log_dir}/\${LOGNAME} 2>&1
 
 exit \$?
 """
