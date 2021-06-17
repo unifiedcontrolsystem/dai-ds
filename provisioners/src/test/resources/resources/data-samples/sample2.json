@@ -1,0 +1,10 @@
+{
+  "@timestamp": "2021-06-17T04:46:52.786Z" ,
+  "host": {
+    "name": "aus-admin1"
+  } ,
+  "message": "DHCPDISCOVER test data" ,
+  "fields": {
+    "log_type": "dhcp"
+  }
+}

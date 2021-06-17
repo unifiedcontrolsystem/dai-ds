@@ -7,7 +7,6 @@ import com.intel.logging.Logger
 import spock.lang.Specification
 
 class AdapterProvisionerNetworkBaseSpec extends Specification {
-    private static AdapterProvisionerApi adapterProvisionerApiMock_
 
     static class TestProvider extends AdapterProvisionerNetworkBase {
         TestProvider(Logger logger, DataStoreFactory factory, AdapterInformation info) {
@@ -22,12 +21,7 @@ class AdapterProvisionerNetworkBaseSpec extends Specification {
                 return true
         }
 
-        @Override
-        AdapterProvisionerApi createAdapterProvisioner() {
-            return adapterProvisionerApiMock_
-        }
-
-        boolean callSuper = false;
+        boolean callSuper = false
     }
 
     def configName_ = this.getClass().getSimpleName() + ".json"
@@ -85,9 +79,7 @@ class AdapterProvisionerNetworkBaseSpec extends Specification {
   }
 }
 """)
-        adapterProvisionerApiMock_ = Mock(AdapterProvisionerApi)
         underTest_ = new TestProvider(Mock(Logger), Mock(DataStoreFactory), Mock(AdapterInformation))
-        adapterProvisionerApiMock_.getClass().getCanonicalName() >> "TestApi"
     }
 
     void cleanup() {
