@@ -46,12 +46,12 @@
         "Ready": [],
         "DHCPDiscovered": ["DHCPDISCOVER"],
         "IPAddressAssigned" : ["DHCPREQUEST"],
-        "BiosStartedDueToReset": ["IFWI version", "Use GPIO to read Board ID", "SeaBIOS version"],
+        "BiosStartedDueToReset": ["IFWI Version", "Use GPIO to read Board ID", "SeaBIOS version"],
         "SelectBootDevice": ["Press [Enter] to directly boot"],
         "PxeDownloadingNbpFile": ["Start PXE over IPv4"],
         "StartingKernelBoot": ["Linux version"],
         "Active": ["SEV:LOG_INFO TEXT:Heartbeat detected"],
-        "Shutdown": ["shutting down"]
+        "Shutdown": ["Stopped LSB: Output message that th…de has booted or is shutting down"]
       }
     },
     "com.intel.dai.provisioners.AdapterProvisionerApi": {
@@ -67,8 +67,8 @@
     "logs": "LogData",
     "events": "RasEvent",
     "stateChanges": "StateChangeEvent",
-    "HPCMLOG": "PowerLogData",
-    "SYSLOG": "DHCPLogData",
-    "BOOTIMAGE": "BootImageData"
+    "heartbeat": "PowerLogData",
+    "syslog": "DhcpLogData",
+    "consolelog": "ConsoleLogData"
   }
 }

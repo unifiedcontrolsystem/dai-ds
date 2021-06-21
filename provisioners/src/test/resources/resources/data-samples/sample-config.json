@@ -1,0 +1,21 @@
+{
+  "data": {
+    "publishTopic": "ucs_boot_event",
+    "publish": true,
+    "nodeStates" : {
+      "Off": ["off"],
+      "DHCPDiscovered": ["DHCPDISCOVER"],
+      "IPAddressAssigned" : ["DHCPREQUEST"],
+      "BiosStartedDueToReset": ["IFWI Version", "Use GPIO to read Board ID", "SeaBIOS version"],
+      "SelectBootDevice": ["Press [Enter] to directly boot"],
+      "PxeDownloadingNbpFile": ["Start PXE over IPv4"],
+      "StartingKernelBoot": ["booting"],
+      "Shutdown": ["Started LSB: Output message that th…de has booted or is shutting down"]
+    }
+  },
+  "subjectMap": {
+    "power": "PowerLogData",
+    "dhcp": "DhcpLogData",
+    "nodestate": "ConsoleLogData"
+  }
+}

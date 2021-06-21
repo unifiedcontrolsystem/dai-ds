@@ -140,19 +140,25 @@ class NetworkListenerSystemActions implements SystemActions, Initializer {
     @Override
     public void changeNodeStateTo(BootState event, String location, long nsTimestamp, boolean informWlm) {
         try {
-            if(nodeInformation_.isComputeNodeHostname(location))
-                location = nodeInformation_.getComputeNodeLocationFromHostname(location);
-            if(nodeInformation_.isServiceNodeHostname(location))
-                location = nodeInformation_.getServiceNodeLocationFromHostname(location);
+            location = getNodeLocation(location);
         } catch(DataStoreException e) {
             log_.exception(e, "Failed to update the boot image ID for compute node location '%s'", location);
         }
         operations_.markNodeState(event, location, nsTimestamp / 1000, informWlm);
     }
 
+    private String getNodeLocation(String location) throws DataStoreException {
+        if(nodeInformation_.isComputeNodeHostname(location))
+            location = nodeInformation_.getComputeNodeLocationFromHostname(location);
+        if(nodeInformation_.isServiceNodeHostname(location))
+            location = nodeInformation_.getServiceNodeLocationFromHostname(location);
+        return location;
+    }
+
     @Override
     public void changeNodeBootImageId(String location, String id) {
         try {
+            location = getNodeLocation(location);
             if(nodeInformation_.isComputeNodeLocation(location))
                 bootImage_.updateComputeNodeBootImageId(location, id, adapter_.getType());
             else

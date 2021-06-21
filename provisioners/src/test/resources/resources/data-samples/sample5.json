@@ -1,0 +1,8 @@
+{
+  "@timestamp": "2021-06-18T04:12:18.833Z",
+  "fields": {
+    "log_type": "nodestate"
+  },
+  "source": "/var/log/consoles/test001",
+  "message": " Command line: BOOT_IMAGE=(tftp)/images/kernel-args HOSTNAME=test001"
+}
