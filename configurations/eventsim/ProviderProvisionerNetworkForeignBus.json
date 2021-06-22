@@ -52,6 +52,11 @@
         "StartingKernelBoot": ["Linux version"],
         "Active": ["SEV:LOG_INFO TEXT:Heartbeat detected"],
         "Shutdown": ["Stopped LSB: Output message that th…de has booted or is shutting down"]
+      },
+      "subscribedTopicMap" : {
+        "heartbeat": "PowerLogData",
+        "syslog": "DhcpLogData",
+        "consolelog": "ConsoleLogData"
       }
     },
     "com.intel.dai.provisioners.AdapterProvisionerApi": {
@@ -66,9 +71,6 @@
     "inventoryChanges": "InventoryChangeEvent",
     "logs": "LogData",
     "events": "RasEvent",
-    "stateChanges": "StateChangeEvent",
-    "heartbeat": "PowerLogData",
-    "syslog": "DhcpLogData",
-    "consolelog": "ConsoleLogData"
+    "stateChanges": "StateChangeEvent"
   }
 }

@@ -41,15 +41,6 @@ public class NetworkListenerProviderForeignBusTest {
 
         when(config_.getProviderConfigurationFromClassName(anyString())).thenReturn(configData_.getMapOrDefault("data", new PropertyMap()));
         when(config_.getSubjectMap()).thenReturn(configData_.getMapOrDefault("subjectMap", new PropertyMap()));
-
-/*        List<String> streams =  new ArrayList<>() {{add("testStream");}};
-        when(config_.getProfileStreams()).thenReturn(streams);
-
-        Map<String, String> testStreamHMap = new HashMap<>() {{
-            put("tokenAuthProvider", "com.intel.authentication.KeycloakTokenAuthentication");
-        }};
-        PropertyMap testStreamMap = new PropertyMap(testStreamHMap);
-        when(config_.getNetworkArguments(anyString())).thenReturn(testStreamMap);*/
     }
 
     @Test
@@ -158,7 +149,6 @@ public class NetworkListenerProviderForeignBusTest {
 
     private NetworkListenerProviderForeignBus transformer_;
     private NetworkListenerConfig config_;
-    private PropertyMap map_;
     private SystemActions system_;
     private ConfigIO parser_;
     private PropertyMap configData_;
