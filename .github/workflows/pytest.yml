@@ -1,0 +1,31 @@
+# Copyright (C)2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Run PyTest CI
+
+on:
+  push:
+    branches-ignore: [ master ]
+
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - run: sudo apt install -y python3-pip python3-setuptools python3-wheel python3-pytest python3-pytest-cov
+      - run: sudo -E pip3 install requests clustershell python-dateutil progress texttable mock timeout_decorator
+      - name: Run PyTest Without Coverage
+        run: cd cli; python3 -m pytest -v --fulltrace .
