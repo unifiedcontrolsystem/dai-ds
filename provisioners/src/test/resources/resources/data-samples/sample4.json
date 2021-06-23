@@ -4,5 +4,5 @@
     "log_type": "nodestate"
   },
   "source": "/var/log/consoles/test001",
-  "message": "test booting data"
+  "message": "[Thu Jun 17 21:13:10 2021] test booting data"
 }

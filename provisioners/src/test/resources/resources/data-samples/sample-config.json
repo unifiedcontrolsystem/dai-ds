@@ -11,11 +11,11 @@
       "PxeDownloadingNbpFile": ["Start PXE over IPv4"],
       "StartingKernelBoot": ["booting"],
       "Shutdown": ["Started LSB: Output message that th…de has booted or is shutting down"]
+    },
+    "subscribedTopicMap" : {
+      "power": "PowerLogData",
+      "dhcp": "DhcpLogData",
+      "nodestate": "ConsoleLogData"
     }
-  },
-  "subjectMap": {
-    "power": "PowerLogData",
-    "dhcp": "DhcpLogData",
-    "nodestate": "ConsoleLogData"
   }
 }

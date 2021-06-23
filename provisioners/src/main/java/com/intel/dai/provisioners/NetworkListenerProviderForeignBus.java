@@ -38,12 +38,12 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             throws NetworkListenerProviderException {
         try {
             if(keywordToNodeStates_ == null)
-                mapKeywordToNodeStates(config);
+                keywordToNodeStatesMap(config);
 
             final List<CommonDataFormat> results = new ArrayList<>();
 
             //To filter syslog messages
-            final String topic = subjectMap_.getStringOrDefault(subject.toLowerCase(), "Unknown");
+            final String topic = subscribedTopicMap_.getStringOrDefault(subject.toLowerCase(), "Unknown");
             if(PROVISIONER_TOPICS.valueOf(topic) == PROVISIONER_TOPICS.DhcpLogData) {
                 if(!data.contains(DHCP_DISCOVER) && !data.contains(DHCP_REQUEST))
                     return results;
@@ -62,7 +62,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
                     final String dataType = dataTypeMap.getStringOrDefault("log_type", "Unknown");
                     if (!dataType.equals("Unknown"))
                         log_.warn("Received %s type data", dataType);
-                        final String localLogType = subjectMap_.getStringOrDefault(dataType, "");
+                        final String localLogType = subscribedTopicMap_.getStringOrDefault(dataType, "");
                         final PROVISIONER_TOPICS provisionerTopic = PROVISIONER_TOPICS.valueOf(localLogType);
                         if(provisionerTopic == PROVISIONER_TOPICS.DhcpLogData)
                             results.add(processDhcpMessage(document));
@@ -119,8 +119,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         final String hostInfo = nodeStateInfo.getString("source");
         final String hostname = hostInfo.substring(hostInfo.lastIndexOf("/") + 1);
 
-        final long nsTimestamp = TimeUtils.nSFromIso8601(getTimeStamp(nodeStateInfo));
         final String message = getMessage(nodeStateInfo);
+        final String timestamp = getTimeStamp(message);
+        final long nsTimestamp = TimeUtils.nSFromIso8601(TimeUtils.stringToIso8601(timestamp));
 
         final BootState bootState = getNodeState(message);
 
@@ -130,8 +131,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     }
 
     private CommonDataFormat processBootImageInfo(PropertyMap consoleLogData) throws Exception {
-        final long nsTimestamp = TimeUtils.nSFromIso8601(getTimeStamp(consoleLogData));
         final String bootImageInfo = getMessage(consoleLogData);
+        final String timestamp = getTimeStamp(bootImageInfo);
+        final long nsTimestamp = TimeUtils.nSFromIso8601(TimeUtils.stringToIso8601(timestamp));
         log_.warn("***Processing BOOT_IMAGE information: %s", bootImageInfo);
         if(bootImageInfo.contains("BOOT_IMAGE=") && bootImageInfo.contains("HOSTNAME=")) {
             final String hostname = bootImageInfo.split("HOSTNAME=")[1].split(" ")[0];
@@ -190,6 +192,14 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return data.getString("@timestamp");
     }
 
+    private String getTimeStamp(String data) throws Exception {
+        String timestamp = data.substring(data.indexOf("[") + 1, data.indexOf("]"));
+/*        final Pattern pattern = Pattern.compile("[A-Za-z]{3} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}");
+        if(!pattern.matcher(timestamp).matches())
+            throw new Exception("Received data contains incorrect time format,ex: 'EEE MMM dd HH:mm:ss yyyy'" + data);*/
+        return timestamp;
+    }
+
     private String getHostName(PropertyMap data) throws Exception {
         if(!data.containsKey("host"))
             log_.warn("Received data is missing 'host' %s", data);
@@ -216,7 +226,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return conversionMap_.get(nodeState);
     }
 
-    private void mapKeywordToNodeStates(NetworkListenerConfig config) {
+    private void keywordToNodeStatesMap(NetworkListenerConfig config) {
         keywordToNodeStates_ = new PropertyMap();
         final PropertyMap map = config.getProviderConfigurationFromClassName(getClass().getCanonicalName());
         final PropertyMap nodeStatesConfig = map.getMapOrDefault(NODE_STATES, new PropertyMap());
@@ -225,6 +235,8 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             for(Object keyword : keywords.toArray())
                 keywordToNodeStates_.putIfAbsent(keyword.toString(), nodeState);
         }
+
+        subscribedTopicMap_ = map.getMapOrDefault(SUBSCRIBED_TOPIC, new PropertyMap());
         subjectMap_ = config.getSubjectMap();
     }
 
@@ -274,11 +286,13 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     private SystemActions actions_ = null;
     private PropertyMap keywordToNodeStates_;
     private PropertyMap subjectMap_;
+    private PropertyMap subscribedTopicMap_;
 
     private final ConfigIO parser_;
     private final static String ORIG_FOREIGN_LOCATION_KEY = "foreignLocation";
 
     private final static String NODE_STATES = "nodeStates";
+    private final static String SUBSCRIBED_TOPIC = "subscribedTopicMap";
 
     private final static String FOREIGN_IMAGE_ID_KEY = "id";
     private final static String FOREIGN_IMAGE_DESCRIPTION_KEY = "description";
