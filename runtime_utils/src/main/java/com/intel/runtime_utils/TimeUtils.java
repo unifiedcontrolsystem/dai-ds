@@ -4,9 +4,11 @@
 //
 package com.intel.runtime_utils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Locale;
 
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
@@ -55,6 +57,11 @@ public final class TimeUtils {
             throw new ParseException("Fraction of seconds is malformed, must be 1-9 digits", isoFormat.indexOf('.'));
         return (ts.getEpochSecond() * NANO_FACTOR) +
                 (Long.parseLong(fraction) * (long)Math.pow(10, 9-fraction.length()));
+    }
+
+    public static String stringToIso8601(String isoFormat) throws ParseException {
+        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);
+        return format.parse(isoFormat).toInstant().toString();
     }
 
     /**
