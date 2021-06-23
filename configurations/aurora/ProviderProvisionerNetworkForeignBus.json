@@ -33,7 +33,7 @@
     "com.intel.dai.network_listener.NetworkListenerSystemActions": {
       "sourceType": "rabbitmq",
       "exchangeName": "ucs",
-      "uri": "amqp://am02-nmn.local"
+      "uri": "amqp://localhost"
     },
     "com.intel.dai.provisioners.NetworkListenerProviderForeignBus": {
       "publishTopic": "ucs_boot_event",
@@ -42,7 +42,27 @@
       "bootParameterForLocationInfoUrl": "http://api-gw-service-nmn.local/apis/bss/boot/v1/bootparameters?name=",
       "bootImageInfoUrl" : "http://api-gw-service-nmn.local/apis/ims/images",
       "bootImageForImageIdInfoUrl" : "http://api-gw-service-nmn.local/apis/ims/images/",
-      "publish": true
+      "publish": true,
+      "nodeStates" : {
+        "Off": ["SEV:LOG_INFO TEXT:Heartbeat sends SIGTERM, shutdown"],
+        "On": ["SEV:LOG_INFO TEXT:Heartbeat not detected"],
+        "Ready": [],
+        "DHCPDiscovered": ["DHCPDISCOVER"],
+        "IPAddressAssigned" : ["DHCPREQUEST"],
+        "BiosStartedDueToReset": ["IFWI Version", "Use GPIO to read Board ID", "SeaBIOS version"],
+        "SelectBootDevice": ["Press [Enter] to directly boot"],
+        "PxeDownloadingNbpFile": ["Start PXE over IPv4"],
+        "StartingKernelBoot": ["Linux version"],
+        "Active": ["SEV:LOG_INFO TEXT:Heartbeat detected"],
+        "Shutdown": ["Stopped LSB: Output message that th…de has booted or is shutting down"]
+      },
+      "subscribedTopicMap" : {
+        "heartbeat": "PowerLogData",
+        "syslog": "DhcpLogData",
+        "consolelog": "ConsoleLogData"
+      }
+
+
     },
     "com.intel.dai.provisioners.AdapterProvisionerApi": {
       "informWorkLoadManager": false,

@@ -85,27 +85,6 @@
       "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
       "TypeOfAdapter": "WLM",
       "NumberOfInstances": 1
-    },
-    {
-      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabric-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X3001-AM1",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
-      "TypeOfAdapter": "FABRIC",
-      "NumberOfInstances": 1
-    },
-    {
-      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricPerf-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X3001-AM1",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricPerfTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
-      "TypeOfAdapter": "FABRICPERF",
-      "NumberOfInstances": 1
-    },
-    {
-      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderFabricCrit-$LCTN-$INSTANCE.log",
-      "ServiceNode": "X3001-AM1",
-      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.fabric.FabricCritTelemetryProvider $VOLTIPADDRS $LCTN $HOSTNAME",
-      "TypeOfAdapter": "FABRICCRIT",
-      "NumberOfInstances": 1
     }
   ],
   "InitialWorkItems": [
@@ -178,27 +157,6 @@
       "NotifyWhenFinished": "F",
       "WorkToBeDone": "HandleInputFromExternalComponent",
       "Queue": ""
-    },
-    {
-      "Parms": "",
-      "TypeOfAdapter": "FABRIC",
-      "NotifyWhenFinished": "F",
-      "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "X3001-AM1"
-    },
-    {
-      "Parms": "",
-      "TypeOfAdapter": "FABRICPERF",
-      "NotifyWhenFinished": "F",
-      "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "X3001-AM1"
-    },
-    {
-      "Parms": "",
-      "TypeOfAdapter": "FABRICCRIT",
-      "NotifyWhenFinished": "F",
-      "WorkToBeDone": "HandleInputFromExternalComponent",
-      "Queue": "X3001-AM1"
     },
     {
       "Queue":"",
@@ -304,6 +262,18 @@
       "Type": "ServiceNode",
       "BmcMacAddr": "unknown",
       "Lctn": "X3001-GWN1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "aus-admin1-bmc",
+      "IpAddr": "172.23.0.1",
+      "BmcAddr": "172.24.0.1",
+      "BootImageId": null,
+      "HostName": "aus-admin1",
+      "MacAddr": "a4:bf:01:6f:da:99",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM2"
     }
   ]
 }

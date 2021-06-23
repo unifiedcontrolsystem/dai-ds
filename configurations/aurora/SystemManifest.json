@@ -25,53 +25,13 @@
           "width": 0, "height": 0, "obscured": true,
           "content": [
             {
-              "name": "HSSW1",
-              "definition": "high-speed switch",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SSW1",
-              "definition": "fabric switch",
-              "x": 0, "y": 0
-            },
-            {
               "name": "CH1",
               "definition": "compute node chassis",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SW3",
-              "definition": "switch",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SW2",
-              "definition": "switch",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SW1",
-              "definition": "switch",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "CH1",
-              "definition": "compute node chassis",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "UAN2",
-              "definition": "user access node",
               "x": 0, "y": 0
             },
             {
               "name": "UAN1",
               "definition": "user access node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "AM3",
-              "definition": "service node",
               "x": 0, "y": 0
             },
             {
@@ -84,8 +44,8 @@
               "definition": "service node",
               "x": 0, "y": 0
             },
-            {
-              "name": "GWN2",
+	    {
+              "name": "AM2",
               "definition": "service node",
               "x": 0, "y": 0
             },
@@ -93,53 +53,8 @@
               "name": "GWN1",
               "definition": "service node",
               "x": 0, "y": 0
-            },
-            {
-              "name": "WN3",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "WN2",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "WN1",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SN3",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SN2",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "SN1",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "MN3",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "MN2",
-              "definition": "service node",
-              "x": 0, "y": 0
-            },
-            {
-              "name": "MN1",
-              "definition": "service node",
-              "x": 0, "y": 0
             }
-          ]
+                      ]
         },
         "rack2": {
           "description": "HW1 Rack 2",
