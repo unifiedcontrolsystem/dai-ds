@@ -18,7 +18,7 @@ public class DataReceiverAmqp {
         mFactory.setAutomaticRecoveryEnabled(true);
         // Connect to the AMQP (RabbitMQ).
         boolean bSuccessfulConnection = false;  int iConnectionRetryCntr = 0;
-        while (!bSuccessfulConnection) {
+        while (!bSuccessfulConnection && !adapter.adapterShuttingDown()) {
             try {
                 mConnection = mFactory.newConnection();  // abstracts the socket connection and takes care of protocol version negotiation and authentication (represents a real TCP connection to the message broker).
                 if (mConnection != null) {
@@ -44,6 +44,8 @@ public class DataReceiverAmqp {
                 try { Thread.sleep(5 * 1000); }  catch (Exception e2) {}
             }
         }
+        if(adapter.adapterShuttingDown() || mConnection == null)
+            throw new IOException("During DataReceiver setup the adapter started shutting down!");
         mChannel = mConnection.createChannel();     // channel has most of the API for getting things done resides (virtual connection or AMQP connection) - you can use 1 channel for everything going via the tcp connection.
         // Create a queue that is used by the DataMover to send Tier1 data to Tier2 - set up so messages have to be manually acknowledged and won't be lost.
         mChannel.queueDeclare(Adapter.DataMoverQueueName, Durable, false, false, null);  // set up our queue from DataMover to the DataReceiver.
