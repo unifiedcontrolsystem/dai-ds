@@ -29,7 +29,7 @@ public class DataReceiverAmqp {
                     log.error("ConnectionFactory returned a null connection - will keep trying!");
             }
             catch (Exception e) {
-                if (iConnectionRetryCntr++ == 0) {
+                if (iConnectionRetryCntr++ == 0 || mConnection == null) {
                     // only cut this RAS event the first time we try, NOT every time we retry the connection!
                     // Cut RAS event indicating that we currently cannot connect to RabbitMQ and that we will retry until we can.
                     adapter.logRasEventNoEffectedJob("RasGenAdapterUnableToConnectToAmqp"

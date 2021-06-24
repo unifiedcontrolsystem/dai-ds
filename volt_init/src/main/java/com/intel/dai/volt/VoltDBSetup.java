@@ -10,6 +10,8 @@ import org.voltdb.client.*;
 
 import java.io.*;
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
 /**
  * Class with static function to either setup voltdb or to wait if voltdb is not ready but being setup. Error states
@@ -68,6 +71,8 @@ public class VoltDBSetup {
     }
 
     void setupOrWaitForVoltDB(long timeoutSeconds) throws DaiBadStateException, TimeoutException {
+        if(!checkDNSServerNames(voltdbServers_))
+            return;
         DaiVoltState state = checkVoltState();
         if(state == DaiVoltState.EMPTY) {
             log_.info("Initializing VoltDB...");
@@ -318,6 +323,24 @@ public class VoltDBSetup {
         try {
             Thread.sleep(LOOP_DELAY_MS);
         } catch(InterruptedException e) { /* Ignore interruption here */ }
+    }
+
+    boolean checkDNSServerNames(String servers) {
+        boolean result = true;
+        String[] serverArray = servers.split(",");
+        Pattern pattern = Pattern.compile("[0-9]+\\.[0-9]\\.[0-9]\\.[0-9]");
+        for(String server: serverArray) {
+            if(!pattern.matcher(server).matches()) {
+                try {
+                    InetAddress address = InetAddress.getByName(server);
+                    log_.info("Server '%s' resolves to '%s'", server, address);
+                } catch(UnknownHostException e) {
+                    log_.error("Failed to resolve the given hostname '%s', this is a fatal error", server);
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 
     static String exceptToString(Throwable e) {
