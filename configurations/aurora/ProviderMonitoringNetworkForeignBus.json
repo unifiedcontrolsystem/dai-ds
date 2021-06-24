@@ -1,69 +1,20 @@
 {
   "providerClassMap": {
-    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderForeignBus",
+    "environmentalData": "com.intel.dai.monitoring.EnvironmentalProviderHPCM",
     "rasData": "com.intel.dai.monitoring.RasEventProviderForeignBus"
   },
 
   "networkStreams": {
-    "fanTelemetry": {
+    "nodeTelemetry": {
       "arguments": {
-        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-fan?stream_id=dai-telemtry",
-        "connectTimeout": "30",
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
-        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
-        "clientId": "admin-client",
-        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
-        "realm": "shasta"
+        "bootstrap.servers": "admin:9092",
+	"group.id": "dai-monitoring",
+	"schema.registry.url": "http://admin:8081",
+	"value.deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer",
+	"auto.commit.enable": true,
+        "topics": "sensors_node"
       },
-      "name": "eventSource"
-    },
-    "energyTelemetry": {
-      "arguments": {
-        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-energy?stream_id=dai-telemtry",
-        "connectTimeout": "30",
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
-        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
-        "clientId": "admin-client",
-        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
-        "realm": "shasta"
-      },
-      "name": "eventSource"
-    },
-    "powerTelemetry": {
-      "arguments": {
-        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-power?stream_id=dai-telemtry",
-        "connectTimeout": "30",
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
-        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
-        "clientId": "admin-client",
-        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
-        "realm": "shasta"
-      },
-      "name": "eventSource"
-    },
-    "temperatureTelemetry": {
-      "arguments": {
-        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-temperature?stream_id=dai-telemtry",
-        "connectTimeout": "30",
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
-        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
-        "clientId": "admin-client",
-        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
-        "realm": "shasta"
-      },
-      "name": "eventSource"
-    },
-    "voltageTelemetry": {
-      "arguments": {
-        "fullUrl": "https://api-gw-service-nmn.local/apis/sma-telemetry-api/v1/stream/cray-telemetry-voltage?stream_id=dai-telemtry",
-        "connectTimeout": "30",
-        "tokenAuthProvider": "com.intel.authentication.KeycloakTokenAuthentication",
-        "tokenServer": "https://api-gw-service-nmn.local/keycloak/",
-        "clientId": "admin-client",
-        "clientSecret": "dd0f8dee-f40b-4b16-a5dd-af2ed1b8a99c",
-        "realm": "shasta"
-      },
-      "name": "eventSource"
+      "name": "kafka"
     },
     "events": {
       "arguments": {
@@ -82,11 +33,7 @@
   "adapterProfiles": {
     "environmental": {
       "networkStreamsRef": [
-        "fanTelemetry",
-        "energyTelemetry",
-        "powerTelemetry",
-        "temperatureTelemetry",
-        "voltageTelemetry"
+        "nodeTelemetry"
       ],
       "subjects": [
         "*"
