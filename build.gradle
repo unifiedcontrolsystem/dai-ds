@@ -67,6 +67,7 @@ def spock_core_version = '1.3-groovy-2.4' // Latest WORKING version
 def cglib_nodep_version = '3.3.0'
 def kafka_clients_version = '2.7.0'
 def kafka_avro_serializer = '6.1.1'
+def elastic_stack_version = '7.13.1'
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Developers and the CI must define the System property 'includeDebugSymbols' as      //
@@ -843,6 +844,9 @@ project(":inventory") {
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
         compileOnly "org.projectlombok:lombok:${lombok_version}"
         annotationProcessor "org.projectlombok:lombok:${lombok_version}"
+
+        compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:${elastic_stack_version}"
+        implementation group: 'org.voltdb', name: 'voltdbclient', version: '10.1.1' // TODO: roll this into DAI_CORE
     }
 
     jacocoTestCoverageVerification {

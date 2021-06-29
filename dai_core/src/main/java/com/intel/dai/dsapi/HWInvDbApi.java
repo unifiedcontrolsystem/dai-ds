@@ -4,6 +4,9 @@
 //
 package com.intel.dai.dsapi;
 
+import com.intel.dai.dsapi.pojo.Dimm;
+import com.intel.dai.dsapi.pojo.FruHost;
+import com.intel.dai.dsapi.pojo.NodeInventory;
 import com.intel.dai.exceptions.DataStoreException;
 
 import java.io.IOException;
@@ -47,4 +50,8 @@ public interface HWInvDbApi {
      * @throws DataStoreException when node ingestion failed
      */
     int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp) throws DataStoreException;
+
+    void ingest(String id, Dimm dimm) throws DataStoreException;
+    void ingest(String id, FruHost fruHost) throws DataStoreException;
+    void ingest(NodeInventory nodeInventory) throws DataStoreException;
 }
