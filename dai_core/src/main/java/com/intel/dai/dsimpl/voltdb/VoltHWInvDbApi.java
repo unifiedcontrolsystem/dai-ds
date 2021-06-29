@@ -5,9 +5,13 @@
 package com.intel.dai.dsimpl.voltdb;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
+import com.google.gson.Gson;
 import com.intel.config_io.ConfigIO;
 import com.intel.config_io.ConfigIOFactory;
 import com.intel.dai.dsapi.*;
+import com.intel.dai.dsapi.pojo.Dimm;
+import com.intel.dai.dsapi.pojo.FruHost;
+import com.intel.dai.dsapi.pojo.NodeInventory;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
@@ -419,6 +423,60 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     }
 
 
+    public void ingest(String id, Dimm dimm) throws DataStoreException {
+        try {
+            upsertRawDimm(id, dimm);
+        } catch (IOException e) {
+            logger.error("IOException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
+    public void ingest(String id, FruHost fruHost) throws DataStoreException {
+        try {
+            upsertRawFruHost(id, fruHost);
+        } catch (IOException e) {
+            logger.error("IOException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
+    public void ingest(NodeInventory nodeInventory) throws DataStoreException {
+        try {
+            insertNodeInventoryHistory(nodeInventory);
+        } catch (IOException e) {
+            logger.error("IOException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        } catch (ProcCallException e) {
+            logger.error("ProcCallException:%s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
+    void upsertRawDimm(String id, Dimm dimm) throws IOException, ProcCallException {
+        String source = gson.toJson(dimm);
+        ClientResponse cr = client.callProcedure("Raw_DIMM_Insert",
+                id, dimm.serial, dimm.mac, dimm.locator, source, dimm.timestamp);
+    }
+
+    void upsertRawFruHost(String id, FruHost fruHost) throws IOException, ProcCallException {
+        String source = gson.toJson(fruHost);
+        ClientResponse cr = client.callProcedure("Raw_FRU_Host_Insert",
+                id, fruHost.boardSerial, fruHost.mac, source, fruHost.timestamp);
+    }
+
+    void insertNodeInventoryHistory(NodeInventory nodeInventory) throws IOException, ProcCallException {
+        String source = gson.toJson(nodeInventory);
+        ClientResponse cr = client.callProcedure("Node_Inventory_History_insert", source);
+    }
+
+    private final static Gson gson = new Gson();
     private final Logger logger;
     private final String[] servers;
     private Client client = null;
