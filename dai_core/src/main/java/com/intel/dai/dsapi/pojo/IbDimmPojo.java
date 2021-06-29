@@ -7,7 +7,7 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-public class IB_DIMM_POJO {
+public class IbDimmPojo {
     @SerializedName("Maximum Voltage") public String Maximum_Voltage;
     @SerializedName("Memory Technology") public String Memory_Technology;
     @SerializedName("Volatile Size") public String Volatile_Size;

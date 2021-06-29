@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-public class OOB_FRU_POJO {
+public class OobFruPojo {
     @SerializedName("Chassis Type") public String Chassis_Type;
     @SerializedName("Chassis Part Number") public String Chassis_Part_Number;
     @SerializedName("Chassis Serial") public String Chassis_Serial;

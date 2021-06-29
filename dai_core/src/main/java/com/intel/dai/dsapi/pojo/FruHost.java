@@ -15,19 +15,19 @@ public class FruHost extends Component {
     public String boardSerial;
     public String hostname;
 
-    @SerializedName("IB_BIOS") public String raw_IB_BIOS;
-    @SerializedName("OOB_REV_INFO") public String raw_OOB_REV_INFO;
-    @SerializedName("IB_BOARD") public String raw_IB_BOARD;
-    @SerializedName("OOB_FRU") public String raw_OOB_FRU;
-    @SerializedName("IB_SYS") public String raw_IB_SYS;
-    @SerializedName("IB_CHASS") public String raw_IB_CHASS;
+    @SerializedName("IB_BIOS") public String rawIbBios;
+    @SerializedName("OOB_REV_INFO") public String rawOobRevInfo;
+    @SerializedName("IB_BOARD") public String rawIbBoard;
+    @SerializedName("OOB_FRU") public String rawOobFru;
+    @SerializedName("IB_SYS") public String rawIbSys;
+    @SerializedName("IB_CHASS") public String rawIbChass;
 
-    public IB_BIOS_POJO ib_bios;
-    public OOB_REV_INFO_POJO oob_rev_info;
-    public IB_BOARD_POJO ib_board;
-    public OOB_FRU_POJO oob_fru;
-    public IB_SYS_POJO ib_sys;
-    public IB_CHASS_POJO ib_chass;
+    public IbBiosPojo ib_bios;
+    public OobRevInfoPojo oob_rev_info;
+    public IbBoardPojo ib_board;
+    public OobFruPojo oob_fru;
+    public IbSysPojo ib_sys;
+    public IbChassPojo ib_chass;
 
     public FruHost(FruHost fruHost) {
         super(fruHost);
@@ -35,70 +35,70 @@ public class FruHost extends Component {
 
         hostname = fruHost.hostname;
 
-        raw_IB_BIOS = fruHost.raw_IB_BIOS;
+        rawIbBios = fruHost.rawIbBios;
         ib_bios = fruHost.ib_bios;
 
-        raw_OOB_REV_INFO = fruHost.raw_OOB_REV_INFO;
+        rawOobRevInfo = fruHost.rawOobRevInfo;
         oob_rev_info = fruHost.oob_rev_info;
 
-        raw_IB_BOARD = fruHost.raw_IB_BOARD;
+        rawIbBoard = fruHost.rawIbBoard;
         ib_board = fruHost.ib_board;
 
-        raw_OOB_FRU = fruHost.raw_OOB_FRU;
+        rawOobFru = fruHost.rawOobFru;
         oob_fru = fruHost.oob_fru;
 
-        raw_IB_SYS = fruHost.raw_IB_SYS;
+        rawIbSys = fruHost.rawIbSys;
         ib_sys = fruHost.ib_sys;
 
-        raw_IB_CHASS = fruHost.raw_IB_CHASS;
+        rawIbChass = fruHost.rawIbChass;
         ib_chass = fruHost.ib_chass;
     }
 }
 
 @ToString
 @EqualsAndHashCode
-class IB_BOARD_POJO {
-    @SerializedName("Features") public String Features;
-    @SerializedName("Asset Tag") public String Asset_Tag;
-    @SerializedName("Chassis Handle") public String Chassis_Handle;
-    @SerializedName("Serial Number") public String Serial_Number;
-    @SerializedName("Version") public String Version;
-    @SerializedName("Contained Object Handles") public String Contained_Object_Handles;
-    @SerializedName("Product Name") public String Product_Name;
-    @SerializedName("Type") public String Type;
-    @SerializedName("Location In Chassis") public String Location_In_Chassis;
-    @SerializedName("Manufacturer") public String Manufacturer;
+class IbBoardPojo {
+    @SerializedName("Features") public String features;
+    @SerializedName("Asset Tag") public String assetTag;
+    @SerializedName("Chassis Handle") public String chassisHandle;
+    @SerializedName("Serial Number") public String serialNumber;
+    @SerializedName("Version") public String version;
+    @SerializedName("Contained Object Handles") public String containedObjectHandles;
+    @SerializedName("Product Name") public String productName;
+    @SerializedName("Type") public String type;
+    @SerializedName("Location In Chassis") public String locationInChassis;
+    @SerializedName("Manufacturer") public String manufacturer;
 }
 
 @ToString
 @EqualsAndHashCode
-class IB_SYS_POJO {
-    @SerializedName("SKU Number") public String SKU_Number;
-    @SerializedName("UUID") public String UUID;
-    @SerializedName("Family") public String Family;
-    @SerializedName("Serial Number") public String Serial_Number;
+class IbSysPojo {
+    @SerializedName("SKU Number") public String skuNumber;
+    @SerializedName("UUID") public String uuid;
+    @SerializedName("Family") public String family;
+    @SerializedName("Serial Number") public String serialNumber;
     @SerializedName("Version") public String Version;
-    @SerializedName("Product Name") public String Product_Name;
-    @SerializedName("Wake-up Type") public String Wake_up_Type;
-    @SerializedName("Manufacturer") public String Manufacturer;
+    @SerializedName("Product Name") public String productName;
+    @SerializedName("Wake-up Type") public String wakeUpType;
+    @SerializedName("Manufacturer") public String manufacturer;
 }
 
 @ToString
 @EqualsAndHashCode
-class IB_CHASS_POJO {
-    @SerializedName("OEM Information") public String OEM_Information;
-    @SerializedName("Number Of Power Cords") public String Number_Of_Power_Cords;
-    @SerializedName("Contained Elements") public String Contained_Elements;
-    @SerializedName("Power Supply State") public String Power_Supply_State;
-    @SerializedName("Thermal State") public String Thermal_State;
-    @SerializedName("Lock") public String Lock;
-    @SerializedName("Height") public String Height;
-    @SerializedName("Serial Number") public String Serial_Number;
-    @SerializedName("Version") public String Version;
-    @SerializedName("Asset Tag") public String Asset_Tag;
-    @SerializedName("SKU Number") public String SKU_Number;
-    @SerializedName("Boot-up State") public String Boot_up_State;
-    @SerializedName("Security Status") public String Security_Status;
-    @SerializedName("Type") public String Type;
-    @SerializedName("Manufacturer") public String Manufacturer;
+class IbChassPojo {
+    @SerializedName("OEM Information") public String oemInformation;
+    @SerializedName("Number Of Power Cords") public String numberOfPowerCords;
+    @SerializedName("Contained Elements") public String containedElements;
+    @SerializedName("Power Supply State") public String powerSupplyState;
+    @SerializedName("Thermal State") public String thermalState;
+    @SerializedName("Lock") public String lock;
+    @SerializedName("Height") public String height;
+    @SerializedName("Serial Number") public String serialNumber;
+    @SerializedName("Version") public String version;
+    @SerializedName("Asset Tag") public String assetTag;
+    @SerializedName("SKU Number") public String skuNumber;
+    @SerializedName("Boot-up State") public String bootUpState;
+    @SerializedName("Security Status") public String securityStatus;
+    @SerializedName("Type") public String type;
+    @SerializedName("Manufacturer") public String manufacturer;
 }

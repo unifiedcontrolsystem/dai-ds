@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-public class OOB_REV_INFO_POJO {
+public class OobRevInfoPojo {
     @SerializedName("Product ID") public String Product_ID;
     @SerializedName("Device GUID") public String Device_GUID;
     @SerializedName("System GUID") public String System_GUID;

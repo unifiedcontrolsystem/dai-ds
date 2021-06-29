@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-public class IB_BIOS_POJO {
+public class IbBiosPojo {
     @SerializedName("Vendor") public String Vendor;
     @SerializedName("Characteristics") public String Characteristics;
     @SerializedName("Runtime Size") public String Runtime_Size;

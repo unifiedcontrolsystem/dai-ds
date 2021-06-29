@@ -15,7 +15,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.voltdb.client.ProcCallException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
@@ -65,13 +64,13 @@ class ElasticsearchIndexIngester {
         String id = doc.left;
         FruHost fruHost = gson.fromJson(doc.right, FruHost.class);
 
-        fruHost.oob_fru = gson.fromJson(fruHost.raw_OOB_FRU, OOB_FRU_POJO.class);
-        fruHost.raw_OOB_FRU = null;
-        fruHost.oob_rev_info = gson.fromJson(fruHost.raw_OOB_REV_INFO, OOB_REV_INFO_POJO.class);
-        fruHost.raw_OOB_REV_INFO = null;
+        fruHost.oob_fru = gson.fromJson(fruHost.rawOobFru, OobFruPojo.class);
+        fruHost.rawOobFru = null;
+        fruHost.oob_rev_info = gson.fromJson(fruHost.rawOobRevInfo, OobRevInfoPojo.class);
+        fruHost.rawOobRevInfo = null;
 
-        fruHost.ib_bios = gson.fromJson(fruHost.raw_IB_BIOS, IB_BIOS_POJO.class);
-        fruHost.raw_IB_BIOS = null;
+        fruHost.ib_bios = gson.fromJson(fruHost.rawIbBios, IbBiosPojo.class);
+        fruHost.rawIbBios = null;
 
         fruHost.boardSerial = fruHost.oob_fru.Board_Serial;
 
@@ -85,8 +84,8 @@ class ElasticsearchIndexIngester {
     private void ingestDimm(ImmutablePair<String, String> doc) {
         String id = doc.left;
         Dimm dimm = gson.fromJson(doc.right, Dimm.class);
-        dimm.ib_dimm = gson.fromJson(dimm.raw_IB_DIMM, IB_DIMM_POJO.class);
-        dimm.raw_IB_DIMM = null;
+        dimm.ib_dimm = gson.fromJson(dimm.rawIbDimm, IbDimmPojo.class);
+        dimm.rawIbDimm = null;
         dimm.locator = dimm.ib_dimm.Locator;
 
         try {
