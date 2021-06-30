@@ -423,9 +423,9 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     }
 
 
-    public void ingest(String id, Dimm dimm) throws DataStoreException {
+    public int ingest(String id, Dimm dimm) throws DataStoreException {
         try {
-            upsertRawDimm(id, dimm);
+            return upsertRawDimm(id, dimm);
         } catch (IOException e) {
             logger.error("IOException:%s", e.getMessage());
             throw new DataStoreException(e.getMessage());
@@ -435,9 +435,9 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    public void ingest(String id, FruHost fruHost) throws DataStoreException {
+    public int ingest(String id, FruHost fruHost) throws DataStoreException {
         try {
-            upsertRawFruHost(id, fruHost);
+            return upsertRawFruHost(id, fruHost);
         } catch (IOException e) {
             logger.error("IOException:%s", e.getMessage());
             throw new DataStoreException(e.getMessage());
@@ -447,9 +447,9 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    public void ingest(NodeInventory nodeInventory) throws DataStoreException {
+    public int ingest(NodeInventory nodeInventory) throws DataStoreException {
         try {
-            insertNodeInventoryHistory(nodeInventory);
+            return insertNodeInventoryHistory(nodeInventory);
         } catch (IOException e) {
             logger.error("IOException:%s", e.getMessage());
             throw new DataStoreException(e.getMessage());
@@ -459,21 +459,39 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
     }
 
-    void upsertRawDimm(String id, Dimm dimm) throws IOException, ProcCallException {
+    int upsertRawDimm(String id, Dimm dimm) throws IOException, ProcCallException {
         String source = gson.toJson(dimm);
         ClientResponse cr = client.callProcedure("Raw_DIMM_Insert",
                 id, dimm.serial, dimm.mac, dimm.locator, source, dimm.timestamp);
+
+        if (cr.getStatus() != ClientResponse.SUCCESS) {
+            logger.error("upsertRawDimm(id=%s) => %d", id, cr.getStatus());
+            return 0;
+        }
+        return 1;
     }
 
-    void upsertRawFruHost(String id, FruHost fruHost) throws IOException, ProcCallException {
+    int upsertRawFruHost(String id, FruHost fruHost) throws IOException, ProcCallException {
         String source = gson.toJson(fruHost);
         ClientResponse cr = client.callProcedure("Raw_FRU_Host_Insert",
                 id, fruHost.boardSerial, fruHost.mac, source, fruHost.timestamp);
+
+        if (cr.getStatus() != ClientResponse.SUCCESS) {
+            logger.error("upsertRawFruHost(id=%s) => %d", id, cr.getStatus());
+            return 0;
+        }
+        return 1;
     }
 
-    void insertNodeInventoryHistory(NodeInventory nodeInventory) throws IOException, ProcCallException {
+    int insertNodeInventoryHistory(NodeInventory nodeInventory) throws IOException, ProcCallException {
         String source = gson.toJson(nodeInventory);
         ClientResponse cr = client.callProcedure("Node_Inventory_History_insert", source);
+
+        if (cr.getStatus() != ClientResponse.SUCCESS) {
+            logger.error("insertNodeInventoryHistory(source=%s) => %d", source, cr.getStatus());
+            return 0;
+        }
+        return 1;
     }
 
     private final static Gson gson = new Gson();

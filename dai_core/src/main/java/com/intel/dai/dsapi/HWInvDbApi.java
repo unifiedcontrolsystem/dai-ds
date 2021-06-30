@@ -51,7 +51,7 @@ public interface HWInvDbApi {
      */
     int ingestCookedNodesChanged(Map<String, String> lastNodeLocationChangeTimestamp) throws DataStoreException;
 
-    void ingest(String id, Dimm dimm) throws DataStoreException;
-    void ingest(String id, FruHost fruHost) throws DataStoreException;
-    void ingest(NodeInventory nodeInventory) throws DataStoreException;
+    int ingest(String id, Dimm dimm) throws DataStoreException;
+    int ingest(String id, FruHost fruHost) throws DataStoreException;
+    int ingest(NodeInventory nodeInventory) throws DataStoreException;
 }
