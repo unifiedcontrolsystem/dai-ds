@@ -31,8 +31,8 @@ public class FruHost extends Component {
 
     public FruHost(FruHost fruHost) {
         super(fruHost);
-        boardSerial = fruHost.boardSerial;
 
+        boardSerial = fruHost.boardSerial;
         hostname = fruHost.hostname;
 
         rawIbBios = fruHost.rawIbBios;
