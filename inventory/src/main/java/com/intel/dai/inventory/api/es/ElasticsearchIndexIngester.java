@@ -1,3 +1,8 @@
+// Copyright (C) 2021 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 package com.intel.dai.inventory.api.es;
 
 import com.google.gson.Gson;
@@ -23,7 +28,6 @@ import java.util.function.Consumer;
 class ElasticsearchIndexIngester {
     private final Logger log_;
     private final static Gson gson = new Gson();
-//    private static VoltdbClient dbClient = null;
     private final String index;   // Elasticsearch index being ingested into voltdb
     private final Scroll scroll;  // defines scroll characteristics, such as minutes to keep scroll control structure alive
     private final RestHighLevelClient esClient;
@@ -35,8 +39,7 @@ class ElasticsearchIndexIngester {
     private String scrollId;    // think of this as a cursor marking the lower edge of iterated json documents
     private int totalNumberOfDocumentsEnumerated = 0;
 
-    ElasticsearchIndexIngester(RestHighLevelClient elasticsearchHighLevelClient, String elasticsearchIndex,
-                               NodeInventoryIngestor nodeInventoryIngestor, Logger log) {
+    ElasticsearchIndexIngester(RestHighLevelClient elasticsearchHighLevelClient, String elasticsearchIndex, Logger log) {
         log_ = log;
         index = elasticsearchIndex;
         esClient = elasticsearchHighLevelClient;
