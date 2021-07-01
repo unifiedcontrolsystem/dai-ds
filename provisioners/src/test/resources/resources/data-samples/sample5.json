@@ -4,5 +4,5 @@
     "log_type": "nodestate"
   },
   "source": "/var/log/consoles/test001",
-  "message": "[Thu Jun 17 21:13:10 2021] Command line: BOOT_IMAGE=(tftp)/images/kernel-args HOSTNAME=test001"
+  "message": "[Thu Jun 17 21:13:10 2021] command line: BOOT_IMAGE=(tftp)/images/kernel-args HOSTNAME=test001"
 }

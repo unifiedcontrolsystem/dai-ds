@@ -34,7 +34,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     public void initialize() { /* Not used but is required */ }
 
     @Override
-    public List<CommonDataFormat> processRawStringData(String subject, final String data, final NetworkListenerConfig config)
+    public List<CommonDataFormat> processRawStringData(final String subject, final String data, final NetworkListenerConfig config)
             throws NetworkListenerProviderException {
         try {
             if(keywordToNodeStates_ == null)
@@ -43,8 +43,9 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             final List<CommonDataFormat> results = new ArrayList<>();
 
             //To filter syslog messages
-            final String topic = subscribedTopicMap_.getStringOrDefault(subject.toLowerCase(), "Unknown");
-            if(PROVISIONER_TOPICS.valueOf(topic) == PROVISIONER_TOPICS.DhcpLogData) {
+            final String receivedDataType = subscribedTopicMap_.getStringOrDefault(subject, "Unknown");
+            final PROVISIONER_TOPICS provisionerTopic = PROVISIONER_TOPICS.valueOf(receivedDataType);
+            if(provisionerTopic == PROVISIONER_TOPICS.DhcpLogData) {
                 if(!data.contains(DHCP_DISCOVER) && !data.contains(DHCP_REQUEST))
                     return results;
             }
@@ -54,23 +55,18 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             if(isJson) {
                 for(final String json: CommonFunctions.breakupStreamedJSONMessages(data)) {
                     final PropertyMap document = parser_.fromString(json).getAsMap();
-                    if(!document.containsKey("fields"))
-                        log_.warn("Received data is missing '@fields' %s", data);
-                    final PropertyMap dataTypeMap = document.getMapOrDefault("fields", new PropertyMap());
-                    if (!dataTypeMap.containsKey("log_type"))
-                        log_.warn("Received data is missing 'log_type' %s", data);
-                    final String dataType = dataTypeMap.getStringOrDefault("log_type", "Unknown");
-                    if (!dataType.equals("Unknown"))
-                        log_.warn("Received %s type data", dataType);
-                        final String localLogType = subscribedTopicMap_.getStringOrDefault(dataType, "");
-                        final PROVISIONER_TOPICS provisionerTopic = PROVISIONER_TOPICS.valueOf(localLogType);
+                    if(provisionerTopic != PROVISIONER_TOPICS.Unknown) {
+                        log_.info("Received %s type data", receivedDataType);
                         if(provisionerTopic == PROVISIONER_TOPICS.DhcpLogData)
                             results.add(processDhcpMessage(document));
                         if(provisionerTopic == PROVISIONER_TOPICS.PowerLogData)
                             results.add(processNodePowerMessage(document));
                         if(provisionerTopic == PROVISIONER_TOPICS.ConsoleLogData)
                             results.add(processConsoleMessage(document));
+                        if(provisionerTopic == PROVISIONER_TOPICS.HeartbeatLogData)
+                            results.add(processHeartbeatMessage(document));
                     }
+                }
             } else {
                //TO-DO for topic non-json format
             }
@@ -101,19 +97,30 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             actions_.publishBootEvent(topic_, data.getStateEvent(), data.getLocation(), dataTimestamp);
     }
 
+    private CommonDataFormat processHeartbeatMessage(PropertyMap heartbeatLogData) throws Exception {
+        final String timestamp = getHBTimeStamp(heartbeatLogData);
+        final long nsTimestamp = TimeUtils.getNsTimestamp() - Long.parseLong(timestamp) * 1000000;
+        final String hostname = getHBNode(heartbeatLogData);
+
+        final BootState bootState = getHBNodeState(heartbeatLogData);
+
+        final CommonDataFormat common = new CommonDataFormat(nsTimestamp, hostname, DataType.StateChangeEvent);
+        common.setStateChangeEvent(bootState);
+        return common;
+    }
+
     private CommonDataFormat processConsoleMessage(PropertyMap consoleLogData) throws Exception {
         if(consoleLogData.containsKey("message")) {
             final String message = consoleLogData.getStringOrDefault("message", null);
-            final boolean isBootImageInfo = message.contains("Command line: BOOT_IMAGE");
+            final boolean isBootImageInfo = message.contains("command line: BOOT_IMAGE");
             if(isBootImageInfo)
                 return processBootImageInfo(consoleLogData);
-            return processNodeStateInfo(consoleLogData);
+            return processNodeStateInfoFromConsole(consoleLogData);
         }
-
         throw new Exception("Received data is missing 'message' field:" + consoleLogData);
     }
 
-    private CommonDataFormat processNodeStateInfo(PropertyMap nodeStateInfo) throws Exception {
+    private CommonDataFormat processNodeStateInfoFromConsole(PropertyMap nodeStateInfo) throws Exception {
         if(!nodeStateInfo.containsKey("source"))
             throw new Exception("Received data is missing 'source' " + nodeStateInfo);
         final String hostInfo = nodeStateInfo.getString("source");
@@ -154,22 +161,11 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     }
 
     private CommonDataFormat processNodePowerMessage(PropertyMap powerLogData) throws Exception {
-        //message: "2021-04-30T10:32:21.167651-07:00 aus-admin1 twistd: clmgr-power:am01-nmn.local EVENT:HEARTBEAT
-        // APP:clmgr-power SEV:LOG_INFO TEXT:Heartbeat sends SIGTERM, shutdown"
-        final String message = getMessage(powerLogData);
+        final long nsTimestamp = Long.parseLong(getPowerServiceTimeStamp(powerLogData));
+        final String hostname = getPowerServiceNode(powerLogData);
 
-        final String[] msgLineColumns = message.split(" ");
-        final String timestamp = msgLineColumns[0];
-        if(timestamp == null || timestamp.isEmpty())
-            throw new Exception("Received message do not contain timestamp data");
-        final long nsTimestamp = TimeUtils.nSFromIso8601(timestamp);
+        final BootState bootState = getPowerServiceNodeState(powerLogData);
 
-        final String powerNodeInfo = msgLineColumns[3];
-        if(powerNodeInfo == null || powerNodeInfo.isEmpty())
-            throw new Exception("Received message do not contain node power info");
-        final String hostname = powerNodeInfo.substring(powerNodeInfo.lastIndexOf(":") + 1);
-
-        final BootState bootState = getNodeState(message);
         final CommonDataFormat common = new CommonDataFormat(nsTimestamp, hostname, DataType.StateChangeEvent);
         common.setStateChangeEvent(bootState);
         return common;
@@ -186,18 +182,65 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return common;
     }
 
+    private BootState getHBNodeState(PropertyMap data) throws Exception {
+        if(!data.containsKey("booted"))
+            throw new Exception("Received data is missing 'booted' " + data);
+        final boolean active = Boolean.parseBoolean(data.getString("booted"));
+        return active ? BootState.ACTIVE : BootState.NODE_OFFLINE;
+    }
+
+    private BootState getPowerServiceNodeState(PropertyMap data) throws Exception {
+        if(!data.containsKey("value"))
+            throw new Exception("Received data is missing 'value' " + data);
+        final PropertyMap hostData = data.getMap("value");
+        if(!hostData.containsKey("string"))
+            throw new Exception("Received data is missing 'string' " + data);
+        final String state = hostData.getString("string");
+        return getNodeState(state);
+    }
+
+    private String getHBTimeStamp(PropertyMap data) throws Exception {
+        if(!data.containsKey("uptime"))
+            throw new Exception("Received data is missing 'uptime' " + data);
+        final PropertyMap hostData = data.getMapOrDefault("uptime", new PropertyMap());
+        if(!hostData.containsKey("long"))
+            return "0";
+        return hostData.getString("long");
+    }
+
+    private String getPowerServiceTimeStamp(PropertyMap data) throws Exception {
+        if(!data.containsKey("timestamp"))
+            throw new Exception("Received data is missing 'timestamp' " + data);
+        return data.getString("timestamp");
+    }
+
     private String getTimeStamp(PropertyMap data) throws Exception {
         if(!data.containsKey("@timestamp"))
             throw new Exception("Received data is missing '@timestamp' " + data);
         return data.getString("@timestamp");
     }
 
-    private String getTimeStamp(String data) throws Exception {
+    private String getTimeStamp(String data) {
         String timestamp = data.substring(data.indexOf("[") + 1, data.indexOf("]"));
 /*        final Pattern pattern = Pattern.compile("[A-Za-z]{3} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4}");
         if(!pattern.matcher(timestamp).matches())
             throw new Exception("Received data contains incorrect time format,ex: 'EEE MMM dd HH:mm:ss yyyy'" + data);*/
         return timestamp;
+    }
+
+    private String getHBNode(PropertyMap data) throws Exception {
+        if(!data.containsKey("node"))
+            throw new Exception("Received data is missing 'node' " + data);
+        return data.getString("node");
+    }
+
+    private String getPowerServiceNode(PropertyMap data) throws Exception {
+        if(!data.containsKey("host"))
+            throw new Exception("Received data is missing 'host' " + data);
+        final PropertyMap hostData = data.getMap("host");
+        if(!hostData.containsKey("string"))
+            throw new Exception("Received data is missing 'string' " + data);
+        return hostData.getString("string");
     }
 
     private String getHostName(PropertyMap data) throws Exception {
@@ -337,9 +380,10 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
             }};
 
     private enum PROVISIONER_TOPICS {
-        PowerLogData,
-        DhcpLogData,
         ConsoleLogData,
+        DhcpLogData,
+        HeartbeatLogData,
+        PowerLogData,
         Unknown
     }
 }
