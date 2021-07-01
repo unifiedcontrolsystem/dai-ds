@@ -846,7 +846,6 @@ project(":inventory") {
         annotationProcessor "org.projectlombok:lombok:${lombok_version}"
 
         compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:${elastic_stack_version}"
-        implementation group: 'org.voltdb', name: 'voltdbclient', version: '10.1.1' // TODO: roll this into DAI_CORE
     }
 
     jacocoTestCoverageVerification {

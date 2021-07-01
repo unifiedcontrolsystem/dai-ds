@@ -54,4 +54,7 @@ public interface HWInvDbApi {
     int ingest(String id, Dimm dimm) throws DataStoreException;
     int ingest(String id, FruHost fruHost) throws DataStoreException;
     int ingest(NodeInventory nodeInventory) throws DataStoreException;
+
+    List<FruHost> enumerateFruHosts();
+    Map<String, String> getDimmJsonsOnFruHost(String fruHostMac);
 }

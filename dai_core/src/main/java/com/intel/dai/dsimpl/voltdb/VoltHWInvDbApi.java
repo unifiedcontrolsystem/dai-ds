@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -494,6 +495,61 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         return 1;
     }
 
+    public List<FruHost> enumerateFruHosts() {
+        try {
+            ClientResponse cr = client.callProcedure("Get_FRU_Hosts");
+            if (cr.getStatus() != ClientResponse.SUCCESS) {
+                System.err.println(cr.getStatusString());
+                return null;
+            }
+            VoltTable tuples = cr.getResults()[0];
+            System.out.println(tuples.getRowCount());
+            tuples.resetRowPosition();
+            ArrayList<FruHost> fruHosts = new ArrayList<>();
+            while (tuples.advanceRow()) {
+                String source = tuples.getString(3);
+//                System.out.println(source);
+                fruHosts.add(gson.fromJson(source, FruHost.class));
+            }
+            return fruHosts;
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } catch (ProcCallException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    public Map<String, String> getDimmJsonsOnFruHost(String fruHostMac) {
+        try {
+            ClientResponse cr = client.callProcedure("Get_Dimms_on_FRU_Host", fruHostMac);
+            if (cr.getStatus() != ClientResponse.SUCCESS) {
+                System.err.println(cr.getStatusString());
+                return null;
+            }
+            VoltTable tuples = cr.getResults()[0];
+//            System.out.println(tuples.getRowCount());
+            tuples.resetRowPosition();
+            HashMap<String, String> dimmMap = new HashMap<>();
+            while (tuples.advanceRow()) {
+//                String serial = tuples.getString(0);
+//                String mac = tuples.getString(1);
+//                long timestamp = tuples.getTimestampAsLong(2);
+                String locator = tuples.getString(3);
+                String source = tuples.getString(4);
+//                long DbUpdatedTimestamp = tuples.getTimestampAsLong(5);
+
+//                System.out.println(source);
+                dimmMap.put(locator, source);
+            }
+            return dimmMap;
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } catch (ProcCallException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
     private final static Gson gson = new Gson();
     private final Logger logger;
     private final String[] servers;
