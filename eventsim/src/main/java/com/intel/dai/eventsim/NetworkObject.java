@@ -28,7 +28,7 @@ public class NetworkObject {
     public void initialise() throws SimulatorException {
         try {
             networkConnectionObject = NetworkConnectionObject.createConnection(getNetworkName(), log_, getNetworkConfiguration(getNetworkName()));
-            DataValidation.isNullOrEmpty(networkConnectionObject, String.format("Cannot initialise the given network : %s", getNetworkName()));
+            DataValidation.isNull(networkConnectionObject, String.format("Cannot initialise the given network : %s", getNetworkName()));
             networkConnectionObject.initialize();
             networkConnectionObject.configureOtherNetworks();
             networkConnectionObject.createNetworkPublisher(getPublisherName(), getNetworkConfiguration(getPublisherName()));
@@ -231,7 +231,7 @@ public class NetworkObject {
      * @throws SimulatorException when required parameters are missing.
      */
     private void validateNetworkConfigurations() throws SimulatorException {
-        DataValidation.validateKeys(config_, NETWORK_CONFIG_KEYS, MISSING_SERVER_CONFIG);
+        DataValidation.validateKeysAndNullValues(config_, NETWORK_CONFIG_KEYS, MISSING_SERVER_CONFIG);
     }
 
     public void setProperty(String schema, String streamId) {

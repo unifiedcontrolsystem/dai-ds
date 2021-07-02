@@ -49,11 +49,12 @@ class EventsCli(object):
         ras_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate ras events. The default values exists in '
                  'eventsim config file')
+        ras_events_parser.add_argument('--event-data-template', help='sample template to generate ras events')
+        ras_events_parser.add_argument('--events-config-template', help='sample template to configure ras events')
         ras_events_parser.add_argument('--locations',
             help='generate ras events at a given location. Provide regex for multiple locations')
         ras_events_parser.add_argument('--output', help='save data to a file')
         ras_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
-        ras_events_parser.add_argument('--template', help='sample template to generate ras events')
         ras_events_parser.add_argument('--timeout', type=int, help='ras sub-command execution timeout')
         ras_events_parser.add_argument('--timezone',
             help='generate ras events for a given timezone. The default values exists in config file')
@@ -65,11 +66,6 @@ class EventsCli(object):
             help='Provide file path with all possible values. Ex: /tmp/source.json')
         ras_events_parser.add_argument('--update-field-metadata-filter',
             help='Provide multiple regex value to fill data in update-field-jpath separated by comma(,). '
-                 'Ex: level0/level1[*]/item1')
-        ras_events_parser.add_argument('--template-field-jpath',
-            help='Provide multiple json-paths to template-field only, separated by comma(,). Ex: level0/level1[*]/item1')
-        ras_events_parser.add_argument('--template-field-filter',
-            help='Provide multiple regex value to fill data in template-field-jpath separated by comma(,). '
                  'Ex: level0/level1[*]/item1')
         ras_events_parser.set_defaults(func=self._generate_ras_events_execute)
 
@@ -85,11 +81,12 @@ class EventsCli(object):
         sensor_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate sensor events. The default values exists in '
                  'eventsim config file')
+        sensor_events_parser.add_argument('--event-data-template', help='sample template to generate ras events')
+        sensor_events_parser.add_argument('--events-config-template', help='sample template to configure ras events')
         sensor_events_parser.add_argument('--locations',
             help='generate sensor events at a given location. Provide regex for multiple locations')
         sensor_events_parser.add_argument('--output', help='save data to a file')
         sensor_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
-        sensor_events_parser.add_argument('--template', help='sample template to generate sensor events')
         sensor_events_parser.add_argument('--timeout', type=int, help='sensor sub-command execution timeout')
         sensor_events_parser.add_argument('--timezone',
             help='generate sensor events for given timezone. The default values exists in config file')
@@ -102,11 +99,6 @@ class EventsCli(object):
             help='Provide file path with all possible values. Ex: /tmp/source.json')
         sensor_events_parser.add_argument('--update-field-metadata-filter',
             help='Provide multiple regex value to fill data in update-field-jpath separated by comma(,). '
-                 'Ex: level0/level1[*]/item1')
-        sensor_events_parser.add_argument('--template-field-jpath',
-            help='Provide multiple json-paths to template-field only, separated by comma(,). Ex: level0/level1[*]/item1')
-        sensor_events_parser.add_argument('--template-field-filter',
-            help='Provide multiple regex value to fill data in template-field-jpath separated by comma(,). '
                  'Ex: level0/level1[*]/item1')
         sensor_events_parser.set_defaults(func=self._generate_sensor_events_execute)
 
@@ -140,13 +132,14 @@ class EventsCli(object):
         boot_events_parser.add_argument('--delay', type=int,
             help='pause for given value in microseconds to generate boot events. The default values exists in '
                  'eventsim config file.')
+        boot_events_parser.add_argument('--event-data-template', help='sample template to generate boot events')
+        boot_events_parser.add_argument('--events-config-template', help='sample template to configure boot events')
         boot_events_parser.add_argument('--locations',
             help='generate boot events at a given location. Provide regex for multiple locations.')
         boot_events_parser.add_argument('--output', help='store data in a file')
         boot_events_parser.add_argument('--probability', default=0,
             help='generate boot events with probability failure. Default no failure.')
         boot_events_parser.add_argument('--seed', type=int, help='seed to duplicate data')
-        boot_events_parser.add_argument('--template', help='sample template to generate boot events')
         boot_events_parser.add_argument('--timeout', type=int, help='boot sub-command execution timeout')
         boot_events_parser.add_argument('--timezone',
             help='generate boot events for given timezone. The default values exists in config file')
@@ -158,11 +151,6 @@ class EventsCli(object):
             help='Provide file path with all possible values. Ex: /tmp/source.json')
         boot_events_parser.add_argument('--update-field-metadata-filter',
             help='Provide multiple regex value to fill data in update-field-jpath separated by comma(,). '
-                 'Ex: level0/level1[*]/item1')
-        boot_events_parser.add_argument('--template-field-jpath',
-            help='Provide multiple json-paths to template-field only, separated by comma(,). Ex: level0/level1[*]/item1')
-        boot_events_parser.add_argument('--template-field-filter',
-            help='Provide multiple regex value to fill data in template-field-jpath separated by comma(,). '
                  'Ex: level0/level1[*]/item1')
         boot_events_parser.set_defaults(func=self._generate_boot_events_execute)
 
@@ -238,9 +226,8 @@ class EventsCli(object):
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
                       'update-field-jpath': args.update_field_jpath, 'update-field-metadata': args.update_field_metadata,
                       'update-field-metadata-filter': args.update_field_metadata_filter, 'output': args.output,
-                      'seed': args.seed, 'template': args.template, 'type': args.type,
-                      'template-field-jpath': args.template_field_jpath,
-                      'template-field-filter': args.template_field_filter}
+                      'seed': args.seed, 'type': args.type, 'event-data-template': args.event_data_template,
+                      'events-config-template': args.events_config_template}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -262,9 +249,8 @@ class EventsCli(object):
         parameters = {'burst': args.burst, 'count': args.count, 'delay': args.delay, 'locations': args.locations,
                       'update-field-jpath': args.update_field_jpath, 'update-field-metadata': args.update_field_metadata,
                       'update-field-metadata-filter': args.update_field_metadata_filter, 'output': args.output,
-                      'seed': args.seed, 'template': args.template, 'type': args.type,
-                      'template-field-jpath': args.template_field_jpath,
-                      'template-field-filter': args.template_field_filter}
+                      'seed': args.seed, 'type': args.type, 'event-data-template': args.event_data_template,
+                      'events-config-template': args.events_config_template}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -302,10 +288,9 @@ class EventsCli(object):
         url = client.get_base_url() + 'apis/events/boot'
         parameters = {'burst': args.burst, 'delay': args.delay, 'locations': args.locations, 'output': args.output,
                       'update-field-jpath': args.update_field_jpath, 'update-field-metadata': args.update_field_metadata,
-                      'update-field-metadata-filter': args.update_field_metadata_filter, 'probability': args.probability,
-                      'seed': args.seed, 'template': args.template, 'type': args.type,
-                      'template-field-jpath': args.template_field_jpath,
-                      'template-field-filter': args.template_field_filter}
+                      'update-field-metadata-filter': args.update_field_metadata_filter, 'output': args.output,
+                      'seed': args.seed, 'type': args.type, 'event-data-template': args.event_data_template,
+                      'events-config-template': args.events_config_template}
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         timeout = args.timeout
@@ -389,10 +374,5 @@ class EventsCli(object):
         elif args.update_field_jpath is not None and args.update_field_metadata_filter is None:
             raise RuntimeError("missing one of the arguments args.update_field_jpath or args.update_field_metadata_filter")
 
-
-        if args.template_field_jpath is None and args.template_field_filter is not None:
-            raise RuntimeError("missing one of the arguments args.template_field_jpath or args.template_field_filter")
-        elif args.template_field_jpath is not None and args.template_field_filter is None:
-            raise RuntimeError("missing one of the arguments args.template_field_jpath or args.template_field_filter")
 
 

@@ -2,6 +2,7 @@ package com.intel.dai.eventsim;
 
 import com.intel.config_io.ConfigIOParseException;
 import com.intel.logging.Logger;
+import com.intel.properties.PropertyArray;
 import com.intel.properties.PropertyMap;
 import com.intel.properties.PropertyNotExpectedType;
 
@@ -18,22 +19,42 @@ import java.util.regex.Pattern;
  */
 class EventTypeTemplate {
 
-    EventTypeTemplate(final String templateConfigFile, final Logger log) {
-        eventTemplateConfig_ = new EventTemplateConfig(templateConfigFile, log);
+    EventTypeTemplate(final Logger log) {
+        log_ = log;
     }
 
-    void validateEventNameAndType(final String eventName, final String eventType) throws SimulatorException,
-            PropertyNotExpectedType {
-        eventTemplateConfig_.validateEventNameAndType(eventName, eventType);
+    /**
+     * This method is used to update sample events configuration template file
+     * @param eventsConfigTemplateFile file path
+     */
+    void setEventsConfigTemplateFile(final String eventsConfigTemplateFile, final String eventType) throws SimulatorException, PropertyNotExpectedType {
+        if(eventsConfigTemplateFile_ != eventsConfigTemplateFile) {
+            loadEventsConfigTemplateData(eventsConfigTemplateFile);
+            validateEventName(eventType);
+        }
+        if(eventType_ != eventType)
+            validateEventName(eventType);
     }
 
-    String getDefaultEventType(final String eventName) throws PropertyNotExpectedType, SimulatorException {
-        eventTemplateConfig_.loadTemplateData();
-        return eventTemplateConfig_.getDefaultEventType(eventName);
+     private void loadEventsConfigTemplateData(final String eventsConfigTemplateFile) throws SimulatorException {
+        try {
+            eventsConfigTemplateFile_ = eventsConfigTemplateFile;
+            eventsConfigTemplateData_ = loadDataFromFile(eventsConfigTemplateFile_);
+            if(!eventsConfigTemplateData_.containsKey(EVENT_TYPES))
+                throw new SimulatorException("");
+            eventsConfigTemplateData_ = eventsConfigTemplateData_.getMap(EVENT_TYPES);
+        } catch (Exception e) {
+            throw new SimulatorException(e.getMessage());
+        }
     }
 
-    void loadData(final String eventType) throws PropertyNotExpectedType {
-        eventTypeTemplate_ = eventTemplateConfig_.getEventTypeTemplateConfig(eventType);
+    void validateEventName(final String eventName) throws SimulatorException, PropertyNotExpectedType {
+        DataValidation.validateKey(eventsConfigTemplateData_, eventName, MISSING_KEY);
+        eventTypeConfigTemplate_ = eventsConfigTemplateData_.getMap(eventName);
+    }
+
+    public void setJPathFieldFiltersConfig(PropertyArray updateJPathFieldFilters_) {
+
     }
 
     /**
@@ -44,7 +65,7 @@ class EventTypeTemplate {
      * @throws ConfigIOParseException unable to read/load data
      */
     PropertyMap getEventTypeSingleTemplateData() throws PropertyNotExpectedType, IOException, ConfigIOParseException {
-        final String eventTypeTemplateFile = eventTypeTemplate_.getString(MESSAGE_TEMPLATE_FILE);
+        final String eventTypeTemplateFile = eventTypeConfigTemplate_.getString(MESSAGE_TEMPLATE_FILE);
         return loadDataFromFile(eventTypeTemplateFile);
     }
 
@@ -54,12 +75,12 @@ class EventTypeTemplate {
      * @throws PropertyNotExpectedType unable to read/load daata
      */
     String getEventTypeStreamName() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getString(STREAM_TYPE);
+        return eventTypeConfigTemplate_.getString(STREAM_TYPE);
     }
 
     String getEventTypeStreamId() throws PropertyNotExpectedType, IOException, ConfigIOParseException {
         final Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(avsc|txt))$)");
-        String streamId =  eventTypeTemplate_.getString(STREAM_ID);
+        String streamId =  eventTypeConfigTemplate_.getString(STREAM_ID);
         boolean isFile = fileExtnPtrn.matcher(streamId).matches();
         if(isFile)
             return loadDataFromFile(streamId).toString();
@@ -71,8 +92,9 @@ class EventTypeTemplate {
      * @return field-filters data
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    PropertyMap getFiltersForSingleTemplate() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getMap(SINGLE_MESSAGE_TEMPLATE);
+    PropertyMap getFiltersForSingleTemplate() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, SINGLE_MESSAGE_TEMPLATE, MISSING_KEY);
+        return eventTypeConfigTemplate_.getMap(SINGLE_MESSAGE_TEMPLATE);
     }
 
     /**
@@ -80,8 +102,9 @@ class EventTypeTemplate {
      * @return count-filter data
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    PropertyMap getFiltersForSingleTemplateCount() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getMap(SINGLE_MESSAGE_TEMP_COUNT);
+    PropertyMap getFiltersForSingleTemplateCount() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, SINGLE_MESSAGE_TEMP_COUNT, MISSING_KEY);
+        return eventTypeConfigTemplate_.getMap(SINGLE_MESSAGE_TEMP_COUNT);
     }
 
     /**
@@ -89,12 +112,14 @@ class EventTypeTemplate {
      * @return fields metadata info
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    PropertyMap getUpdateFieldsInfoWithMetada() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getMap(UPDATE_FIELDS);
+    PropertyMap getUpdateFieldsInfoWithMetada() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, UPDATE_FIELDS, MISSING_KEY);
+        return eventTypeConfigTemplate_.getMap(UPDATE_FIELDS);
     }
 
-    boolean isUpdateTemplateRequired() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getBoolean(UPDATE_TEMPLATE);
+    boolean isUpdateTemplateRequired() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, UPDATE_TEMPLATE, MISSING_KEY);
+        return eventTypeConfigTemplate_.getBoolean(UPDATE_TEMPLATE);
     }
 
     /**
@@ -103,8 +128,9 @@ class EventTypeTemplate {
      * @return generate data path and overflow path
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    Map<String, Object> getPathToGenerateDataAndOverFlowInfo() throws PropertyNotExpectedType {
-        final PropertyMap data =  eventTypeTemplate_.getMap(GEN_DATA_OVERFLOW_PATH);
+    Map<String, Object> getPathToGenerateDataAndOverFlowInfo() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, GEN_DATA_OVERFLOW_PATH, MISSING_KEY);
+        final PropertyMap data =  eventTypeConfigTemplate_.getMap(GEN_DATA_OVERFLOW_PATH);
         dataDscByKeyLen_.clear();
         dataDscByKeyLen_.putAll(data);
         return dataDscByKeyLen_;
@@ -115,8 +141,9 @@ class EventTypeTemplate {
      * @return rate-count data
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    Map<String, Object> getJPathCounterInfo() throws PropertyNotExpectedType {
-        final PropertyMap data =  eventTypeTemplate_.getMap(PATH_COUNT);
+    Map<String, Object> getJPathCounterInfo() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, PATH_COUNT, MISSING_KEY);
+        final PropertyMap data =  eventTypeConfigTemplate_.getMap(PATH_COUNT);
         dataAscByKeyLen_.clear();
         dataAscByKeyLen_.putAll(data);
         return dataAscByKeyLen_;
@@ -127,8 +154,9 @@ class EventTypeTemplate {
      * @return path to timestamp
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    String getPathToUpdateTimestamp() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getString(TIMESTAMP_PATH);
+    String getPathToUpdateTimestamp() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, TIMESTAMP_PATH, MISSING_KEY);
+        return eventTypeConfigTemplate_.getString(TIMESTAMP_PATH);
     }
 
     /**
@@ -136,17 +164,9 @@ class EventTypeTemplate {
      * @return timestamp type
      * @throws PropertyNotExpectedType unable to read/load data
      */
-    String getPathToUpdateTimestampType() throws PropertyNotExpectedType {
-        return eventTypeTemplate_.getString(TIMESTAMP_TYPE);
-    }
-
-    /**
-     * This method is used to update sample event format file
-     * @param eventTypeTemplateFile file path
-     */
-    void setEventTypeTemplateFile(final String eventTypeTemplateFile) {
-        if(eventTypeTemplateFile != null)
-            eventTypeTemplate_.put(MESSAGE_TEMPLATE_FILE, eventTypeTemplateFile);
+    String getPathToUpdateTimestampType() throws PropertyNotExpectedType, SimulatorException {
+        DataValidation.validateKey(eventTypeConfigTemplate_, TIMESTAMP_TYPE, MISSING_KEY);
+        return eventTypeConfigTemplate_.getString(TIMESTAMP_TYPE);
     }
 
     /**
@@ -164,10 +184,16 @@ class EventTypeTemplate {
         }
     }
 
-    private EventTemplateConfig eventTemplateConfig_;
+    private PropertyMap eventsConfigTemplateData_;
+    private PropertyMap eventTypeConfigTemplate_;
+    private PropertyMap eventTy;
+    private String eventsConfigTemplateFile_ = null;
+    private String eventType_ = null;
 
-    private PropertyMap eventTypeTemplate_;
+    private final Logger log_;
 
+    private static final String MISSING_KEY = "given key/data is null, key = ";
+    private static final String EVENT_TYPES = "event-types";
     private static final String MESSAGE_TEMPLATE_FILE = "template";
     private static final String STREAM_ID = "stream-id";
     private static final String STREAM_TYPE = "stream-type";

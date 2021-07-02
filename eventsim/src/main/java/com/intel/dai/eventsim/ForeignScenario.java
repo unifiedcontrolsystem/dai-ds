@@ -37,7 +37,7 @@ class ForeignScenario {
     void loadScenarioConfigData() throws SimulatorException {
         try {
             scenarioConfig_ = loadDataFromFile(scenarioConfigFile_);
-            DataValidation.validateKeys(scenarioConfig_, SCENARIO_CONFIG, MISSING_SCENARIO_CONFIG);
+            DataValidation.validateKeysAndNullValues(scenarioConfig_, SCENARIO_CONFIG, MISSING_SCENARIO_CONFIG);
             validateScenarioConfiguration(scenarioConfig_);
         } catch (ConfigIOParseException | IOException | PropertyNotExpectedType e) {
             throw new SimulatorException(e.getMessage());
@@ -164,14 +164,14 @@ class ForeignScenario {
         PropertyMap modeConfig = scenarioConfig_.getMap(mode);
 
         if(SCENARIO_MODES.valueOf(mode.toUpperCase()) == SCENARIO_MODES.BURST) {
-            DataValidation.validateKeys(modeConfig, BURST_CONFIG, MISSING_MODE_CONFIG);
+            DataValidation.validateKeysAndNullValues(modeConfig, BURST_CONFIG, MISSING_MODE_CONFIG);
             return;
         }
         else if(SCENARIO_MODES.valueOf(mode.toUpperCase()) == SCENARIO_MODES.GROUP_BURST) {
             return;
         }
         else if(SCENARIO_MODES.valueOf(mode.toUpperCase()) == SCENARIO_MODES.REPEAT) {
-            DataValidation.validateKeys(modeConfig, REPEAT_CONFIG, MISSING_MODE_CONFIG);
+            DataValidation.validateKeysAndNullValues(modeConfig, REPEAT_CONFIG, MISSING_MODE_CONFIG);
             return;
         }
         throw new SimulatorException("Unknown scenario mode is specified");
