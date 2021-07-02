@@ -9,9 +9,12 @@ import com.google.gson.Gson;
 import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.HWInvDbApi;
 import com.intel.dai.dsapi.pojo.*;
+import com.intel.dai.dsimpl.DataStoreFactoryImpl;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.inventory.ProviderInventoryNetworkForeignBus;
 import com.intel.logging.Logger;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -20,14 +23,13 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
 import java.util.function.Consumer;
 
 class ElasticsearchIndexIngester {
-    private final Logger log_;
     private final static Gson gson = new Gson();
+    private final Logger log_;
     private final String index;   // Elasticsearch index being ingested into voltdb
     private final Scroll scroll;  // defines scroll characteristics, such as minutes to keep scroll control structure alive
     private final RestHighLevelClient esClient;
@@ -37,9 +39,11 @@ class ElasticsearchIndexIngester {
     private SearchResponse searchResponse;
     private SearchHit[] searchHits;
     private String scrollId;    // think of this as a cursor marking the lower edge of iterated json documents
-    private int totalNumberOfDocumentsEnumerated = 0;
+    private long totalNumberOfDocumentsEnumerated = 0;
+    private long totalNumberOfDocumentsIngested = 0;
 
-    ElasticsearchIndexIngester(RestHighLevelClient elasticsearchHighLevelClient, String elasticsearchIndex, Logger log) {
+    public ElasticsearchIndexIngester(RestHighLevelClient elasticsearchHighLevelClient, String elasticsearchIndex,
+                                      DataStoreFactory factory, Logger log) {
         log_ = log;
         index = elasticsearchIndex;
         esClient = elasticsearchHighLevelClient;
@@ -55,12 +59,31 @@ class ElasticsearchIndexIngester {
                 ingestMethodReference = null;
         }
 
-        final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
-        if (factory_ == null) {
-            log_.error("ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
-            return;
+        onlineInventoryDatabaseClient_ = factory.createHWInvApi();
+        onlineInventoryDatabaseClient_.initialize();
+    }
+
+    public boolean ingestIndexIntoVoltdb() throws DataStoreException {
+
+        log_.info("Starting getChronologicalSearchRequest %s ...", index);
+        try {
+            getChronologicalSearchRequest();
+            getFirstScrollSearchResponse();
+
+            while (isAnyHitInScrollSearchResponse()) {
+                ingestScrollSearchResponseIntoVoltdb();
+                getNextScrollWindow();
+            }
+
+            log_.info("Finished getChronologicalSearchRequest %s", index);
+            return clearScroll();
+        } catch (IOException e) {
+            log_.error("IOException: %s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
+        } catch (ElasticsearchStatusException e) {
+            log_.error("ElasticsearchStatusException: %s", e.getMessage());
+            throw new DataStoreException(e.getMessage());
         }
-        onlineInventoryDatabaseClient_ = factory_.createHWInvApi();
     }
 
     private void ingestFruHost(ImmutablePair<String, String> doc) {
@@ -78,9 +101,9 @@ class ElasticsearchIndexIngester {
         fruHost.boardSerial = fruHost.oob_fru.Board_Serial;
 
         try {
-            onlineInventoryDatabaseClient_.ingest(id, fruHost);
+            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, fruHost);
         } catch (DataStoreException e) {
-            System.out.printf("DataStoreException: %s%n", e.getMessage());
+            log_.error("DataStoreException: %s", e.getMessage());
         }
     }
 
@@ -92,28 +115,18 @@ class ElasticsearchIndexIngester {
         dimm.locator = dimm.ib_dimm.Locator;
 
         try {
-            onlineInventoryDatabaseClient_.ingest(id, dimm);
+            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, dimm);
         } catch (DataStoreException e) {
-            System.out.printf("DataStoreException: %s%n", e.getMessage());
+            log_.error("DataStoreException: %s", e.getMessage());
         }
     }
 
-    boolean ingestIndexIntoVoltdb() throws IOException {
-
-        System.out.println("getChronologicalSearchRequest ...");
-        getChronologicalSearchRequest();
-        getFirstScrollSearchResponse();
-
-        while (isAnyHitInScrollSearchResponse()) {
-            ingestScrollSearchResponseIntoVoltdb();
-            getNextScrollWindow();
-        }
-
-        return clearScroll();
-    }
-
-    long getNumberOfDocumentsEnumerated() {
+    public long getNumberOfDocumentsEnumerated() {
         return totalNumberOfDocumentsEnumerated;
+    }
+
+    public long getTotalNumberOfDocumentsIngested() {
+        return totalNumberOfDocumentsIngested;
     }
 
     private Scroll getScroll() {
@@ -130,10 +143,7 @@ class ElasticsearchIndexIngester {
 
     private void ingestScrollSearchResponseIntoVoltdb() {
         for (SearchHit hit : searchHits) {
-//            String source = hit.getSourceAsString();
-//            String id = hit.getId();
             ImmutablePair<String, String> doc = new ImmutablePair<>(hit.getId(), hit.getSourceAsString());
-//            System.out.println(str);
             totalNumberOfDocumentsEnumerated += 1;
             ingestMethodReference.accept(doc);
         }

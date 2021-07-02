@@ -7,7 +7,6 @@ class ElasticsearchITSpec extends Specification {
     Elasticsearch ts
 
     def setup() {
-
         println Helper.testStartMessage(specificationContext)
         ts = new Elasticsearch()
     }
@@ -18,8 +17,7 @@ class ElasticsearchITSpec extends Specification {
     }
 
     def "getRestHighLevelClient - positive"() {
-        when: ts.getRestHighLevelClient(hostName, port, userName, password)
-        then: ts.client != null
+        expect: ts.getRestHighLevelClient(hostName, port, userName, password) != null
 
         where:
         hostName                            | port | userName   | password

@@ -439,11 +439,8 @@ public class VoltHWInvDbApi implements HWInvDbApi {
     public int ingest(String id, FruHost fruHost) throws DataStoreException {
         try {
             return upsertRawFruHost(id, fruHost);
-        } catch (IOException e) {
-            logger.error("IOException:%s", e.getMessage());
-            throw new DataStoreException(e.getMessage());
-        } catch (ProcCallException e) {
-            logger.error("ProcCallException:%s", e.getMessage());
+        } catch (IOException | ProcCallException e) {
+            logger.error(e.getMessage());
             throw new DataStoreException(e.getMessage());
         }
     }
@@ -499,23 +496,23 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         try {
             ClientResponse cr = client.callProcedure("Get_FRU_Hosts");
             if (cr.getStatus() != ClientResponse.SUCCESS) {
-                System.err.println(cr.getStatusString());
+                logger.error("cr.getStatusString(): %d", cr.getStatusString());
                 return null;
             }
             VoltTable tuples = cr.getResults()[0];
-            System.out.println(tuples.getRowCount());
+            logger.info("Number of FRUs = %s", tuples.getRowCount());
             tuples.resetRowPosition();
             ArrayList<FruHost> fruHosts = new ArrayList<>();
+            long numberFrusEnumerated = 0;
             while (tuples.advanceRow()) {
+                numberFrusEnumerated += 1;
                 String source = tuples.getString(3);
-//                System.out.println(source);
+                logger.debug("%d: %s%n", numberFrusEnumerated, source);
                 fruHosts.add(gson.fromJson(source, FruHost.class));
             }
             return fruHosts;
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        } catch (ProcCallException e) {
-            System.out.println(e.getMessage());
+        } catch (IOException | ProcCallException e) {
+            logger.error(e.getMessage());
         }
         return null;
     }
@@ -524,14 +521,16 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         try {
             ClientResponse cr = client.callProcedure("Get_Dimms_on_FRU_Host", fruHostMac);
             if (cr.getStatus() != ClientResponse.SUCCESS) {
-                System.err.println(cr.getStatusString());
+                logger.error(cr.getStatusString());
                 return null;
             }
             VoltTable tuples = cr.getResults()[0];
-//            System.out.println(tuples.getRowCount());
+            logger.info("Number of DIMM associated with %s = %d", fruHostMac, tuples.getRowCount());
             tuples.resetRowPosition();
             HashMap<String, String> dimmMap = new HashMap<>();
+            int i = 0;
             while (tuples.advanceRow()) {
+                i += 1;
 //                String serial = tuples.getString(0);
 //                String mac = tuples.getString(1);
 //                long timestamp = tuples.getTimestampAsLong(2);
@@ -539,14 +538,12 @@ public class VoltHWInvDbApi implements HWInvDbApi {
                 String source = tuples.getString(4);
 //                long DbUpdatedTimestamp = tuples.getTimestampAsLong(5);
 
-//                System.out.println(source);
+                logger.debug("%d: %s", i, source);
                 dimmMap.put(locator, source);
             }
             return dimmMap;
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        } catch (ProcCallException e) {
-            System.out.println(e.getMessage());
+        } catch (IOException | ProcCallException e) {
+            logger.error(e.getMessage());
         }
         return null;
     }

@@ -35,53 +35,53 @@ class DatabaseSynchronizerITSpec extends Specification {
         println Helper.testEndMessage(specificationContext)
     }
 
-    def "updateDaiInventoryTables - near line server unavailable"() {
-        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> null    //near line server unavailable
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
-
-    def "updateDaiInventoryTables - initial loading"() {
-        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> ''  // initial loading
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
-
-    def "updateDaiInventoryTables - patching"() {
-        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> '2020-07-27T21:10:49.745223Z'  // patching
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
-
-    def "updateDaiInventoryTables - history unavailable"() {
-        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> '2222-07-27T21:10:49.745223Z'  // future; history unavailable
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
-
-    def "updateDaiInventoryTables - not a timestamp"() {
-        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> 'notATimeStamp' // not a timestamp
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
+//    def "updateDaiInventoryTables - near line server unavailable"() {
+//        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> null    //near line server unavailable
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
+//
+//    def "updateDaiInventoryTables - initial loading"() {
+//        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> ''  // initial loading
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
+//
+//    def "updateDaiInventoryTables - patching"() {
+//        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> '2020-07-27T21:10:49.745223Z'  // patching
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
+//
+//    def "updateDaiInventoryTables - history unavailable"() {
+//        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> '2222-07-27T21:10:49.745223Z'  // future; history unavailable
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
+//
+//    def "updateDaiInventoryTables - not a timestamp"() {
+//        def dsFactory = new DataStoreFactoryImpl(null as String, Mock(Logger))
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [Mock(Logger), dsFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> 'notATimeStamp' // not a timestamp
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
 }

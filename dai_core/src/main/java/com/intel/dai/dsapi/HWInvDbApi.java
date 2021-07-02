@@ -9,8 +9,6 @@ import com.intel.dai.dsapi.pojo.FruHost;
 import com.intel.dai.dsapi.pojo.NodeInventory;
 import com.intel.dai.exceptions.DataStoreException;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 

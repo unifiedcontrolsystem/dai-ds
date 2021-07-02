@@ -14,7 +14,7 @@ import org.elasticsearch.client.core.MainResponse;
 import java.io.IOException;
 
 public class Elasticsearch {
-    void getRestHighLevelClient(String hostName, int port, String userName, String password) {
+    RestHighLevelClient getRestHighLevelClient(String hostName, int port, String userName, String password) {
         final CredentialsProvider credentialsProvider =
                 new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
@@ -26,6 +26,7 @@ public class Elasticsearch {
                         .setDefaultCredentialsProvider(credentialsProvider));
 
         client = new RestHighLevelClient(builder);
+        return client;
     }
 
     String getElasticsearchServerVersion() throws IOException {
