@@ -1,3 +1,8 @@
+// Copyright (C) 2021 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 package com.intel.dai.inventory.api.es
 
 import com.intel.dai.dsapi.DataStoreFactory
@@ -22,8 +27,7 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
 
     def setup() {
         println Helper.testStartMessage(specificationContext)
-        "echo 'truncate table raw_DIMM;' | sqlcmd --servers=css-centos-8-00.ra.intel.com".execute().text
-        "echo 'truncate table raw_FRU_Host;' | sqlcmd --servers=css-centos-8-00.ra.intel.com".execute().text
+        print "./src/integration/resources/scripts/drop_inventory_data.sh".execute().text
 
         esClient = es.getRestHighLevelClient("cmcheung-centos-7.ra.intel.com", 9200,
                 "elkrest", "elkdefault")
@@ -83,9 +87,8 @@ class NodeInventoryIngesterITSpec extends Specification {
 
     def setup() {
         println Helper.testStartMessage(specificationContext)
-        "echo 'truncate table raw_DIMM;' | sqlcmd --servers=css-centos-8-00.ra.intel.com".execute().text
-        "echo 'truncate table raw_FRU_Host;' | sqlcmd --servers=css-centos-8-00.ra.intel.com".execute().text
-        "echo 'truncate table Node_Inventory_History;' | sqlcmd --servers=css-centos-8-00.ra.intel.com".execute().text
+        print "./src/integration/resources/scripts/drop_inventory_data.sh".execute().text
+
         dsClientFactory.createHWInvApi() >> new VoltHWInvDbApi(logger, util, servers)
         ts = new NodeInventoryIngester(dsClientFactory, logger)
 
