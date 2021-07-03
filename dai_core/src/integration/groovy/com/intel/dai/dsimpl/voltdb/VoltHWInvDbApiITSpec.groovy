@@ -1,6 +1,8 @@
 package com.intel.dai.dsimpl.voltdb
 
+
 import com.intel.dai.dsapi.HWInvHistoryEvent
+import com.intel.dai.dsapi.HWInvUtil
 import com.intel.logging.Logger
 import org.apache.commons.io.FileUtils
 import spock.lang.Specification
@@ -18,12 +20,13 @@ class VoltHWInvDbApiITSpec extends Specification {
     static def rawInventoryDataFilePath = Paths.get dataDir+inventoryFileName
 
     VoltHWInvDbApi ts
+
     Logger logger = Mock Logger
+    HWInvUtil util = new HWInvUtilImpl(logger)
+    String[] voltDbServers = ['css-centos-8-00.ra.intel.com']
 
     def setup() {
-        String server = "localhost"
-        String[] servers = [server]
-        ts = new VoltHWInvDbApi(logger, new HWInvUtilImpl(logger), servers)
+        ts = new VoltHWInvDbApi(logger, util, voltDbServers)
         ts.initialize()
         ts.deleteAllRawHistoricalRecords()
         ts.deleteAllCookedNodes()

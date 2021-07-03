@@ -7,7 +7,11 @@ package com.intel.dai.inventory;
 import com.intel.dai.dsapi.*;
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.inventory.api.es.Elasticsearch;
+import com.intel.dai.inventory.api.es.ElasticsearchIndexIngester;
+import com.intel.dai.inventory.api.es.NodeInventoryIngester;
 import com.intel.logging.Logger;
+import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -21,6 +25,8 @@ import java.util.regex.Pattern;
  * and that this may be ongoing!
  */
 class InventoryUpdateThread implements Runnable {
+    private final Logger log_;
+
     InventoryUpdateThread(Logger log) {
         log_ = log;
     }
@@ -30,28 +36,34 @@ class InventoryUpdateThread implements Runnable {
      * information from the foreign server.
      */
     public void run() {
-        log_.debug("HWI:%n %s", "run()");
+        log_.debug("run()");
         final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
         if (factory_ == null) {
-            log_.error("HWI:%n %s", "ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
+            log_.error("ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
             return;
         }
         try {
-            log_.info("HWI:%n  %s", "InventoryUpdateThread started");
+            log_.info("InventoryUpdateThread started");
             DatabaseSynchronizer synchronizer = new DatabaseSynchronizer(log_, factory_);
             synchronizer.updateDaiInventoryTables();
         } finally {
-            log_.info("HWI:%n  %s", "InventoryUpdateThread terminated");
+            log_.info("InventoryUpdateThread terminated");
         }
     }
-
-    private final Logger log_;
 }
 
 /**
  * Synchronizes synchronizes the inventory data in voltdb, postgres and foreign server.
  */
 class DatabaseSynchronizer {
+    private final Logger log_;
+    private final DataStoreFactory factory_;
+    protected HWInvUtil util_;
+    protected HWInvDbApi onlineInventoryDatabaseClient_;                // voltdb
+    protected ForeignInventoryClient foreignInventoryDatabaseClient_;   // foreign inventory server
+    InventorySnapshot nearLineInventoryDatabaseClient_;                 // postgres
+    long totalNumberOfInjectedDocuments = 0;                            // for testing only
+
     DatabaseSynchronizer(Logger log, DataStoreFactory factory) {
         log_ = log;
         factory_ = factory;
@@ -63,26 +75,49 @@ class DatabaseSynchronizer {
 
             String lastInventoryUpdate = getLastHWInventoryHistoryUpdate();
             if (lastInventoryUpdate == null) {
-                log_.error("HWI:%n   Cannot determine lastInventoryUpdate.  Database loading is skipped.");
+                log_.error("Cannot determine lastInventoryUpdate.  Database loading is skipped.");
                 return;
             }
-            log_.info("HWI:%n  getLastHWInventoryHistoryUpdate() =>'%s'", lastInventoryUpdate);
+            log_.info("getLastHWInventoryHistoryUpdate() =>'%s'", lastInventoryUpdate);
 
             List<HWInvHistoryEvent> changedLocationEvents = ingestRawInventoryHistoryEvents(lastInventoryUpdate);
-            log_.info("HWI:%n  ingestRawInventoryHistoryEvents(lastInventoryUpdate=%s) => %d",
+            log_.info("ingestRawInventoryHistoryEvents(lastInventoryUpdate=%s) => %d",
                     lastInventoryUpdate, changedLocationEvents.size());
 
             int numRawLocationsIngested = ingestRawInventorySnapshot(lastInventoryUpdate, changedLocationEvents);
-            log_.info("HWI:%n  ingestRawInventorySnapshot(lastInventoryUpdate=%s, changedLocationEvents=%s) => %d",
+            log_.info("ingestRawInventorySnapshot(lastInventoryUpdate=%s, changedLocationEvents=%s) => %d",
                     lastInventoryUpdate, util_.head(changedLocationEvents.toString(), 80),
                     numRawLocationsIngested);
 
             Map<String, String> changedNodeLocations = extractChangedNodeLocations(changedLocationEvents);
             int numCookedNodesIngested = ingestCookedNodes(changedNodeLocations);
-            log_.info("HWI:%n  ingestCookedNodes(changedNodeLocations=%s) => %d",
+            log_.info("ingestCookedNodes(changedNodeLocations=%s) => %d",
                     util_.head(changedNodeLocations.toString(), 80), numCookedNodesIngested);
+
+            // New inventory code; TODO: old code needs to be deleted after new code works
+
+            // TODO: Add config in the next pull request
+            Elasticsearch es = new Elasticsearch(log_);
+            RestHighLevelClient esClient = es.getRestHighLevelClient("cmcheung-centos-7.ra.intel.com", 9200,
+                    "elkrest", "elkdefault");
+
+            String[] elasticsearchIndices = {"kafka_fru_host", "kafka_dimm"};
+            for (String index : elasticsearchIndices) {
+                ElasticsearchIndexIngester eii = new ElasticsearchIndexIngester(esClient, index, factory_, log_);
+                eii.ingestIndexIntoVoltdb();
+                totalNumberOfInjectedDocuments += eii.getNumberOfDocumentsEnumerated();
+                log_.info("Number of %s documents = %d", index, eii.getNumberOfDocumentsEnumerated());
+            }
+            es.close();
+
+            NodeInventoryIngester ni = new NodeInventoryIngester(factory_, log_);
+            ni.ingestInitialNodeInventoryHistory();
+            totalNumberOfInjectedDocuments += ni.getNumberNodeInventoryJsonIngested();
+
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
         } finally {
-            log_.info("HWI:%n  %s","updateDaiInventoryTables() completed");
+            log_.info("updateDaiInventoryTables() completed");
         }
     }
 
@@ -96,18 +131,19 @@ class DatabaseSynchronizer {
 
     /**
      * This method can return both null or the string "null".
+     *
      * @return last raw inventory update timestamp, "null" if the raw history table is empty, or null if there was an error.
      */
     String getLastHWInventoryHistoryUpdate() {  // must not be private or Spy will not work
-        log_.error("HWI:%n  %s", ">> getLastHWInventoryHistoryUpdate()");
+        log_.error(">> getLastHWInventoryHistoryUpdate()");
         try {
             String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
         } catch (DataStoreException e) {
-            log_.error("HWI:%n  getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
+            log_.error("getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
             return null;
         } catch (NullPointerException e) {
-            log_.exception(e,"HWI:%n  null pointer exception: %s", e.getMessage());
+            log_.exception(e, "null pointer exception: %s", e.getMessage());
             return null;
         }
     }
@@ -153,7 +189,7 @@ class DatabaseSynchronizer {
 
             // Now we patch in the actual locations that were changed.
             for (HWInvHistoryEvent record : changedLocationEvents) {
-                log_.info("HWI:%n  ingestInventorySnapshot(event.ID=%s)", record.ID);
+                log_.info("ingestInventorySnapshot(event.ID=%s)", record.ID);
                 numRawInventoryLocationsIngested += ingestInventorySnapshot(record.ID);
             }
 
@@ -174,7 +210,7 @@ class DatabaseSynchronizer {
 
         int numRawInventoryLocationsIngested = 0;
         for (String changedNodeLocation : changedNodeLocations) {
-            log_.info("HWI:%n  ingestInventorySnapshot(changedNodeLocation=%s)", changedNodeLocation);
+            log_.info("ingestInventorySnapshot(changedNodeLocation=%s)", changedNodeLocation);
             numRawInventoryLocationsIngested += ingestInventorySnapshot(changedNodeLocation);
         }
         return numRawInventoryLocationsIngested;
@@ -183,7 +219,7 @@ class DatabaseSynchronizer {
     private List<HWInvHistoryEvent> ingestRawInventoryHistoryEvents(String lastInventoryUpdate) {
         String history = foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(lastInventoryUpdate);
         log_.debug(
-                "HWI:%n  foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(lastInventoryUpdate=%s) =>%n  %s",
+                "foreignInventoryDatabaseClient_.getCanonicalHWInvHistoryJson(lastInventoryUpdate=%s) =>%n  %s",
                 lastInventoryUpdate,
                 util_.head(history, 240));
 
@@ -194,7 +230,7 @@ class DatabaseSynchronizer {
 
     private int ingestInventorySnapshot(String location) {
         String inventory = foreignInventoryDatabaseClient_.getCanonicalHWInvJson(location);
-        log_.debug("HWI:%n  foreignInventoryDatabaseClient_.getCanonicalHWInvJson(location=%s) => %s",
+        log_.debug("foreignInventoryDatabaseClient_.getCanonicalHWInvJson(location=%s) => %s",
                 location, util_.head(inventory, 240));
         return ingestCanonicalHWInvJson(inventory);
     }
@@ -202,6 +238,7 @@ class DatabaseSynchronizer {
     /**
      * For some reason, drives are not part of the nested node structure even though a
      * drive event has a node event as a prefix.
+     *
      * @param event historic record of a fru change
      * @return parent node location of the event location
      */
@@ -217,7 +254,7 @@ class DatabaseSynchronizer {
         Pattern pattern = Pattern.compile("^(.+n\\d+)");
         Matcher matcher = pattern.matcher(event.ID);
         if (matcher.find()) {
-            log_.warn("HWI:%n, Incomplete conversion: event.ID=%s is still in foreign namespace",
+            log_.warn("Incomplete conversion: event.ID=%s is still in foreign namespace",
                     event.ID);  // this may be caused by an incomplete namespace conversion map
             return null;
         }
@@ -237,6 +274,7 @@ class DatabaseSynchronizer {
     /**
      * Ingests the HW inventory locations in canonical form.
      * N.B. System actions are not available to the caller of this method.
+     *
      * @param canonicalHwInvJson json containing the HW inventory locations in canonical format
      */
     private int ingestCanonicalHWInvJson(String canonicalHwInvJson) {
@@ -257,23 +295,15 @@ class DatabaseSynchronizer {
 
     private List<HWInvHistoryEvent> ingestCanonicalHWInvHistoryJson(String canonicalHwInvHistJson) {
         if (canonicalHwInvHistJson == null) {
-            log_.info("HWI:%n  %s", "canonicalHwInvHistJson is null");
+            log_.info("canonicalHwInvHistJson is null");
             return new ArrayList<>();
         }
 
         try {
             return onlineInventoryDatabaseClient_.ingestHistory(canonicalHwInvHistJson);
         } catch (DataStoreException e) {
-            log_.error("HWI:%n  DataStoreException: %s", e.getMessage());
+            log_.error("DataStoreException: %s", e.getMessage());
         }
         return new ArrayList<>();
     }
-
-    private final Logger log_;
-    private final DataStoreFactory factory_;
-
-    protected HWInvUtil util_;
-    protected HWInvDbApi onlineInventoryDatabaseClient_;                // voltdb
-    protected ForeignInventoryClient foreignInventoryDatabaseClient_;   // foreign inventory server
-    InventorySnapshot nearLineInventoryDatabaseClient_;                 // postgres
 }

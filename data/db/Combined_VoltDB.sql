@@ -3309,17 +3309,16 @@ CREATE TABLE Raw_DIMM
 CREATE TABLE Raw_FRU_Host
 (
     id                 VARCHAR(50)        NOT NULL, -- Elasticsearch doc id
-    boardSerial        VARCHAR(50) UNIQUE NOT NULL,
-    mac                VARCHAR(50)        NOT NULL,
+    boardSerial        VARCHAR(50),
+    mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
     timestamp          TIMESTAMP,                   -- 1 second resolution
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
-    PRIMARY KEY (boardSerial)
+    PRIMARY KEY (mac)
 );
 
 CREATE TABLE Node_Inventory_History
 (
-    Lctn               VARCHAR(25)    NOT NULL,
     source             VARCHAR(70000) NOT NULL,
     DbUpdatedTimestamp TIMESTAMP      NOT NULL,
     PRIMARY KEY (DbUpdatedTimestamp)
@@ -3340,5 +3339,5 @@ CREATE PROCEDURE Get_Dimms_on_FRU_Host AS SELECT * FROM Raw_DIMM
 CREATE PROCEDURE Get_FRU_Hosts AS SELECT * FROM Raw_FRU_Host ORDER BY timestamp;
 
 CREATE PROCEDURE Node_Inventory_History_insert AS
-    INSERT INTO Node_Inventory_History(Lctn, source, DbUpdatedTimestamp)
-        VALUES(?, ?, CURRENT_TIMESTAMP);
+    INSERT INTO Node_Inventory_History(source, DbUpdatedTimestamp)
+        VALUES(?, CURRENT_TIMESTAMP);
