@@ -5922,7 +5922,7 @@ BEGIN
     IF (p_timestamp > last_updated_doc_timestamp) then
         RETURN false;
     END IF;
-    RETURN FORMAT('SELECT count(1) > 0 FROM tier2_Raw_DIMM WHERE doc_timestamp = ''%s'' AND serial = ''%s''', p_timestamp, p_serial);
+    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_DIMM WHERE doc_timestamp = ''%s'' AND serial = ''%s''', p_timestamp, p_serial);
 END
 $$ LANGUAGE plpgsql;
 
@@ -5944,7 +5944,7 @@ BEGIN
     IF (p_timestamp > last_updated_doc_timestamp) then
         RETURN false;
     END IF;
-    RETURN FORMAT('SELECT count(1) > 0 FROM tier2_Raw_FRU_Host WHERE doc_timestamp = ''%s'' AND mac = ''%s''', p_timestamp, p_mac);
+    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_FRU_Host WHERE doc_timestamp = ''%s'' AND mac = ''%s''', p_timestamp, p_mac);
 END
 $$ LANGUAGE plpgsql;
 
