@@ -1,5 +1,6 @@
 package com.intel.dai.inventory.api.es;
 
+import com.intel.logging.Logger;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -14,7 +15,14 @@ import org.elasticsearch.client.core.MainResponse;
 import java.io.IOException;
 
 public class Elasticsearch {
-    void getRestHighLevelClient(String hostName, int port, String userName, String password) {
+    Logger log_;
+    RestHighLevelClient client;
+
+    public Elasticsearch(Logger log) {
+        log_ = log;
+    }
+
+    public RestHighLevelClient getRestHighLevelClient(String hostName, int port, String userName, String password) {
         final CredentialsProvider credentialsProvider =
                 new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
@@ -26,6 +34,7 @@ public class Elasticsearch {
                         .setDefaultCredentialsProvider(credentialsProvider));
 
         client = new RestHighLevelClient(builder);
+        return client;
     }
 
     String getElasticsearchServerVersion() throws IOException {
@@ -33,9 +42,12 @@ public class Elasticsearch {
         return response.getVersion().getNumber();
     }
 
-    void close() throws IOException {
-        client.close();
+    public void close() {
+        try {
+            client.close();
+        } catch (IOException e) {
+            log_.error(e.getMessage());
+            e.printStackTrace();
+        }
     }
-
-    RestHighLevelClient client;
 }

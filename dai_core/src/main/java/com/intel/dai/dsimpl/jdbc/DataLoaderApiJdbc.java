@@ -300,7 +300,7 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
 
     private static final String[] TABLES = { "BootImage", "Chassis", "ComputeNode",
             "Machine", "Rack", "ServiceNode", "ServiceOperation", "Switch", "WorkItem", "Diag_Tools", "MachineAdapterInstance", "RasMetaData", "CacheIpAddrToLctn", "CacheMacAddrToLctn",
-            "UcsConfigValue", "UniqueValues", "RawHWInventory_History"};
+            "UcsConfigValue", "UniqueValues", "RawHWInventory_History", "Raw_DIMM", "Raw_FRU_Host"};
     private static final Map<String, String> HISTORY_TABLES;
     private static final Map<String, String> TABLE_TO_PROCEDURE;
     private static final Map<String, String[]> TABLE_FIELDS;
@@ -384,6 +384,8 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         String[] hwinventoryfruFields = {"FruId", "FruType", "FruSubType", "DbUpdatedTimestamp"};
         String[] hwinventorylocationFields = {"Id", "Type", "Ordinal", "FruId", "DbUpdatedTimestamp"};
         String[] rawinventoryhistoryFields = {"Action", "Id", "FruId", "ForeignTimestamp", "DbUpdatedTimestamp"};
+        String[] rawDimmFields = {"id", "serial", "mac", "locator", "source", "timestamp", "DbUpdatedTimestamp"};
+        String[] rawFruHostFields = {"id", "boardSerial", "mac", "source", "timestamp", "DbUpdatedTimestamp"};
 
         TABLE_FIELDS = new HashMap<>();
         TABLE_FIELDS.put("Adapter", adapterFields);
@@ -408,6 +410,8 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_FIELDS.put("UcsConfigValue", ucsConfigValueFields);
         TABLE_FIELDS.put("UniqueValues", uniqueValuesFields);
         TABLE_FIELDS.put("RawHWInventory_History", rawinventoryhistoryFields);
+        TABLE_FIELDS.put("Raw_DIMM", rawDimmFields);
+        TABLE_FIELDS.put("Raw_FRU_Host", rawFruHostFields);
 
         HISTORY_TABLES = new HashMap<>();
         HISTORY_TABLES.put("Adapter", "Adapter_History");
@@ -465,6 +469,8 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_TO_PROCEDURE.put("UniqueValues", "get_uniquevalues_records()");
         TABLE_TO_PROCEDURE.put("RawHWInventory_History", "get_rawinventoryhistory_records()");
         TABLE_TO_PROCEDURE.put("NodeInventory_History", "get_nodeinventoryhistory_records()");
+        TABLE_TO_PROCEDURE.put("Raw_DIMM", "get_rawinventoryhistory_records()");
+        TABLE_TO_PROCEDURE.put("Raw_FRU_Host", "get_rawinventoryhistory_records()");
     }
 
     private Connection onlineTierConn;

@@ -47,6 +47,10 @@ public class NearlineTableUpdater {
 
     public void Update(String tableName, VoltTable tableData) throws DataStoreException, SQLException  {
         PreparedStatement stmt = getStmt(tableName);
+        log.debug("Using stmt %s on table %s",
+                stmt == null ? "null" : stmt.toString(),
+                tableName);
+
         PreparedStatement snapshotStmt = getStmt(tableName + "_SS"); //Is there a snapshot table entry?
         // Is this table supported?
         if (stmt == null) {
@@ -346,6 +350,14 @@ public class NearlineTableUpdater {
         SQL_STMTS.put("RawHWInventory_History",
                 new DataUpdateStmt(
                         "{call insertorupdaterawhwinventorydata(?,?,?,?,?)}",
+                        true));
+        SQL_STMTS.put("Raw_DIMM",
+                new DataUpdateStmt(
+                        "{call insertorupdaterawdimmdata(?,?,?,?,?,?,?)}",
+                        true));
+        SQL_STMTS.put("Raw_FRU_Host",
+                new DataUpdateStmt(
+                        "{call insertorupdaterawfruhostdata(?,?,?,?,?,?)}",
                         true));
         SQL_STMTS.put("ComputeNode_SS",
                 new DataUpdateStmt(
