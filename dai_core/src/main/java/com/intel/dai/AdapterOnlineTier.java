@@ -76,6 +76,8 @@ public abstract class AdapterOnlineTier {
         mTablesToBePurgedSet.add("Accelerator_History");        // Index 31
         mTablesToBePurgedSet.add("Hfi_History");                // Index 32
         mTablesToBePurgedSet.add("RawHWInventory_History");     // Index 33
+        mTablesToBePurgedSet.add("Raw_DIMM");                   // Index 34
+        mTablesToBePurgedSet.add("Raw_FRU_Host");               // Index 35
     }   // ctor
 
     void initializeAdapter() throws IOException, TimeoutException {

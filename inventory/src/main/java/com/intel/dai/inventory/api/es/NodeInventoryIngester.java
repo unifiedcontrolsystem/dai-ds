@@ -12,29 +12,24 @@ import com.intel.dai.dsapi.pojo.Dimm;
 import com.intel.dai.dsapi.pojo.FruHost;
 import com.intel.dai.dsapi.pojo.NodeInventory;
 import com.intel.dai.exceptions.DataStoreException;
-import com.intel.dai.inventory.ProviderInventoryNetworkForeignBus;
 import com.intel.logging.Logger;
 
 import java.util.List;
 import java.util.Map;
 
-public class NodeInventoryIngestor {
+public class NodeInventoryIngester {
     private final Logger log_;
     protected HWInvDbApi onlineInventoryDatabaseClient_;                // voltdb
     private final static Gson gson = new Gson();
+    private long numberNodeInventoryJsonIngested = 0;
 
-    NodeInventoryIngestor(Logger log) {
+    public NodeInventoryIngester(DataStoreFactory factory, Logger log) {
         log_ = log;
-
-        final DataStoreFactory factory_ = ProviderInventoryNetworkForeignBus.getDataStoreFactory();
-        if (factory_ == null) {
-            log_.error("ProviderInventoryNetworkForeignBus.getDataStoreFactory() => null");
-            return;
-        }
-        onlineInventoryDatabaseClient_ = factory_.createHWInvApi();
+        onlineInventoryDatabaseClient_ = factory.createHWInvApi();
+        onlineInventoryDatabaseClient_.initialize();
     }
 
-    int constructAndIngestNodeInventoryJson(FruHost fruHost) throws DataStoreException {
+    void constructAndIngestNodeInventoryJson(FruHost fruHost) throws DataStoreException {
         log_.info("Constructing node inventory from %s", fruHost.hostname);
         NodeInventory nodeInventory = new NodeInventory(fruHost);
 
@@ -43,7 +38,7 @@ public class NodeInventoryIngestor {
             addDimmJsonsToFruHostJson(nodeInventory, location, dimmJsons.get(location));
         }
 
-        return onlineInventoryDatabaseClient_.ingest(nodeInventory);
+        numberNodeInventoryJsonIngested += onlineInventoryDatabaseClient_.ingest(nodeInventory);
     }
 
     void addDimmJsonsToFruHostJson(NodeInventory nodeInventory, String location, String json) {
@@ -104,18 +99,23 @@ public class NodeInventoryIngestor {
         }
     }
 
-    int ingestInitialNodeInventoryHistory() {
-        int numberNodeInventoryJsonIngested = 0;
+    public void ingestInitialNodeInventoryHistory() {
         List<FruHost> fruHosts = onlineInventoryDatabaseClient_.enumerateFruHosts();
-        if (fruHosts != null) {
-            for (FruHost fruHost : fruHosts) {
-                try {
-                    numberNodeInventoryJsonIngested += constructAndIngestNodeInventoryJson(fruHost);
-                } catch (DataStoreException e) {
-                    log_.error("DataStoreException: %s", e.getMessage());
-                }
+        if (fruHosts == null) {
+            log_.error("fruHosts is null");
+            return;
+        }
+
+        for (FruHost fruHost : fruHosts) {
+            try {
+                constructAndIngestNodeInventoryJson(fruHost);
+            } catch (DataStoreException e) {
+                log_.error("DataStoreException: %s", e.getMessage());
             }
         }
+    }
+
+    public long getNumberNodeInventoryJsonIngested() {
         return numberNodeInventoryJsonIngested;
     }
 }

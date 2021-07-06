@@ -50,6 +50,8 @@ import java.text.SimpleDateFormat;
  *      mDataMoverResultTblIndxToTableNameMap.put(31, "Accelerator");
  *      mDataMoverResultTblIndxToTableNameMap.put(32, "Hfi");
  *      mDataMoverResultTblIndxToTableNameMap.put(33, "RawHWInventory_History");
+ *      mDataMoverResultTblIndxToTableNameMap.put(34, "Raw_DIMM");
+ *      mDataMoverResultTblIndxToTableNameMap.put(35, "Raw_FRU_Host");
  */
 
 public class DataMoverGetListOfRecsToMove extends VoltProcedure {
@@ -91,6 +93,8 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
     public final SQLStmt selectAcceleratorToBeMovedSql                  = new SQLStmt("SELECT * FROM Accelerator WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectHfiToBeMovedSql                          = new SQLStmt("SELECT * FROM Hfi WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
     public final SQLStmt selectRawHWInventory_HistoryToBeMovedSql       = new SQLStmt("SELECT * FROM RawHWInventory_History WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectRawDIMMToBeMovedSql                      = new SQLStmt("SELECT * FROM Raw_DIMM WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
+    public final SQLStmt selectRawFRUHostToBeMovedSql                   = new SQLStmt("SELECT * FROM Raw_FRU_Host WHERE DbUpdatedTimestamp BETWEEN TO_TIMESTAMP(MICROSECOND, ?) AND TO_TIMESTAMP(MICROSECOND, ?) ORDER BY DbUpdatedTimestamp ASC;");
 
 
     public VoltTable[] run(long lEndTsInMicroSecs, long lStartTsInMicroSecs) throws VoltAbortException {
@@ -129,7 +133,8 @@ public class DataMoverGetListOfRecsToMove extends VoltProcedure {
         voltQueueSQL(selectAcceleratorToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectHfiToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         voltQueueSQL(selectRawHWInventory_HistoryToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
-
+        voltQueueSQL(selectRawDIMMToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
+        voltQueueSQL(selectRawFRUHostToBeMovedSql, lStartTsInMicroSecs, lEndTsInMicroSecs);
         // Actually get the results for each of the tables.
         VoltTable[] aVt = voltExecuteSQL(true);
 

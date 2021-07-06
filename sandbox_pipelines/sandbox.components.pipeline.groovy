@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 pipeline {
+    options { disableConcurrentBuilds() }
     agent none
     parameters {
         booleanParam(name: 'QUICK_BUILD', defaultValue: true,
@@ -10,6 +11,15 @@ pipeline {
         choice(name: 'AGENT', choices: ['COMPONENT'], description: 'Agent label')
     }
     stages {
+        stage('Restart Component Test Servers') {
+            agent { label "DOCKER-TEST-SERVER-HOST" }
+            steps {
+                script { utilities.fixFilesPermission() }
+                dir ('inventory/src/integration/resources/scripts') {
+                    sh './restart_voltdb.sh'
+                }
+            }
+        }
         stage('Sequential Stages') { // all the sub-stages needs to be run on the same machine
             agent { label "${AGENT}" }
             environment {
