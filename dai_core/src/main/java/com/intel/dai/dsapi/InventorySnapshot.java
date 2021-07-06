@@ -6,6 +6,7 @@ package com.intel.dai.dsapi;
 
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.properties.PropertyMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.time.Instant;
 
@@ -23,4 +24,13 @@ public interface InventorySnapshot {
      * @throws DataStoreException when the timestamp string cannot be retrieved from the near line adapter
      */
     String getLastHWInventoryHistoryUpdate() throws DataStoreException;
+
+    /**
+     * The last json document ingested is characterized by its timestamp and serial, where
+     * timestamp is in epoch seconds, and serial is a string.
+     * @return
+     * @throws DataStoreException
+     */
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngested() throws DataStoreException;
+//    boolean isDuplicated(RawDimm a) throws DataStoreException;
 }

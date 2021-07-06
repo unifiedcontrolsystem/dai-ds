@@ -11,6 +11,7 @@ import com.intel.dai.dsapi.InventorySnapshot;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
 import com.intel.properties.PropertyMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.sql.*;
 import java.time.Instant;
@@ -18,6 +19,45 @@ import java.time.Instant;
 public class InventorySnapshotJdbc implements InventorySnapshot {
     public InventorySnapshotJdbc(Logger logger) {
         log_ = logger;
+    }
+
+    /**
+     * The last json document ingested is characterized by its timestamp and serial, where
+     * timestamp is in epoch seconds, and serial is a string.
+     * @return
+     * @throws DataStoreException
+     */
+    public ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngested() throws DataStoreException {
+        PreparedStatement preparedStatement = null;
+        try {
+            establishConnectionToNearlineDb();
+            preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_UPDATE_SQL);
+            return executeGetLastRawDimmUpdateStmt(preparedStatement);
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
+            tearDown(preparedStatement);
+        }
+    }
+
+    private ImmutablePair<Long, String> executeGetLastRawDimmUpdateStmt(PreparedStatement preparedStatement)
+            throws DataStoreException {
+        try (ResultSet result = preparedStatement.executeQuery()) {
+
+            if (!result.next()) {
+                throw new DataStoreException("!result.next()");
+            }
+            log_.debug("ES index: %s", result.getString(1));
+            return  new ImmutablePair<>(result.getLong(2), result.getString(3)); // first column is indexed at 1
+        } catch (SQLException ex) {
+            throw new DataStoreException(ex.getMessage());
+        } catch (NullPointerException ex) {
+            String msg = String.format(ex.getMessage());
+            throw new DataStoreException(msg);
+        }
+        // Ignore (assume result set is already closed or no longer valid)
     }
 
     /**
@@ -35,7 +75,7 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             retrieveRefLastRawInventoryHistoryUpdate = prepareStatement(GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL);
             return executeRetrieveRefLastRawInventoryUpdateStmt(retrieveRefLastRawInventoryHistoryUpdate);
         } catch (DataStoreException e) {
-            log_.error("HWI:%n  %s", e.getMessage());
+            log_.error(e.getMessage());
             throw e;    // rethrow
         }
         finally {
@@ -271,6 +311,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String SET_REF_SNAPSHOT_SQL = "{call SetRefSnapshotDataForLctn(?)}";
     private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
             "select LastRawReplacementHistoryUpdate()";
+    private static final String GET_LAST_RAW_DIMM_UPDATE_SQL =
+            "select LastRawDimmIngested()";
 
     private Logger log_;
 }

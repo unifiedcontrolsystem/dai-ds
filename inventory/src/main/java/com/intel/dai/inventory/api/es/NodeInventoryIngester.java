@@ -29,21 +29,30 @@ public class NodeInventoryIngester {
         onlineInventoryDatabaseClient_.initialize();
     }
 
-    void constructAndIngestNodeInventoryJson(FruHost fruHost) throws DataStoreException {
+    String constructAndIngestNodeInventoryJson(FruHost fruHost) throws DataStoreException {
         log_.info("Constructing node inventory from %s", fruHost.hostname);
         NodeInventory nodeInventory = new NodeInventory(fruHost);
 
         Map<String, String> dimmJsons = onlineInventoryDatabaseClient_.getDimmJsonsOnFruHost(fruHost.mac);
-        for (String location : dimmJsons.keySet()) {
-            addDimmJsonsToFruHostJson(nodeInventory, location, dimmJsons.get(location));
+        for (String locator : dimmJsons.keySet()) {
+            addDimmJsonsToFruHostJson(nodeInventory, locator, dimmJsons.get(locator));
+
+            // Armando: these are for your function call
+            // locator is the loop variable
+            String hostname = fruHost.hostname;
+            long doc_timestamp = fruHost.timestamp; // epoch seconds
+            String dimmJson = gson.toJson(fruHost);
+
+            // TODO Armando: Call function hostname; locator; doc_timestamp; dimmJson
         }
 
         numberNodeInventoryJsonIngested += onlineInventoryDatabaseClient_.ingest(nodeInventory);
+        return gson.toJson(nodeInventory);
     }
 
-    void addDimmJsonsToFruHostJson(NodeInventory nodeInventory, String location, String json) {
-        log_.debug("  Adding %s => %s", location, json);
-        switch (location) {
+    void addDimmJsonsToFruHostJson(NodeInventory nodeInventory, String locator, String json) {
+        log_.debug("  Adding %s => %s", locator, json);
+        switch (locator) {
             case "CPU0_DIMM_A1":
                 nodeInventory.CPU0_DIMM_A1 = gson.fromJson(json, Dimm.class);
                 break;
@@ -95,7 +104,7 @@ public class NodeInventoryIngester {
                 break;
 
             default:
-                log_.error("Unknown location %s", location);
+                log_.error("Unknown location %s", locator);
         }
     }
 
@@ -108,7 +117,15 @@ public class NodeInventoryIngester {
 
         for (FruHost fruHost : fruHosts) {
             try {
-                constructAndIngestNodeInventoryJson(fruHost);
+                String nodeInventoryJson = constructAndIngestNodeInventoryJson(fruHost);
+
+                // Armando: these are for your function call
+                String hostname = fruHost.hostname;
+                String mac = fruHost.mac;
+                long doc_timestamp = fruHost.timestamp;
+                // nodeInventoryJson: see above
+
+                // TODO Armando: hostname; mac; doc_timestamp; nodeInventoryJson
             } catch (DataStoreException e) {
                 log_.error("DataStoreException: %s", e.getMessage());
             }
