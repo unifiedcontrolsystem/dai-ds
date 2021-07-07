@@ -114,6 +114,7 @@ class DatabaseSynchronizer {
             NodeInventoryIngester ni = new NodeInventoryIngester(factory_, log_);
             ni.ingestInitialNodeInventoryHistory();
             totalNumberOfInjectedDocuments += ni.getNumberNodeInventoryJsonIngested();
+            log_.info("Number of Raw_Node_Inventory_History documents = %d", ni.getNumberNodeInventoryJsonIngested());
 
             Thread.sleep(5000);     // CMC_TODO: remove after debugging
             getLastHWInventoryHistoryUpdate();
