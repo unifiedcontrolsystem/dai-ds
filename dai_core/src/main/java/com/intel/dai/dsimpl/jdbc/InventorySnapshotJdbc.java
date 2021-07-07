@@ -31,8 +31,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
-            preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_UPDATE_SQL);
-            return executeGetLastRawDimmUpdateStmt(preparedStatement);
+            preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_SQL);
+            return executeGetLastRawComponentStmt(preparedStatement);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
             throw e;    // rethrow
@@ -42,20 +42,35 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         }
     }
 
-    private ImmutablePair<Long, String> executeGetLastRawDimmUpdateStmt(PreparedStatement preparedStatement)
-            throws DataStoreException {
-        try (ResultSet result = preparedStatement.executeQuery()) {
+    public ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngested() throws DataStoreException {
+        PreparedStatement preparedStatement = null;
+        try {
+            establishConnectionToNearlineDb();
+            preparedStatement = prepareStatement(GET_LAST_RAW_FRU_HOST_SQL);
+            return executeGetLastRawComponentStmt(preparedStatement);
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
+            tearDown(preparedStatement);
+        }
+    }
 
+    private ImmutablePair<Long, String> executeGetLastRawComponentStmt(PreparedStatement preparedStatement)
+            throws DataStoreException {
+        log_.info("preparedStatement: %s", preparedStatement.toString());
+        try (ResultSet result = preparedStatement.executeQuery()) {
             if (!result.next()) {
-                throw new DataStoreException("!result.next()");
+                log_.error("!result.next()");
+                return ImmutablePair.nullPair();
             }
             log_.debug("ES index: %s", result.getString(1));
-            return  new ImmutablePair<>(result.getLong(2), result.getString(3)); // first column is indexed at 1
+            return new ImmutablePair<>(result.getLong(3), result.getString(2)); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
         } catch (NullPointerException ex) {
-            String msg = String.format(ex.getMessage());
-            throw new DataStoreException(msg);
+            throw new DataStoreException(ex.getMessage());
         }
         // Ignore (assume result set is already closed or no longer valid)
     }
@@ -88,9 +103,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         try (ResultSet result = retrieveRefLastRawInventoryUpdate.executeQuery()) {
 
             if (!result.next()) {
-                throw new DataStoreException("HWI:%n  Reference last raw inventory update:!result.next()");
+                throw new DataStoreException("Reference last raw inventory update:!result.next()");
             }
-            return  result.getString(1); // first column is indexed at 1
+            return result.getString(1); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
         } catch (NullPointerException ex) {
@@ -311,8 +326,10 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String SET_REF_SNAPSHOT_SQL = "{call SetRefSnapshotDataForLctn(?)}";
     private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
             "select LastRawReplacementHistoryUpdate()";
-    private static final String GET_LAST_RAW_DIMM_UPDATE_SQL =
-            "select LastRawDimmIngested()";
+    private static final String GET_LAST_RAW_DIMM_SQL =
+            "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY EntryNumber DESC LIMIT 1";
+    private static final String GET_LAST_RAW_FRU_HOST_SQL =
+            "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY EntryNumber DESC LIMIT 1";
 
     private Logger log_;
 }

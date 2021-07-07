@@ -3301,7 +3301,7 @@ CREATE TABLE Raw_DIMM
     mac                VARCHAR(50)        NOT NULL, -- foreign key into Raw_FRU_host
     locator            VARCHAR(50)        NOT NULL,
     source             VARCHAR(5000)      NOT NULL,
-    doc_timestamp      TIMESTAMP,                   -- 1 second resolution
+    doc_timestamp      BIGINT,                      -- epoch seconds
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     PRIMARY KEY (serial)
 );
@@ -3313,7 +3313,7 @@ CREATE TABLE tier2_Raw_DIMM
     mac                VARCHAR(50)        NOT NULL, -- foreign key into Raw_FRU_host
     locator            VARCHAR(50)        NOT NULL,
     source             VARCHAR(5000)      NOT NULL,
-    doc_timestamp      TIMESTAMP,                   -- 1 second resolution
+    doc_timestamp      BIGINT,                      -- epoch seconds
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (serial)
@@ -3325,7 +3325,7 @@ CREATE TABLE Raw_FRU_Host
     boardSerial        VARCHAR(50),
     mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
-    doc_timestamp      TIMESTAMP,   -- 1 second resolution
+    doc_timestamp      BIGINT,      -- epoch seconds
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     PRIMARY KEY (mac)
 );
@@ -3336,7 +3336,7 @@ CREATE TABLE tier2_Raw_FRU_Host
     boardSerial        VARCHAR(50),
     mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
-    doc_timestamp      TIMESTAMP,   -- 1 second resolution
+    doc_timestamp      BIGINT,      -- epoch seconds
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (mac)
@@ -3351,11 +3351,11 @@ CREATE TABLE Raw_Node_Inventory_History
 
 CREATE PROCEDURE Raw_DIMM_Insert AS
     UPSERT INTO Raw_DIMM(id, serial, mac, locator, source, doc_timestamp, DbUpdatedTimestamp)
-        VALUES(?, ?, ?, ?, ?, TO_TIMESTAMP(SECOND, ?), CURRENT_TIMESTAMP);
+        VALUES(?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 CREATE PROCEDURE Raw_FRU_Host_Insert AS
     UPSERT INTO Raw_FRU_Host(id, boardSerial, mac, source, doc_timestamp, DbUpdatedTimestamp)
-        VALUES(?, ?, ?, ?, TO_TIMESTAMP(SECOND, ?), CURRENT_TIMESTAMP);
+        VALUES(?, ?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 -- The parameter is the mac address of the FRU host under consideration
 CREATE PROCEDURE Get_Dimms_on_FRU_Host AS

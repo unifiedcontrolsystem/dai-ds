@@ -2,6 +2,7 @@ package com.intel.dai.inventory
 
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.HWInvUtil
+import com.intel.dai.dsimpl.jdbc.InventorySnapshotJdbc
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.dsimpl.voltdb.VoltHWInvDbApi
 import com.intel.dai.inventory.utilities.*
@@ -21,6 +22,7 @@ class InventoryUpdateThreadITSpec extends Specification {
         println Helper.testStartMessage(specificationContext)
         print "./src/integration/resources/scripts/drop_inventory_data.sh".execute().text
         dsClientFactory.createHWInvApi() >> new VoltHWInvDbApi(logger, util, voltDbServers)
+//        dsClientFactory.createInventorySnapshotApi() >> new InventorySnapshotJdbc(logger)
     }
 
     def cleanup() {
