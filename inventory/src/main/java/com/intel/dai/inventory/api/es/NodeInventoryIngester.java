@@ -11,8 +11,12 @@ import com.intel.dai.dsapi.HWInvDbApi;
 import com.intel.dai.dsapi.pojo.Dimm;
 import com.intel.dai.dsapi.pojo.FruHost;
 import com.intel.dai.dsapi.pojo.NodeInventory;
+import com.intel.dai.dsapi.InventoryTrackingApi;
 import com.intel.dai.exceptions.DataStoreException;
 import com.intel.logging.Logger;
+import com.intel.config_io.ConfigIO;
+import com.intel.config_io.ConfigIOFactory;
+import com.intel.properties.PropertyMap;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +24,8 @@ import java.util.Map;
 public class NodeInventoryIngester {
     private final Logger log_;
     protected HWInvDbApi onlineInventoryDatabaseClient_;                // voltdb
+    protected InventoryTrackingApi inventoryApi_;
+    protected ConfigIO jsonParser;
     private final static Gson gson = new Gson();
     private long numberNodeInventoryJsonIngested = 0;
 
@@ -27,6 +33,8 @@ public class NodeInventoryIngester {
         log_ = log;
         onlineInventoryDatabaseClient_ = factory.createHWInvApi();
         onlineInventoryDatabaseClient_.initialize();
+        inventoryApi_ = factory.createInventoryTrackingApi();
+        jsonParser = ConfigIOFactory.getInstance("json");
     }
 
     String constructAndIngestNodeInventoryJson(FruHost fruHost) throws DataStoreException {
@@ -35,15 +43,21 @@ public class NodeInventoryIngester {
 
         Map<String, String> dimmJsons = onlineInventoryDatabaseClient_.getDimmJsonsOnFruHost(fruHost.mac);
         for (String locator : dimmJsons.keySet()) {
-            addDimmJsonsToFruHostJson(nodeInventory, locator, dimmJsons.get(locator));
-
-            // Armando: these are for your function call
-            // locator is the loop variable
+            String dimmJson = dimmJsons.get(locator);
+            addDimmJsonsToFruHostJson(nodeInventory, locator, dimmJson);
             String hostname = fruHost.hostname;
             long doc_timestamp = fruHost.timestamp; // epoch seconds
-            String dimmJson = gson.toJson(fruHost);
 
-            // TODO Armando: Call function hostname; locator; doc_timestamp; dimmJson
+
+            long sizeMB = 0l;
+            try {
+                PropertyMap dimm = jsonParser.fromString(dimmJson).getAsMap();
+                sizeMB = Long.valueOf(dimm.getString("Size").split(" ")[0]);
+            } catch (Exception e) {
+                log_.exception(e, "Failed retrieving dimm size from json file.");
+            }
+
+            inventoryApi_.addDimm(hostname, hostname + "_" + locator, "A", sizeMB, locator, null, doc_timestamp * 1000000l, "INVENTORY", -1);
         }
 
         numberNodeInventoryJsonIngested += onlineInventoryDatabaseClient_.ingest(nodeInventory);
@@ -118,14 +132,7 @@ public class NodeInventoryIngester {
         for (FruHost fruHost : fruHosts) {
             try {
                 String nodeInventoryJson = constructAndIngestNodeInventoryJson(fruHost);
-
-                // Armando: these are for your function call
-                String hostname = fruHost.hostname;
-                String mac = fruHost.mac;
-                long doc_timestamp = fruHost.timestamp;
-                // nodeInventoryJson: see above
-
-                // TODO Armando: hostname; mac; doc_timestamp; nodeInventoryJson
+                inventoryApi_.addFru(fruHost.hostname, fruHost.timestamp * 1000000l, nodeInventoryJson, fruHost.mac, fruHost.rawIbBios);
             } catch (DataStoreException e) {
                 log_.error("DataStoreException: %s", e.getMessage());
             }

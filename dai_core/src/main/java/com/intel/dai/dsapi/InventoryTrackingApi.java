@@ -19,4 +19,8 @@ public interface InventoryTrackingApi {
             throws DataStoreException;
     void replaceServiceNode(String location, String serialNumber, String fruType, PropertyMap inventoryInfo,
                             Instant timestamp, String reqAdapterType, long reqWorkItemId) throws DataStoreException;
+
+    void addDimm(String nodeLocation, String componentLocation, String state, long sizeMB, String moduleLocator, String bankLocator, long inventoryTS, String adapter, long workItem) throws DataStoreException;
+
+    void addFru(String nodeLocation, long inventoryTS, String inventoryInfo, String sernum, String biosInfo) throws DataStoreException;
 }
