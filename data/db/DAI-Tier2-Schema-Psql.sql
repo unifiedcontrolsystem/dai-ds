@@ -5783,7 +5783,7 @@ CREATE TABLE public.tier2_Raw_DIMM
     mac                VARCHAR(50)        NOT NULL, -- foreign key into Raw_FRU_host
     locator            VARCHAR(50)        NOT NULL,
     source             VARCHAR(5000)      NOT NULL,
-    doc_timestamp      TIMESTAMP,                   -- 1 second resolution
+    doc_timestamp      BIGINT,                      -- 1 second resolution
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (serial)
@@ -5795,7 +5795,7 @@ CREATE TABLE public.tier2_Raw_FRU_Host
     boardSerial        VARCHAR(50),
     mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
-    doc_timestamp      TIMESTAMP,   -- 1 second resolution
+    doc_timestamp      BIGINT,      -- 1 second resolution
     DbUpdatedTimestamp TIMESTAMP          NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (mac)
@@ -5834,7 +5834,7 @@ CREATE OR REPLACE FUNCTION public.insertorupdaterawdimmdata(
     p_mac VarChar,
     p_locator VarChar,
     p_source VarChar,
-    p_timestamp TIMESTAMP,
+    p_timestamp BIGINT,
     p_DbUpdatedTimestamp TIMESTAMP) RETURNS void
     LANGUAGE sql
 AS
@@ -5855,7 +5855,7 @@ CREATE OR REPLACE FUNCTION public.insertorupdaterawfruhostdata(
     p_boardSerial VarChar,
     p_mac VarChar,
     p_source VarChar,
-    p_timestamp TIMESTAMP,
+    p_timestamp BIGINT,
     p_DbUpdatedTimestamp TIMESTAMP) RETURNS void
     LANGUAGE sql
 AS
@@ -5870,30 +5870,13 @@ on conflict(mac) do update set id=p_id,
     ;
 $$;
 
-CREATE OR REPLACE FUNCTION public.LastRawDimmIngested()
-    RETURNS
-        TABLE
-        (
-            id            character varying, -- Elasticsearch doc id for debugging only
-            serial        character varying,
-            doc_timestamp TIMESTAMP          -- 1 second resolution
-        )
-    LANGUAGE sql
-AS
-$$
-SELECT id, serial, doc_timestamp
-FROM tier2_Raw_DIMM
-ORDER BY EntryNumber DESC
-LIMIT 1;
-$$;
-
 CREATE OR REPLACE FUNCTION public.LastRawFruHostIngested()
     RETURNS
         TABLE
         (
             id            character varying, -- Elasticsearch doc id for debugging only
             mac           character varying,
-            doc_timestamp TIMESTAMP          -- 1 second resolution
+            doc_timestamp BIGINT             -- 1 second resolution
         )
     LANGUAGE sql
 AS
@@ -5906,7 +5889,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION public.IsDuplicatedRawDimm(
     p_serial VarChar,
-    p_timestamp TIMESTAMP -- 1 second resolution
+    p_timestamp BIGINT -- 1 second resolution
 )
     RETURNS BOOLEAN
 AS
@@ -5922,19 +5905,20 @@ BEGIN
     IF (p_timestamp > last_updated_doc_timestamp) then
         RETURN false;
     END IF;
-    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_DIMM WHERE doc_timestamp = ''%s'' AND serial = ''%s''', p_timestamp, p_serial);
+    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_DIMM WHERE doc_timestamp = ''%s'' AND serial = ''%s''',
+                  p_timestamp, p_serial);
 END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public.IsDuplicatedRawFruHost(
     p_mac VarChar,
-    p_timestamp TIMESTAMP -- 1 second resolution
+    p_timestamp BIGINT -- 1 second resolution
 )
     RETURNS BOOLEAN
 AS
 $$
 DECLARE
-    last_updated_doc_timestamp TIMESTAMP;
+    last_updated_doc_timestamp BIGINT;
 BEGIN
     EXECUTE 'SELECT max(doc_timestamp) FROM tier2_Raw_FRU_Host' INTO last_updated_doc_timestamp;
 
@@ -5944,7 +5928,8 @@ BEGIN
     IF (p_timestamp > last_updated_doc_timestamp) then
         RETURN false;
     END IF;
-    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_FRU_Host WHERE doc_timestamp = ''%s'' AND mac = ''%s''', p_timestamp, p_mac);
+    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_FRU_Host WHERE doc_timestamp = ''%s'' AND mac = ''%s''',
+                  p_timestamp, p_mac);
 END
 $$ LANGUAGE plpgsql;
 

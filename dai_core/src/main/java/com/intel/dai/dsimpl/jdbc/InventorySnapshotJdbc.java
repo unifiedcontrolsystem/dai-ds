@@ -31,8 +31,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
-            preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_UPDATE_SQL);
-            return executeGetLastRawDimmUpdateStmt(preparedStatement);
+            preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_SQL);
+            return executeGetLastRawDimmStmt(preparedStatement);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
             throw e;    // rethrow
@@ -42,20 +42,19 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         }
     }
 
-    private ImmutablePair<Long, String> executeGetLastRawDimmUpdateStmt(PreparedStatement preparedStatement)
+    private ImmutablePair<Long, String> executeGetLastRawDimmStmt(PreparedStatement preparedStatement)
             throws DataStoreException {
+        log_.info("preparedStatement: %s", preparedStatement.toString());
         try (ResultSet result = preparedStatement.executeQuery()) {
-
             if (!result.next()) {
-                throw new DataStoreException("!result.next()");
+                throw new DataStoreException("Reference last raw dimm serial:!result.next()");
             }
             log_.debug("ES index: %s", result.getString(1));
-            return  new ImmutablePair<>(result.getLong(2), result.getString(3)); // first column is indexed at 1
+            return new ImmutablePair<>(result.getLong(2), result.getString(3)); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
         } catch (NullPointerException ex) {
-            String msg = String.format(ex.getMessage());
-            throw new DataStoreException(msg);
+            throw new DataStoreException(ex.getMessage());
         }
         // Ignore (assume result set is already closed or no longer valid)
     }
@@ -88,9 +87,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         try (ResultSet result = retrieveRefLastRawInventoryUpdate.executeQuery()) {
 
             if (!result.next()) {
-                throw new DataStoreException("HWI:%n  Reference last raw inventory update:!result.next()");
+                throw new DataStoreException("Reference last raw inventory update:!result.next()");
             }
-            return  result.getString(1); // first column is indexed at 1
+            return result.getString(1); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
         } catch (NullPointerException ex) {
@@ -311,8 +310,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String SET_REF_SNAPSHOT_SQL = "{call SetRefSnapshotDataForLctn(?)}";
     private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
             "select LastRawReplacementHistoryUpdate()";
-    private static final String GET_LAST_RAW_DIMM_UPDATE_SQL =
-            "select LastRawDimmIngested()";
+    private static final String GET_LAST_RAW_DIMM_SQL =
+            "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY EntryNumber DESC LIMIT 1";
 
     private Logger log_;
 }

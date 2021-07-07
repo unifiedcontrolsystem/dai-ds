@@ -11,6 +11,7 @@ import com.intel.dai.inventory.api.es.Elasticsearch;
 import com.intel.dai.inventory.api.es.ElasticsearchIndexIngester;
 import com.intel.dai.inventory.api.es.NodeInventoryIngester;
 import com.intel.logging.Logger;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.*;
@@ -114,6 +115,10 @@ class DatabaseSynchronizer {
             ni.ingestInitialNodeInventoryHistory();
             totalNumberOfInjectedDocuments += ni.getNumberNodeInventoryJsonIngested();
 
+            Thread.sleep(5000);     // CMC_TODO: remove after debugging
+            getLastHWInventoryHistoryUpdate();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
         } finally {
@@ -135,12 +140,30 @@ class DatabaseSynchronizer {
      * @return last raw inventory update timestamp, "null" if the raw history table is empty, or null if there was an error.
      */
     String getLastHWInventoryHistoryUpdate() {  // must not be private or Spy will not work
-        log_.error(">> getLastHWInventoryHistoryUpdate()");
+        log_.info(">> getLastHWInventoryHistoryUpdate()");
         try {
+            ImmutablePair<Long, String> lastRawDimmIngested = getCharacteristicsOfLastRawDimm();
+            log_.info("At %d: lastRawDimmSerial: %s", lastRawDimmIngested.left, lastRawDimmIngested.right);
+
             String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
         } catch (DataStoreException e) {
             log_.error("getLastHWInventoryHistoryUpdate() threw (%s)", e.getMessage());
+            return null;
+        } catch (NullPointerException e) {
+            log_.exception(e, "null pointer exception: %s", e.getMessage());
+            return null;
+        }
+    }
+
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawDimm() {  // must not be private or Spy will not work
+        log_.info(">> getCharacteristicsOfLastRawDimm()");
+        try {
+            ImmutablePair<Long, String> lastIngestedRawDimm =
+                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawDimmIngested();
+            return Objects.requireNonNullElse(lastIngestedRawDimm, ImmutablePair.nullPair());
+        } catch (DataStoreException e) {
+            log_.error("getCharacteristicsOfLastRawDimm() threw (%s)", e.getMessage());
             return null;
         } catch (NullPointerException e) {
             log_.exception(e, "null pointer exception: %s", e.getMessage());
