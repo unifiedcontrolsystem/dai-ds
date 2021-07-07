@@ -32,7 +32,7 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         try {
             establishConnectionToNearlineDb();
             preparedStatement = prepareStatement(GET_LAST_RAW_DIMM_SQL);
-            return executeGetLastRawDimmStmt(preparedStatement);
+            return executeGetLastRawComponentStmt(preparedStatement);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
             throw e;    // rethrow
@@ -42,15 +42,31 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         }
     }
 
-    private ImmutablePair<Long, String> executeGetLastRawDimmStmt(PreparedStatement preparedStatement)
+    public ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngested() throws DataStoreException {
+        PreparedStatement preparedStatement = null;
+        try {
+            establishConnectionToNearlineDb();
+            preparedStatement = prepareStatement(GET_LAST_RAW_FRU_HOST_SQL);
+            return executeGetLastRawComponentStmt(preparedStatement);
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
+            tearDown(preparedStatement);
+        }
+    }
+
+    private ImmutablePair<Long, String> executeGetLastRawComponentStmt(PreparedStatement preparedStatement)
             throws DataStoreException {
         log_.info("preparedStatement: %s", preparedStatement.toString());
         try (ResultSet result = preparedStatement.executeQuery()) {
             if (!result.next()) {
-                throw new DataStoreException("Reference last raw dimm serial:!result.next()");
+                log_.error("!result.next()");
+                return ImmutablePair.nullPair();
             }
             log_.debug("ES index: %s", result.getString(1));
-            return new ImmutablePair<>(result.getLong(2), result.getString(3)); // first column is indexed at 1
+            return new ImmutablePair<>(result.getLong(3), result.getString(2)); // first column is indexed at 1
         } catch (SQLException ex) {
             throw new DataStoreException(ex.getMessage());
         } catch (NullPointerException ex) {
@@ -312,6 +328,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             "select LastRawReplacementHistoryUpdate()";
     private static final String GET_LAST_RAW_DIMM_SQL =
             "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY EntryNumber DESC LIMIT 1";
+    private static final String GET_LAST_RAW_FRU_HOST_SQL =
+            "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY EntryNumber DESC LIMIT 1";
 
     private Logger log_;
 }

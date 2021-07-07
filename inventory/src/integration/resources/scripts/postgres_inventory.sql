@@ -92,23 +92,6 @@ on conflict(mac) do update set id=p_id,
     ;
 $$;
 
-CREATE OR REPLACE FUNCTION public.LastRawFruHostIngested()
-    RETURNS
-        TABLE
-        (
-            id            character varying, -- Elasticsearch doc id for debugging only
-            mac           character varying,
-            doc_timestamp BIGINT             -- 1 second resolution
-        )
-    LANGUAGE sql
-AS
-$$
-SELECT id, mac, doc_timestamp
-FROM tier2_Raw_FRU_Host
-ORDER BY EntryNumber DESC
-LIMIT 1;
-$$;
-
 CREATE OR REPLACE FUNCTION public.IsDuplicatedRawDimm(
     p_serial VarChar,
     p_timestamp BIGINT -- 1 second resolution

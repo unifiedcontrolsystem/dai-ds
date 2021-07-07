@@ -384,8 +384,8 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         String[] hwinventoryfruFields = {"FruId", "FruType", "FruSubType", "DbUpdatedTimestamp"};
         String[] hwinventorylocationFields = {"Id", "Type", "Ordinal", "FruId", "DbUpdatedTimestamp"};
         String[] rawinventoryhistoryFields = {"Action", "Id", "FruId", "ForeignTimestamp", "DbUpdatedTimestamp"};
-        String[] rawDimmFields = {"id", "serial", "mac", "locator", "source", "timestamp", "DbUpdatedTimestamp"};
-        String[] rawFruHostFields = {"id", "boardSerial", "mac", "source", "timestamp", "DbUpdatedTimestamp"};
+        String[] rawDimmFields = {"id", "serial", "mac", "locator", "source", "doc_timestamp", "DbUpdatedTimestamp"};
+        String[] rawFruHostFields = {"id", "boardSerial", "mac", "source", "doc_timestamp", "DbUpdatedTimestamp"};
 
         TABLE_FIELDS = new HashMap<>();
         TABLE_FIELDS.put("Adapter", adapterFields);
@@ -469,10 +469,6 @@ public class DataLoaderApiJdbc implements DataLoaderApi {
         TABLE_TO_PROCEDURE.put("UniqueValues", "get_uniquevalues_records()");
         TABLE_TO_PROCEDURE.put("RawHWInventory_History", "get_rawinventoryhistory_records()");
         TABLE_TO_PROCEDURE.put("NodeInventory_History", "get_nodeinventoryhistory_records()");
-
-        // TODO: Determine if the following lines are necessary
-        TABLE_TO_PROCEDURE.put("Raw_DIMM", "get_rawinventoryhistory_records()");
-        TABLE_TO_PROCEDURE.put("Raw_FRU_Host", "get_rawinventoryhistory_records()");
     }
 
     private Connection onlineTierConn;

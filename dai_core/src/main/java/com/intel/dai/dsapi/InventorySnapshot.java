@@ -32,5 +32,6 @@ public interface InventorySnapshot {
      * @throws DataStoreException
      */
     ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngested() throws DataStoreException;
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngested() throws DataStoreException;
 //    boolean isDuplicated(RawDimm a) throws DataStoreException;
 }

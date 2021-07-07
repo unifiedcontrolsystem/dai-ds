@@ -145,6 +145,9 @@ class DatabaseSynchronizer {
             ImmutablePair<Long, String> lastRawDimmIngested = getCharacteristicsOfLastRawDimm();
             log_.info("At %d: lastRawDimmSerial: %s", lastRawDimmIngested.left, lastRawDimmIngested.right);
 
+            ImmutablePair<Long, String> lastRawFruHostIngested = getCharacteristicsOfLastRawFruHost();
+            log_.info("At %d: lastRawFruHostMac: %s", lastRawFruHostIngested.left, lastRawFruHostIngested.right);
+
             String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
         } catch (DataStoreException e) {
@@ -164,6 +167,21 @@ class DatabaseSynchronizer {
             return Objects.requireNonNullElse(lastIngestedRawDimm, ImmutablePair.nullPair());
         } catch (DataStoreException e) {
             log_.error("getCharacteristicsOfLastRawDimm() threw (%s)", e.getMessage());
+            return null;
+        } catch (NullPointerException e) {
+            log_.exception(e, "null pointer exception: %s", e.getMessage());
+            return null;
+        }
+    }
+
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHost() {  // must not be private or Spy will not work
+        log_.info(">> getCharacteristicsOfLastRawFruHost()");
+        try {
+            ImmutablePair<Long, String> lastIngestedRawFruHost =
+                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawFruHostIngested();
+            return Objects.requireNonNullElse(lastIngestedRawFruHost, ImmutablePair.nullPair());
+        } catch (DataStoreException e) {
+            log_.error("getCharacteristicsOfLastRawFruHost() threw (%s)", e.getMessage());
             return null;
         } catch (NullPointerException e) {
             log_.exception(e, "null pointer exception: %s", e.getMessage());
