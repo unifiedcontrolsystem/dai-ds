@@ -135,6 +135,42 @@ public class VoltDbInventoryTrackingApi implements InventoryTrackingApi {
         }
     }
 
+    @Override
+    public void addDimm(String nodeLocation, String componentLocation, String state, long sizeMB, String moduleLocator, String bankLocator, long inventoryTS, String adapter, long workItem) throws DataStoreException {
+        try {
+            ClientResponse response = voltClient.callProcedure(ADD_DIMM_SP, nodeLocation, componentLocation,
+                    state, sizeMB, moduleLocator, bankLocator, inventoryTS, adapter, workItem);
+            if (response.getStatus() != ClientResponse.SUCCESS) {
+                String statusDesc = response.getStatusString();
+                logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, ComponentLocation=%s, " +
+                                "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s.", ADD_DIMM_SP,
+                        nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator);
+                throw new DataStoreException("Unable to add dimm to history.  Status returned by server: " +
+                        statusDesc);
+            }
+        } catch (IOException | ProcCallException ex) {
+            logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, ComponentLocation=%s, " +
+                            "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s.", ADD_DIMM_SP,
+                    nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator);
+            throw new DataStoreException("An error occurred while adding dimm to history", ex);
+        }
+    }
+
+    @Override
+    public void addFru(String nodeLocation, long inventoryTS, String inventoryInfo, String sernum, String biosInfo) throws DataStoreException {
+        try {
+            ClientResponse response = voltClient.callProcedure(ADD_FRU_SP, nodeLocation, inventoryTS, inventoryInfo, sernum, biosInfo);
+            if (response.getStatus() != ClientResponse.SUCCESS) {
+                String statusDesc = response.getStatusString();
+                logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, sernum=%s. ", ADD_FRU_SP, nodeLocation, sernum);
+                throw new DataStoreException("Unable to add fru to history.  Status returned by server: " + statusDesc);
+            }
+        } catch (IOException | ProcCallException ex) {
+            logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, sernum=%s. ", ADD_FRU_SP, nodeLocation, sernum);
+            throw new DataStoreException("An error occurred while adding fru history", ex);
+        }
+    }
+
     private static long convertInstantToMicrosec(Instant timestamp) {
         long microsec = TimeUnit.SECONDS.toMicros(timestamp.getEpochSecond()) +
                 TimeUnit.NANOSECONDS.toMicros(timestamp.getNano());
@@ -145,6 +181,8 @@ public class VoltDbInventoryTrackingApi implements InventoryTrackingApi {
     private static String COMPUTE_NODE_REPLACEMENT_SP = "ComputeNodeReplaced";
     private static String SERVICE_NODE_STATE_UPDATE_SP = "ServiceNodeSetState";
     private static String SERVICE_NODE_REPLACEMENT_SP = "ServiceNodeReplaced";
+    private static String ADD_DIMM_SP = "DimmAddToHistory";
+    private static String ADD_FRU_SP = "FruAddToHistory";
 
     private Client voltClient;
     private Logger logger;
