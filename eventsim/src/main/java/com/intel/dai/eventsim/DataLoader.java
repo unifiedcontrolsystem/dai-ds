@@ -94,7 +94,7 @@ class DataLoader {
     private void loadForeignSimulatorServerConfiguration() throws IOException, ConfigIOParseException,
             SimulatorException {
         serverConfiguration_ = loadDataFromFile(serverConfigFile_);
-        DataValidation.validateKeys(serverConfiguration_, FOREIGN_SERVER_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+        DataValidation.validateKeysAndNullValues(serverConfiguration_, FOREIGN_SERVER_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
     }
 
     /**
@@ -104,7 +104,7 @@ class DataLoader {
      */
     private void loadForeignApiSimulatorConfiguration() throws PropertyNotExpectedType, SimulatorException {
         PropertyMap apiConfiguration = serverConfiguration_.getMap(FS_API_SIMULATOR_CONFIG);
-        DataValidation.validateKeys(apiConfiguration, FS_API_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+        DataValidation.validateKeysAndNullValues(apiConfiguration, FS_API_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
         bootParamsFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_BOOT_PARAMETERS);
         bootImagesFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_BOOT_IMAGES);
         hwInventoryFileAbsolutePath_ = apiConfiguration.getString(FOREIGN_API_HW_INVENTORY);
@@ -121,7 +121,7 @@ class DataLoader {
      */
     private void loadForeignEventsSimulatorConfiguration() throws SimulatorException, PropertyNotExpectedType {
         eventsConfiguration_ = serverConfiguration_.getMap(FS_EVENTS_SIMULATOR_CONFIG);
-        DataValidation.validateKeys(eventsConfiguration_, FS_EVENTS_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
+        DataValidation.validateKeysAndNullValues(eventsConfiguration_, FS_EVENTS_CONFIG_KEYS, MISSING_FOREIGN_SERVER_CONFIG);
     }
 
     /**
@@ -276,7 +276,7 @@ class DataLoader {
     private final static String FOREIGN_API_NODE_STATE = "node-state";
 
     private final static String FOREIGN_EVENTS_COUNT = "count";
-    private final static String FOREIGN_EVENTS_TEMPLATE_CONFIG = "events-template-config";
+    private final static String FOREIGN_EVENTS_TEMPLATE_CONFIG = "events-config-template";
     private final static String FOREIGN_EVENTS_TIME_DELAY_MUS = "time-delay-mus";
 
 

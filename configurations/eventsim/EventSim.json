@@ -10,7 +10,7 @@
   },
   "events-simulator-config" : {
     "count": 10,
-    "events-template-config" : "/opt/ucs/etc/EventsTemplate.json",
+    "events-config-template" : "/opt/ucs/etc/EventsTemplate.json",
     "seed": "1234",
     "time-delay-mus": 1,
     "timezone": "GMT"

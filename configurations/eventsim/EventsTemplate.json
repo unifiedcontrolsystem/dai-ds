@@ -1,26 +1,4 @@
 {
-  "event": {
-    "ras" : {
-      "default" : "old-ras",
-      "types" :[
-        "fabric-crit", "old-ras"
-      ]
-    },
-
-    "sensor" : {
-      "default" : "energy",
-      "types" :[
-        "energy", "fabric-perf", "power", "temperature", "voltage"
-      ]
-    },
-
-    "boot" : {
-      "default" : "all",
-      "types" :[
-        "off", "on", "ready"
-      ]
-    }
-  } ,
   "event-types": {
     "energy": {
       "template": "/resources/templates/telemetry-energy.json" ,

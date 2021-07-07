@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SSENetwork extends NetworkConnectionObject {
 
     public SSENetwork(final PropertyMap config, final Logger log) throws SimulatorException {
-        DataValidation.validateKeys(config, SSE_CONFIG_KEYS, MISSING_SERVER_CONFIG);
+        DataValidation.validateKeysAndNullValues(config, SSE_CONFIG_KEYS, MISSING_SERVER_CONFIG);
         config_ = config;
         log_ = log;
     }

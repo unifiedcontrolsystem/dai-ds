@@ -76,27 +76,25 @@ class ForeignFilter {
      * @throws ConfigIOParseException unable to create events
      * @throws SimulatorException unable to create events
      */
-    PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, PropertyArray updateJpathFieldFilter_, PropertyArray templateFieldFilters_,
-                                    long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
-        boolean updateTemplate = eventTypeTemplate.isUpdateTemplateRequired();
+    PropertyDocument generateEvents(final EventTypeTemplate eventTypeTemplate, final long count, final long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
+        final boolean updateTemplate = eventTypeTemplate.isUpdateTemplateRequired();
         if(updateTemplate)
-            return generateEventsWithUpdate(eventTypeTemplate, updateJpathFieldFilter_, templateFieldFilters_, count,
-                    seed);
-        return generateEvents(eventTypeTemplate, count, seed);
+            return generateEventsWithUpdate(eventTypeTemplate, count, seed);
+        return generateEventsWithoutUpdate(eventTypeTemplate, count, seed);
     }
 
-    private PropertyDocument generateEvents(EventTypeTemplate eventTypeTemplate, long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException {
+    private PropertyDocument generateEventsWithoutUpdate(final EventTypeTemplate eventTypeTemplate, final long count, final long seed)
+    throws PropertyNotExpectedType, IOException, ConfigIOParseException {
         PropertyMap templateData = eventTypeTemplate.getEventTypeSingleTemplateData();
         PropertyArray data = new PropertyArray();
-        for(int eventsCount = 0; eventsCount < count; eventsCount++)
+        for(long eventsCount = 0; eventsCount < count; eventsCount++)
             data.add(templateData);
         return data;
     }
 
-    private PropertyDocument generateEventsWithUpdate(EventTypeTemplate eventTypeTemplate, PropertyArray updateJpathFieldFilter_, PropertyArray templateFieldFilters_,
-                                                      long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
+    private PropertyDocument generateEventsWithUpdate(EventTypeTemplate eventTypeTemplate, long count, long seed) throws PropertyNotExpectedType, IOException, ConfigIOParseException, SimulatorException {
         PropertyMap updateJPathField = eventTypeTemplate.getUpdateFieldsInfoWithMetada();
-        updateJPathFieldInfo(updateJPathField, updateJpathFieldFilter_);
+        updateJPathFieldInfo(updateJPathField, new PropertyArray());
         PropertyMap updateJPathWithMetadata = new PropertyMap();
         loadMetadataToUpdateJPathFields(updateJPathField, updateJPathWithMetadata);
 
@@ -104,7 +102,7 @@ class ForeignFilter {
         PropertyMap sampleTemplateData = new PropertyMap(templateData);
 
         PropertyMap filtersForSingleTemplate = eventTypeTemplate.getFiltersForSingleTemplate();
-        updateFiltersSingleTemplate(filtersForSingleTemplate, templateFieldFilters_);
+        updateFiltersSingleTemplate(filtersForSingleTemplate, new PropertyArray());
         filterEventTypeTemplateData(templateData, filtersForSingleTemplate);
 
         PropertyMap jPathFilterCounterInfo = eventTypeTemplate.getFiltersForSingleTemplateCount();
@@ -185,7 +183,7 @@ class ForeignFilter {
                 for(Map.Entry<String, Object> field : fieldsMetadataInfo.entrySet()) {
                     String fieldName = field.getKey();
                     PropertyMap metadataInfo = (PropertyMap) field.getValue();
-                    DataValidation.validateKeys(metadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
+                    DataValidation.validateKeysAndNullValues(metadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
 
                     String metadataFile = metadataInfo.getString(METADATA_KEYS[0]);
                     Object metadataFilter = metadataInfo.get(METADATA_KEYS[1]);
@@ -193,7 +191,7 @@ class ForeignFilter {
                     pathAndValue.put(fieldName, metadata);
                 }
             } else {
-                DataValidation.validateKeys(fieldsMetadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
+                DataValidation.validateKeysAndNullValues(fieldsMetadataInfo, METADATA_KEYS, MISSING_METADATA_KEYS);
                 String metadataFile = fieldsMetadataInfo.getString(METADATA_KEYS[0]);
                 Object metadataFilter = fieldsMetadataInfo.get(METADATA_KEYS[1]);
                 PropertyArray metadata = filterDataWithValue(metadataFile, metadataFilter);
