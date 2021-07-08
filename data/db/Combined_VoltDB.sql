@@ -3290,6 +3290,12 @@ CREATE PROCEDURE NodeHistoryRowCount   -- needed for testing
 
 -- <<< Inventory stored procedures
 
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.DimmAddToHistory;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FruAddToHistory;
+
 --- >>> New Inventory
 -- All non-source columns contain data duplicated from the JSON blob.  This redundancy allows us to leverage the power
 -- of a relational database.
