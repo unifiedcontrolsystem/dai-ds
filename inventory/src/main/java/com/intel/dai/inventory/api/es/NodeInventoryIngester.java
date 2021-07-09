@@ -57,7 +57,13 @@ public class NodeInventoryIngester {
                 log_.exception(e, "Failed retrieving dimm size from json file.");
             }
 
-            inventoryApi_.addDimm(hostname, hostname + "_" + locator, "A", sizeMB, locator, null, doc_timestamp * 1000000l, "INVENTORY", -1);
+            try {
+                inventoryApi_.addDimm(hostname, hostname + "_" + locator,
+                        "A", sizeMB, locator, null,
+                        doc_timestamp * 1000000l, "INVENTORY", -1);
+            } catch (DataStoreException e) {
+                log_.error(e.getMessage());
+            }
         }
 
         numberNodeInventoryJsonIngested += onlineInventoryDatabaseClient_.ingest(nodeInventory);

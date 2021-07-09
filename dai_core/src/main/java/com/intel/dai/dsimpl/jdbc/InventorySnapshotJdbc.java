@@ -57,6 +57,59 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
         }
     }
 
+    public boolean isRawDimmDuplicated(String serial, Long timestamp) throws DataStoreException {
+        PreparedStatement preparedStatement = null;
+        try {
+            establishConnectionToNearlineDb();
+            preparedStatement = prepareStatement(IS_DUPLICATED_RAW_DIMM_SQL);
+            return executeIsDuplicatedRawComponentStmt(preparedStatement, serial, timestamp);
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
+            tearDown(preparedStatement);
+        }
+    }
+
+    public boolean isRawFruHostDuplicated(String mac, Long timestamp) throws DataStoreException {
+        PreparedStatement preparedStatement = null;
+        try {
+            establishConnectionToNearlineDb();
+            preparedStatement = prepareStatement(IS_DUPLICATED_RAW_FRU_HOST_SQL);
+            return executeIsDuplicatedRawComponentStmt(preparedStatement, mac, timestamp);
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+            throw e;    // rethrow
+        }
+        finally {
+            tearDown(preparedStatement);
+        }
+    }
+
+    private boolean executeIsDuplicatedRawComponentStmt(PreparedStatement preparedStatement,
+                                                        String key, Long timestamp) throws DataStoreException {
+        log_.info("preparedStatement: %s", preparedStatement.toString());
+        try {
+            preparedStatement.setString(1, key);
+            preparedStatement.setLong(2, timestamp);
+        } catch (SQLException e) {
+            throw new DataStoreException(e.getMessage());
+        }
+
+        try (ResultSet result = preparedStatement.executeQuery()) {
+            if (!result.next()) {
+                log_.error("!result.next()");
+                return false;
+            }
+            return result.getBoolean(1);
+        } catch (SQLException e) {
+            throw new DataStoreException(e.getMessage());
+        } catch (NullPointerException e) {
+            throw new DataStoreException(e.getMessage());
+        }
+    }
+
     private ImmutablePair<Long, String> executeGetLastRawComponentStmt(PreparedStatement preparedStatement)
             throws DataStoreException {
         log_.info("preparedStatement: %s", preparedStatement.toString());
@@ -330,6 +383,10 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY EntryNumber DESC LIMIT 1";
     private static final String GET_LAST_RAW_FRU_HOST_SQL =
             "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY EntryNumber DESC LIMIT 1";
+    private static final String IS_DUPLICATED_RAW_DIMM_SQL =
+            "select * from IsDuplicatedRawDimm(key, doc_timestamp) values(?,?)";
+    private static final String IS_DUPLICATED_RAW_FRU_HOST_SQL =
+            "select * from IsDuplicatedRawFruHost(key, doc_timestamp) values(?,?)";
 
     private Logger log_;
 }

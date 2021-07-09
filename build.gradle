@@ -592,6 +592,8 @@ project(':dai_core') {
         testCompile "cglib:cglib-nodep:${cglib_nodep_version}"
         compileOnly "org.projectlombok:lombok:${lombok_version}"
         annotationProcessor "org.projectlombok:lombok:${lombok_version}"
+
+        testCompile group: 'org.postgresql', name: 'postgresql', version: postgres_jdbc_version
     }
 
     project.mainClassName = 'com.intel.dai.AdapterDaiMgr'

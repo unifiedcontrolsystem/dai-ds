@@ -1,7 +1,8 @@
 #!/bin/bash
 
-docker stop node1
-docker rm node1
-docker run -d -P -e HOST_COUNT=1 -e HOSTS=node1 -p 21212:21212 -p 8081:8080 --name=node1 --network=voltLocalCluster voltdb/voltdb-community
-sleep 12
+docker-compose -f docker-compose/db.yml down
+docker-compose -f docker-compose/db.yml up -d
+sleep 15
+PGPASSWORD=postgres createdb --host=css-centos-8-00.ra.intel.com --username=postgres dai
+PGPASSWORD=postgres psql --host=css-centos-8-00.ra.intel.com --username=postgres --dbname=dai < postgres_inventory.sql
 sqlcmd < inventory.sql
