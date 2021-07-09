@@ -110,42 +110,9 @@ class ViewCli(object):
                                         action='store_true')
         environment_parser.set_defaults(func=self._view_environment_execute)
 
-    def _add_inventory_snapshot_parser(self, view_parser):
-        parser = view_parser.add_parser('inventory-snapshot', help='view the snapshot for a specific location')
-
-        parser.add_argument('locations', help='Display the snapshot history for a given location.')
-
-        parser.add_argument('--limit', default=1, type=int,
-                            help='Provide a limit to the number of records of data being retrieved. '
-                            'The default value is 100')
-        parser.add_argument('--format', choices=['json', 'table'], default='table',
-                            help='Display data either in JSON or table format. '
-                            'Default will be to display data in tabular format')
-        parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                            'Uses a default of 900s')
-
-        parser.set_defaults(func=self._view_inventory_snapshot_execute)
-
-    def _add_fru_migration_parser(self, view_parser):
-        parser = view_parser.add_parser('fru-migration', help='view the migration history for a specific fru')
-
-        # cli only understands locations as a required argument.
-        parser.add_argument('locations', help='Display the migration history for a given fru.')
-
-        parser.add_argument('--limit', default=100, type=int,
-                                          help='Provide a limit to the number of records of data being retrieved. '
-                                          'The default value is 100')
-        parser.add_argument('--format', choices=['json', 'table'], default='table',
-                                          help='Display data either in JSON or table format. '
-                                          'Default will be to display data in tabular format')
-        parser.add_argument('--timeout', default=900, type=int, help='Timeout value for HTTP request. '
-                                          'Uses a default of 900s')
-
-        parser.set_defaults(func=self._view_fru_migration_history_execute)
-
     def _add_inventory_parser(self, view_parser):
         inventory_parser = view_parser.add_parser('inventory', help='view the inventory info data for a '
-                                                  'specific location')
+                                                                         'specific location')
         inventory_parser.add_argument('locations',
                                       help='Filter all inventory info data for a given locations. '
                                            'Provide comma separated location list or location group. '
@@ -485,176 +452,34 @@ class ViewCli(object):
         if display_format == 'json':
             data_to_display = json_display.display_raw_json()
         else:
-            columns_order = ["foreigntimestamp", "id", "action", "fruid"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_inventory_snapshot_execute(self, args):
-        client = HttpClient()
-        if args.locations is None:
-            response_msg = 'The inventory snapshot requires location to be specified. ' \
-                           'Try again with a location'
-            return self._parse_response_as_per_user_request(args.format, 1,
-                                                            JsonError(response_msg).construct_error_result())
-
-        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-        user = 'user=' + self.user
-
-        # This implementation is only for this milestone.  When the underlying HPC API is decided, it may
-        # be replaced with a more sophistical implementation
-
-        url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user, ''] if x != ""])
-        self.lgr.debug("_view_inventory_snapshot_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["lctn", "hostname", "inventorytimestamp", "sernum"]
-            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-        return CommandResult(response_code, data_to_display)
-
-    def _view_fru_migration_history_execute(self, args):
-        client = HttpClient()
-        if args.locations is None:
-            response_msg = 'The fru migration history requires fru to be specified. ' \
-                           'Try again with a fru'
-            return self._parse_response_as_per_user_request(args.format, 1,
-                                                            JsonError(response_msg).construct_error_result())
-
-        limit, fru, display_format, time_out = self._retrieve_from_args(args)  # there is no lctn; only fru
-        user = 'user=' + self.user
-        url = client.get_base_url() + 'cli/getfrumigrationhistory?' + "&".join(
-            [x for x in [limit, fru, user] if x != ""])
-        self.lgr.debug("_view_fru_migration_history_execute: URL for request is {0}".format(url))
-        response_code, response = client.send_get_request(url, time_out)
-
-        json_display = JsonDisplay(response)
-
-        if display_format == 'json':
-            data_to_display = json_display.display_raw_json()
-        else:
-            columns_order = ["inventory_timestamp",
-                             "node_location", "component_location",
-                             "node_serial_number", "component_serial_number"]
+            if args.all:
+                columns_order = ["lastchgtimestamp", "lctn", "hostname", "oldsernum", "newsernum", "serviceoperationid", "oldstate",
+                                 "newstate", "frutype", "entrynumber", "dbupdatedtimestamp"]
+            else:
+                columns_order = ["lastchgtimestamp", "lctn", "hostname", "oldsernum", "newsernum", "serviceoperationid"]
             data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 
     def _view_inventory_execute(self, args):
-        def convert_json_dict_to_pretty_formatted_str(json_dict):
-            return json.dumps(json_dict, sort_keys=True,
-                              indent=4, separators=(',', ': '))
-
-        def convert_json_str_to_json(json_str):
-            try:
-                return json.loads(json_str)
-            except ValueError:
-                return json_str
-            except TypeError:
-                return json_str
-
-        def replace_value_json_str_with_json(hw_info_dict):
-            for key in hw_info_dict.keys():
-                hw_info_dict[key]['value'] = convert_json_str_to_json(hw_info_dict[key]['value'])
-            return hw_info_dict
-
-        def convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component):
-            if not node_location_hist_list:
-                return ''
-
-            pretty_formatted_str = '============================================================================\n'
-            pretty_formatted_str += 'Details:\n'
-            pretty_formatted_str += '============================================================================\n'
-            for node_location_hist_entry in node_location_hist_list:
-                location = node_location_hist_entry[0]
-                serial_number = node_location_hist_entry[4]
-                inventory_timestamp = get_inventory_timestamp(node_location_hist_entry)
-
-                inventory_info_dict = json.loads(node_location_hist_entry[3])
-                hw_info_dict = inventory_info_dict['HWInfo']
-                fixed_up_hw_info_dict = replace_value_json_str_with_json(hw_info_dict)
-
-                if component is not None:
-                    fixed_up_hw_info_dict = extract_component_location_dict(fixed_up_hw_info_dict, component)
-                    location = get_component_value(hw_info_dict, component, 'loc')
-                    serial_number = get_component_value(hw_info_dict, component, 'fru_id')
-                pretty_formatted_str += location + ' contains ' + serial_number + ' at ' + inventory_timestamp + ':\n'
-                pretty_formatted_str += \
-                    convert_json_dict_to_pretty_formatted_str(fixed_up_hw_info_dict) + '\n'
-                pretty_formatted_str += '----------------------------------------------------------------------------\n'
-            return pretty_formatted_str
-
-        def pretty_format_response(response_str, component=None):
-            response_dict = json.loads(response_str)
-
-            try:
-                node_location_hist_list = response_dict['data']
-            except KeyError:
-                # Error message is printed by the http client code
-                node_location_hist_list = []
-
-            return convert_location_history_list_to_pretty_formatted_str(node_location_hist_list, component)
-
-        def extract_component_location_dict(hw_info_dict, component):
-            component_location_dict = {}
-            for attribute in ['loc', 'loc_info', 'fru_id', 'fru_info']:
-                component_location_dict[f"fru/{component}/{attribute}"] = get_component_value(
-                    hw_info_dict, component, attribute)
-
-            return component_location_dict
-
-        def get_component_value(hw_info_dict, component, attribute):
-            try:
-                return hw_info_dict[f"fru/{component}/{attribute}"]['value']
-            except KeyError as e:
-                return f"KeyError: {str(e)}"
-
-        def get_inventory_timestamp(node_location_hist_entry):
-            return node_location_hist_entry[2]
-
         client = HttpClient()
         if not args.history:
-            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-            location_parts = lctn.split('_')  # this may change since it looks really weird
+            args.limit = 1
+        limit, lctn, display_format, time_out = self._retrieve_from_args(args)
+        user = 'user=' + self.user
+        sernum = ''
+        if args.sernum is not None:
+            sernum = 'Sernum=' + str(args.sernum)
+        url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user, sernum] if x != ""])
+        self.lgr.debug("_view_inventory_execute: URL for request is {0}".format(url))
+        response_code, response = client.send_get_request(url, time_out)
 
-            component_lctn = None
-            if len(location_parts) == 2:
-                lctn = location_parts[0]
-                component_lctn = location_parts[1]
+        json_display = JsonDisplay(response)
 
-            user = 'user=' + self.user
-            sernum = ''
-            if args.sernum is not None:
-                sernum = 'Sernum=' + str(args.sernum)
-            url = client.get_base_url() + 'cli/getnodeinvinfo?' + "&".join([x for x in [limit, lctn, user, sernum] if x != ""])
-            self.lgr.debug("_view_inventory_execute: URL for request is {0}".format(url))
-            response_code, response = client.send_get_request(url, time_out)
-
-            json_display = JsonDisplay(response)
-
-            if display_format == 'json':
-                data_to_display = json_display.display_raw_json()
-            else:
-                columns_order = ["lctn", "inventorytimestamp", "sernum"]
-                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
-                data_to_display += '\n' + pretty_format_response(response, component_lctn)
+        if display_format == 'json':
+            data_to_display = json_display.display_raw_json()
         else:
-            limit, lctn, display_format, time_out = self._retrieve_from_args(args)
-            user = 'user=' + self.user
-            url = client.get_base_url() + 'cli/getinvhislctn?' + "&".join(
-            [x for x in [limit, lctn, user] if x != ""])
-            self.lgr.debug("_view_inventory_change_execute: URL for request is {0}".format(url))
-            response_code, response = client.send_get_request(url, time_out)
-
-            json_display = JsonDisplay(response)
-
-            if display_format == 'json':
-                data_to_display = json_display.display_raw_json()
-            else:
-                columns_order = ["id", "fruid"]
-                data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
+            columns_order = ["lctn", "hostname", "sernum", "inventorytimestamp", "inventoryinfo", "detectedinvmismatch"]
+            data_to_display = '\n' + json_display.display_json_in_tabular_format(columns_order)
         return CommandResult(response_code, data_to_display)
 
     def _view_state_execute(self, args):
