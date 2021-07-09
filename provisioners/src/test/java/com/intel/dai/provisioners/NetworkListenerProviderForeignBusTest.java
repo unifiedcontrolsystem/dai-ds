@@ -64,6 +64,14 @@ public class NetworkListenerProviderForeignBusTest {
         data = mapToString(loadDataFromFile(sample5));
         dataList = transformer_.processRawStringData("nodestate", data, config_);
         assertEquals(1, dataList.size());
+
+        data = mapToString(loadDataFromFile(sample6));
+        dataList = transformer_.processRawStringData("heartbeat", data, config_);
+        assertEquals(1, dataList.size());
+
+        data = mapToString(loadDataFromFile(sample7));
+        dataList = transformer_.processRawStringData("heartbeat", data, config_);
+        assertEquals(1, dataList.size());
     }
 
     @Test
@@ -160,6 +168,8 @@ public class NetworkListenerProviderForeignBusTest {
     private static final String sample3 = "/resources/data-samples/sample3.json";
     private static final String sample4 = "/resources/data-samples/sample4.json";
     private static final String sample5 = "/resources/data-samples/sample5.json";
+    private static final String sample6 = "/resources/data-samples/sample6.json";
+    private static final String sample7 = "/resources/data-samples/sample7.json";
     private static final String badSample1 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"unknown\"}]}}";
     private static final String badSample2 = "{\"metrics\":{\"messages\":[{\"Components\":[\"x3000c0s34b4n0\"],\"Flag\":\"Alert\",\"State\":\"unknown\"}]}}";
 }
