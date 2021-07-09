@@ -1589,19 +1589,19 @@ BEGIN
     if p_diagid != '%' then
     v_diagids := (string_to_array(p_diagid, ',') ::int[]);
     return query
-            select * from  tier2_diagresults
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and diagid = ANY(v_diagids) and
-                case
-                   when p_lctn ='%' then (lctn ~ '.*' or lctn is null)
-                    when p_lctn != '%' then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))))
-                end
-            order by dbupdatedtimestamp DESC LIMIT p_limit;
+        select * from tier2_diagresults d1 where date(d1.dbupdatedtimestamp) = date((select max(d2.dbupdatedtimestamp) from tier2_diagresults d2
+        where d2.dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+        d2.dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and d1.diagid=d2.diagid and d2.diagid = ANY(v_diagids))) and
+        case
+            when p_lctn ='%' then (lctn ~ '.*' or lctn is null)
+            when p_lctn != '%' then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))))
+        end
+        order by dbupdatedtimestamp DESC LIMIT p_limit;
     else
     return query
-    select * from  tier2_diagresults
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
-                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
+        select * from tier2_diagresults d1 where date(d1.dbupdatedtimestamp) = date((select max(d2.dbupdatedtimestamp) from tier2_diagresults d2 where d1.diagid=d2.diagid))
+        and dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+        dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
             case
                when p_lctn ='%' then (lctn ~ '.*' or lctn is null)
                 when p_lctn != '%' then ((lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ','))))
@@ -1980,28 +1980,28 @@ $$;
 -- Name: getinventorychange(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_RawHWInventory_History
+CREATE OR REPLACE FUNCTION public.getinventorychange(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS SETOF public.tier2_replacement_history
     LANGUAGE plpgsql
     AS $$
     DECLARE
-         p_fruid character varying;
+        p_sernum character varying;
     BEGIN
-        p_fruid := (select distinct on (fruid) fruid from tier2_RawHWInventory_History where fruid = p_lctn);
-        if (p_fruid is not null) then   -- p_lctn is really a fruid ...
+        p_sernum := (select distinct on (newsernum) newsernum from tier2_replacement_history where newsernum = p_lctn);
+        if (p_sernum is not null) then
         return query
-            select * from  tier2_RawHWInventory_History
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-                dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                fruid like (p_fruid || '%')
-            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
+            select * from  tier2_replacement_history
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
+                newsernum like (p_sernum || '%')
+            order by lctn, dbupdatedtimestamp desc limit p_limit;
 
         else
         return query
-            select * from  tier2_RawHWInventory_History
-            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-                dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-                (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
-            order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
+            select * from  tier2_replacement_history
+            where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp at time zone 'UTC') and
+                dbupdatedtimestamp >= coalesce(p_start_time, (current_timestamp at time zone 'UTC') - INTERVAL '3 MONTHS') and
+                (lctn not like '') and ((select string_to_array(lctn, ' ')) <@  (select string_to_array(p_lctn, ',')))
+            order by lctn, dbupdatedtimestamp desc limit p_limit;
         end if;
         return;
     END
@@ -2012,10 +2012,11 @@ $$;
 -- Name: getnodeinventoryinfoforlctn(p_lctn character varying, p_limit integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character varying, p_sernum character varying, p_limit integer) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), InventoryTimestamp TIMESTAMP, Sernum VarChar(50), EntryNumber BigInt)
+CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character varying, p_sernum character varying, p_limit integer) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), InventoryTimestamp TIMESTAMP, Sernum VarChar(50), EntryNumber BigInt, DetectedInvMismatch VarChar(16384))
     LANGUAGE sql
     AS $$
-        select IH.Lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.Sernum, IH.EntryNumber  from tier2_nodeinventory_history IH
+        select IH.Lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.Sernum, IH.EntryNumber, array_to_string(array_agg(distinct right(RE.instancedata, length(RE.instancedata) - position('DetectedInvMismatch=' in RE.instancedata) - 19)),', ') AS DetectedInvMismatch
+        from tier2_nodeinventory_history IH, tier2_rasevent RE
         where
         case
             when p_lctn = '%' then (IH.Lctn ~ '.*' or IH.Lctn is null)
@@ -2026,44 +2027,13 @@ CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character v
             when p_sernum = '%' then (IH.Sernum ~ '.*' or IH.Sernum is null)
             when p_sernum != '%' then (IH.Sernum not like '') and ((select string_to_array(IH.Sernum, '')) <@ (select string_to_array(p_sernum, ',')))
         end
+        and IH.lctn = RE.lctn
+        and IH.dbupdatedtimestamp  = RE.dbupdatedtimestamp
+        and RE.descriptivename = 'RasGenAdapterUpdatingDbInvInfo'
+        group by IH.lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.sernum, IH.entrynumber
         order by IH.InventoryTimestamp desc limit p_limit;
 $$;
 
---
--- Name: getinventoryhistoryforlctn(timestamp without time zone, timestamp without time zone, character varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.getinventoryhistoryforlctn(p_start_time timestamp without time zone, p_end_time timestamp without time zone, p_lctn character varying, p_limit integer) RETURNS TABLE(id character varying(64), fruid character varying(80))
-    LANGUAGE sql
-    AS $$
-       select id, fruid from  tier2_RawHWInventory_History
-       where dbupdatedtimestamp <= coalesce(p_end_time, current_timestamp) and
-            dbupdatedtimestamp >= coalesce(p_start_time, current_timestamp - INTERVAL '3 MONTHS') and
-            (select string_to_array(id, ' ')) <@  (select string_to_array(p_lctn, ','))
-       order by dbupdatedtimestamp, id, action, fruid desc limit p_limit;
-$$;
-
---
--- Name: getinventoryinfoforlctn(tcharacter varying, character varying, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE OR REPLACE FUNCTION public.getinventoryinfoforlctn(p_lctn character varying, p_limit integer)
- RETURNS TABLE(lctn character varying
-              , dbupdatedtimestamp timestamp without time zone
-              , inventorytimestamp timestamp without time zone
-              , inventoryinfo character varying
-              , sernum character varying)
-LANGUAGE sql
-AS $$
-select HI.Lctn
-    , HI.dbupdatedtimestamp
-    , HI.InventoryTimestamp
-    , InventoryInfo::varchar
-    , HI.Sernum
-from tier2_nodeinventory_history HI
-where HI.Lctn = p_lctn
-order by HI.InventoryTimestamp desc, HI.Lctn asc LIMIT p_limit;
-$$;
 
 --
 -- Name: getinventorydataforlctn(timestamp without time zone, timestamp without time zone, character varying, integer); Type: FUNCTION; Schema: public; Owner: -

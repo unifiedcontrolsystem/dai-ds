@@ -26,7 +26,7 @@ class ViewTest(TestCase):
         sys.argv = ['ucs', 'view']
         parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -38,7 +38,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -50,7 +50,7 @@ class ViewTest(TestCase):
         with self.assertRaises(SystemExit):
             parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
-        self.assertIn('{env,event,fru-migration,inventory-snapshot,inventory,job,network-config,replacement-history,'
+        self.assertIn('{env,event,inventory,job,network-config,replacement-history,'
                       'reservation,state,system-info}', captured_output.getvalue())
         captured_output.close()
 
@@ -457,6 +457,162 @@ class ViewTest(TestCase):
         captured_output.close()
         os.remove(temp_filepath)
 
+    def test_inventory_execute_positive(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory', 'c01']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},{\"unit\":\"string\",\"data\":\"state\","
+                                         "\"heading\":\"state\"},{\"unit\":\"string\",\"data\":\"hostname\","
+                                         "\"heading\":\"hostname\"},{\"unit\":\"string\",\"data\":\"sernum\","
+                                         "\"heading\":\"sernum\"},{\"unit\":\"string\",\"data\":\"bootimageid\","
+                                         "\"heading\":\"bootimageid\"},{\"unit\":\"string\",\"data\":\"environment\","
+                                         "\"heading\":\"environment\"},{\"unit\":\"string\",\"data\":\"ipaddr\","
+                                         "\"heading\":\"ipaddr\"},{\"unit\":\"string\",\"data\":\"macaddr\","
+                                         "\"heading\":\"macaddr\"},{\"unit\":\"string\",\"data\":\"type\","
+                                         "\"heading\":\"type\"},{\"unit\":\"string\",\"data\":\"bmcipaddr\","
+                                         "\"heading\":\"bmcipaddr\"},{\"unit\":\"string\",\"data\":\"bmcmacaddr\","
+                                         "\"heading\":\"bmcmacaddr\"},{\"unit\":\"string\",\"data\":\"bmchostname\","
+                                         "\"heading\":\"bmchostname\"},{\"unit\":\"string\","
+                                         "\"data\":\"dbupdatedtimestamp\",\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},{\"unit\":\"string\","
+                                         "\"data\":\"lastchgadaptertype\",\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},{\"unit\":\"string\",\"data\":\"owner\","
+                                         "\"heading\":\"owner\"},{\"unit\":\"string\",\"data\":\"aggregator\","
+                                         "\"heading\":\"aggregator\"},{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},{\"unit\":\"string\","
+                                         "\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},{\"unit\":\"string\","
+                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,"
+                                         "\"W\",\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('LCTN', captured_output.getvalue())
+        captured_output.close()
+
+    def test_inventory_execute_positive_json(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'inventory', 'c01', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},{\"unit\":\"string\",\"data\":\"state\","
+                                         "\"heading\":\"state\"},{\"unit\":\"string\",\"data\":\"hostname\","
+                                         "\"heading\":\"hostname\"},{\"unit\":\"string\",\"data\":\"sernum\","
+                                         "\"heading\":\"sernum\"},{\"unit\":\"string\",\"data\":\"bootimageid\","
+                                         "\"heading\":\"bootimageid\"},{\"unit\":\"string\",\"data\":\"environment\","
+                                         "\"heading\":\"environment\"},{\"unit\":\"string\",\"data\":\"ipaddr\","
+                                         "\"heading\":\"ipaddr\"},{\"unit\":\"string\",\"data\":\"macaddr\","
+                                         "\"heading\":\"macaddr\"},{\"unit\":\"string\",\"data\":\"type\","
+                                         "\"heading\":\"type\"},{\"unit\":\"string\",\"data\":\"bmcipaddr\","
+                                         "\"heading\":\"bmcipaddr\"},{\"unit\":\"string\",\"data\":\"bmcmacaddr\","
+                                         "\"heading\":\"bmcmacaddr\"},{\"unit\":\"string\",\"data\":\"bmchostname\","
+                                         "\"heading\":\"bmchostname\"},{\"unit\":\"string\","
+                                         "\"data\":\"dbupdatedtimestamp\",\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},{\"unit\":\"string\","
+                                         "\"data\":\"lastchgadaptertype\",\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},{\"unit\":\"string\",\"data\":\"owner\","
+                                         "\"heading\":\"owner\"},{\"unit\":\"string\",\"data\":\"aggregator\","
+                                         "\"heading\":\"aggregator\"},{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},{\"unit\":\"string\","
+                                         "\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},{\"unit\":\"string\","
+                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,"
+                                         "\"W\",\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('lctn', captured_output.getvalue())
+        captured_output.close()
+
+    def test_replacement_execute_positive(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'replacement-history', '--start-time', '2018-09-14', '--end-time', '2018-09-15',
+                    'c01']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"serviceoperationid\","
+                                         "\"heading\":\"serviceoperationid\"},{\"unit\":\"string\","
+                                         "\"data\":\"oldsernum\",\"heading\":\"oldsernum\"},{\"unit\":\"string\","
+                                         "\"data\":\"newsernum\",\"heading\":\"newsernum\"},{\"unit\":\"string\","
+                                         "\"data\":\"oldstate\",\"heading\":\"oldstate\"},{\"unit\":\"string\","
+                                         "\"data\":\"newstate\",\"heading\":\"newstate\"},{\"unit\":\"string\","
+                                         "\"data\":\"dbupdatedtimestamp\",\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},{\"unit\":\"string\","
+                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"R48-CH00-CN0\","
+                                         "\"compute\", \"0\", null, null, \"A\", \"A\", \"2019-07-15 23:35:53.361\","
+                                         "\"2019-07-15 23:35:53.361\", \"21321\"]],"
+                                         "\"result-data-columns\":10}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('NEWSERNUM', captured_output.getvalue())
+        captured_output.close()
+
+    def test_replacement_execute_positive_json(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        parser = Parser()
+        sys.argv = ['ucs', 'view', 'replacement-history', '--start-time', '2018-09-14', '--end-time', '2018-09-15',
+                    'c01', '--format', 'json']
+        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+            patched_construct.return_value = "http://localhost/4567:"
+            with patch('requests.get') as patched_get:
+                type(patched_get.return_value).text = \
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"frutype\",\"heading\":\"frutype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"serviceoperationid\","
+                                         "\"heading\":\"serviceoperationid\"},{\"unit\":\"string\","
+                                         "\"data\":\"oldsernum\",\"heading\":\"oldsernum\"},{\"unit\":\"string\","
+                                         "\"data\":\"newsernum\",\"heading\":\"newsernum\"},{\"unit\":\"string\","
+                                         "\"data\":\"oldstate\",\"heading\":\"oldstate\"},{\"unit\":\"string\","
+                                         "\"data\":\"newstate\",\"heading\":\"newstate\"},{\"unit\":\"string\","
+                                         "\"data\":\"dbupdatedtimestamp\",\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},{\"unit\":\"string\","
+                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"R48-CH00-CN0\","
+                                         "\"compute\", \"0\", null, null, \"A\", \"A\", \"2019-07-15 23:35:53.361\","
+                                         "\"2019-07-15 23:35:53.361\", \"21321\"]],"
+                                         "\"result-data-columns\":10}"})
+                parser.execute_cli_cmd()
+        sys.stdout = sys.__stdout__
+        self.assertIn('newsernum', captured_output.getvalue())
+        captured_output.close()
+
     def test_state_execute_positive(self):
         captured_output = io.StringIO()
         sys.stdout = captured_output
@@ -466,41 +622,41 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sequencenumber\","
-                                          "\"heading\":\"sequencenumber\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
-                                          "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
-                                          "\"heading\":\"dbupdatedtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                          "\"heading\":\"lastchgtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
-                                          "\"heading\":\"lastchgadaptertype\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
-                                          "\"heading\":\"lastchgworkitemid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
-                                          "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
-                                          "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
-                                          "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
-                                          "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,"
-                                          "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
-                                          "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
-                                          "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
-                                          "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
-                                          "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},"
+                                         "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                         "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
+                                         "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
+                                         "\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
+                                         "\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
+                                         "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
+                                         "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},"
+                                         "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                         "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
+                                         "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('STATE', captured_output.getvalue())
@@ -515,41 +671,41 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sequencenumber\","
-                                          "\"heading\":\"sequencenumber\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
-                                          "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
-                                          "\"heading\":\"dbupdatedtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                          "\"heading\":\"lastchgtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
-                                          "\"heading\":\"lastchgadaptertype\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
-                                          "\"heading\":\"lastchgworkitemid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
-                                          "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
-                                          "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
-                                          "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
-                                          "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,"
-                                          "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
-                                          "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
-                                          "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
-                                          "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
-                                          "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},"
+                                         "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                         "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
+                                         "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
+                                         "\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
+                                         "\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
+                                         "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
+                                         "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},"
+                                         "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                         "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
+                                         "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('state', captured_output.getvalue())
@@ -565,42 +721,41 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sequencenumber\","
-                                          "\"heading\":\"sequencenumber\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
-                                          "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
-                                          "\"heading\":\"dbupdatedtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                          "\"heading\":\"lastchgtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
-                                          "\"heading\":\"lastchgadaptertype\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
-                                          "\"heading\":\"lastchgworkitemid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
-                                          "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
-                                          "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
-                                          "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\","
-                                          "\"heading\":\"wlmnodestate\"}, "
-                                          "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,"
-                                          "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
-                                          "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
-                                          "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
-                                          "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
-                                          "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},"
+                                         "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                         "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
+                                         "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
+                                         "\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
+                                         "\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
+                                         "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
+                                         "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},"
+                                         "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                         "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
+                                         "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('MACADDR', captured_output.getvalue())
@@ -616,58 +771,57 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sequencenumber\","
-                                          "\"heading\":\"sequencenumber\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
-                                          "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
-                                          "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
-                                          "\"heading\":\"dbupdatedtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                          "\"heading\":\"lastchgtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
-                                          "\"heading\":\"lastchgadaptertype\"},"
-                                          "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
-                                          "\"heading\":\"lastchgworkitemid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
-                                          "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
-                                          "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
-                                          "\"heading\":\"inventoryinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"wlmnodestate\","
-                                          "\"heading\":\"wlmnodestate\"}, "
-                                          "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,"
-                                          "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
-                                          "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
-                                          "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
-                                          "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
-                                          "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\":[{\"unit\":\"string\",\"data\":\"lctn\",\"heading\":\"lctn\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sequencenumber\","
+                                         "\"heading\":\"sequencenumber\"},"
+                                         "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                         "{\"unit\":\"string\",\"data\":\"hostname\",\"heading\":\"hostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"sernum\",\"heading\":\"sernum\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bootimageid\",\"heading\":\"bootimageid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"environment\",\"heading\":\"environment\"},"
+                                         "{\"unit\":\"string\",\"data\":\"ipaddr\",\"heading\":\"ipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"macaddr\",\"heading\":\"macaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"type\",\"heading\":\"type\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcipaddr\",\"heading\":\"bmcipaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmcmacaddr\",\"heading\":\"bmcmacaddr\"},"
+                                         "{\"unit\":\"string\",\"data\":\"bmchostname\",\"heading\":\"bmchostname\"},"
+                                         "{\"unit\":\"string\",\"data\":\"dbupdatedtimestamp\","
+                                         "\"heading\":\"dbupdatedtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
+                                         "\"heading\":\"lastchgtimestamp\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgadaptertype\","
+                                         "\"heading\":\"lastchgadaptertype\"},"
+                                         "{\"unit\":\"string\",\"data\":\"lastchgworkitemid\","
+                                         "\"heading\":\"lastchgworkitemid\"},"
+                                         "{\"unit\":\"string\",\"data\":\"owner\",\"heading\":\"owner\"},"
+                                         "{\"unit\":\"string\",\"data\":\"aggregator\",\"heading\":\"aggregator\"},"
+                                         "{\"unit\":\"string\",\"data\":\"inventoryinfo\","
+                                         "\"heading\":\"inventoryinfo\"},"
+                                         "{\"unit\":\"string\",\"data\":\"wlmnodestate\",\"heading\":\"wlmnodestate\"},"
+                                         "{\"unit\":\"string\",\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
+                                         "\"result-data-lines\":1,\"result-status-code\":0,"
+                                         "\"data\":[[\"R48-CH00-CN0\",0,\"A\",\"c01\",null,\"centos7.3-default\",null,"
+                                         "\"192.168.0.85\",\"00:1e:67:38:8f:c1\",\"dense-compute-node\","
+                                         "\"192.168.10.105\",\"53:54:00:47:a4:00\",\"R48-CH00-CN0-BMC\","
+                                         "\"2019-07-15 23:35:53.361\",\"2019-07-15 23:35:53.361\",\"DAI_MGR\",2,\"W\","
+                                         "\"SN1-M\",null,\"U\",118]],\"result-data-columns\":22}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('macaddr', captured_output.getvalue())
         captured_output.close()
 
     def test_job_execute_positive(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'job', '--start-time', '2018-09-14', '--end-time', '2018-09-15']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result":
+            captured_output = io.StringIO()
+            sys.stdout = captured_output
+            parser = Parser()
+            sys.argv = ['ucs', 'view', 'job', '--start-time', '2018-09-14', '--end-time', '2018-09-15']
+            with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
+                patched_construct.return_value = "http://localhost/4567:"
+                with patch('requests.get') as patched_get:
+                    type(patched_get.return_value).text = \
+                        json.dumps({"Status": "F",
+                                    "Result":
                                     "{\"schema\":[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
                                     "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
                                     "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
@@ -679,10 +833,10 @@ class ViewTest(TestCase):
                                     "\"test\",\"A\",\"root\",\"16\","
                                     "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\"]],"
                                     "\"result-data-columns\":7}"})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('JOBID', captured_output.getvalue())
-        captured_output.close()
+                    parser.execute_cli_cmd()
+            sys.stdout = sys.__stdout__
+            self.assertIn('JOBID', captured_output.getvalue())
+            captured_output.close()
 
     def test_job_execute_positive_json(self):
         captured_output = io.StringIO()
@@ -696,17 +850,17 @@ class ViewTest(TestCase):
                 type(patched_get.return_value).text = \
                     json.dumps({"Status": "F",
                                 "Result":
-                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
-                                    "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
-                                    "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                    "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
-                                    "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
-                                    "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"}],"
-                                    "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
-                                    "\"test\",\"A\",\"root\",\"16\","
-                                    "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\"]],"
-                                    "\"result-data-columns\":7}"})
+                                "{\"schema\":[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
+                                "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
+                                "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
+                                "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
+                                "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"}],"
+                                "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
+                                "\"test\",\"A\",\"root\",\"16\","
+                                "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\"]],"
+                                "\"result-data-columns\":7}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('jobid', captured_output.getvalue())
@@ -721,24 +875,21 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\": "
-                                          "[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
-                                          "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
-                                          "{\"unit\":\"string\",\"data\":\"starttimestamp\","
-                                          "\"heading\":\"starttimestamp\"}, "
-                                          "{\"unit\":\"string\",\"data\":\"endtimestamp\","
-                                          "\"heading\":\"endtimestamp\"}, "
-                                          "{\"unit\":\"string\",\"data\":\"jobacctinfo\",\"heading\":\"jobacctinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
-                                          "\"test\",\"A\",\"root\",\"16\","
-                                          "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\","
-                                          "\"nodes\"]], "
-                                          "\"result-data-columns\":9}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\": "
+                                "[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
+                                "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
+                                "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
+                                "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
+                                "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"jobacctinfo\",\"heading\":\"jobacctinfo\"},"
+                                "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"}],"
+                                "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
+                                "\"test\",\"A\",\"root\",\"16\","
+                                "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\",\"nodes\"]],"
+                                "\"result-data-columns\":9}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('NODES', captured_output.getvalue())
@@ -753,21 +904,21 @@ class ViewTest(TestCase):
             patched_construct.return_value = "http://localhost/4567:"
             with patch('requests.get') as patched_get:
                 type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F",
-                                "Result": "{\"schema\": "
-                                          "[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
-                                          "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
-                                          "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
-                                          "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
-                                          "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
-                                          "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
-                                          "{\"unit\":\"string\",\"data\":\"jobacctinfo\",\"heading\":\"jobacctinfo\"},"
-                                          "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"}],"
-                                          "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
-                                          "\"test\",\"A\",\"root\",\"16\","
-                                          "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\",\"nodes\"]],"
-                                          "\"result-data-columns\":9}"})
+                    json.dumps({"Status":"F",
+                                "Result":"{\"schema\": "
+                                "[{\"unit\":\"string\",\"data\":\"jobid\",\"heading\":\"jobid\"},"
+                                "{\"unit\":\"string\",\"data\":\"jobname\",\"heading\":\"jobname\"},"
+                                "{\"unit\":\"string\",\"data\":\"state\",\"heading\":\"state\"},"
+                                "{\"unit\":\"string\",\"data\":\"user\",\"heading\":\"username\"},"
+                                "{\"unit\":\"string\",\"data\":\"numnodes\",\"heading\":\"numnodes\"},"
+                                "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"jobacctinfo\",\"heading\":\"jobacctinfo\"},"
+                                "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"}],"
+                                "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"42\","
+                                "\"test\",\"A\",\"root\",\"16\","
+                                "\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\",\"info\",\"nodes\"]],"
+                                "\"result-data-columns\":9}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('NODES', captured_output.getvalue())
@@ -784,20 +935,17 @@ class ViewTest(TestCase):
                 type(patched_get.return_value).text = \
                     json.dumps({"Status": "F",
                                 "Result":
-                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\","
-                                    "\"heading\":\"reservationname\"}, "
-                                    "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
-                                    "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
-                                    "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\","
-                                    "\"heading\":\"deletedtimestamp\"}, "
-                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                    "\"heading\":\"lastchgtimestamp\"}], "
-                                    "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
-                                    "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
-                                    "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
-                                    "\"result-data-columns\":7}"})
+                                "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\",\"heading\":\"reservationname\"},"
+                                "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
+                                "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
+                                "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"deletedtimestamp\",\"heading\":\"deletedtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\",\"heading\":\"lastchgtimestamp\"}],"
+                                "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
+                                "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
+                                "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
+                                "\"result-data-columns\":7}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('RESERVATIONNAME', captured_output.getvalue())
@@ -815,281 +963,21 @@ class ViewTest(TestCase):
                 type(patched_get.return_value).text = \
                     json.dumps({"Status": "F",
                                 "Result":
-                                    "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\","
-                                    "\"heading\":\"reservationname\"}, "
-                                    "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
-                                    "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
-                                    "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
-                                    "{\"unit\":\"string\",\"data\":\"deletedtimestamp\","
-                                    "\"heading\":\"deletedtimestamp\"}, "
-                                    "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\","
-                                    "\"heading\":\"lastchgtimestamp\"}], "
-                                    "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
-                                    "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
-                                    "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
-                                    "\"result-data-columns\":7}"})
+                                "{\"schema\":[{\"unit\":\"string\",\"data\":\"reservationname\",\"heading\":\"reservationname\"},"
+                                "{\"unit\":\"string\",\"data\":\"users\",\"heading\":\"users\"},"
+                                "{\"unit\":\"string\",\"data\":\"nodes\",\"heading\":\"nodes\"},"
+                                "{\"unit\":\"string\",\"data\":\"starttimestamp\",\"heading\":\"starttimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"endtimestamp\",\"heading\":\"endtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"deletedtimestamp\",\"heading\":\"deletedtimestamp\"},"
+                                "{\"unit\":\"string\",\"data\":\"lastchgtimestamp\",\"heading\":\"lastchgtimestamp\"}],"
+                                "\"result-data-lines\":1,\"result-status-code\":0,\"data\":[[\"testres\","
+                                "\"username\",\"node0\",\"2019-07-15 22:35:53.361\",\"2019-07-15 23:35:53.361\","
+                                "\"2019-07-15 23:40:53.361\",\"2019-07-15 23:40:53.361\"]],"
+                                "\"result-data-columns\":7}"})
                 parser.execute_cli_cmd()
         sys.stdout = sys.__stdout__
         self.assertIn('reservationname', captured_output.getvalue())
         captured_output.close()
-
-    def test_view_replacement_history_execute_positive(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'replacement-history', 'R8-21-CH11-CN0']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"action\","
-                                                         "\"heading\":\"action\"},{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
-                                                         "\"data\":\"dbupdatedtimestamp\","
-                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                                         "\"result-data-lines\":3,\"result-status-code\":0,\"data\":[["
-                                                         "\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN0\","
-                                                         "\"2020-02-06 16:12:44.0\",1],[\"DELETE\",\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\",\"2020-02-07 16:12:44.0\",2],"
-                                                         "[\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN1\","
-                                                         "\"2020-02-08 16:12:44.0\",3]],\"result-data-columns\":5}"})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('ID', captured_output.getvalue())
-        captured_output.close()
-
-    def test_view_replacement_history_execute_positive_json(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'replacement-history', 'R8-21-CH11-CN0', '--format', 'json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"action\","
-                                                         "\"heading\":\"action\"},{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"},{\"unit\":\"string\","
-                                                         "\"data\":\"dbupdatedtimestamp\","
-                                                         "\"heading\":\"dbupdatedtimestamp\"},{\"unit\":\"string\","
-                                                         "\"data\":\"entrynumber\",\"heading\":\"entrynumber\"}],"
-                                                         "\"result-data-lines\":3,\"result-status-code\":0,\"data\":[["
-                                                         "\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN0\","
-                                                         "\"2020-02-06 16:12:44.0\",1],[\"DELETE\",\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\",\"2020-02-07 16:12:44.0\",2],"
-                                                         "[\"INSERT\",\"R8-21-CH11-CN0\",\"FRUIDforR8-21-CH11-CN1\","
-                                                         "\"2020-02-08 16:12:44.0\",3]],\"result-data-columns\":5}"})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('id', captured_output.getvalue())
-        captured_output.close()
-
-    def test_view_inventory_change_execute_positive_positive(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"}],\"result-data-lines\":3,"
-                                                         "\"result-status-code\":0,\"data\":[[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN1\"]],\"result-data-columns\":2}"})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('FRUID', captured_output.getvalue())
-        captured_output.close()
-
-    def test_view_inventory_change_execute_positive_json(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'R8-21-CH11-CN0', '--history', '--format', 'json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": "{\"schema\":[{\"unit\":\"string\",\"data\":\"id\","
-                                                         "\"heading\":\"id\"},{\"unit\":\"string\",\"data\":\"fruid\","
-                                                         "\"heading\":\"fruid\"}],\"result-data-lines\":3,"
-                                                         "\"result-status-code\":0,\"data\":[[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN0\"],[\"R8-21-CH11-CN0\","
-                                                         "\"FRUIDforR8-21-CH11-CN1\"]],\"result-data-columns\":2}"})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('fruid', captured_output.getvalue())
-        captured_output.close()
-
-    def inventory_rest_result_str(self):
-        result_dict = {
-            "schema": [
-                {
-                    "unit": "string",
-                    "data": "lctn",
-                    "heading": "lctn"
-                },
-                {
-                    "unit": "string",
-                    "data": "dbupdatedtimestamp",
-                    "heading": "dbupdatedtimestamp"
-                },
-                {
-                    "unit": "string",
-                    "data": "inventorytimestamp",
-                    "heading": "inventorytimestamp"
-                },
-                {
-                    "unit": "string",
-                    "data": "inventoryinfo",
-                    "heading": "inventoryinfo"
-                },
-                {
-                    "unit": "string",
-                    "data": "sernum",
-                    "heading": "sernum"
-                }
-            ],
-            "result-data-lines": 1,
-            "result-status-code": 0,
-            "data": [
-                [
-                    "X0-CH6-CN2",
-                    "2020-10-28 15:41:14.617",
-                    "2020-08-01 15:44:39.346",
-                    "{\"HWInfo\": {\"fru/CPU0/loc\": {\"value\": \"X0-CH6-CN2_CPU0\"}}}",
-                    "Node.WO105483L01S010"
-                ]
-            ],
-            "result-data-columns": 5
-        }
-
-        return json.dumps(result_dict)
-
-    def test_view_inventory_info_execute_positive(self):
-        result_str = self.inventory_rest_result_str()
-
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'X0-CH6-CN2']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": result_str})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-
-        self.assertIn('SERNUM', captured_output.getvalue())
-        captured_output.close()
-
-    def test__view_inventory_info_execute_positive_json(self):
-        result_str = self.inventory_rest_result_str()
-
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'inventory', 'X0-CH6-CN2', '--format', 'json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": result_str})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('inventoryinfo', captured_output.getvalue())
-        captured_output.close()
-
-    def fru_migration_result_str(self):
-        result_dict = {
-            "schema": [
-                {
-                  "unit": "string",
-                  "data": "inventory_timestamp",
-                  "heading": "inventory_timestamp"
-                },
-                {
-                  "unit": "string",
-                  "data": "node_location",
-                  "heading": "node_location"
-                },
-                {
-                  "unit": "string",
-                  "data": "component_location",
-                  "heading": "component_location"
-                },
-                {
-                  "unit": "string",
-                  "data": "node_serial_number",
-                  "heading": "node_serial_number"
-                },
-                {
-                  "unit": "string",
-                  "data": "component_serial_number",
-                  "heading": "component_serial_number"
-                }
-            ],
-            "result-data-lines": 1,
-            "result-status-code": 0,
-            "data": [
-                 [
-                      "2020-07-19 15:44:30.051",
-                      "X0-CH6-CN2",
-                      "X0-CH6-CN2_DIMM1",
-                      "Node.WO105483L01S010",
-                      "FRUIDforx0c0s28b0n0d1"
-                ]
-            ],
-            "result-data-columns": 5
-        }
-
-        return json.dumps(result_dict)
-
-    def test_view_fru_migration_execute_positive(self):
-        result_str = self.fru_migration_result_str()
-
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'fru-migration', 'FRUIDforx0c0s28b0n0d1']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": result_str})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-
-        self.assertIn('NODE_LOCATION', captured_output.getvalue())
-        captured_output.close()
-
-    def test__view_fru_migration_execute_positive_json(self):
-        result_str = self.fru_migration_result_str()
-
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        parser = Parser()
-        sys.argv = ['ucs', 'view', 'fru-migration', 'FRUIDforx0c0s28b0n0d1', '--format', 'json']
-        with patch('cli.src.http_client.HttpClient._construct_base_url_from_configuration_file') as patched_construct:
-            patched_construct.return_value = "http://localhost/4567:"
-            with patch('requests.get') as patched_get:
-                type(patched_get.return_value).text = \
-                    json.dumps({"Status": "F", "Result": result_str})
-                parser.execute_cli_cmd()
-        sys.stdout = sys.__stdout__
-        self.assertIn('node_location', captured_output.getvalue())
-        captured_output.close()
-
     def test_is_bad_input(self):
         self.assertTrue(ViewCli.is_bad_input('123?'))
 

@@ -105,6 +105,20 @@ public class CannedAPI {
                     jsonResult = executeProcedure("{call GetAggregatedEvnDataWithFilters(?, ?, ?, ?)}", times, vars, limit);
                     break;
                 }
+                case "getnodeinvinfo": {
+                    times = new Timestamp[0];
+                    vars = new String[2];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    vars[1] = params_map.getOrDefault("Sernum", "%");
+                    jsonResult = executeProcedure("{call GetNodeInventoryInfoForLctn(?, ?, ?)}", times, vars, limit);
+                    break;
+                }
+                case "getinvchanges": {
+                    vars = new String[1];
+                    vars[0] = params_map.getOrDefault("Lctn", "%");
+                    jsonResult = executeProcedure("{call GetInventoryChange(?, ?, ?, ?)}", times, vars, limit);
+                    break;
+                }
                 case "getinvspecificlctn": {
                     jsonResult = new PropertyMap();
                     vars = new String[1];
@@ -160,32 +174,6 @@ public class CannedAPI {
 
                     log_.info("GetServiceNodeSummary procedure called");
                     jsonResult.put("service", map_state_values(executeProcedure("{call GetServiceNodeSummary()}", times, vars, limit)));
-                    break;
-                }
-                case "getfrumigrationhistory": {
-                    vars = new String[1];
-                    vars[0] = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedure("{call MigrationHistoryOfFru(?, ?, ?, ?)}", times, vars, limit);
-                    break;
-                }
-                case "getinvchanges": {
-                    vars = new String[1];
-                    vars[0] = params_map.getOrDefault("Lctn", null);
-                    jsonResult = executeProcedure("{call GetInventoryChange(?, ?, ?, ?)}", times, vars, limit);
-                    break;
-                }
-                case "getinvhislctn": {
-                    vars = new String[1];
-                    vars[0] = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedure("{call GetInventoryHistoryForLctn(?, ?, ?, ?)}", times, vars, limit);
-                    jsonResult = map_state_values(jsonResult);
-                    break;
-                }
-                case "getnodeinvinfo": {
-                    times = new Timestamp[0];
-                    vars = new String[1];
-                    vars[0] = params_map.getOrDefault("Lctn", "%");
-                    jsonResult = executeProcedure("{call GetInventoryInfoForLctn(?, ?)}", times, vars, limit);
                     break;
                 }
                 default:

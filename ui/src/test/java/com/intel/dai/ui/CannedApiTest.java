@@ -126,15 +126,6 @@ public class CannedApiTest {
     }
 
     @Test
-    public void getFruMigration() throws Exception {
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        PropertyMap result = canned.getData("getfrumigrationhistory", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
     public void getSystemSummary() throws Exception {
         MockCannedApi canned = new MockCannedApi();
         when(mockstmt.executeQuery()).thenReturn(mockrs);
@@ -149,15 +140,6 @@ public class CannedApiTest {
         when(mockstmt.executeQuery()).thenReturn(mockrs);
         when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
         PropertyMap result = canned.getData("getinvchanges", input_map);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void getInventoryHistory() throws Exception {
-        MockCannedApi canned = new MockCannedApi();
-        when(mockstmt.executeQuery()).thenReturn(mockrs);
-        when(mockconn.prepareCall(ArgumentMatchers.anyString())).thenReturn(mockstmt);
-        PropertyMap result = canned.getData("getinvhislctn", input_map);
         assertNotNull(result);
     }
 
