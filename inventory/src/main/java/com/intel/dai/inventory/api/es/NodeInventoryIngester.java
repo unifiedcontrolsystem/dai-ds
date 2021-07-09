@@ -52,7 +52,8 @@ public class NodeInventoryIngester {
             long sizeMB = 0l;
             try {
                 PropertyMap dimm = jsonParser.fromString(dimmJson).getAsMap();
-                sizeMB = Long.valueOf(dimm.getString("Size").split(" ")[0]);
+                PropertyMap ib_dimm = dimm.getMap("ib_dimm");
+                sizeMB = Long.valueOf(ib_dimm.getString("Size").split(" ")[0]);
             } catch (Exception e) {
                 log_.exception(e, "Failed retrieving dimm size from json file.");
             }

@@ -888,6 +888,12 @@ CREATE PROCEDURE NodeHistoryDelete   -- needed for testing
 CREATE PROCEDURE NodeHistoryRowCount   -- needed for testing
    AS SELECT COUNT(*) FROM NodeInventory_History;
 
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.DimmAddToHistory;
+
+CREATE PROCEDURE FROM
+    CLASS com.intel.dai.procedures.FruAddToHistory;
+
 -- <<< Inventory stored procedures
 
 END_OF_BATCH
