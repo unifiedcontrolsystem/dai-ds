@@ -7,6 +7,7 @@ package com.intel.dai.inventory.api.es
 
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.HWInvUtil
+import com.intel.dai.dsapi.InventoryTrackingApi
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.dsimpl.voltdb.VoltHWInvDbApi
 import com.intel.dai.exceptions.DataStoreException
@@ -88,6 +89,8 @@ class NodeInventoryIngesterITSpec extends Specification {
         "./src/integration/resources/scripts/drop_inventory_data.sh".execute().text
 
         dsClientFactory.createHWInvApi() >> new VoltHWInvDbApi(logger, util, servers)
+        dsClientFactory.createInventoryTrackingApi() >> Mock(InventoryTrackingApi)
+
         ts = new NodeInventoryIngester(dsClientFactory, logger)
 
         def es = new Elasticsearch(logger)

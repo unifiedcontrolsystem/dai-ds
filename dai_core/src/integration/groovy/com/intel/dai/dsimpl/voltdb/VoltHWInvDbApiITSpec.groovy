@@ -1,6 +1,5 @@
 package com.intel.dai.dsimpl.voltdb
 
-
 import com.intel.dai.dsapi.HWInvHistoryEvent
 import com.intel.dai.dsapi.HWInvUtil
 import com.intel.logging.Logger
