@@ -30,8 +30,6 @@ class ViewCli(object):
         self._root_parser.set_defaults(func=self._view_execute)
         self._add_environment_parser(view_subparsers)
         self._add_events_parser(view_subparsers)
-        self._add_fru_migration_parser(view_subparsers)
-        self._add_inventory_snapshot_parser(view_subparsers)
         self._add_inventory_parser(view_subparsers)
         self._add_job_info_parser(view_subparsers)
         self._add_network_config_parser(view_subparsers)
