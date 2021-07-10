@@ -5789,12 +5789,12 @@ CREATE SEQUENCE public.tier2_Raw_FRU_Host_entrynumber_seq
 
 ALTER SEQUENCE public.tier2_Raw_DIMM_entrynumber_seq OWNED BY public.tier2_Raw_DIMM.entrynumber;
 ALTER TABLE ONLY public.tier2_Raw_DIMM
-    ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_Raw_DIMM_entrynumber_seq'::regclass);
+ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_Raw_DIMM_entrynumber_seq'::regclass);
 SELECT pg_catalog.setval('public.tier2_Raw_DIMM_entrynumber_seq', 1, false);
 
 ALTER SEQUENCE public.tier2_Raw_FRU_Host_entrynumber_seq OWNED BY public.tier2_Raw_FRU_Host.entrynumber;
 ALTER TABLE ONLY public.tier2_Raw_FRU_Host
-    ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_Raw_FRU_Host_entrynumber_seq'::regclass);
+ALTER COLUMN entrynumber SET DEFAULT nextval('public.tier2_Raw_FRU_Host_entrynumber_seq'::regclass);
 SELECT pg_catalog.setval('public.tier2_Raw_FRU_Host_entrynumber_seq', 1, false);
 
 
@@ -5817,7 +5817,7 @@ on conflict(serial) do update set id=p_id,
                                   source=p_source,
                                   doc_timestamp=p_timestamp,
                                   DbUpdatedTimestamp=p_DbUpdatedTimestamp
-    ;
+;
 $$;
 
 CREATE OR REPLACE FUNCTION public.insertorupdaterawfruhostdata(
@@ -5837,54 +5837,8 @@ on conflict(mac) do update set id=p_id,
                                source=p_source,
                                doc_timestamp=p_timestamp,
                                DbUpdatedTimestamp=p_DbUpdatedTimestamp
-    ;
+;
 $$;
-
-CREATE OR REPLACE FUNCTION public.IsDuplicatedRawDimm(
-    p_serial VarChar,
-    p_timestamp BIGINT -- 1 second resolution
-)
-    RETURNS BOOLEAN
-AS
-$$
-DECLARE
-    last_updated_doc_timestamp TIMESTAMP;
-BEGIN
-    EXECUTE 'SELECT max(doc_timestamp) FROM tier2_Raw_DIMM' INTO last_updated_doc_timestamp;
-
-    IF (p_timestamp < last_updated_doc_timestamp) then
-        RETURN true;
-    END IF;
-    IF (p_timestamp > last_updated_doc_timestamp) then
-        RETURN false;
-    END IF;
-    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_DIMM WHERE doc_timestamp = ''%s'' AND serial = ''%s''',
-                  p_timestamp, p_serial);
-END
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION public.IsDuplicatedRawFruHost(
-    p_mac VarChar,
-    p_timestamp BIGINT -- 1 second resolution
-)
-    RETURNS BOOLEAN
-AS
-$$
-DECLARE
-    last_updated_doc_timestamp BIGINT;
-BEGIN
-    EXECUTE 'SELECT max(doc_timestamp) FROM tier2_Raw_FRU_Host' INTO last_updated_doc_timestamp;
-
-    IF (p_timestamp < last_updated_doc_timestamp) then
-        RETURN true;
-    END IF;
-    IF (p_timestamp > last_updated_doc_timestamp) then
-        RETURN false;
-    END IF;
-    RETURN FORMAT('SELECT count(*) > 0 FROM tier2_Raw_FRU_Host WHERE doc_timestamp = ''%s'' AND mac = ''%s''',
-                  p_timestamp, p_mac);
-END
-$$ LANGUAGE plpgsql;
 
 --
 -- PostgreSQL database dump complete

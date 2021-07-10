@@ -2,6 +2,7 @@ package com.intel.dai.inventory
 
 import com.intel.dai.dsapi.DataStoreFactory
 import com.intel.dai.dsapi.HWInvUtil
+import com.intel.dai.dsapi.InventorySnapshot
 import com.intel.dai.dsapi.InventoryTrackingApi
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.dsimpl.voltdb.VoltHWInvDbApi
@@ -49,6 +50,7 @@ class DatabaseSynchronizerITSpec extends Specification {
         "./src/integration/resources/scripts/drop_inventory_data.sh".execute().text
         dsClientFactory.createHWInvApi() >> new VoltHWInvDbApi(logger, util, voltDbServers)
         dsClientFactory.createInventoryTrackingApi() >> Mock(InventoryTrackingApi)
+        dsClientFactory.createInventorySnapshotApi() >> Mock(InventorySnapshot)
     }
 
     def cleanup() {
@@ -70,6 +72,7 @@ class DatabaseSynchronizerITSpec extends Specification {
      */
     def "updateDaiInventoryTables - initial loading"() {
         def ts = Spy(DatabaseSynchronizer, constructorArgs: [logger, dsClientFactory])
+        ts.areEmptyInventoryTablesInPostgres() >> true
         ts.getLastHWInventoryHistoryUpdate() >> ''  // initial loading
         when:
         ts.updateDaiInventoryTables()

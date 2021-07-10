@@ -102,7 +102,7 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
                 log_.error("!result.next()");
                 return false;
             }
-            return result.getBoolean(1);
+            return result.getLong(1) == 1;
         } catch (SQLException e) {
             throw new DataStoreException(e.getMessage());
         } catch (NullPointerException e) {
@@ -384,9 +384,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String GET_LAST_RAW_FRU_HOST_SQL =
             "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY EntryNumber DESC LIMIT 1";
     private static final String IS_DUPLICATED_RAW_DIMM_SQL =
-            "select * from IsDuplicatedRawDimm(key, doc_timestamp) values(?,?)";
+            "SELECT count(*) FROM tier2_Raw_DIMM WHERE serial=? AND doc_timestamp=?";
     private static final String IS_DUPLICATED_RAW_FRU_HOST_SQL =
-            "select * from IsDuplicatedRawFruHost(key, doc_timestamp) values(?,?)";
+            "SELECT count(*) FROM tier2_Raw_FRU_Host WHERE mac=? AND doc_timestamp=?";
 
     private Logger log_;
 }

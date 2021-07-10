@@ -98,28 +98,28 @@ class DatabaseSynchronizer {
             // New inventory code; TODO: old code needs to be deleted after new code works
 
             // TODO: Add config in the next pull request
-            Elasticsearch es = new Elasticsearch(log_);
-            RestHighLevelClient esClient = es.getRestHighLevelClient("cmcheung-centos-7.ra.intel.com", 9200,
-                    "elkrest", "elkdefault");
+            if (areEmptyInventoryTablesInPostgres()) {
+                log_.info("areEmptyInventoryTablesInPostgres() => true");
+                Elasticsearch es = new Elasticsearch(log_);
+                RestHighLevelClient esClient = es.getRestHighLevelClient("cmcheung-centos-7.ra.intel.com", 9200,
+                        "elkrest", "elkdefault");
 
-            String[] elasticsearchIndices = {"kafka_fru_host", "kafka_dimm"};
-            for (String index : elasticsearchIndices) {
-                ElasticsearchIndexIngester eii = new ElasticsearchIndexIngester(esClient, index, factory_, log_);
-                eii.ingestIndexIntoVoltdb();
-                totalNumberOfInjectedDocuments += eii.getNumberOfDocumentsEnumerated();
-                log_.info("Number of %s documents = %d", index, eii.getNumberOfDocumentsEnumerated());
+                String[] elasticsearchIndices = {"kafka_fru_host", "kafka_dimm"};
+                for (String index : elasticsearchIndices) {
+                    ElasticsearchIndexIngester eii = new ElasticsearchIndexIngester(esClient, index, factory_, log_);
+                    eii.ingestIndexIntoVoltdb();
+                    totalNumberOfInjectedDocuments += eii.getNumberOfDocumentsEnumerated();
+                    log_.info("Number of %s documents = %d", index, eii.getNumberOfDocumentsEnumerated());
+                }
+                es.close();
+
+                NodeInventoryIngester ni = new NodeInventoryIngester(factory_, log_);
+                ni.ingestInitialNodeInventoryHistory();
+                totalNumberOfInjectedDocuments += ni.getNumberNodeInventoryJsonIngested();
+                log_.info("Number of Raw_Node_Inventory_History documents = %d", ni.getNumberNodeInventoryJsonIngested());
+                return;
             }
-            es.close();
-
-            NodeInventoryIngester ni = new NodeInventoryIngester(factory_, log_);
-            ni.ingestInitialNodeInventoryHistory();
-            totalNumberOfInjectedDocuments += ni.getNumberNodeInventoryJsonIngested();
-            log_.info("Number of Raw_Node_Inventory_History documents = %d", ni.getNumberNodeInventoryJsonIngested());
-
-            Thread.sleep(5000);     // CMC_TODO: remove after debugging
-            getLastHWInventoryHistoryUpdate();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            log_.info("areEmptyInventoryTablesInPostgres() => false");
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
         } finally {
@@ -135,6 +135,22 @@ class DatabaseSynchronizer {
         nearLineInventoryDatabaseClient_ = factory_.createInventorySnapshotApi();
     }
 
+    boolean areEmptyInventoryTablesInPostgres() {
+        try {
+            ImmutablePair<Long, String> lastRawDimm =
+                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawDimmIngested();
+            log_.info("lastRawDimm: %d %s", lastRawDimm.left, lastRawDimm.right);
+            ImmutablePair<Long, String> lastRawFruHost =
+                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawFruHostIngested();
+            log_.info("lastRawFruHost: %d %s", lastRawFruHost.left, lastRawFruHost.right);
+
+            return lastRawDimm.right == null && lastRawFruHost.right == null;
+        } catch (DataStoreException e) {
+            log_.error(e.getMessage());
+        }
+        return true;
+    }
+
     /**
      * This method can return both null or the string "null".
      *
@@ -143,12 +159,6 @@ class DatabaseSynchronizer {
     String getLastHWInventoryHistoryUpdate() {  // must not be private or Spy will not work
         log_.info(">> getLastHWInventoryHistoryUpdate()");
         try {
-            ImmutablePair<Long, String> lastRawDimmIngested = getCharacteristicsOfLastRawDimm();
-            log_.info("At %d: lastRawDimmSerial: %s", lastRawDimmIngested.left, lastRawDimmIngested.right);
-
-            ImmutablePair<Long, String> lastRawFruHostIngested = getCharacteristicsOfLastRawFruHost();
-            log_.info("At %d: lastRawFruHostMac: %s", lastRawFruHostIngested.left, lastRawFruHostIngested.right);
-
             String lastUpdateTimestamp = nearLineInventoryDatabaseClient_.getLastHWInventoryHistoryUpdate();
             return Objects.requireNonNullElse(lastUpdateTimestamp, "");
         } catch (DataStoreException e) {
