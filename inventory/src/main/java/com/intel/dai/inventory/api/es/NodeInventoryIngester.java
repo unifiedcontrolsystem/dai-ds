@@ -49,7 +49,7 @@ public class NodeInventoryIngester {
             long doc_timestamp = fruHost.timestamp; // epoch seconds
 
 
-            long sizeMB = 0l;
+            long sizeMB = 0L;
             try {
                 PropertyMap dimm = jsonParser.fromString(dimmJson).getAsMap();
                 PropertyMap ib_dimm = dimm.getMap("ib_dimm");
@@ -61,7 +61,7 @@ public class NodeInventoryIngester {
             try {
                 inventoryApi_.addDimm(hostname, hostname + "_" + locator,
                         "A", sizeMB, locator, null,
-                        doc_timestamp * 1000000l, "INVENTORY", -1);
+                        doc_timestamp * 1000000L, "INVENTORY", -1);
             } catch (DataStoreException e) {
                 log_.error(e.getMessage());
             }
@@ -139,7 +139,7 @@ public class NodeInventoryIngester {
         for (FruHost fruHost : fruHosts) {
             try {
                 String nodeInventoryJson = constructAndIngestNodeInventoryJson(fruHost);
-                inventoryApi_.addFru(fruHost.hostname, fruHost.timestamp * 1000000l, nodeInventoryJson, fruHost.mac, fruHost.rawIbBios);
+                inventoryApi_.addFru(fruHost.hostname, fruHost.timestamp * 1000000L, nodeInventoryJson, fruHost.mac, fruHost.rawIbBios);
             } catch (DataStoreException e) {
                 log_.error("DataStoreException: %s", e.getMessage());
             }

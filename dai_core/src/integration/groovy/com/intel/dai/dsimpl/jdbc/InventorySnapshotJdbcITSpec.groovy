@@ -1,11 +1,8 @@
 package com.intel.dai.dsimpl.jdbc
 
-import com.intel.dai.exceptions.DataStoreException
 import com.intel.logging.Logger
 import org.apache.commons.lang3.tuple.ImmutablePair
 import spock.lang.Specification
-
-import java.sql.Connection
 import java.sql.DriverManager
 
 class InventorySnapshotJdbcITSpec extends Specification {
@@ -27,11 +24,6 @@ class InventorySnapshotJdbcITSpec extends Specification {
     def "trivial"() {
         expect: ts != null
     }
-
-//    def "establishConnectionToNearlineDb" () {
-//        when: ts.establishConnectionToNearlineDb()
-//        then: thrown DataStoreException
-//    }
 
     def "getCharacteristicsOfLastRawDimmIngested"() {
         when:
@@ -67,12 +59,3 @@ class InventorySnapshotJdbcITSpec extends Specification {
         res.right == 'p_mac2'
     }
 }
-
-//private void establishConnectionToNearlineDb() throws DataStoreException {
-//    if (dbConn == null) {
-//        dbConn = DbConnectionFactory.createDefaultConnection();
-//        if (dbConn == null) {
-//            throw new DataStoreException("DbConnectionFactory.createDefaultConnection() => null");
-//        }
-//    }
-//}

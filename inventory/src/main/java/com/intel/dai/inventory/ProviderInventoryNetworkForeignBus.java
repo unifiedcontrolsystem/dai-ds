@@ -30,7 +30,7 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
                     "use 3 arguments: voltdb_servers, location, and hostname in that order", adapterName));
 
         Logger logger = LoggerFactory.getInstance(AdapterInventoryNetworkBase.ADAPTER_TYPE, adapterName, "console");
-        logger.info("HWI:%n  main(args=[%s, %s, %s])", args[0], args[1], args[2]);
+        logger.info("main(args=[%s, %s, %s])", args[0], args[1], args[2]);
 
         AdapterInformation adapterInfo = new AdapterInformation(AdapterInventoryNetworkBase.ADAPTER_TYPE, adapterName,
                 args[1],args[2], -1L);
@@ -40,14 +40,20 @@ public class ProviderInventoryNetworkForeignBus extends AdapterInventoryNetworkB
         ProviderInventoryNetworkForeignBus app = new ProviderInventoryNetworkForeignBus(logger, factory_, adapterInfo,
                 "/opt/ucs/log/ProviderInventoryNetworkForeignBus-Benchmarking.json", 5);
         String configName = ProviderInventoryNetworkForeignBus.class.getSimpleName() + ".json";
+        logger.info("Using configName: %s", configName);
 
-        app.preInitialize();
+        try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
+            app.preInitialize(configStream);
+        } catch (IOException | ConfigIOParseException e) {
+            logger.exception(e, "preInitialize: missing or unreadable configuration is fatal, halting the provider process.");
+        }
+
         app.postInitialize();
 
         try (InputStream configStream = AdapterInventoryNetworkBase.getConfigStream(configName)) {
             app.entryPoint(configStream);
         } catch (IOException | ConfigIOParseException e) {
-            logger.exception(e, "Missing or unreadable configuration is fatal, halting the provider process.");
+            logger.exception(e, "entryPoint: missing or unreadable configuration is fatal, halting the provider process.");
         }
     }
 

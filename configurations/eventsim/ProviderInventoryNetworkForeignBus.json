@@ -36,6 +36,12 @@
       "publishTopic": "ucs_inventory_event",
       "informWorkLoadManager": false,
       "publish": true
+    },
+    "com.intel.dai.inventory.DatabaseSynchronizer": {
+      "hostName": "cmcheung-centos-7.ra.intel.com",
+      "port": 9200,
+      "userName": "elkrest",
+      "password": "elkdefault"
     }
   },
 

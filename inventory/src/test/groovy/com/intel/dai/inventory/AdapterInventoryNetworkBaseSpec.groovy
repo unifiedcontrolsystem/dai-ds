@@ -100,7 +100,7 @@ class AdapterInventoryNetworkBaseSpec extends Specification {
     }
 
     def "Test preInitialize"() {
-        underTest_.preInitialize()
+        underTest_.preInitialize(null)
         expect: true    // this method has an empty body
     }
 

@@ -17,6 +17,7 @@ public class Dimm extends Component {
     public String handle;
     public String locator;
 
-    @SerializedName("IB_DIMM") public String rawIbDimm;
+    @SerializedName("IB_DIMM")
+    public String rawIbDimm;
     public IbDimmPojo ib_dimm;
 }

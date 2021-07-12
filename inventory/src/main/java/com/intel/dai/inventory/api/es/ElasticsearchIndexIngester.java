@@ -40,11 +40,23 @@ public class ElasticsearchIndexIngester {
     private String scrollId;    // think of this as a cursor marking the lower edge of iterated json documents
     private long totalNumberOfDocumentsEnumerated = 0;
     private long totalNumberOfDocumentsIngested = 0;
+    private final long startEpochSecond;
+
+    public ImmutablePair<Long, String> getCharacteristicsOfLastDocIngested() {
+        log_.debug("Last ingested index: %s", LastIdIngested);
+        return new ImmutablePair<>(lastDocTimestampIngested, lastKeyIngested);
+    }
+
+    private String LastIdIngested = null;
+    private String lastKeyIngested = null;
+    private long lastDocTimestampIngested = 0;
 
     public ElasticsearchIndexIngester(RestHighLevelClient elasticsearchHighLevelClient, String elasticsearchIndex,
+                                      long startEpochSec,
                                       DataStoreFactory factory, Logger log) {
         log_ = log;
         index = elasticsearchIndex;
+        startEpochSecond = startEpochSec;
         esClient = elasticsearchHighLevelClient;
         scroll = getScroll();
         switch (index) {
@@ -101,6 +113,10 @@ public class ElasticsearchIndexIngester {
 
         try {
             totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, fruHost);
+            LastIdIngested = doc.left;
+            lastKeyIngested = fruHost.mac;
+            lastDocTimestampIngested = fruHost.timestamp;
+            log_.debug("ES ingested %s: %d, %s", doc.left, fruHost.timestamp, fruHost.mac);
         } catch (DataStoreException e) {
             log_.error("DataStoreException: %s", e.getMessage());
         }
@@ -115,6 +131,10 @@ public class ElasticsearchIndexIngester {
 
         try {
             totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, dimm);
+            LastIdIngested = doc.left;
+            lastKeyIngested = dimm.serial;
+            lastDocTimestampIngested = dimm.timestamp;
+            log_.debug("ES ingested %s: %d, %s", doc.left, dimm.timestamp, dimm.serial);
         } catch (DataStoreException e) {
             log_.error("DataStoreException: %s", e.getMessage());
         }
@@ -159,8 +179,14 @@ public class ElasticsearchIndexIngester {
     private void getChronologicalSearchRequest() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         int resultSetSize = 100;
-        String insertionOrder = "_doc";
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery()).sort(insertionOrder, SortOrder.ASC).size(resultSetSize);
+        String primarySortOrder = "timestamp";
+        String secondarySortOrder = "id";
+        searchSourceBuilder.query(QueryBuilders.
+                matchAllQuery()).
+                sort(primarySortOrder, SortOrder.ASC).
+                sort(secondarySortOrder, SortOrder.ASC).
+                postFilter(QueryBuilders.rangeQuery("timestamp").from(startEpochSecond).to(9999999999L)).  // Saturday, November 20, 2286 17:46:39
+                size(resultSetSize);
         searchRequest = new SearchRequest(index).source(searchSourceBuilder).scroll(scroll);
     }
 

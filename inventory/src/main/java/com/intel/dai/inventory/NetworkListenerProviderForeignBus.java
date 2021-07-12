@@ -140,12 +140,13 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
 
         BootState bootState = workItem.getStateEvent();
         if (!isSupportedInventoryEvents(bootState)) {
-            log_.debug("HWI:%n  Unsupported boot state=%d", bootState);
+            log_.debug("Unsupported boot state=%d", bootState);
             return;
         }
 
+        // CMC_TODO: The following will be removed
         log_.info("Starting InventoryUpdateThread ...");
-        Thread t = new Thread(new InventoryUpdateThread(log_));
+        Thread t = new Thread(new InventoryUpdateThread(log_, config));
         t.start();  // background update of inventory
     }
 

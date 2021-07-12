@@ -7,6 +7,7 @@ import com.intel.dai.dsapi.InventoryTrackingApi
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
 import com.intel.dai.dsimpl.voltdb.VoltHWInvDbApi
 import com.intel.dai.inventory.utilities.*
+import com.intel.dai.network_listener.NetworkListenerConfig
 import com.intel.logging.Logger
 import spock.lang.Specification
 
@@ -31,7 +32,7 @@ class InventoryUpdateThreadITSpec extends Specification {
     }
 
     def "run - near line server unavailable"() {
-        def ts = new InventoryUpdateThread(Mock(Logger))
+        def ts = new InventoryUpdateThread(Mock(Logger), Mock(NetworkListenerConfig))
         when:
         ts.run()
         then:
@@ -41,9 +42,12 @@ class InventoryUpdateThreadITSpec extends Specification {
 
 class DatabaseSynchronizerITSpec extends Specification {
     Logger logger = Mock Logger
+    NetworkListenerConfig config = Mock NetworkListenerConfig
     HWInvUtil util = new HWInvUtilImpl(logger)
     DataStoreFactory dsClientFactory = Mock DataStoreFactory
     String[] voltDbServers = ['css-centos-8-00.ra.intel.com']
+
+    DatabaseSynchronizer ts
 
     def setup() {
         println Helper.testStartMessage(specificationContext)
@@ -51,29 +55,34 @@ class DatabaseSynchronizerITSpec extends Specification {
         dsClientFactory.createHWInvApi() >> new VoltHWInvDbApi(logger, util, voltDbServers)
         dsClientFactory.createInventoryTrackingApi() >> Mock(InventoryTrackingApi)
         dsClientFactory.createInventorySnapshotApi() >> Mock(InventorySnapshot)
+
+        ts = Spy(DatabaseSynchronizer, constructorArgs: [logger, dsClientFactory, config])
+        ts.waitForDataMoverToFinishMovingRawFruHosts() >> {}
+        ts.areEmptyInventoryTablesInPostgres() >> true
+        ts.getLastHWInventoryHistoryUpdate() >> ''  // initial loading
     }
 
     def cleanup() {
         println Helper.testEndMessage(specificationContext)
     }
 
-    def "updateDaiInventoryTables - near line server unavailable"() {
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [logger, dsClientFactory])
-        ts.getLastHWInventoryHistoryUpdate() >> null    //near line server unavailable
-        when:
-        ts.updateDaiInventoryTables()
-        then:
-        notThrown Exception
-    }
+//    def "updateDaiInventoryTables - near line server unavailable"() {
+//        def ts = Spy(DatabaseSynchronizer, constructorArgs: [logger, dsClientFactory])
+//        ts.getLastHWInventoryHistoryUpdate() >> null    //near line server unavailable
+//        when:
+//        ts.updateDaiInventoryTables()
+//        then:
+//        notThrown Exception
+//    }
 
     /**
      * We need to use a Spy because getLastHWInventoryHistoryUpdate() does not work in the
      * absence of Postgres.
      */
     def "updateDaiInventoryTables - initial loading"() {
-        def ts = Spy(DatabaseSynchronizer, constructorArgs: [logger, dsClientFactory])
-        ts.areEmptyInventoryTablesInPostgres() >> true
-        ts.getLastHWInventoryHistoryUpdate() >> ''  // initial loading
+        setup:
+        ts.setElasticsearchServerAttributes("cmcheung-centos-7.ra.intel.com", 9200,
+                "elkrest", "elkdefault");
         when:
         ts.updateDaiInventoryTables()
         then:

@@ -11,6 +11,8 @@ import com.intel.dai.network_listener.NetworkListenerConfig;
 import com.intel.dai.network_listener.NetworkListenerCore;
 import com.intel.logging.Logger;
 import com.intel.perflogging.BenchmarkHelper;
+import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import com.intel.xdg.XdgConfigFile;
 
 import java.io.FileNotFoundException;
@@ -55,9 +57,17 @@ abstract class AdapterInventoryNetworkBase {
      * Ingests HW inventory data into database.  Note that if postgres already contains inventory data
      * only a patching of the inventory data is performed.
      */
-    void preInitialize() {
+    void preInitialize(InputStream configStream) throws IOException, ConfigIOParseException {
         log_.info("Starting InventoryUpdateThread ...");
-        Thread t = new Thread(new InventoryUpdateThread(log_));
+        if (configStream == null) {
+            log_.error("configStream is null.  preInitialize exiting.");
+            return;
+        }
+
+        NetworkListenerConfig config = new NetworkListenerConfig(adapter_, log_);
+        config.loadFromStream(configStream);
+        log_.info("Starting InventoryUpdateThread");
+        Thread t = new Thread(new InventoryUpdateThread(log_, config));
         t.start();  // background updates of HW inventory
     }
 

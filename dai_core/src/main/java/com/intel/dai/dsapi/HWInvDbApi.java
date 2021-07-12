@@ -8,6 +8,7 @@ import com.intel.dai.dsapi.pojo.Dimm;
 import com.intel.dai.dsapi.pojo.FruHost;
 import com.intel.dai.dsapi.pojo.NodeInventory;
 import com.intel.dai.exceptions.DataStoreException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.List;
 import java.util.Map;
