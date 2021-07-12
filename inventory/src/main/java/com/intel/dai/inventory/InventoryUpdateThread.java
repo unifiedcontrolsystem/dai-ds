@@ -10,7 +10,10 @@ import com.intel.dai.exceptions.DataStoreException;
 import com.intel.dai.inventory.api.es.Elasticsearch;
 import com.intel.dai.inventory.api.es.ElasticsearchIndexIngester;
 import com.intel.dai.inventory.api.es.NodeInventoryIngester;
+import com.intel.dai.network_listener.NetworkListenerConfig;
 import com.intel.logging.Logger;
+import com.intel.properties.PropertyMap;
+import com.intel.properties.PropertyNotExpectedType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.client.RestHighLevelClient;
 
@@ -27,9 +30,11 @@ import java.util.regex.Pattern;
  */
 class InventoryUpdateThread implements Runnable {
     private final Logger log_;
+    private final NetworkListenerConfig config_;
 
-    InventoryUpdateThread(Logger log) {
+    InventoryUpdateThread(Logger log, NetworkListenerConfig config) {
         log_ = log;
+        config_ = config;
     }
 
     /**
@@ -45,7 +50,7 @@ class InventoryUpdateThread implements Runnable {
         }
         try {
             log_.info("InventoryUpdateThread started");
-            DatabaseSynchronizer synchronizer = new DatabaseSynchronizer(log_, factory_);
+            DatabaseSynchronizer synchronizer = new DatabaseSynchronizer(log_, factory_, config_);
             synchronizer.updateDaiInventoryTables();
         } finally {
             log_.info("InventoryUpdateThread terminated");
@@ -64,10 +69,41 @@ class DatabaseSynchronizer {
     protected ForeignInventoryClient foreignInventoryDatabaseClient_;   // foreign inventory server
     InventorySnapshot nearLineInventoryDatabaseClient_;                 // postgres
     long totalNumberOfInjectedDocuments = 0;                            // for testing only
+    ImmutablePair<Long, String> characteristicsOfLastRawDimmIngested;
+    ImmutablePair<Long, String> characteristicsOfLastRawFruHostIngested;
 
-    DatabaseSynchronizer(Logger log, DataStoreFactory factory) {
+    final long dataMoverTimeOutLimit = 60 * 1000;    // wait at most 1 minute
+
+    private String hostName_ = "localhost";
+    private int port_ = 9200;
+    private String userName_ = "";
+    private String password_ = "";
+
+    DatabaseSynchronizer(Logger log, DataStoreFactory factory, NetworkListenerConfig config) {
         log_ = log;
         factory_ = factory;
+
+        PropertyMap configMap = config.getProviderConfigurationFromClassName(getClass().getCanonicalName());
+        if (configMap != null) {
+            try {
+                hostName_ = configMap.getString("hostName");
+                port_ = configMap.getInt("port");
+                userName_ = configMap.getString("userName");
+                password_ = configMap.getString("password");
+            } catch (PropertyNotExpectedType propertyNotExpectedType) {
+                log_.error(propertyNotExpectedType.getMessage());
+            }
+            return;
+        }
+        log_.error("getProviderConfigurationFromClassName(%s) => null", getClass().getCanonicalName());
+    }
+
+    // For testing
+    void setElasticsearchServerAttributes(String hostName, int port, String userName, String password) {
+        hostName_ = hostName;
+        port_ = port;
+        userName_ = userName;
+        password_ = password;
     }
 
     void updateDaiInventoryTables() {
@@ -97,21 +133,20 @@ class DatabaseSynchronizer {
 
             // New inventory code; TODO: old code needs to be deleted after new code works
 
-            // TODO: Add config in the next pull request
+            log_.info("hostName:%s port:%s userName:%s password:%s", hostName_, port_, userName_, password_);
             if (areEmptyInventoryTablesInPostgres()) {
                 log_.info("areEmptyInventoryTablesInPostgres() => true");
                 Elasticsearch es = new Elasticsearch(log_);
-                RestHighLevelClient esClient = es.getRestHighLevelClient("cmcheung-centos-7.ra.intel.com", 9200,
-                        "elkrest", "elkdefault");
+                RestHighLevelClient esClient = es.getRestHighLevelClient(hostName_, port_,
+                        userName_, password_);
 
-                String[] elasticsearchIndices = {"kafka_fru_host", "kafka_dimm"};
-                for (String index : elasticsearchIndices) {
-                    ElasticsearchIndexIngester eii = new ElasticsearchIndexIngester(esClient, index, factory_, log_);
-                    eii.ingestIndexIntoVoltdb();
-                    totalNumberOfInjectedDocuments += eii.getNumberOfDocumentsEnumerated();
-                    log_.info("Number of %s documents = %d", index, eii.getNumberOfDocumentsEnumerated());
-                }
+                characteristicsOfLastRawDimmIngested = ingest(esClient, "kafka_dimm");
+                characteristicsOfLastRawFruHostIngested = ingest(esClient, "kafka_fru_host");
+
                 es.close();
+
+                sleepForOneSecond();
+                waitForDataMoverToFinish();
 
                 NodeInventoryIngester ni = new NodeInventoryIngester(factory_, log_);
                 ni.ingestInitialNodeInventoryHistory();
@@ -127,6 +162,83 @@ class DatabaseSynchronizer {
         }
     }
 
+    private ImmutablePair<Long, String> ingest(RestHighLevelClient esClient, String index) throws DataStoreException {
+        ElasticsearchIndexIngester eii = new ElasticsearchIndexIngester(esClient, index, 0, factory_, log_);
+        eii.ingestIndexIntoVoltdb();
+        totalNumberOfInjectedDocuments += eii.getNumberOfDocumentsEnumerated();
+        log_.info("Number of %s documents = %d", index, eii.getNumberOfDocumentsEnumerated());
+        return eii.getCharacteristicsOfLastDocIngested();
+    }
+
+    private void waitForDataMoverToFinish() {
+        waitForDataMoverToFinishMovingRawDimms();
+        waitForDataMoverToFinishMovingRawFruHosts();
+    }
+
+    private void waitForDataMoverToFinishMovingRawDimms() {
+        if (characteristicsOfLastRawDimmIngested.right == null) {
+            log_.error("characteristicsOfLastRawDimmIngested.right == null");
+            return;
+        }
+
+        long timeOut = dataMoverTimeOutLimit;
+        while (timeOut > 0) {
+            ImmutablePair<Long, String> lastRawDimmTransferred = getCharacteristicsOfLastRawDimmIngestedIntoNearLine();
+            if (lastRawDimmTransferred.right != null) {
+                log_.info("Comparing characteristicsOfLastRawDimmIngested <%d, %s> against lastRawDimmTransferred <%d, %s>",
+                        characteristicsOfLastRawDimmIngested.left, characteristicsOfLastRawDimmIngested.right,
+                        lastRawDimmTransferred.left, lastRawDimmTransferred.right);
+                if (characteristicsOfLastRawDimmIngested.equals(lastRawDimmTransferred)) {
+                    log_.info("Raw DIMMs transfer completed at %dms", dataMoverTimeOutLimit - timeOut);
+                    return;
+                }
+            } else {
+                log_.error("lastRawDimmTransferred.right == null");
+            }
+            log_.info("Waiting for data mover - Raw DIMMs: %dms left", timeOut);
+            timeOut -= sleepForOneSecond();
+        }
+    }
+
+    private void waitForDataMoverToFinishMovingRawFruHosts() {
+        if (characteristicsOfLastRawFruHostIngested.right == null) {
+            log_.error("characteristicsOfLastRawFruHostIngested.right == null");
+            return;
+        }
+
+        long timeOut = dataMoverTimeOutLimit;
+        while (timeOut > 0) {
+            ImmutablePair<Long, String> lastRawFruHostTransferred = getCharacteristicsOfLastRawFruHostIngestedIntoNearLine();
+            if (lastRawFruHostTransferred.right != null) {
+                log_.info("Comparing characteristicsOfLastRawFruHostIngested <%d, %s> against lastRawFruHostTransferred <%d, %s>",
+                        characteristicsOfLastRawFruHostIngested.left, characteristicsOfLastRawFruHostIngested.right,
+                        lastRawFruHostTransferred.left, lastRawFruHostTransferred.right);
+                if (characteristicsOfLastRawFruHostIngested.equals(lastRawFruHostTransferred)) {
+                    log_.info("Raw FRU Hosts transfer completed at %dms", dataMoverTimeOutLimit - timeOut);
+                    return;
+                }
+            } else {
+                log_.error("lastRawFruHostTransferred.right == null");
+            }
+            log_.info("Waiting for data mover - Raw FRU Hosts: %dms left", timeOut);
+            timeOut -= sleepForOneSecond();
+        }
+    }
+
+    /**
+     * InterruptedExeptions are ignored.
+     * @return sleepLength
+     */
+    private long sleepForOneSecond() {
+        final long sleepLengthWaitingForDataMoverToFinish = 1000;
+        try {
+            Thread.sleep(sleepLengthWaitingForDataMoverToFinish);
+        } catch (InterruptedException e) {
+            log_.info(e.getMessage());
+        }
+        return sleepLengthWaitingForDataMoverToFinish;
+    }
+
     private void initializeDependencies() {
         util_ = new HWInvUtilImpl(log_);
 
@@ -136,19 +248,14 @@ class DatabaseSynchronizer {
     }
 
     boolean areEmptyInventoryTablesInPostgres() {
-        try {
-            ImmutablePair<Long, String> lastRawDimm =
-                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawDimmIngested();
-            log_.info("lastRawDimm: %d %s", lastRawDimm.left, lastRawDimm.right);
-            ImmutablePair<Long, String> lastRawFruHost =
-                    nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawFruHostIngested();
-            log_.info("lastRawFruHost: %d %s", lastRawFruHost.left, lastRawFruHost.right);
+        ImmutablePair<Long, String> lastRawDimm =
+                nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawDimmIngested();
+        log_.info("lastRawDimm: %d %s", lastRawDimm.left, lastRawDimm.right);
+        ImmutablePair<Long, String> lastRawFruHost =
+                nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawFruHostIngested();
+        log_.info("lastRawFruHost: %d %s", lastRawFruHost.left, lastRawFruHost.right);
 
-            return lastRawDimm.right == null && lastRawFruHost.right == null;
-        } catch (DataStoreException e) {
-            log_.error(e.getMessage());
-        }
-        return true;
+        return lastRawDimm.right == null && lastRawFruHost.right == null;
     }
 
     /**
@@ -170,33 +277,27 @@ class DatabaseSynchronizer {
         }
     }
 
-    ImmutablePair<Long, String> getCharacteristicsOfLastRawDimm() {  // must not be private or Spy will not work
-        log_.info(">> getCharacteristicsOfLastRawDimm()");
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngestedIntoNearLine() {
+        log_.info(">> getCharacteristicsOfLastRawDimmIngestedIntoNearLine()");
         try {
             ImmutablePair<Long, String> lastIngestedRawDimm =
                     nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawDimmIngested();
             return Objects.requireNonNullElse(lastIngestedRawDimm, ImmutablePair.nullPair());
-        } catch (DataStoreException e) {
-            log_.error("getCharacteristicsOfLastRawDimm() threw (%s)", e.getMessage());
-            return null;
         } catch (NullPointerException e) {
             log_.exception(e, "null pointer exception: %s", e.getMessage());
-            return null;
+            return ImmutablePair.nullPair();
         }
     }
 
-    ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHost() {  // must not be private or Spy will not work
+    ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngestedIntoNearLine() {  // must not be private or Spy will not work
         log_.info(">> getCharacteristicsOfLastRawFruHost()");
         try {
             ImmutablePair<Long, String> lastIngestedRawFruHost =
                     nearLineInventoryDatabaseClient_.getCharacteristicsOfLastRawFruHostIngested();
             return Objects.requireNonNullElse(lastIngestedRawFruHost, ImmutablePair.nullPair());
-        } catch (DataStoreException e) {
-            log_.error("getCharacteristicsOfLastRawFruHost() threw (%s)", e.getMessage());
-            return null;
         } catch (NullPointerException e) {
             log_.exception(e, "null pointer exception: %s", e.getMessage());
-            return null;
+            return ImmutablePair.nullPair();
         }
     }
 

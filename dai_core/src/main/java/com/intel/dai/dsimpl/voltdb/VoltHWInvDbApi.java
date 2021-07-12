@@ -466,6 +466,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             logger.error("upsertRawDimm(id=%s) => %d", id, cr.getStatus());
             return 0;
         }
+        guaranteeDbUpdatedTimestampUniqueness();
         return 1;
     }
 
@@ -478,7 +479,16 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             logger.error("upsertRawFruHost(id=%s) => %d", id, cr.getStatus());
             return 0;
         }
+        guaranteeDbUpdatedTimestampUniqueness();
         return 1;
+    }
+
+    private void guaranteeDbUpdatedTimestampUniqueness() {
+        try {
+            Thread.sleep(2);    // ensures DbUpdatedTimestamp uniqueness
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     int insertNodeInventoryHistory(NodeInventory nodeInventory) throws IOException, ProcCallException {
@@ -489,6 +499,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
             logger.error("insertNodeInventoryHistory(source=%s) => %d", source, cr.getStatus());
             return 0;
         }
+        guaranteeDbUpdatedTimestampUniqueness();
         return 1;
     }
 
@@ -547,6 +558,7 @@ public class VoltHWInvDbApi implements HWInvDbApi {
         }
         return null;
     }
+
     private final static Gson gson = new Gson();
     private final Logger logger;
     private final String[] servers;

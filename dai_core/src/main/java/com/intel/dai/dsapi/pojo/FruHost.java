@@ -29,6 +29,9 @@ public class FruHost extends Component {
     public IbSysPojo ib_sys;
     public IbChassPojo ib_chass;
 
+    public FruHost() {
+    }
+
     public FruHost(FruHost fruHost) {
         super(fruHost);
 

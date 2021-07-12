@@ -41,7 +41,7 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
 
     def "ElasticsearchIndexIngester constructor - positive"() {
         expect:
-        new ElasticsearchIndexIngester(esClient, elasticsearchIndex, dsClientFactory, logger) != status
+        new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger) != status
 
         where:
         elasticsearchIndex  || status
@@ -50,7 +50,7 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
     }
 
     def "ingestIndexIntoVoltdb - negative"() {
-        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, dsClientFactory, logger)
+        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
 
         when:ts.ingestIndexIntoVoltdb()
         then: thrown DataStoreException
@@ -61,7 +61,7 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
     }
 
     def "ingestIndexIntoVoltdb - positive"() {
-        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, dsClientFactory, logger)
+        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
 
         expect:
         ts.ingestIndexIntoVoltdb()
@@ -98,7 +98,7 @@ class NodeInventoryIngesterITSpec extends Specification {
                 "elkrest", "elkdefault")
 
         for (String elasticsearchIndex in ['kafka_fru_host', 'kafka_dimm']) {
-            def eii = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, dsClientFactory, logger)
+            def eii = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
             eii.ingestIndexIntoVoltdb()
         }
 

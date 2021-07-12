@@ -10,11 +10,12 @@ import com.intel.dai.dsapi.HWInvHistoryEvent
 import com.intel.dai.dsapi.HWInvUtil
 import com.intel.dai.dsapi.InventorySnapshot
 import com.intel.dai.dsimpl.voltdb.HWInvUtilImpl
+import com.intel.dai.network_listener.NetworkListenerConfig
 import com.intel.logging.Logger
 import spock.lang.Specification
 
 class DatabaseSynchronizerSpec extends Specification {
-    def ts = new DatabaseSynchronizer(Mock(Logger), Mock(DataStoreFactory))
+    def ts = new DatabaseSynchronizer(Mock(Logger), Mock(DataStoreFactory), Mock(NetworkListenerConfig))
 
     def "initializeDependencies"() {
         when: ts.initializeDependencies()

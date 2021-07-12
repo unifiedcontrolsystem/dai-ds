@@ -25,9 +25,8 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
      * The last json document ingested is characterized by its timestamp and serial, where
      * timestamp is in epoch seconds, and serial is a string.
      * @return
-     * @throws DataStoreException
      */
-    public ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngested() throws DataStoreException {
+    public ImmutablePair<Long, String> getCharacteristicsOfLastRawDimmIngested() {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
@@ -35,14 +34,14 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             return executeGetLastRawComponentStmt(preparedStatement);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
-            throw e;    // rethrow
         }
         finally {
             tearDown(preparedStatement);
         }
+        return ImmutablePair.nullPair();
     }
 
-    public ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngested() throws DataStoreException {
+    public ImmutablePair<Long, String> getCharacteristicsOfLastRawFruHostIngested() {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
@@ -50,14 +49,14 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             return executeGetLastRawComponentStmt(preparedStatement);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
-            throw e;    // rethrow
         }
         finally {
             tearDown(preparedStatement);
         }
+        return ImmutablePair.nullPair();
     }
 
-    public boolean isRawDimmDuplicated(String serial, Long timestamp) throws DataStoreException {
+    public boolean isRawDimmDuplicated(String serial, Long timestamp) {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
@@ -65,14 +64,14 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             return executeIsDuplicatedRawComponentStmt(preparedStatement, serial, timestamp);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
-            throw e;    // rethrow
         }
         finally {
             tearDown(preparedStatement);
         }
+        return false;
     }
 
-    public boolean isRawFruHostDuplicated(String mac, Long timestamp) throws DataStoreException {
+    public boolean isRawFruHostDuplicated(String mac, Long timestamp) {
         PreparedStatement preparedStatement = null;
         try {
             establishConnectionToNearlineDb();
@@ -80,11 +79,11 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
             return executeIsDuplicatedRawComponentStmt(preparedStatement, mac, timestamp);
         } catch (DataStoreException e) {
             log_.error(e.getMessage());
-            throw e;    // rethrow
         }
         finally {
             tearDown(preparedStatement);
         }
+        return false;
     }
 
     private boolean executeIsDuplicatedRawComponentStmt(PreparedStatement preparedStatement,
@@ -380,9 +379,9 @@ public class InventorySnapshotJdbc implements InventorySnapshot {
     private static final String GET_LAST_RAW_INVENTORY_HISTORY_UPDATE_SQL =
             "select LastRawReplacementHistoryUpdate()";
     private static final String GET_LAST_RAW_DIMM_SQL =
-            "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY EntryNumber DESC LIMIT 1";
+            "SELECT id, serial, doc_timestamp FROM tier2_Raw_DIMM ORDER BY DbUpdatedTimestamp DESC LIMIT 1";
     private static final String GET_LAST_RAW_FRU_HOST_SQL =
-            "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY EntryNumber DESC LIMIT 1";
+            "SELECT id, mac, doc_timestamp FROM tier2_Raw_FRU_Host ORDER BY DbUpdatedTimestamp DESC LIMIT 1";
     private static final String IS_DUPLICATED_RAW_DIMM_SQL =
             "SELECT count(*) FROM tier2_Raw_DIMM WHERE serial=? AND doc_timestamp=?";
     private static final String IS_DUPLICATED_RAW_FRU_HOST_SQL =

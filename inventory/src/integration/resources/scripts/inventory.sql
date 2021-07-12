@@ -10,8 +10,8 @@ CREATE TABLE Raw_DIMM
     mac                VARCHAR(50)        NOT NULL, -- foreign key into Raw_FRU_host
     locator            VARCHAR(50)        NOT NULL,
     source             VARCHAR(5000)      NOT NULL,
-    doc_timestamp      BIGINT,                      -- epoch seconds
-    DbUpdatedTimestamp TIMESTAMP          NOT NULL,
+    doc_timestamp      BIGINT             NOT NULL, -- epoch seconds
+    DbUpdatedTimestamp TIMESTAMP UNIQUE   NOT NULL,
     PRIMARY KEY (serial)
 );
 
@@ -22,39 +22,39 @@ CREATE TABLE tier2_Raw_DIMM
     mac                VARCHAR(50)        NOT NULL, -- foreign key into Raw_FRU_host
     locator            VARCHAR(50)        NOT NULL,
     source             VARCHAR(5000)      NOT NULL,
-    doc_timestamp      BIGINT,                      -- epoch seconds
-    DbUpdatedTimestamp TIMESTAMP          NOT NULL,
+    doc_timestamp      BIGINT             NOT NULL, -- epoch seconds
+    DbUpdatedTimestamp TIMESTAMP UNIQUE   NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (serial)
 );
 
 CREATE TABLE Raw_FRU_Host
 (
-    id                 VARCHAR(50), -- Elasticsearch doc id
+    id                 VARCHAR(50),                 -- Elasticsearch doc id
     boardSerial        VARCHAR(50),
     mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
-    doc_timestamp      BIGINT,      -- epoch seconds
-    DbUpdatedTimestamp TIMESTAMP          NOT NULL,
+    doc_timestamp      BIGINT             NOT NULL, -- epoch seconds
+    DbUpdatedTimestamp TIMESTAMP UNIQUE   NOT NULL,
     PRIMARY KEY (mac)
 );
 
 CREATE TABLE tier2_Raw_FRU_Host
 (
-    id                 VARCHAR(50), -- Elasticsearch doc id
+    id                 VARCHAR(50),                 -- Elasticsearch doc id
     boardSerial        VARCHAR(50),
     mac                VARCHAR(50) UNIQUE NOT NULL,
     source             VARCHAR(10000)     NOT NULL,
-    doc_timestamp      BIGINT,      -- epoch seconds
-    DbUpdatedTimestamp TIMESTAMP          NOT NULL,
+    doc_timestamp      BIGINT             NOT NULL, -- epoch seconds
+    DbUpdatedTimestamp TIMESTAMP UNIQUE   NOT NULL,
     EntryNumber        BigInt             NOT NULL,
     PRIMARY KEY (mac)
 );
 
 CREATE TABLE Raw_Node_Inventory_History
 (
-    source             VARCHAR(70000) NOT NULL,
-    DbUpdatedTimestamp TIMESTAMP      NOT NULL,
+    source             VARCHAR(70000)   NOT NULL,
+    DbUpdatedTimestamp TIMESTAMP UNIQUE NOT NULL,
     PRIMARY KEY (DbUpdatedTimestamp)
 );
 

@@ -29,6 +29,9 @@ public class NodeInventory extends FruHost {
     public Dimm CPU1_DIMM_G1;
     public Dimm CPU1_DIMM_H1;
 
+    public NodeInventory() {
+    }
+
     public NodeInventory(FruHost fruHost) {
         super(fruHost);
     }
