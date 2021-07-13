@@ -1924,7 +1924,7 @@
         "Severity":"ERROR",
         "Category":"Adapter",
         "Component":"AdapterProvisioner",
-        "ControlOperation":"ErrorOnNode",
+        "ControlOperation":null,
         "GenerateAlert":"N",
         "Msg":"Found a PCIE AER message, but the message has an unexpected AER error type:"
     },
@@ -1978,7 +1978,36 @@
         "GenerateAlert":"N",
         "Msg":"Copy of GPU Crash Dump Succeeded"
     },
-
+    {
+        "DescriptiveName":"RasProvAerBusErrorUncorrectedFatal",
+        "EventType":"0004000134",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":"ErrorOnNode",
+        "GenerateAlert":"N",
+        "Msg":"Uncorrectable PCIE AER fatal error, error type BUS error:"
+    },
+    {
+        "DescriptiveName":"RasProvAerBusErrorUncorrectedNonFatal",
+        "EventType":"0004000135",
+        "Severity":"WARN",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Uncorrectable PCIE AER non-fatal error, error type BUS error:"
+    },
+    {
+        "DescriptiveName":"RasProvAerBusErrorCorrected",
+        "EventType":"0004000136",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"AdapterProvisioner",
+        "ControlOperation":null,
+        "GenerateAlert":"N",
+        "Msg":"Correctable PCIE AER error, error type BUS error:"
+    },
     {
         "DescriptiveName":"RasWlmMissingCaseStmt",
         "EventType":"0005000001",
@@ -3014,6 +3043,16 @@
         "ControlOperation":"ErrorOnNode",
         "GenerateAlert":"Y",
         "Msg":"Sensys detected a BMC SEL CATERR message:"
+    },
+    {
+        "DescriptiveName":"RasMntrNewCrashdumpEntry",
+        "EventType":"0008000302",
+        "Severity":"FATAL",
+        "Category":"Adapter",
+        "Component":"AdapterMonitorSensys",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Sensys found a new crashdump entry:"
     },
 
 
