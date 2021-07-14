@@ -8,10 +8,10 @@
     "nodeTelemetry": {
       "arguments": {
         "bootstrap.servers": "admin:9092",
-	"group.id": "dai-monitoring",
-	"schema.registry.url": "http://admin:8081",
-	"value.deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer",
-	"auto.commit.enable": true,
+        "group.id": "dai-monitoring",
+        "schema.registry.url": "http://admin:8081",
+        "value.deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer",
+        "auto.commit.enable": true,
         "topics": "sensors_node"
       },
       "name": "kafka"
@@ -57,10 +57,11 @@
       "exchangeName": "ucs",
       "uri": "amqp://am02-nmn.local"
     },
-    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+    "com.intel.dai.monitoring.EnvironmentalProviderHPCM": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
-      "publish": true
+      "publish": true,
+      "windowSize": 25
     },
     "com.intel.dai.monitoring.RasEventProviderForeignBus": {
       "publishTopic": "ucs_ras_event",

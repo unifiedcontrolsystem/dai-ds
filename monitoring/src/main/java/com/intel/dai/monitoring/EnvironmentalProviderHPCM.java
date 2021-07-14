@@ -141,6 +141,8 @@ public class EnvironmentalProviderHPCM implements NetworkListenerProviderEx, Ini
             processorMap_.put("sensors_node", new TopicMetricSensorNode(log_, doAggregation));
             processorMap_.put("metric_cooldev", new TopicMetricCoolDev(log_, doAggregation));
             processorMap_.put("pcm-monitoring", new TopicMetricPcmMonitoring(log_, doAggregation));
+            processorMap_.put("slingshot_CrayFabricPerfTelemetry", new TopicMetricFabricPerfTelemetry(log_, doAggregation));
+            processorMap_.put("slingshot_CrayFabricCritTelemetry", new TopicMetricFabricCritTelemetry(log_, doAggregation));
         }
     }
 
