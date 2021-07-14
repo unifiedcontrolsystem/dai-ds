@@ -14,6 +14,9 @@ pipeline {
     }
     stages {
         stage('Restart Component Test Servers') {
+            environment {
+                PGPASSWORD = 'postgres'
+            }
             agent { label "DOCKER-TEST-SERVER-HOST" }
             steps {
                 script { utilities.fixFilesPermission() }
