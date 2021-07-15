@@ -1,0 +1,671 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+from collections import OrderedDict
+import sys
+from os import makedirs
+from yaml import safe_load
+from ClusterShell.NodeSet import NodeSet
+from json import dump
+import re
+
+
+class MakeAuroraConfig(object):
+    """Class used to make the DAI/DS configuration files from a single input file for a system."""
+    def __init__(self, filename):
+        self.location_map = OrderedDict()
+        with open(filename, 'r') as fd:
+            self.data = safe_load(fd)
+        self.extra_xnames = self.data['extra-xnames']
+        del self.data['extra-xnames']
+        self.hpcm_assigned_services_to_hostnames = self.data['hpcm-assigned-services-to-hostnames']
+        del self.data['hpcm-assigned-services-to-hostnames']
+        self.dai_nodes_and_roles = self.data['dai-nodes-and-roles']
+        del self.data['dai-nodes-and-roles']
+        self.dai_monitoring_summary = self.data['dai-monitoring-summary']
+        del self.data['dai-monitoring-summary']
+        self.dai_key_values = self.data['dai-key-values']
+        del self.data['dai-key-values']
+        self.dai_adapters = self.data['dai-adapters']
+        del self.data['dai-adapters']
+        self.dai_monitoring_profiles = []
+        for name in self.data['dai-networking-topics'].keys():
+            self.dai_monitoring_profiles.append(name)
+        self.dai_networking_topics = self.data['dai-networking-topics']
+        del self.data['dai-networking-topics']
+        self.dai_service_info = self.data['dai-services-info']
+        del self.data['dai-services-info']
+        if 'hostname-map' in self.data:
+            self.hostname_map = self.data['hostname-map']
+            del self.data['hostname-map']
+        else:
+            self.hostname_map = {}
+        if 'network-details' in self.data:
+            self.network_details = self.data['network-details']
+            del self.data['network-details']
+        else:
+            self.network_details = {}
+        self.nodes = OrderedDict()
+        self.processors = OrderedDict()
+        self.hsns = OrderedDict()
+        self.dimms = OrderedDict()
+        self.non_nodes = OrderedDict()
+
+        self.ip_template = '10.{}.{}.{}'
+        self.bmc_ip_addr = 128
+        self.mac_template = '80:00:00:{:02x}:{:02x}:{:02x}'
+        self.bmc_mac_template = 'c0:00:00:{:02x}:{:02x}:{:02x}'
+        self.ip_number = int(1)
+        self.mac_number = int(1)
+        self.racks = int(0)
+
+        self.reverse_types = ['Rack', 'Chassis', 'ServiceNode', 'ComputeNode', 'Switch', 'PDU']
+
+    def make_location_map(self, location_filename):
+        self.traverse_data(self.data['views']['Full']['floor'], '', '')
+        print('Total Racks:      {}'.format(self.racks))
+        print('Total Nodes:      {}'.format(len(self.nodes)))
+        print('Total CPUs:       {}'.format(len(self.processors)))
+        print('Total HSN NICS:   {}'.format(len(self.hsns)))
+        print('Total DIMMs:      {}'.format(len(self.dimms)))
+        self.trim_special_definitions(self.data['views']['Full']['floor'])
+        with open(location_filename, 'w') as fd:
+            dump(self.location_map, fp=fd, indent=2)
+
+    def get_hostname_from_xname(self, xname):
+        patterns = [
+            '(^d[0-9]+)(.*)',
+            '(^x[0-9]+p[0-9]+)(.*)',
+            '(^x[0-9]+c[0-9]+[rw][0-9]+)(.*)',
+            '(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+n[0-9]+)(.*)',
+            '(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+)($)'
+        ]
+        truncated = None
+        for pattern in patterns:
+            if re.search(pattern, xname) is not None:
+                truncated = re.match(pattern, xname).group(1)
+                break
+        if truncated is None:
+            return None
+        if truncated in self.hostname_map:
+            return self.hostname_map[truncated]
+        return truncated
+
+    def traverse_data(self, start, xname_prefix, name_prefix):
+        content = start['content']
+        new_content = []
+        for item in content:
+            xnames = NodeSet()
+            xnames.add(item['xname'])
+            names = NodeSet()
+            names.add(item['name'])
+            if xname_prefix == '' and self.data['views']['Full']['definitions'][item['definition']]['type'] == 'Rack':
+                self.racks += len(names)
+            if len(xnames) != len(names):
+                raise Exception("Count mismatch between x-names and names: " + str(item))
+            for index in range(0, len(xnames)):
+                reverse = len(xnames) - 1 - index
+                self.location_map[xname_prefix + xnames[index]] = name_prefix + names[index]
+                new_start = self.data['views']['Full']['definitions'][item['definition']]
+                if self.data['views']['Full']['definitions'][item['definition']]['type'] in self.reverse_types:
+                    self.expand_content(item, names[reverse], xnames[reverse], new_content)
+                else:
+                    self.expand_content(item, names[index], xnames[index], new_content)
+                self.traverse_data(new_start, xname_prefix + xnames[index], name_prefix + names[index] + '-')
+        self.get_extra_sub_maps(start, xname_prefix, name_prefix[0:-1])
+        if 'type' in start and (start['type'] == 'ServiceNode' or start['type'] == 'ComputeNode'):
+            bmc = re.match('(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+)(n[0-9]+)', xname_prefix).group(1)
+            self.nodes[name_prefix[0:-1]] = {'hostname': xname_prefix, 'bmc_hostname': bmc, 'type': start['type']}
+        if 'type' in start and start['type'] == 'Processor':
+            proc = re.match('(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+)(n[0-9]+)(k)([0-9]+)', xname_prefix).group(4)
+            self.processors[name_prefix[0:-1]] = {
+                'designation': 'CPU{}'.format(proc), 'type': start['type']}
+        if 'type' in start and start['type'] == 'Hfi':
+            slot = start['board_slot'].format(int(re.match('(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+)(n[0-9]+)(h)([0-9]+)',
+                                                           xname_prefix).group(4)) + 1)
+            self.hsns[name_prefix[0:-1]] = {
+                'slot': slot, 'type': start['type']}
+        if 'type' in start and start['type'] == 'Dimm':
+            match = re.match('(^x[0-9]+c[0-9]+s[0-9]+b[0-9]+)(n[0-9]+)(k)([0-9]+)(d)([0-9]+)', xname_prefix)
+            cpu = int(match.group(4))
+            dimm = int(match.group(6))
+            bank = 'NODE {}'.format(cpu + 1)
+            letter = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+            module = 'CPU{}_DIMM_{}{}'.format(cpu + 1, letter[int(dimm / 2)], (dimm % 2) + 1)
+            self.dimms[name_prefix[0:-1]] = {'module': module, 'bank': bank, 'type': start['type']}
+        if 'type' in start and start['type'] == 'PDU':
+            self.non_nodes[name_prefix[0:-1]] = {'type': start['type'], 'hostname': xname_prefix}
+        start['content'] = new_content
+
+    @staticmethod
+    def expand_content(item, location, xname, new_content):
+        new = OrderedDict()
+        new['definition'] = item['definition']
+        new['name'] = location
+        new['xname'] = xname
+        new['x'] = item['x']
+        new['y'] = item['y']
+        new_content.append(new)
+
+    def get_extra_sub_maps(self, definition, xname_prefix, name):
+        if 'type' in definition and definition['type'] == 'Switch':
+            for obj in self.extra_xnames['Switch']:
+                pattern = obj['pattern']
+                if re.search(pattern, xname_prefix) is not None:
+                    extra = NodeSet()
+                    extra.add(obj['additional'].replace('%P', str(definition['ports'])))
+                    for sub in extra:
+                        self.location_map[xname_prefix + sub] = name
+
+    def trim_special_definitions(self, start):
+        if 'ports' in start:
+            del start['ports']
+        if 'board_slot' in start:
+            del start['board_slot']
+        for obj in start['content']:
+            if 'xname' in obj:
+                del obj['xname']
+            self.trim_special_definitions(self.data['views']['Full']['definitions'][obj['definition']])
+
+    def make_system_manifest(self, manifest_filename):
+        with open(manifest_filename, 'w') as fd:
+            dump(self.data, fp=fd, indent=2)
+
+    def make_machine_config_template(self, config_filename):
+        config = OrderedDict()
+        config['UcsConfigValues'] = []
+        config['AdapterInstances'] = []
+        config['InitialWorkItems'] = []
+        config['Nodes'] = []
+        config['Processors'] = []
+        config['Hfis'] = []
+        config['Dimms'] = []
+        config['PDUS'] = []
+        self.fill_nodes(config['Nodes'])
+        self.fill_processors(config['Processors'])
+        self.fill_hsns(config['Hfis'])
+        self.fill_dimms(config['Dimms'])
+        self.fill_pdus(config['PDUS'])
+        self.fill_ucs_values(config['UcsConfigValues'])
+        self.fill_adapter_instances(config['AdapterInstances'])
+        self.fill_adapter_items(config['InitialWorkItems'])
+        with open(config_filename, 'w') as fd:
+            dump(config, fp=fd, indent=2)
+
+    def fill_nodes(self, array):
+        aggregator = 'manual'
+        for dai_node in self.dai_nodes_and_roles:
+            if 'aggregator' in self.dai_nodes_and_roles[dai_node]:
+                aggregator = self.location_map[dai_node]
+                break
+        for location in self.nodes:
+            agg = aggregator
+            if location == aggregator:
+                agg = 'manual'
+            xname = self.nodes[location]['hostname']
+            xname_bmc = self.nodes[location]['bmc_hostname']
+            entry = {
+                'Lctn': location,
+                'Type': self.nodes[location]['type'],
+                'HostName': self.get_hostname_from_xname(xname),
+                'BmcHostName': self.get_hostname_from_xname(xname_bmc),
+                'Aggregator': agg,
+                'BootImageId': None,
+                'IpAddr': self.get_ip(xname, False),
+                'MacAddr': self.get_mac(xname, False),
+                'BmcAddr': self.get_ip(xname_bmc, True),
+                'BmcMacAddr': self.get_mac(xname_bmc, True)
+            }
+            self.ip_number += 1
+            self.mac_number += 1
+            array.append(entry)
+
+    def get_ip(self, xname, for_bmc):
+        if len(self.network_details) == 0 or xname not in self.network_details:
+            return self.generate_ip(for_bmc)
+        else:
+            return self.network_details[xname]['ip']
+
+    def get_mac(self, xname, for_bmc):
+        if len(self.network_details) == 0 or xname not in self.network_details:
+            return self.generate_mac(for_bmc)
+        else:
+            return self.network_details[xname]['mac']
+
+    def generate_ip(self, for_bmc):
+        b1 = int(self.ip_number % 256)
+        if b1 == 0:
+            self.ip_number += 1
+            b1 = self.ip_number % 256
+        b2 = int((self.ip_number % 65536) / 256)
+        b3 = int((self.ip_number % 16777216) / 65536)
+        if for_bmc:
+            b3 = (b3 + self.bmc_ip_addr) % 256
+        return self.ip_template.format(b3, b2, b1)
+
+    def generate_mac(self, for_bmc):
+        b1 = int(self.mac_number % 256)
+        b2 = int((self.mac_number % 65536) / 256)
+        b3 = int((self.mac_number % 16777216) / 65536)
+        if for_bmc:
+            return self.bmc_mac_template.format(b3, b2, b1)
+        else:
+            return self.mac_template.format(b3, b2, b1)
+
+    def fill_processors(self, array):
+        for location in self.processors:
+            entry = {
+                'Lctn': location,
+                'Type': self.processors[location]['type'],
+                'SocketDesignation': self.processors[location]['designation']
+            }
+            array.append(entry)
+
+    def fill_hsns(self, array):
+        for location in self.hsns:
+            entry = {
+                'Lctn': location,
+                'Type': self.hsns[location]['type'],
+                'Slot': self.hsns[location]['slot']
+            }
+            array.append(entry)
+
+    def fill_dimms(self, array):
+        for location in self.dimms:
+            entry = {
+                'Lctn': location,
+                'Type': self.dimms[location]['type'],
+                'BankLocator': self.dimms[location]['bank'],
+                'ModuleLocator': self.dimms[location]['module']
+            }
+            array.append(entry)
+
+    def fill_pdus(self, array):
+        aggregator = None
+        for dai_node in self.dai_nodes_and_roles:
+            if 'aggregator' in self.dai_nodes_and_roles[dai_node]:
+                aggregator = self.location_map[dai_node]
+                break
+        for location in self.non_nodes:
+            entry = {
+                'Lctn': location,
+                'Type': self.non_nodes[location]['type'],
+                'Hostname': self.get_hostname_from_xname(self.non_nodes[location]['hostname']),
+                'Aggregator': aggregator,
+                'IpAddr': self.get_ip(self.non_nodes[location]['hostname'], True)
+            }
+            self.bmc_ip_addr += 1
+            self.mac_number += 1
+            array.append(entry)
+
+    def fill_ucs_values(self, array):
+
+        for key in self.dai_key_values:
+            value = self.dai_key_values[key]
+            if isinstance(value, str):
+                value = self.replace_variables(value)
+            if value in ['SmwHostname']:
+                value = self.get_hostname_from_xname(value)
+            entry = {
+                'Key': key,
+                'Value': value
+            }
+            array.append(entry)
+
+    def replace_variables(self, some_str):
+        output = some_str.replace('@aggregator', self.get_role_xname('aggregator'))
+        output = output.replace('@online', self.get_role_xname('online'))
+        output = output.replace('@nearline', self.get_role_xname('nearline'))
+        output = output.replace('@ras', self.get_role_xname('ras'))
+        output = output.replace('@ui', self.get_role_xname('ui'))
+        output = output.replace('@provisioner', self.get_role_xname('provisioner'))
+        output = output.replace('@wlm', self.get_role_xname('wlm'))
+        output = output.replace('@inventory', self.get_role_xname('inventory'))
+        output = output.replace('@monitoring', self.get_role_xname('monitoring'))
+        output = output.replace('@rabbitmq', self.get_role_xname('rabbitmq'))
+        return output
+
+    def get_role_xname(self, role):
+        for xname in self.dai_nodes_and_roles:
+            if role in self.dai_nodes_and_roles[xname]:
+                return xname
+        return None
+
+    def fill_adapter_instances(self, array):
+        invoke_template = '$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE {} ' \
+                          '$VOLTIPADDRS $LCTN $HOSTNAME'
+        log_template = '$UCSLOGFILEDIRECTORY/{}-$LCTN-$INSTANCE.log'
+        for adapter_type in self.dai_adapters:
+            java_class = self.dai_adapters[adapter_type]['class-name']
+            xname = self.get_role_xname(self.dai_adapters[adapter_type]['adapter-role'][1:])
+            entry = {
+                'TypeOfAdapter': adapter_type,
+                'ServiceNode': self.location_map[xname],
+                'NumberOfInstances': self.dai_adapters[adapter_type]['instances'],
+                'Invocation': invoke_template.format(java_class),
+                'LogFile': log_template.format(java_class.split('.')[-1])
+            }
+            array.append(entry)
+
+    def fill_adapter_items(self, array):
+        for adapter_type in self.dai_adapters:
+            entry = {
+                'TypeOfAdapter': 'DAI_MGR',
+                'WorkToBeDone': 'MotherSuperiorDaiMgr',
+                'Parms': '',
+                'NotifyWhenFinished': 'F',
+                'Queue': self.get_role_xname('aggregator')
+            }
+            array.append(entry)
+            for dai_xname in self.dai_nodes_and_roles:
+                entry = {
+                    'TypeOfAdapter': 'DAI_MGR',
+                    'WorkToBeDone': 'ChildDaiMgr',
+                    'Parms': '',
+                    'NotifyWhenFinished': 'F',
+                    'Queue': self.location_map[dai_xname]
+                }
+                array.append(entry)
+
+            if adapter_type == 'MONITOR':
+                self.fill_adapter_items_monitoring(array, adapter_type)
+            else:
+                entry = {
+                    'TypeOfAdapter': adapter_type,
+                    'WorkToBeDone': self.dai_adapters[adapter_type]['work'],
+                    'Parms': self.replace_variables(self.dai_adapters[adapter_type]['parameters']),
+                    'NotifyWhenFinished': 'F',
+                    'Queue': ""
+                }
+                array.append(entry)
+
+    def fill_adapter_items_monitoring(self, array, adapter_type):
+        if len(self.dai_monitoring_profiles) != self.dai_adapters[adapter_type]['instances']:
+            raise Exception("Bad YAML file check: adapter monitoring instance does not match the number of profiles!")
+        for profile in self.dai_monitoring_profiles:
+            entry = {
+                'TypeOfAdapter': adapter_type,
+                'WorkToBeDone': self.dai_adapters[adapter_type]['work'],
+                'Parms': self.dai_adapters[adapter_type]['parameters'].replace('@profile', profile),
+                'NotifyWhenFinished': 'F',
+                'Queue': ""
+            }
+            array.append(entry)
+
+    def make_monitoring_config(self, filename):
+        if 'MONITOR' in self.dai_adapters:
+            config = self.build_monitoring_data()
+            with open(filename, 'w') as fd:
+                dump(config, fp=fd, indent=2)
+
+    def build_monitoring_data(self):
+        config = OrderedDict()
+        config['providerClassMap'] = {
+            'environmentalProvider': 'com.intel.dai.monitoring.EnvironmentalProviderHPCM',
+            'rasProvider': 'com.intel.dai.monitoring.RasEventProviderHPCM'
+        }
+
+        config['adapterProfiles'] = {}
+        for profile in self.dai_monitoring_profiles:
+            config['adapterProfiles'][profile] = {
+                'adapterProvider': self.dai_networking_topics[profile]['provider'],
+                'networkStreamsRef': self.dai_networking_topics[profile]['topics'],
+                'subjects': ['*']
+            }
+
+        deserializers = {True: 'io.confluent.kafka.serializers.KafkaAvroDeserializer',
+                         False: 'org.apache.kafka.common.serialization.StringSerializer'}
+        config['networkStreams'] = {}
+        for profile in self.dai_monitoring_profiles:
+            for topic in self.dai_networking_topics[profile]['topics']:
+                deserializer = deserializers[self.dai_networking_topics[profile]['avro']]
+                config['networkStreams'][topic] = {
+                    'name': 'kafka',
+                    "arguments": {
+                        'bootstrap.servers': self.hpcm_assigned_services_to_hostnames['kafka'],
+                        'schema.registry.url': self.hpcm_assigned_services_to_hostnames['registry'],
+                        'value.deserializer': deserializer,
+                        'group.id': 'dai-monitoring',
+                        'topics': topic,
+                        'auto.commit.enable': True
+                    }
+                }
+
+        config['providerConfigurations'] = {
+            'com.intel.dai.network_listener.NetworkListenerSystemActions': {
+                'sourceType': 'rabbitmq',
+                'exchangeName': 'ucs',
+                'uri': 'amqp://{}'.format(self.get_role_xname('rabbitmq'))
+            },
+            'com.intel.dai.monitoring.EnvironmentalProviderHPCM': {
+                'publishRawTopic': 'ucs_raw_data',
+                'publishAggregatedTopic': 'ucs_aggregated_data',
+                'publish': True
+            },
+            'com.intel.dai.monitoring.RasEventProviderHPCM': {
+                'publishTopic': 'ucs_ras_event',
+                'publish': True
+            }
+        }
+        for obj in self.dai_monitoring_summary:
+            details = config['providerConfigurations'][obj['class-name']]
+            for prop in obj:
+                if prop != 'class-name':
+                    details[prop] = obj[prop]
+
+        config['subjectMap'] = {
+            'telemetry': 'EnvironmentalData',
+            'inventoryChanges': 'InventoryChangeEvent',
+            'logs': 'LogData',
+            'events': 'RasEvent',
+            'stateChanges': 'StateChangeEvent'
+        }
+
+        return config
+
+    def make_nearline_config(self, filename):
+        config = {
+            'db': {
+                'type': 'jdbc',
+                'url': 'jdbc:postgresql://{}:5432/dai'.format(self.get_role_xname('postgres')),
+                'username': self.dai_service_info['postgres']['username'],
+                'password': self.dai_service_info['postgres']['password']
+            }
+        }
+        with open(filename, 'w') as fd:
+            dump(config, fp=fd, indent=2)
+
+    def make_voltip_config(self, filename):
+        config = ''
+        for server in self.dai_nodes_and_roles:
+            if 'voltdb' in self.dai_nodes_and_roles[server]:
+                if config == '':
+                    config += server
+                else:
+                    config += ',' + server
+        config += '\n'
+        with open(filename, 'w') as fd:
+            fd.write(config)
+
+    def make_cli_config(self, filename):
+        config = {
+            'rest_server_address': self.get_role_xname('ui'),
+            'rest_server_port': '4567'
+        }
+        with open(filename, 'w') as fd:
+            dump(config, fp=fd, indent=2)
+
+    def make_provisioner_config(self, filename):
+        if 'PROVISIONER' in self.dai_adapters:
+            config = self.build_provisioner_data()
+            with open(filename, 'w') as fd:
+                dump(config, fp=fd, indent=2)
+
+    def build_provisioner_data(self):
+        config = {
+            'providerClassMap': {
+                'bootProvider': 'com.intel.dai.provisioners.NetworkListenerProviderForeignBus'
+            },
+            'adapterProfiles': {
+                'default': {
+                    'adapterProvider': 'bootProvider',
+                    'networkStreamsRef': ['stateSource'],
+                    'subjects': ['*']
+                }
+            },
+            'networkStreams': {
+                'stateSource': {
+                    'name': 'kafka',
+                    'arguments': {
+                        'bootstrap.servers': self.hpcm_assigned_services_to_hostnames['kafka'],
+                        'schema.registry.url': self.hpcm_assigned_services_to_hostnames['registry'],
+                        'group.id': 'dai-boot-states',
+                        'topics': self.dai_adapters['PROVISIONER']['topics'],
+                        'auto.commit.enable': True,
+                        'auto.offset.reset': 'latest'
+                    }
+                }
+            },
+            'providerConfigurations': {
+                'com.intel.dai.network_listener.NetworkListenerSystemActions': {
+                    'sourceType': 'rabbitmq',
+                    'exchangeName': 'ucs',
+                    'uri': 'amqp://{}'.format(self.get_role_xname('rabbitmq'))
+                },
+                'com.intel.dai.provisioners.NetworkListenerProviderForeignBus': {
+                    'publishTopic': 'ucs_boot_event',
+                    'publish': True,
+                    'informWorkLoadManager': False,
+                    'nodeStates': self.dai_adapters['PROVISIONER']['state-patterns'],
+                    'subscribedTopicMap': self.dai_adapters['PROVISIONER']['topic-map']
+                }
+            },
+            'subjectMap': {
+                'telemetry': 'EnvironmentalData',
+                'inventoryChanges': 'InventoryChangeEvent',
+                'logs': 'LogData',
+                'events': 'RasEvent',
+                'stateChanges': 'StateChangeEvent'
+            }
+        }
+
+        return config
+
+    def make_inventory_config(self, filename):
+        if 'INVENTORY' in self.dai_adapters:
+            config = self.build_inventory_data()
+            with open(filename, 'w') as fd:
+                dump(config, fp=fd, indent=2)
+
+    def build_inventory_data(self):
+        config = {
+            'providerClassMap': {
+                'inventoryData': 'com.intel.dai.inventory.NetworkListenerProviderForeignBus'
+            },
+            'networkStreams': {
+                'default': {
+                    'arguments': {
+                        'bootstrap.servers': self.hpcm_assigned_services_to_hostnames['kafka'],
+                        'group.id': 'dai-inventory',
+                        'schema.registry.url': self.hpcm_assigned_services_to_hostnames['registry'],
+                        'auto.commit.enable': True,
+                        'auto.offset.reset': 'latest',
+                        'topics': self.dai_adapters['INVENTORY']['topics']
+                    },
+                    'name': 'kafka'
+                }
+            },
+            'adapterProfiles': {
+                'default': {
+                    'networkStreamsRef': ['default'],
+                    'subjects': ['*'],
+                    'adapterProvider': 'inventoryData'
+                }
+            },
+            'providerConfigurations': {
+                'com.intel.dai.network_listener.NetworkListenerSystemActions': {
+                    'sourceType': 'rabbitmq',
+                    'exchangeName': 'ucs',
+                    'uri': 'amqp://{}'.format(self.get_role_xname('rabbitmq'))
+                },
+                'com.intel.dai.inventory.NetworkListenerProviderForeignBus': {
+                    'publishTopic': 'ucs_inventory_event',
+                    'informWorkLoadManager': False,
+                    'publish': True
+                },
+                'com.intel.dai.inventory.DatabaseSynchronizer': {
+                    'hostName': self.hpcm_assigned_services_to_hostnames['elk'].split(':')[0],
+                    'port': int(self.hpcm_assigned_services_to_hostnames['elk'].split(':')[1]),
+                    'userName': self.dai_service_info['elk']['username'],
+                    'password': self.dai_service_info['elk']['password']
+                }
+            },
+            'subjectMap': {
+                'telemetry': 'EnvironmentalData',
+                'inventoryChanges': 'InventoryChangeEvent',
+                'logs': 'LogData',
+                'events': 'RasEvent',
+                'stateChanges': 'StateChangeEvent'
+            }
+        }
+        return config
+
+    def make_wlm_config(self, filename):
+        if 'WLM' in self.dai_adapters:
+            config = self.build_wlm_data()
+            with open(filename, 'w') as fd:
+                dump(config, fp=fd, indent=2)
+
+    def build_wlm_data(self):
+        config = {
+            'bootstrap.servers': self.hpcm_assigned_services_to_hostnames['kafka'],
+            'group.id': 'dai-pbs-runjobs',
+            'schema.registry.url': self.hpcm_assigned_services_to_hostnames['registry'],
+            'enable.auto.commit': True,
+            'auto.offset.reset': 'latest',
+            'topics': self.dai_adapters['WLM']['topics']
+        }
+        return config
+
+
+# Main program with basic CLI handling
+def usage_exit(fd, rv):
+    print('Usage: make_aurora_config [input-yml-file | -h | --help]', file=fd)
+    print('       configuration files will appear in "./configurations"', file=fd)
+    exit(rv)
+
+
+def error_print(message):
+    print('Error: ' + message, file=sys.stderr)
+    usage_exit(sys.stderr, 1)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 2:
+        error_print('Only one optional argument is expected!')
+    if len(sys.argv) == 2:
+        if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+            usage_exit(sys.stdout, 0)
+        elif sys.argv[1].startswith('-'):
+            error_print('Bad option, only -h and --help are allowed!')
+
+    makedirs('./configuration', exist_ok=True)
+    if len(sys.argv) == 2:
+        inputFile = sys.argv[1]
+    else:
+        print('Defaulting to input file ./Aurora.yml...')
+        inputFile = 'Aurora.yml'
+    app = MakeAuroraConfig(inputFile)
+    app.make_location_map('configuration/LocationTranslationMap.json')
+    app.make_system_manifest('configuration/SystemManifest.json')
+    app.make_machine_config_template('configuration/MachineConfig.json')
+    app.make_monitoring_config('configuration/ProviderMonitoringNetworkForeignBus.json')
+    app.make_nearline_config('configuration/NearlineConfig.json')
+    app.make_voltip_config('configuration/volt.ip')
+    app.make_cli_config('configuration/cli_config.json')
+    app.make_provisioner_config('configuration/ProviderProvisionerNetworkForeignBus.json')
+    app.make_wlm_config('configuration/AdapterWlmPBS.json')
+    app.make_inventory_config('configuration/ProviderInventoryNetworkForeignBus.json')
