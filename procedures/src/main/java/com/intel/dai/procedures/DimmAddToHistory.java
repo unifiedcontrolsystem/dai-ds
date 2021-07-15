@@ -29,7 +29,7 @@ public class DimmAddToHistory extends VoltProcedure {
 
     public final SQLStmt insertHistory = new SQLStmt(
                  "INSERT INTO Dimm " +
-                 "(NodeLctn, Lctn, State, SizeMB, ModuleLocator, BankLocator, Serial, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
+                 "(NodeLctn, Lctn, State, SizeMB, ModuleLocator, BankLocator, Sernum, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
