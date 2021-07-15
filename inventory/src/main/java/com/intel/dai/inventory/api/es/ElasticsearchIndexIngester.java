@@ -10,6 +10,7 @@ import com.intel.dai.dsapi.DataStoreFactory;
 import com.intel.dai.dsapi.HWInvDbApi;
 import com.intel.dai.dsapi.pojo.*;
 import com.intel.dai.exceptions.DataStoreException;
+import com.intel.dai.inventory.api.database.RawInventoryDataIngester;
 import com.intel.logging.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.ElasticsearchStatusException;
@@ -61,10 +62,10 @@ public class ElasticsearchIndexIngester {
         scroll = getScroll();
         switch (index) {
             case "kafka_dimm":
-                ingestMethodReference = this::ingestDimm;
+                ingestMethodReference = RawInventoryDataIngester::ingestDimm;
                 break;
             case "kafka_fru_host":
-                ingestMethodReference = this::ingestFruHost;
+                ingestMethodReference = RawInventoryDataIngester::ingestFruHost;
                 break;
             default:
                 ingestMethodReference = null;
@@ -97,48 +98,48 @@ public class ElasticsearchIndexIngester {
         }
     }
 
-    private void ingestFruHost(ImmutablePair<String, String> doc) {
-        String id = doc.left;
-        FruHost fruHost = gson.fromJson(doc.right, FruHost.class);
-
-        fruHost.oob_fru = gson.fromJson(fruHost.rawOobFru, OobFruPojo.class);
-        fruHost.rawOobFru = null;
-        fruHost.oob_rev_info = gson.fromJson(fruHost.rawOobRevInfo, OobRevInfoPojo.class);
-        fruHost.rawOobRevInfo = null;
-
-        fruHost.ib_bios = gson.fromJson(fruHost.rawIbBios, IbBiosPojo.class);
-        fruHost.rawIbBios = null;
-
-        fruHost.boardSerial = fruHost.oob_fru.Board_Serial;
-
-        try {
-            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, fruHost);
-            LastIdIngested = doc.left;
-            lastKeyIngested = fruHost.mac;
-            lastDocTimestampIngested = fruHost.timestamp;
-            log_.debug("ES ingested %s: %d, %s", doc.left, fruHost.timestamp, fruHost.mac);
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
-    }
-
-    private void ingestDimm(ImmutablePair<String, String> doc) {
-        String id = doc.left;
-        Dimm dimm = gson.fromJson(doc.right, Dimm.class);
-        dimm.ib_dimm = gson.fromJson(dimm.rawIbDimm, IbDimmPojo.class);
-        dimm.rawIbDimm = null;
-        dimm.locator = dimm.ib_dimm.Locator;
-
-        try {
-            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, dimm);
-            LastIdIngested = doc.left;
-            lastKeyIngested = dimm.serial;
-            lastDocTimestampIngested = dimm.timestamp;
-            log_.debug("ES ingested %s: %d, %s", doc.left, dimm.timestamp, dimm.serial);
-        } catch (DataStoreException e) {
-            log_.error("DataStoreException: %s", e.getMessage());
-        }
-    }
+//    private void ingestFruHost(ImmutablePair<String, String> doc) {
+//        String id = doc.left;
+//        FruHost fruHost = gson.fromJson(doc.right, FruHost.class);
+//
+//        fruHost.oob_fru = gson.fromJson(fruHost.rawOobFru, OobFruPojo.class);
+//        fruHost.rawOobFru = null;
+//        fruHost.oob_rev_info = gson.fromJson(fruHost.rawOobRevInfo, OobRevInfoPojo.class);
+//        fruHost.rawOobRevInfo = null;
+//
+//        fruHost.ib_bios = gson.fromJson(fruHost.rawIbBios, IbBiosPojo.class);
+//        fruHost.rawIbBios = null;
+//
+//        fruHost.boardSerial = fruHost.oob_fru.Board_Serial;
+//
+//        try {
+//            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, fruHost);
+//            LastIdIngested = doc.left;
+//            lastKeyIngested = fruHost.mac;
+//            lastDocTimestampIngested = fruHost.timestamp;
+//            log_.debug("ES ingested %s: %d, %s", doc.left, fruHost.timestamp, fruHost.mac);
+//        } catch (DataStoreException e) {
+//            log_.error("DataStoreException: %s", e.getMessage());
+//        }
+//    }
+//
+//    private void ingestDimm(ImmutablePair<String, String> doc) {
+//        String id = doc.left;
+//        Dimm dimm = gson.fromJson(doc.right, Dimm.class);
+//        dimm.ib_dimm = gson.fromJson(dimm.rawIbDimm, IbDimmPojo.class);
+//        dimm.rawIbDimm = null;
+//        dimm.locator = dimm.ib_dimm.Locator;
+//
+//        try {
+//            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, dimm);
+//            LastIdIngested = doc.left;
+//            lastKeyIngested = dimm.serial;
+//            lastDocTimestampIngested = dimm.timestamp;
+//            log_.debug("ES ingested %s: %d, %s", doc.left, dimm.timestamp, dimm.serial);
+//        } catch (DataStoreException e) {
+//            log_.error("DataStoreException: %s", e.getMessage());
+//        }
+//    }
 
     public long getNumberOfDocumentsEnumerated() {
         return totalNumberOfDocumentsEnumerated;

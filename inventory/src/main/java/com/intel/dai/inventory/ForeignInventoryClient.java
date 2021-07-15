@@ -94,17 +94,17 @@ class ForeignInventoryClient {
     private String getForeignHWInvHistoryJson(String startTime) {
         try {
             hwInvDiscovery_.initialize();
-            log_.debug("HWI:%n  %s", "Rest client created");
+            log_.debug("Rest client created");
 
         } catch (RESTClientException e) {
-            log_.fatal("HWI:%n  Failed to create REST client: %s", e.getMessage());
+            log_.fatal("Failed to create REST client: %s", e.getMessage());
             return null;
         }
 
         ImmutablePair<Integer, String> foreignHwInvHistory = hwInvDiscovery_.queryHWInvHistory(startTime);
 
         if (foreignHwInvHistory.left != 0) {
-            log_.error("HWI:%n  %s", "Failed to acquire foreign HW inventory history json");
+            log_.error("Failed to acquire foreign HW inventory history json");
             return null;
         }
         return foreignHwInvHistory.right;

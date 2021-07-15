@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "*** Bounce Kafka server ***"
+docker-compose -f /opt/kafka/docker-compose.yml down
+docker-compose -f /opt/kafka/docker-compose.yml up -d
+
 distributions=$(dirname "$0")
 echo "*** distributions_dir: ${distributions}"
 

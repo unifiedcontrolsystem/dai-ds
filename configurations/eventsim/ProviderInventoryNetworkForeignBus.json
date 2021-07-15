@@ -6,11 +6,14 @@
   "networkStreams": {
     "stateChangeSource": {
       "arguments": {
-        "fullUrl": "http://api-gw-service-nmn.local:8080/apis/smd/hsm/v1/Subscriptions/SCN?stream_id=dai-inventory",
-        "inputBufferSize": "4",
-        "connectTimeout": "30"
+        "bootstrap.servers": "localhost:9092",
+        "group.id": "inventory",
+        "schema.registry.url": "http://localhost:8081",
+        "auto.commit.enable": true,
+        "auto.offset.reset": "latest",
+        "topics": "kafka_dimm,kafka_fru_host"
       },
-      "name": "eventSource"
+      "name": "kafka"
     }
   },
 
