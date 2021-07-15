@@ -30,7 +30,7 @@ public class DimmAddToHistory extends VoltProcedure {
     public final SQLStmt insertHistory = new SQLStmt(
                  "INSERT INTO Dimm " +
                  "(NodeLctn, Lctn, State, SizeMB, ModuleLocator, BankLocator, Sernum, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
-                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     public long run(String sNodeLctn, String sComponentLctn, String sNewState, long lSizeMB, String sModuleLocator, String sBankLocator, String sSerial, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
