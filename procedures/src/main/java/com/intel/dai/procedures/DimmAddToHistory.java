@@ -28,12 +28,12 @@ import org.voltdb.*;
 public class DimmAddToHistory extends VoltProcedure {
 
     public final SQLStmt insertHistory = new SQLStmt(
-                 "INSERT INTO Dimm_History " +
-                 "(NodeLctn, Lctn, State, SizeMB, ModuleLocator, BankLocator, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
+                 "INSERT INTO Dimm " +
+                 "(NodeLctn, Lctn, State, SizeMB, ModuleLocator, BankLocator, Serial, DbUpdatedTimestamp, LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
-    public long run(String sNodeLctn, String sComponentLctn, String sNewState, long lSizeMB, String sModuleLocator, String sBankLocator, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
+    public long run(String sNodeLctn, String sComponentLctn, String sNewState, long lSizeMB, String sModuleLocator, String sBankLocator, String sSerial, long lTsInMicroSecs, String sReqAdapterType, long lReqWorkItemId) throws VoltAbortException
     {
 
         //----------------------------------------------------------------------
@@ -47,6 +47,7 @@ public class DimmAddToHistory extends VoltProcedure {
                     ,lSizeMB
                     ,sModuleLocator
                     ,sBankLocator
+                    ,sSerial
                     ,this.getTransactionTime()          // DbUpdatedTimestamp
                     ,lTsInMicroSecs                     // LastChgTimestamp
                     ,sReqAdapterType                    // LastChgAdapterType

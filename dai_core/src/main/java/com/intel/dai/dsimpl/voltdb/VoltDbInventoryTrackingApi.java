@@ -136,22 +136,22 @@ public class VoltDbInventoryTrackingApi implements InventoryTrackingApi {
     }
 
     @Override
-    public void addDimm(String nodeLocation, String componentLocation, String state, long sizeMB, String moduleLocator, String bankLocator, long inventoryTS, String adapter, long workItem) throws DataStoreException {
+    public void addDimm(String nodeLocation, String componentLocation, String state, long sizeMB, String moduleLocator, String bankLocator, String serial, long inventoryTS, String adapter, long workItem) throws DataStoreException {
         try {
             ClientResponse response = voltClient.callProcedure(ADD_DIMM_SP, nodeLocation, componentLocation,
-                    state, sizeMB, moduleLocator, bankLocator, inventoryTS, adapter, workItem);
+                    state, sizeMB, moduleLocator, bankLocator, serial, inventoryTS, adapter, workItem);
             if (response.getStatus() != ClientResponse.SUCCESS) {
                 String statusDesc = response.getStatusString();
                 logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, ComponentLocation=%s, " +
-                                "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s.", ADD_DIMM_SP,
-                        nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator);
+                                "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s, serial=%s", ADD_DIMM_SP,
+                        nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator, serial);
                 throw new DataStoreException("Unable to add dimm to history.  Status returned by server: " +
                         statusDesc);
             }
         } catch (IOException | ProcCallException ex) {
             logger.error("Error invoking stored procedure: %s.  Request details: Location=%s, ComponentLocation=%s, " +
-                            "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s.", ADD_DIMM_SP,
-                    nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator);
+                            "state=%s, sizeMb=%d, moduleLocator=%s, bankLocator=%s, serial=%s", ADD_DIMM_SP,
+                    nodeLocation, componentLocation, state, sizeMB, moduleLocator, bankLocator, serial);
             throw new DataStoreException("An error occurred while adding dimm to history", ex);
         }
     }
