@@ -1,0 +1,279 @@
+{
+  "UcsConfigValues": [
+    {
+      "Value": "/opt/ucs/log",
+      "Key": "UcsLogfileDirectory"
+    },
+    {
+      "Value": "/opt/ucs/etc/log4j2.xml",
+      "Key": "UcsLog4jConfigurationFile"
+    },
+    {
+      "Value": "/opt/ucs/etc",
+      "Key": "UcsConfigDirectory"
+    },
+    {
+      "Value": "am01-nmn.local",
+      "Key": "SmwHostname"
+    },
+    {
+      "Value": "/opt/voltdb/voltdb/*:/opt/ucs/lib/*",
+      "Key": "UcsClasspath"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnCompNodeNumLevels"
+    },
+    {
+      "Value": "3",
+      "Key": "UcsLctnServiceNodeNumLevels"
+    }
+  ],
+  "AdapterInstances": [
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterOnlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterOnlineTierVolt $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterUI-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ui.AdapterUIRest $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "UI",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterRas-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.ras.AdapterRas $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "RAS",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterNearlineTier-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.AdapterNearlineTierJdbc $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderProvisionerNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "PROVISIONER",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderInventoryNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.inventory.ProviderInventoryNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "INVENTORY",
+      "NumberOfInstances": 1
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/ProviderMonitoringNetworkForeignBus-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "MONITOR",
+      "NumberOfInstances": 2
+    },
+    {
+      "LogFile": "$UCSLOGFILEDIRECTORY/AdapterWLM-$LCTN-$INSTANCE.log",
+      "ServiceNode": "X3001-AM1",
+      "Invocation": "$JAVA -classpath $UCSCLASSPATH -Dlog4j.configurationFile=$UCSLOG4JCONFIGURATIONFILE com.intel.dai.resource_managers.cobalt.AdapterWlmCobalt $VOLTIPADDRS $LCTN $HOSTNAME",
+      "TypeOfAdapter": "WLM",
+      "NumberOfInstances": 1
+    }
+  ],
+  "InitialWorkItems": [
+    {
+      "Parms": null,
+      "TypeOfAdapter": "DAI_MGR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "MotherSuperiorDaiMgr",
+      "Queue": "X3001-AM1"
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"RAS",
+      "WorkToBeDone":"HandleFillingInJobIdsAndControlOps",
+      "Parms":null,
+      "NotifyWhenFinished":"F"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleFillingInJobIdOnly",
+      "Queue": ""
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "RAS",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleControlOpsOnly",
+      "Queue": ""
+    },
+    {
+      "Parms": "IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=localhost",
+      "TypeOfAdapter": "ONLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataMover",
+      "Queue": ""
+    },
+    {
+      "Parms": "RabbitMQHost=localhost",
+      "TypeOfAdapter": "NEARLINE_TIER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "DataReceiver",
+      "Queue": ""
+    },
+    {
+      "Parms": "$Profile#environmental",
+      "TypeOfAdapter": "MONITOR",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM1"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "PROVISIONER",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM1"
+    },
+    {
+      "Parms": null,
+      "TypeOfAdapter": "INVENTORY",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": "X3001-AM1"
+    },
+    {
+      "Parms": "RabbitMQHost=localhost",
+      "TypeOfAdapter": "WLM",
+      "NotifyWhenFinished": "F",
+      "WorkToBeDone": "HandleInputFromExternalComponent",
+      "Queue": ""
+    },
+    {
+      "Queue":"",
+      "TypeOfAdapter":"UI",
+      "WorkToBeDone":"HandleInputFromUsers",
+      "Parms":"",
+      "NotifyWhenFinished":"F"
+    }
+  ],
+  "Nodes": [
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "cn1-bmc",
+      "IpAddr": "172.23.0.2",
+      "BmcAddr": "172.24.0.2",
+      "BootImageId": null,
+      "HostName": "cn1",
+      "MacAddr": "b4:96:91:a8:91:d0",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "cn2-bmc",
+      "IpAddr": "172.23.0.4",
+      "BmcAddr": "172.24.0.4",
+      "BootImageId": null,
+      "HostName": "cn2",
+      "MacAddr": "b4:96:91:a8:92:14",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN2"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "cn3-bmc",
+      "IpAddr": "172.23.0.3",
+      "BmcAddr": "172.24.0.3",
+      "BootImageId": null,
+      "HostName": "cn3",
+      "MacAddr": "b4:96:91:a8:90:cc",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN3"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "cn4-bmc",
+      "IpAddr": "172.23.0.6",
+      "BmcAddr": "172.24.0.6",
+      "BootImageId": null,
+      "HostName": "cn4",
+      "MacAddr": "b4:96:91:a8:8f:a0",
+      "Type": "ComputeNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-CH1-CN4"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "uan1-bmc",
+      "IpAddr": "172.23.0.5",
+      "BmcAddr": "172.24.0.5",
+      "BootImageId": null,
+      "HostName": "uan1",
+      "MacAddr": "b4:96:91:8a:b1:b8",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-UAN1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "am01-nmn.local-bmc",
+      "IpAddr": "172.23.0.7",
+      "BmcAddr": "172.24.0.7",
+      "BootImageId": null,
+      "HostName": "am01-nmn.local",
+      "MacAddr": "b4:96:91:a6:8d:8c",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "daos1-bmc",
+      "IpAddr": "172.23.0.8",
+      "BmcAddr": "172.24.0.8",
+      "BootImageId": null,
+      "HostName": "daos1",
+      "MacAddr": "b4:96:91:a8:92:0c",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-DAOS1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "gateway1-bmc",
+      "IpAddr": "172.23.0.12",
+      "BmcAddr": "172.24.0.9",
+      "BootImageId": null,
+      "HostName": "gateway1",
+      "MacAddr": "a4:bf:01:6f:da:99",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-GWN1"
+    },
+    {
+      "Aggregator": "X3001-AM1",
+      "BmcHostName": "aus-admin1-bmc",
+      "IpAddr": "172.23.0.1",
+      "BmcAddr": "172.24.0.1",
+      "BootImageId": null,
+      "HostName": "aus-admin1",
+      "MacAddr": "a4:bf:01:6f:da:90",
+      "Type": "ServiceNode",
+      "BmcMacAddr": "unknown",
+      "Lctn": "X3001-AM2"
+    }
+  ]
+}
