@@ -88,6 +88,7 @@ public class RasEventProviderHPCM implements NetworkListenerProviderEx, Initiali
                 topic_ = map.getStringOrDefault("publishTopic", topic_);
             }
             processorMap_.put("log_sel", new TopicEventLogSel(log_, false));
+            processorMap_.put("SYSLOG", new TopicEventSyslog(log_, false));
         }
     }
 
