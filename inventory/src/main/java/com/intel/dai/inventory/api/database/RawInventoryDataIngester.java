@@ -22,7 +22,8 @@ public class RawInventoryDataIngester {
     private static long lastDocTimestampIngested = 0;
 
 
-    public static void initialize (DataStoreFactory factory, Logger logger) {
+    public static void initialize(DataStoreFactory factory, Logger logger) {
+        logger.info(">> initialize()");
         factory_ = factory;
         log_ = logger;
         onlineInventoryDatabaseClient_ = factory.createHWInvApi();
@@ -37,7 +38,12 @@ public class RawInventoryDataIngester {
         dimm.locator = dimm.ib_dimm.Locator;
 
         try {
-            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, dimm);
+            int numRawDimmIngested = onlineInventoryDatabaseClient_.ingest(id, dimm);
+            if (numRawDimmIngested != 1) {
+                log_.error("Failed to ingest raw DIMM");
+                return;
+            }
+            totalNumberOfDocumentsIngested += numRawDimmIngested;
             LastIdIngested = doc.left;
             lastKeyIngested = dimm.serial;
             lastDocTimestampIngested = dimm.timestamp;
@@ -62,7 +68,12 @@ public class RawInventoryDataIngester {
         fruHost.boardSerial = fruHost.oob_fru.Board_Serial;
 
         try {
-            totalNumberOfDocumentsIngested += onlineInventoryDatabaseClient_.ingest(id, fruHost);
+            int numRawFruHostIngested = onlineInventoryDatabaseClient_.ingest(id, fruHost);
+            if (numRawFruHostIngested != 1) {
+                log_.error("Failed to ingest raw FRU host");
+                return;
+            }
+            totalNumberOfDocumentsIngested += numRawFruHostIngested;
             LastIdIngested = doc.left;
             lastKeyIngested = fruHost.mac;
             lastDocTimestampIngested = fruHost.timestamp;

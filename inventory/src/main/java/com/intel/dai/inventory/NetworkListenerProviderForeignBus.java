@@ -5,10 +5,6 @@
 package com.intel.dai.inventory;
 
 import com.intel.dai.dsapi.BootState;
-import com.intel.dai.foreign_bus.CommonFunctions;
-import com.intel.dai.foreign_bus.ConversionException;
-import com.intel.dai.inventory.api.HWInvNotificationTranslator;
-import com.intel.dai.inventory.api.pojo.scn.ForeignHWInvChangeNotification;
 import com.intel.dai.network_listener.*;
 import com.intel.logging.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -43,7 +39,10 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     @Override
     public List<CommonDataFormat> processRawStringData(String topic, String inventoryJson, NetworkListenerConfig config)
             throws NetworkListenerProviderException {
-        log_.debug("Received %s: %s", topic, inventoryJson);
+        log_.debug("Kafka data received %s: %s", topic, inventoryJson);
+
+        if(config_ == null)
+            setConfig(config);
 
         // First start with performing the voltdb update right here
         // CMC_TODO: Refactor working code into actOnData; actually, it is not worth it
@@ -155,7 +154,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
     @Override
     public void actOnData(CommonDataFormat workItem, NetworkListenerConfig config, SystemActions systemActions) {
         if(config_ == null)
-            getConfig(config);
+            setConfig(config);
 
         // Enqueue inventory json into a voltdb table so that a dedicated thread can consume them.
         // This means that inventory loading thread cannot shutdown by itself.  Use an interrupt
@@ -176,7 +175,7 @@ public class NetworkListenerProviderForeignBus implements NetworkListenerProvide
         return bootState == BootState.NODE_ONLINE || bootState == BootState.NODE_OFFLINE;
     }
 
-    private void getConfig(NetworkListenerConfig config) {
+    private void setConfig(NetworkListenerConfig config) {
         config_ = config;
         // System actions no longer used because the DB update code needs to run before
         // system actions are available.
