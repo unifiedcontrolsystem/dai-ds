@@ -2421,12 +2421,21 @@ exit \$?
     // Configuration
     from("${projectDir}/configurations/aurora") {
         into(etc_dir)
+        exclude('**/.idea', '**/make_aurora_config')
+    }
+    from("${projectDir}/configurations/aurora/scripts/make_aurora_config") {
+        into(etc_dir + '/scripts')
+        fileMode = 0755
     }
     from("${projectDir}/configurations/common") {
         into(etc_dir)
     }
     from("${projectDir}/data/db/Combined_VoltDB.sql") {
         into(etc_dir)
+    }
+    from("${projectDir}/cli/runtime-requirements") {
+        into(etc_dir)
+        rename('runtime-requirements.txt', 'requirements.txt')
     }
 
     link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")
@@ -2558,12 +2567,21 @@ exit \$?
     // Configuration
     from("${projectDir}/configurations/aurora") {
         into(etc_dir)
+        exclude('**/.idea', '**/make_aurora_config')
+    }
+    from("${projectDir}/configurations/aurora/scripts/make_aurora_config") {
+        into(etc_dir + '/scripts')
+        fileMode = 0755
     }
     from("${projectDir}/configurations/common") {
         into(etc_dir)
     }
     from("${projectDir}/data/db/Combined_VoltDB.sql") {
         into(etc_dir)
+    }
+    from("${projectDir}/cli/runtime-requirements.txt") {
+        into(etc_dir)
+        rename('runtime-requirements.txt', 'requirements.txt')
     }
 
     link("/usr/bin/show-adapters", "${bin_dir}/show-adapters")

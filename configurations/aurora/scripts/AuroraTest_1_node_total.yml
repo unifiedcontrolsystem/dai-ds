@@ -1,0 +1,664 @@
+---
+#######################################################
+# Test File Description
+#######################################################
+# hostname must be x3100c0s21b0n0
+# Everything must be location on this system includeing:
+#   voltdb
+#   postgres
+#   rabbitmq
+
+# x-names are used through most of this document for "hostnames". This is
+# required. If the actual hostname is different you can create an optional map
+# at the bottom (see comments at the bottom of this document).
+
+# This section is very close to a YAML version of the SystemManifest.json file
+# with additional information to help map x-names to DAI-DS locations. It also
+# contains information like switch port counts, etc...
+sysname: Aurora
+views:
+  Full:
+    initzoom: 0
+    rackscale: 12
+    view: Full
+    view-description: Full Floor Layout
+    zoomscales: [ 4, 6, 8 ]
+    boot-images:
+      content: []
+
+# Floor Definition
+    floor:
+      description: The full floor map
+      height: 0
+      width: 0
+
+# DAOS Service Racks
+      content:
+      - definition: daos_rack_a
+        name: X[3900-3907],X[3800-3807],X[3700-3707],X[3600-3607],X[3500-3507],X[3400-3407],X[3300-3307],X[3200-3203]
+        xname: x[3900-3907],x[3800-3807],x[3700-3707],x[3600-3607],x[3500-3507],x[3400-3407],x[3300-3307],x[3200-3203]
+        x: 0
+        y: 0
+      - definition: daos_rack_b
+        name: X3204
+        xname: x3204
+        x: 0
+        y: 0
+      - definition: daos_rack_c
+        name: X[3205-3207]
+        xname: x[3205-3207]
+        x: 0
+        y: 0
+# Gateway Service Racks
+      - definition: gw_rack_b
+        name: X[3102-3105]
+        xname: x[3102-3105]
+        x: 0
+        y: 0
+      - definition: gw_rack_a
+        name: X[3106-3107]
+        xname: x[3106-3107]
+        x: 0
+        y: 0
+# HPCM and Argonne Service Racks
+      - definition: service_rack_b
+        name: X3100
+        xname: x3100
+        x: 0
+        y: 0
+      - definition: service_rack_a
+        name: X3101
+        xname: x3101
+        x: 0
+        y: 0
+      - definition: service_rack_c
+        name: X[3005-3008]
+        xname: x[3005-3008]
+        x: 0
+        y: 0
+
+# All Non-Floor Definitions
+    definitions:
+# Rack Definitions
+      daos_rack_c:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-3]
+            xname: c0r[44-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW0
+            xname: c0w42
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SW[1-2]
+            xname: c0w[39-40]
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SW3
+            xname: c0w37
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SN[0-15]
+            xname: c0s[0-30/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      daos_rack_b:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-3]
+            xname: c0r[44-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW0
+            xname: c0w42
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SW[1-2]
+            xname: c0w[39-40]
+            definition: aggregation_tor
+            x: 0
+            y: 0
+          - name: SW3
+            xname: c0w37
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SN[0-15]
+            xname: c0s[0-30/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      daos_rack_a:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-3]
+            xname: c0r[44-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW0
+            xname: c0w37
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SN[0-15]
+            xname: c0s[0-30/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      gw_rack_b:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-3]
+            xname: c0r[44-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW0
+            xname: c0w37
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SN[0-16]
+            xname: c0s[0-32/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      gw_rack_a:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-1]
+            xname: c0r[46-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW0
+            xname: c0w37
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SN[0-15]
+            xname: c0s[0-30/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      service_rack_c:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-1]
+            xname: c0r[46-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW[0-1]
+            xname: c0w[38-39]
+            definition: aggregation_tor
+            x: 0
+            y: 0
+          - name: SW2
+            xname: c0w37
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SN[0-27]
+            xname: c0s[0-27]b0n0
+            definition: service_node_1u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      service_rack_b:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-1]
+            xname: c0r[46-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW[0-1]
+            xname: c0w[43-44]
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SW[2-5]
+            xname: c0w[38-41]
+            definition: aggregation_tor
+            x: 0
+            y: 0
+          - name: SW6
+            xname: c0w37
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SW7
+            xname: c0w34
+            definition: edge_router_R4M67A
+            x: 0
+            y: 0
+          - name: SN[0-6]
+            xname: c0s[18-24]b0n0
+            definition: service_node_1u
+            x: 0
+            y: 0
+          - name: SN[7-14]
+            xname: c0s[0-14/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+      service_rack_a:
+        description: 'River Rack'
+        type: Rack
+        width: 0
+        height: 0
+        obscured: true
+        content:
+          - name: FSW[0-1]
+            xname: c0r[46-47]
+            definition: columbia_R5K41A
+            x: 0
+            y: 0
+          - name: SW[0-1]
+            xname: c0w[43-44]
+            definition: aggregation_spine
+            x: 0
+            y: 0
+          - name: SW[2-3]
+            xname: c0w[40-41]
+            definition: aggregation_tor
+            x: 0
+            y: 0
+          - name: SW4
+            xname: c0w39
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SW5
+            xname: w37
+            definition: aggregation_leaf
+            x: 0
+            y: 0
+          - name: SW6
+            xname: c0w34
+            definition: edge_router_R4M67A
+            x: 0
+            y: 0
+          - name: SN[0-6]
+            xname: c0s[18-24]b0n0
+            definition: service_node_1u
+            x: 0
+            y: 0
+          - name: SN[7-14]
+            xname: c0s[0-14/2]b0n0
+            definition: service_node_2u
+            x: 0
+            y: 0
+          - name: PDU[0-3]
+            xname: p[0-3]
+            definition: pdu_river
+            x: 0
+            y: 0
+
+# Service Node Definitions
+      service_node_2u:
+        description: 2U Service Node
+        type: ServiceNode
+        width: 0
+        height: 0
+        content:
+          - name: P[0-1]
+            xname: k[0-1]
+            definition: processor_a
+            x: 0
+            y: 0
+          - name: D[0-11]
+            xname: k0d[0-11]
+            definition: dimm_a
+            x: 0
+            y: 0
+          - name: D[12-23]
+            xname: k1d[0-11]
+            definition: dimm_a
+            x: 0
+            y: 0
+          - name: H[0-1]
+            xname: h[0-1]
+            definition: hsn_nic
+            x: 0
+            y: 0
+      service_node_1u:
+        description: 1U Service Node
+        type: ServiceNode
+        width: 0
+        height: 0
+        content:
+          - name: P[0-1]
+            xname: k[0-1]
+            definition: processor_a
+            x: 0
+            y: 0
+          - name: D[0-11]
+            xname: k0d[0-11]
+            definition: dimm_a
+            x: 0
+            y: 0
+          - name: D[12-23]
+            xname: k1d[0-11]
+            definition: dimm_a
+            x: 0
+            y: 0
+          - name: H[0-1]
+            xname: h[0-1]
+            definition: hsn_nic
+            x: 0
+            y: 0
+
+# Switch Definitions
+      columbia_R5K41A:
+        description: 200G, R5K41A, main fabric switches
+        type: Switch
+        ports: 32
+        width: 0
+        height: 0
+        content: []
+      aggregation_leaf:
+        description: 1G, JL762A
+        ports: 48
+        type: Switch
+        width: 0
+        height: 0
+        content: []
+      aggregation_spine:
+        description: 100G, JL627A, both CDU and spine
+        type: Switch
+        ports: 48
+        width: 0
+        height: 0
+        content: []
+      aggregation_tor:
+        description: 25G, JL625A, both TOR and NCN
+        type: Switch
+        ports: 48
+        width: 0
+        height: 0
+        content: []
+      edge_router_R4M67A:
+        description: No details, R4M67A
+        type: Switch
+        ports: 32
+        width: 0
+        height: 0
+        content: []
+
+# PDU Definitions
+      pdu_river:
+        description: River Rack PDUs
+        type: PDU
+        x: 0
+        y: 0
+        content: []
+
+# Other Node FRUs
+      dimm_a:
+        description: Memory Dimm
+        type: Dimm
+        x: 0
+        y: 0
+        content: []
+      processor_a:
+        description: Node Processor
+        type: Processor
+        x: 0
+        y: 0
+        content: []
+      hsn_nic:
+        description: Fabric NICs for HSN (HFI)
+        board_slot: '8.{}-1'
+        type: Hfi
+        x: 0
+        y: 0
+        content: []
+
+###################################################
+# DAI Specific information for MachineConfig file.
+###################################################
+
+# Patterns for the LocationTranslationMap.json file that do not have other
+# uses in DAI/DS.
+extra-xnames:
+  Switch:
+    - pattern: '^x[0-9]+c[0-9]+w[0-9]+$'
+      additional: l[0-%P]
+    - pattern: '^x[0-9]+c[0-9]+r[0-9]+$'
+      additional: j[0-%P],j[0-%P]p[0-1]
+
+# Network connection information used to communicate with HPCM services.
+hpcm-assigned-services-to-hostnames:
+  kafka: x3100c0s22b0n0:9092
+  registry: http://x3100c0s22b0n0:8085
+  elk: x3100c0s22b0n0:9200
+
+# These are the x-name hostnames for DAI/DS and the roles intended for those
+# service nodes.
+dai-nodes-and-roles: # Real locations for DAI/DS are currently not known...
+  x3100c0s21b0n0: [ voltdb, postgres, rabbitmq, aggregator, ui, wlm, provisioner, online, nearline, ras, monitoring, inventory ]
+
+# Specify if and how to do data summary aggregation.
+#    useTimeWindow: false       Time window or data count window
+#    windowSize: 25             Using a data count for the time window
+#    useMovingAverage: false    Turn moving average on an off
+#    timeWindowSeconds: 600     Second for time window if being used
+#    useAggregation: true       Set to false to turn off data aggregation
+dai-monitoring-summary:
+  - class-name: com.intel.dai.monitoring.EnvironmentalProviderHPCM
+    useTimeWindow: false
+    windowSize: 25
+    useMovingAverage: false
+    timeWindowSeconds: 600
+    useAggregation: true
+
+# This section translates directly to the the "UcsConfigValues" in the
+# "MachineConfig.json" file.
+dai-key-values:
+  UcsLogfileDirectory: /opt/ucs/log
+  UcsLog4jConfigurationFile: /opt/ucs/etc/log4j2.xml
+  UcsConfigDirectory: /opt/ucs/etc
+  SmwHostname: '@aggregator'
+  UcsClasspath: /opt/ucs/lib/*
+  UcsLctnCompNodeNumLevels: 3
+  UcsLctnServiceNodeNumLevels: 2
+
+# This defines information for creating both "AdapterInstances" and
+# "InitialWorkItems" in the "MachineConfig.json" file.
+dai-adapters:
+  ONLINE_TIER:
+    instances: 1
+    adapter-role: '@online'
+    class-name: com.intel.dai.AdapterOnlineTierVolt
+    work: DataMover
+    parameters: 'IntvlBtwnPurgesMs=3600000,AddtlTimeToKeepMovedDataBeforePurgeMs=86400000,RabbitMQHost=@rabbitmq'
+  NEARLINE_TIER:
+    instances: 1
+    adapter-role: '@nearline'
+    class-name: com.intel.dai.AdapterNearlineTierJdbc
+    work: DataReceiver
+    parameters: 'RabbitMQHost=@rabbitmq'
+  RAS:
+    instances: 1
+    adapter-role: '@ras'
+    class-name: com.intel.dai.ras.AdapterRas
+    work: HandleFillingInJobIdsAndControlOps
+    parameters: ''
+  UI:
+    instances: 1
+    adapter-role: '@ui'
+    class-name: com.intel.dai.ui.AdapterUIRest
+    work: HandleInputFromUsers
+    parameters: ''
+  PROVISIONER:
+    instances: 1
+    adapter-role: '@provisioner'
+    class-name: com.intel.dai.provisioners.ProviderProvisionerNetworkForeignBus
+    work: HandleInputFromExternalComponent
+    parameters: '$Profile#default'
+    topics: SYSLOG,HPCMLOG,powerservice_operations,powerservice_node_hb_status
+    state-patterns:
+      Off: ['SEV:LOG_INFO TEXT:Heartbeat sends SIGTERM, shutdown', 'false']
+      On: ['SEV:LOG_INFO TEXT:Heartbeat not detected', 'true']
+      Ready: []
+      DHCPDiscovered: ['DHCPDISCOVER']
+      IPAddressAssigned: ['DHCPREQUEST']
+      BiosStartedDueToReset: ['IFWI Version', 'Use GPIO to read Board ID', 'SeaBIOS version']
+      SelectBootDevice: ['Press [Enter] to directly boot']
+      PxeDownloadingNbpFile: ['Start PXE over IPv4']
+      StartingKernelBoot: ['Linux version']
+      Active: ['SEV:LOG_INFO TEXT:Heartbeat detected', 'login:']
+      Shutdown: [ 'Stopped LSB: Output message that th…de has booted or is shutting down', 'reboot', 'reset']
+    topic-map:
+      powerservice_operations: PowerLogData,
+      powerservice_node_hb_status: HeartbeatLogData,
+      SYSLOG: DhcpLogData,
+      HPCMLOG: ConsoleLogData
+  WLM:
+    instances: 1
+    adapter-role: '@wlm'
+    class-name: com.intel.dai.resource_managers.pbs.AdapterWlmPBS
+    work: HandleInputFromExternalComponent
+    parameters: 'RabbitMQHost=@rabbitmq'
+    topics: pbs_runjobs
+  INVENTORY:
+    instances: 1
+    adapter-role: '@inventory'
+    class-name: com.intel.dai.inventory.ProviderInventoryNetworkForeignBus
+    work: HandleInputFromExternalComponent
+    parameters: ''
+    topics: kafka_dimm,kafka_fru_host
+  MONITOR:  # Monitoring is special case, more config below
+    instances: 4
+    adapter-role: '@monitoring'
+    class-name: com.intel.dai.monitoring.ProviderMonitoringNetworkForeignBus
+    work: HandleInputFromExternalComponent
+    parameters: '$Profile#@profile'
+
+# This section help create the "ProviderMonitoringNetworkForeignBus.json"
+# configuration file. Providers are either "environmentalProvider" or
+# "rasProvider" depending on type of data being processed (sensors or events).
+dai-networking-topics:
+  environmental1: # Plain Text topics only
+      topics:
+        - pcm-monitoring
+        - slingshot_CrayFabricCritTelemetry
+        - slingshot_CrayFabricHealthTelemetry
+        - slingshot_CrayFabricPerfTelemetry
+        - slingshot_CrayFabricTelemetry
+      provider: environmentalProvider
+      avro: False
+  environmental2: # AVRO topics only
+      topics: [ pdu_energy, pdu_power, sensors_node ]
+      provider: environmentalProvider
+      avro: True
+  events1: # Plain Text topics only
+      topics: [ SYSLOG ]
+      provider: rasProvider
+      avro: False
+  events2: # AVRO topics only
+      topics: [ log_sel ]
+      provider: rasProvider
+      avro: True
+
+# Extra information to finish creating configuration files for DAI/DS.
+dai-services-info:
+  postgres:
+    username: dai
+    password: 123@dai
+  elk:
+    username: elkrest
+    password: elkdefault
+
+##############################################################
+# This section is optional if hostnames ARE EQUAL TO x-names.
+#
+# IPs and MACs are "fake" generated numbers in this script. A separate script
+# will need to be written to incorporate actual IPs and MACs into the
+# MachineConfig.json file. This must be done when access to the hardware is
+# available.
+#
+# hostname-map:
+#   x3005c0s23b0n0: service-a-12
+#   x3005c0s23b0: service-a-12-bmc
+#   d173: cooling-tower-17-3
+
+#################################################################
+# Map for network details: hostname map to ip and mac addresses.
+# network-details:
+#   hostname:
+#     ip: <ip-address>
+#     mac: <mac-address>
