@@ -4692,6 +4692,26 @@
         "GenerateAlert":"N",
         "Msg":"System health test detected basic MPI functionality issues:"
     },
+    {
+        "DescriptiveName":"RasCrayFabricCritTelemetry",
+        "EventType":"1003000010",
+        "Severity":"INFO",
+        "Category":"Adapter",
+        "Component":"EnvironmentalProviderHPCM",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"Payload: "
+    },
+    {
+        "DescriptiveName":"RasHPCMSYSLOG",
+        "EventType":"1003000011",
+        "Severity":"ERROR",
+        "Category":"Adapter",
+        "Component":"RasProviderHPCM",
+        "ControlOperation":null,
+        "GenerateAlert":"Y",
+        "Msg":"SYSLOG payload: "
+    },
 
 
     {
@@ -5331,5 +5351,4 @@
         "GenerateAlert":"N",
         "Msg":"Test RAS Wlm Event 15:"
     }
-
 ]}

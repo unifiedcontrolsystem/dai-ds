@@ -56,10 +56,11 @@
       "exchangeName": "ucs",
       "uri": "amqp://am02-nmn.local"
     },
-    "com.intel.dai.monitoring.EnvironmentalProviderForeignBus": {
+    "com.intel.dai.monitoring.EnvironmentalProviderHPCM": {
       "publishRawTopic": "ucs_raw_data",
       "publishAggregatedTopic": "ucs_aggregated_data",
-      "publish": true
+      "publish": true,
+      "windowSize": 25
     },
     "com.intel.dai.monitoring.RasEventProviderHPCM": {
       "publishTopic": "ucs_ras_event",
