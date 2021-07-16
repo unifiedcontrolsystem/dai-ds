@@ -122,13 +122,13 @@ class ForeignHwInventoryRequester implements ForeignServerInventoryRest {
 
     String toForeignLocationName(String locationName) {
         if (isForeignLocationName(locationName)) {
-            logger.warn("HWI:%n  %s is already in foreign namespace", locationName);
+            logger.warn("%s is already in foreign namespace", locationName);
             return locationName;
         }
         try {
             return CommonFunctions.convertLocationToForeign(locationName);
         } catch (ConversionException e) {
-            logger.error("HWI:%n  %s cannot be mapped into foreign namespace because %s",
+            logger.error("%s cannot be mapped into foreign namespace because %s",
                     locationName, e.getMessage());
             return locationName;
         }

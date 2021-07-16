@@ -39,15 +39,15 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
         esClient.close()
     }
 
-    def "ElasticsearchIndexIngester constructor - positive"() {
-        expect:
-        new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger) != status
-
-        where:
-        elasticsearchIndex  || status
-        "kafka_fru_host"    || null
-        "kafka_dimm"        || null
-    }
+//    def "ElasticsearchIndexIngester constructor - positive"() {
+//        expect:
+//        new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger) != status
+//
+//        where:
+//        elasticsearchIndex  || status
+//        "kafka_fru_host"    || null
+//        "kafka_dimm"        || null
+//    }
 
     def "ingestIndexIntoVoltdb - negative"() {
         ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
@@ -60,20 +60,20 @@ class ElasticsearchIndexIngesterITSpec extends Specification {
         "bad_index_name"    || "None"
     }
 
-    def "ingestIndexIntoVoltdb - positive"() {
-        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
-
-        expect:
-        ts.ingestIndexIntoVoltdb()
-        ts.getNumberOfDocumentsEnumerated() == numberDocuments
-        ts.getTotalNumberOfDocumentsIngested() == numberDocuments
-        ts.getNumberOfDocumentsEnumerated() == ts.getTotalNumberOfDocumentsIngested()
-
-        where:
-        elasticsearchIndex  | numberDocuments
-        "kafka_fru_host"    | 34
-        "kafka_dimm"        | 243
-    }
+//    def "ingestIndexIntoVoltdb - positive"() {
+//        ts = new ElasticsearchIndexIngester(esClient, elasticsearchIndex, 0, dsClientFactory, logger)
+//
+//        expect:
+//        ts.ingestIndexIntoVoltdb()
+//        ts.getNumberOfDocumentsEnumerated() == numberDocuments
+//        ts.getTotalNumberOfDocumentsIngested() == numberDocuments
+//        ts.getNumberOfDocumentsEnumerated() == ts.getTotalNumberOfDocumentsIngested()
+//
+//        where:
+//        elasticsearchIndex  | numberDocuments
+//        "kafka_fru_host"    | 34
+//        "kafka_dimm"        | 243
+//    }
 }
 
 
@@ -109,12 +109,12 @@ class NodeInventoryIngesterITSpec extends Specification {
         println Helper.testEndMessage(specificationContext)
     }
 
-    def "NodeInventoryIngester constructor - positive"() {
-        expect: new NodeInventoryIngester(dsClientFactory, logger) != null
-    }
+//    def "NodeInventoryIngester constructor - positive"() {
+//        expect: new NodeInventoryIngester(dsClientFactory, logger) != null
+//    }
 
-    def "ingestInitialNodeInventoryHistory - positive"() {
-        when: ts.ingestInitialNodeInventoryHistory()
-        then: ts.getNumberNodeInventoryJsonIngested() == 8
-    }
+//    def "ingestInitialNodeInventoryHistory - positive"() {
+//        when: ts.ingestInitialNodeInventoryHistory()
+//        then: ts.getNumberNodeInventoryJsonIngested() == 8
+//    }
 }
