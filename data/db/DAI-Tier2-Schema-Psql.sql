@@ -1120,6 +1120,7 @@ CREATE TABLE public.Tier2_Processor_History (
                                                                --    - E = Error
                                                                --    - U = Unknown
    SocketDesignation       VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   Sernum                  VarChar(50),                        -- Processor serial number
    DbUpdatedTimestamp      timestamp without time zone NOT NULL,     -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        timestamp without time zone NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1140,6 +1141,7 @@ CREATE TABLE public.Tier2_Processor_ss (
                                                                --    - E = Error
                                                                --    - U = Unknown
    SocketDesignation       VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   Sernum                  VarChar(50),                        -- Processor serial number
    DbUpdatedTimestamp      timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1161,6 +1163,7 @@ CREATE TABLE public.tier2_Accelerator_ss (
                                                             --    - U = Unknown
    BusAddr              VarChar(12),         -- E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,                        -- Slot that this device is in.
+   Sernum               VarChar(50),                        -- Accelerator serial number
    DbUpdatedTimestamp   timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1180,6 +1183,7 @@ CREATE TABLE public.Tier2_Accelerator_History (
                                                                --    - U = Unknown
    BusAddr                 VarChar(12),         -- E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                    VarChar(10)       NOT NULL,                        -- Slot that this device is in.
+   Sernum                  VarChar(50),                        -- Accelerator serial number
    DbUpdatedTimestamp      timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1201,6 +1205,7 @@ CREATE TABLE public.tier2_Hfi_ss (
                                                             --    - U = Unknown
    BusAddr              VarChar(12) ,         -- E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,                        -- Slot that this device is in.
+   Sernum               VarChar(50),                        -- HFI serial number
    DbUpdatedTimestamp   timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1222,6 +1227,7 @@ CREATE TABLE public.Tier2_Hfi_History (
                                                                --    - U = Unknown
    BusAddr                 VarChar(12),         -- E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                    VarChar(10)       NOT NULL,                        -- Slot that this device is in.
+   Sernum                  VarChar(50),                        -- HFI serial number
    DbUpdatedTimestamp      timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1244,6 +1250,7 @@ CREATE TABLE public.tier2_Dimm_ss (
    SizeMB               BigInt            NOT NULL,         -- Size of this memory module in megabyte units
    ModuleLocator        VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
    BankLocator          VarChar(25),                        -- E.g., Node 1, Node 2
+   Sernum               VarChar(50),                        -- Dimm serial number
    DbUpdatedTimestamp   timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1266,6 +1273,7 @@ CREATE TABLE public.Tier2_Dimm_History (
    SizeMB                  BigInt            NOT NULL,         -- Size of this memory module in megabyte units
    ModuleLocator           VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
    BankLocator             VarChar(25),                        -- E.g., Node 1, Node 2
+   Sernum                  VarChar(50),                        -- Dimm serial number
    DbUpdatedTimestamp      timestamp without time zone         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        timestamp without time zone         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -2015,8 +2023,8 @@ $$;
 CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character varying, p_sernum character varying, p_limit integer) RETURNS TABLE(Lctn VarChar(25), InventoryInfo VarChar(16384), InventoryTimestamp TIMESTAMP, Sernum VarChar(50), EntryNumber BigInt, DetectedInvMismatch VarChar(16384))
     LANGUAGE sql
     AS $$
-        select IH.Lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.Sernum, IH.EntryNumber, array_to_string(array_agg(distinct right(RE.instancedata, length(RE.instancedata) - position('DetectedInvMismatch=' in RE.instancedata) - 19)),', ') AS DetectedInvMismatch
-        from tier2_nodeinventory_history IH, tier2_rasevent RE
+        select IH.Lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.Sernum, IH.EntryNumber
+        from tier2_nodeinventory_history IH
         where
         case
             when p_lctn = '%' then (IH.Lctn ~ '.*' or IH.Lctn is null)
@@ -2027,10 +2035,6 @@ CREATE OR REPLACE FUNCTION public.getnodeinventoryinfoforlctn(p_lctn character v
             when p_sernum = '%' then (IH.Sernum ~ '.*' or IH.Sernum is null)
             when p_sernum != '%' then (IH.Sernum not like '') and ((select string_to_array(IH.Sernum, '')) <@ (select string_to_array(p_sernum, ',')))
         end
-        and IH.lctn = RE.lctn
-        and IH.dbupdatedtimestamp  = RE.dbupdatedtimestamp
-        and RE.descriptivename = 'RasGenAdapterUpdatingDbInvInfo'
-        group by IH.lctn, IH.InventoryInfo, IH.InventoryTimestamp, IH.sernum, IH.entrynumber
         order by IH.InventoryTimestamp desc limit p_limit;
 $$;
 
@@ -4003,58 +4007,58 @@ select *
 from Tier2_dimm_SS ;
 $$;
 
-create or replace function public.insertorupdateprocessordata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_SocketDesignation varchar,
+create or replace function public.insertorupdateprocessordata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_SocketDesignation varchar, p_Sernum varchar,
 p_DbUpdatedTimestamp timestamp without time zone, p_LastChgTimestamp timestamp without time zone, p_LastChgAdapterType varchar, p_LastChgWorkItemId bigint) returns void
 LANGUAGE sql
 AS $$
-insert into Tier2_Processor_ss(NodeLctn , Lctn, State, SocketDesignation,
+insert into Tier2_Processor_ss(NodeLctn , Lctn, State, SocketDesignation, Sernum,
 DbUpdatedTimestamp,LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId)
-values (p_NodeLctn , p_Lctn, p_State, p_SocketDesignation,
+values (p_NodeLctn , p_Lctn, p_State, p_SocketDesignation, p_Sernum,
 p_DbUpdatedTimestamp, p_LastChgTimestamp, p_LastChgAdapterType, p_LastChgWorkItemId)
 on conflict(NodeLctn, Lctn) do update set
-State = p_State, SocketDesignation = p_SocketDesignation,
+State = p_State, SocketDesignation = p_SocketDesignation, Sernum = p_Sernum,
 DbUpdatedTimestamp = p_DbUpdatedTimestamp, LastChgAdapterType = p_LastChgAdapterType,
 LastChgWorkItemId = p_LastChgWorkItemId, LastChgTimestamp=p_LastChgTimestamp;
 $$;
 
-create or replace function public.insertorupdateacceleratordata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_BusAddr varchar, p_Slot varchar,
+create or replace function public.insertorupdateacceleratordata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_BusAddr varchar, p_Slot varchar, p_Sernum varchar,
 p_DbUpdatedTimestamp timestamp without time zone, p_LastChgTimestamp timestamp without time zone, p_LastChgAdapterType varchar, p_LastChgWorkItemId bigint) returns void
 LANGUAGE sql
 AS $$
-insert into Tier2_accelerator_ss(NodeLctn , Lctn, State, BusAddr, Slot,
+insert into Tier2_accelerator_ss(NodeLctn , Lctn, State, BusAddr, Slot, Sernum,
 DbUpdatedTimestamp,LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId)
-values (p_NodeLctn , p_Lctn, p_State, p_BusAddr, p_Slot,
+values (p_NodeLctn , p_Lctn, p_State, p_BusAddr, p_Slot, p_Sernum,
 p_DbUpdatedTimestamp, p_LastChgTimestamp, p_LastChgAdapterType, p_LastChgWorkItemId)
     on conflict(NodeLctn, Lctn) do update set
-State = p_State, BusAddr = p_BusAddr, Slot = p_Slot,
+State = p_State, BusAddr = p_BusAddr, Slot = p_Slot, Sernum = p_Sernum,
 DbUpdatedTimestamp = p_DbUpdatedTimestamp, LastChgAdapterType = p_LastChgAdapterType,
 LastChgWorkItemId = p_LastChgWorkItemId, LastChgTimestamp=p_LastChgTimestamp;
 $$;
 
-create or replace function public.insertorupdatehfidata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_BusAddr varchar, p_Slot varchar,
+create or replace function public.insertorupdatehfidata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_BusAddr varchar, p_Slot varchar, p_Sernum varchar,
 p_DbUpdatedTimestamp timestamp without time zone, p_LastChgTimestamp timestamp without time zone, p_LastChgAdapterType varchar, p_LastChgWorkItemId bigint) returns void
 LANGUAGE sql
 AS $$
-insert into Tier2_hfi_ss(NodeLctn , Lctn, State, BusAddr, Slot,
+insert into Tier2_hfi_ss(NodeLctn , Lctn, State, BusAddr, Slot, Sernum,
 DbUpdatedTimestamp,LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId)
-values (p_NodeLctn , p_Lctn,  p_State, p_BusAddr, p_Slot,
+values (p_NodeLctn , p_Lctn,  p_State, p_BusAddr, p_Slot, p_Sernum,
 p_DbUpdatedTimestamp, p_LastChgTimestamp, p_LastChgAdapterType, p_LastChgWorkItemId)
     on conflict(NodeLctn, Lctn) do update set
-State = p_State, BusAddr = p_BusAddr, Slot = p_Slot,
+State = p_State, BusAddr = p_BusAddr, Slot = p_Slot, Sernum = p_Sernum,
 DbUpdatedTimestamp = p_DbUpdatedTimestamp, LastChgAdapterType = p_LastChgAdapterType,
 LastChgWorkItemId = p_LastChgWorkItemId, LastChgTimestamp=p_LastChgTimestamp;
 $$;
 
-create or replace function public.insertorupdatedimmdata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_Sizemb bigint, p_ModuleLocator varchar, p_BankLocator varchar,
+create or replace function public.insertorupdatedimmdata_ss(p_NodeLctn varchar, p_Lctn varchar, p_State varchar, p_Sizemb bigint, p_ModuleLocator varchar, p_BankLocator varchar, p_Sernum varchar,
 p_DbUpdatedTimestamp timestamp without time zone, p_LastChgTimestamp timestamp without time zone, p_LastChgAdapterType varchar, p_LastChgWorkItemId bigint) returns void
 LANGUAGE sql
 AS $$
-insert into Tier2_dimm_ss(NodeLctn , Lctn, State, SizeMB, ModuleLocator, BankLocator,
+insert into Tier2_dimm_ss(NodeLctn , Lctn, State, SizeMB, ModuleLocator, BankLocator, Sernum,
 DbUpdatedTimestamp,LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId)
-values (p_NodeLctn , p_Lctn, p_State, p_Sizemb, p_ModuleLocator, p_BankLocator,
+values (p_NodeLctn , p_Lctn, p_State, p_Sizemb, p_ModuleLocator, p_BankLocator, p_Sernum,
 p_DbUpdatedTimestamp, p_LastChgTimestamp, p_LastChgAdapterType, p_LastChgWorkItemId)
     on conflict(NodeLctn, Lctn) do update set
-State = p_State, SizeMB=p_Sizemb, ModuleLocator= p_ModuleLocator, BankLocator = p_BankLocator,
+State = p_State, SizeMB=p_Sizemb, ModuleLocator= p_ModuleLocator, BankLocator = p_BankLocator, Sernum = p_Sernum,
 DbUpdatedTimestamp = p_DbUpdatedTimestamp, LastChgAdapterType = p_LastChgAdapterType,
 LastChgWorkItemId = p_LastChgWorkItemId, LastChgTimestamp=p_LastChgTimestamp;
 $$;

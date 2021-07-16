@@ -50,17 +50,19 @@ public class NodeInventoryIngester {
 
 
             long sizeMB = 0L;
+            String serial = "";
             try {
                 PropertyMap dimm = jsonParser.fromString(dimmJson).getAsMap();
                 PropertyMap ib_dimm = dimm.getMap("ib_dimm");
                 sizeMB = Long.valueOf(ib_dimm.getString("Size").split(" ")[0]);
+                serial = ib_dimm.getString("Serial Number");
             } catch (Exception e) {
-                log_.exception(e, "Failed retrieving dimm size from json file.");
+                log_.exception(e, "Failed retrieving dimm info from json file.");
             }
 
             try {
                 inventoryApi_.addDimm(hostname, hostname + "_" + locator,
-                        "A", sizeMB, locator, null,
+                        "A", sizeMB, locator, null, serial,
                         doc_timestamp * 1000000L, "INVENTORY", -1);
             } catch (DataStoreException e) {
                 log_.error(e.getMessage());
@@ -139,7 +141,7 @@ public class NodeInventoryIngester {
         for (FruHost fruHost : fruHosts) {
             try {
                 String nodeInventoryJson = constructAndIngestNodeInventoryJson(fruHost);
-                inventoryApi_.addFru(fruHost.hostname, fruHost.timestamp * 1000000L, nodeInventoryJson, fruHost.mac, fruHost.rawIbBios);
+                inventoryApi_.addFru(fruHost.hostname, fruHost.timestamp * 1000000L, nodeInventoryJson, fruHost.boardSerial, fruHost.rawIbBios);
             } catch (DataStoreException e) {
                 log_.error("DataStoreException: %s", e.getMessage());
             }

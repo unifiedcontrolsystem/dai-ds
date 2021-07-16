@@ -791,6 +791,7 @@ CREATE TABLE Dimm (
    SizeMB               BigInt            NOT NULL,         -- Size of this memory module in megabyte units
    ModuleLocator        VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
    BankLocator          VarChar(25),                        -- E.g., Node 1, Node 2
+   Sernum               VarChar(50),                        -- Dimm serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -818,6 +819,7 @@ CREATE TABLE Dimm_History (
    SizeMB               BigInt            NOT NULL,         -- Size of this memory module in megabyte units
    ModuleLocator        VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
    BankLocator          VarChar(25),                        -- E.g., Node 1, Node 2
+   Sernum               VarChar(50),                        -- Dimm serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -845,6 +847,7 @@ CREATE TABLE Tier2_Dimm_History (
    SizeMB                  BigInt            NOT NULL,         -- Size of this memory module in megabyte units
    ModuleLocator           VarChar(25)       NOT NULL,         -- E.g., CPU1_DIMM_A2, CPU2_DIMM_F1
    BankLocator             VarChar(25),                        -- E.g., Node 1, Node 2
+   Sernum                  VarChar(50),                        -- Dimm serial number
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -873,6 +876,7 @@ CREATE TABLE Processor (
                                                             --    - E = Error
                                                             --    - U = Unknown
    SocketDesignation    VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   Sernum               VarChar(50),                        -- Processor serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -898,6 +902,7 @@ CREATE TABLE Processor_History (
                                                             --    - E = Error
                                                             --    - U = Unknown
    SocketDesignation    VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   Sernum               VarChar(50),                        -- Processor serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -923,6 +928,7 @@ CREATE TABLE Tier2_Processor_History (
                                                                --    - E = Error
                                                                --    - U = Unknown
    SocketDesignation       VarChar(25)       NOT NULL,         -- E.g., CPU0, CPU1
+   Sernum                  VarChar(50),                        -- Processor serial number
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -952,6 +958,7 @@ CREATE TABLE Accelerator (
                                                             --    - U = Unknown
    BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum               VarChar(50),                        -- Accelerator serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -978,6 +985,7 @@ CREATE TABLE Accelerator_History (
                                                             --    - U = Unknown
    BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum               VarChar(50),                        -- Accelerator serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1004,6 +1012,7 @@ CREATE TABLE Tier2_Accelerator_History (
                                                                --    - U = Unknown
    BusAddr                 VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                    VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum                  VarChar(50),                        -- Accelerator serial number
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1033,6 +1042,7 @@ CREATE TABLE Hfi (
                                                             --    - U = Unknown
    BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum               VarChar(50),                        -- HFI serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1059,6 +1069,7 @@ CREATE TABLE Hfi_History (
                                                             --    - U = Unknown
    BusAddr              VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                 VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum               VarChar(50),                        -- HFI serial number
    DbUpdatedTimestamp   TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp     TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                             -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
@@ -1085,6 +1096,7 @@ CREATE TABLE Tier2_Hfi_History (
                                                                --    - U = Unknown
    BusAddr                 VarChar(12),                        -- PCIE bus address, E.g., 0000:33:00.0, 0000:4d:00.0, 0000:b3:00.0
    Slot                    VarChar(10)       NOT NULL,         -- Slot that this device is in, e.g., 1, 2, 3, 4, 5, 6 (Accelerators)  7.1-1, 7.2-1, 8.1, 8.2 (HFIs)
+   Sernum                  VarChar(50),                        -- HFI serial number
    DbUpdatedTimestamp      TIMESTAMP         NOT NULL,         -- Time the last change to this record was recorded in the database.  It is the actual time that the db update occurred.  This is different than LastChgTimestamp.
    LastChgTimestamp        TIMESTAMP         NOT NULL,         -- Time the event occurred that resulted in this entry being changed.
                                                                -- Note: this timestamp is not necessarily the time the change occurred in the database.  Rather it is the time (maybe from a log) that the change actually occurred.
