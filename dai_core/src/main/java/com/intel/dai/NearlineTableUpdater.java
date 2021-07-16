@@ -322,30 +322,30 @@ public class NearlineTableUpdater {
         SQL_STMTS.put("Processor",
                 new DataUpdateStmt(
                         "insert into Tier2_Processor_history(NodeLctn , Lctn,"  +
-                                "State, SocketDesignation,DbUpdatedTimestamp, "+
+                                "State, SocketDesignation,Sernum,DbUpdatedTimestamp, "+
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
-                                "values (?,?,?,?,?,?,?,?)",
+                                "values (?,?,?,?,?,?,?,?,?)",
                         false));
         SQL_STMTS.put("Accelerator",
                 new DataUpdateStmt(
                         "insert into Tier2_accelerator_history(NodeLctn , Lctn, " +
-                                "State, BusAddr, Slot ,DbUpdatedTimestamp," +
+                                "State, BusAddr, Slot ,Sernum,DbUpdatedTimestamp," +
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
-                                "values (?,?,?,?,?,?,?,?,?)",
+                                "values (?,?,?,?,?,?,?,?,?,?)",
                         false));
         SQL_STMTS.put("Hfi",
                 new DataUpdateStmt(
                         "insert into Tier2_hfi_history(NodeLctn , Lctn, " +
-                                "State, BusAddr, Slot,DbUpdatedTimestamp," +
+                                "State, BusAddr, Slot,Sernum,DbUpdatedTimestamp," +
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
-                                "values (?,?,?,?,?,?,?,?,?)",
+                                "values (?,?,?,?,?,?,?,?,?,?)",
                         false));
         SQL_STMTS.put("Dimm",
                 new DataUpdateStmt(
                         "insert into Tier2_dimm_history(NodeLctn , Lctn, " +
-                                "State, SizeMB, ModuleLocator, BankLocator,DbUpdatedTimestamp," +
+                                "State, SizeMB, ModuleLocator, BankLocator,Sernum,DbUpdatedTimestamp," +
                                 "LastChgTimestamp, LastChgAdapterType, LastChgWorkItemId) " +
-                                "values (?,?,?,?,?,?,?,?,?,?)",
+                                "values (?,?,?,?,?,?,?,?,?,?,?)",
                         false));
         SQL_STMTS.put("RawHWInventory_History",
                 new DataUpdateStmt(

@@ -55,7 +55,7 @@ public class NodeInventoryIngester {
                 PropertyMap dimm = jsonParser.fromString(dimmJson).getAsMap();
                 PropertyMap ib_dimm = dimm.getMap("ib_dimm");
                 sizeMB = Long.valueOf(ib_dimm.getString("Size").split(" ")[0]);
-                serial = ib_dimm.getString("serial");
+                serial = ib_dimm.getString("Serial Number");
             } catch (Exception e) {
                 log_.exception(e, "Failed retrieving dimm info from json file.");
             }
